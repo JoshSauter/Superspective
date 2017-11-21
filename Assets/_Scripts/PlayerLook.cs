@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerLook : MonoBehaviour {
     Transform playerTransform;
     Transform cameraTransform;
-    float rotationY = 0F;
+    public float rotationY = 0F;
 
     // Use this for initialization
     void Start () {

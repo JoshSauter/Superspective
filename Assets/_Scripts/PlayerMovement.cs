@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
     float acceleration = 150f;
-    float backwardsSpeed = 0.01f;
-    float walkSpeed = 4f;
-    float runSpeed = 14f;
+    float backwardsSpeed = 0.1f;
+    public float walkSpeed = 4f;
+    public float runSpeed = 10f;
     float movespeed;
     private Rigidbody thisRigidbody;
 
@@ -19,10 +19,10 @@ public class PlayerMovement : MonoBehaviour {
 
     private void Update() {
         if (Input.GetKey(KeyCode.LeftShift)) {
-            movespeed = runSpeed;
+            movespeed = walkSpeed;
         }
         else {
-            movespeed = walkSpeed;
+            movespeed = runSpeed;
         }
     }
 
@@ -43,7 +43,9 @@ public class PlayerMovement : MonoBehaviour {
         }
         // If no keys are pressed, decelerate to a stop
         if (!(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))) {
-            thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, Vector3.zero, 0.15f);
+            Vector2 horizontalVelocity = new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
+            horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 0.15f);
+            thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
         }
         // If at least one direction is pressed, move the desired direction
         else {
@@ -60,9 +62,9 @@ public class PlayerMovement : MonoBehaviour {
         Vector3 accelForce = direction * acceleration;
         thisRigidbody.AddForce(accelForce, ForceMode.Acceleration);
 
-        Vector2 curHorizontalMovespeed = new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
-        if (curHorizontalMovespeed.magnitude > movespeed) {
-            Vector2 cappedHorizontalMovespeed = curHorizontalMovespeed.normalized * movespeed;
+        Vector2 curHorizontalVelocity = HorizontalVelocity();
+        if (curHorizontalVelocity.magnitude > movespeed) {
+            Vector2 cappedHorizontalMovespeed = curHorizontalVelocity.normalized * movespeed;
             thisRigidbody.velocity = new Vector3(cappedHorizontalMovespeed.x, thisRigidbody.velocity.y, cappedHorizontalMovespeed.y);
         }
 
@@ -75,5 +77,13 @@ public class PlayerMovement : MonoBehaviour {
             curVel.z *= multiplier;
             thisRigidbody.velocity = curVel;
         }
+    }
+
+    public Vector2 HorizontalVelocity() {
+        return new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
+    }
+
+    public float HorizontalMovespeed() {
+        return HorizontalVelocity().magnitude;
     }
 }

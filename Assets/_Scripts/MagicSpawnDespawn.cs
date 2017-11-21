@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MagicSpawnDespawn : MagicTrigger {
     public GameObject[] objectsToEnable;
@@ -20,3 +23,30 @@ public class MagicSpawnDespawn : MagicTrigger {
         }
     }
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(MagicSpawnDespawn))]
+public class MagicSpawnDespawnEditor : MagicTriggerEditor {
+    private int enableListSize;
+    private int disableListSize;
+
+    public override void OnInspectorGUI() {
+        base.OnInspectorGUI();
+
+        SerializedProperty objectsToEnable = serializedObject.FindProperty("objectsToEnable");
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(objectsToEnable, true);
+        if (EditorGUI.EndChangeCheck())
+            serializedObject.ApplyModifiedProperties();
+
+        SerializedProperty objectsToDisable = serializedObject.FindProperty("objectsToDisable");
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(objectsToDisable, true);
+        if (EditorGUI.EndChangeCheck())
+            serializedObject.ApplyModifiedProperties();
+
+        EditorGUILayout.Space();
+    }
+}
+
+#endif
