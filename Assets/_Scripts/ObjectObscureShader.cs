@@ -5,18 +5,26 @@ using UnityEngine;
 public class ObjectObscureShader : MonoBehaviour {
     private static RenderTexture discardRenderTexture;
     private Camera obscureShaderCamera;
+    private MeshRenderer thisMeshRenderer;
+
+    int currentWidth;
+    int currentHeight;
 
     private void Awake() {
+        currentWidth = Screen.width;
+        currentHeight = Screen.height;
+
         obscureShaderCamera = GameObject.Find("ObscureShaderCamera").GetComponent<Camera>();
+        thisMeshRenderer = GetComponent<MeshRenderer>();
     }
 
     private void OnEnable() {
+        thisMeshRenderer.material.SetFloat("_ResolutionX", Screen.width);
+        thisMeshRenderer.material.SetFloat("_ResolutionY", Screen.height);
+
         if (discardRenderTexture == null || !discardRenderTexture.IsCreated()) {
-            discardRenderTexture = new RenderTexture(Camera.main.pixelWidth, Camera.main.pixelHeight, 24);
-            discardRenderTexture.enableRandomWrite = true;
-            discardRenderTexture.Create();
+            CreateRenderTexture();
         }
-        obscureShaderCamera.targetTexture = discardRenderTexture;
     }
 
     private void OnDisable() {
@@ -25,6 +33,25 @@ public class ObjectObscureShader : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        GetComponent<MeshRenderer>().material.SetTexture("_DiscardTex", discardRenderTexture);
+        // Update the resolution if necessary
+        if (Screen.width != currentWidth || Screen.height != currentHeight) {
+            discardRenderTexture.Release();
+
+            currentWidth = Screen.width;
+            currentHeight = Screen.height;
+            CreateRenderTexture();
+
+            thisMeshRenderer.material.SetFloat("_ResolutionX", currentWidth);
+            thisMeshRenderer.material.SetFloat("_ResolutionY", currentHeight);
+        }
+        thisMeshRenderer.material.SetTexture("_DiscardTex", discardRenderTexture);
+    }
+
+    void CreateRenderTexture() {
+        discardRenderTexture = new RenderTexture(currentWidth, currentHeight, 24);
+        discardRenderTexture.enableRandomWrite = true;
+        discardRenderTexture.Create();
+
+        obscureShaderCamera.targetTexture = discardRenderTexture;
     }
 }
