@@ -12,12 +12,12 @@ public class Sign : MonoBehaviour {
     // Use this for initialization
     private void OnEnable() {
         teleporter.OnTeleport += Move;
-        magicDespawnTrigger.OnMagicTrigger += ConditionalDespawn;
+        magicDespawnTrigger.OnMagicTriggerStay += ConditionalDespawn;
     }
 
     private void OnDisable() {
         teleporter.OnTeleport -= Move;
-        magicDespawnTrigger.OnMagicTrigger -= ConditionalDespawn;
+        magicDespawnTrigger.OnMagicTriggerStay -= ConditionalDespawn;
     }
 
     public void Move(Vector3 displacement) {

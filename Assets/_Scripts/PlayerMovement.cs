@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
     float acceleration = 150f;
-    float backwardsSpeed = 0.1f;
+    float backwardsSpeed = 0.7f;
     public float walkSpeed = 4f;
     public float runSpeed = 10f;
     float movespeed;
@@ -77,6 +77,10 @@ public class PlayerMovement : MonoBehaviour {
             curVel.z *= multiplier;
             thisRigidbody.velocity = curVel;
         }
+    }
+
+    public Vector3 HorizontalVelocity3() {
+        return new Vector3(thisRigidbody.velocity.x, 0, thisRigidbody.velocity.z);
     }
 
     public Vector2 HorizontalVelocity() {

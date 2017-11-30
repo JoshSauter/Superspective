@@ -11,7 +11,7 @@ public class MagicSpawnDespawn : MagicTrigger {
 
 	// Use this for initialization
 	void Start () {
-        OnMagicTrigger += EnableDisableObjects;
+        OnMagicTriggerStay += EnableDisableObjects;
 	}
 
     private void EnableDisableObjects(Collider o) {
@@ -26,10 +26,8 @@ public class MagicSpawnDespawn : MagicTrigger {
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(MagicSpawnDespawn))]
+[CanEditMultipleObjects]
 public class MagicSpawnDespawnEditor : MagicTriggerEditor {
-    private int enableListSize;
-    private int disableListSize;
-
     public override void OnInspectorGUI() {
         base.OnInspectorGUI();
 

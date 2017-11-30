@@ -16,11 +16,11 @@ public class TeleportEnter : MonoBehaviour {
 	void Awake () {
         parent = GetComponentInParent<Teleport>();
         trigger = GetComponent<MagicTrigger>();
-        trigger.OnMagicTrigger += TeleportTriggered;
+        trigger.OnMagicTriggerStay += TeleportTriggered;
 	}
 
     private void OnDisable() {
-        trigger.OnMagicTrigger -= TeleportTriggered;
+        trigger.OnMagicTriggerStay -= TeleportTriggered;
     }
 
     private void TeleportTriggered(Collider other) {

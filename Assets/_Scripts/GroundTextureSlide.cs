@@ -8,7 +8,6 @@ public class GroundTextureSlide : MonoBehaviour {
     // Use this for initialization
     void Start () {
         groundMat = GetComponent<Renderer>().sharedMaterial;
-
     }
 
     private void OnEnable() {
@@ -17,6 +16,7 @@ public class GroundTextureSlide : MonoBehaviour {
 
     private void OnDisable() {
         TeleportEnter.OnAnyTeleport -= Slide;
+        groundMat.mainTextureOffset = Vector2.zero;
     }
 
     void Slide(Vector3 displacement) {

@@ -13,7 +13,8 @@ public class MagicTrigger : MonoBehaviour {
         PlayerFacingObject,
         PlayerFacingAwayFromObject,
         PlayerFacingPosition,
-        PlayerFacingAwayFromPosition
+        PlayerFacingAwayFromPosition,
+        PlayerMovingDirection
     }
     public TriggerConditionType triggerCondition;
     public float playerFaceThreshold;
@@ -28,7 +29,8 @@ public class MagicTrigger : MonoBehaviour {
     public bool allowTriggeringWhileInsideObject = false;
 
     public delegate void MagicAction(Collider other);
-    public event MagicAction OnMagicTrigger;
+    public event MagicAction OnMagicTriggerStay;
+    public event MagicAction OnMagicTriggerEnter;
 
     private void OnTriggerStay(Collider other) {
         if (other.gameObject.tag == "Player") {
@@ -36,8 +38,23 @@ public class MagicTrigger : MonoBehaviour {
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
             }
-            if (facingAmount > playerFaceThreshold && OnMagicTrigger != null) {
-                OnMagicTrigger(other);
+            if (facingAmount > playerFaceThreshold && OnMagicTriggerStay != null) {
+                OnMagicTriggerStay(other);
+                if (disableOnTrigger) {
+                    gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "Player") {
+            float facingAmount = FacingAmount(other);
+            if (DEBUG) {
+                print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
+            }
+            if (facingAmount > playerFaceThreshold && OnMagicTriggerEnter != null) {
+                OnMagicTriggerEnter(other);
                 if (disableOnTrigger) {
                     gameObject.SetActive(false);
                 }
@@ -72,6 +89,11 @@ public class MagicTrigger : MonoBehaviour {
                 return Vector3.Dot(player.transform.forward, playerToPositionVector);
             }
 
+            case TriggerConditionType.PlayerMovingDirection: {
+                PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
+                return Vector3.Dot(playerMovement.HorizontalVelocity3().normalized, targetDirection.normalized);
+            }
+
             default:
                 throw new System.Exception("TriggerCondition: " + triggerCondition + " not handled!");
         }
@@ -81,6 +103,7 @@ public class MagicTrigger : MonoBehaviour {
 #if UNITY_EDITOR
 
 [CustomEditor(typeof(MagicTrigger))]
+[CanEditMultipleObjects]
 public class MagicTriggerEditor : Editor {
     public override void OnInspectorGUI() {
         MagicTrigger script = target as MagicTrigger;
@@ -115,6 +138,9 @@ public class MagicTriggerEditor : Editor {
             case MagicTrigger.TriggerConditionType.PlayerFacingPosition:
             case MagicTrigger.TriggerConditionType.PlayerFacingAwayFromPosition:
                 script.targetPosition = EditorGUILayout.Vector3Field("Player facing position: ", script.targetPosition);
+                break;
+            case MagicTrigger.TriggerConditionType.PlayerMovingDirection:
+                script.targetDirection = EditorGUILayout.Vector3Field("Player moving towards: ", script.targetDirection);
                 break;
         }
 
