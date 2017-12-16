@@ -54,6 +54,8 @@ public class MagicTrigger : MonoBehaviour {
         }
     }
 
+	// There is a bug right now where if a player walks into a trigger zone but doesn't meet the enter conditions immediately, the trigger will not happen until the player leaves and re-enters
+	// FIX: Right your own logic within OnTriggerStay using OnTriggerLeave to re-create the proper functionality for one-time triggers
     private void OnTriggerEnter(Collider other) {
 		if (!enabled) return;
 
