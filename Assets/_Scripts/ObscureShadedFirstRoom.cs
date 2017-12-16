@@ -12,8 +12,12 @@ public class ObscureShadedFirstRoom : MonoBehaviour {
         Left
     }
     public Triggers triggerBase = Triggers.Right;
+	public bool triggersActive = false;
     const int NUM_TRIGGERS = 4;
-    public int triggersActive = 0;
+    const int MAX_TRIGGERS_ACTIVE = NUM_TRIGGERS + 1;
+    public int numTriggersActive = 0;
+
+	public MagicTrigger centralPillarSpawnTrigger;
 
     List<MagicTrigger> forwardTriggers = new List<MagicTrigger>();
     List<MagicTrigger> backwardTriggers = new List<MagicTrigger>();
@@ -35,77 +39,68 @@ public class ObscureShadedFirstRoom : MonoBehaviour {
                 triggers[i].OnMagicTriggerEnter += TriggerBackward;
             }
         }
+
+		centralPillarSpawnTrigger.OnMagicTriggerStay += TurnTriggersOn;
 	}
 
     void TriggerForward(Collider player) {
-        // If this is not the first trigger to activate, we need to switch from obscure wall to full red wall for a certain direction
-        if (triggersActive > 0) {
-            int triggerIndex = (triggersActive + (int)triggerBase - 1) % NUM_TRIGGERS;
-            if (DEBUG) {
-                print("Turning on " + (Triggers)(triggerIndex) + " full red" + "\n" +
-                    "Turning off " + (Triggers)(triggerIndex) + " obscure wall because it's now covered by full red");
-            }
-            fullRed[triggerIndex].SetActive(true);
-            obscureWalls[triggerIndex].SetActive(false);
+        // Not all triggers are activated yet
+        if (triggersActive && numTriggersActive < MAX_TRIGGERS_ACTIVE) {
+            if (numTriggersActive < NUM_TRIGGERS) {
+                int obscureWallOnIndex = (numTriggersActive + (int)triggerBase - 1);
+                obscureWallOnIndex = (obscureWallOnIndex < 0) ? (obscureWallOnIndex + NUM_TRIGGERS) % NUM_TRIGGERS : obscureWallOnIndex % NUM_TRIGGERS;
 
-            // Allow the way out of the first room for the player
-            if ((Triggers)triggerIndex == Triggers.Front) {
-                if (DEBUG) {
-                    print("Turning off the front wall collider (allowing player to pass into the hallway)");
+                obscureWalls[obscureWallOnIndex].SetActive(true);
+            }
+            
+            // If this is not the first trigger to activate, we need to switch from obscure wall to full red wall for a certain direction
+            if (numTriggersActive > 0) {
+                int fullRedIndex = (numTriggersActive + (int)triggerBase - 2);
+                fullRedIndex = (fullRedIndex < 0) ? (fullRedIndex + NUM_TRIGGERS) % NUM_TRIGGERS : fullRedIndex % NUM_TRIGGERS;
+                obscureWalls[fullRedIndex].SetActive(false);
+                fullRed[fullRedIndex].SetActive(true);
+
+                // Special case for handling the front wall hallway collider
+                if ((Triggers)fullRedIndex == Triggers.Front) {
                     hallwayBlockingCollider.enabled = false;
                 }
             }
-        }
 
-        // Increment the trigger base if we have already activated all the triggers
-        if (triggersActive == NUM_TRIGGERS) {
+            // Increment the number of triggers activated
+            numTriggersActive++;
+        }
+        // All triggers are activated, just change the base
+        else {
             triggerBase = (Triggers)(((int)triggerBase + 1) % NUM_TRIGGERS);
         }
-        // Else turn on the appropriate things
-        else {
-            int triggerIndex = (triggersActive + (int)triggerBase) % NUM_TRIGGERS;
-            if (DEBUG) {
-                print("Turning on " + (Triggers)(triggerIndex) + " obscure wall");
-            }
-            obscureWalls[triggerIndex].SetActive(true);
-            triggersActive++;
-        }
-
-
     }
     void TriggerBackward(Collider player) {
-        if (triggersActive > 0) {
-            int triggerIndex = (triggersActive + (int)triggerBase - 2);
-            if (triggerIndex < 0) triggerIndex += NUM_TRIGGERS;
-            if (DEBUG) {
-                print("Turning off " + (Triggers)(triggerIndex) + " full red" + "\n" +
-                    "Turning on " + (Triggers)(triggerIndex) + " obscure wall because the full red isn't covering it anymore");
-            }
-            fullRed[triggerIndex].SetActive(false);
-            obscureWalls[triggerIndex].SetActive(true);
-            
-            if ((Triggers)triggerIndex == Triggers.Front) {
-                if (DEBUG) {
-                    print("Turning off the front wall collider (disallowing player to pass into the hallway)");
-                }
-                hallwayBlockingCollider.enabled = false;
-            }
-        }
+		// Not all triggers are deactivated yet
+		if (triggersActive && numTriggersActive > 0) {
+			if (numTriggersActive > 1) {
+				int fullRedIndex = (numTriggersActive + (int)triggerBase + 1) % NUM_TRIGGERS;
+				obscureWalls[fullRedIndex].SetActive(true);
+				fullRed[fullRedIndex].SetActive(false);
 
-        if (triggersActive == 0) {
-            if (triggerBase == Triggers.Front) triggerBase = Triggers.Left;
-            else triggerBase = (Triggers)(((int)triggerBase - 1) % NUM_TRIGGERS);
-        }
-        else {
-            int triggerIndex = (triggersActive + (int)triggerBase - 1) % NUM_TRIGGERS;
-            if (DEBUG) {
-                print("Turning off " + (Triggers)(triggerIndex) + " obscure wall");
-            }
-            obscureWalls[triggerIndex].SetActive(false);
+				// Special case for handling the front wall hallway collider
+				if ((Triggers)fullRedIndex == Triggers.Front) {
+					hallwayBlockingCollider.enabled = true;
+				}
+			}
+			if (numTriggersActive < MAX_TRIGGERS_ACTIVE) {
+				int obscureWallIndex = (numTriggersActive + (int)triggerBase + 2) % NUM_TRIGGERS;
+				obscureWalls[obscureWallIndex].SetActive(false);
+			}
 
-            triggersActive--;
-        }
-
-
+			numTriggersActive--;
+		}
+		else {
+			if (triggerBase == Triggers.Front) triggerBase = Triggers.Left;
+			else triggerBase = (Triggers)(((int)triggerBase - 1) % NUM_TRIGGERS);
+		}
     }
+
+	void TurnTriggersOn(Collider c) {
+		triggersActive = true;
+	}
 }

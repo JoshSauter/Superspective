@@ -4,17 +4,20 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
-    float acceleration = 150f;
+    float acceleration = 75f;
     float backwardsSpeed = 0.7f;
     public float walkSpeed = 4f;
-    public float runSpeed = 10f;
+    public float runSpeed = 7f;
     float movespeed;
     private Rigidbody thisRigidbody;
+
+	CapsuleCollider thisCollider;
 
 	// Use this for initialization
 	void Start () {
         movespeed = walkSpeed;
         thisRigidbody = GetComponent<Rigidbody>();
+		thisCollider = GetComponent<CapsuleCollider>();
 	}
 
     private void Update() {
@@ -51,6 +54,8 @@ public class PlayerMovement : MonoBehaviour {
         else {
             Move(moveDirection.normalized);
         }
+
+		SphereCastDown();
 	}
 
     void Move(Vector3 direction) {
@@ -90,4 +95,13 @@ public class PlayerMovement : MonoBehaviour {
     public float HorizontalMovespeed() {
         return HorizontalVelocity().magnitude;
     }
+
+	public void SphereCastDown() {
+		RaycastHit hitInfo = new RaycastHit();
+		Physics.SphereCast(transform.position, thisCollider.radius, Vector3.down, out hitInfo, thisCollider.height/2f);
+		if (hitInfo.collider != null) {
+			//Debug.Log(hitInfo.collider.name + "\n" + hitInfo.normal);
+			Physics.gravity = Vector3.Project(Physics.gravity, hitInfo.normal).normalized * Physics.gravity.magnitude;
+		}
+	}
 }

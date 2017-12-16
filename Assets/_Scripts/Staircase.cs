@@ -10,6 +10,8 @@ public class Staircase : MonoBehaviour {
     float playerStartPos;
     float playerEndPos;
 
+	float startEndGap = 0.25f;
+
 	// Use this for initialization
 	void Start () {
         startRot = transform.parent.rotation.eulerAngles;
@@ -22,8 +24,8 @@ public class Staircase : MonoBehaviour {
 
     private void OnTriggerStay(Collider other) {
         if (other.tag == "Player") {
-            playerStartPos = collider.bounds.min.x;
-            playerEndPos = collider.bounds.max.x;
+            playerStartPos = collider.bounds.min.x + startEndGap;
+            playerEndPos = collider.bounds.max.x - startEndGap;
 
             float t = Mathf.InverseLerp(playerStartPos, playerEndPos, other.transform.position.x);
             transform.parent.rotation = Quaternion.Euler(Vector3.Lerp(startRot, endRot, t));

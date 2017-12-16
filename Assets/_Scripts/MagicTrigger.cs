@@ -19,7 +19,8 @@ public class MagicTrigger : MonoBehaviour {
     public TriggerConditionType triggerCondition;
     public float playerFaceThreshold;
 
-    public bool disableOnTrigger = false;
+	public bool disableScriptOnTrigger = false;
+    public bool disableGameObjectOnTrigger = false;
     
     // enum-specific target
     public Vector3 targetDirection;
@@ -33,6 +34,8 @@ public class MagicTrigger : MonoBehaviour {
     public event MagicAction OnMagicTriggerEnter;
 
     private void OnTriggerStay(Collider other) {
+		if (!enabled) return;
+
         if (other.gameObject.tag == "Player") {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
@@ -40,7 +43,11 @@ public class MagicTrigger : MonoBehaviour {
             }
             if (facingAmount > playerFaceThreshold && OnMagicTriggerStay != null) {
                 OnMagicTriggerStay(other);
-                if (disableOnTrigger) {
+
+				if (disableScriptOnTrigger) {
+					enabled = false;
+				}
+				if (disableGameObjectOnTrigger) {
                     gameObject.SetActive(false);
                 }
             }
@@ -48,6 +55,8 @@ public class MagicTrigger : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
+		if (!enabled) return;
+
         if (other.gameObject.tag == "Player") {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
@@ -55,7 +64,11 @@ public class MagicTrigger : MonoBehaviour {
             }
             if (facingAmount > playerFaceThreshold && OnMagicTriggerEnter != null) {
                 OnMagicTriggerEnter(other);
-                if (disableOnTrigger) {
+
+				if (disableScriptOnTrigger) {
+					enabled = false;
+				}
+                if (disableGameObjectOnTrigger) {
                     gameObject.SetActive(false);
                 }
             }
@@ -63,30 +76,32 @@ public class MagicTrigger : MonoBehaviour {
     }
 
     private float FacingAmount(Collider player) {
+		Transform cameraTransform = player.transform.Find("Main Camera");
+
         switch (triggerCondition) {
             case TriggerConditionType.PlayerFacingDirection:
-                return Vector3.Dot(player.transform.forward, targetDirection.normalized);
+                return Vector3.Dot(cameraTransform.forward, targetDirection.normalized);
 
             case TriggerConditionType.PlayerFacingObject: {
                 // TODO: Handle player being inside of object as a "always false" case
-                Vector3 objectToPlayerVector = (targetObject.ClosestPointOnBounds(player.transform.position) - player.transform.position).normalized;
+                Vector3 objectToPlayerVector = (targetObject.ClosestPointOnBounds(cameraTransform.position) - cameraTransform.position).normalized;
                 bool insideTargetObject = false;
-                return insideTargetObject ? -1 : Vector3.Dot(player.transform.forward, objectToPlayerVector);
+                return insideTargetObject ? -1 : Vector3.Dot(cameraTransform.forward, objectToPlayerVector);
             }
             case TriggerConditionType.PlayerFacingAwayFromObject: {
                 // TODO: Handle player being inside of object as a "always false" case
-                Vector3 playerToObjectVector = (player.transform.position - targetObject.ClosestPointOnBounds(player.transform.position)).normalized;
+                Vector3 playerToObjectVector = (cameraTransform.position - targetObject.ClosestPointOnBounds(cameraTransform.position)).normalized;
                 bool insideTargetObject = false;
-                return insideTargetObject ? -1 : Vector3.Dot(player.transform.forward, playerToObjectVector);
+                return insideTargetObject ? -1 : Vector3.Dot(cameraTransform.forward, playerToObjectVector);
             }
 
             case TriggerConditionType.PlayerFacingPosition: {
-                Vector3 positionToPlayerVector = (targetPosition - player.transform.position).normalized;
-                return Vector3.Dot(player.transform.forward, positionToPlayerVector);
+                Vector3 positionToPlayerVector = (targetPosition - cameraTransform.position).normalized;
+                return Vector3.Dot(cameraTransform.forward, positionToPlayerVector);
             }
             case TriggerConditionType.PlayerFacingAwayFromPosition: {
-                Vector3 playerToPositionVector = (player.transform.position - targetPosition).normalized;
-                return Vector3.Dot(player.transform.forward, playerToPositionVector);
+                Vector3 playerToPositionVector = (cameraTransform.position - targetPosition).normalized;
+                return Vector3.Dot(cameraTransform.forward, playerToPositionVector);
             }
 
             case TriggerConditionType.PlayerMovingDirection: {
@@ -107,8 +122,9 @@ public class MagicTrigger : MonoBehaviour {
 public class MagicTriggerEditor : Editor {
     public override void OnInspectorGUI() {
         MagicTrigger script = target as MagicTrigger;
+		float defaultWidth = EditorGUIUtility.labelWidth;
 
-        EditorGUILayout.Space();
+		EditorGUILayout.Space();
 
         script.DEBUG = EditorGUILayout.Toggle("Debug logging?", script.DEBUG);
 
@@ -129,8 +145,7 @@ public class MagicTriggerEditor : Editor {
                 script.targetObject = EditorGUILayout.ObjectField("Target object: ", script.targetObject, typeof(Collider), true) as Collider;
 
                 EditorGUILayout.Space();
-
-                float defaultWidth = EditorGUIUtility.labelWidth;
+				
                 EditorGUIUtility.labelWidth = 300;
                 script.allowTriggeringWhileInsideObject = EditorGUILayout.Toggle("Allow triggering while inside of target object?", script.allowTriggeringWhileInsideObject);
                 EditorGUIUtility.labelWidth = defaultWidth;
@@ -150,10 +165,16 @@ public class MagicTriggerEditor : Editor {
 
         EditorGUILayout.Space();
 
-        script.disableOnTrigger = EditorGUILayout.Toggle("Disable self upon trigger? ", script.disableOnTrigger);
+		EditorGUIUtility.labelWidth = 300;
+		script.disableGameObjectOnTrigger = EditorGUILayout.Toggle("Disable this gameobject upon trigger? ", script.disableGameObjectOnTrigger);
 
-        EditorGUILayout.Space();
-    }
+		EditorGUILayout.Space();
+
+		script.disableScriptOnTrigger = EditorGUILayout.Toggle("Disable this script upon trigger? ", script.disableScriptOnTrigger);
+		EditorGUIUtility.labelWidth = defaultWidth;
+
+		EditorGUILayout.Space();
+	}
 }
 
 #endif
