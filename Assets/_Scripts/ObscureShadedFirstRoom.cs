@@ -32,11 +32,11 @@ public class ObscureShadedFirstRoom : MonoBehaviour {
 		for (int i = 0; i < triggers.Length; i++) {
             if (i % 2 == 0) {
                 forwardTriggers.Add(triggers[i]);
-                triggers[i].OnMagicTriggerEnter += TriggerForward;
+                triggers[i].OnMagicTriggerStayOneTime += TriggerForward;
             }
             else {
                 backwardTriggers.Add(triggers[i]);
-                triggers[i].OnMagicTriggerEnter += TriggerBackward;
+                triggers[i].OnMagicTriggerStayOneTime += TriggerBackward;
             }
         }
 

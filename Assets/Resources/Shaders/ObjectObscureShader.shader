@@ -16,6 +16,7 @@
 
 		Pass
 		{
+			ZWrite On ZTest LEqual
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag

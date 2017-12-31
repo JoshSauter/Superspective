@@ -1,6 +1,7 @@
 Shader "Toon/Basic" {
 	Properties {
 		_Color ("Main Color", Color) = (.5,.5,.5,1)
+		[PerRendererData]_RenderColor ("Render Color", Color) = (0,0,0,0)
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_ToonShade ("ToonShader Cubemap(RGB)", CUBE) = "" { }
 	}
@@ -23,6 +24,7 @@ Shader "Toon/Basic" {
 			samplerCUBE _ToonShade;
 			float4 _MainTex_ST;
 			float4 _Color;
+			float4 _RenderColor;
 
 			struct appdata {
 				float4 vertex : POSITION;
@@ -49,7 +51,7 @@ Shader "Toon/Basic" {
 
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = _Color * tex2D(_MainTex, i.texcoord);
+				fixed4 col = (_Color * (1 - _RenderColor.a) + _RenderColor * _RenderColor.a) * tex2D(_MainTex, i.texcoord);
 				fixed4 cube = texCUBE(_ToonShade, i.cubenormal);
 				fixed4 c = fixed4(2.0f * cube.rgb * col.rgb, col.a);
 				UNITY_APPLY_FOG(i.fogCoord, c);

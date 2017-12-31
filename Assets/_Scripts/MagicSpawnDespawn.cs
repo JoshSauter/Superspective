@@ -8,6 +8,8 @@ using UnityEditor;
 public class MagicSpawnDespawn : MagicTrigger {
     public GameObject[] objectsToEnable;
     public GameObject[] objectsToDisable;
+	public MonoBehaviour[] scriptsToEnable;
+	public MonoBehaviour[] scriptsToDisable;
 
 	// Use this for initialization
 	void Start () {
@@ -21,6 +23,12 @@ public class MagicSpawnDespawn : MagicTrigger {
         foreach (var objectToDisable in objectsToDisable) {
             objectToDisable.SetActive(false);
         }
+		foreach (var scriptToEnable in scriptsToEnable) {
+			scriptToEnable.enabled = true;
+		}
+		foreach (var scriptToDisable in scriptsToDisable) {
+			scriptToDisable.enabled = false;
+		}
     }
 }
 
@@ -42,6 +50,18 @@ public class MagicSpawnDespawnEditor : MagicTriggerEditor {
         EditorGUILayout.PropertyField(objectsToDisable, true);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
+
+		SerializedProperty scriptsToEnable = serializedObject.FindProperty("scriptsToEnable");
+		EditorGUI.BeginChangeCheck();
+		EditorGUILayout.PropertyField(scriptsToEnable, true);
+		if (EditorGUI.EndChangeCheck())
+			serializedObject.ApplyModifiedProperties();
+
+		SerializedProperty scriptsToDisable = serializedObject.FindProperty("scriptsToDisable");
+		EditorGUI.BeginChangeCheck();
+		EditorGUILayout.PropertyField(scriptsToDisable, true);
+		if (EditorGUI.EndChangeCheck())
+			serializedObject.ApplyModifiedProperties();
 
         EditorGUILayout.Space();
     }

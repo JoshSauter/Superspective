@@ -11,14 +11,19 @@ public class Sign : MonoBehaviour {
 
     // Use this for initialization
     private void OnEnable() {
-        teleporter.OnTeleport += Move;
+        teleporter.OnTeleport += MoveByTeleport;
         magicDespawnTrigger.OnMagicTriggerStay += ConditionalDespawn;
     }
 
     private void OnDisable() {
-        teleporter.OnTeleport -= Move;
+        teleporter.OnTeleport -= MoveByTeleport;
         magicDespawnTrigger.OnMagicTriggerStay -= ConditionalDespawn;
     }
+
+	public void MoveByTeleport(Teleport teleporter, Collider player) {
+		Vector3 teleportDisplacement = teleporter.enter.transform.position - teleporter.exit.transform.position;
+		Move(teleportDisplacement);
+	}
 
     public void Move(Vector3 displacement) {
         transform.position -= displacement;

@@ -11,13 +11,18 @@ public class GroundTextureSlide : MonoBehaviour {
     }
 
     private void OnEnable() {
-        TeleportEnter.OnAnyTeleport += Slide;
+        TeleportEnter.OnAnyTeleport += SlideByTeleport;
     }
 
     private void OnDisable() {
-        TeleportEnter.OnAnyTeleport -= Slide;
+        TeleportEnter.OnAnyTeleport -= SlideByTeleport;
         groundMat.mainTextureOffset = Vector2.zero;
     }
+
+	void SlideByTeleport(Teleport teleporter, Collider player) {
+		Vector3 teleportDisplacement = teleporter.enter.transform.position - teleporter.exit.transform.position;
+		Slide(teleportDisplacement);
+	}
 
     void Slide(Vector3 displacement) {
         Vector2 groundTextureDisplacement = Vector2.Scale(new Vector2(displacement.x, displacement.z), new Vector2(1f / groundMat.mainTextureScale.x, 1f / groundMat.mainTextureScale.y));

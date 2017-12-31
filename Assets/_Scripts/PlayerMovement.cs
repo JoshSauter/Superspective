@@ -4,6 +4,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
+	// DEBUG:
+	public Vector3 curVelocity;
     float acceleration = 75f;
     float backwardsSpeed = 0.7f;
     public float walkSpeed = 4f;
@@ -27,6 +29,9 @@ public class PlayerMovement : MonoBehaviour {
         else {
             movespeed = runSpeed;
         }
+
+		// DEBUG:
+		curVelocity = new Vector3(Mathf.RoundToInt(thisRigidbody.velocity.x), Mathf.RoundToInt(thisRigidbody.velocity.y), Mathf.RoundToInt(thisRigidbody.velocity.z));
     }
 
     // Update is called once per frame

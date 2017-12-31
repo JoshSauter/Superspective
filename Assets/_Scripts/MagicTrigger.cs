@@ -32,6 +32,9 @@ public class MagicTrigger : MonoBehaviour {
     public delegate void MagicAction(Collider other);
     public event MagicAction OnMagicTriggerStay;
     public event MagicAction OnMagicTriggerEnter;
+	public event MagicAction OnMagicTriggerStayOneTime;
+
+	private bool hasTriggeredOnStay = false;
 
     private void OnTriggerStay(Collider other) {
 		if (!enabled) return;
@@ -41,21 +44,32 @@ public class MagicTrigger : MonoBehaviour {
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
             }
-            if (facingAmount > playerFaceThreshold && OnMagicTriggerStay != null) {
-                OnMagicTriggerStay(other);
+            if (facingAmount > playerFaceThreshold) {
+				if (OnMagicTriggerStay != null) {
+					OnMagicTriggerStay (other);
 
-				if (disableScriptOnTrigger) {
-					enabled = false;
+					if (disableScriptOnTrigger) {
+						enabled = false;
+					}
+					if (disableGameObjectOnTrigger) {
+						gameObject.SetActive (false);
+					}
 				}
-				if (disableGameObjectOnTrigger) {
-                    gameObject.SetActive(false);
-                }
+				if (OnMagicTriggerStayOneTime != null && !hasTriggeredOnStay) {
+					hasTriggeredOnStay = true;
+					OnMagicTriggerStayOneTime (other);
+
+					if (disableScriptOnTrigger) {
+						enabled = false;
+					}
+					if (disableGameObjectOnTrigger) {
+						gameObject.SetActive (false);
+					}
+				}
             }
         }
     }
 
-	// There is a bug right now where if a player walks into a trigger zone but doesn't meet the enter conditions immediately, the trigger will not happen until the player leaves and re-enters
-	// FIX: Right your own logic within OnTriggerStay using OnTriggerLeave to re-create the proper functionality for one-time triggers
     private void OnTriggerEnter(Collider other) {
 		if (!enabled) return;
 
@@ -76,6 +90,16 @@ public class MagicTrigger : MonoBehaviour {
             }
         }
     }
+
+	private void OnTriggerExit(Collider other) {
+		if (!enabled) return;
+
+		if (other.gameObject.tag == "Player") {
+			if (hasTriggeredOnStay) {
+				hasTriggeredOnStay = false;
+			}
+		}
+	}
 
     private float FacingAmount(Collider player) {
 		Transform cameraTransform = player.transform.Find("Main Camera");
