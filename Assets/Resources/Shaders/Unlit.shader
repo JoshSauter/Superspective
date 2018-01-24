@@ -6,7 +6,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "ReplacementTag"="Unlit"}
+		Tags { "RenderType"="Opaque" }
 		LOD 100
 
 		Pass
@@ -52,4 +52,6 @@
 			ENDCG
 		}
 	}
+
+	Fallback "VertexLit"
 }

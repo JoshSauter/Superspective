@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: ObscuredObject
-  m_Shader: {fileID: 4800000, guid: a39d8dda2e7cf15469d4f8a98a864745, type: 3}
+  m_Name: RedMinusGreen
+  m_Shader: {fileID: 4800000, guid: f9f582e0003b9ee49bebea510d54e516, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -59,17 +59,20 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _BlueMultiplier: 0
     - _BumpScale: 1
-    - _Cutoff: 0.558
+    - _Cutoff: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _GreenMultiplier: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _RedMultiplier: -1
     - _ResolutionX: 512
     - _ResolutionY: 512
     - _SmoothnessTextureChannel: 0
@@ -78,5 +81,5 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

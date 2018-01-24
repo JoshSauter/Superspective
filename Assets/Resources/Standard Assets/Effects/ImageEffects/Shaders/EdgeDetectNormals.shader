@@ -2,6 +2,7 @@
 Shader "Hidden/EdgeDetect" { 
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "" {}
+		_CustomDepthNormal ("Custom Depth Normal RT", 2D) = "white" {}
 	}
 
 	CGINCLUDE
@@ -279,6 +280,7 @@ Shader "Hidden/EdgeDetect" {
 	ENDCG 
 	
 Subshader {
+ Tags { "RenderType" = "Transparent" }
  Pass {
 	  ZTest Always Cull Off ZWrite Off
 

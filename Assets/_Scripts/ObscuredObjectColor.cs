@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectObscureShaderColor : RecolorOnTeleport {
+public class ObscuredObjectColor : RecolorOnTeleport {
 	public Color color;
 	public Material[] unlitMaterials;
 	Renderer _renderer;
