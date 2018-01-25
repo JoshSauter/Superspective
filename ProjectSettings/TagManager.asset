@@ -14,8 +14,8 @@ TagManager:
   - UI
   - 
   - 
-  - ObscureShader
-  - IgnorePointLight
+  - ObscureShader1
+  - ObscureShader2
   - 
   - 
   - 

@@ -30,13 +30,20 @@ public class MagicTrigger : MonoBehaviour {
     public bool allowTriggeringWhileInsideObject = false;
 
     public delegate void MagicAction(Collider other);
+	// These events are fired when the trigger condition specified is met
     public event MagicAction OnMagicTriggerStay;
     public event MagicAction OnMagicTriggerEnter;
 	public event MagicAction OnMagicTriggerStayOneTime;
+	// These events are fired whenever the opposite of the trigger condition is met (does not necessarily form a complete set with the events above, something may not be fired)
+	public event MagicAction OnNegativeMagicTriggerStay;
+	public event MagicAction OnNegativeMagicTriggerEnter;
+	public event MagicAction OnNegativeMagicTriggerStayOneTime;
 
 	private bool hasTriggeredOnStay = false;
+	private bool hasNegativeTriggeredOnStay = false;
 
-    private void OnTriggerStay(Collider other) {
+
+	private void OnTriggerStay(Collider other) {
 		if (!enabled) return;
 
         if (other.gameObject.tag == "Player") {
@@ -44,29 +51,51 @@ public class MagicTrigger : MonoBehaviour {
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
             }
-            if (facingAmount > playerFaceThreshold) {
+			// Magic Events triggered
+			if (facingAmount > playerFaceThreshold) {
+				if (DEBUG) Debug.Log("Triggering MagicTrigger!");
 				if (OnMagicTriggerStay != null) {
-					OnMagicTriggerStay (other);
+					OnMagicTriggerStay(other);
 
 					if (disableScriptOnTrigger) {
 						enabled = false;
 					}
 					if (disableGameObjectOnTrigger) {
-						gameObject.SetActive (false);
+						gameObject.SetActive(false);
 					}
 				}
-				if (OnMagicTriggerStayOneTime != null && !hasTriggeredOnStay) {
+				if (!hasTriggeredOnStay) {
 					hasTriggeredOnStay = true;
-					OnMagicTriggerStayOneTime (other);
+					hasNegativeTriggeredOnStay = false;
 
-					if (disableScriptOnTrigger) {
-						enabled = false;
-					}
-					if (disableGameObjectOnTrigger) {
-						gameObject.SetActive (false);
+					if (OnMagicTriggerStayOneTime != null) {
+						OnMagicTriggerStayOneTime(other);
+
+						if (disableScriptOnTrigger) {
+							enabled = false;
+						}
+						if (disableGameObjectOnTrigger) {
+							gameObject.SetActive(false);
+						}
 					}
 				}
-            }
+			}
+			// Negative Magic Events triggered (negative triggers cannot turn self off)
+			else if (facingAmount < -playerFaceThreshold) {
+				if (DEBUG) Debug.Log("Triggering NegativeMagicTrigger!");
+				if (OnNegativeMagicTriggerStay != null) {
+					OnNegativeMagicTriggerStay(other);
+				}
+				if (!hasNegativeTriggeredOnStay) {
+					hasNegativeTriggeredOnStay = true;
+					hasTriggeredOnStay = false;
+					if (OnNegativeMagicTriggerStayOneTime != null) {
+						OnNegativeMagicTriggerStayOneTime(other);
+					}
+				}
+			}
+
+			if (DEBUG) Debug.Log(facingAmount + " < " + -playerFaceThreshold + ": " + (facingAmount < -playerFaceThreshold));
         }
     }
 
@@ -88,6 +117,9 @@ public class MagicTrigger : MonoBehaviour {
                     gameObject.SetActive(false);
                 }
             }
+			else if (facingAmount < -playerFaceThreshold && OnNegativeMagicTriggerEnter != null) {
+				OnNegativeMagicTriggerEnter(other);
+			}
         }
     }
 
@@ -97,6 +129,9 @@ public class MagicTrigger : MonoBehaviour {
 		if (other.gameObject.tag == "Player") {
 			if (hasTriggeredOnStay) {
 				hasTriggeredOnStay = false;
+			}
+			if (hasNegativeTriggeredOnStay) {
+				hasNegativeTriggeredOnStay = false;
 			}
 		}
 	}

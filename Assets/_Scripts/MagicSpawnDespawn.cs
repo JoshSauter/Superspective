@@ -12,11 +12,11 @@ public class MagicSpawnDespawn : MagicTrigger {
 	public MonoBehaviour[] scriptsToDisable;
 
 	// Use this for initialization
-	void Start () {
-        OnMagicTriggerStay += EnableDisableObjects;
+	protected virtual void Start () {
+        OnMagicTriggerStayOneTime += EnableDisableObjects;
 	}
 
-    private void EnableDisableObjects(Collider o) {
+    protected void EnableDisableObjects(Collider o) {
         foreach (var objectToEnable in objectsToEnable) {
             objectToEnable.SetActive(true);
         }

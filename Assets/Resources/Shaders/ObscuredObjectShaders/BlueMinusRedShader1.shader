@@ -1,14 +1,14 @@
-﻿Shader "Custom/ObscuredObjectShaders/RedMinusBlueShader"
+﻿Shader "Custom/ObscuredObjectShaders/BlueMinusRedShader1"
 {
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_Cutoff ("Bias Towards Visible", Range(-1.0, 1.0)) = 0
+		_BiasTowardsVisible ("Bias Towards Visible", Range(-1.0, 1.0)) = 0
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
 	}
 	SubShader
 	{
-		Tags { "Queue"="Geometry" "RenderType"="RedMinusBlue" }
+		Tags { "Queue"="Geometry" "RenderType"="BlueMinusRed1" }
 		LOD 100
 
 		Pass
@@ -36,7 +36,7 @@
 			};
 
 			sampler2D _MainTex;
-			sampler2D _DiscardTex;
+			sampler2D _DiscardTex1;
 			float _BiasTowardsVisible;
 			float4 _Color;
 			float4 _MainTex_ST;
@@ -58,8 +58,8 @@
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv) * _Color;
 				float2 viewportVertex = float2(i.vertex.x / _ResolutionX, i.vertex.y / _ResolutionY);
-				float4 samplePixel = tex2D(_DiscardTex, viewportVertex);
-				clip(_BiasTowardsVisible + samplePixel.r - samplePixel.b);
+				float4 samplePixel = tex2D(_DiscardTex1, viewportVertex);
+				clip(_BiasTowardsVisible + samplePixel.b - samplePixel.r);
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;

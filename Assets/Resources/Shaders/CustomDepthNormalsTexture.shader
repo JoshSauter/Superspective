@@ -8,7 +8,8 @@ Properties {
 CGINCLUDE
 #include "UnityCG.cginc"
 
-sampler2D _DiscardTex;
+sampler2D _DiscardTex1;
+sampler2D _DiscardTex2;
 float _ResolutionX;
 float _ResolutionY;
 
@@ -18,9 +19,13 @@ struct ObscuredObjectFragIn {
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-float4 SampleDiscardPixel(ObscuredObjectFragIn i) {
+float4 SampleDiscardPixel1(ObscuredObjectFragIn i) {
 	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	return tex2D(_DiscardTex, viewportVertex);
+	return tex2D(_DiscardTex1, viewportVertex);
+}
+float4 SampleDiscardPixel2(ObscuredObjectFragIn i) {
+	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
+	return tex2D(_DiscardTex2, viewportVertex);
 }
 
 ObscuredObjectFragIn ObscuredObjectVert( appdata_base v ) {
@@ -32,90 +37,181 @@ ObscuredObjectFragIn ObscuredObjectVert( appdata_base v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-fixed4 GminusR_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+// DISCARD TEXTURE 1
+fixed4 GminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.g-samplePixel.r);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
-fixed4 GminusB_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+fixed4 GminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.g-samplePixel.b);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
-fixed4 RminusG_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+fixed4 RminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.r-samplePixel.g);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
-fixed4 RminusB_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+fixed4 RminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.r-samplePixel.b);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
-fixed4 BminusR_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+fixed4 BminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.b-samplePixel.r);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
-fixed4 BminusG_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel(i);
+fixed4 BminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
+	clip(samplePixel.b-samplePixel.g);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+// DISCARD TEXTURE 2
+fixed4 GminusR2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
+	clip(samplePixel.g-samplePixel.r);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 GminusB2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
+	clip(samplePixel.g-samplePixel.b);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 RminusG2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
+	clip(samplePixel.r-samplePixel.g);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 RminusB2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
+	clip(samplePixel.r-samplePixel.b);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 BminusR2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
+	clip(samplePixel.b-samplePixel.r);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 BminusG2_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel2(i);
 	clip(samplePixel.b-samplePixel.g);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 
 ENDCG
 
+
+// DISCARD TEXTURE 1 SUBSHADERS
 SubShader {
-    Tags { "RenderType"="GreenMinusRed" }
+    Tags { "RenderType"="GreenMinusRed1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment GminusR_frag
+#pragma fragment GminusR1_frag
 ENDCG
     }
 }
 SubShader {
-    Tags { "RenderType"="GreenMinusBlue" }
+    Tags { "RenderType"="GreenMinusBlue1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment GminusB_frag
+#pragma fragment GminusB1_frag
 ENDCG
     }
 }
 SubShader {
-    Tags { "RenderType"="RedMinusGreen" }
+    Tags { "RenderType"="RedMinusGreen1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment RminusG_frag
+#pragma fragment RminusG1_frag
 ENDCG
     }
 }
 SubShader {
-    Tags { "RenderType"="RedMinusBlue" }
+    Tags { "RenderType"="RedMinusBlue1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment RminusB_frag
+#pragma fragment RminusB1_frag
 ENDCG
     }
 }
 SubShader {
-    Tags { "RenderType"="BlueMinusRed" }
+    Tags { "RenderType"="BlueMinusRed1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment BminusR_frag
+#pragma fragment BminusR1_frag
 ENDCG
     }
 }
 SubShader {
-    Tags { "RenderType"="BlueMinusGreen" }
+    Tags { "RenderType"="BlueMinusGreen1" }
     Pass {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
-#pragma fragment BminusG_frag
+#pragma fragment BminusG1_frag
+ENDCG
+    }
+}
+
+
+// DISCARD TEXTURE 2 SUBSHADERS
+SubShader {
+    Tags { "RenderType"="GreenMinusRed2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusR2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="GreenMinusBlue2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusB2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="RedMinusGreen2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment RminusG2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="RedMinusBlue2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment RminusB2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="BlueMinusRed2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment BminusR2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="BlueMinusGreen2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment BminusG2_frag
 ENDCG
     }
 }
