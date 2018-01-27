@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: BlueMinusGreen
-  m_Shader: {fileID: 4800000, guid: efd6188afc1ee3643b21520e457c030c, type: 3}
+  m_Name: BlueMinusGreen2
+  m_Shader: {fileID: 4800000, guid: 7dae6ed03a481fe49a2b4b59c0687232, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -59,6 +59,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _BiasTowardsVisible: 0
     - _BlueMultiplier: 0
     - _BumpScale: 1
     - _Cutoff: 0

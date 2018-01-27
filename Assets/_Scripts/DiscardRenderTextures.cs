@@ -56,7 +56,7 @@ public class DiscardRenderTextures : MonoBehaviour {
 
 		for (int i = 0; i < textures.Length; i++) {
 			// Will write to global textures named _DiscardTex1, _DiscardTex2, etc.
-			Shader.SetGlobalTexture("_DiscardTex" + i, textures[i]);
+			Shader.SetGlobalTexture("_DiscardTex" + (i+1), textures[i]);
 		}
 	}
 

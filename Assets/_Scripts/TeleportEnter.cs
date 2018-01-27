@@ -30,7 +30,7 @@ public class TeleportEnter : MonoBehaviour {
 		Vector3 curVelocity = other.GetComponent<Rigidbody>().velocity;
 		Vector3 relativeVelocity = parent.enter.transform.InverseTransformDirection(curVelocity);
 		curVelocity = parent.exit.transform.TransformDirection(relativeVelocity);
-		print("Velocity was " + other.GetComponent<Rigidbody>().velocity + " but is now " + curVelocity);
+		//print("Velocity was " + other.GetComponent<Rigidbody>().velocity + " but is now " + curVelocity);
 		other.GetComponent<Rigidbody>().velocity = curVelocity;
 
 		// Handle position and rotation
