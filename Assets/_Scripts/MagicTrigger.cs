@@ -94,8 +94,6 @@ public class MagicTrigger : MonoBehaviour {
 					}
 				}
 			}
-
-			if (DEBUG) Debug.Log(facingAmount + " < " + -playerFaceThreshold + ": " + (facingAmount < -playerFaceThreshold));
         }
     }
 
