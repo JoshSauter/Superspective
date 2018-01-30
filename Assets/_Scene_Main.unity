@@ -1935,7 +1935,7 @@ Transform:
   m_LocalScale: {x: 8.5, y: 0, z: 1.0000005}
   m_Children: []
   m_Father: {fileID: 492769417}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &216209326
 MonoBehaviour:
@@ -3305,7 +3305,7 @@ Transform:
   m_LocalScale: {x: 8.5, y: 0, z: 1}
   m_Children: []
   m_Father: {fileID: 492769417}
-  m_RootOrder: 9
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &361409096
 MonoBehaviour:
@@ -4362,7 +4362,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 492769417}
-  - component: {fileID: 492769418}
   m_Layer: 0
   m_Name: Triggers
   m_TagString: Untagged
@@ -4387,23 +4386,14 @@ Transform:
   - {fileID: 1258027243}
   - {fileID: 686629731}
   - {fileID: 1504377721}
+  - {fileID: 1878244044}
   - {fileID: 216209325}
   - {fileID: 1431522134}
+  - {fileID: 1827226074}
   - {fileID: 361409095}
   m_Father: {fileID: 1683227342}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &492769418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 492769416}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 901e69568565e6a4f9b34c7c5f05fcb3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &501654370
 GameObject:
   m_ObjectHideFlags: 0
@@ -10730,7 +10720,7 @@ GameObject:
   - component: {fileID: 1431522136}
   - component: {fileID: 1431522135}
   m_Layer: 0
-  m_Name: XDoorPartial/Off
+  m_Name: XDoorPartial/Off with P1 On P2 Any
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10743,11 +10733,11 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1431522133}
   m_LocalRotation: {x: 0.7065347, y: -0.02843918, z: 0.02843918, w: 0.7065347}
-  m_LocalPosition: {x: -55.33, y: 14.95, z: -26.71}
-  m_LocalScale: {x: 6.999999, y: 0, z: 1.0000005}
+  m_LocalPosition: {x: -38.7, y: 14.95, z: -25.4}
+  m_LocalScale: {x: 8.5, y: 0, z: 1.0000005}
   m_Children: []
   m_Father: {fileID: 492769417}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 90, y: -4.61, z: 0}
 --- !u!114 &1431522135
 MonoBehaviour:
@@ -10772,6 +10762,8 @@ MonoBehaviour:
   objectsToEnable:
   - {fileID: 1533404678}
   - {fileID: 1925680527}
+  - {fileID: 1925680527}
+  - {fileID: 361409094}
   objectsToDisable: []
   scriptsToEnable: []
   scriptsToDisable: []
@@ -11532,7 +11524,7 @@ GameObject:
   - component: {fileID: 1504377723}
   - component: {fileID: 1504377722}
   m_Layer: 0
-  m_Name: -XDoorPartial/Off
+  m_Name: -XDoorPartial/Off with P1 Any P2 On
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11544,13 +11536,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1504377720}
-  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 37.5, y: 15, z: -15.16}
+  m_LocalRotation: {x: 0.7065347, y: -0.02843918, z: 0.02843918, w: 0.7065347}
+  m_LocalPosition: {x: 37.04, y: 15, z: -15.2}
   m_LocalScale: {x: 8.5, y: 0, z: 1.0000005}
   m_Children: []
   m_Father: {fileID: 492769417}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: -4.61, z: 0}
 --- !u!114 &1504377722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11574,6 +11566,7 @@ MonoBehaviour:
   objectsToEnable:
   - {fileID: 2029726283}
   - {fileID: 1727411052}
+  - {fileID: 216209324}
   objectsToDisable: []
   scriptsToEnable: []
   scriptsToDisable: []
@@ -12168,6 +12161,7 @@ GameObject:
   - component: {fileID: 1533404682}
   - component: {fileID: 1533404681}
   - component: {fileID: 1533404680}
+  - component: {fileID: 1533404683}
   m_Layer: 9
   m_Name: XWallBlocker
   m_TagString: Untagged
@@ -12243,6 +12237,19 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1533404678}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1533404683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1533404678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7538d53c683ff44bb84510015140a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  columnPartial: {fileID: 501654370}
+  columnSolid: {fileID: 1749559303}
 --- !u!1 &1535000026
 GameObject:
   m_ObjectHideFlags: 0
@@ -13848,29 +13855,30 @@ MonoBehaviour:
   objectsDuringPillar1:
   - {fileID: 797025341}
   - {fileID: 1013867028}
-  - {fileID: 1431522133}
   objectsDuringPillar1Solid:
   - {fileID: 1226410086}
-  - {fileID: 216209324}
   - {fileID: 1504377720}
+  - {fileID: 1878244043}
+  - {fileID: 1431522133}
   objectsDuringPillar1SolidPillar2:
   - {fileID: 434099502}
   - {fileID: 1226410086}
-  - {fileID: 216209324}
   - {fileID: 1504377720}
+  - {fileID: 1431522133}
   objectsDuringPillar1SolidPillar2Solid:
   - {fileID: 1258027242}
   - {fileID: 434099502}
-  - {fileID: 216209324}
   - {fileID: 1504377720}
+  - {fileID: 1431522133}
   objectsDuringPillar1Pillar2Solid:
   - {fileID: 686629730}
   - {fileID: 1258027242}
-  - {fileID: 216209324}
   - {fileID: 1504377720}
+  - {fileID: 1431522133}
   objectsDuringPillar2Solid:
   - {fileID: 686629730}
-  - {fileID: 216209324}
+  - {fileID: 1504377720}
+  - {fileID: 1827226073}
 --- !u!1 &1683424398
 GameObject:
   m_ObjectHideFlags: 0
@@ -14594,6 +14602,7 @@ GameObject:
   - component: {fileID: 1727411056}
   - component: {fileID: 1727411055}
   - component: {fileID: 1727411054}
+  - component: {fileID: 1727411057}
   m_Layer: 9
   m_Name: -XWallUnblocker
   m_TagString: Untagged
@@ -14669,6 +14678,19 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1727411052}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1727411057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1727411052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7538d53c683ff44bb84510015140a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  columnPartial: {fileID: 501654370}
+  columnSolid: {fileID: 1749559303}
 --- !u!1 &1733251480
 GameObject:
   m_ObjectHideFlags: 0
@@ -16503,6 +16525,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textures: []
   obscureShaderCameras: []
+--- !u!1 &1827226073
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1827226074}
+  - component: {fileID: 1827226077}
+  - component: {fileID: 1827226076}
+  - component: {fileID: 1827226075}
+  m_Layer: 0
+  m_Name: XDoorPartial/Off with P1 Off P2 On
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1827226074
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1827226073}
+  m_LocalRotation: {x: 0.7065347, y: -0.02843918, z: 0.02843918, w: 0.7065347}
+  m_LocalPosition: {x: -52.47, y: 14.95, z: -26.51}
+  m_LocalScale: {x: 5.5, y: 0, z: 1.0000005}
+  m_Children: []
+  m_Father: {fileID: 492769417}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 90, y: -4.61, z: 0}
+--- !u!114 &1827226075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1827226073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0b3d76fe2d20404f82f20df04c8369d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  triggerCondition: 5
+  playerFaceThreshold: 0.01
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
+  targetDirection: {x: 0, y: 0, z: 1}
+  targetObject: {fileID: 0}
+  targetPosition: {x: 0, y: 0, z: 0}
+  allowTriggeringWhileInsideObject: 0
+  objectsToEnable:
+  - {fileID: 1533404678}
+  - {fileID: 1925680527}
+  - {fileID: 1925680527}
+  - {fileID: 361409094}
+  objectsToDisable: []
+  scriptsToEnable: []
+  scriptsToDisable: []
+--- !u!64 &1827226076
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1827226073}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 1
+  m_InflateMesh: 0
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!33 &1827226077
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1827226073}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1836784961
 GameObject:
   m_ObjectHideFlags: 0
@@ -16918,6 +17020,85 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1858605028}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1878244043
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1878244044}
+  - component: {fileID: 1878244047}
+  - component: {fileID: 1878244046}
+  - component: {fileID: 1878244045}
+  m_Layer: 0
+  m_Name: -XDoorPartial/Off with P1 On P2 Off
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1878244044
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1878244043}
+  m_LocalRotation: {x: 0.7065347, y: -0.02843918, z: 0.02843918, w: 0.7065347}
+  m_LocalPosition: {x: 53.1, y: 15, z: -13.9}
+  m_LocalScale: {x: 5.5, y: 0, z: 0.99999976}
+  m_Children: []
+  m_Father: {fileID: 492769417}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 90, y: -4.61, z: 0}
+--- !u!114 &1878244045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1878244043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0b3d76fe2d20404f82f20df04c8369d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  triggerCondition: 5
+  playerFaceThreshold: 0.01
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
+  targetDirection: {x: 0, y: 0, z: -1}
+  targetObject: {fileID: 0}
+  targetPosition: {x: 0, y: 0, z: 0}
+  allowTriggeringWhileInsideObject: 0
+  objectsToEnable:
+  - {fileID: 2029726283}
+  - {fileID: 1727411052}
+  - {fileID: 216209324}
+  objectsToDisable: []
+  scriptsToEnable: []
+  scriptsToDisable: []
+--- !u!64 &1878244046
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1878244043}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 1
+  m_InflateMesh: 0
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!33 &1878244047
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1878244043}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1878978930
 GameObject:
   m_ObjectHideFlags: 0
@@ -17331,6 +17512,7 @@ GameObject:
   - component: {fileID: 1925680531}
   - component: {fileID: 1925680530}
   - component: {fileID: 1925680529}
+  - component: {fileID: 1925680532}
   m_Layer: 9
   m_Name: XWallUnblocker
   m_TagString: Untagged
@@ -17406,6 +17588,19 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1925680527}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1925680532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1925680527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7538d53c683ff44bb84510015140a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  columnPartial: {fileID: 1966631899}
+  columnSolid: {fileID: 1858605028}
 --- !u!1 &1927609956
 GameObject:
   m_ObjectHideFlags: 0
@@ -18204,6 +18399,7 @@ GameObject:
   - component: {fileID: 2029726287}
   - component: {fileID: 2029726286}
   - component: {fileID: 2029726285}
+  - component: {fileID: 2029726288}
   m_Layer: 9
   m_Name: -XWallBlocker
   m_TagString: Untagged
@@ -18279,6 +18475,19 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2029726283}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2029726288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2029726283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7538d53c683ff44bb84510015140a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  columnPartial: {fileID: 1966631899}
+  columnSolid: {fileID: 1858605028}
 --- !u!1 &2030393736
 GameObject:
   m_ObjectHideFlags: 0
