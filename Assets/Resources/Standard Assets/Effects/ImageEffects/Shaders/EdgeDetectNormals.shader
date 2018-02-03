@@ -273,8 +273,8 @@ Shader "Hidden/EdgeDetect" {
 		
 		edge *= CheckSame(centerNormal, centerDepth, sample1);
 		edge *= CheckSame(centerNormal, centerDepth, sample2);
-			
-		return edge * lerp(original, _BgColor, _BgFade);
+
+		return (edge) * lerp(original, _BgColor, _BgFade);
 	}
 	
 	ENDCG 
