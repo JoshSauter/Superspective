@@ -59,6 +59,8 @@ public class RisingBridge : MonoBehaviour {
 			yield return new WaitForSeconds(timeBetweenEachBridgePiece);
 		}
 
+		// Allow time for the last bridge piece to rise before marking the coroutine complete
+		yield return new WaitForSeconds(timeForEachBridgePieceToRise);
 		inBridgeRiseCoroutine = false;
 	}
 
