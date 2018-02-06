@@ -90,6 +90,33 @@ Shader "Hidden/EdgeDetect" {
 		// 0 - otherwise
 		
 		return isSameNormal * isSameDepth ? 1.0 : 0.0;
+	}
+
+	inline half CheckSameJosh (half2 centerNormal, float centerDepth, half4 theSample)
+	{
+		// difference in normals
+		// do not bother decoding normals - there's no need here
+		half2 diff = abs(centerNormal - theSample.xy) * _Sensitivity.y;
+		int isSameNormal = (diff.x + diff.y) * _Sensitivity.y < 0.1;
+		// difference in depth
+		float sampleDepth = DecodeFloatRG (theSample.zw);
+		float zdiff = 0;
+		int isSameDepth = 0;
+		if (centerDepth < .01) {
+			zdiff = abs(centerDepth-sampleDepth);
+			isSameDepth = zdiff * _Sensitivity.x < 0.09 * centerDepth;
+		}
+		else {
+			zdiff = abs(log(centerDepth)-log(sampleDepth));
+			isSameDepth = zdiff * _Sensitivity.x < 0.9 * centerDepth;
+		}
+		// scale the required threshold by the distance
+	
+		// return:
+		// 1 - if normals and depth are similar enough
+		// 0 - otherwise
+		
+		return isSameNormal * isSameDepth ? 1.0 : 0.0;
 	}	
 		
 	v2f vertRobert( appdata_img v ) 
@@ -269,12 +296,12 @@ Shader "Hidden/EdgeDetect" {
 		// decoded depth
 		float centerDepth = DecodeFloatRG (center.zw);
 		
-		half edge = 1.0;
+		half notEdge = 1.0;
 		
-		edge *= CheckSame(centerNormal, centerDepth, sample1);
-		edge *= CheckSame(centerNormal, centerDepth, sample2);
+		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample1);
+		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample2);
 
-		return (edge) * lerp(original, _BgColor, _BgFade);
+		return (notEdge) * lerp(original, _BgColor, _BgFade);
 	}
 	
 	ENDCG 

@@ -35,6 +35,7 @@ Shader "Custom/DepthNormalOverlay" {
 				float depthValue;
 				float3 normalValues;
 				DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, i.scrPos.xy), depthValue, normalValues);
+				depthValue = depthValue;
 				half4 depth;
 
 				depth.r = depthValue;

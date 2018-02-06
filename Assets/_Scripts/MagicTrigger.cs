@@ -29,7 +29,8 @@ public class MagicTrigger : MonoBehaviour {
 
     public bool allowTriggeringWhileInsideObject = false;
 
-    public delegate void MagicAction(Collider other);
+#region events
+	public delegate void MagicAction(Collider other);
 	// These events are fired when the trigger condition specified is met
     public event MagicAction OnMagicTriggerStay;
     public event MagicAction OnMagicTriggerEnter;
@@ -38,6 +39,7 @@ public class MagicTrigger : MonoBehaviour {
 	public event MagicAction OnNegativeMagicTriggerStay;
 	public event MagicAction OnNegativeMagicTriggerEnter;
 	public event MagicAction OnNegativeMagicTriggerStayOneTime;
+#endregion
 
 	private bool hasTriggeredOnStay = false;
 	private bool hasNegativeTriggeredOnStay = false;
