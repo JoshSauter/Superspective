@@ -74,7 +74,8 @@ public class SideRoomPanel : MonoBehaviour {
 
 			yield return null;
 		}
-		roomPropBlock.SetColor("_Color", gemColor);
-		roomRenderer.SetPropertyBlock(panelPropBlock);
+		//roomPropBlock.SetColor("_Color", gemColor);
+		//roomPropBlock.SetColor("_EmissionColor", gemColor * roomEmissionLevel);
+		//roomRenderer.SetPropertyBlock(panelPropBlock);
 	}
 }
