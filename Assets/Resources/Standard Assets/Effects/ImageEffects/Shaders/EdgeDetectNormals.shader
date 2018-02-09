@@ -2,7 +2,7 @@
 Shader "Hidden/EdgeDetect" { 
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "" {}
-		_CustomDepthNormal ("Custom Depth Normal RT", 2D) = "white" {}
+		_EdgeColor ("Colors of Edges", Color) = (0, 0, 0, 1)
 	}
 
 	CGINCLUDE
@@ -31,6 +31,7 @@ Shader "Hidden/EdgeDetect" {
 
 	uniform half4 _Sensitivity; 
 	uniform half4 _BgColor;
+	uniform half4 _EdgeColor;
 	uniform half _BgFade;
 	uniform half _SampleDistance;
 	uniform float _Exponent;
@@ -301,7 +302,7 @@ Shader "Hidden/EdgeDetect" {
 		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample1);
 		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample2);
 
-		return (notEdge) * lerp(original, _BgColor, _BgFade);
+		return (notEdge) * lerp(original, _BgColor, _BgFade) + (1-notEdge) * _EdgeColor;
 	}
 	
 	ENDCG 

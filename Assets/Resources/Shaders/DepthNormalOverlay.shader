@@ -35,16 +35,14 @@ Shader "Custom/DepthNormalOverlay" {
 				float depthValue;
 				float3 normalValues;
 				DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, i.scrPos.xy), depthValue, normalValues);
-				depthValue = depthValue;
-				half4 depth;
+				half4 overlayColor;
 
-				depth.r = depthValue;
-				depth.g = depthValue;
-				depth.b = depthValue;
+				overlayColor.r = depthValue;
+				overlayColor.g = depthValue;
+				overlayColor.b = depthValue;
 
-				// depth.rgb = normalValues.xyz;
-				depth.a = 1;
-				return depth;
+				overlayColor.a = 1;
+				return overlayColor;
 			}
 			ENDCG
 		}
@@ -76,15 +74,15 @@ Shader "Custom/DepthNormalOverlay" {
 				float depthValue;
 				float3 normalValues;
 				DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, i.scrPos.xy), depthValue, normalValues);
-				half4 depth;
+				half4 overlayColor;
 
-				// depth.r = depthValue;
-				// depth.g = depthValue;
-				// depth.b = depthValue;
+//				overlayColor.r = test.r;
+//				overlayColor.g = test.g;
+//				overlayColor.b = test.b;
 
-				depth.rgb = normalValues.xyz;
-				depth.a = 1;
-				return depth;
+				overlayColor.rgb = normalValues;
+				overlayColor.a = 1;
+				return overlayColor;
 			}
 			ENDCG
 		}
