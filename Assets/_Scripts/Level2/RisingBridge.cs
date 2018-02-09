@@ -4,6 +4,8 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class RisingBridge : MonoBehaviour {
+	public LaserReceiver redLaserReceiver;
+	public LaserReceiver purpleLaserReceiver;
 	public bool DEBUG = false;
 	public AnimationCurve bridgePieceRiseCurve;
 
@@ -25,6 +27,15 @@ public class RisingBridge : MonoBehaviour {
 			for (int i = 0; i < bridgePieces.Length; i++) {
 				originalPositions[i] = bridgePieces[i].position;
 			}
+		}
+
+		redLaserReceiver.OnReceiverActivated += StartBridgeRiseIfBothReceiversActivated;
+		purpleLaserReceiver.OnReceiverActivated += StartBridgeRiseIfBothReceiversActivated;
+	}
+
+	void StartBridgeRiseIfBothReceiversActivated() {
+		if (!inBridgeRiseCoroutine && LaserReceiver.numReceiversActivated == 2) {
+			StartCoroutine(BridgeRise());
 		}
 	}
 	
