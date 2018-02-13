@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Staircase
   layers:
   - Default
   - TransparentFX
@@ -16,9 +17,9 @@ TagManager:
   - 
   - ObscureShader1
   - ObscureShader2
-  - 
-  - 
-  - 
+  - WalkableObject
+  - WallOnly
+  - Scenery
   - 
   - 
   - 

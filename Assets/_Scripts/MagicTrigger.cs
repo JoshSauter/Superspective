@@ -167,7 +167,7 @@ public class MagicTrigger : MonoBehaviour {
 
             case TriggerConditionType.PlayerMovingDirection: {
                 PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
-                return Vector3.Dot(playerMovement.HorizontalVelocity3().normalized, targetDirection.normalized);
+                return Vector3.Dot(playerMovement.curVelocity.normalized, targetDirection.normalized);
             }
 
             default:

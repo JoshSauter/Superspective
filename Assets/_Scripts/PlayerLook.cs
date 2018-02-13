@@ -19,6 +19,7 @@ public class PlayerLook : MonoBehaviour {
         cameraTransform = playerTransform.GetChild(0);
 
         Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
 	}
 	
 	// Update is called once per frame

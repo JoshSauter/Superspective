@@ -88,6 +88,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 112000002, guid: 6666291f113af5148bfc534f3a8bd389,
     type: 2}
   m_UseShadowmask: 1
@@ -2985,7 +2986,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 234727118}
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: -2.7000008, y: -0.0099983215, z: 2.25}
+  m_LocalPosition: {x: 0, y: 0, z: 2.25}
   m_LocalScale: {x: 0.025, y: 0.025, z: 0.025}
   m_Children:
   - {fileID: 75975834}
@@ -4159,7 +4160,7 @@ Transform:
   m_LocalScale: {x: 20, y: 10, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 24
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &297595555 stripped
 GameObject:
@@ -6465,13 +6466,16 @@ MonoBehaviour:
   DEBUG: 0
   triggerCondition: 0
   playerFaceThreshold: 0
-  disableOnTrigger: 0
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
   targetDirection: {x: 0, y: 0, z: 0}
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   allowTriggeringWhileInsideObject: 0
   objectsToEnable: []
   objectsToDisable: []
+  scriptsToEnable: []
+  scriptsToDisable: []
 --- !u!65 &439097128
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7452,11 +7456,11 @@ ParticleSystem:
     m_Rotation: {x: 0, y: 0, z: 0}
     m_Scale: {x: 4.9, y: 19.9, z: 1}
     placementMode: 0
+    m_MeshMaterialIndex: 0
+    m_MeshNormalOffset: 0
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_MeshMaterialIndex: 0
-    m_MeshNormalOffset: 0
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
     alignToDirection: 0
@@ -8172,6 +8176,47 @@ ParticleSystem:
         - serializedVersion: 2
           time: 1
           value: 0
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    speedModifier:
+      serializedVersion: 2
+      minMaxState: 0
+      scalar: 1
+      minScalar: 1
+      maxCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 2
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        - serializedVersion: 2
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      minCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 2
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        - serializedVersion: 2
+          time: 1
+          value: 1
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -9569,6 +9614,7 @@ ParticleSystem:
     maxLights: 20
   TrailModule:
     enabled: 0
+    mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
@@ -9613,12 +9659,14 @@ ParticleSystem:
         m_RotationOrder: 4
     minVertexDistance: 0.2
     textureMode: 0
+    ribbonCount: 1
     worldSpace: 0
     dieWithParticles: 1
     sizeAffectsWidth: 1
     sizeAffectsLifetime: 0
     inheritParticleColor: 1
     generateLightingData: 0
+    splitSubEmitterRibbons: 0
     colorOverLifetime:
       serializedVersion: 2
       minMaxState: 0
@@ -10267,7 +10315,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 27
+  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!4 &463637615 stripped
 Transform:
@@ -11420,12 +11468,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 569492596}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 74.5, y: 17.5, z: 35.5}
-  m_LocalScale: {x: 80, y: 35, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 19.75, y: 8.75, z: 2.75}
+  m_LocalScale: {x: 40, y: 17.5, z: 0.5}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 21
+  m_Father: {fileID: 1856492729}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &571009312
 GameObject:
@@ -11509,7 +11557,7 @@ Transform:
   m_LocalScale: {x: 1, y: 10, z: 10}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 23
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &582113072 stripped
 Transform:
@@ -11705,7 +11753,7 @@ Transform:
   - {fileID: 1442003086}
   - {fileID: 234727119}
   m_Father: {fileID: 0}
-  m_RootOrder: 22
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &615176258
 Prefab:
@@ -13930,9 +13978,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Convex: 1
-  m_InflateMesh: 0
+  m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: e2c4bbeabfa5cf947bf7fcbacc55a029, type: 3}
 --- !u!23 &757304168
@@ -13987,6 +14035,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5aec01cc52f64484eb42c815924ad46c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  otherObjectsToRotate:
+  - {fileID: 1856492729}
+  - {fileID: 1601490490}
+  axisOfRotation: {x: 0, y: 0, z: 1}
 --- !u!1001 &769545385
 Prefab:
   m_ObjectHideFlags: 0
@@ -16920,12 +16972,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 983181146}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 74.5, y: 34.5, z: 30}
-  m_LocalScale: {x: 80, y: 1, z: 10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 19.75, y: 17.25, z: 0}
+  m_LocalScale: {x: 40, y: 0.5, z: 5}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 19
+  m_Father: {fileID: 1856492729}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &994532706
 Prefab:
@@ -19931,9 +19983,9 @@ MeshCollider:
   m_Material: {fileID: 13400000, guid: 14f555812d0b14143a4c0fbdadddbe6b, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Convex: 0
-  m_InflateMesh: 0
+  m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: e2c4bbeabfa5cf947bf7fcbacc55a029, type: 3}
 --- !u!23 &1133984317
@@ -20336,12 +20388,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1146487826}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 74.5, y: 17.5, z: 24.5}
-  m_LocalScale: {x: 80, y: 35, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 19.75, y: 8.75, z: -2.75}
+  m_LocalScale: {x: 40, y: 17.5, z: 0.5}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 20
+  m_Father: {fileID: 1856492729}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1149888266 stripped
 Transform:
@@ -21307,7 +21359,7 @@ Transform:
   m_LocalScale: {x: 5, y: 1, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 26
+  m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1226347974
 Prefab:
@@ -24421,9 +24473,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Convex: 0
-  m_InflateMesh: 0
+  m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!33 &1442003089
@@ -26729,7 +26781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f14eb8aacd475f24bb23747be83cee18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundTextureDisplacement: {x: 0, y: 0}
+  trigger: {fileID: 0}
 --- !u!65 &1567682795
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26756,7 +26808,8 @@ MonoBehaviour:
   DEBUG: 0
   triggerCondition: 0
   playerFaceThreshold: 0
-  disableOnTrigger: 0
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
   targetDirection: {x: 0, y: 0, z: 0}
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
@@ -26835,9 +26888,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Convex: 0
-  m_InflateMesh: 0
+  m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!33 &1577086021
@@ -30087,11 +30140,11 @@ ParticleSystem:
     m_Rotation: {x: 0, y: 0, z: 0}
     m_Scale: {x: 4.9, y: 19.9, z: 1}
     placementMode: 0
+    m_MeshMaterialIndex: 0
+    m_MeshNormalOffset: 0
     m_Mesh: {fileID: 0}
     m_MeshRenderer: {fileID: 0}
     m_SkinnedMeshRenderer: {fileID: 0}
-    m_MeshMaterialIndex: 0
-    m_MeshNormalOffset: 0
     m_UseMeshMaterialIndex: 0
     m_UseMeshColors: 1
     alignToDirection: 0
@@ -30807,6 +30860,47 @@ ParticleSystem:
         - serializedVersion: 2
           time: 1
           value: 0
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    speedModifier:
+      serializedVersion: 2
+      minMaxState: 0
+      scalar: 1
+      minScalar: 1
+      maxCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 2
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        - serializedVersion: 2
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      minCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 2
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+        - serializedVersion: 2
+          time: 1
+          value: 1
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -32204,6 +32298,7 @@ ParticleSystem:
     maxLights: 20
   TrailModule:
     enabled: 0
+    mode: 0
     ratio: 1
     lifetime:
       serializedVersion: 2
@@ -32248,12 +32343,14 @@ ParticleSystem:
         m_RotationOrder: 4
     minVertexDistance: 0.2
     textureMode: 0
+    ribbonCount: 1
     worldSpace: 0
     dieWithParticles: 1
     sizeAffectsWidth: 1
     sizeAffectsLifetime: 0
     inheritParticleColor: 1
     generateLightingData: 0
+    splitSubEmitterRibbons: 0
     colorOverLifetime:
       serializedVersion: 2
       minMaxState: 0
@@ -32902,7 +32999,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 25
+  m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!4 &1726819233 stripped
 Transform:
@@ -34502,7 +34599,8 @@ MonoBehaviour:
   DEBUG: 0
   triggerCondition: 0
   playerFaceThreshold: 0
-  disableOnTrigger: 0
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
   targetDirection: {x: 0, y: 0, z: 0}
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
@@ -34568,6 +34666,8 @@ MonoBehaviour:
   - {fileID: 222191983}
   - {fileID: 1145574917}
   - {fileID: 1788414446}
+  scriptsToEnable: []
+  scriptsToDisable: []
 --- !u!65 &1834435286
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -34954,6 +35054,37 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9bd16d784372b4647bbe7ffe2670373a, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &1856492728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1856492729}
+  m_Layer: 0
+  m_Name: StaircaseWalls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1856492729
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1856492728}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 35, y: 0, z: 30}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_Children:
+  - {fileID: 983181150}
+  - {fileID: 1146487830}
+  - {fileID: 569492600}
+  m_Father: {fileID: 0}
+  m_RootOrder: 25
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1869040564 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1179229575062316, guid: 9bd16d784372b4647bbe7ffe2670373a,
@@ -34999,7 +35130,8 @@ MonoBehaviour:
   DEBUG: 0
   triggerCondition: 0
   playerFaceThreshold: 0
-  disableOnTrigger: 0
+  disableScriptOnTrigger: 0
+  disableGameObjectOnTrigger: 0
   targetDirection: {x: 0, y: 0, z: -1}
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
@@ -38834,9 +38966,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Convex: 0
-  m_InflateMesh: 0
+  m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!33 &2061898036

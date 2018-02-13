@@ -19,10 +19,10 @@ public class SideRoomPanel : MonoBehaviour {
 
 #region events
 	public delegate void SideRoomPanelAction();
-	public SideRoomPanelAction OnPanelActivateStart;
-	public SideRoomPanelAction OnPanelActivateFinish;
-	public SideRoomPanelAction OnLaserActivateStart;
-	public SideRoomPanelAction OnLaserActivateFinish;
+	public event SideRoomPanelAction OnPanelActivateStart;
+	public event SideRoomPanelAction OnPanelActivateFinish;
+	public event SideRoomPanelAction OnLaserActivateStart;
+	public event SideRoomPanelAction OnLaserActivateFinish;
 #endregion
 
 	// Use this for initialization

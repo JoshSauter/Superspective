@@ -12,7 +12,7 @@ public class LaserReceiver : MonoBehaviour {
 
 #region events
 	public delegate void LaserReceiverAction();
-	public LaserReceiverAction OnReceiverActivated;
+	public event LaserReceiverAction OnReceiverActivated;
 #endregion
 
 	// Use this for initialization
