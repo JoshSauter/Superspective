@@ -26,7 +26,7 @@ public class PlayerLook : MonoBehaviour {
 	void Update () {
 		LookHorizontal(Input.GetAxis("Mouse X") * 4 * generalSensitivity * sensitivityX);
 		rotationY += Input.GetAxis("Mouse Y") * 4 * generalSensitivity * sensitivityY;
-        rotationY = Mathf.Clamp(rotationY, -75f, 75f);
+        rotationY = Mathf.Clamp(rotationY, -85f, 85f);
         LookVertical(rotationY);
 	}
 
