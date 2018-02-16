@@ -50,6 +50,7 @@
 			{
 				fixed4 originalSample = tex2D(_MainTex, i.uv);
 				fixed4 sketchSample = tex2D(_SketchTex, i.sketch_uv);
+				return originalSample * sketchSample;
 				return lerp(originalSample, sketchSample, _Intensity);
 			}
 			ENDCG

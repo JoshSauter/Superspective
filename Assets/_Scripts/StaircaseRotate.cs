@@ -15,6 +15,7 @@ public class StaircaseRotate : MonoBehaviour {
 
     Vector3 startRot;
 	public Transform[] otherObjectsToRotate;
+	Transform globalDirectionalLight;
 	public RotationAxes axisOfRotation;
 	float currentRotation = 0;
 
@@ -26,6 +27,7 @@ public class StaircaseRotate : MonoBehaviour {
 	void Start () {
         startRot = transform.parent.rotation.eulerAngles;
         collider = GetComponent<Collider>();
+		globalDirectionalLight = GameObject.Find("Directional Light").transform;
 	}
 
     private void OnTriggerStay(Collider other) {
@@ -47,7 +49,7 @@ public class StaircaseRotate : MonoBehaviour {
 			playerLook.rotationY += lookDirection * lookMultiplier * Mathf.Abs(currentRotation - desiredRotation);
 
 			// Move the global directional light
-			GameObject.Find("Directional Light").transform.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
+			globalDirectionalLight.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
 
 			foreach (var obj in otherObjectsToRotate) {
 				// All other objects rotate as well as translate
