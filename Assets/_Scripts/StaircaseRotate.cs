@@ -39,11 +39,15 @@ public class StaircaseRotate : MonoBehaviour {
 
 			// Player should rotate around the pivot but without rotating the player's actual rotation (just position)
 			other.transform.position = RotateAroundPivot(other.transform.position, transform.parent.position, Quaternion.Euler(GetRotationAxis(axisOfRotation) * (currentRotation - desiredRotation)));
+			// Adjust the player's look direction up or down to further the effect
 			PlayerLook playerLook = other.transform.GetComponentInChildren<PlayerLook>();
 			PlayerMovement playerMovement = other.transform.GetComponent<PlayerMovement>();
 			int lookDirection = (axisOfRotation == RotationAxes.forward || axisOfRotation == RotationAxes.right) ? 1 : -1;
 			float lookMultiplier = Vector2.Dot(new Vector2(other.transform.forward.x, other.transform.forward.z).normalized, playerMovement.HorizontalVelocity().normalized);
 			playerLook.rotationY += lookDirection * lookMultiplier * Mathf.Abs(currentRotation - desiredRotation);
+
+			// Move the global directional light
+			GameObject.Find("Directional Light").transform.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
 
 			foreach (var obj in otherObjectsToRotate) {
 				// All other objects rotate as well as translate
