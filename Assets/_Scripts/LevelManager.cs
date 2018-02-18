@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
-public class LevelManager : PersistentSingleton<LevelManager> {
+public class LevelManager : Singleton<LevelManager> {
 	public string startingScene;
 
 	Dictionary<string, List<string>> worldGraph;
@@ -13,20 +16,28 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 	List<string> currentlyUnloadingSceneNames;
 
 #region level names
+	private const string managerScene = "_ManagerScene";
+
 	private const string level1 = "_Level1";
 	private const string level2 = "_Level2";
+	private const string level3 = "_Level3";
 
 	private const string transition1_2 = "_Transition1_2";
 	private const string transition2_3 = "_Transition2_3";
 #endregion
 
 	public void Start() {
-		worldGraph = new Dictionary<string, List<string>>();
-		PopulateWorldGraph();
-
 		loadedSceneNames = new List<string>();
 		currentlyLoadingSceneNames = new List<string>();
 		currentlyUnloadingSceneNames = new List<string>();
+
+		worldGraph = new Dictionary<string, List<string>>();
+		PopulateWorldGraph();
+
+#if UNITY_EDITOR
+		PopulateAlreadyLoadedScenes();
+#endif
+
 
 		SceneManager.sceneLoaded += FinishLoadingScene;
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
@@ -37,7 +48,7 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 	}
 
 	/// <summary>
-	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes
+	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="levelName">Name of the scene to become active</param>
 	public void SwitchActiveScene(string levelName) {
@@ -72,18 +83,19 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 	}
 
 	/// <summary>
-	/// Defines the world graph which determines which scenes are adjacent to one another
+	/// Defines the world graph which determines which scenes are adjacent to one another.
 	/// </summary>
 	private void PopulateWorldGraph() {
 		worldGraph.Add(level1, new List<string>() { transition1_2 });
 		worldGraph.Add(level2, new List<string>() { transition1_2, transition2_3 });
+		worldGraph.Add(level3, new List<string>() { transition2_3 });
 
 		worldGraph.Add(transition1_2, new List<string>() { level1, level2 });
-		worldGraph.Add(transition2_3, new List<string>() { level2 });
+		worldGraph.Add(transition2_3, new List<string>() { level2, level3 });
 	}
 
 	/// <summary>
-	/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph
+	/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph.
 	/// </summary>
 	/// <param name="selectedScene"></param>
 	private void DeactivateUnrelatedScenes(string selectedScene) {
@@ -103,7 +115,7 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 	/// <summary>
 	/// Callback for a finished async level load.
 	/// Marks scene as active if it's name matches activeSceneName.
-	/// Removes scene name from currentlyLoadingSceneNames and adds it to loadedSceneNames
+	/// Removes scene name from currentlyLoadingSceneNames and adds it to loadedSceneNames.
 	/// </summary>
 	/// <param name="loadedScene">Scene that finished loading</param>
 	/// <param name="mode">(Unused) Additive or Single</param>
@@ -122,7 +134,7 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 
 	/// <summary>
 	/// Callback for a finished async level unload.
-	/// Removes the scene from currentlyUnloadingSceneNames
+	/// Removes the scene from currentlyUnloadingSceneNames.
 	/// </summary>
 	/// <param name="unloadedScene">Scene that finished unloading</param>
 	private void FinishUnloadingScene(Scene unloadedScene) {
@@ -134,4 +146,20 @@ public class LevelManager : PersistentSingleton<LevelManager> {
 			currentlyUnloadingSceneNames.Remove(unloadedScene.name);
 		}
 	}
+
+#if UNITY_EDITOR
+	/// <summary>
+	/// When ran from the Editor, checks every scene in the build settings to see which are loaded.
+	/// Any already loaded levels are added to the loadedSceneNames list.
+	/// Manager scene is left out of scene management.
+	/// </summary>
+	private void PopulateAlreadyLoadedScenes() {
+		foreach (var scene in EditorBuildSettings.scenes) {
+			Scene alreadyLoadedScene = SceneManager.GetSceneByPath(scene.path);
+			if (alreadyLoadedScene.IsValid() && alreadyLoadedScene.name != managerScene) {
+				loadedSceneNames.Add(alreadyLoadedScene.name);
+			}
+		}
+	}
+#endif
 }

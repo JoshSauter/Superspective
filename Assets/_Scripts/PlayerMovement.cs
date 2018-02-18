@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour {
 	float backwardsSpeed = 0.7f;
 	public float walkSpeed = 4f;
 	public float runSpeed = 7f;
+	public float windResistanceMultiplier = 0.2f;
 	float movespeed;
 	private Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
@@ -77,6 +78,12 @@ public class PlayerMovement : MonoBehaviour {
 		// If at least one direction is pressed, move the desired direction
 		else {
 			Move(moveDirection.normalized);
+		}
+
+		// Handle jumping
+		// TODO: Make this real
+		if (grounded && input.SpaceHeld) {
+			thisRigidbody.AddForce(Vector3.up * 12, ForceMode.Impulse);
 		}
 	}
 
@@ -158,6 +165,10 @@ public class PlayerMovement : MonoBehaviour {
 			moveDirection = moveDirection.normalized * movespeed;
 			Vector3 desiredVelocity = new Vector3(moveDirection.x, thisRigidbody.velocity.y, moveDirection.z);
 			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, desiredVelocity, 0.075f);
+		}
+		// Apply wind resistance
+		if (thisRigidbody.velocity.y < 0) {
+			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
 		}
 	}
 

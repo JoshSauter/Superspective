@@ -29,11 +29,3 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
 		}
 	}
 }
-
-public class PersistentSingleton<T> : Singleton<T> where T : MonoBehaviour {
-	public virtual void Awake() {
-		if (instance != null) {
-			DontDestroyOnLoad(instance);
-		}
-	}
-}

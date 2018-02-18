@@ -299,8 +299,8 @@ Shader "Hidden/EdgeDetect" {
 		
 		half notEdge = 1.0;
 		
-		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample1);
-		notEdge *= CheckSameJosh(centerNormal, centerDepth, sample2);
+		notEdge *= CheckSame(centerNormal, centerDepth, sample1);
+		notEdge *= CheckSame(centerNormal, centerDepth, sample2);
 
 		return (notEdge) * lerp(original, _BgColor, _BgFade) + (1-notEdge) * _EdgeColor;
 	}

@@ -38,10 +38,18 @@ public class TeleportEnter : MonoBehaviour {
 		Vector3 displacementToCenter = parent.enter.transform.position - other.transform.position;
 		float rotationBetweenEnterExit = GetRotationAngleBetweenTeleporters(parent);
 
+
 		other.transform.position += displacementToCenter;
 		other.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
         other.transform.position -= teleportDisplacement;
 		other.transform.position -= parent.exit.transform.TransformVector(parent.enter.transform.TransformVector(displacementToCenter));
+
+		foreach (Transform otherObject in parent.otherObjectsToTeleport) {
+			otherObject.transform.position += displacementToCenter;
+			otherObject.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
+			otherObject.transform.position -= teleportDisplacement;
+			otherObject.transform.position -= parent.exit.transform.TransformVector(parent.enter.transform.TransformVector(displacementToCenter));
+		}
 
         if (OnTeleport != null) {
 			OnTeleport(parent, other);
@@ -58,4 +66,5 @@ public class TeleportEnter : MonoBehaviour {
 		float angleExit = Mathf.Rad2Deg * Mathf.Atan2(forwardExit.x, forwardExit.z);
 		return Mathf.DeltaAngle(angleEnter, angleExit);
 	}
+	
 }
