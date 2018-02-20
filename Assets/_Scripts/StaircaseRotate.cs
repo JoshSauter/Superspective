@@ -19,14 +19,14 @@ public class StaircaseRotate : MonoBehaviour {
 	public RotationAxes axisOfRotation;
 	float currentRotation = 0;
 
-    Collider collider;
+    Collider stairCollider;
 
 	float startEndGap = 0.25f;
 
 	// Use this for initialization
 	void Start () {
         startRot = transform.parent.rotation.eulerAngles;
-        collider = GetComponent<Collider>();
+        stairCollider = GetComponent<Collider>();
 		globalDirectionalLight = GameObject.Find("Directional Light").transform;
 	}
 
@@ -90,15 +90,15 @@ public class StaircaseRotate : MonoBehaviour {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
 			case RotationAxes.left:
-				return collider.bounds.min.z + startEndGap;
+				return stairCollider.bounds.min.z + startEndGap;
 			case RotationAxes.up:
 			case RotationAxes.down:
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
 			case RotationAxes.forward:
-				return collider.bounds.min.x + startEndGap;
+				return stairCollider.bounds.min.x + startEndGap;
 			case RotationAxes.back:
-				return collider.bounds.max.x - startEndGap;
+				return stairCollider.bounds.max.x - startEndGap;
 			default:
 				Debug.LogError("Unreachable");
 				return 0;
@@ -109,7 +109,7 @@ public class StaircaseRotate : MonoBehaviour {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
 			case RotationAxes.left:
-				return collider.bounds.max.z - startEndGap;
+				return stairCollider.bounds.max.z - startEndGap;
 			case RotationAxes.up:
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
@@ -117,9 +117,9 @@ public class StaircaseRotate : MonoBehaviour {
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
 			case RotationAxes.forward:
-				return collider.bounds.max.x - startEndGap;
+				return stairCollider.bounds.max.x - startEndGap;
 			case RotationAxes.back:
-				return collider.bounds.min.x + startEndGap;
+				return stairCollider.bounds.min.x + startEndGap;
 			default:
 				Debug.LogError("Unreachable");
 				return 0;

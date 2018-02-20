@@ -8,7 +8,7 @@ public class ObscuredObjectColor : RecolorOnTeleport {
 	Renderer _renderer;
 	MaterialPropertyBlock propBlock;
 
-	void Awake() {
+	protected override void Awake() {
 		base.Awake();
 		propBlock = new MaterialPropertyBlock();
 		_renderer = GetComponent<Renderer>();

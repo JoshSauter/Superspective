@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour {
 		// Handle jumping
 		// TODO: Make this real
 		if (grounded && input.SpaceHeld) {
-			thisRigidbody.AddForce(Vector3.up * 12, ForceMode.Impulse);
+			thisRigidbody.AddForce(Vector3.up * 4, ForceMode.Impulse);
 		}
 	}
 
@@ -212,7 +212,7 @@ public class PlayerMovement : MonoBehaviour {
 	/// <param name="hitInfo">RaycastHit info about the WalkableObject that's hit by the raycast and passes the Dot test with Vector3.up</param>
 	/// <returns>True if the player is grounded, otherwise false.</returns>
 	public bool IsGrounded(out RaycastHit hitInfo) {
-		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius, -transform.up, thisCollider.height / 2f + .02f, layerMask);
+		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f, layerMask);
 		foreach (RaycastHit curHitInfo in allHit) {
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 

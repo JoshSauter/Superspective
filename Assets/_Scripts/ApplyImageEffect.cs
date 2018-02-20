@@ -23,7 +23,7 @@ public class ApplyImageEffect : MonoBehaviour {
 	}
 
     private void Update() {
-        //desiredIntensity = Mathf.Lerp(minIntensity, maxIntensity, Mathf.InverseLerp(player.walkSpeed, player.runSpeed, player.HorizontalMovespeed()-2.5f));
+       desiredIntensity = Mathf.Lerp(minIntensity, maxIntensity, Mathf.InverseLerp(player.walkSpeed, player.runSpeed, player.curVelocity.magnitude-2.5f));
 
         float lerpSpeed = (curIntensity < desiredIntensity) ? lerpSpeedUp : lerpSpeedDown;
         curIntensity = Mathf.Lerp(curIntensity, desiredIntensity, Time.deltaTime * lerpSpeed);

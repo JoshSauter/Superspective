@@ -5,17 +5,21 @@ using UnityEngine;
 public class GoingSomewhereSwitch : MonoBehaviour {
 	public GameObject[] objectsToEnable;
 	public GameObject[] objectsToDisable;
-	public TeleportEnter teleporter;
+	public TeleportEnter[] teleporters;
 
 	bool hasDisplayedGoingSomewhereOnce = false;
 
 	// Update is called once per frame
 	void Awake() {
-		teleporter.OnTeleport += TurnObjectsOnOff;
+		foreach (var teleporter in teleporters) {
+			teleporter.OnTeleport += TurnObjectsOnOff;
+		}
 	}
 
 	void OnDisable() {
-		teleporter.OnTeleport -= TurnObjectsOnOff;
+		foreach (var teleporter in teleporters) {
+			teleporter.OnTeleport -= TurnObjectsOnOff;
+		}
 	}
 
 	void TurnObjectsOnOff(Teleport teleporter, Collider player) {

@@ -14,7 +14,8 @@ public class MagicTrigger : MonoBehaviour {
         PlayerFacingAwayFromObject,
         PlayerFacingPosition,
         PlayerFacingAwayFromPosition,
-        PlayerMovingDirection
+        PlayerMovingDirection,
+		PlayerMovingAndFacingDirection
     }
     public TriggerConditionType triggerCondition;
     public float playerFaceThreshold;
@@ -170,6 +171,13 @@ public class MagicTrigger : MonoBehaviour {
                 return Vector3.Dot(playerMovement.curVelocity.normalized, targetDirection.normalized);
             }
 
+			case TriggerConditionType.PlayerMovingAndFacingDirection: {
+				PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
+				float movingDirection = Vector3.Dot(playerMovement.curVelocity.normalized, targetDirection.normalized);
+				float facingDirection = Vector3.Dot(cameraTransform.forward, targetDirection.normalized);
+				return Mathf.Min(movingDirection, facingDirection);
+			}
+
             default:
                 throw new System.Exception("TriggerCondition: " + triggerCondition + " not handled!");
         }
@@ -218,6 +226,9 @@ public class MagicTriggerEditor : Editor {
             case MagicTrigger.TriggerConditionType.PlayerMovingDirection:
                 script.targetDirection = EditorGUILayout.Vector3Field("Player moving towards: ", script.targetDirection);
                 break;
+			case MagicTrigger.TriggerConditionType.PlayerMovingAndFacingDirection:
+				script.targetDirection = EditorGUILayout.Vector3Field("Player moving and facing towards: ", script.targetDirection);
+				break;
         }
 
         EditorGUILayout.Space();

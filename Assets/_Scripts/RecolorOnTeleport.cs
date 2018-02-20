@@ -7,7 +7,7 @@ public abstract class RecolorOnTeleport : MonoBehaviour {
 	protected int index = 0;
 	protected int NUM_MATERIALS = 4;
 
-	protected void Awake() {
+	protected virtual void Awake() {
 		index = startIndex;
 	}
 

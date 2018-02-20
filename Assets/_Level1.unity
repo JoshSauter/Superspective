@@ -325,12 +325,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startIndex: 2
-  color: {r: 0, g: 0, b: 0, a: 0}
-  unlitMaterials:
-  - {fileID: 2100000, guid: 8d369263b4dde437ab91d85cddda230b, type: 2}
-  - {fileID: 2100000, guid: a1bec598cba2740aa9725b243d8d3784, type: 2}
-  - {fileID: 2100000, guid: 3ce9ec9676850429591c706b16eb7b22, type: 2}
-  - {fileID: 2100000, guid: a0e2b19a2cbd94427b16370226e9f50b, type: 2}
+  color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
+  unlitMaterials: []
 --- !u!1 &10830264
 GameObject:
   m_ObjectHideFlags: 0
@@ -511,12 +507,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startIndex: 0
-  color: {r: 0.9490196, g: 0.90588236, b: 0.90588236, a: 1}
-  unlitMaterials:
-  - {fileID: 2100000, guid: 8d369263b4dde437ab91d85cddda230b, type: 2}
-  - {fileID: 2100000, guid: a1bec598cba2740aa9725b243d8d3784, type: 2}
-  - {fileID: 2100000, guid: 3ce9ec9676850429591c706b16eb7b22, type: 2}
-  - {fileID: 2100000, guid: a0e2b19a2cbd94427b16370226e9f50b, type: 2}
+  color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
+  unlitMaterials: []
 --- !u!33 &66169939
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1869,7 +1861,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 67007f3384660e54c9d171a8e5355b2f, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2357,12 +2349,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startIndex: 1
-  color: {r: 0, g: 0, b: 0, a: 0}
-  unlitMaterials:
-  - {fileID: 2100000, guid: 8d369263b4dde437ab91d85cddda230b, type: 2}
-  - {fileID: 2100000, guid: a1bec598cba2740aa9725b243d8d3784, type: 2}
-  - {fileID: 2100000, guid: 3ce9ec9676850429591c706b16eb7b22, type: 2}
-  - {fileID: 2100000, guid: a0e2b19a2cbd94427b16370226e9f50b, type: 2}
+  color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
+  unlitMaterials: []
 --- !u!1 &720572755
 GameObject:
   m_ObjectHideFlags: 0
@@ -2645,7 +2633,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 0.9191176, g: 0.9191176, b: 0.9191176, a: 1}
   m_enableVertexGradient: 0
   m_fontColorGradient:
     topLeft: {r: 1, g: 1, b: 1, a: 1}
@@ -5591,12 +5579,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startIndex: 3
-  color: {r: 0, g: 0, b: 0, a: 0}
-  unlitMaterials:
-  - {fileID: 2100000, guid: 8d369263b4dde437ab91d85cddda230b, type: 2}
-  - {fileID: 2100000, guid: a1bec598cba2740aa9725b243d8d3784, type: 2}
-  - {fileID: 2100000, guid: 3ce9ec9676850429591c706b16eb7b22, type: 2}
-  - {fileID: 2100000, guid: a0e2b19a2cbd94427b16370226e9f50b, type: 2}
+  color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
+  unlitMaterials: []
 --- !u!1 &1559218286
 GameObject:
   m_ObjectHideFlags: 0
@@ -5629,7 +5613,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 67007f3384660e54c9d171a8e5355b2f, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
