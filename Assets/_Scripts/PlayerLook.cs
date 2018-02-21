@@ -12,6 +12,16 @@ public class PlayerLook : MonoBehaviour {
 	[Range(0.01f,1)]
 	public float sensitivityY = 0.5f;
     public float rotationY = 0F;
+	private float yClamp = 85;
+
+	/// <summary>
+	/// Returns the rotationY normalized to the range (-1, 1)
+	/// </summary>
+	public float normalizedY {
+		get {
+			return rotationY / yClamp;
+		}
+	}
 
     // Use this for initialization
     void Start () {
@@ -26,7 +36,7 @@ public class PlayerLook : MonoBehaviour {
 	void Update () {
 		LookHorizontal(Input.GetAxis("Mouse X") * 4 * generalSensitivity * sensitivityX);
 		rotationY += Input.GetAxis("Mouse Y") * 4 * generalSensitivity * sensitivityY;
-        rotationY = Mathf.Clamp(rotationY, -85f, 85f);
+        rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
         LookVertical(rotationY);
 	}
 

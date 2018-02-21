@@ -17,6 +17,7 @@ public class LevelManager : Singleton<LevelManager> {
 
 #region level names
 	private const string managerScene = "_ManagerScene";
+	private const string testScene = "_TestScene";
 
 	private const string level1 = "_Level1";
 	private const string level2 = "_Level2";
@@ -86,6 +87,10 @@ public class LevelManager : Singleton<LevelManager> {
 	/// Defines the world graph which determines which scenes are adjacent to one another.
 	/// </summary>
 	private void PopulateWorldGraph() {
+#if UNITY_EDITOR
+		worldGraph.Add(testScene, new List<string>());
+#endif
+
 		worldGraph.Add(level1, new List<string>() { transition1_2 });
 		worldGraph.Add(level2, new List<string>() { transition1_2, transition2_3 });
 		worldGraph.Add(level3, new List<string>() { transition2_3 });
