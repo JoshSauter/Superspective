@@ -3,31 +3,45 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DesirePlatformRiseFall : MonoBehaviour {
-	Rigidbody thisRigidbody;
+	Rigidbody panelRigidbody;
 	PlayerLook playerLook;
 	Transform lookPanel;
+	Vector3 notchStartPos;
 
 
 	float curLook = 0;
-	float curLookLerpSpeed = 0.1f;
+	public float curLookLerpSpeed = 0.08f;
+	float panelDeadZone = 0.15f;
 	float deadZone = 0.2f;
-	float riseSpeed = 3;
+	public float riseSpeed = 3;
 	float platformDecelerationLerpRate = 0.2f;
-	float platformAccelerationLerpRate = 0.15f;
+	float platformAccelerationLerpRate = 0.1f;
 
 	float maxPanelYPosition = 0;
 	float minPanelYPosition = -3;
 
+	Transform notch;
+	Renderer notchRenderer;
+	float maxNotchOffset = 0.5f;
+	Color notchGreen = new Color(0.09812928f, 0.8897059f, 0.1035884f);
+	Color notchRed = new Color(0.8897059f, 0.09812924f, 0.09812924f);
+
 	// Use this for initialization
 	void Start () {
-		thisRigidbody = GetComponentInParent<Rigidbody>();
+		panelRigidbody = GetComponentInParent<Rigidbody>();
 		lookPanel = transform.parent.Find("Panel");
+		notch = lookPanel.Find("Notch");
+		notchStartPos = notch.localPosition;
+		notchRenderer = notch.GetComponent<Renderer>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (playerLook != null) {
 			HandlePlayerLook(playerLook.normalizedY);
+		}
+		else {
+			curLook = Mathf.Lerp(curLook, 0, 0.1f);
 		}
 	}
 
@@ -60,19 +74,52 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	private void HandlePlayerLook(float normalizedYLook) {
 		curLook = Mathf.Lerp(curLook, normalizedYLook, curLookLerpSpeed);
 
-		if (Mathf.Abs(curLook) < deadZone) {
-			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, Vector3.zero, platformDecelerationLerpRate);
-			MovePanel(curLook);
-		}
-		else {
-			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, Mathf.Sign(curLook) * riseSpeed * Vector3.up, platformAccelerationLerpRate);
-		}
+		MovePanel(curLook);
+		MoveNotch(curLook);
+		ColorNotch(curLook);
+		MovePlatform(curLook);
 	}
 
 	private void MovePanel(float curLook) {
-		float t = Mathf.InverseLerp(-deadZone, deadZone, curLook);
+		float t = Mathf.InverseLerp(-panelDeadZone, panelDeadZone, curLook);
 		Vector3 curPanelPos = lookPanel.localPosition;
 		curPanelPos.y = Mathf.Lerp(minPanelYPosition, maxPanelYPosition, t);
-		//lookPanel.localPosition = curPanelPos;
+		lookPanel.localPosition = curPanelPos;
+	}
+
+	private void MoveNotch(float curLook) {
+		if (curLook > deadZone || curLook < -deadZone) {
+			notch.localPosition = notchStartPos + new Vector3(0, Mathf.Sign(curLook) * maxNotchOffset, 0);
+
+		}
+		else if (curLook > panelDeadZone || curLook < -panelDeadZone) {
+			float t = Mathf.InverseLerp(panelDeadZone, deadZone, Mathf.Abs(curLook));
+			notch.localPosition = notchStartPos + Vector3.Lerp(Vector3.zero, Vector3.up * Mathf.Sign(curLook) * maxNotchOffset, t);
+		}
+		else {
+			notch.localPosition = notchStartPos;
+		}
+	}
+
+	private void ColorNotch(float curLook) {
+		if (curLook > deadZone) {
+			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, notchGreen, "_EmissionColor");
+		}
+		else if (curLook < -deadZone) {
+			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, notchRed, "_EmissionColor");
+		}
+		else {
+			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, Color.white, "_EmissionColor");
+		}
+	}
+
+	private void MovePlatform(float curLook) {
+		if (Mathf.Abs(curLook) < deadZone) {
+			panelRigidbody.velocity = Vector3.Lerp(panelRigidbody.velocity, Vector3.zero, platformDecelerationLerpRate);
+			return;
+		}
+		else {
+			panelRigidbody.velocity = Vector3.Lerp(panelRigidbody.velocity, Mathf.Sign(curLook) * riseSpeed * Vector3.up, platformAccelerationLerpRate);
+		}
 	}
 }

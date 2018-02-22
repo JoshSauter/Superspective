@@ -19,6 +19,13 @@ namespace EpitaphUtils {
 			return children;
 		}
 
+		public static void SetColorForRenderer(Renderer r, Color color, string colorPropertyName = "_Color") {
+			MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+			r.GetPropertyBlock(propBlock);
+			propBlock.SetColor(colorPropertyName, color);
+			r.SetPropertyBlock(propBlock);
+		}
+
 		// Subvectors of Vector3
 		public static Vector2 xy(Vector3 v3) {
 			return new Vector2(v3.x, v3.y);
