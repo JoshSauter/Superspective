@@ -22,9 +22,12 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string level1 = "_Level1";
 	private const string level2 = "_Level2";
 	private const string level3 = "_Level3";
+	private const string level4 = "_Level4";
 
 	private const string transition1_2 = "_Transition1_2";
 	private const string transition2_3 = "_Transition2_3";
+	private const string transition3_4 = "_Transition3_4";
+
 #endregion
 
 	public void Start() {
@@ -93,10 +96,12 @@ public class LevelManager : Singleton<LevelManager> {
 
 		worldGraph.Add(level1, new List<string>() { transition1_2 });
 		worldGraph.Add(level2, new List<string>() { transition1_2, transition2_3 });
-		worldGraph.Add(level3, new List<string>() { transition2_3 });
+		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
+		worldGraph.Add(level4, new List<string>() { transition3_4 });
 
 		worldGraph.Add(transition1_2, new List<string>() { level1, level2 });
 		worldGraph.Add(transition2_3, new List<string>() { level2, level3 });
+		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
 	}
 
 	/// <summary>

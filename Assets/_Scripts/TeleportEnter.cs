@@ -4,6 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(MagicTrigger))]
 public class TeleportEnter : MonoBehaviour {
+	public bool DEBUG = false;
     public MagicTrigger trigger;
     Teleport parent;
 	public delegate void TeleportAction(Teleport teleporter, Collider player);
@@ -30,18 +31,24 @@ public class TeleportEnter : MonoBehaviour {
 		Vector3 curVelocity = other.GetComponent<Rigidbody>().velocity;
 		Vector3 relativeVelocity = parent.enter.transform.InverseTransformDirection(curVelocity);
 		curVelocity = parent.exit.transform.TransformDirection(relativeVelocity);
-		//print("Velocity was " + other.GetComponent<Rigidbody>().velocity + " but is now " + curVelocity);
+		if (DEBUG) {
+			print("Velocity was " + other.GetComponent<Rigidbody>().velocity + " but is now " + curVelocity);
+		}
 		other.GetComponent<Rigidbody>().velocity = curVelocity;
 
 		// Handle position and rotation
 		Vector3 teleportDisplacement = parent.enter.transform.position - parent.exit.transform.position;
 		Vector3 displacementToCenter = parent.enter.transform.position - other.transform.position;
 		float rotationBetweenEnterExit = GetRotationAngleBetweenTeleporters(parent);
-
+		if (DEBUG) {
+			print("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nAngleBetweenEnterExit: " + rotationBetweenEnterExit);
+		}
 
 		other.transform.position += displacementToCenter;
+		// Note: This only works for Y-axis rotations
 		other.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
-        other.transform.position -= teleportDisplacement;
+
+		other.transform.position -= teleportDisplacement;
 		other.transform.position -= parent.exit.transform.TransformVector(parent.enter.transform.TransformVector(displacementToCenter));
 
 		foreach (Transform otherObject in parent.otherObjectsToTeleport) {

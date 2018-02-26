@@ -30,5 +30,7 @@ ExportedObj/
 sysinfo.txt
 
 # Builds
+TestBuild*
 *.apk
 *.unitypackage
+*.7z

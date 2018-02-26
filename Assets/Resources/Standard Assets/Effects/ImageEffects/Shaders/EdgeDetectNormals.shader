@@ -150,19 +150,19 @@ Shader "Hidden/EdgeDetect" {
 		o.pos = UnityObjectToClipPos(v.vertex);
 		
 		float2 uv = v.texcoord.xy;
-		o.uv[0] = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
 		
 		#if UNITY_UV_STARTS_AT_TOP
 		if (_MainTex_TexelSize.y < 0)
 			uv.y = 1-uv.y;
 		#endif
 		
-		o.uv[1] = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
-		o.uv[4] = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
+		o.uv[0] = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
 				
 		// offsets for two additional samples
-		o.uv[2] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
-		o.uv[3] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[1] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[2] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[3] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[4] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
 		
 		return o;
 	}	  
@@ -288,9 +288,11 @@ Shader "Hidden/EdgeDetect" {
 	{
 		half4 original = tex2D(_MainTex, i.uv[0]);
 		
-		half4 center = tex2D (_CameraDepthNormalsTexture, i.uv[1]);
-		half4 sample1 = tex2D (_CameraDepthNormalsTexture, i.uv[2]);
-		half4 sample2 = tex2D (_CameraDepthNormalsTexture, i.uv[3]);
+		half4 center = tex2D (_CameraDepthNormalsTexture, i.uv[0]);
+		half4 sample1 = tex2D (_CameraDepthNormalsTexture, i.uv[1]);
+		half4 sample2 = tex2D (_CameraDepthNormalsTexture, i.uv[2]);
+		half4 sample3 = tex2D (_CameraDepthNormalsTexture, i.uv[3]);
+		half4 sample4 = tex2D (_CameraDepthNormalsTexture, i.uv[4]);
 		
 		// encoded normal
 		half2 centerNormal = center.xy;
@@ -301,6 +303,8 @@ Shader "Hidden/EdgeDetect" {
 		
 		notEdge *= CheckSame(centerNormal, centerDepth, sample1);
 		notEdge *= CheckSame(centerNormal, centerDepth, sample2);
+		notEdge *= CheckSame(centerNormal, centerDepth, sample3);
+		notEdge *= CheckSame(centerNormal, centerDepth, sample4);
 
 		return (notEdge) * lerp(original, _BgColor, _BgFade) + (1-notEdge) * _EdgeColor;
 	}
