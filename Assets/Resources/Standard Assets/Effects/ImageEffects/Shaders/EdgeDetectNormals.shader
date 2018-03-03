@@ -93,31 +93,18 @@ Shader "Hidden/EdgeDetect" {
 		return isSameNormal * isSameDepth ? 1.0 : 0.0;
 	}
 
-	inline half CheckSameJosh (half2 centerNormal, float centerDepth, half4 theSample)
+	inline half CheckSameJosh (half4 sample1, half4 sample2, float centerDepth)
 	{
 		// difference in normals
 		// do not bother decoding normals - there's no need here
-		half2 diff = abs(centerNormal - theSample.xy) * _Sensitivity.y;
+		half2 diff = abs(sample1.xy - sample2.xy) * _Sensitivity.y;
 		int isSameNormal = (diff.x + diff.y) * _Sensitivity.y < 0.1;
 		// difference in depth
-		float sampleDepth = DecodeFloatRG (theSample.zw);
+		float sampleDepth1 = DecodeFloatRG (sample1.zw);
+		float sampleDepth2 = DecodeFloatRG (sample2.zw);
 		float zdiff = 0;
-		int isSameDepth = 0;
-		if (centerDepth < .01) {
-			zdiff = abs(centerDepth-sampleDepth);
-			isSameDepth = zdiff * _Sensitivity.x < 0.09 * centerDepth;
-		}
-		else {
-			zdiff = abs(log(centerDepth)-log(sampleDepth));
-			isSameDepth = zdiff * _Sensitivity.x < 0.9 * centerDepth;
-		}
-		// scale the required threshold by the distance
-	
-		// return:
-		// 1 - if normals and depth are similar enough
-		// 0 - otherwise
 		
-		return isSameNormal * isSameDepth ? 1.0 : 0.0;
+		return isSameNormal;
 	}	
 		
 	v2f vertRobert( appdata_img v ) 
@@ -161,8 +148,8 @@ Shader "Hidden/EdgeDetect" {
 		// offsets for two additional samples
 		o.uv[1] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
 		o.uv[2] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
-		o.uv[3] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
-		o.uv[4] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[3] = UnityStereoScreenSpaceUVAdjust(uv + float2(+_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
+		o.uv[4] = UnityStereoScreenSpaceUVAdjust(uv + float2(-_MainTex_TexelSize.x, +_MainTex_TexelSize.y) * _SampleDistance, _MainTex_ST);
 		
 		return o;
 	}	  
@@ -305,6 +292,12 @@ Shader "Hidden/EdgeDetect" {
 		notEdge *= CheckSame(centerNormal, centerDepth, sample2);
 		notEdge *= CheckSame(centerNormal, centerDepth, sample3);
 		notEdge *= CheckSame(centerNormal, centerDepth, sample4);
+
+		half cornersAreSame = 1;
+		cornersAreSame *= CheckSame(sample1.xy, DecodeFloatRG(sample1.zw), sample3);
+		cornersAreSame *= CheckSame(sample2.xy, DecodeFloatRG(sample2.zw), sample4);
+
+		notEdge *= (cornersAreSame);
 
 		return (notEdge) * lerp(original, _BgColor, _BgFade) + (1-notEdge) * _EdgeColor;
 	}

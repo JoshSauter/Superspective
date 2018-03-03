@@ -3,42 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 
-public class SideRoomPanel : MonoBehaviour {
-	public Color gemColor;
-	Button gemButton;
+public class SideRoomPanel : Panel {
 	Transform[] laserParents;
 	public ParticleSystem laser;
 
 	public Renderer roomRenderer;
-	Renderer thisRenderer;
-	public float colorLerpTime = 1.75f;
 	public float roomEmissionLevel = 0.2f;
 	public Color startingRoomColor = new Color(0.1f, 0.1f, 0.1f);
-	MaterialPropertyBlock panelPropBlock;
 	MaterialPropertyBlock roomPropBlock;
 
 #region events
-	public delegate void SideRoomPanelAction();
-	public event SideRoomPanelAction OnPanelActivateStart;
-	public event SideRoomPanelAction OnPanelActivateFinish;
-	public event SideRoomPanelAction OnLaserActivateStart;
-	public event SideRoomPanelAction OnLaserActivateFinish;
+	public event PanelAction OnLaserActivateStart;
+	public event PanelAction OnLaserActivateFinish;
 #endregion
 
 	// Use this for initialization
 	void Start () {
-		// Set up references
-		thisRenderer = GetComponent<Renderer>();
 
 		List<Transform> laserParentsList = new List<Transform>(Utils.GetComponentsInChildrenOnly<Transform>(laser.transform.parent));
 		laserParents = laserParentsList.FindAll(x => x != laser.transform).ToArray();
 
-		gemButton = GetComponentInChildren<Button>();
-		gemColor = gemButton.GetComponent<MeshRenderer>().material.color;
-		gemButton.OnButtonPressFinish += PanelActivate;
 
-		// Set up material property blocks
-		panelPropBlock = new MaterialPropertyBlock();
+		// Set up material property block
 		roomPropBlock = new MaterialPropertyBlock();
 
 		// Set initial room color
@@ -47,8 +33,7 @@ public class SideRoomPanel : MonoBehaviour {
 		roomRenderer.SetPropertyBlock(roomPropBlock);
 	}
 
-	void PanelActivate(Button b) {
-		StartCoroutine(PanelColorLerp());
+	protected override void PanelActivate(Button b) {
 		StartCoroutine(RoomColorLerp());
 		TurnOnLaser();
 
@@ -56,28 +41,6 @@ public class SideRoomPanel : MonoBehaviour {
 		b.GetComponent<RotateObject>().enabled = false;
 	}
 
-	IEnumerator PanelColorLerp() {
-		if (OnPanelActivateStart != null) OnPanelActivateStart();
-
-		thisRenderer.GetPropertyBlock(panelPropBlock);
-		Color startColor = thisRenderer.material.color;
-
-		float timeElapsed = 0;
-		while (timeElapsed < colorLerpTime) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / colorLerpTime;
-
-			Color curColor = Color.Lerp(startColor, gemColor, t);
-			panelPropBlock.SetColor("_Color", curColor);
-			thisRenderer.SetPropertyBlock(panelPropBlock);
-
-			yield return null;
-		}
-		panelPropBlock.SetColor("_Color", gemColor);
-		thisRenderer.SetPropertyBlock(panelPropBlock);
-
-		if (OnPanelActivateFinish != null) OnPanelActivateFinish();
-	}
 
 	IEnumerator RoomColorLerp() {
 		roomRenderer.GetPropertyBlock(roomPropBlock);

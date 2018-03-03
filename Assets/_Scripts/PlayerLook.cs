@@ -47,4 +47,11 @@ public class PlayerLook : MonoBehaviour {
     private void LookHorizontal(float rotation) {
         playerTransform.Rotate(new Vector3(0, rotation, 0));
     }
+
+	private void OnApplicationFocus(bool focus) {
+#if !UNITY_EDITOR
+		Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
+		Cursor.visible = !focus;
+#endif
+	}
 }

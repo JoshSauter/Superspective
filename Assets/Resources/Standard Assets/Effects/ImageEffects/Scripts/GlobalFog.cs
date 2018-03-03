@@ -6,8 +6,10 @@ namespace UnityStandardAssets.ImageEffects
     [ExecuteInEditMode]
     [RequireComponent (typeof(Camera))]
     [AddComponentMenu ("Image Effects/Rendering/Global Fog")]
-    class GlobalFog : PostEffectsBase
+    public class GlobalFog : PostEffectsBase
 	{
+		[Tooltip("Fog color")]
+		public Color fogColor = Color.gray;
 		[Tooltip("Apply distance-based fog?")]
         public bool  distanceFog = true;
 		[Tooltip("Exclude far plane pixels from distance-based fog? (Skybox or clear color)")]
@@ -86,6 +88,7 @@ namespace UnityStandardAssets.ImageEffects
             sceneParams.w = linear ? sceneEnd * invDiff : 0.0f;
             fogMaterial.SetVector("_SceneFogParams", sceneParams);
             fogMaterial.SetVector("_SceneFogMode", new Vector4((int)sceneMode, useRadialDistance ? 1 : 0, 0, 0));
+			fogMaterial.SetColor("_FogColor", fogColor);
 
             int pass = 0;
             if (distanceFog && heightFog)

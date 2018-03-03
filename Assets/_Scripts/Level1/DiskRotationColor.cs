@@ -16,7 +16,7 @@ public class DiskRotationColor : MonoBehaviour {
 	void Update () {
 		_renderer.GetPropertyBlock(propBlock);
 		float t = 0.5f * Mathf.Sin(transform.rotation.eulerAngles.y / 360 * Mathf.PI) + 0.5f;
-		propBlock.SetColor("_RenderColor", rotationGradient.Evaluate(t));
+		propBlock.SetColor("_Color", rotationGradient.Evaluate(t));
 		_renderer.SetPropertyBlock(propBlock);
 	}
 }

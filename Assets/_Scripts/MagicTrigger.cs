@@ -56,7 +56,7 @@ public class MagicTrigger : MonoBehaviour {
             }
 			// Magic Events triggered
 			if (facingAmount > playerFaceThreshold) {
-				if (DEBUG) Debug.Log("Triggering MagicTrigger!");
+				if (DEBUG) Debug.Log("Triggering MagicTrigger!", this.gameObject);
 				if (OnMagicTriggerStay != null) {
 					OnMagicTriggerStay(other);
 

@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 4
-  runSpeed: 14
+  runSpeed: 12
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.7
 --- !u!54 &623971846
@@ -306,14 +306,14 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1757516, y: 11.958359, z: -23.010712}
+  m_LocalRotation: {x: -0, y: -0.014450973, z: 0, w: -0.99989563}
+  m_LocalPosition: {x: 0, y: 3, z: -22.5}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -358.344, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 826182536}
   m_Layer: 0
   m_Name: ObscureShaderCamera2
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -431,7 +431,7 @@ GameObject:
   - component: {fileID: 940225956}
   m_Layer: 0
   m_Name: ObscureShaderCamera1
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -759,6 +759,7 @@ GameObject:
   - component: {fileID: 1809741069}
   - component: {fileID: 1809741066}
   - component: {fileID: 1809741067}
+  - component: {fileID: 1809741070}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -780,7 +781,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 708b781cad112c75d0008dfa8d76c639, type: 3}
   radius: {x: 1, y: 1}
-  angle: 0
+  angle: 8.89
   center: {x: 0.5, y: 0.5}
 --- !u!114 &1809741058
 MonoBehaviour:
@@ -911,7 +912,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.94509804, g: 0.89411765, b: 0.827451, a: 0}
+  m_BackGroundColor: {r: 0.94509804, g: 0.89411765, b: 0.827451, a: 1}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -1004,3 +1005,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenShifts: 0.15
   intensity: 0.8
+--- !u!114 &1809741070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76b5ec6153a1d55438228df10fe66844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fogColor: {r: 0.94509804, g: 0.89411765, b: 0.827451, a: 1}
+  distanceFog: 1
+  excludeFarPixels: 0
+  useRadialDistance: 0
+  heightFog: 1
+  height: 0
+  heightDensity: 0.01
+  startDistance: 150
+  fogShader: {fileID: 4800000, guid: 70d8568987ac0499f952b54c7c13e265, type: 3}

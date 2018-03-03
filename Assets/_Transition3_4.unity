@@ -58216,8 +58216,8 @@ MonoBehaviour:
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   allowTriggeringWhileInsideObject: 0
-  levelForward: _Level3
-  levelBackward: _Transition2_3
+  levelForward: _Level4
+  levelBackward: _Transition3_4
 --- !u!64 &1838463643
 MeshCollider:
   m_ObjectHideFlags: 0
