@@ -18,8 +18,8 @@ public class SideRoomPanel : Panel {
 #endregion
 
 	// Use this for initialization
-	void Start () {
-
+	override protected void Start () {
+		base.Start();
 		List<Transform> laserParentsList = new List<Transform>(Utils.GetComponentsInChildrenOnly<Transform>(laser.transform.parent));
 		laserParents = laserParentsList.FindAll(x => x != laser.transform).ToArray();
 
@@ -34,6 +34,7 @@ public class SideRoomPanel : Panel {
 	}
 
 	protected override void PanelActivate(Button b) {
+		base.PanelActivate(b);
 		StartCoroutine(RoomColorLerp());
 		TurnOnLaser();
 

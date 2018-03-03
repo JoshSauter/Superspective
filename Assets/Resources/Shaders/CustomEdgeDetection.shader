@@ -1,50 +1,74 @@
-﻿Shader "Hidden/CustomEdgeDetection"
-{
-	Properties
-	{
+﻿Shader "Hidden/CustomEdgeDetection" {
+	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
+		_EdgeColor ("Colors of Edges", Color) = (0, 0, 0, 1)
 	}
-	SubShader
-	{
-		// No culling or depth
-		Cull Off ZWrite Off ZTest Always
 
-		Pass
-		{
+	SubShader {
+
+		Pass {
 			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+// Upgrade NOTE: excluded shader from DX11 because it uses wrong array syntax (type[size] name)
+#pragma exclude_renderers d3d11
+			#pragma vertex Vert
+			#pragma fragment Frag
 			
 			#include "UnityCG.cginc"
-
-			struct appdata
-			{
-				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
-			};
-
-			struct v2f
-			{
-				float2 uv : TEXCOORD0;
-				float4 vertex : SV_POSITION;
-			};
-
-			v2f vert (appdata v)
-			{
-				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = v.uv;
-				return o;
-			}
-			
 			sampler2D _MainTex;
 
-			fixed4 frag (v2f i) : SV_Target
-			{
-				fixed4 col = tex2D(_MainTex, i.uv);
-				// just invert the colors
-				col.rgb = 1 - col.rgb;
-				return col;
+			const half2 uvDisplacements = half2[9](
+				half2(0,0),
+				half2(-1,-1),
+				half2(0,-1),
+				half2(1,-1),
+				half2(-1,0),
+				half2(1,0),
+				half2(-1,1),
+				half2(0,1),
+				half2(1,1),
+			);
+
+			struct UVPositions {
+				/* UVs are laid out as below
+				     -1   0   1
+				
+				    –––––––––––––
+			   -1   | 1 | 2 | 3 |
+				    |–––––––––––|
+				0   | 4 | 0 | 5 |
+				    |–––––––––––|
+				1   | 6 | 7 | 8 |
+				    –––––––––––––
+
+				Or, as displacement from center:
+				i:		( x,  y)
+				–––––––––––––––––
+				0:		( 0,  0)
+				1:		(-1, -1)
+				2:		( 0, -1)
+				3:		( 1, -1)
+				4:		(-1,  0)
+				5:		( 1,  0)
+				6:		(-1,  1)
+				7:		( 0,  1)
+				8:		( 1,  1)
+				*/
+				float2 UVs[9];
+			};
+
+			UVPositions Vert (appdata_img v) {
+				float2 uv = MultiplyUV(UNITY_MATRIX_TEXTURE0, v.texcoord);
+				UVPositions uvPositions;
+				for (int i = 0; i < 9; i++) {
+					uvPositions[i] = UnityStereoScreenSpaceUVAdjust(uv + _MainTex_TexelSize.xy * uvDisplacements[i] * _SampleDistance, _MainTex_ST);
+				}
+				//o.uv[0] = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
+				//o.uv[1] = UnityStereoScreenSpaceUVAdjust(uv + _MainTex_TexelSize.xy * half2(-1,-1) * _SampleDistance, _MainTex_ST);
+			}
+			
+
+			fixed4 Frag (v2f i) : SV_Target {
+				return fixed4(0,0,0,0);
 			}
 			ENDCG
 		}
