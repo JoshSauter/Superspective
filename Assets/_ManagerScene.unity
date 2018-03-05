@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 4
-  runSpeed: 12
+  runSpeed: 14
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.7
 --- !u!54 &623971846
@@ -750,6 +750,7 @@ GameObject:
   - component: {fileID: 1809741063}
   - component: {fileID: 1809741062}
   - component: {fileID: 1809741068}
+  - component: {fileID: 1809741071}
   - component: {fileID: 1809741061}
   - component: {fileID: 1809741060}
   - component: {fileID: 1809741059}
@@ -870,7 +871,7 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 730475ee64f9a894bbac0d9e6f22e813, type: 3}
   m_Name: 
@@ -1004,7 +1005,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeBetweenShifts: 0.15
-  intensity: 0.8
+  intensity: 0.4
 --- !u!114 &1809741070
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1025,3 +1026,17 @@ MonoBehaviour:
   heightDensity: 0.01
   startDistance: 150
   fogShader: {fileID: 4800000, guid: 70d8568987ac0499f952b54c7c13e265, type: 3}
+--- !u!114 &1809741071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 543dc804960a8c64b9a7d40169eeee43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  depthSensitivity: 50
+  normalSensitivity: 3
+  edgeColor: {r: 1, g: 1, b: 1, a: 1}

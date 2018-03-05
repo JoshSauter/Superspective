@@ -16336,6 +16336,7 @@ GameObject:
   - component: {fileID: 348517892}
   - component: {fileID: 348517891}
   - component: {fileID: 348517890}
+  - component: {fileID: 348517889}
   m_Layer: 11
   m_Name: DownstairsHallway
   m_TagString: Untagged
@@ -16356,6 +16357,20 @@ Transform:
   m_Father: {fileID: 156221829}
   m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &348517889
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 348517887}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 1810113340}
 --- !u!114 &348517890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19549,7 +19564,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh538258
+  m_Name: pb_Mesh1408870
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -58042,7 +58057,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh538232
+  m_Name: pb_Mesh1408844
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2

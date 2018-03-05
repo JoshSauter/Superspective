@@ -35,7 +35,5 @@ public class PostProcessDepthGrayscale : MonoBehaviour {
 		else {
 			Graphics.Blit(source, destination);
 		}
-		//mat is the material which contains the shader
-		//we are passing the destination RenderTexture to
 	}
 }
