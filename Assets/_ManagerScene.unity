@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5559bdf01982dac4e9e33c3b5f6df9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingScene: _Level1
+  startingScene: _Transition2_3
 --- !u!4 &505772567
 Transform:
   m_ObjectHideFlags: 0
@@ -238,6 +238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 4
   runSpeed: 14
+  jumpForce: 15
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.7
 --- !u!54 &623971846
@@ -306,14 +307,14 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: -0, y: -0.014450973, z: 0, w: -0.99989563}
-  m_LocalPosition: {x: 0, y: 3, z: -22.5}
-  m_LocalScale: {x: 1, y: 2, z: 1}
+  m_LocalRotation: {x: -0, y: -0.02136138, z: 0, w: -0.99977183}
+  m_LocalPosition: {x: 260.96118, y: 7.5676994, z: 272.80518}
+  m_LocalScale: {x: 1, y: 1.75, z: 1}
   m_Children:
   - {fileID: 505772567}
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: -358.344, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -357.552, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -751,7 +752,6 @@ GameObject:
   - component: {fileID: 1809741062}
   - component: {fileID: 1809741068}
   - component: {fileID: 1809741071}
-  - component: {fileID: 1809741061}
   - component: {fileID: 1809741060}
   - component: {fileID: 1809741059}
   - component: {fileID: 1809741058}
@@ -761,6 +761,7 @@ GameObject:
   - component: {fileID: 1809741066}
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741070}
+  - component: {fileID: 1809741061}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -867,26 +868,29 @@ MonoBehaviour:
 --- !u!114 &1809741061
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114956917619834794, guid: 0aef4a11980069f48bfb7cdb9139dd38,
-    type: 2}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 730475ee64f9a894bbac0d9e6f22e813, type: 3}
+  m_Script: {fileID: 11500000, guid: 646b5bc27a658f447b1d929fd5ffbd70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 0
-  sensitivityDepth: 0.52
-  sensitivityNormals: 1.2
-  lumThreshold: 0.16
-  edgeExp: 0.48
-  sampleDist: 1
-  edgesOnly: 0
-  edgesOnlyBgColor: {r: 0.7058823, g: 0.7058823, b: 0.7058823, a: 1}
-  edgeColor: {r: 1, g: 1, b: 1, a: 1}
-  edgeDetectShader: {fileID: 4800000, guid: 0d1644bdf064147baa97f235fc5b4903, type: 3}
-  edgeDetectMaterial: {fileID: 0}
+  mode: 1
+  showGeneratedNormals: 0
+  offsetScale: 0.2
+  blurRadius: 18
+  edgeThresholdMin: 0.05
+  edgeThreshold: 0.2
+  edgeSharpness: 4
+  dlaaSharp: 0
+  ssaaShader: {fileID: 4800000, guid: b3728d1488b02490cbd196c7941bf1f8, type: 3}
+  dlaaShader: {fileID: 4800000, guid: 017ca72b9e8a749058d13ebd527e98fa, type: 3}
+  nfaaShader: {fileID: 4800000, guid: ce0cb2621f6d84e21a87414e471a3cce, type: 3}
+  shaderFXAAPreset2: {fileID: 4800000, guid: 6f1418cffd12146f2a83be795f6fa5a7, type: 3}
+  shaderFXAAPreset3: {fileID: 4800000, guid: c182fa94a5a0a4c02870641efcd38cd5, type: 3}
+  shaderFXAAII: {fileID: 4800000, guid: cd5b323dcc592457790ff18b528f5e67, type: 3}
+  shaderFXAAIII: {fileID: 4800000, guid: c547503fff0e8482ea5793727057041c, type: 3}
 --- !u!81 &1809741062
 AudioListener:
   m_ObjectHideFlags: 0
@@ -1037,6 +1041,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543dc804960a8c64b9a7d40169eeee43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depthSensitivity: 50
+  debugMode: 0
+  depthSensitivity: 3
   normalSensitivity: 3
+  sampleDistance: 1
   edgeColor: {r: 1, g: 1, b: 1, a: 1}
