@@ -19,14 +19,14 @@ Shader "Custom/DepthNormalOverlay" {
 
 			struct v2f {
 				float4 pos : SV_POSITION;
-				float4 scrPos:TEXCOORD1;
+				float4 scrPos : TEXCOORD1;
 			};
 
 			//Vertex Shader
 			v2f vert (appdata_base v){
 				v2f o;
 				o.pos = UnityObjectToClipPos (v.vertex);
-				o.scrPos=ComputeScreenPos(o.pos);
+				o.scrPos = ComputeScreenPos(o.pos);
 				return o;
 			}
 
@@ -58,14 +58,14 @@ Shader "Custom/DepthNormalOverlay" {
 
 			struct v2f {
 				float4 pos : SV_POSITION;
-				float4 scrPos:TEXCOORD1;
+				float4 scrPos : TEXCOORD1;
 			};
 
 			//Vertex Shader
 			v2f vert (appdata_base v){
 				v2f o;
 				o.pos = UnityObjectToClipPos (v.vertex);
-				o.scrPos=ComputeScreenPos(o.pos);
+				o.scrPos = ComputeScreenPos(o.pos);
 				return o;
 			}
 

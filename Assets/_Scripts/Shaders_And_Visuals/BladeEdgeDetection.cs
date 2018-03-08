@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
+[RequireComponent(typeof(Camera))]
 public class BladeEdgeDetection : MonoBehaviour {
 	public bool debugMode = false;
 	public float depthSensitivity = 1;
@@ -12,17 +14,17 @@ public class BladeEdgeDetection : MonoBehaviour {
 	Shader edgeDetectShader;
 	Material shaderMaterial;
 	
-	void Awake () {
+	private void OnEnable () {
 		edgeDetectShader = Resources.Load<Shader>("Shaders/BladeEdgeDetection");
-		shaderMaterial = new Material(edgeDetectShader);
 
-		Camera.main.depthTextureMode = DepthTextureMode.DepthNormals;
+		SetDepthNormalTextureFlag();
 	}
 	
 	[ImageEffectOpaque]
 	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
-		if (shaderMaterial == null) {
-			Debug.LogError("Shader material not yet set!");
+		if (shaderMaterial == null && !CreateMaterial()) {
+			Debug.LogError("Failed to create shader material!");
+			Graphics.Blit(source, destination);
 			this.enabled = false;
 		}
 
@@ -32,5 +34,26 @@ public class BladeEdgeDetection : MonoBehaviour {
 		shaderMaterial.SetFloat("_DebugMode", debugMode ? 1 : 0);
 		shaderMaterial.SetInt("_SampleDistance", sampleDistance);
 		Graphics.Blit(source, destination, shaderMaterial);
+	}
+
+	private void SetDepthNormalTextureFlag () {
+		GetComponent<Camera>().depthTextureMode = DepthTextureMode.DepthNormals;
+	}
+
+	private bool CreateMaterial() {
+		if (!edgeDetectShader.isSupported) {
+			return false;
+		}
+		shaderMaterial = new Material(edgeDetectShader);
+		shaderMaterial.hideFlags = HideFlags.HideAndDontSave;
+
+		return shaderMaterial != null;
+	}
+
+	private void OnDisable() {
+		if (shaderMaterial != null) {
+			DestroyImmediate(shaderMaterial);
+			shaderMaterial = null;
+		}
 	}
 }

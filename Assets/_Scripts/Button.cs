@@ -17,25 +17,29 @@ public class Button : MonoBehaviour, InteractableObject {
 	public float timeToPressButton = 1f;
 	public float timeToDepressButton = 0.5f;
 	public float depressDistance = 1f;
-	protected bool inButtonPressCoroutine = false;
+	protected bool inButtonPressOrDepressCoroutine = false;
 	protected bool buttonPressed = false;
 
 	public bool depressAfterPress = false;
 	public float timeBetweenPressEndDepressStart = 0.5f;
+	public float deadTimeAfterButtonPress = 0;
+	public float deadTimeAfterButtonDepress = 0;
 
 	public void OnLeftMouseButtonDown() { PressButton(); }
 	public void OnLeftMouseButtonUp() {}
 	public void OnLeftMouseButton() {}
 
-	void PressButton() {
-		print("Button was pressed");
-		if (!inButtonPressCoroutine && !buttonPressed) {
+	public void PressButton() {
+		if (!inButtonPressOrDepressCoroutine && !buttonPressed) {
 			StartCoroutine(ButtonPress());
+		}
+		else if (!inButtonPressOrDepressCoroutine && buttonPressed) {
+			StartCoroutine(ButtonDepress());
 		}
 	}
 
 	virtual protected IEnumerator ButtonPress() {
-		inButtonPressCoroutine = true;
+		inButtonPressOrDepressCoroutine = true;
 		Vector3 startPos = transform.position;
 		Vector3 endPos = startPos + transform.up * depressDistance;
 
@@ -52,7 +56,9 @@ public class Button : MonoBehaviour, InteractableObject {
 		}
 
 		transform.position = endPos;
-		inButtonPressCoroutine = false;
+
+		yield return new WaitForSeconds(deadTimeAfterButtonPress);
+		inButtonPressOrDepressCoroutine = false;
 		buttonPressed = true;
 
 		if (OnButtonPressFinish != null) OnButtonPressFinish(this);
@@ -64,7 +70,7 @@ public class Button : MonoBehaviour, InteractableObject {
 	}
 
 	virtual protected IEnumerator ButtonDepress() {
-		inButtonPressCoroutine = true;
+		inButtonPressOrDepressCoroutine = true;
 		Vector3 startPos = transform.position;
 		Vector3 endPos = startPos - transform.up * depressDistance;
 
@@ -81,7 +87,9 @@ public class Button : MonoBehaviour, InteractableObject {
 		}
 
 		transform.position = endPos;
-		inButtonPressCoroutine = false;
+
+		yield return new WaitForSeconds(deadTimeAfterButtonDepress);
+		inButtonPressOrDepressCoroutine = false;
 		buttonPressed = false;
 
 		if (OnButtonDepressFinish != null) OnButtonDepressFinish(this);

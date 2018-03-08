@@ -176,11 +176,11 @@
 					similarNormals *= similar;
 				}
 
-				/////////////////////////
-				// Normal Double-Check //
-				/////////////////////////
+				//////////////////////////////////////////////////
+				// Normal Double-Check A.K.A. The Chyr Maneuver //
+				//////////////////////////////////////////////////
 				/* If an edge is detected due to a difference in normals,
-					double-check with the pixel on the opposite side.
+					double-check with the pixels on the opposite sides of a +Cross and xCross
 
 					-------------------------------
 					| (1,0,0) | (0,1,0) | (1,0,0) |  Not an edge, more likely to be an artifact from floating point error near two adjacent faces

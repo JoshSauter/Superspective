@@ -11,10 +11,14 @@ public class Panel : MonoBehaviour {
 	public float colorLerpTime = 1.75f;
 	MaterialPropertyBlock panelPropBlock;
 
+	public bool activated = false;
+
 #region events
 	public delegate void PanelAction();
-	public event PanelAction OnPanelActivateStart;
+	public event PanelAction OnPanelActivateBegin;
 	public event PanelAction OnPanelActivateFinish;
+	public event PanelAction OnPanelDeactivateBegin;
+	public event PanelAction OnPanelDeactivateFinish;
 #endregion
 
 	// Use this for initialization
@@ -23,37 +27,47 @@ public class Panel : MonoBehaviour {
 		thisRenderer = GetComponent<Renderer>();
 
 		gemButton = GetComponentInChildren<Button>();
+		gemButton.deadTimeAfterButtonPress = colorLerpTime;
+		gemButton.deadTimeAfterButtonDepress = 0.25f;
 		gemColor = gemButton.GetComponent<MeshRenderer>().material.color;
 		gemButton.OnButtonPressFinish += PanelActivate;
+		gemButton.OnButtonDepressBegin += PanelDeactivate;
 
 		// Set up material property block
 		panelPropBlock = new MaterialPropertyBlock();
 	}
 
 	virtual protected void PanelActivate(Button b) {
-		StartCoroutine(PanelColorLerp());
+		activated = true;
+		StartCoroutine(PanelColorLerp(thisRenderer.material.color, gemColor));
+	}
+
+	virtual protected void PanelDeactivate(Button b) {
+		activated = false;
+		StartCoroutine(PanelColorLerp(gemColor, thisRenderer.material.color));
 	}
 	
-	IEnumerator PanelColorLerp() {
-		if (OnPanelActivateStart != null) OnPanelActivateStart();
+	IEnumerator PanelColorLerp(Color startColor, Color endColor) {
+		if (activated && OnPanelActivateBegin != null) OnPanelActivateBegin();
+		else if (!activated && OnPanelDeactivateBegin != null) OnPanelDeactivateBegin();
 
 		thisRenderer.GetPropertyBlock(panelPropBlock);
-		Color startColor = thisRenderer.material.color;
 
 		float timeElapsed = 0;
 		while (timeElapsed < colorLerpTime) {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / colorLerpTime;
 
-			Color curColor = Color.Lerp(startColor, gemColor, t);
+			Color curColor = Color.Lerp(startColor, endColor, t);
 			panelPropBlock.SetColor("_Color", curColor);
 			thisRenderer.SetPropertyBlock(panelPropBlock);
 
 			yield return null;
 		}
-		panelPropBlock.SetColor("_Color", gemColor);
+		panelPropBlock.SetColor("_Color", endColor);
 		thisRenderer.SetPropertyBlock(panelPropBlock);
 
-		if (OnPanelActivateFinish != null) OnPanelActivateFinish();
+		if (activated && OnPanelActivateFinish != null) OnPanelActivateFinish();
+		else if (!activated && OnPanelDeactivateFinish != null) OnPanelDeactivateFinish();
 	}
 }

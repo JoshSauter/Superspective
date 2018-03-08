@@ -10,8 +10,11 @@ public class PlayerMovement : MonoBehaviour {
 	float acceleration = 75f;
 	float backwardsSpeed = 0.7f;
 	public float walkSpeed = 4f;
-	public float runSpeed = 7f;
+	public float runSpeed = 12f;
+	public float jumpForce = 40;
 	public float windResistanceMultiplier = 0.2f;
+	bool jumpIsOnCooldown = false;
+	float jumpCooldown = 0.2f;
 	float movespeed;
 	private Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
@@ -81,9 +84,8 @@ public class PlayerMovement : MonoBehaviour {
 		}
 
 		// Handle jumping
-		// TODO: Make this real
-		if (grounded && input.SpaceHeld) {
-			thisRigidbody.AddForce(Vector3.up * 4, ForceMode.Impulse);
+		if (grounded && input.SpaceHeld && !jumpIsOnCooldown) {
+			StartCoroutine(Jump());
 		}
 	}
 
@@ -122,7 +124,6 @@ public class PlayerMovement : MonoBehaviour {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 0.15f);
 			thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
-			//thisRigidbody.velocity = Vector3.zero;
 		}
 		else {
 			float adjustedMovespeed = (ground.collider.tag == "Staircase") ? walkSpeed : movespeed;
@@ -154,21 +155,44 @@ public class PlayerMovement : MonoBehaviour {
 		// DEBUG:
 		Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.green, 0.1f);
 
+		// Handle mid-air collision with obstacles
+		moveDirection.Normalize();
+		moveDirection = AirCollisionMovementAdjustment(moveDirection * movespeed);
+
 		// If no keys are pressed, decelerate to a horizontal stop
 		if (!(input.UpHeld || input.DownHeld || input.RightHeld || input.LeftHeld)) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 0.15f);
 			thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
-			//thisRigidbody.velocity = 
 		}
 		else {
-			moveDirection = moveDirection.normalized * movespeed;
-			Vector3 desiredVelocity = new Vector3(moveDirection.x, thisRigidbody.velocity.y, moveDirection.z);
-			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, desiredVelocity, 0.075f);
+			Vector2 horizontalVelocity = HorizontalVelocity();
+			Vector2 desiredHorizontalVelocity = new Vector2(moveDirection.x, moveDirection.z);
+			Vector2 newHorizontalVelocity = Vector2.Lerp(horizontalVelocity, desiredHorizontalVelocity, 0.075f);
+			thisRigidbody.velocity = new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y, newHorizontalVelocity.y);
 		}
 		// Apply wind resistance
 		if (thisRigidbody.velocity.y < 0) {
 			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
+		}
+	}
+
+	/// <summary>
+	/// Checks the area in front of where the player wants to move for an obstacle.
+	/// If one is found, adjusts the player's movement to be parallel to the obstacle's face.
+	/// </summary>
+	/// <param name="movementVector"></param>
+	/// <returns>True if there is something in the way of the player's desired movement vector, false otherwise.</returns>
+	Vector3 AirCollisionMovementAdjustment(Vector3 movementVector) {
+		float rayDistance = movespeed * Time.fixedDeltaTime + thisCollider.radius;
+		RaycastHit obstacle = new RaycastHit();
+		Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
+		
+		if (obstacle.collider == null) {
+			return movementVector;
+		}
+		else {
+			return Vector3.ProjectOnPlane(movementVector, obstacle.normal);
 		}
 	}
 
@@ -202,6 +226,23 @@ public class PlayerMovement : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Removes any current y-direction movement on the player, applies a one time impulse force to the player upwards,
+	/// then waits jumpCooldown seconds to be ready again.
+	/// </summary>
+	IEnumerator Jump() {
+		jumpIsOnCooldown = true;
+
+		Vector3 curVelocity = thisRigidbody.velocity;
+		curVelocity.y = 0;
+		thisRigidbody.velocity = curVelocity;
+
+		thisRigidbody.AddForce(-Physics.gravity.normalized * jumpForce, ForceMode.Impulse);
+		yield return new WaitForSeconds(jumpCooldown);
+
+		jumpIsOnCooldown = false;
+	}
+
 	public Vector2 HorizontalVelocity() {
 		return new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
 	}
@@ -212,7 +253,7 @@ public class PlayerMovement : MonoBehaviour {
 	/// <param name="hitInfo">RaycastHit info about the WalkableObject that's hit by the raycast and passes the Dot test with Vector3.up</param>
 	/// <returns>True if the player is grounded, otherwise false.</returns>
 	public bool IsGrounded(out RaycastHit hitInfo) {
-		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f, layerMask);
+		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius - 0.02f, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f, layerMask);
 		foreach (RaycastHit curHitInfo in allHit) {
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 
