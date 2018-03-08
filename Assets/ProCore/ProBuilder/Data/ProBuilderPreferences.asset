@@ -23,6 +23,7 @@ MonoBehaviour:
   - pbMeshesAreAssets
   - pb_UVTemplate_transparentBackground
   - pb_UVTemplate_hideGrid
+  - pbGenerateUV2PerObject
   m_Int_keys:
   - pbDefaultEditLevel
   - pbDefaultSelectionMode
@@ -43,11 +44,11 @@ MonoBehaviour:
   m_Color_keys: []
   m_Material_keys:
   - pbDefaultMaterial
-  m_Bool_values: 0001000101010000000101
+  m_Bool_values: 000100010101000000010100
   m_Int_values: 0000000002000000000000000000000004000000020000000200000000040000
   m_Float_values:
   - 0
-  - 0
+  - 44
   - 0.075
   m_String_values:
   - Assets/ProCore/ProBuilder/Data/Default Material Palette.asset
