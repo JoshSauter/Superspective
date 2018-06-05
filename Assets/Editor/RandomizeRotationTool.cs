@@ -4,12 +4,12 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-public class RandomizeRotation : ScriptableWizard {
+public class RandomizeRotationTool : ScriptableWizard {
 	public float range = 180;
 
 	[MenuItem("My Tools/Randomize Y Rotation")]
 	static void RandomizeYRotationWizard() {
-		DisplayWizard<RandomizeRotation>("Randomize Y Rotation", "Randomize");
+		DisplayWizard<RandomizeRotationTool>("Randomize Y Rotation", "Randomize");
 	}
 
 	// TODO: Learn how to make this undo-able

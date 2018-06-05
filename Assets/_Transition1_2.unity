@@ -31994,7 +31994,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16794
+  m_Name: pb_Mesh16196
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -36883,17 +36883,9 @@ MonoBehaviour:
     areaError: 15
   asset_guid: 
   dontDestroyMeshOnDelete: 0
-  m_selectedFaces: 27000000
-  m_SelectedEdges:
-  - x: 156
-    y: 157
-  - x: 158
-    y: 156
-  - x: 157
-    y: 159
-  - x: 159
-    y: 158
-  m_selectedTriangles: 9c0000009d0000009e0000009d0000009f0000009e000000
+  m_selectedFaces: 
+  m_SelectedEdges: []
+  m_selectedTriangles: 
 --- !u!33 &1732724475
 MeshFilter:
   m_ObjectHideFlags: 0
