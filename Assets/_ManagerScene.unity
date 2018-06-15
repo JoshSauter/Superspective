@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 623971843}
   - component: {fileID: 623971850}
   - component: {fileID: 623971851}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -238,6 +238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 4
   runSpeed: 14
+  jumpForce: 14
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.7
 --- !u!54 &623971846
@@ -307,7 +308,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: -0, y: -0.014450973, z: 0, w: -0.99989563}
-  m_LocalPosition: {x: 0, y: 3, z: -22.5}
+  m_LocalPosition: {x: 0, y: 3, z: -15}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -349,7 +350,7 @@ GameObject:
   - component: {fileID: 826182534}
   - component: {fileID: 826182537}
   - component: {fileID: 826182536}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: ObscureShaderCamera2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -406,7 +407,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 8192
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: c8d224ebe16d3d54d908c3adc1fdf2fb, type: 2}
   m_TargetDisplay: 0
@@ -429,7 +430,7 @@ GameObject:
   - component: {fileID: 940225955}
   - component: {fileID: 940225957}
   - component: {fileID: 940225956}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: ObscureShaderCamera1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -486,7 +487,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 8192
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: c8d224ebe16d3d54d908c3adc1fdf2fb, type: 2}
   m_TargetDisplay: 0
@@ -761,7 +762,7 @@ GameObject:
   - component: {fileID: 1809741066}
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741070}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -928,7 +929,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294966527
+    m_Bits: 4294892799
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1019,7 +1020,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fogColor: {r: 0.94509804, g: 0.89411765, b: 0.827451, a: 1}
   distanceFog: 1
-  excludeFarPixels: 0
+  excludeFarPixels: 1
   useRadialDistance: 0
   heightFog: 1
   height: 0
@@ -1037,6 +1038,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543dc804960a8c64b9a7d40169eeee43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depthSensitivity: 50
+  debugMode: 0
+  depthSensitivity: 3
   normalSensitivity: 3
+  sampleDistance: 1
   edgeColor: {r: 1, g: 1, b: 1, a: 1}

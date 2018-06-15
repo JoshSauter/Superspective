@@ -39,17 +39,33 @@ ObscuredObjectFragIn ObscuredObjectVert( appdata_base v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
+// NEW VISIBILITY SHADERS
+fixed4 RedFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(SampleDiscardPixel1(i).r-0.5);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+fixed4 GreenFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(SampleDiscardPixel1(i).g-0.5);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+fixed4 BlueFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(SampleDiscardPixel1(i).b-0.5);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+fixed4 NegRedFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(0.5-SampleDiscardPixel1(i).r);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+fixed4 NegGreenFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(0.5-SampleDiscardPixel1(i).g);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+fixed4 NegBlueFrag(ObscuredObjectFragIn i) : SV_Target {
+	clip(0.5-SampleDiscardPixel1(i).b);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+
 // DISCARD TEXTURE 1
-fixed4 GminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.g-samplePixel.r);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 GminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.g-samplePixel.b);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
 fixed4 RminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
 	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.r-samplePixel.g);
@@ -58,6 +74,16 @@ fixed4 RminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
 fixed4 RminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
 	float4 samplePixel = SampleDiscardPixel1(i);
 	clip(samplePixel.r-samplePixel.b);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 GminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
+	clip(samplePixel.g-samplePixel.r);
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+fixed4 GminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
+	float4 samplePixel = SampleDiscardPixel1(i);
+	clip(samplePixel.g-samplePixel.b);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 fixed4 BminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
@@ -104,26 +130,64 @@ fixed4 BminusG2_frag(ObscuredObjectFragIn i) : SV_Target {
 
 ENDCG
 
+// NEW VISIBILITY SHADERS
+SubShader {
+	Tags { "RenderType"="Red1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment RedFrag
+ENDCG
+	}
+}
+SubShader {
+	Tags { "RenderType"="Green1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GreenFrag
+ENDCG
+	}
+}
+SubShader {
+	Tags { "RenderType"="Blue1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment BlueFrag
+ENDCG
+	}
+}
+SubShader {
+	Tags { "RenderType"="NegRed1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment NegRedFrag
+ENDCG
+	}
+}
+SubShader {
+	Tags { "RenderType"="NegGreen1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment NegGreenFrag
+ENDCG
+	}
+}
+SubShader {
+	Tags { "RenderType"="NegBlue1" }
+	Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment NegBlueFrag
+ENDCG
+	}
+}
+
 
 // DISCARD TEXTURE 1 SUBSHADERS
-SubShader {
-    Tags { "RenderType"="GreenMinusRed1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusR1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusBlue1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusB1_frag
-ENDCG
-    }
-}
 SubShader {
     Tags { "RenderType"="RedMinusGreen1" }
     Pass {
@@ -139,6 +203,24 @@ SubShader {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
 #pragma fragment RminusB1_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="GreenMinusRed1" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusR1_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="GreenMinusBlue1" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusB1_frag
 ENDCG
     }
 }
@@ -164,24 +246,6 @@ ENDCG
 
 // DISCARD TEXTURE 2 SUBSHADERS
 SubShader {
-    Tags { "RenderType"="GreenMinusRed2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusR2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusBlue2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusB2_frag
-ENDCG
-    }
-}
-SubShader {
     Tags { "RenderType"="RedMinusGreen2" }
     Pass {
 CGPROGRAM
@@ -196,6 +260,24 @@ SubShader {
 CGPROGRAM
 #pragma vertex ObscuredObjectVert
 #pragma fragment RminusB2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="GreenMinusRed2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusR2_frag
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="GreenMinusBlue2" }
+    Pass {
+CGPROGRAM
+#pragma vertex ObscuredObjectVert
+#pragma fragment GminusB2_frag
 ENDCG
     }
 }

@@ -20,11 +20,11 @@ TagManager:
   - WalkableObject
   - WallOnly
   - Scenery
-  - 
-  - 
-  - 
-  - 
-  - 
+  - VisibilityMask
+  - Player
+  - NoClip
+  - Invisible
+  - RoomBounds
   - 
   - 
   - 

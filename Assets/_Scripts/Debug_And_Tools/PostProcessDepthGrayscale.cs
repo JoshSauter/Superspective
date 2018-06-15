@@ -6,7 +6,7 @@ public class PostProcessDepthGrayscale : MonoBehaviour {
 
 	KeyCode modeSwitchKey = KeyCode.N;
 
-	private const int NUM_MODES = 3;
+	private const int NUM_MODES = 4;
 	private int _mode = NUM_MODES-1;
 	int mode {
 		get {

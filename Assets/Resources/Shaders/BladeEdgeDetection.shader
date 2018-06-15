@@ -23,6 +23,7 @@
 			float _NormalSensitivity;
 			int _SampleDistance;
 			fixed4 _EdgeColor;
+			#define FILL_IN_ARTIFACTS
 
 			// Source texture information, screen before edge detection is applied
 			sampler2D _MainTex;
@@ -35,8 +36,11 @@
 
 			// Constants
 			#define NUM_SAMPLES 9
-			#define DEPTH_THRESHOLD_CONSTANT .054
+			#define DEPTH_THRESHOLD_BASELINE 0.0001
+			#define DEPTH_THRESHOLD_CONSTANT 0.054
 			#define NORMAL_THRESHOLD_CONSTANT 0.1
+			#define OBLIQUENESS_FACTOR 100
+			#define OBLIQUENESS_THRESHOLD 0.9
 
 			struct UVPositions {
 				/* UVs are laid out as below
@@ -68,12 +72,24 @@
 				float2 UVs[NUM_SAMPLES] : TEXCOORD0;
 			};
 
+			float ObliquenessFromNormal(float3 sampleNormal, float2 scrPos) {
+				// Credit to Keijiro Takahashi of Unity Japan (and this thread: https://forum.unity.com/threads/help-with-view-space-normals.454248/)
+				// get the perspective projection
+                float2 p11_22 = float2(unity_CameraProjection._11, unity_CameraProjection._22);
+                // convert the uvs into view space by "undoing" projection
+                float3 viewDir = -normalize(float3((scrPos * 2 - 1) / p11_22, -1));
+ 
+                float fresnel = 1.0 - dot(viewDir.xyz, sampleNormal);
+ 
+                return fresnel;
+			}
 
-			// TODO: Add a check for dot(normal, camera.forward) here to remove same surface depth dissimilarities
-			// That way more oblique angles require much higher depth threshold to be considered similar
-			half DepthsAreSimilar(float a, float b) {
+			half DepthsAreSimilar(float a, float b, float obliqueness) {
+				// Highly oblique angles have more tolerance for differences in depth values
+				// "if (obliqueness > OBLIQUENESS_THRESHOLD) obliqueness = 0;"
+				float obliquenessMultiplier = 1 + OBLIQUENESS_FACTOR * (step(OBLIQUENESS_THRESHOLD, obliqueness) * obliqueness);
 				// Further values have more tolerance for difference in depth values
-				float depthThreshold = DEPTH_THRESHOLD_CONSTANT * min(a, b);
+				float depthThreshold = DEPTH_THRESHOLD_BASELINE + obliquenessMultiplier * DEPTH_THRESHOLD_CONSTANT * min(a, b);
 				float depthDiff = abs(a - b);
 
 				int isSameDepth = depthDiff * _DepthSensitivity < depthThreshold;
@@ -94,6 +110,17 @@
 				half bc = NormalsAreSimilar(b, c);
 				half bd = NormalsAreSimilar(b, d);
 				half cd = NormalsAreSimilar(c, d);
+				return ab * ac * ad * bc * bd * cd;
+			}
+
+			// Returns 1 if all four depths are similar, 0 otherwise
+			half FourDepthArtifactCheck(float a, float b, float c, float d, float obA, float obB, float obC, float obD) {
+				half ab = DepthsAreSimilar(a, b, obA);
+				half ac = DepthsAreSimilar(a, c, obA);
+				half ad = DepthsAreSimilar(a, d, obA);
+				half bc = DepthsAreSimilar(b, c, obB);
+				half bd = DepthsAreSimilar(b, d, obB);
+				half cd = DepthsAreSimilar(c, d, obC);
 				return ab * ac * ad * bc * bd * cd;
 			}
 
@@ -138,12 +165,20 @@
 				for (int n = 0; n < NUM_SAMPLES; n++) {
 					normalSamples[n] = samples[n].xy;
 				}
+				float3 obliqueness[NUM_SAMPLES];
+				for (int nd = 0; nd < NUM_SAMPLES; nd++) {
+					float dummyDepth;
+					float3 decodedNormal;
+					DecodeDepthNormal(samples[nd], dummyDepth, decodedNormal);
+					obliqueness[nd] = ObliquenessFromNormal(decodedNormal, uvPositions.UVs[nd]);
+				}
 				
 				// Check depth similarity with surrounding samples
 				half similarDepth = 1;
+				half allDepthsAreDissimilar = 1;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
 					float depthDiff = depthSamples[0] - depthSamples[x];
-					half similar = DepthsAreSimilar(depthSamples[0], depthSamples[x]);
+					half similar = DepthsAreSimilar(depthSamples[0], depthSamples[x], obliqueness[0]);
 					////////////////////////
 					// Depth Double-Check //
 					////////////////////////
@@ -153,20 +188,45 @@
 					    -------------------
 					    |  10 | 110 | 210 |  Not an edge, more likely an obliquely viewed surface
 						-------------------
+						
+						-------------------
+						|  10 | 110 |  10 |  Not an edge, more likely to be an artifact from floating point error near two adjacent faces
+						-------------------
 
 						-------------------
 						|  10 | 110 | 120 |  More likely an edge than an obliquely viewed surface
 						-------------------
-
 					*/
+					allDepthsAreDissimilar *= (1-similar);
 					if (similar < 1) {
 						// If the oppositeDepthDiff is similar to the depthDiff, don't consider this an edge
 						float oppositeDepthDiff = depthSamples[NUM_SAMPLES-x] - depthSamples[0];
-						similar = (abs(oppositeDepthDiff-depthDiff) * _DepthSensitivity < DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
+						similar = (abs(oppositeDepthDiff-depthDiff) * _DepthSensitivity < DEPTH_THRESHOLD_CONSTANT * depthSamples[0] * obliqueness[0]) ? 1 : 0;
 					}
 
 					similarDepth *= similar;
 				}
+
+#ifdef FILL_IN_ARTIFACTS
+				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
+				if (allDepthsAreDissimilar > 0) {
+					return tex2D(_MainTex, uvPositions.UVs[2]);
+				}
+#endif
+
+				// If this pixel seems to be an edge when compared to every pixel around it, it is probably an artifact and should not be considered an edge
+				similarDepth = max(similarDepth, allDepthsAreDissimilar);
+
+				if (similarDepth < 1) {
+					// If the depths of a +Cross or xCross are similar, don't consider this an edge
+					half crossIsSimilar = FourDepthArtifactCheck(depthSamples[2], depthSamples[4], depthSamples[5], depthSamples[7],
+																  obliqueness[2],  obliqueness[4],  obliqueness[5],  obliqueness[7]);
+					half xCrossIsSimilar = FourDepthArtifactCheck(depthSamples[1], depthSamples[3], depthSamples[6], depthSamples[8],
+					                                               obliqueness[1],  obliqueness[3],  obliqueness[6],  obliqueness[8]);
+
+					similarDepth = max(crossIsSimilar, xCrossIsSimilar);
+				}
+
 
 				// Check normal similarity with surrounding samples
 				half similarNormals = 1;

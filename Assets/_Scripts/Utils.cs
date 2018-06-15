@@ -92,4 +92,43 @@ namespace EpitaphUtils {
 			return new Vector3(v4.y, v4.z, v4.w);
 		}
 	}
+
+	public class PolarCoordinate {
+		public float radius;
+		public float angle;  //In Radians
+		public float y;
+
+		public PolarCoordinate(float newRadius, Vector3 cartesianPoint) {
+			radius = newRadius;
+			angle = Mathf.Atan2(cartesianPoint.z, cartesianPoint.x);
+			y = cartesianPoint.y;
+		}
+
+		public PolarCoordinate(float newRadius, float newAngle) {
+			radius = newRadius;
+			angle = newAngle;
+		}
+
+		public override string ToString() {
+			return "(" + radius.ToString("0.####") + ", " + (angle / Mathf.PI).ToString("0.####") + "*PI rads)\t(" + y + " y-value)";
+		}
+
+		/// <summary>
+		/// Creates a Vector3 from a PolarCoordinate, restoring the Y value if it was created with a Vector3
+		/// </summary>
+		/// <returns>A Vector3 containing the PolarToCartesian transformation for the X and Z values, and the restored Y value</returns>
+		public Vector3 PolarToCartesian() {
+			return new Vector3(radius * Mathf.Cos(angle), y, radius * Mathf.Sin(angle));
+		}
+
+		/// <summary>
+		/// Creates a PolarCoordinate from a Vector3's X and Z values, and retains the Y value for converting back later
+		/// </summary>
+		/// <param name="cart"></param>
+		/// <returns>A PolarCoordinate based on the X and Z values only.</returns>
+		public static PolarCoordinate CartesianToPolar(Vector3 cart) {
+			float radius = Mathf.Sqrt(Mathf.Pow(cart.x, 2) + Mathf.Pow(cart.z, 2));
+			return new PolarCoordinate(radius, cart);
+		}
+	}
 }
