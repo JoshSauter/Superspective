@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PillarSpawnPanel : Panel {
-	public GameObject pillar;
+	public GameObject pillarBeforeActive;
+	public ObscurePillar pillar;
 
 	override protected void Start() {
 		base.Start();
@@ -12,6 +13,8 @@ public class PillarSpawnPanel : Panel {
 	}
 
 	void SpawnPillar(Button b) {
-		pillar.SetActive(true);
+		pillar.gameObject.SetActive(true);
+		pillarBeforeActive.SetActive(false);
+		ObscurePillar.activePillar = pillar;
 	}
 }

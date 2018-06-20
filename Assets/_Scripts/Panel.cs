@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Panel : MonoBehaviour {
-
-	Renderer thisRenderer;
+	EpitaphRenderer thisRenderer;
 	public Color gemColor;
 	public Button gemButton;
 
 	public float colorLerpTime = 1.75f;
-	MaterialPropertyBlock panelPropBlock;
 
 	public bool activated = false;
 
@@ -24,7 +22,7 @@ public class Panel : MonoBehaviour {
 	// Use this for initialization
 	virtual protected void Start () {
 		// Set up references
-		thisRenderer = GetComponent<Renderer>();
+		thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
 
 		gemButton = GetComponentInChildren<Button>();
 		gemButton.deadTimeAfterButtonPress = colorLerpTime;
@@ -32,40 +30,33 @@ public class Panel : MonoBehaviour {
 		gemColor = gemButton.GetComponent<MeshRenderer>().material.color;
 		gemButton.OnButtonPressFinish += PanelActivate;
 		gemButton.OnButtonDepressBegin += PanelDeactivate;
-
-		// Set up material property block
-		panelPropBlock = new MaterialPropertyBlock();
 	}
 
 	virtual protected void PanelActivate(Button b) {
 		activated = true;
-		StartCoroutine(PanelColorLerp(thisRenderer.material.color, gemColor));
+		StartCoroutine(PanelColorLerp(thisRenderer.GetMainColor(), gemColor));
 	}
 
 	virtual protected void PanelDeactivate(Button b) {
 		activated = false;
-		StartCoroutine(PanelColorLerp(gemColor, thisRenderer.material.color));
+		StartCoroutine(PanelColorLerp(gemColor, thisRenderer.GetMainColor()));
 	}
 	
 	IEnumerator PanelColorLerp(Color startColor, Color endColor) {
 		if (activated && OnPanelActivateBegin != null) OnPanelActivateBegin();
 		else if (!activated && OnPanelDeactivateBegin != null) OnPanelDeactivateBegin();
-
-		thisRenderer.GetPropertyBlock(panelPropBlock);
-
+		
 		float timeElapsed = 0;
 		while (timeElapsed < colorLerpTime) {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / colorLerpTime;
 
 			Color curColor = Color.Lerp(startColor, endColor, t);
-			panelPropBlock.SetColor("_Color", curColor);
-			thisRenderer.SetPropertyBlock(panelPropBlock);
+			thisRenderer.SetMainColor(curColor);
 
 			yield return null;
 		}
-		panelPropBlock.SetColor("_Color", endColor);
-		thisRenderer.SetPropertyBlock(panelPropBlock);
+		thisRenderer.SetMainColor(endColor);
 
 		if (activated && OnPanelActivateFinish != null) OnPanelActivateFinish();
 		else if (!activated && OnPanelDeactivateFinish != null) OnPanelDeactivateFinish();

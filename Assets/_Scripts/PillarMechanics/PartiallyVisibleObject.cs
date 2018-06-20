@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public enum VisibilityState {
 	invisible,
@@ -8,7 +12,29 @@ public enum VisibilityState {
 	visible
 };
 
+public enum FindPillarsTechnique {
+	whitelist,
+	automaticSphere,
+	automaticSphereWithBlacklist,
+	automaticBox,
+	automaticBoxWithBlacklist
+}
+
 public class PartiallyVisibleObject : MonoBehaviour {
+	////////////////////////////////////
+	// Techniques for finding pillars //
+	////////////////////////////////////
+	public FindPillarsTechnique findPillarsTechnique;
+	[SerializeField]
+	private List<ObscurePillar> pillarsFound = new List<ObscurePillar>();
+	// Whitelist/blacklist pillars
+	public List<ObscurePillar> whitelist = new List<ObscurePillar>();
+	public List<ObscurePillar> blacklist = new List<ObscurePillar>();
+	LayerMask searchForPillarLayerMask;
+	public float pillarSearchRadius = 40;
+	public Vector3 pillarSearchBoxSize = Vector3.one * 80;
+
+	public bool setMaterialColorOnStart = true;
 	public Color materialColor = Color.black;
 	private VisibilityState _visibilityState;
 	public VisibilityState visibilityState {
@@ -21,21 +47,174 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	VisibilityState oppositeStartingVisibilityState;
 	bool negativeRenderer;
 	int initialLayer;
+	int invisibleLayer;
 	Material visibleMaterial;
 	Material initialMaterial;
-	Renderer renderer;
+	EpitaphRenderer renderer;
 
-	void Awake() {
+	public bool overrideOnOffAngles = false;
+	public Angle onAngle;
+	public Angle offAngle;
+
+#region events
+	public delegate void VisibilityStateChangeAction(VisibilityState newState);
+	public event VisibilityStateChangeAction OnVisibilityStateChange;
+#endregion
+
+	private void Awake() {
+		searchForPillarLayerMask = 1 << LayerMask.NameToLayer("Pillar");
+		invisibleLayer = LayerMask.NameToLayer("Invisible");
+	}
+
+	void OnEnable() {
 		initialLayer = gameObject.layer;
-		renderer = GetComponent<Renderer>();
+		renderer = gameObject.AddComponent<EpitaphRenderer>();
 		visibleMaterial = Resources.Load<Material>("Materials/Unlit/Unlit");
-		initialMaterial = renderer.material;
+		initialMaterial = renderer.GetMaterial();
 		negativeRenderer = initialMaterial.name.Contains("Neg");
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState.visible ? VisibilityState.invisible : VisibilityState.visible;
+
+		ObscurePillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
+		ObscurePillar.OnActivePillarChanged += HandlePillarChanged;
+		ObscurePillar.OnActivePillarChanged += ResetVisibilityStateIfNeeded;
+	}
+
+	private void OnDisable() {
+		ObscurePillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
+		ObscurePillar.OnActivePillarChanged -= HandlePillarChanged;
+		ObscurePillar.OnActivePillarChanged -= ResetVisibilityStateIfNeeded;
 	}
 
 	private void Start() {
 		SetVisibilityState(startingVisibilityState);
+		if (setMaterialColorOnStart) {
+			renderer.SetMainColor(materialColor);
+		}
+		HandlePillarChanged();
+	}
+
+	private void HandlePillarChanged() {
+		HandlePillarChanged(null);
+	}
+
+	private void HandlePillarChanged(ObscurePillar unused) {
+
+		pillarsFound.Clear();
+		switch (findPillarsTechnique) {
+			case FindPillarsTechnique.whitelist:
+				foreach (var pillar in whitelist) {
+					pillarsFound.Add(pillar);
+				}
+				break;
+			case FindPillarsTechnique.automaticSphere:
+				SearchForPillarsInSphere(new List<ObscurePillar>());
+				break;
+			case FindPillarsTechnique.automaticSphereWithBlacklist:
+				SearchForPillarsInSphere(blacklist);
+				break;
+			case FindPillarsTechnique.automaticBox:
+				SearchForPillarsInBox(new List<ObscurePillar>());
+				break;
+			case FindPillarsTechnique.automaticBoxWithBlacklist:
+				SearchForPillarsInBox(blacklist);
+				break;
+		}
+		if (!overrideOnOffAngles && pillarsFound.Contains(ObscurePillar.activePillar)) {
+			RecalculateOnOffPositions();
+		}
+	}
+
+	private void SearchForPillarsInSphere(List<ObscurePillar> blacklist) {
+		foreach (var pillarMaybe in Physics.OverlapSphere(transform.position, pillarSearchRadius, searchForPillarLayerMask)) {
+			ObscurePillar pillar = pillarMaybe.GetComponent<ObscurePillar>();
+			if (pillar != null && !blacklist.Contains(pillar)) {
+				pillarsFound.Add(pillar);
+			}
+		}
+	}
+
+	private void SearchForPillarsInBox(List<ObscurePillar> blacklist) {
+		foreach (var pillarMaybe in Physics.OverlapBox(transform.position, pillarSearchBoxSize/2f, new Quaternion(), searchForPillarLayerMask)) {
+			ObscurePillar pillar = pillarMaybe.GetComponent<ObscurePillar>();
+			if (pillar != null && !blacklist.Contains(pillar)) {
+				pillarsFound.Add(pillar);
+			}
+		}
+	}
+
+	private void HandlePlayerMoveAroundPillar(Angle prevAngle, Angle newAngle) {
+		if (prevAngle == newAngle || ObscurePillar.activePillar == null || !pillarsFound.Contains(ObscurePillar.activePillar)) {
+			return;
+		}
+		Angle t = (newAngle - prevAngle).Normalize();
+		MovementDirection direction = t > Angle.Radians(Mathf.PI) ? MovementDirection.clockwise : MovementDirection.counterclockwise;
+
+		switch (direction) {
+			case MovementDirection.clockwise:
+				if (Angle.IsAngleBetween(onAngle, newAngle, prevAngle)) {
+					HitBySweepingCollider(direction);
+					print(gameObject.name + ":\tHitBySweepingColliderClockwise");
+				}
+				if (Angle.IsAngleBetween(offAngle, newAngle, prevAngle)) {
+					SweepingColliderExit(direction);
+					print(gameObject.name + ":\tSweepingColliderExitClockwise");
+				}
+				break;
+			case MovementDirection.counterclockwise:
+				if (Angle.IsAngleBetween(offAngle, prevAngle, newAngle)) {
+					HitBySweepingCollider(direction);
+					print(gameObject.name + ":\tHitBySweepingColliderCounterclockwise");
+				}
+				if (Angle.IsAngleBetween(onAngle, prevAngle, newAngle)) {
+					SweepingColliderExit(direction);
+					print(gameObject.name + ":\tSweepingColliderExitCounterclockwise");
+				}
+				break;
+		}
+	}
+
+	private void RecalculateOnOffPositions() {
+		RecalculateOnOffPositions(null);
+	}
+
+	private void RecalculateOnOffPositions(ObscurePillar unused) {
+		if (ObscurePillar.activePillar == null) {
+			onAngle = null; offAngle = null;
+			return;
+		}
+
+		Vector3[] bounds = new Vector3[] { renderer.GetRendererBounds().min, renderer.GetRendererBounds().max };
+		Vector3[] corners = new Vector3[] {
+			new Vector3(bounds[0].x, bounds[0].y, bounds[0].z),
+			new Vector3(bounds[0].x, bounds[0].y, bounds[1].z),
+			new Vector3(bounds[0].x, bounds[1].y, bounds[0].z),
+			new Vector3(bounds[0].x, bounds[1].y, bounds[1].z),
+			new Vector3(bounds[1].x, bounds[0].y, bounds[0].z),
+			new Vector3(bounds[1].x, bounds[0].y, bounds[1].z),
+			new Vector3(bounds[1].x, bounds[1].y, bounds[0].z),
+			new Vector3(bounds[1].x, bounds[1].y, bounds[1].z)
+		};
+
+		Vector3 centerOfObject = renderer.GetRendererBounds().center;
+		Angle baseAngle = PolarCoordinate.CartesianToPolar(centerOfObject - ObscurePillar.activePillar.transform.position).angle;
+		onAngle = Angle.Radians(baseAngle.radians + .001f);
+		offAngle = Angle.Radians(baseAngle.radians);
+		foreach (var corner in corners) {
+			PolarCoordinate cornerPolar = PolarCoordinate.CartesianToPolar(corner - ObscurePillar.activePillar.transform.position);
+			if (!Angle.IsAngleBetween(cornerPolar.angle, offAngle, onAngle)) {
+				Angle replaceOn = Angle.AngleBetween(cornerPolar.angle, offAngle);
+				Angle replaceOff = Angle.AngleBetween(cornerPolar.angle, onAngle);
+				if (replaceOn.radians > replaceOff.radians) {
+					onAngle = cornerPolar.angle;
+				}
+				else {
+					offAngle = cornerPolar.angle;
+				}
+			}
+		}
+		onAngle.Reverse();
+		offAngle.Reverse();
+		//print(onAngle + "\n" + offAngle);
 	}
 
 	/// <summary>
@@ -84,6 +263,12 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		return false;
 	}
 
+	private void ResetVisibilityStateIfNeeded(ObscurePillar unused) {
+		if (visibilityState == VisibilityState.partiallyVisible) {
+			ResetVisibilityState();
+		}
+	}
+
 	public void ResetVisibilityState() {
 		SetVisibilityState(startingVisibilityState);
 	}
@@ -91,29 +276,149 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	public void SetVisibilityState(VisibilityState newState) {
 		_visibilityState = newState;
 		UpdateVisibilitySettings();
+
+		if (OnVisibilityStateChange != null) {
+			OnVisibilityStateChange(newState);
+		}
 	}
 
 	private void UpdateVisibilitySettings() {
 		switch (visibilityState) {
 			case VisibilityState.invisible:
-				gameObject.layer = LayerMask.NameToLayer("Invisible");
+				Utils.SetLayerRecursively(gameObject, invisibleLayer);
 				break;
 			case VisibilityState.partiallyVisible:
-				gameObject.layer = initialLayer;
-				UpdateMaterial(initialMaterial);
+				Utils.SetLayerRecursively(gameObject, initialLayer);
+				renderer.SetMaterial(initialMaterial);
 				break;
 			case VisibilityState.visible:
-				gameObject.layer = initialLayer;
-				UpdateMaterial(visibleMaterial);
+				Utils.SetLayerRecursively(gameObject, initialLayer);
+				renderer.SetMaterial(visibleMaterial);
 				break;
 		}
 	}
 
-	private void UpdateMaterial(Material newMaterial) {
-		renderer.material = newMaterial;
-		MaterialPropertyBlock pb = new MaterialPropertyBlock();
-		renderer.GetPropertyBlock(pb);
-		pb.SetColor("_Color", materialColor);
-		renderer.SetPropertyBlock(pb);
+}
+
+#if UNITY_EDITOR
+
+[CustomEditor(typeof(PartiallyVisibleObject))]
+[CanEditMultipleObjects]
+public class PartiallyVisibleObjectEditor : Editor {
+	public override void OnInspectorGUI() {
+		PartiallyVisibleObject script = target as PartiallyVisibleObject;
+		float defaultWidth = EditorGUIUtility.labelWidth;
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.findPillarsTechnique = (FindPillarsTechnique)EditorGUILayout.EnumPopup("Technique for finding pillars", script.findPillarsTechnique);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).findPillarsTechnique = script.findPillarsTechnique;
+			}
+		}
+
+		EditorGUILayout.Space();
+
+		switch (script.findPillarsTechnique) {
+			case FindPillarsTechnique.whitelist:
+				SerializedProperty whitelist = serializedObject.FindProperty("whitelist");
+				EditorGUI.BeginChangeCheck();
+				EditorGUILayout.PropertyField(whitelist, new GUIContent("Whitelist: "), true);
+				if (EditorGUI.EndChangeCheck())
+					serializedObject.ApplyModifiedProperties();
+				break;
+			case FindPillarsTechnique.automaticSphere:
+				UpdateSearchRadiusForAll(script);
+				break;
+			case FindPillarsTechnique.automaticSphereWithBlacklist: {
+					UpdateSearchRadiusForAll(script);
+					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
+					EditorGUI.BeginChangeCheck();
+					EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
+					if (EditorGUI.EndChangeCheck())
+						serializedObject.ApplyModifiedProperties();
+				}
+				break;
+			case FindPillarsTechnique.automaticBox:
+				UpdateSearchBoxSizeForAll(script);
+				break;
+			case FindPillarsTechnique.automaticBoxWithBlacklist: {
+					UpdateSearchBoxSizeForAll(script);
+					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
+					EditorGUI.BeginChangeCheck();
+					EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
+					if (EditorGUI.EndChangeCheck())
+						serializedObject.ApplyModifiedProperties();
+				}
+				break;
+		}
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.setMaterialColorOnStart = EditorGUILayout.Toggle("Set material color on start? ", script.setMaterialColorOnStart);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).setMaterialColorOnStart = script.setMaterialColorOnStart;
+			}
+		}
+		if (script.setMaterialColorOnStart) {
+			script.materialColor = EditorGUILayout.ColorField("Material color: ", script.materialColor);
+		}
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.startingVisibilityState = (VisibilityState)EditorGUILayout.EnumPopup("Starting visibility state: ", script.startingVisibilityState);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).startingVisibilityState = script.startingVisibilityState;
+			}
+		}
+		string s = script.visibilityState.ToString();
+		EditorGUILayout.LabelField("Current visibility state: ", char.ToUpper(s[0]) + s.Substring(1));
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.overrideOnOffAngles = EditorGUILayout.Toggle("Override On/Off Angles?", script.overrideOnOffAngles);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).overrideOnOffAngles = script.overrideOnOffAngles;
+			}
+		}
+
+		if (script.overrideOnOffAngles) {
+			script.onAngle = Angle.Degrees(EditorGUILayout.FloatField("On Angle Degrees: ", script.onAngle.degrees));
+			script.offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
+		}
+		else {
+			EditorGUILayout.LabelField("On Angle: ", script.onAngle.ToString());
+			EditorGUILayout.LabelField("Off Angle: ", script.offAngle.ToString());
+		}
+	}
+
+	private void UpdateSearchRadiusForAll(PartiallyVisibleObject script) {
+		EditorGUI.BeginChangeCheck();
+		script.pillarSearchRadius = EditorGUILayout.FloatField("Search radius: ", script.pillarSearchRadius);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).pillarSearchRadius = script.pillarSearchRadius;
+			}
+		}
+	}
+
+	private void UpdateSearchBoxSizeForAll(PartiallyVisibleObject script) {
+		EditorGUI.BeginChangeCheck();
+		script.pillarSearchBoxSize = EditorGUILayout.Vector3Field("Search box size: ", script.pillarSearchBoxSize);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).pillarSearchBoxSize = script.pillarSearchBoxSize;
+			}
+		}
 	}
 }
+
+#endif

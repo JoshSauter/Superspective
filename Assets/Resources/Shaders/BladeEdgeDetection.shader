@@ -148,6 +148,14 @@
 
 				return uvPositions;
 			}
+
+			fixed4 FinalColor(fixed4 original, half isEdge, half similarDepth, half similarNormals) {
+				// Return values for normal render mode and debug mode
+				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * _EdgeColor);
+				fixed4 debugColors = (1-similarDepth) * fixed4(1,0,0,1) + (1-similarNormals) * fixed4(0,1,0,1);
+
+				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;
+			}
 			
 			fixed4 Frag (UVPositions uvPositions) : SV_Target {
 				fixed4 original = tex2D(_MainTex, uvPositions.UVs[0]);
@@ -210,7 +218,7 @@
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
 				if (allDepthsAreDissimilar > 0) {
-					return tex2D(_MainTex, uvPositions.UVs[2]);
+					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 1, 1);
 				}
 #endif
 
@@ -261,11 +269,7 @@
 
 				int isEdge = 1 - (similarDepth * similarNormals);
 
-				// Return values for normal render mode and debug mode
-				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * _EdgeColor);
-				fixed4 debugColors = (1-similarDepth) * fixed4(1,0,0,1) + (1-similarNormals) * fixed4(0,1,0,1);
-
-				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;
+				return FinalColor(original, isEdge, similarDepth, similarNormals);
 			}
 			ENDCG
 		}

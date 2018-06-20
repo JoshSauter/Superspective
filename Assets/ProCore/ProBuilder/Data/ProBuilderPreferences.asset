@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Int_values: 0000000002000000000000000000000004000000020000000200000000040000
   m_Float_values:
   - 0
-  - 44
+  - 0
   - 0.075
   m_String_values:
   - Assets/ProCore/ProBuilder/Data/Default Material Palette.asset

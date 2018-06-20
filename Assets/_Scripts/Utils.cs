@@ -36,6 +36,14 @@ namespace EpitaphUtils {
 			r.SetPropertyBlock(propBlock);
 		}
 
+		public static void SetLayerRecursively(GameObject obj, int layer) {
+			obj.layer = layer;
+
+			foreach (Transform child in obj.transform) {
+				SetLayerRecursively(child.gameObject, layer);
+			}
+		}
+
 		public static float Perlin3D(float x, float y, float z) {
 			float xy = Mathf.PerlinNoise(x, y);
 			float xz = Mathf.PerlinNoise(x, z);
@@ -95,22 +103,22 @@ namespace EpitaphUtils {
 
 	public class PolarCoordinate {
 		public float radius;
-		public float angle;  //In Radians
+		public Angle angle;
 		public float y;
 
 		public PolarCoordinate(float newRadius, Vector3 cartesianPoint) {
 			radius = newRadius;
-			angle = Mathf.Atan2(cartesianPoint.z, cartesianPoint.x);
+			angle = Angle.Radians((Mathf.Atan2(cartesianPoint.z, cartesianPoint.x) + (2 * Mathf.PI)) % (2 * Mathf.PI));
 			y = cartesianPoint.y;
 		}
 
-		public PolarCoordinate(float newRadius, float newAngle) {
+		public PolarCoordinate(float newRadius, Angle newAngle) {
 			radius = newRadius;
 			angle = newAngle;
 		}
 
 		public override string ToString() {
-			return "(" + radius.ToString("0.####") + ", " + (angle / Mathf.PI).ToString("0.####") + "*PI rads)\t(" + y + " y-value)";
+			return "(" + radius.ToString("0.####") + ", " + (angle.radians / Mathf.PI).ToString("0.####") + "*PI rads)\t(" + y + " y-value)";
 		}
 
 		/// <summary>
@@ -118,7 +126,7 @@ namespace EpitaphUtils {
 		/// </summary>
 		/// <returns>A Vector3 containing the PolarToCartesian transformation for the X and Z values, and the restored Y value</returns>
 		public Vector3 PolarToCartesian() {
-			return new Vector3(radius * Mathf.Cos(angle), y, radius * Mathf.Sin(angle));
+			return new Vector3(radius * Mathf.Cos(angle.radians), y, radius * Mathf.Sin(angle.radians));
 		}
 
 		/// <summary>
@@ -129,6 +137,134 @@ namespace EpitaphUtils {
 		public static PolarCoordinate CartesianToPolar(Vector3 cart) {
 			float radius = Mathf.Sqrt(Mathf.Pow(cart.x, 2) + Mathf.Pow(cart.z, 2));
 			return new PolarCoordinate(radius, cart);
+		}
+	}
+
+	[Serializable]
+	public class Angle {
+		public float radians;
+		public float degrees {
+			get { return Mathf.Rad2Deg * radians; }
+			set { radians = Mathf.Deg2Rad * value; }
+		}
+
+		public override string ToString() {
+			return degrees + "°";
+		}
+
+		// Constructors
+		private Angle(float _radians) {
+			radians = _radians;
+		}
+
+		public static Angle Radians(float radians) {
+			return new Angle(radians);
+		}
+
+		public static Angle Degrees(float degrees) {
+			return new Angle(Mathf.Deg2Rad * degrees);
+		}
+
+		/// <summary>
+		/// Gives the same normalized angle on the opposite quadrant of the circle
+		/// </summary>
+		/// <returns>This angle after being added and normalized</returns>
+		public Angle Reverse() {
+			this.radians += Mathf.PI;
+			return Normalize();
+		}
+
+		/// <summary>
+		/// Normalizes an angle to [0-2*PI) range
+		/// </summary>
+		/// <returns>This angle after being modified</returns>
+		public Angle Normalize() {
+			return Normalize(Radians(0), Radians(2 * Mathf.PI));
+		}
+
+		/// <summary>
+		/// Normalizes an angle to [startRange, endRange) range
+		/// </summary>
+		/// <param name="startRange">Start of the range to normalize to</param>
+		/// <param name="endRange">End of the range to normalize to</param>
+		/// <returns>This angle after being modified</returns>
+		public Angle Normalize(Angle startRange, Angle endRange) {
+			Angle width = endRange - startRange;
+			Angle offsetValue = this - startRange; // value relative to startRange
+
+			this.radians = offsetValue.radians - Mathf.Floor(offsetValue.radians / width.radians) * width.radians + startRange.radians;
+			return this;
+		}
+		
+		/// <summary>
+		/// Calculates the smallest angle possible between this angle and the given angle
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns>A new Angle containing the angle between this angle and the input</returns>
+		public Angle AngleBetween(Angle other) {
+			return AngleBetween(this, other);
+		}
+
+		/// <summary>
+		/// Calculates the smallest angle possible between the given angles
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <returns>A new Angle containing the angle between the two inputs</returns>
+		public static Angle AngleBetween(Angle a, Angle b) {
+			float aMinusB = (a - b).Normalize().radians;
+			float bMinusA = (b - a).Normalize().radians;
+
+			return new Angle(Mathf.Min(aMinusB, bMinusA));
+		}
+
+		/// <summary>
+		/// Determines whether the test angle falls between angles a and b (counter-clockwise from a to b)
+		/// </summary>
+		/// <param name="test"></param>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <returns>True if test falls between a and b (counter-clockwise), false otherwise</returns>
+		public static bool IsAngleBetween(Angle test, Angle a, Angle b) {
+			float testNormalized = new Angle(test.radians).Normalize().radians;
+			float aNormalized = new Angle(a.radians).Normalize().radians;
+			float bNormalized = new Angle(b.radians).Normalize().radians;
+
+			if (aNormalized < bNormalized) {
+				return aNormalized <= testNormalized && testNormalized <= bNormalized;
+			}
+			else {
+				return aNormalized <= testNormalized || testNormalized <= bNormalized;
+			}
+		}
+
+		// Operators
+		public static Angle operator -(Angle a) {
+			return new Angle(-a.radians);
+		}
+		public static Angle operator +(Angle a, Angle b) {
+			return new Angle(a.radians + b.radians);
+		}
+		public static Angle operator -(Angle a, Angle b) {
+			return new Angle(a.radians - b.radians);
+		}
+		public static Angle operator /(Angle a, Angle b) {
+			return new Angle(a.radians / b.radians);
+		}
+		public static Angle operator *(Angle a, Angle b) {
+			return new Angle(a.radians * b.radians);
+		}
+		public static bool operator <(Angle a, Angle b) {
+			return (a - b).radians < 0;
+		}
+		public static bool operator >(Angle a, Angle b) {
+			return (b - a).radians < 0;
+		}
+		public static bool operator ==(Angle a, Angle b) {
+			return a.radians == b.radians;
+		}
+		public static bool operator !=(Angle a, Angle b) {
+			return a.radians != b.radians;
 		}
 	}
 }

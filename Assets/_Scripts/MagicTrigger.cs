@@ -201,8 +201,13 @@ public class MagicTriggerEditor : Editor {
         EditorGUILayout.Separator();
         EditorGUILayout.Space();
 
+		EditorGUI.BeginChangeCheck();
         script.triggerCondition = (MagicTrigger.TriggerConditionType)EditorGUILayout.EnumPopup("Trigger Condition Type", script.triggerCondition);
-
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (var obj in targets) {
+				((MagicTrigger)obj).triggerCondition = script.triggerCondition;
+			}
+		}
         EditorGUILayout.Space();
 
         switch (script.triggerCondition) {

@@ -308,7 +308,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: -0, y: -0.014450973, z: 0, w: -0.99989563}
-  m_LocalPosition: {x: 0, y: 3, z: -15}
+  m_LocalPosition: {x: 0, y: 3, z: -14.5}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -758,6 +758,7 @@ GameObject:
   - component: {fileID: 1809741058}
   - component: {fileID: 1809741057}
   - component: {fileID: 1809741065}
+  - component: {fileID: 1809741072}
   - component: {fileID: 1809741069}
   - component: {fileID: 1809741066}
   - component: {fileID: 1809741067}
@@ -1043,3 +1044,29 @@ MonoBehaviour:
   normalSensitivity: 3
   sampleDistance: 1
   edgeColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1809741072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 646b5bc27a658f447b1d929fd5ffbd70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  showGeneratedNormals: 0
+  offsetScale: 0.2
+  blurRadius: 18
+  edgeThresholdMin: 0.05
+  edgeThreshold: 0.2
+  edgeSharpness: 4
+  dlaaSharp: 0
+  ssaaShader: {fileID: 4800000, guid: b3728d1488b02490cbd196c7941bf1f8, type: 3}
+  dlaaShader: {fileID: 4800000, guid: 017ca72b9e8a749058d13ebd527e98fa, type: 3}
+  nfaaShader: {fileID: 4800000, guid: ce0cb2621f6d84e21a87414e471a3cce, type: 3}
+  shaderFXAAPreset2: {fileID: 4800000, guid: 6f1418cffd12146f2a83be795f6fa5a7, type: 3}
+  shaderFXAAPreset3: {fileID: 4800000, guid: c182fa94a5a0a4c02870641efcd38cd5, type: 3}
+  shaderFXAAII: {fileID: 4800000, guid: cd5b323dcc592457790ff18b528f5e67, type: 3}
+  shaderFXAAIII: {fileID: 4800000, guid: c547503fff0e8482ea5793727057041c, type: 3}
