@@ -12,37 +12,32 @@ public enum VisibilityState {
 	visible
 };
 
-public enum FindPillarsTechnique {
-	whitelist,
-	automaticSphere,
-	automaticSphereWithBlacklist,
-	automaticBox,
-	automaticBoxWithBlacklist
-}
 
 public class PartiallyVisibleObject : MonoBehaviour {
 	////////////////////////////////////
 	// Techniques for finding pillars //
 	////////////////////////////////////
+	public enum FindPillarsTechnique {
+		whitelist,
+		automaticSphere,
+		automaticSphereWithBlacklist,
+		automaticBox,
+		automaticBoxWithBlacklist
+	}
 	public FindPillarsTechnique findPillarsTechnique;
-	[SerializeField]
 	private List<ObscurePillar> pillarsFound = new List<ObscurePillar>();
 	// Whitelist/blacklist pillars
 	public List<ObscurePillar> whitelist = new List<ObscurePillar>();
 	public List<ObscurePillar> blacklist = new List<ObscurePillar>();
-	LayerMask searchForPillarLayerMask;
 	public float pillarSearchRadius = 40;
 	public Vector3 pillarSearchBoxSize = Vector3.one * 80;
 
+	///////////////////////////////////
+	// Initial values and references //
+	///////////////////////////////////
+	public bool setLayerRecursively = true;
 	public bool setMaterialColorOnStart = true;
 	public Color materialColor = Color.black;
-	private VisibilityState _visibilityState;
-	public VisibilityState visibilityState {
-		get {
-			return _visibilityState;
-		}
-	}
-
 	public VisibilityState startingVisibilityState;
 	VisibilityState oppositeStartingVisibilityState;
 	bool negativeRenderer;
@@ -52,6 +47,19 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	Material initialMaterial;
 	EpitaphRenderer renderer;
 
+	//////////////////////
+	// Visibility state //
+	//////////////////////
+	private VisibilityState _visibilityState;
+	public VisibilityState visibilityState {
+		get {
+			return _visibilityState;
+		}
+	}
+
+	///////////////////
+	// On/Off Angles //
+	///////////////////
 	public bool overrideOnOffAngles = false;
 	public Angle onAngle;
 	public Angle offAngle;
@@ -62,14 +70,13 @@ public class PartiallyVisibleObject : MonoBehaviour {
 #endregion
 
 	private void Awake() {
-		searchForPillarLayerMask = 1 << LayerMask.NameToLayer("Pillar");
 		invisibleLayer = LayerMask.NameToLayer("Invisible");
+		visibleMaterial = Resources.Load<Material>("Materials/Unlit/Unlit");
 	}
 
 	void OnEnable() {
 		initialLayer = gameObject.layer;
 		renderer = gameObject.AddComponent<EpitaphRenderer>();
-		visibleMaterial = Resources.Load<Material>("Materials/Unlit/Unlit");
 		initialMaterial = renderer.GetMaterial();
 		negativeRenderer = initialMaterial.name.Contains("Neg");
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState.visible ? VisibilityState.invisible : VisibilityState.visible;
@@ -125,7 +132,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
 	private void SearchForPillarsInSphere(List<ObscurePillar> blacklist) {
-		foreach (var pillarMaybe in Physics.OverlapSphere(transform.position, pillarSearchRadius, searchForPillarLayerMask)) {
+		foreach (var pillarMaybe in Physics.OverlapSphere(transform.position, pillarSearchRadius)) {
 			ObscurePillar pillar = pillarMaybe.GetComponent<ObscurePillar>();
 			if (pillar != null && !blacklist.Contains(pillar)) {
 				pillarsFound.Add(pillar);
@@ -134,7 +141,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
 	private void SearchForPillarsInBox(List<ObscurePillar> blacklist) {
-		foreach (var pillarMaybe in Physics.OverlapBox(transform.position, pillarSearchBoxSize/2f, new Quaternion(), searchForPillarLayerMask)) {
+		foreach (var pillarMaybe in Physics.OverlapBox(transform.position, pillarSearchBoxSize/2f, new Quaternion())) {
 			ObscurePillar pillar = pillarMaybe.GetComponent<ObscurePillar>();
 			if (pillar != null && !blacklist.Contains(pillar)) {
 				pillarsFound.Add(pillar);
@@ -285,16 +292,25 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	private void UpdateVisibilitySettings() {
 		switch (visibilityState) {
 			case VisibilityState.invisible:
-				Utils.SetLayerRecursively(gameObject, invisibleLayer);
+				SetLayer(invisibleLayer);
 				break;
 			case VisibilityState.partiallyVisible:
-				Utils.SetLayerRecursively(gameObject, initialLayer);
+				SetLayer(initialLayer);
 				renderer.SetMaterial(initialMaterial);
 				break;
 			case VisibilityState.visible:
-				Utils.SetLayerRecursively(gameObject, initialLayer);
+				SetLayer(initialLayer);
 				renderer.SetMaterial(visibleMaterial);
 				break;
+		}
+	}
+
+	private void SetLayer(int layer) {
+		if (setLayerRecursively) {
+			Utils.SetLayerRecursively(gameObject, layer);
+		}
+		else {
+			gameObject.layer = layer;
 		}
 	}
 
@@ -312,7 +328,7 @@ public class PartiallyVisibleObjectEditor : Editor {
 		EditorGUILayout.Space();
 
 		EditorGUI.BeginChangeCheck();
-		script.findPillarsTechnique = (FindPillarsTechnique)EditorGUILayout.EnumPopup("Technique for finding pillars", script.findPillarsTechnique);
+		script.findPillarsTechnique = (PartiallyVisibleObject.FindPillarsTechnique)EditorGUILayout.EnumPopup("Technique for finding pillars", script.findPillarsTechnique);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
 				((PartiallyVisibleObject)obj).findPillarsTechnique = script.findPillarsTechnique;
@@ -322,37 +338,47 @@ public class PartiallyVisibleObjectEditor : Editor {
 		EditorGUILayout.Space();
 
 		switch (script.findPillarsTechnique) {
-			case FindPillarsTechnique.whitelist:
+			case PartiallyVisibleObject.FindPillarsTechnique.whitelist:
 				SerializedProperty whitelist = serializedObject.FindProperty("whitelist");
 				EditorGUI.BeginChangeCheck();
 				EditorGUILayout.PropertyField(whitelist, new GUIContent("Whitelist: "), true);
 				if (EditorGUI.EndChangeCheck())
 					serializedObject.ApplyModifiedProperties();
 				break;
-			case FindPillarsTechnique.automaticSphere:
+			case PartiallyVisibleObject.FindPillarsTechnique.automaticSphere:
 				UpdateSearchRadiusForAll(script);
 				break;
-			case FindPillarsTechnique.automaticSphereWithBlacklist: {
-					UpdateSearchRadiusForAll(script);
-					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
-					EditorGUI.BeginChangeCheck();
-					EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
-					if (EditorGUI.EndChangeCheck())
-						serializedObject.ApplyModifiedProperties();
+			case PartiallyVisibleObject.FindPillarsTechnique.automaticSphereWithBlacklist: {
+				UpdateSearchRadiusForAll(script);
+				SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
+				EditorGUI.BeginChangeCheck();
+				EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
+				if (EditorGUI.EndChangeCheck())
+					serializedObject.ApplyModifiedProperties();
 				}
 				break;
-			case FindPillarsTechnique.automaticBox:
+			case PartiallyVisibleObject.FindPillarsTechnique.automaticBox:
 				UpdateSearchBoxSizeForAll(script);
 				break;
-			case FindPillarsTechnique.automaticBoxWithBlacklist: {
-					UpdateSearchBoxSizeForAll(script);
-					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
-					EditorGUI.BeginChangeCheck();
-					EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
-					if (EditorGUI.EndChangeCheck())
-						serializedObject.ApplyModifiedProperties();
+			case PartiallyVisibleObject.FindPillarsTechnique.automaticBoxWithBlacklist: {
+				UpdateSearchBoxSizeForAll(script);
+				SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
+				EditorGUI.BeginChangeCheck();
+				EditorGUILayout.PropertyField(blacklist, new GUIContent("Blacklist: "), true);
+				if (EditorGUI.EndChangeCheck())
+					serializedObject.ApplyModifiedProperties();
 				}
 				break;
+		}
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.setLayerRecursively = EditorGUILayout.Toggle("Set layer recursively? ", script.setLayerRecursively);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).setLayerRecursively = script.setLayerRecursively;
+			}
 		}
 
 		EditorGUILayout.Space();

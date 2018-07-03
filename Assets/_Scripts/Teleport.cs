@@ -8,15 +8,21 @@ public class Teleport : MonoBehaviour {
     public Collider enter;
     public Collider exit;
 
+	public bool findEnterExitInChildren = false;
+
 	// Use this for initialization
 	void Awake () {
 		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new Transform[0];
 
-		if (enter == null) {
-			enter = transform.Find("Enter").GetComponent<Collider>();
-		}
-		if (exit == null) {
-			exit = transform.Find("Exit").GetComponent<Collider>();
+		if (findEnterExitInChildren) {
+			if (enter == null) {
+				enter = transform.Find("Enter").GetComponent<Collider>();
+			}
+			if (exit == null) {
+				exit = transform.Find("Exit").GetComponent<Collider>();
+			}
 		}
 	}
+
+
 }

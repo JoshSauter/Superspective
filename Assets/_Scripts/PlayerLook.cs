@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerLook : MonoBehaviour {
     Transform playerTransform;
-    Transform cameraTransform;
+    public Transform cameraTransform;
 	[Range(0.01f,1)]
 	public float generalSensitivity = 0.5f;
 	[Range(0.01f,1)]

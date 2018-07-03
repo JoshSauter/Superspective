@@ -266,5 +266,10 @@ namespace EpitaphUtils {
 		public static bool operator !=(Angle a, Angle b) {
 			return a.radians != b.radians;
 		}
+
+		public override bool Equals(object obj) {
+			Angle angleObj = obj as Angle;
+			return angleObj != null && angleObj == this;
+		}
 	}
 }

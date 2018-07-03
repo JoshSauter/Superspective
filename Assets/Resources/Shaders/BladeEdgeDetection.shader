@@ -173,7 +173,7 @@
 				for (int n = 0; n < NUM_SAMPLES; n++) {
 					normalSamples[n] = samples[n].xy;
 				}
-				float3 obliqueness[NUM_SAMPLES];
+				float obliqueness[NUM_SAMPLES];
 				for (int nd = 0; nd < NUM_SAMPLES; nd++) {
 					float dummyDepth;
 					float3 decodedNormal;

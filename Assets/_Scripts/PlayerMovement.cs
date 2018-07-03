@@ -11,20 +11,20 @@ public class PlayerMovement : MonoBehaviour {
 	float backwardsSpeed = 0.7f;
 	public float walkSpeed = 4f;
 	public float runSpeed = 12f;
-	public float jumpForce = 40;
+	public float jumpForce = 30;
 	public float windResistanceMultiplier = 0.2f;
 	bool jumpIsOnCooldown = false;
 	float jumpCooldown = 0.2f;
 	float movespeed;
 	private Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
+	bool grounded = false;
 
 	CapsuleCollider thisCollider;
 
 #region IsGrounded characteristics
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
-	int layerMask;
 #endregion
 
 	private void Awake() {
@@ -36,8 +36,6 @@ public class PlayerMovement : MonoBehaviour {
 		movespeed = walkSpeed;
 		thisRigidbody = GetComponent<Rigidbody>();
 		thisCollider = GetComponent<CapsuleCollider>();
-
-		layerMask = 1 << LayerMask.NameToLayer("WalkableObject");
 	}
 
 	private void Update() {
@@ -51,7 +49,7 @@ public class PlayerMovement : MonoBehaviour {
 	
 	void FixedUpdate() {
 		RaycastHit ground = new RaycastHit();
-		bool grounded = IsGrounded(out ground);
+		grounded = IsGrounded(out ground);
 
 		if (grounded) HandleGroundMovement(ground);
 		else {
@@ -188,7 +186,7 @@ public class PlayerMovement : MonoBehaviour {
 		RaycastHit obstacle = new RaycastHit();
 		Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
 		
-		if (obstacle.collider == null) {
+		if (obstacle.collider == null || obstacle.collider.isTrigger) {
 			return movementVector;
 		}
 		else {
@@ -201,11 +199,6 @@ public class PlayerMovement : MonoBehaviour {
 	/// </summary>
 	/// <param name="direction"></param>
 	void Move(Vector3 direction) {
-		// Walking backwards is slower than forwards
-		// TODO: This needs to operate based on transform.forward
-		if (direction.x == 0) {
-			direction.x *= backwardsSpeed;
-		}
 		Vector3 accelForce = direction * acceleration;
 		thisRigidbody.AddForce(accelForce, ForceMode.Acceleration);
 
@@ -217,6 +210,7 @@ public class PlayerMovement : MonoBehaviour {
 
 		Vector3 curDirectionSpeed = new Vector3(thisRigidbody.velocity.x, 0, thisRigidbody.velocity.z);
 		float facingSameDirection = Vector3.Dot(curDirectionSpeed.normalized, transform.forward);
+		// Walking backwards is slower than forwards
 		if (facingSameDirection < 0) {
 			Vector3 curVel = thisRigidbody.velocity;
 			float multiplier = Mathf.Lerp(1, backwardsSpeed, -facingSameDirection);
@@ -233,11 +227,11 @@ public class PlayerMovement : MonoBehaviour {
 	IEnumerator Jump() {
 		jumpIsOnCooldown = true;
 
-		Vector3 curVelocity = thisRigidbody.velocity;
-		curVelocity.y = 0;
-		thisRigidbody.velocity = curVelocity;
+		float multiplier = Mathf.Lerp(1, 1.2f, Mathf.InverseLerp(0, movespeed, HorizontalVelocity().magnitude));
 
-		thisRigidbody.AddForce(-Physics.gravity.normalized * jumpForce, ForceMode.Impulse);
+		thisRigidbody.AddForce(-Physics.gravity.normalized * jumpForce * multiplier, ForceMode.Impulse);
+		yield return new WaitForSeconds(0.5f);
+		yield return new WaitWhile(() => !grounded);
 		yield return new WaitForSeconds(jumpCooldown);
 
 		jumpIsOnCooldown = false;
@@ -253,8 +247,9 @@ public class PlayerMovement : MonoBehaviour {
 	/// <param name="hitInfo">RaycastHit info about the WalkableObject that's hit by the raycast and passes the Dot test with Vector3.up</param>
 	/// <returns>True if the player is grounded, otherwise false.</returns>
 	public bool IsGrounded(out RaycastHit hitInfo) {
-		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius - 0.02f, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f, layerMask);
+		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius - 0.02f, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f);
 		foreach (RaycastHit curHitInfo in allHit) {
+			if (!(curHitInfo.collider.tag == "Ground" || curHitInfo.collider.tag == "Staircase")) continue;
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 
 			// Return the first ground-like object hit

@@ -6,29 +6,33 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_ManagerScene.unity
+    path: Assets/__Scenes/_ManagerScene.unity
     guid: 3fcf0f08a36318544bf0e8c697f9b3b7
   - enabled: 0
-    path: Assets/_TestScene.unity
+    path: Assets/PrototypeAndTesting/_TestScene.unity
     guid: 332e1962a8c708447a42a2b310b15c5e
   - enabled: 1
-    path: Assets/_Level1.unity
+    path: Assets/__Scenes/_EmptyRoom.unity
     guid: a47f678a069cb5e459c4212b545eecbc
   - enabled: 1
-    path: Assets/_Transition1_2.unity
+    path: Assets/__Scenes/_TutorialHallway.unity
     guid: 75960477af1e6df48affe1b53f2792bc
   - enabled: 1
-    path: Assets/_Level2.unity
+    path: Assets/__Scenes/_HexPillarRoom.unity
     guid: 70a2eec1ab96519458618ddccfb97d74
   - enabled: 1
-    path: Assets/_Transition2_3.unity
+    path: Assets/__Scenes/_Transition2_3.unity
     guid: 01999cf9d7dd58a4b99cecbdea650515
   - enabled: 1
-    path: Assets/_Level3.unity
+    path: Assets/__Scenes/_Level3.unity
     guid: ce9ee02a31407d84782da38822a49848
   - enabled: 1
-    path: Assets/_Transition3_4.unity
+    path: Assets/__Scenes/_Transition3_4.unity
     guid: 74c2830e8c2ed1b4ca4ad7d00d2a1333
   - enabled: 1
-    path: Assets/_Level4.unity
+    path: Assets/__Scenes/_Level4.unity
     guid: ede387f93d4b4e540bcf46973bb3a244
+  - enabled: 1
+    path: Assets/__Scenes/_Library.unity
+    guid: cf7f75d7dafe81d4ba8f03916fde368a
+  m_configObjects: {}

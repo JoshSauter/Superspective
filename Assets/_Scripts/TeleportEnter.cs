@@ -5,17 +5,29 @@ using UnityEngine;
 [RequireComponent(typeof(MagicTrigger))]
 public class TeleportEnter : MonoBehaviour {
 	public bool DEBUG = false;
+	public bool teleportPlayer = true;
     public MagicTrigger trigger;
-    Teleport parent;
-	public delegate void TeleportAction(Teleport teleporter, Collider player);
+	Collider teleportEnter;
+    public Collider teleportExit;
+	public Vector3 teleportOffset = Vector3.zero;
+	public Transform[] otherObjectsToTeleport;
+
+#region events
+	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, Collider player);
     public event TeleportAction OnTeleport;
     public static event TeleportAction OnAnyTeleport;
+#endregion
 
 	// Use this for initialization
 	void Awake () {
-        parent = GetComponentInParent<Teleport>();
-
+		teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
+
+		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new Transform[0];
+	}
+
+	private void Start() {
+		Debug.Assert(teleportExit != null, "Please specify the teleport exit for " + gameObject.scene.name + ": " + gameObject.name);
 	}
 
 	private void OnEnable() {
@@ -29,49 +41,55 @@ public class TeleportEnter : MonoBehaviour {
     private void TeleportTriggered(Collider other) {
 		// Handle velocity
 		Vector3 curVelocity = other.GetComponent<Rigidbody>().velocity;
-		Vector3 relativeVelocity = parent.enter.transform.InverseTransformDirection(curVelocity);
-		curVelocity = parent.exit.transform.TransformDirection(relativeVelocity);
+		Vector3 relativeVelocity = teleportEnter.transform.InverseTransformDirection(curVelocity);
+		curVelocity = teleportExit.transform.TransformDirection(relativeVelocity);
 		if (DEBUG) {
 			print("Velocity was " + other.GetComponent<Rigidbody>().velocity + " but is now " + curVelocity);
 		}
 		other.GetComponent<Rigidbody>().velocity = curVelocity;
 
 		// Handle position and rotation
-		Vector3 teleportDisplacement = parent.enter.transform.position - parent.exit.transform.position;
-		Vector3 displacementToCenter = parent.enter.transform.position - other.transform.position;
-		float rotationBetweenEnterExit = GetRotationAngleBetweenTeleporters(parent);
+		Vector3 teleportDisplacement = TeleporterDisplacement() + teleportOffset;
+		Vector3 displacementToCenter = teleportEnter.transform.position - other.transform.position;
+		float rotationBetweenEnterExit = GetRotationAngleBetweenTeleporters();
 		if (DEBUG) {
 			print("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nAngleBetweenEnterExit: " + rotationBetweenEnterExit);
 		}
 
-		other.transform.position += displacementToCenter;
-		// Note: This only works for Y-axis rotations
-		other.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
+		if (teleportPlayer) {
+			other.transform.position += displacementToCenter;
+			// Note: This only works for Y-axis rotations
+			other.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
 
-		other.transform.position -= teleportDisplacement;
-		other.transform.position -= parent.exit.transform.TransformVector(parent.enter.transform.TransformVector(displacementToCenter));
+			other.transform.position -= teleportDisplacement;
+			other.transform.position -= teleportExit.transform.TransformDirection(teleportEnter.transform.InverseTransformDirection(displacementToCenter));
+		}
 
-		foreach (Transform otherObject in parent.otherObjectsToTeleport) {
+		foreach (Transform otherObject in otherObjectsToTeleport) {
 			otherObject.transform.position += displacementToCenter;
 			otherObject.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
 			otherObject.transform.position -= teleportDisplacement;
-			otherObject.transform.position -= parent.exit.transform.TransformVector(parent.enter.transform.TransformVector(displacementToCenter));
+			otherObject.transform.position -= teleportExit.transform.TransformVector(teleportEnter.transform.TransformVector(displacementToCenter));
 		}
 
         if (OnTeleport != null) {
-			OnTeleport(parent, other);
+			OnTeleport(teleportEnter, teleportExit, other);
         }
         if (OnAnyTeleport != null) {
-            OnAnyTeleport(parent, other);
+            OnAnyTeleport(teleportEnter, teleportExit, other);
         }
     }
 
-	public static float GetRotationAngleBetweenTeleporters(Teleport teleporter) {
-		Vector3 forwardEnter = teleporter.enter.transform.rotation * Vector3.forward;
-		Vector3 forwardExit = teleporter.exit.transform.rotation * Vector3.forward;
+	float GetRotationAngleBetweenTeleporters() {
+		Vector3 forwardEnter = teleportEnter.transform.rotation * Vector3.forward;
+		Vector3 forwardExit = teleportExit.transform.rotation * Vector3.forward;
 		float angleEnter = Mathf.Rad2Deg * Mathf.Atan2(forwardEnter.x, forwardEnter.z);
 		float angleExit = Mathf.Rad2Deg * Mathf.Atan2(forwardExit.x, forwardExit.z);
 		return Mathf.DeltaAngle(angleEnter, angleExit);
 	}
-	
+
+	Vector3 TeleporterDisplacement() {
+		return teleportEnter.transform.position - teleportExit.transform.position;
+	}
+
 }

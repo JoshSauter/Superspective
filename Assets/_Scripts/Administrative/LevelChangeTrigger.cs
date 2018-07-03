@@ -6,8 +6,10 @@ using UnityEditor;
 #endif
 
 public class LevelChangeTrigger : MagicTrigger {
-	public string levelForward;
-	public string levelBackward;
+	[SerializeField]
+	public Level levelForward;
+	[SerializeField]
+	public Level levelBackward;
 
 	// Use this for initialization
 	void Start () {
@@ -31,9 +33,21 @@ public class LevelChangeTriggerEditor : MagicTriggerEditor {
 	public override void OnInspectorGUI() {
 		LevelChangeTrigger script = target as LevelChangeTrigger;
 		base.OnInspectorGUI();
-		
-		script.levelForward = EditorGUILayout.TextField("Forward level: ", script.levelForward);
-		script.levelBackward = EditorGUILayout.TextField("Backward level: ", script.levelBackward);
+
+		EditorGUI.BeginChangeCheck();
+		script.levelForward = (Level)EditorGUILayout.EnumPopup("Forward level: ", script.levelForward);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((LevelChangeTrigger)obj).levelForward = script.levelForward;
+			}
+		}
+		EditorGUI.BeginChangeCheck();
+		script.levelBackward = (Level)EditorGUILayout.EnumPopup("Backward level: ", script.levelBackward);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((LevelChangeTrigger)obj).levelBackward = script.levelBackward;
+			}
+		}
 
 		EditorGUILayout.Space();
 	}

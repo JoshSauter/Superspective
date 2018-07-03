@@ -44,7 +44,6 @@ GameObject:
   - component: {fileID: 124558097284637276}
   - component: {fileID: 81900083578728210}
   - component: {fileID: 114956917619834794}
-  - component: {fileID: 114489041457036346}
   - component: {fileID: 114159433433022562}
   - component: {fileID: 114554233014705428}
   - component: {fileID: 114823194635714982}
@@ -113,6 +112,7 @@ Camera:
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -130,6 +130,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
@@ -210,19 +211,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 4
   runSpeed: 14
---- !u!114 &114489041457036346
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1286186898992828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c4564be102d8ec499ed7640cbf8a2b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shader: {fileID: 4800000, guid: 09cb4763911f4fd45b15cecbf382e851, type: 3}
-  mat: {fileID: 0}
+  jumpForce: 40
+  windResistanceMultiplier: 0.2
+  isGroundThreshold: 0.6
 --- !u!114 &114554233014705428
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -296,6 +287,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7a5373e2aa26fa4ab83f917defe1bd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 0}
+  generalSensitivity: 0.5
+  sensitivityX: 0.5
+  sensitivityY: 0.5
   rotationY: 0
 --- !u!114 &114956917619834794
 MonoBehaviour:
@@ -316,7 +311,9 @@ MonoBehaviour:
   sampleDist: 1
   edgesOnly: 0
   edgesOnlyBgColor: {r: 0.7058823, g: 0.7058823, b: 0.7058823, a: 1}
+  edgeColor: {r: 0, g: 0, b: 0, a: 1}
   edgeDetectShader: {fileID: 4800000, guid: 0d1644bdf064147baa97f235fc5b4903, type: 3}
+  edgeDetectMaterial: {fileID: 0}
 --- !u!124 &124558097284637276
 Behaviour:
   m_ObjectHideFlags: 1

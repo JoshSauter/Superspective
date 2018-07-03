@@ -93,6 +93,7 @@ CGINCLUDE
 	{
 		float dist; 
 		if (_SceneFogMode.y == 1)
+			// Radial distance
 			dist = length(camDir);
 		else
 			dist = zdepth * _ProjectionParams.z;

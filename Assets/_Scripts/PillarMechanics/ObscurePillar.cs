@@ -9,6 +9,8 @@ public enum MovementDirection {
 }
 
 public class ObscurePillar : MonoBehaviour {
+	public bool DEBUG = false;
+
 	public bool isActivePillar = false;
 	// Can be null if there is no active pillar
 	private static ObscurePillar _activePillar;
@@ -27,6 +29,8 @@ public class ObscurePillar : MonoBehaviour {
 	public static event ActivePillarChangedEvent OnActivePillarChanged;
 	public delegate void PlayerMoveAroundPillarEvent(Angle previousAngle, Angle newAngle);
 	public static event PlayerMoveAroundPillarEvent OnPlayerMoveAroundPillar;
+
+	PartiallyVisibleObject thisPartiallyVisibleObject;
 
 	Angle previousCameraAngleRelativeToPillar;
 
@@ -60,6 +64,14 @@ public class ObscurePillar : MonoBehaviour {
 		else {
 			DisablePillar();
 		}
+
+
+	}
+
+	private void HandlePillarVisibilityChange(VisibilityState newState) {
+		if (newState == VisibilityState.visible) {
+			ObscurePillar.activePillar = this;
+		}
 	}
 
 	private void HandleActivePillarChanged(ObscurePillar previousPillar) {
@@ -73,10 +85,18 @@ public class ObscurePillar : MonoBehaviour {
 
 	private void OnEnable() {
 		OnActivePillarChanged += HandleActivePillarChanged;
+
+		thisPartiallyVisibleObject = GetComponent<PartiallyVisibleObject>();
+		if (thisPartiallyVisibleObject != null) {
+			thisPartiallyVisibleObject.OnVisibilityStateChange += HandlePillarVisibilityChange;
+		}
 	}
 
 	private void OnDisable() {
 		OnActivePillarChanged -= HandleActivePillarChanged;
+		if (thisPartiallyVisibleObject != null) {
+			thisPartiallyVisibleObject.OnVisibilityStateChange += HandlePillarVisibilityChange;
+		}
 	}
 
 	private void EnablePillar() {
@@ -105,7 +125,10 @@ public class ObscurePillar : MonoBehaviour {
 		if (previousCameraAngleRelativeToPillar.radians < 0) {
 			previousCameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;
 		}
-		else if (OnPlayerMoveAroundPillar != null) {
+		else if (OnPlayerMoveAroundPillar != null && activePillar == this) {
+			if (DEBUG) {
+				print(newCameraAngleRelativeToPillar);
+			}
 			OnPlayerMoveAroundPillar(previousCameraAngleRelativeToPillar, newCameraAngleRelativeToPillar);
 		}
 		previousCameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;

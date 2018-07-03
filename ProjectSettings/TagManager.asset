@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - Staircase
+  - Pillar
   layers:
   - Default
   - TransparentFX
@@ -26,8 +27,8 @@ TagManager:
   - Invisible
   - RoomBounds
   - Pillar
-  - 
-  - 
+  - Portal
+  - HideFromPortal
   - 
   - 
   - 
