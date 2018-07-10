@@ -142,6 +142,32 @@ public class Portal : MonoBehaviour {
 			newFog.heightDensity = playerFog.heightDensity;
 			newFog.startDistance = playerFog.startDistance;
 			newFog.fogShader = playerFog.fogShader;
+			newFog.enabled = playerFog.enabled;
+			// Initialize Fog
+			ColorfulFog playerFog2 = playerCamera.GetComponent<ColorfulFog>();
+			ColorfulFog newFog2 = newPortalCameraObj.AddComponent<ColorfulFog>();
+			newFog2.useCustomDepthTexture = playerFog2.useCustomDepthTexture;
+			newFog2.fogDensity = playerFog2.fogDensity;
+			newFog2.distanceFog = playerFog2.distanceFog;
+			newFog2.useRadialDistance = playerFog2.useRadialDistance;
+			newFog2.heightFog = playerFog2.heightFog;
+			newFog2.enabled = playerFog2.enabled;
+			newFog2.height = playerFog2.height;
+			newFog2.heightDensity = playerFog2.heightDensity;
+			newFog2.startDistance = playerFog2.startDistance;
+			newFog2.fogMode = playerFog2.fogMode;
+			newFog2.fogStart = playerFog2.fogStart;
+			newFog2.coloringMode = playerFog2.coloringMode;
+			newFog2.fogCube = playerFog2.fogCube;
+			newFog2.solidColor = playerFog2.solidColor;
+			newFog2.skyColor = playerFog2.skyColor;
+			newFog2.equatorColor = playerFog2.equatorColor;
+			newFog2.groundColor = playerFog2.groundColor;
+			newFog2.gradient = playerFog2.gradient;
+			newFog2.gradientResolution = playerFog2.gradientResolution;
+			newFog2.gradientTexture = playerFog2.gradientTexture;
+			newFog2.fogShader = playerFog2.fogShader;
+			newFog2.customDepthShader = playerFog2.customDepthShader;
 			// Initialize Portal Camera Texture component
 			portalCameraTextures[i] = newPortalCameraObj.AddComponent<PortalCameraTexture>();
 			portalCameraTextures[i].portal = this;

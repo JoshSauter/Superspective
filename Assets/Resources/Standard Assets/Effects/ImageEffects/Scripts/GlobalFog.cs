@@ -6,8 +6,7 @@ namespace UnityStandardAssets.ImageEffects
     [ExecuteInEditMode]
     [RequireComponent (typeof(Camera))]
     [AddComponentMenu ("Image Effects/Rendering/Global Fog")]
-    public class GlobalFog : PostEffectsBase
-	{
+    public class GlobalFog : PostEffectsBase {
 		[Tooltip("Fog color")]
 		public Color fogColor = Color.gray;
 		[Tooltip("Apply distance-based fog?")]
@@ -15,7 +14,7 @@ namespace UnityStandardAssets.ImageEffects
 		[Tooltip("Exclude far plane pixels from distance-based fog? (Skybox or clear color)")]
 		public bool  excludeFarPixels = true;
 		[Tooltip("Distance fog is based on radial distance from camera when checked")]
-		public bool  useRadialDistance = false;
+		public bool  useRadialDistance = true;
 		[Tooltip("Apply height-based fog?")]
 		public bool  heightFog = true;
 		[Tooltip("Fog top Y coordinate")]

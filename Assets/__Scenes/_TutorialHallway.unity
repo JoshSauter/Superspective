@@ -10530,7 +10530,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1798786
+  m_Name: pb_Mesh189908
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -16612,8 +16612,8 @@ MonoBehaviour:
   targetObject: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   allowTriggeringWhileInsideObject: 0
-  levelForward: 0
-  levelBackward: 0
+  levelForward: 3
+  levelBackward: 7
 --- !u!64 &769480101
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -30285,6 +30285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   otherPortal: {fileID: 215707195}
   portalEdgeDetectionColor: {r: 1, g: 1, b: 1, a: 1}
+  teleportOnEnter: 1
   portalOffset: -1
   colliderOffset: 0
   useMeshAsCollider: 0
@@ -30302,9 +30303,6 @@ MonoBehaviour:
   - {fileID: 0}
   playerCamera: {fileID: 0}
   portalCameras:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalTeleporters:
   - {fileID: 0}
   - {fileID: 0}
   portalTeleportEnters:
@@ -34786,7 +34784,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-5644572
+  m_Name: pb_Mesh189840
   serializedVersion: 8
   m_SubMeshes:
   - serializedVersion: 2
@@ -36107,9 +36105,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 1
+  teleportPlayer: 1
   trigger: {fileID: 0}
-  parent: {fileID: 0}
+  teleportExit: {fileID: 0}
   teleportOffset: {x: 0, y: 0, z: 0}
+  otherObjectsToTeleport: []
 --- !u!114 &1666347881
 MonoBehaviour:
   m_ObjectHideFlags: 0

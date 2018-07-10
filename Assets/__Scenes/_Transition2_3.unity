@@ -302,6 +302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  teleportPlayer: 1
   trigger: {fileID: 0}
   teleportExit: {fileID: 993163370}
   teleportOffset: {x: 0, y: 0, z: 0}
@@ -9074,26 +9075,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae846c941abeefb4586d5add188f9220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _column1State: 2
-  _column2State: 2
-  column1Solid: {fileID: 184381172}
-  column2Solid: {fileID: 412698139}
-  column1: {fileID: 540043054}
-  column2: {fileID: 631662655}
-  objectsDuringNothing: []
-  objectsDuringPillar1: []
-  objectsDuringPillar1Solid:
-  - {fileID: 51020778}
-  - {fileID: 1619226685}
-  objectsDuringPillar1SolidPillar2:
-  - {fileID: 51020778}
-  - {fileID: 790904826}
-  - {fileID: 247079250}
-  objectsDuringPillar1SolidPillar2Solid:
-  - {fileID: 790904826}
-  - {fileID: 247079250}
-  objectsDuringPillar1Pillar2Solid: []
-  objectsDuringPillar2Solid: []
 --- !u!114 &393063299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9105,8 +9086,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea96dc26a04ba6141ad09c6ff99ed95c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  column2PartiallyOnTrigger: {fileID: 0}
-  column2OffTrigger: {fileID: 0}
 --- !u!1 &412698139
 GameObject:
   m_ObjectHideFlags: 0
@@ -21949,9 +21928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624abb8deb4d940cb8af78c407aa4196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startIndex: 0
-  color: {r: 0.7294118, g: 0.12156863, b: 0.12156863, a: 1}
-  unlitMaterials: []
 --- !u!114 &631662658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53229,6 +53205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  teleportPlayer: 1
   trigger: {fileID: 0}
   teleportExit: {fileID: 2134523973}
   teleportOffset: {x: 0, y: 0, z: 0}
@@ -56472,9 +56449,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624abb8deb4d940cb8af78c407aa4196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startIndex: 0
-  color: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 1}
-  unlitMaterials: []
 --- !u!64 &2022815340
 MeshCollider:
   m_ObjectHideFlags: 0

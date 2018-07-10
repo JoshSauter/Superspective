@@ -58744,6 +58744,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  teleportPlayer: 1
   trigger: {fileID: 0}
   teleportExit: {fileID: 740555792}
   teleportOffset: {x: 0, y: 0, z: 0}
