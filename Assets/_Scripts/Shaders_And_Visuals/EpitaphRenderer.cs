@@ -23,14 +23,14 @@ public class EpitaphRenderer : MonoBehaviour {
 		return GetColor(mainColor);
 	}
 
-	public void SetColor(Color color, string colorName) {
+	public void SetColor(string colorName, Color color) {
 		r.GetPropertyBlock(propBlock);
 		propBlock.SetColor(colorName, color);
 		r.SetPropertyBlock(propBlock);
 	}
 
 	public void SetMainColor(Color color) {
-		SetColor(color, mainColor);
+		SetColor(mainColor, color);
 	}
 
 	public Material GetMaterial() {

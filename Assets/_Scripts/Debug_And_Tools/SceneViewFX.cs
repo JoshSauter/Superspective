@@ -8,22 +8,28 @@ using UnityEngine;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
-public class SceneViewFX : MonoBehaviour {
+public class SceneViewFX : Singleton<SceneViewFX> {
 
 #if UNITY_EDITOR
-
-	private static SceneViewFX _instance;
 	private SceneView sceneView;
 	private Camera sceneViewCamera;
 	private Camera myCamera;
+	[HideInInspector]
+	public bool cachedEnableState;
+
+	[MenuItem("Custom/SceneFxToggle _F1")]
+	private static void ToggleFx() {
+		if (instance != null) {
+			instance.enabled = !instance.enabled;
+		}
+	}
 
 	private void OnEnable() {
-		if (_instance != null && _instance != this) {
+		if (instance != null && instance != this) {
 			Debug.LogError("Cannot add SceneViewFX. Already one active in this scene");
 			DestroyImmediate(this);
 			return;
 		}
-		_instance = this;
 		sceneViewCamera = GetCamera();
 		if (!Application.isPlaying) {
 			UpdateComponents();

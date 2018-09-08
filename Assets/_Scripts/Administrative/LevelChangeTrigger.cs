@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -30,22 +30,36 @@ public class LevelChangeTrigger : MagicTrigger {
 [CustomEditor(typeof(LevelChangeTrigger))]
 [CanEditMultipleObjects]
 public class LevelChangeTriggerEditor : MagicTriggerEditor {
-	public override void OnInspectorGUI() {
-		LevelChangeTrigger script = target as LevelChangeTrigger;
-		base.OnInspectorGUI();
+	SerializedProperty levelForward;
+	SerializedProperty levelBackward;
+
+	protected override void OnEnable() {
+		base.OnEnable();
+		levelForward = serializedObject.FindProperty("levelForward");
+		levelBackward = serializedObject.FindProperty("levelBackward");
+	}
+
+	public override void MoreOnInspectorGUI() {
+		base.MoreOnInspectorGUI();
 
 		EditorGUI.BeginChangeCheck();
-		script.levelForward = (Level)EditorGUILayout.EnumPopup("Forward level: ", script.levelForward);
+		EditorGUILayout.PropertyField(levelForward);
+		Level currentLevelForward = (Level)Enum.GetValues(typeof(Level)).GetValue(levelForward.enumValueIndex);
 		if (EditorGUI.EndChangeCheck()) {
-			foreach (Object obj in targets) {
-				((LevelChangeTrigger)obj).levelForward = script.levelForward;
+			foreach (System.Object obj in targets) {
+				var trigger = ((LevelChangeTrigger)obj);
+				trigger.levelForward = currentLevelForward;
+				UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(trigger.gameObject.scene);
 			}
 		}
 		EditorGUI.BeginChangeCheck();
-		script.levelBackward = (Level)EditorGUILayout.EnumPopup("Backward level: ", script.levelBackward);
+		EditorGUILayout.PropertyField(levelBackward);
+		Level currentLevelBackward = (Level)Enum.GetValues(typeof(Level)).GetValue(levelBackward.enumValueIndex);
 		if (EditorGUI.EndChangeCheck()) {
-			foreach (Object obj in targets) {
-				((LevelChangeTrigger)obj).levelBackward = script.levelBackward;
+			foreach (System.Object obj in targets) {
+				var trigger = ((LevelChangeTrigger)obj);
+				trigger.levelBackward = currentLevelBackward;
+				UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(trigger.gameObject.scene);
 			}
 		}
 

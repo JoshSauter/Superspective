@@ -1,11 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using EpitaphUtils;
 
 public class LibraryElevator : MonoBehaviour {
+	public TeleportEnter elevatorTeleport;
 	public float elevateSpeed = 2;
 	public float rotationSpeedDegrees = 10;
+	private float offsetWhenToRotate = 20;
+	private float heightBetweenDoors = 80;
 
 	bool inElevateCoroutine = false;
 	bool inRotateCoroutine = false;
@@ -46,7 +50,13 @@ public class LibraryElevator : MonoBehaviour {
 		}
 
 		while (inElevateCoroutine) {
-			transform.parent.position += transform.up * elevateSpeed * Time.fixedDeltaTime;
+			// Determine when to rotate the elevator
+			float distanceToMove = elevateSpeed * Time.fixedDeltaTime;
+			float currentHeight = (transform.parent.localPosition.y - heightBetweenDoors) % heightBetweenDoors;
+			if (currentHeight < offsetWhenToRotate && currentHeight + distanceToMove >= offsetWhenToRotate && !inRotateCoroutine) {
+				StartCoroutine(RotateDegrees(90));
+			}
+			transform.parent.position += transform.up * distanceToMove;
 			yield return new WaitForFixedUpdate();
 		}
 	}
@@ -72,6 +82,7 @@ public class LibraryElevator : MonoBehaviour {
 	private void OnCollisionEnter(Collision collision) {
 		if (collision.gameObject.tag == "Player") {
 			collision.transform.SetParent(transform);
+			elevatorTeleport.teleportPlayer = false;
 			if (!inElevateCoroutine) {
 				StartCoroutine(ElevateAndRotate());
 			}
@@ -81,6 +92,9 @@ public class LibraryElevator : MonoBehaviour {
 	private void OnCollisionExit(Collision collision) {
 		if (collision.gameObject.tag == "Player") {
 			collision.transform.SetParent(null);
+			Scene managerScene = SceneManager.GetSceneByName(LevelManager.instance.GetSceneName(Level.managerScene));
+			SceneManager.MoveGameObjectToScene(collision.gameObject, managerScene);
+			elevatorTeleport.teleportPlayer = true;
 		}
 	}
 }

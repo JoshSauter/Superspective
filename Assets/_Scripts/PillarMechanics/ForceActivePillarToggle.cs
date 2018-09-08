@@ -28,17 +28,25 @@ public class ForceActivePillarToggle : MagicTrigger {
 [CustomEditor(typeof(ForceActivePillarToggle))]
 [CanEditMultipleObjects]
 public class ForceActivePillarToggleEditor : MagicTriggerEditor {
-	public override void OnInspectorGUI() {
-		ForceActivePillarToggle script = target as ForceActivePillarToggle;
-		base.OnInspectorGUI();
+	SerializedProperty forwardTriggeredPillar;
+	SerializedProperty backwardTriggeredPillar;
+
+	protected override void OnEnable() {
+		base.OnEnable();
+		forwardTriggeredPillar = serializedObject.FindProperty("forwardTriggeredPillar");
+		backwardTriggeredPillar = serializedObject.FindProperty("backwardTriggeredPillar");
+	}
+
+	public override void MoreOnInspectorGUI() {
+		base.MoreOnInspectorGUI();
 
 		EditorGUILayout.Space();
 
-		script.forwardTriggeredPillar = EditorGUILayout.ObjectField("Forward Pillar: ", script.forwardTriggeredPillar, typeof(ObscurePillar), true) as ObscurePillar;
+		forwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Forward Pillar: ", forwardTriggeredPillar.objectReferenceValue, typeof(ObscurePillar), true) as ObscurePillar;
 
 		EditorGUILayout.Space();
 
-		script.backwardTriggeredPillar = EditorGUILayout.ObjectField("Backward Pillar: ", script.backwardTriggeredPillar, typeof(ObscurePillar), true) as ObscurePillar;
+		backwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Backward Pillar: ", backwardTriggeredPillar.objectReferenceValue, typeof(ObscurePillar), true) as ObscurePillar;
 	}
 }
 

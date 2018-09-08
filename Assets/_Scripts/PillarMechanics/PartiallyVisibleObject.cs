@@ -83,13 +83,13 @@ public class PartiallyVisibleObject : MonoBehaviour {
 
 		ObscurePillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
 		ObscurePillar.OnActivePillarChanged += HandlePillarChanged;
-		ObscurePillar.OnActivePillarChanged += ResetVisibilityStateIfNeeded;
+		ObscurePillar.OnActivePillarChanged += ResetVisibilityStateIfPartiallyVisible;
 	}
 
 	private void OnDisable() {
 		ObscurePillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
 		ObscurePillar.OnActivePillarChanged -= HandlePillarChanged;
-		ObscurePillar.OnActivePillarChanged -= ResetVisibilityStateIfNeeded;
+		ObscurePillar.OnActivePillarChanged -= ResetVisibilityStateIfPartiallyVisible;
 	}
 
 	private void Start() {
@@ -225,7 +225,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Handles the VisibilityState switching logic when a sweeping collider hits this object
+	/// Handles the VisibilityState switching logic when a sweeping collider (now just a metaphorical object) hits this object
 	/// </summary>
 	/// <param name="direction">Direction the sweeping collider is moving</param>
 	/// <returns>true if VisibilityState changes, false otherwise</returns>
@@ -250,7 +250,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Handles the VisibilityState switching logic when a sweeping collider exits this object
+	/// Handles the VisibilityState switching logic when a sweeping collider (now just a metaphorical object) exits this object
 	/// </summary>
 	/// <param name="direction">Direction the sweeping collider is moving</param>
 	/// <returns>true if VisibilityState changes, false otherwise</returns>
@@ -270,7 +270,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		return false;
 	}
 
-	private void ResetVisibilityStateIfNeeded(ObscurePillar unused) {
+	private void ResetVisibilityStateIfPartiallyVisible(ObscurePillar unused) {
 		if (visibilityState == VisibilityState.partiallyVisible) {
 			ResetVisibilityState();
 		}

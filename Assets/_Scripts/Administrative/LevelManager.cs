@@ -60,13 +60,10 @@ public class LevelManager : Singleton<LevelManager> {
 		PopulateAlreadyLoadedScenes();
 #endif
 
-
 		SceneManager.sceneLoaded += FinishLoadingScene;
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
 
-		if (startingScene != null) {
-			SwitchActiveScene(startingScene);
-		}
+		SwitchActiveScene(startingScene);
 	}
 
 	/// <summary>
@@ -112,6 +109,10 @@ public class LevelManager : Singleton<LevelManager> {
 		}
 	}
 
+	public string GetSceneName(Level level) {
+		return enumToSceneName[level];
+	}
+
 	private void PopulateSceneNames() {
 #if UNITY_EDITOR
 		enumToSceneName.Add(Level.testScene, testScene);
@@ -137,7 +138,7 @@ public class LevelManager : Singleton<LevelManager> {
 
 		worldGraph.Add(emptyRoom, new List<string>() { tutorialHallway });
 		worldGraph.Add(hexPillarRoom, new List<string>() { tutorialHallway, library });
-		worldGraph.Add(library, new List<string>());
+		worldGraph.Add(library, new List<string>() { hexPillarRoom, tutorialHallway });
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 

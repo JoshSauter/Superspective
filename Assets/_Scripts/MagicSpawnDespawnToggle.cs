@@ -35,8 +35,8 @@ public class MagicSpawnDespawnToggle : MagicSpawnDespawn {
 [CustomEditor(typeof(MagicSpawnDespawnToggle))]
 [CanEditMultipleObjects]
 public class MagicSpawnDespawnToggleEditor : MagicSpawnDespawnEditor {
-	public override void OnInspectorGUI() {
-		base.OnInspectorGUI();
+	public override void MoreOnInspectorGUI() {
+		base.MoreOnInspectorGUI();
 	}
 }
 

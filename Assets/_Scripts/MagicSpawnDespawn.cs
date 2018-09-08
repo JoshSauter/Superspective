@@ -36,28 +36,39 @@ public class MagicSpawnDespawn : MagicTrigger {
 [CustomEditor(typeof(MagicSpawnDespawn))]
 [CanEditMultipleObjects]
 public class MagicSpawnDespawnEditor : MagicTriggerEditor {
-    public override void OnInspectorGUI() {
-        base.OnInspectorGUI();
+	SerializedProperty objectsToEnable;
+	SerializedProperty objectsToDisable;
 
-        SerializedProperty objectsToEnable = serializedObject.FindProperty("objectsToEnable");
+	SerializedProperty scriptsToEnable;
+	SerializedProperty scriptsToDisable;
+
+	protected override void OnEnable() {
+		base.OnEnable();
+		objectsToEnable = serializedObject.FindProperty("objectsToEnable");
+		objectsToDisable = serializedObject.FindProperty("objectsToDisable");
+
+		scriptsToEnable = serializedObject.FindProperty("scriptsToEnable");
+		scriptsToDisable = serializedObject.FindProperty("scriptsToDisable");
+	}
+
+    public override void MoreOnInspectorGUI() {
+        base.MoreOnInspectorGUI();
+		
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(objectsToEnable, true);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-
-        SerializedProperty objectsToDisable = serializedObject.FindProperty("objectsToDisable");
+		
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(objectsToDisable, true);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-
-		SerializedProperty scriptsToEnable = serializedObject.FindProperty("scriptsToEnable");
+		
 		EditorGUI.BeginChangeCheck();
 		EditorGUILayout.PropertyField(scriptsToEnable, true);
 		if (EditorGUI.EndChangeCheck())
 			serializedObject.ApplyModifiedProperties();
-
-		SerializedProperty scriptsToDisable = serializedObject.FindProperty("scriptsToDisable");
+		
 		EditorGUI.BeginChangeCheck();
 		EditorGUILayout.PropertyField(scriptsToDisable, true);
 		if (EditorGUI.EndChangeCheck())

@@ -14,8 +14,11 @@ public class TeleportEnter : MonoBehaviour {
 
 #region events
 	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, Collider player);
+	public delegate void SimpleTeleportAction();
     public event TeleportAction OnTeleport;
+	public event SimpleTeleportAction OnTeleportSimple;
     public static event TeleportAction OnAnyTeleport;
+	public static event SimpleTeleportAction OnAnyTeleportSimple;
 #endregion
 
 	// Use this for initialization
@@ -72,12 +75,7 @@ public class TeleportEnter : MonoBehaviour {
 			otherObject.transform.position -= teleportExit.transform.TransformVector(teleportEnter.transform.TransformVector(displacementToCenter));
 		}
 
-        if (OnTeleport != null) {
-			OnTeleport(teleportEnter, teleportExit, other);
-        }
-        if (OnAnyTeleport != null) {
-            OnAnyTeleport(teleportEnter, teleportExit, other);
-        }
+		TriggerEvents(other);
     }
 
 	float GetRotationAngleBetweenTeleporters() {
@@ -90,6 +88,21 @@ public class TeleportEnter : MonoBehaviour {
 
 	Vector3 TeleporterDisplacement() {
 		return teleportEnter.transform.position - teleportExit.transform.position;
+	}
+
+	void TriggerEvents(Collider player) {
+		if (OnTeleport != null) {
+			OnTeleport(teleportEnter, teleportExit, player);
+		}
+		if (OnAnyTeleport != null) {
+			OnAnyTeleport(teleportEnter, teleportExit, player);
+		}
+		if (OnTeleportSimple != null) {
+			OnTeleportSimple();
+		}
+		if (OnAnyTeleportSimple != null) {
+			OnAnyTeleportSimple();
+		}
 	}
 
 }

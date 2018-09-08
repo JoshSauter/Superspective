@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -189,69 +189,106 @@ public class MagicTrigger : MonoBehaviour {
 [CustomEditor(typeof(MagicTrigger))]
 [CanEditMultipleObjects]
 public class MagicTriggerEditor : Editor {
-    public override void OnInspectorGUI() {
-        MagicTrigger script = target as MagicTrigger;
+	SerializedProperty DEBUG;
+
+	SerializedProperty triggerCondition;
+	SerializedProperty targetDirection;
+	SerializedProperty targetObject;
+	SerializedProperty targetPosition;
+	SerializedProperty allowTriggeringWhileInsideObject;
+	SerializedProperty playerFaceThreshold;
+
+	SerializedProperty disableGameObjectOnTrigger;
+	SerializedProperty disableScriptOnTrigger;
+
+	protected virtual void OnEnable() {
+		DEBUG = serializedObject.FindProperty("DEBUG");
+
+		triggerCondition = serializedObject.FindProperty("triggerCondition");
+		targetDirection = serializedObject.FindProperty("targetDirection");
+		targetObject = serializedObject.FindProperty("targetObject");
+		targetPosition = serializedObject.FindProperty("targetPosition");
+		allowTriggeringWhileInsideObject = serializedObject.FindProperty("allowTriggeringWhileInsideObject");
+		playerFaceThreshold = serializedObject.FindProperty("playerFaceThreshold");
+
+		disableGameObjectOnTrigger = serializedObject.FindProperty("disableGameObjectOnTrigger");
+		disableScriptOnTrigger = serializedObject.FindProperty("disableScriptOnTrigger");
+	}
+
+	public sealed override void OnInspectorGUI() {
+		serializedObject.Update();
 		float defaultWidth = EditorGUIUtility.labelWidth;
 
 		EditorGUILayout.Space();
 
-        script.DEBUG = EditorGUILayout.Toggle("Debug logging?", script.DEBUG);
+        DEBUG.boolValue = EditorGUILayout.Toggle("Debug logging?", DEBUG.boolValue);
 
         EditorGUILayout.Space();
         EditorGUILayout.Separator();
         EditorGUILayout.Space();
 
 		EditorGUI.BeginChangeCheck();
-        script.triggerCondition = (MagicTrigger.TriggerConditionType)EditorGUILayout.EnumPopup("Trigger Condition Type", script.triggerCondition);
+		EditorGUILayout.PropertyField(triggerCondition);
+		MagicTrigger.TriggerConditionType currentTriggerCondition =
+				(MagicTrigger.TriggerConditionType)Enum.GetValues(typeof(MagicTrigger.TriggerConditionType)).GetValue(triggerCondition.enumValueIndex);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (var obj in targets) {
-				((MagicTrigger)obj).triggerCondition = script.triggerCondition;
+				var trigger = ((MagicTrigger)obj);
+				trigger.triggerCondition = currentTriggerCondition;
+				UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(trigger.gameObject.scene);
 			}
 		}
-        EditorGUILayout.Space();
+		EditorGUILayout.Space();
 
-        switch (script.triggerCondition) {
+        switch (currentTriggerCondition) {
             case MagicTrigger.TriggerConditionType.PlayerFacingDirection:
-                script.targetDirection = EditorGUILayout.Vector3Field("Player facing direction: ", script.targetDirection);
+				EditorGUILayout.PropertyField(targetDirection);
+                //targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player facing direction: ", targetDirection.vector3Value);
                 break;
             case MagicTrigger.TriggerConditionType.PlayerFacingObject:
             case MagicTrigger.TriggerConditionType.PlayerFacingAwayFromObject:
-                script.targetObject = EditorGUILayout.ObjectField("Target object: ", script.targetObject, typeof(Collider), true) as Collider;
+                targetObject.objectReferenceValue = EditorGUILayout.ObjectField("Target object: ", targetObject.objectReferenceValue, typeof(Collider), true) as Collider;
 
                 EditorGUILayout.Space();
 				
                 EditorGUIUtility.labelWidth = 300;
-                script.allowTriggeringWhileInsideObject = EditorGUILayout.Toggle("Allow triggering while inside of target object?", script.allowTriggeringWhileInsideObject);
+                allowTriggeringWhileInsideObject.boolValue = EditorGUILayout.Toggle("Allow triggering while inside of target object?", allowTriggeringWhileInsideObject.boolValue);
                 EditorGUIUtility.labelWidth = defaultWidth;
                 break;
             case MagicTrigger.TriggerConditionType.PlayerFacingPosition:
             case MagicTrigger.TriggerConditionType.PlayerFacingAwayFromPosition:
-                script.targetPosition = EditorGUILayout.Vector3Field("Player facing position: ", script.targetPosition);
+                targetPosition.vector3Value = EditorGUILayout.Vector3Field("Player facing position: ", targetPosition.vector3Value);
                 break;
             case MagicTrigger.TriggerConditionType.PlayerMovingDirection:
-                script.targetDirection = EditorGUILayout.Vector3Field("Player moving towards: ", script.targetDirection);
+                targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player moving towards: ", targetDirection.vector3Value);
                 break;
 			case MagicTrigger.TriggerConditionType.PlayerMovingAndFacingDirection:
-				script.targetDirection = EditorGUILayout.Vector3Field("Player moving and facing towards: ", script.targetDirection);
+				targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player moving and facing towards: ", targetDirection.vector3Value);
 				break;
         }
 
         EditorGUILayout.Space();
 
-        script.playerFaceThreshold = EditorGUILayout.Slider("Trigger threshold: ", script.playerFaceThreshold, -1, 1);
+        playerFaceThreshold.floatValue = EditorGUILayout.Slider("Trigger threshold: ", playerFaceThreshold.floatValue, -1, 1);
 
         EditorGUILayout.Space();
 
 		EditorGUIUtility.labelWidth = 300;
-		script.disableGameObjectOnTrigger = EditorGUILayout.Toggle("Disable this gameobject upon trigger? ", script.disableGameObjectOnTrigger);
+		disableGameObjectOnTrigger.boolValue = EditorGUILayout.Toggle("Disable this gameobject upon trigger? ", disableGameObjectOnTrigger.boolValue);
 
 		EditorGUILayout.Space();
 
-		script.disableScriptOnTrigger = EditorGUILayout.Toggle("Disable this script upon trigger? ", script.disableScriptOnTrigger);
+		disableScriptOnTrigger.boolValue = EditorGUILayout.Toggle("Disable this script upon trigger? ", disableScriptOnTrigger.boolValue);
 		EditorGUIUtility.labelWidth = defaultWidth;
 
 		EditorGUILayout.Space();
+
+		MoreOnInspectorGUI();
+
+		serializedObject.ApplyModifiedProperties();
 	}
+
+	public virtual void MoreOnInspectorGUI() { }
 }
 
 #endif

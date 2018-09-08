@@ -124,50 +124,18 @@ public class Portal : MonoBehaviour {
 			portalCameras[i] = newPortalCameraObj.AddComponent<Camera>();
 			portalCameras[i].CopyFrom(playerCamera);
 			portalCameras[i].depth = -100;
-			portalCameras[i].cullingMask &= ~(1 << portalLayer);
+			int portalSpecificHiddenLayer = LayerMask.NameToLayer("HideFromPortal" + ((char)('A' + i)));
+			portalCameras[i].cullingMask &= ~(1 << portalLayer | 1 << portalSpecificHiddenLayer);
 			// Initialize Edge Detection
 			BladeEdgeDetection playerEdgeDetection = playerCamera.GetComponent<BladeEdgeDetection>();
 			BladeEdgeDetection edgeDetection = newPortalCameraObj.AddComponent<BladeEdgeDetection>();
 			edgeDetection.edgeColor = portalEdgeDetectionColor;
 			edgeDetection.depthSensitivity = playerEdgeDetection.depthSensitivity;
 			edgeDetection.normalSensitivity = playerEdgeDetection.normalSensitivity;
-			// Initialize Global Fog
-			GlobalFog playerFog = playerCamera.GetComponent<GlobalFog>();
-			GlobalFog newFog = newPortalCameraObj.AddComponent<GlobalFog>();
-			newFog.fogColor = playerFog.fogColor;
-			newFog.distanceFog = playerFog.distanceFog;
-			newFog.excludeFarPixels = playerFog.excludeFarPixels;
-			newFog.useRadialDistance = playerFog.useRadialDistance;
-			newFog.heightFog = playerFog.heightFog;
-			newFog.heightDensity = playerFog.heightDensity;
-			newFog.startDistance = playerFog.startDistance;
-			newFog.fogShader = playerFog.fogShader;
-			newFog.enabled = playerFog.enabled;
 			// Initialize Fog
 			ColorfulFog playerFog2 = playerCamera.GetComponent<ColorfulFog>();
 			ColorfulFog newFog2 = newPortalCameraObj.AddComponent<ColorfulFog>();
-			newFog2.useCustomDepthTexture = playerFog2.useCustomDepthTexture;
-			newFog2.fogDensity = playerFog2.fogDensity;
-			newFog2.distanceFog = playerFog2.distanceFog;
-			newFog2.useRadialDistance = playerFog2.useRadialDistance;
-			newFog2.heightFog = playerFog2.heightFog;
-			newFog2.enabled = playerFog2.enabled;
-			newFog2.height = playerFog2.height;
-			newFog2.heightDensity = playerFog2.heightDensity;
-			newFog2.startDistance = playerFog2.startDistance;
-			newFog2.fogMode = playerFog2.fogMode;
-			newFog2.fogStart = playerFog2.fogStart;
-			newFog2.coloringMode = playerFog2.coloringMode;
-			newFog2.fogCube = playerFog2.fogCube;
-			newFog2.solidColor = playerFog2.solidColor;
-			newFog2.skyColor = playerFog2.skyColor;
-			newFog2.equatorColor = playerFog2.equatorColor;
-			newFog2.groundColor = playerFog2.groundColor;
-			newFog2.gradient = playerFog2.gradient;
-			newFog2.gradientResolution = playerFog2.gradientResolution;
-			newFog2.gradientTexture = playerFog2.gradientTexture;
-			newFog2.fogShader = playerFog2.fogShader;
-			newFog2.customDepthShader = playerFog2.customDepthShader;
+			CopyFogComponent(playerFog2, ref newFog2);
 			// Initialize Portal Camera Texture component
 			portalCameraTextures[i] = newPortalCameraObj.AddComponent<PortalCameraTexture>();
 			portalCameraTextures[i].portal = this;
@@ -265,5 +233,30 @@ public class Portal : MonoBehaviour {
 		if (portalTeleportEnterB != null && portalTeleportEnterB.trigger != null) {
 			portalTeleportEnterB.trigger.OnMagicTriggerStayOneTime -= SwapEdgeDetectionColorsB;
 		}
+	}
+
+	private void CopyFogComponent(ColorfulFog source, ref ColorfulFog dest) {
+		dest.useCustomDepthTexture = source.useCustomDepthTexture;
+		dest.fogDensity = source.fogDensity;
+		dest.distanceFog = source.distanceFog;
+		dest.useRadialDistance = source.useRadialDistance;
+		dest.heightFog = source.heightFog;
+		dest.enabled = source.enabled;
+		dest.height = source.height;
+		dest.heightDensity = source.heightDensity;
+		dest.startDistance = source.startDistance;
+		dest.fogMode = source.fogMode;
+		dest.fogStart = source.fogStart;
+		dest.coloringMode = source.coloringMode;
+		dest.fogCube = source.fogCube;
+		dest.solidColor = source.solidColor;
+		dest.skyColor = source.skyColor;
+		dest.equatorColor = source.equatorColor;
+		dest.groundColor = source.groundColor;
+		dest.gradient = source.gradient;
+		dest.gradientResolution = source.gradientResolution;
+		dest.gradientTexture = source.gradientTexture;
+		dest.fogShader = source.fogShader;
+		dest.customDepthShader = source.customDepthShader;
 	}
 }
