@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 #endif
 
+// When adding a new Level to this enum, make sure you also add it under level names region,
+// PopulateSceneNames function, PopulateWorldGraph function, and add the scene to Build Settings as well
 [Serializable]
 public enum Level {
 	managerScene,
@@ -15,6 +17,7 @@ public enum Level {
 	library,
 	level3,
 	level4,
+	axis,
 	tutorialHallway,
 	transition2_3,
 	transition3_4
@@ -39,6 +42,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string library = "_Library";
 	private const string level3 = "_Level3";
 	private const string level4 = "_Level4";
+	private const string axis = "_Axis";
 
 	private const string tutorialHallway = "_TutorialHallway";
 	private const string transition2_3 = "_Transition2_3";
@@ -123,6 +127,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.library, library);
 		enumToSceneName.Add(Level.level3, level3);
 		enumToSceneName.Add(Level.level4, level4);
+		enumToSceneName.Add(Level.axis, axis);
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
 		enumToSceneName.Add(Level.transition2_3, transition2_3);
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
@@ -141,6 +146,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(library, new List<string>() { hexPillarRoom, tutorialHallway });
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
+		worldGraph.Add(axis, new List<string>());
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });

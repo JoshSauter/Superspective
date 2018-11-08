@@ -151,7 +151,7 @@
 
 			fixed4 FinalColor(fixed4 original, half isEdge, half similarDepth, half similarNormals) {
 				// Return values for normal render mode and debug mode
-				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * _EdgeColor);
+				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, _EdgeColor, _EdgeColor.a));
 				fixed4 debugColors = (1-similarDepth) * fixed4(1,0,0,1) + (1-similarNormals) * fixed4(0,1,0,1);
 
 				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;

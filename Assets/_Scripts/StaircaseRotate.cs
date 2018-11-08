@@ -44,7 +44,7 @@ public class StaircaseRotate : MonoBehaviour {
 			// Adjust the player's look direction up or down to further the effect
 			PlayerLook playerLook = other.transform.GetComponentInChildren<PlayerLook>();
 			PlayerMovement playerMovement = other.transform.GetComponent<PlayerMovement>();
-			int lookDirection = (axisOfRotation == RotationAxes.forward || axisOfRotation == RotationAxes.right) ? 1 : -1;
+			int lookDirection = (axisOfRotation == RotationAxes.right) ? 1 : -1;
 			float lookMultiplier = Vector2.Dot(new Vector2(other.transform.forward.x, other.transform.forward.z).normalized, playerMovement.HorizontalVelocity().normalized);
 			playerLook.rotationY += lookDirection * lookMultiplier * Mathf.Abs(currentRotation - desiredRotation);
 

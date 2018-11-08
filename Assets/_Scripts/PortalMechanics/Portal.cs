@@ -7,6 +7,7 @@ using UnityStandardAssets.ImageEffects;
 public class Portal : MonoBehaviour {
 	// Only things set in Inspector, everything else should be automatic
 	public Transform otherPortal;
+	public bool useCameraEdgeDetectionColor = true;
 	public Color portalEdgeDetectionColor = Color.black;
 	public bool teleportOnEnter = true;
 	public float portalOffset = 0;
@@ -109,6 +110,10 @@ public class Portal : MonoBehaviour {
 		}
 
 		playerCamera = EpitaphScreen.instance.playerCamera;
+		if (useCameraEdgeDetectionColor) {
+			Color playerCamEdgeDetectColor = playerCamera.GetComponent<BladeEdgeDetection>().edgeColor;
+			portalEdgeDetectionColor = playerCamEdgeDetectColor;
+		}
 
 		InitializePortalCameras();
 		InitializePortalTeleporters();
