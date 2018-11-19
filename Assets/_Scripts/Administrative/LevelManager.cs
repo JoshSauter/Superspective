@@ -17,10 +17,10 @@ public enum Level {
 	library,
 	level3,
 	level4,
-	axis,
 	tutorialHallway,
 	transition2_3,
-	transition3_4
+	transition3_4,
+	axis
 }
 
 public class LevelManager : Singleton<LevelManager> {

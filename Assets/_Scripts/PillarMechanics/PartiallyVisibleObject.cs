@@ -39,6 +39,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	public bool setMaterialColorOnStart = true;
 	public Color materialColor = Color.black;
 	public VisibilityState startingVisibilityState;
+	public bool swapRevealDirection = false;
 	VisibilityState oppositeStartingVisibilityState;
 	bool negativeRenderer;
 	int initialLayer;
@@ -76,7 +77,10 @@ public class PartiallyVisibleObject : MonoBehaviour {
 
 	void OnEnable() {
 		initialLayer = gameObject.layer;
-		renderer = gameObject.AddComponent<EpitaphRenderer>();
+		renderer = gameObject.GetComponent<EpitaphRenderer>();
+		if (renderer == null) {
+			renderer = gameObject.AddComponent<EpitaphRenderer>();
+		}
 		initialMaterial = renderer.GetMaterial();
 		negativeRenderer = initialMaterial.name.Contains("Neg");
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState.visible ? VisibilityState.invisible : VisibilityState.visible;
@@ -221,7 +225,6 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		}
 		onAngle.Reverse();
 		offAngle.Reverse();
-		//print(onAngle + "\n" + offAngle);
 	}
 
 	/// <summary>
@@ -230,6 +233,9 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	/// <param name="direction">Direction the sweeping collider is moving</param>
 	/// <returns>true if VisibilityState changes, false otherwise</returns>
 	public bool HitBySweepingCollider(MovementDirection direction) {
+		if (swapRevealDirection) {
+			direction = OppositeMovementDirection(direction);
+		}
 		switch (direction) {
 			case MovementDirection.clockwise:
 				if (visibilityState == startingVisibilityState) {
@@ -255,6 +261,9 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	/// <param name="direction">Direction the sweeping collider is moving</param>
 	/// <returns>true if VisibilityState changes, false otherwise</returns>
 	public bool SweepingColliderExit(MovementDirection direction) {
+		if (swapRevealDirection) {
+			direction = OppositeMovementDirection(direction);
+		}
 		if (visibilityState == VisibilityState.partiallyVisible) {
 			switch (direction) {
 				case MovementDirection.clockwise:
@@ -268,6 +277,11 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			}
 		}
 		return false;
+	}
+
+	private MovementDirection OppositeMovementDirection(MovementDirection m) {
+		if (m == MovementDirection.clockwise) return MovementDirection.counterclockwise;
+		else return MovementDirection.clockwise;
 	}
 
 	private void ResetVisibilityStateIfPartiallyVisible(ObscurePillar unused) {
@@ -391,7 +405,13 @@ public class PartiallyVisibleObjectEditor : Editor {
 			}
 		}
 		if (script.setMaterialColorOnStart) {
+			EditorGUI.BeginChangeCheck();
 			script.materialColor = EditorGUILayout.ColorField("Material color: ", script.materialColor);
+			if (EditorGUI.EndChangeCheck()) {
+				foreach (Object obj in targets) {
+					((PartiallyVisibleObject)obj).materialColor = script.materialColor;
+				}
+			}
 		}
 
 		EditorGUILayout.Space();
@@ -409,6 +429,16 @@ public class PartiallyVisibleObjectEditor : Editor {
 		EditorGUILayout.Space();
 
 		EditorGUI.BeginChangeCheck();
+		script.swapRevealDirection = EditorGUILayout.Toggle("Reverse reveal direction? ", script.swapRevealDirection);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).swapRevealDirection = script.swapRevealDirection;
+			}
+		}
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
 		script.overrideOnOffAngles = EditorGUILayout.Toggle("Override On/Off Angles?", script.overrideOnOffAngles);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
@@ -417,8 +447,16 @@ public class PartiallyVisibleObjectEditor : Editor {
 		}
 
 		if (script.overrideOnOffAngles) {
+
+			EditorGUI.BeginChangeCheck();
 			script.onAngle = Angle.Degrees(EditorGUILayout.FloatField("On Angle Degrees: ", script.onAngle.degrees));
 			script.offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
+			if (EditorGUI.EndChangeCheck()) {
+				foreach (Object obj in targets) {
+					((PartiallyVisibleObject)obj).onAngle = Angle.Degrees(EditorGUILayout.FloatField("On Angle Degrees: ", script.onAngle.degrees));
+					((PartiallyVisibleObject)obj).offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
+				}
+			}
 		}
 		else {
 			EditorGUILayout.LabelField("On Angle: ", script.onAngle.ToString());

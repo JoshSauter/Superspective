@@ -11,6 +11,7 @@ public enum MovementDirection {
 public class ObscurePillar : MonoBehaviour {
 	public bool DEBUG = false;
 
+	[Tooltip("Setting this in inspector will NOT trigger events based off of active pillar changing")]
 	public bool isActivePillar = false;
 	// Can be null if there is no active pillar
 	private static ObscurePillar _activePillar;
@@ -24,6 +25,8 @@ public class ObscurePillar : MonoBehaviour {
 			}
 		}
 	}
+
+	public float radsOffsetForVisibilityMask = 0.125f;
 
 	public delegate void ActivePillarChangedEvent(ObscurePillar previousActivePillar);
 	public static event ActivePillarChangedEvent OnActivePillarChanged;
@@ -135,10 +138,10 @@ public class ObscurePillar : MonoBehaviour {
 	}
 
 	private void UpdateVisibleMaskWall() {
-		UpdateWallPosition(visibleMaskWall.transform, -0.125f * Mathf.PI);
+		UpdateWallPosition(visibleMaskWall.transform, -radsOffsetForVisibilityMask * Mathf.PI);
 		UpdateWallRotation(visibleMaskWall.transform);
 		UpdateWallSize(visibleMaskWall.transform);
-		UpdateWallPosition(visibleMaskWall.transform, -0.125f * Mathf.PI);
+		UpdateWallPosition(visibleMaskWall.transform, -radsOffsetForVisibilityMask * Mathf.PI);
 	}
 
 	private PolarCoordinate CameraToPillar() {

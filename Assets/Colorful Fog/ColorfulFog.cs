@@ -10,6 +10,7 @@ public class ColorfulFog : MonoBehaviour
     public bool distanceFog = true;
     public bool useRadialDistance = false;
     public bool heightFog = false;
+	public bool skyboxFog = false;
 
     public float height = 0.0f;
     [Range(0.001f, 10.0f)]
@@ -264,6 +265,7 @@ public class ColorfulFog : MonoBehaviour
             }
             fogMaterial.SetTexture("_Gradient", tmpGradientTexture);
         }
+		fogMaterial.SetInt("_SkyboxFog", skyboxFog ? 1 : 0);
         CustomGraphicsBlit(source, destination, fogMaterial, pass);
     }
 

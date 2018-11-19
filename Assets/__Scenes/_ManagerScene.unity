@@ -395,7 +395,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4, y: 5.1, z: 114}
+  m_LocalPosition: {x: 0, y: 5.1, z: 54}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -972,7 +972,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1535199393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1098,7 +1098,6 @@ GameObject:
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741060}
   - component: {fileID: 1809741073}
-  - component: {fileID: 1809741070}
   - component: {fileID: 1809741075}
   - component: {fileID: 1809741074}
   m_Layer: 14
@@ -1348,26 +1347,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenShifts: 0.15
   intensity: 0.3
---- !u!114 &1809741070
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1809741056}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76b5ec6153a1d55438228df10fe66844, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fogColor: {r: 0.3820755, g: 1, b: 0.96136206, a: 1}
-  distanceFog: 1
-  excludeFarPixels: 1
-  useRadialDistance: 1
-  heightFog: 0
-  height: 1
-  heightDensity: 2
-  startDistance: 150
-  fogShader: {fileID: 4800000, guid: 70d8568987ac0499f952b54c7c13e265, type: 3}
 --- !u!114 &1809741071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1448,6 +1427,7 @@ MonoBehaviour:
   distanceFog: 1
   useRadialDistance: 1
   heightFog: 0
+  skyboxFog: 1
   height: 0
   heightDensity: 2
   startDistance: 200

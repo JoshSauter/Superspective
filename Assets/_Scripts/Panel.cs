@@ -22,12 +22,15 @@ public class Panel : MonoBehaviour {
 	// Use this for initialization
 	virtual protected void Start () {
 		// Set up references
-		thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
+		thisRenderer = gameObject.GetComponent<EpitaphRenderer>();
+		if (thisRenderer == null) {
+			thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
+		}
 
 		gemButton = GetComponentInChildren<Button>();
 		gemButton.deadTimeAfterButtonPress = colorLerpTime;
 		gemButton.deadTimeAfterButtonDepress = 0.25f;
-		gemColor = gemButton.GetComponent<MeshRenderer>().material.color;
+		gemColor = gemButton.GetComponent<EpitaphRenderer>().GetMainColor();
 		gemButton.OnButtonPressFinish += PanelActivate;
 		gemButton.OnButtonDepressBegin += PanelDeactivate;
 	}

@@ -14,7 +14,9 @@ Shader "Hidden/JG/ColorfulFog"
 	uniform sampler2D _MainTex;
 	uniform int _UseCustomDepth;
 	uniform sampler2D_float _CameraDepthTexture;
+	uniform sampler2D _CameraDepthNormalsTexture;
 	uniform sampler2D_float _CustomDepthTexture;
+	int _SkyboxFog;
 	samplerCUBE _Cube;
 	sampler2D _Gradient;
 	half4x4 _Colors;
@@ -167,8 +169,12 @@ Shader "Hidden/JG/ColorfulFog"
 		}
 		else //depth provided by unity.
 		{
-			rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,i.uv_depth);
-			dpth = Linear01Depth(rawDepth);
+			// Uncomment to use _CameraDepthNormalsTexture
+			rawDepth = DecodeFloatRG(tex2D(_CameraDepthNormalsTexture, i.uv_depth).zw);
+			dpth = rawDepth;
+			// Uncomment to use _CameraDepthTexture
+			//rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,i.uv_depth);
+			//dpth = Linear01Depth(rawDepth);
 		}
 		//return dpth;
 		float4 wsDir = dpth * i.interpolatedRay;
@@ -185,7 +191,7 @@ Shader "Hidden/JG/ColorfulFog"
 		half fogFac = ComputeFogFactor(max(0.0,g));
 
 		// Do not fog skybox
-		if (rawDepth >= 0.999999)
+		if ((1-_SkyboxFog) * rawDepth >= 0.999999)
 			fogFac = 1.0;
 
 		// Compute fog color

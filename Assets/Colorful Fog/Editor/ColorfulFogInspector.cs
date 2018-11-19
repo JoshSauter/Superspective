@@ -19,6 +19,7 @@ public class ColorfulFogInspector : Editor
     SerializedProperty useRadialDistance;
 
     SerializedProperty useCustomDepthTexture;
+	SerializedProperty skyboxFog;
 
     SerializedProperty coloringMode;
     SerializedProperty fogCube;
@@ -42,6 +43,7 @@ public class ColorfulFogInspector : Editor
         useRadialDistance = serializedObject.FindProperty("useRadialDistance");
 
         useCustomDepthTexture = serializedObject.FindProperty("useCustomDepthTexture");
+		skyboxFog = serializedObject.FindProperty("skyboxFog");
 
         coloringMode = serializedObject.FindProperty("coloringMode");
         fogCube = serializedObject.FindProperty("fogCube");
@@ -60,7 +62,10 @@ public class ColorfulFogInspector : Editor
         useCustomDepthTexture.boolValue = EditorGUILayout.Toggle(new GUIContent("Generate Depth Texture?",
             "Should be checked on platforms that doesn't supply a depth texture by default. For example Android & IOS"),
             useCustomDepthTexture.boolValue);
-        if (!useCustomDepthTexture.boolValue)
+
+		skyboxFog.boolValue = EditorGUILayout.Toggle("Apply fog to skybox?", skyboxFog.boolValue);
+
+		if (!useCustomDepthTexture.boolValue)
         {
             BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
             if (buildTarget == BuildTarget.Android ||

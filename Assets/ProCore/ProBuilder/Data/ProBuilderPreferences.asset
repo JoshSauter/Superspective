@@ -24,6 +24,8 @@ MonoBehaviour:
   - pb_UVTemplate_transparentBackground
   - pb_UVTemplate_hideGrid
   - pbDetachToNewObject
+  - pbGrowSelectionUsingAngle
+  - pbGrowSelectionAngleIterative
   m_Int_keys:
   - pbDefaultEditLevel
   - pbDefaultSelectionMode
@@ -34,11 +36,13 @@ MonoBehaviour:
   - pbShadowCastingMode
   - pb_UVTemplate_imageSize
   - pbExtrudeMethod
+  - pbMirrorObjectScale
   m_Float_keys:
   - pbEditorScroll.x
   - pbEditorScroll.y
   - pbBevelAmount
   - pbExtrudeDistance
+  - pbGrowSelectionAngle
   m_String_keys:
   - pbCurrentMaterialPalette
   - pb_UVTemplate_lineColor
@@ -46,13 +50,14 @@ MonoBehaviour:
   m_Color_keys: []
   m_Material_keys:
   - pbDefaultMaterial
-  m_Bool_values: 000100010101000000010101
-  m_Int_values: 000000000100000001000000000000000400000002000000020000000004000001000000
+  m_Bool_values: 0001000101010000000101010100
+  m_Int_values: 0000000002000000010000000100000004000000020000000200000000040000010000000c000000
   m_Float_values:
   - 0
-  - 20.19983
+  - 0
   - 0.075
   - 0
+  - 42
   m_String_values:
   - Assets/ProCore/ProBuilder/Data/Default Material Palette.asset
   - RGBA(0.000, 1.000, 0.000, 1.000)

@@ -12,6 +12,7 @@ public class EpitaphRenderer : MonoBehaviour {
 	void Awake () {
 		r = GetComponent<Renderer>();
 		propBlock = new MaterialPropertyBlock();
+		SetMainColor(r.material.color);
 	}
 
 	public Color GetColor(string colorName) {
