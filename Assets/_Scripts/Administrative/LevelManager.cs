@@ -148,7 +148,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>());
 
-		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom });
+		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });
 		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
 	}

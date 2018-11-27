@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Renderer))]
 public class EpitaphRenderer : MonoBehaviour {
-	private const string mainColor = "_Color";
+	public const string mainColor = "_Color";
 	MaterialPropertyBlock propBlock;
 	public Renderer r;
 

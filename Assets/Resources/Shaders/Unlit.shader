@@ -3,6 +3,8 @@
 	Properties
 	{
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
+		[HDR]
+		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 	}
 	SubShader
 	{
@@ -32,6 +34,7 @@
 			};
 
 			float4 _Color;
+			float4 _EmissionColor;
 			
 			v2f vert (appdata v)
 			{
@@ -46,6 +49,7 @@
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog
+				col += _EmissionColor;
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

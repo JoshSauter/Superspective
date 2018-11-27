@@ -32,31 +32,33 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	public float pillarSearchRadius = 40;
 	public Vector3 pillarSearchBoxSize = Vector3.one * 80;
 
-	///////////////////////////////////
-	// Initial values and references //
-	///////////////////////////////////
-	public bool setLayerRecursively = true;
-	public bool setMaterialColorOnStart = true;
-	public Color materialColor = Color.black;
-	public VisibilityState startingVisibilityState;
-	public bool swapRevealDirection = false;
-	VisibilityState oppositeStartingVisibilityState;
-	bool negativeRenderer;
-	int initialLayer;
-	int invisibleLayer;
-	Material visibleMaterial;
-	Material initialMaterial;
-	EpitaphRenderer renderer;
+    /////////////////////
+    // Toggle Settings //
+    /////////////////////
+    public bool setLayerRecursively = true;
+    public bool setMaterialColorOnStart = true;
+    public bool swapRevealDirection = false;
+
+    ///////////////////////////////////
+    // Initial values and references //
+    ///////////////////////////////////
+    public VisibilityState startingVisibilityState;     // invisible, partiallyVisible, or visible
+    VisibilityState oppositeStartingVisibilityState;
+    public Color materialColor = Color.black;           // Only used if setMaterialColorOnStart is true
+    [ColorUsageAttribute(true, true)]
+    public Color emissiveColor = Color.black;            // Only used if setMaterialColorOnStart is true, emissive color
+    const string emissiveColorKey = "_EmissionColor";
+    int initialLayer;                                   // Set automatically from the gameObject's layer
+	int invisibleLayer;                                 // Set automatically from LayerMask.NameToLayer("Invisible")
+	public Material visibleMaterial;                    // Defaults to Materials/Unlit/Unlit, can be set in inspector
+    public Material partiallyVisibleMaterial;           // Needs to be set in inspector
+	// Material initialMaterial;
+	EpitaphRenderer renderer;                           // EpitaphRenderer used to easily swap materials and colors
 
 	//////////////////////
 	// Visibility state //
 	//////////////////////
-	private VisibilityState _visibilityState;
-	public VisibilityState visibilityState {
-		get {
-			return _visibilityState;
-		}
-	}
+	public VisibilityState visibilityState { get; private set; }
 
 	///////////////////
 	// On/Off Angles //
@@ -72,7 +74,14 @@ public class PartiallyVisibleObject : MonoBehaviour {
 
 	private void Awake() {
 		invisibleLayer = LayerMask.NameToLayer("Invisible");
-		visibleMaterial = Resources.Load<Material>("Materials/Unlit/Unlit");
+
+        if (partiallyVisibleMaterial == null) {
+            Debug.LogError("PartiallyVisibleMaterial for object: " + gameObject.name + " is not set.");
+            enabled = false;
+        }
+        if (visibleMaterial == null) {
+            visibleMaterial = Resources.Load<Material>("Materials/Unlit/Unlit");
+        }
 	}
 
 	void OnEnable() {
@@ -81,9 +90,13 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		if (renderer == null) {
 			renderer = gameObject.AddComponent<EpitaphRenderer>();
 		}
-		initialMaterial = renderer.GetMaterial();
-		negativeRenderer = initialMaterial.name.Contains("Neg");
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState.visible ? VisibilityState.invisible : VisibilityState.visible;
+
+        if (!setMaterialColorOnStart) {
+            Material startingMaterial = renderer.GetMaterial();
+            materialColor = startingMaterial.GetColor(EpitaphRenderer.mainColor);
+            emissiveColor = startingMaterial.GetColor(emissiveColorKey);
+        }
 
 		ObscurePillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
 		ObscurePillar.OnActivePillarChanged += HandlePillarChanged;
@@ -99,7 +112,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	private void Start() {
 		SetVisibilityState(startingVisibilityState);
 		if (setMaterialColorOnStart) {
-			renderer.SetMainColor(materialColor);
+            SetColors(materialColor, emissiveColor);
 		}
 		HandlePillarChanged();
 	}
@@ -295,7 +308,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
 	public void SetVisibilityState(VisibilityState newState) {
-		_visibilityState = newState;
+		visibilityState = newState;
 		UpdateVisibilitySettings();
 
 		if (OnVisibilityStateChange != null) {
@@ -310,14 +323,21 @@ public class PartiallyVisibleObject : MonoBehaviour {
 				break;
 			case VisibilityState.partiallyVisible:
 				SetLayer(initialLayer);
-				renderer.SetMaterial(initialMaterial);
+				renderer.SetMaterial(partiallyVisibleMaterial);
+                SetColors(materialColor, emissiveColor);
 				break;
 			case VisibilityState.visible:
 				SetLayer(initialLayer);
 				renderer.SetMaterial(visibleMaterial);
-				break;
+                SetColors(materialColor, emissiveColor);
+                break;
 		}
 	}
+
+    private void SetColors(Color mainColor, Color emissiveColor) {
+        renderer.SetMainColor(materialColor);
+        renderer.SetColor(emissiveColorKey, emissiveColor);
+    }
 
 	private void SetLayer(int layer) {
 		if (setLayerRecursively) {
@@ -412,7 +432,14 @@ public class PartiallyVisibleObjectEditor : Editor {
 					((PartiallyVisibleObject)obj).materialColor = script.materialColor;
 				}
 			}
-		}
+            EditorGUI.BeginChangeCheck();
+            script.emissiveColor = EditorGUILayout.ColorField("Material emission color: ", script.emissiveColor);
+            if (EditorGUI.EndChangeCheck()) {
+                foreach (Object obj in targets) {
+                    ((PartiallyVisibleObject)obj).emissiveColor = script.emissiveColor;
+                }
+            }
+        }
 
 		EditorGUILayout.Space();
 
@@ -428,7 +455,28 @@ public class PartiallyVisibleObjectEditor : Editor {
 
 		EditorGUILayout.Space();
 
-		EditorGUI.BeginChangeCheck();
+        ///////////////
+        // Materials //
+        ///////////////
+        EditorGUI.BeginChangeCheck();
+        bool allowSceneObjects = !EditorUtility.IsPersistent(target);
+        script.visibleMaterial = (Material)EditorGUILayout.ObjectField("Fully Visible Material: ", script.visibleMaterial, typeof(Material), allowSceneObjects);
+        if (EditorGUI.EndChangeCheck()) {
+            foreach (Object obj in targets) {
+                ((PartiallyVisibleObject)obj).visibleMaterial = script.visibleMaterial;
+            }
+        }
+        EditorGUI.BeginChangeCheck();
+        script.partiallyVisibleMaterial = (Material)EditorGUILayout.ObjectField("Partially Visible Material: ", script.partiallyVisibleMaterial, typeof(Material), allowSceneObjects);
+        if (EditorGUI.EndChangeCheck()) {
+            foreach (Object obj in targets) {
+                ((PartiallyVisibleObject)obj).partiallyVisibleMaterial = script.partiallyVisibleMaterial;
+            }
+        }
+
+        EditorGUILayout.Space();
+
+        EditorGUI.BeginChangeCheck();
 		script.swapRevealDirection = EditorGUILayout.Toggle("Reverse reveal direction? ", script.swapRevealDirection);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {

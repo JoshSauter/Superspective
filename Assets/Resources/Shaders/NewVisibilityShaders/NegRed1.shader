@@ -4,6 +4,8 @@
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
+		[HDR]
+		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 	}
 	SubShader
 	{
@@ -37,6 +39,7 @@
 			sampler2D _MainTex;
 			sampler2D _DiscardTex1;
 			float4 _Color;
+			float4 _EmissionColor;
 			float4 _MainTex_ST;
 
 			float _ResolutionX;
@@ -59,6 +62,7 @@
 				float4 samplePixel = tex2D(_DiscardTex1, viewportVertex);
 				clip(0.5-samplePixel.r);
 				// apply fog
+				col += _EmissionColor;
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

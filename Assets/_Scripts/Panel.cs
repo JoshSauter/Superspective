@@ -30,7 +30,11 @@ public class Panel : MonoBehaviour {
 		gemButton = GetComponentInChildren<Button>();
 		gemButton.deadTimeAfterButtonPress = colorLerpTime;
 		gemButton.deadTimeAfterButtonDepress = 0.25f;
-		gemColor = gemButton.GetComponent<EpitaphRenderer>().GetMainColor();
+        EpitaphRenderer gemButtonRenderer = gemButton.GetComponent<EpitaphRenderer>();
+        if (gemButtonRenderer == null) {
+            gemButtonRenderer = gemButton.gameObject.AddComponent<EpitaphRenderer>();
+        }
+		gemColor = gemButtonRenderer.GetMainColor();
 		gemButton.OnButtonPressFinish += PanelActivate;
 		gemButton.OnButtonDepressBegin += PanelDeactivate;
 	}

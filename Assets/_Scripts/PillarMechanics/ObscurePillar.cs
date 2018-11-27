@@ -120,7 +120,12 @@ public class ObscurePillar : MonoBehaviour {
 	void Update () {
 		UpdateVisibleMaskWall();
 		UpdateCameraPosition();
-	}
+
+
+        if (DEBUG && Input.GetKeyDown("r")) {
+            ReportPlayerAngle();
+        }
+    }
 
 	private void UpdateCameraPosition() {
 		Angle newCameraAngleRelativeToPillar = CameraToPillar().angle;
@@ -129,9 +134,6 @@ public class ObscurePillar : MonoBehaviour {
 			previousCameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;
 		}
 		else if (OnPlayerMoveAroundPillar != null && activePillar == this) {
-			if (DEBUG) {
-				print(newCameraAngleRelativeToPillar);
-			}
 			OnPlayerMoveAroundPillar(previousCameraAngleRelativeToPillar, newCameraAngleRelativeToPillar);
 		}
 		previousCameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;
@@ -197,4 +199,10 @@ public class ObscurePillar : MonoBehaviour {
 		wallTransform.localScale = new Vector3(visibilityMaskWidth / transform.localScale.x, pillarHeight / transform.localScale.y, 1 / transform.localScale.z);
 		wallTransform.position = new Vector3(0, pillarHeight / 2f + bottomOfPillar.y, 0);
 	}
+
+    // Debug
+    [ContextMenu("Report Player's current angle relative to this Pillar")]
+    private void ReportPlayerAngle() {
+        Debug.Log(CameraToPillar().angle);
+    }
 }
