@@ -21,7 +21,7 @@ public class RisingBridge : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
-		bridgePieces = Utils.GetComponentsInChildrenOnly<Transform>(transform);
+		bridgePieces = transform.GetComponentsInChildrenOnly<Transform>();
 		if (DEBUG) {
 			originalPositions = new Vector3[bridgePieces.Length];
 			for (int i = 0; i < bridgePieces.Length; i++) {

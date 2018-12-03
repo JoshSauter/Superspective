@@ -124,6 +124,16 @@
 				return ab * ac * ad * bc * bd * cd;
 			}
 
+			// Returns 1 if no discontinuities in normals are detected, 0 otherwise
+			half AllGradientsAreSimilar(half2 original, half2 topLeft, half2 topCenter, half2 topRight, half2 midLeft, half2 midRight, half2 botLeft, half2 botCenter, half2 botRight) {
+				half backslash = NormalsAreSimilar(topLeft - original, original - botRight);
+				half pipe = NormalsAreSimilar(topCenter - original, original - botCenter);
+				half slash = NormalsAreSimilar(topRight - original, original - botLeft);
+				half dash = NormalsAreSimilar(midLeft - original, original - midRight);
+
+				return backslash * pipe * slash * dash;
+			}
+
 			UVPositions Vert (appdata_img v) {
 				// Constant offsets:
 				const half2 uvDisplacements[NUM_SAMPLES] = {
@@ -258,13 +268,30 @@
 					-------------------------------
 					| (1,0,0) | (0,1,0) | (0,1,0) |  More likely an edge than an artifact from close faces/Z-fighting
 					-------------------------------
-
 				*/
 				if (similarNormals < 1) {
 					half crossIsSimilar = FourNormalArtifactCheck(normalSamples[2], normalSamples[4], normalSamples[5], normalSamples[7]);
 					half xCrossIsSimilar = FourNormalArtifactCheck(normalSamples[1], normalSamples[3], normalSamples[6], normalSamples[8]);
+					/*  Additionally, if there is a smooth and continuous difference in normals across the samples,
+						it is more likely that this is a smoothly curved object rather than a true edge
 
-					similarNormals = max(crossIsSimilar, xCrossIsSimilar);
+						---------------------------------
+						| (1,0,-1) | (0,0,0) | (-1,0,1) |  Not an edge, more likely to be a smoothly curving surface
+						---------------------------------
+					*/
+					half gradientIsSimilar = AllGradientsAreSimilar(
+						normalSamples[0],
+						normalSamples[1],
+						normalSamples[2],
+						normalSamples[3],
+						normalSamples[4],
+						normalSamples[5],
+						normalSamples[6],
+						normalSamples[7],
+						normalSamples[8]
+					);
+
+					similarNormals = max(gradientIsSimilar, max(crossIsSimilar, xCrossIsSimilar));
 				}
 
 

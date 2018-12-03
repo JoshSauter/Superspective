@@ -24,6 +24,14 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		}
 	}
 
+	private void OnReloadScripts() {
+		// Re-enabling the script prevents the Scene view window bug
+		instance.enabled = false;
+		if (Application.isPlaying) {
+			instance.enabled = true;
+		}
+	}
+
 	private void OnEnable() {
 		if (instance != null && instance != this) {
 			Debug.LogError("Cannot add SceneViewFX. Already one active in this scene");
@@ -34,6 +42,8 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		if (!Application.isPlaying) {
 			UpdateComponents();
 		}
+
+		AssemblyReloadEvents.beforeAssemblyReload += OnReloadScripts;
 	}
 
 	private void OnDisable() {
@@ -89,6 +99,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	public void ClearCurrentEffects() {
 		// clear sceneview camera of any previous components / fx.
 		if (sceneViewCamera == null) sceneViewCamera = GetCamera();
+		if (sceneViewCamera == null) return;
 		Component[] compsOnCam = sceneViewCamera.GetComponents<Component>();
 		for (int i = compsOnCam.Length - 1; i >= 0; i--) {
 			// these components are default on the SceneView camera...

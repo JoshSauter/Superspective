@@ -30,7 +30,7 @@ public class DoorOpenClose : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
-		doorPieces = Utils.GetComponentsInChildrenOnly<Transform>(transform);
+		doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
 		originalScales = new Vector3[doorPieces.Length];
 		for (int i = 0; i < doorPieces.Length; i++) {
 			originalScales[i] = doorPieces[i].localScale;

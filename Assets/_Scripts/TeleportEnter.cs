@@ -64,14 +64,14 @@ public class TeleportEnter : MonoBehaviour {
 			// Note: This only works for Y-axis rotations
 			other.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
 
-			other.transform.position -= teleportDisplacement;
+			other.transform.position += teleportDisplacement;
 			other.transform.position -= teleportExit.transform.TransformDirection(teleportEnter.transform.InverseTransformDirection(displacementToCenter));
 		}
 
 		foreach (Transform otherObject in otherObjectsToTeleport) {
 			otherObject.transform.position += displacementToCenter;
 			otherObject.transform.Rotate(new Vector3(0, rotationBetweenEnterExit, 0));
-			otherObject.transform.position -= teleportDisplacement;
+			otherObject.transform.position += teleportDisplacement;
 			otherObject.transform.position -= teleportExit.transform.TransformVector(teleportEnter.transform.TransformVector(displacementToCenter));
 		}
 
@@ -87,7 +87,7 @@ public class TeleportEnter : MonoBehaviour {
 	}
 
 	Vector3 TeleporterDisplacement() {
-		return teleportEnter.transform.position - teleportExit.transform.position;
+		return teleportExit.transform.position - teleportEnter.transform.position;
 	}
 
 	void TriggerEvents(Collider player) {

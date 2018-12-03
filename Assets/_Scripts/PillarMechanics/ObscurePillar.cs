@@ -11,6 +11,9 @@ public enum MovementDirection {
 public class ObscurePillar : MonoBehaviour {
 	public bool DEBUG = false;
 
+	public static Dictionary<string, ObscurePillar> pillars = new Dictionary<string, ObscurePillar>();
+	public string pillarKey;
+
 	[Tooltip("Setting this in inspector will NOT trigger events based off of active pillar changing")]
 	public bool isActivePillar = false;
 	// Can be null if there is no active pillar
@@ -51,6 +54,15 @@ public class ObscurePillar : MonoBehaviour {
 	Vector3 bottomOfPillar;
 	Vector3 topOfPillar;
 
+	void InitializeDictEntry() {
+		if (pillarKey == "") {
+			pillarKey = gameObject.scene.name + " " + gameObject.name;
+		}
+		if (!pillars.ContainsKey(pillarKey)) {
+			pillars[pillarKey] = this;
+		}
+	}
+
 	// Use this for initialization
 	void Start () {
 		mainCamera = Camera.main;
@@ -87,6 +99,8 @@ public class ObscurePillar : MonoBehaviour {
 	}
 
 	private void OnEnable() {
+		InitializeDictEntry();
+
 		OnActivePillarChanged += HandleActivePillarChanged;
 
 		thisPartiallyVisibleObject = GetComponent<PartiallyVisibleObject>();

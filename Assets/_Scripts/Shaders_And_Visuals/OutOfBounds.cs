@@ -24,7 +24,7 @@ public class OutOfBounds : MonoBehaviour {
 	void Awake () {
 		timeLeft = initialTimeLeft;
 		countdownText = transform.Find("Countdown").GetComponent<TMP_Text>();
-		returnToPlayzoneText = Utils.GetComponentsInChildrenOnly<TMP_Text>(countdownText.transform)[0];
+		returnToPlayzoneText = countdownText.transform.GetComponentsInChildrenOnly<TMP_Text>()[0];
 		blackForeground = transform.parent.Find("Black").GetComponent<Image>();
 		redBackground = transform.Find("RedBackground").GetComponent<Image>();
 	}

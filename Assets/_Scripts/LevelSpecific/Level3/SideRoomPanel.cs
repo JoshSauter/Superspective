@@ -20,7 +20,7 @@ public class SideRoomPanel : Panel {
 	// Use this for initialization
 	override protected void Start () {
 		base.Start();
-		List<Transform> laserParentsList = new List<Transform>(Utils.GetComponentsInChildrenOnly<Transform>(laser.transform.parent));
+		List<Transform> laserParentsList = new List<Transform>(laser.transform.parent.GetComponentsInChildrenOnly<Transform>());
 		laserParents = laserParentsList.FindAll(x => x != laser.transform).ToArray();
 
 

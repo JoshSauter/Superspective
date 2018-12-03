@@ -5,6 +5,7 @@ using UnityEngine;
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
 public class BladeEdgeDetection : MonoBehaviour {
+	// In debug mode, depth-detected edges are rendered as red, normal-detected edges are rendered as green, and yellow if both checks detected an edge
 	public bool debugMode = false;
 	public float depthSensitivity = 1;
 	public float normalSensitivity = 1;

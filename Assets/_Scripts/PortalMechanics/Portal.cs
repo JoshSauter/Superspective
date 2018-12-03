@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
+using EpitaphUtils;
 
 [RequireComponent(typeof(Collider))]
 public class Portal : MonoBehaviour {
+	public static Dictionary<int, PortalReceiver> receiversByChannel = new Dictionary<int, PortalReceiver>();
+
 	// Only things set in Inspector, everything else should be automatic
 	public Transform otherPortal;
+	public int channel;
 	public bool useCameraEdgeDetectionColor = true;
 	public Color portalEdgeDetectionColor = Color.black;
 	public bool teleportOnEnter = true;
-	public float portalOffset = 0;
+	public float portalFrameDepth = 0;
+	[System.Obsolete("This really shouldn't ever need to be set. Everything should be handled automatically.")]
 	public float colliderOffset = 0;
 	public bool useMeshAsCollider = false;
 
@@ -92,6 +97,13 @@ public class Portal : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		// If portal lives in another scene, grab reference through channel dictionary
+		if (otherPortal == null) {
+			if (receiversByChannel.ContainsKey(channel)) {
+				otherPortal = receiversByChannel[channel].transform;
+			}
+		}
+
 		portalLayer = LayerMask.NameToLayer("HideFromPortal");
 		portalA = transform;
 		portalB = otherPortal;
@@ -131,16 +143,18 @@ public class Portal : MonoBehaviour {
 			portalCameras[i].depth = -100;
 			int portalSpecificHiddenLayer = LayerMask.NameToLayer("HideFromPortal" + ((char)('A' + i)));
 			portalCameras[i].cullingMask &= ~(1 << portalLayer | 1 << portalSpecificHiddenLayer);
+
+			// Order of components here matters; it affects the rendering order of the postprocess effects
+			// Initialize SSAO
+			ScreenSpaceAmbientOcclusion playerSSAO = playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
+			newPortalCameraObj.PasteComponent(playerSSAO);
 			// Initialize Edge Detection
 			BladeEdgeDetection playerEdgeDetection = playerCamera.GetComponent<BladeEdgeDetection>();
-			BladeEdgeDetection edgeDetection = newPortalCameraObj.AddComponent<BladeEdgeDetection>();
+			BladeEdgeDetection edgeDetection = newPortalCameraObj.PasteComponent(playerEdgeDetection);
 			edgeDetection.edgeColor = portalEdgeDetectionColor;
-			edgeDetection.depthSensitivity = playerEdgeDetection.depthSensitivity;
-			edgeDetection.normalSensitivity = playerEdgeDetection.normalSensitivity;
 			// Initialize Fog
 			ColorfulFog playerFog2 = playerCamera.GetComponent<ColorfulFog>();
-			ColorfulFog newFog2 = newPortalCameraObj.AddComponent<ColorfulFog>();
-			CopyFogComponent(playerFog2, ref newFog2);
+			newPortalCameraObj.PasteComponent(playerFog2);
 			// Initialize Portal Camera Texture component
 			portalCameraTextures[i] = newPortalCameraObj.AddComponent<PortalCameraTexture>();
 			portalCameraTextures[i].portal = this;
@@ -207,7 +221,7 @@ public class Portal : MonoBehaviour {
 			}
 			// Set up offsets after other reference intialization is complete
 			for (int i = 0; i < 2; i++) {
-				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2] * portalOffset;
+				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2] * portalFrameDepth;
 				triggerColliders[i].transform.position += portalForwards[0] * colliderOffset;
 			}
 		}
@@ -238,30 +252,5 @@ public class Portal : MonoBehaviour {
 		if (portalTeleportEnterB != null && portalTeleportEnterB.trigger != null) {
 			portalTeleportEnterB.trigger.OnMagicTriggerStayOneTime -= SwapEdgeDetectionColorsB;
 		}
-	}
-
-	private void CopyFogComponent(ColorfulFog source, ref ColorfulFog dest) {
-		dest.useCustomDepthTexture = source.useCustomDepthTexture;
-		dest.fogDensity = source.fogDensity;
-		dest.distanceFog = source.distanceFog;
-		dest.useRadialDistance = source.useRadialDistance;
-		dest.heightFog = source.heightFog;
-		dest.enabled = source.enabled;
-		dest.height = source.height;
-		dest.heightDensity = source.heightDensity;
-		dest.startDistance = source.startDistance;
-		dest.fogMode = source.fogMode;
-		dest.fogStart = source.fogStart;
-		dest.coloringMode = source.coloringMode;
-		dest.fogCube = source.fogCube;
-		dest.solidColor = source.solidColor;
-		dest.skyColor = source.skyColor;
-		dest.equatorColor = source.equatorColor;
-		dest.groundColor = source.groundColor;
-		dest.gradient = source.gradient;
-		dest.gradientResolution = source.gradientResolution;
-		dest.gradientTexture = source.gradientTexture;
-		dest.fogShader = source.fogShader;
-		dest.customDepthShader = source.customDepthShader;
 	}
 }

@@ -17,7 +17,7 @@ public class StaircaseRotate : MonoBehaviour {
 	public Transform[] otherObjectsToRotate;
 	Transform globalDirectionalLight;
 	public RotationAxes axisOfRotation;
-	float currentRotation = 0;
+	public float currentRotation = 0;
 
     Collider stairCollider;
 
@@ -30,7 +30,11 @@ public class StaircaseRotate : MonoBehaviour {
 		globalDirectionalLight = GameObject.Find("Directional Light").transform;
 	}
 
-    private void OnTriggerStay(Collider other) {
+	private void OnTriggerEnter(Collider other) {
+		SetAxisOfRotationBasedOnPlayerPosition(other.transform.position);
+	}
+
+	private void OnTriggerStay(Collider other) {
         if (other.tag == "Player") {
 			float t = GetPlayerLerpPosition(other);
 			float desiredRotation = 90 * t;
@@ -61,6 +65,36 @@ public class StaircaseRotate : MonoBehaviour {
         }
     }
 
+	void SetAxisOfRotationBasedOnPlayerPosition(Vector3 playerPos) {
+		float stairCaseStart = GetStartPosition();
+		float stairCaseEnd = GetEndPosition();
+
+		float distanceFromStart = 0;
+		float distanceFromEnd = 0;
+		switch (axisOfRotation) {
+			case RotationAxes.left:
+			case RotationAxes.right:
+				distanceFromStart = Mathf.Abs(stairCaseStart - playerPos.z);
+				distanceFromEnd = Mathf.Abs(stairCaseEnd - playerPos.z);
+				break;
+			case RotationAxes.up:
+			case RotationAxes.down:
+				Debug.LogError("Up/Down not handled yet");
+				return;
+			case RotationAxes.forward:
+			case RotationAxes.back:
+				distanceFromStart = Mathf.Abs(stairCaseStart - playerPos.x);
+				distanceFromEnd = Mathf.Abs(stairCaseEnd - playerPos.x);
+				break;
+		}
+
+		currentRotation = 0;
+		if (distanceFromStart > distanceFromEnd) {
+			// Swap right/left, up/down, or forward/back
+			axisOfRotation = (RotationAxes)((((int)axisOfRotation % 2) * -2 + 1) + (int)axisOfRotation);
+		}
+	}
+
 	Vector3 RotateAroundPivot(Vector3 point, Vector3 pivot, Quaternion angle) {
 		return angle * (point - pivot) + pivot;
 	}
@@ -89,8 +123,9 @@ public class StaircaseRotate : MonoBehaviour {
 	float GetStartPosition() {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
-			case RotationAxes.left:
 				return stairCollider.bounds.min.z + startEndGap;
+			case RotationAxes.left:
+				return stairCollider.bounds.max.z - startEndGap;
 			case RotationAxes.up:
 			case RotationAxes.down:
 				Debug.LogError("Up/Down not handled yet");
@@ -108,8 +143,9 @@ public class StaircaseRotate : MonoBehaviour {
 	float GetEndPosition() {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
-			case RotationAxes.left:
 				return stairCollider.bounds.max.z - startEndGap;
+			case RotationAxes.left:
+				return stairCollider.bounds.min.z + startEndGap;
 			case RotationAxes.up:
 				Debug.LogError("Up/Down not handled yet");
 				return 0;

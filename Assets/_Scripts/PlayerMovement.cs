@@ -4,6 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
+	public bool DEBUG = false;
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
 	}
@@ -13,6 +14,10 @@ public class PlayerMovement : MonoBehaviour {
 	public float runSpeed = 12f;
 	public float jumpForce = 30;
 	public float windResistanceMultiplier = 0.2f;
+	// Amount of vertical velocity added to a player if they are sliding up a wall while jumping (to combat "friction" of collisions)
+	float wallFrictionJumpHelper = .275f;
+	// Multiplier to jump force added to a player to keep jumps between standing and running same height
+	float runningJumpHelper = 1.331f;
 	bool jumpIsOnCooldown = false;
 	float jumpCooldown = 0.2f;
 	float movespeed;
@@ -167,7 +172,7 @@ public class PlayerMovement : MonoBehaviour {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			Vector2 desiredHorizontalVelocity = new Vector2(moveDirection.x, moveDirection.z);
 			Vector2 newHorizontalVelocity = Vector2.Lerp(horizontalVelocity, desiredHorizontalVelocity, 0.075f);
-			thisRigidbody.velocity = new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y, newHorizontalVelocity.y);
+			thisRigidbody.velocity = new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y + moveDirection.y, newHorizontalVelocity.y);
 		}
 		// Apply wind resistance
 		if (thisRigidbody.velocity.y < 0) {
@@ -190,7 +195,12 @@ public class PlayerMovement : MonoBehaviour {
 			return movementVector;
 		}
 		else {
-			return Vector3.ProjectOnPlane(movementVector, obstacle.normal);
+			Vector3 verticalHelp = Vector3.zero;
+			if (jumpIsOnCooldown && thisRigidbody.velocity.y > 0) {
+				verticalHelp = Vector3.up * wallFrictionJumpHelper;
+			}
+			Vector3 newMovementVector = Vector3.ProjectOnPlane(movementVector, obstacle.normal) + verticalHelp;
+			return newMovementVector;
 		}
 	}
 
@@ -220,6 +230,19 @@ public class PlayerMovement : MonoBehaviour {
 		}
 	}
 
+	IEnumerator PrintMaxHeight(float startHeight) {
+		float maxHeight = startHeight;
+		while (!grounded) {
+			if (transform.position.y > maxHeight) {
+				maxHeight = transform.position.y;
+			}
+			yield return new WaitForFixedUpdate();
+		}
+		if (DEBUG) {
+			print("Highest jump height: " + (maxHeight - startHeight));
+		}
+	}
+
 	/// <summary>
 	/// Removes any current y-direction movement on the player, applies a one time impulse force to the player upwards,
 	/// then waits jumpCooldown seconds to be ready again.
@@ -227,13 +250,17 @@ public class PlayerMovement : MonoBehaviour {
 	IEnumerator Jump() {
 		jumpIsOnCooldown = true;
 
-		float multiplier = Mathf.Lerp(1, 1.2f, Mathf.InverseLerp(0, movespeed, HorizontalVelocity().magnitude));
-
-		thisRigidbody.AddForce(-Physics.gravity.normalized * jumpForce * multiplier, ForceMode.Impulse);
+		float multiplier = Mathf.Lerp(1, runningJumpHelper, Mathf.InverseLerp(0, movespeed, HorizontalVelocity().magnitude));
+		Vector3 jumpVector = -Physics.gravity.normalized * jumpForce * multiplier;
+		thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
+		float startHeight = transform.position.y;
 		yield return new WaitForSeconds(0.5f);
+		Coroutine p = StartCoroutine(PrintMaxHeight(startHeight));
 		yield return new WaitWhile(() => !grounded);
 		yield return new WaitForSeconds(jumpCooldown);
 
+		if (p != null)
+			StopCoroutine(p);
 		jumpIsOnCooldown = false;
 	}
 

@@ -56,7 +56,7 @@ public class PortalCameraTexture : MonoBehaviour {
 		Vector3 cameraWorldPos = portal.playerCamera.transform.position;
 		Vector3 cameraThisPortalLocalPos = thisPortal.InverseTransformPoint(cameraWorldPos);
 		transform.localPosition = cameraThisPortalLocalPos;
-		transform.position -= thisPortalForward * portal.portalOffset;
+		transform.position -= otherPortalForward * portal.portalFrameDepth;
 	}
 
 	private void CreateRenderTexture(int currentWidth, int currentHeight) {

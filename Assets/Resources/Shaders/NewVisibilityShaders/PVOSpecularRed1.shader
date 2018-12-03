@@ -134,8 +134,19 @@ Shader "Custom/PVOSpecularRed"
 			//#pragma multi_compile _ LOD_FADE_CROSSFADE
 
 			#pragma vertex vertAdd
-			#pragma fragment fragAdd
+			#pragma fragment fragAddNew
 			#include "UnityStandardCoreForward.cginc"
+			
+			sampler2D _DiscardTex1;
+			float _ResolutionX;
+			float _ResolutionY;
+
+			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
+				float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
+				float4 samplePixel = tex2D(_DiscardTex1, viewportVertex);
+				clip(samplePixel.r - 0.5);
+				return fragAdd(i);
+			}
 
 			ENDCG
 		}

@@ -322,8 +322,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0870e363690555847a43d9792aeeeff9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   walkSpeed: 4
-  runSpeed: 14
+  runSpeed: 18
   jumpForce: 11
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.7
@@ -395,7 +396,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.1, z: 57.625}
+  m_LocalPosition: {x: 227, y: 5.1, z: -18}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -1086,6 +1087,7 @@ GameObject:
   - component: {fileID: 1809741063}
   - component: {fileID: 1809741062}
   - component: {fileID: 1809741068}
+  - component: {fileID: 1809741070}
   - component: {fileID: 1809741071}
   - component: {fileID: 1809741061}
   - component: {fileID: 1809741059}
@@ -1347,6 +1349,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeBetweenShifts: 0.15
   intensity: 0.3
+--- !u!114 &1809741070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0923359e9e352a4b9b11c7b7161ad67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Radius: 0.409
+  m_SampleCount: 1
+  m_OcclusionIntensity: 1.78
+  m_Blur: 3
+  m_Downsampling: 1
+  m_OcclusionAttenuation: 0.924
+  m_MinZ: 0.01
+  m_SSAOShader: {fileID: 4800000, guid: 43ca18288c424f645aaa1e9e07f04c50, type: 3}
+  m_RandomTexture: {fileID: 2800000, guid: a181ca8e3c62f3e4b8f183f6c586b032, type: 3}
 --- !u!114 &1809741071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1406,12 +1428,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
