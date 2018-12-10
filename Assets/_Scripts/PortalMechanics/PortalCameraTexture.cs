@@ -16,6 +16,8 @@ public class PortalCameraTexture : MonoBehaviour {
 
 	Camera thisPortalCamera;
 	RenderTexture rt;
+	public Quaternion debugQ = new Quaternion(0,0,1,1);
+	public Vector3 debugV = new Vector3();
 
 	// Use this for initialization
 	void Start () {
@@ -38,28 +40,48 @@ public class PortalCameraTexture : MonoBehaviour {
 
 	// Update is called once per frame
 	void LateUpdate () {
+		// Clean self up if portal references break (they will be re-initialized by Portal.InitializePortal())
+		if (thisPortal == null || otherPortal == null) {
+			Destroy(gameObject);
+			Destroy(transform.parent.GetComponentInChildren<TeleportEnter>().gameObject);
+			return;
+		}
+
 		// Handle Camera Rotation
 		Vector3 thisPortalForward = portal.portalForwards[portalIndex];
 		Vector3 otherPortalForward = portal.portalForwards[otherIndex];
-		// I don't understand why adding 180 to the angle helps here
-		Quaternion portalRotationalDiff = Quaternion.Euler(Quaternion.FromToRotation(thisPortalForward, otherPortalForward).eulerAngles + 180*Vector3.up);
-		
-		Vector3 newCameraDirection = portalRotationalDiff * portal.playerCamera.transform.forward;
-		// I don't understand why this needs to happen
-		if (Vector3.Dot(thisPortalForward, otherPortalForward) == -1) {
-			newCameraDirection.x *= -1;
-			newCameraDirection.y *= -1;
-		}
-		transform.rotation = Quaternion.LookRotation(newCameraDirection, Vector3.up);
+		// TODO: Fix this for non-0/180 degree angles between portals
+		transform.rotation = thisPortal.transform.rotation * (otherPortal.transform.rotation * portal.playerCamera.transform.rotation);
 
 		// Handle Camera Position
 		Vector3 cameraWorldPos = portal.playerCamera.transform.position;
 		Vector3 cameraThisPortalLocalPos = thisPortal.InverseTransformPoint(cameraWorldPos);
 		transform.localPosition = cameraThisPortalLocalPos;
 		transform.position -= otherPortalForward * portal.portalFrameDepth;
+
+		// Handle Camera Oblique Frustum (cull objects behind portal)
+		//Plane clipPlane = new Plane(transform.InverseTransformDirection(thisPortalForward).normalized, transform.InverseTransformPoint(thisPortal.position));
+		//float distance = (cameraWorldPos - clipPlane.ClosestPointOnPlane(cameraWorldPos)).magnitude;
+		//float oldDistance = (cameraWorldPos - thisPortal.position).magnitude;
+		////print(distance + "\n" + oldDistance);
+		////print(thisPortalForward + "\n" + (Vector3.Project(thisPortalCamera.transform.forward, thisPortalForward)));
+		//print(clipPlane.normal);
+		//debugV = -clipPlane.normal.normalized;
+		//Matrix4x4 test = thisPortalCamera.CalculateObliqueMatrix(new Vector4(debugV.x, debugV.y, debugV.z, Mathf.Max(1, debugQ.w)));
+		//print(thisPortalCamera.projectionMatrix + "\n" + test);
+		//thisPortalCamera.projectionMatrix = test;
+		
 	}
 
 	private void CreateRenderTexture(int currentWidth, int currentHeight) {
+		// Clean self up if portal references break (they will be re-initialized by Portal.InitializePortal())
+		if (thisPortalCamera == null || thisPortalRenderer == null && gameObject != null) {
+			thisPortal.GetComponent<Portal>().isInitialized = false;
+			Destroy(gameObject);
+			Destroy(transform.parent.GetComponentInChildren<TeleportEnter>().gameObject);
+			return;
+		}
+
 		rt = new RenderTexture(currentWidth, currentHeight, 24);
 		thisPortalCamera.targetTexture = rt;
 

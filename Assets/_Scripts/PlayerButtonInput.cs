@@ -12,6 +12,14 @@ using UnityEngine;
 public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 #region events
+	public delegate void StickHeldEvent(Vector2 dir);
+	public delegate void StickHeldDurationEvent(Vector2 dir, float durationHeld);
+
+	public event StickHeldEvent OnLeftStickHeld;
+	public event StickHeldEvent OnRightStickHeld;
+	public event StickHeldDurationEvent OnLeftStickHeldWithDuration;
+	public event StickHeldDurationEvent OnRightStickHeldWithDuration;
+
 	public delegate void ButtonPressEvent();
 	public delegate void ButtonReleaseEvent();
 	public delegate void ButtonHeldEvent(float durationHeld);
@@ -20,6 +28,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonPressEvent OnDownPress;
 	public event ButtonPressEvent OnRightPress;
 	public event ButtonPressEvent OnLeftPress;
+	public event ButtonPressEvent OnAction1Press;
 	public event ButtonPressEvent OnEscapePress;
 	public event ButtonPressEvent OnSpacePress;
 	public event ButtonPressEvent OnShiftPress;
@@ -28,6 +37,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonReleaseEvent OnDownRelease;
 	public event ButtonReleaseEvent OnRightRelease;
 	public event ButtonReleaseEvent OnLeftRelease;
+	public event ButtonReleaseEvent OnAction1Release;
 	public event ButtonReleaseEvent OnEscapeRelease;
 	public event ButtonReleaseEvent OnSpaceRelease;
 	public event ButtonReleaseEvent OnShiftRelease;
@@ -36,22 +46,40 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonHeldEvent OnDownHeld;
 	public event ButtonHeldEvent OnRightHeld;
 	public event ButtonHeldEvent OnLeftHeld;
+	public event ButtonHeldEvent OnAction1Held;
 	public event ButtonHeldEvent OnEscapeHeld;
 	public event ButtonHeldEvent OnSpaceHeld;
 	public event ButtonHeldEvent OnShiftHeld;
 #endregion
 
 #region Coroutine bools
+	private bool inLeftStickHeldCoroutine = false;
+	private bool inRightStickHeldCoroutine = false;
+
 	private bool inUpHoldCoroutine = false;
 	private bool inDownHoldCoroutine = false;
 	private bool inRightHoldCoroutine = false;
 	private bool inLeftHoldCoroutine = false;
+	private bool inAction1HoldCoroutine = false;
 	private bool inEscapeHoldCoroutine = false;
 	private bool inSpaceHoldCoroutine = false;
 	private bool inShiftHoldCoroutine = false;
-	#endregion
+#endregion
 	
 	public void Update() {
+		// Left stick
+		if (LeftStickHeld) {
+			if (!inLeftStickHeldCoroutine) {
+				StartCoroutine(LeftStickHeldCoroutine());
+			}
+		}
+		// Right stick
+		if (RightStickHeld) {
+			if (!inRightStickHeldCoroutine) {
+				StartCoroutine(RightStickHeldCoroutine());
+			}
+		}
+
 		// Up button
 		if (UpPressed && OnUpPress != null) {
 			OnUpPress();
@@ -92,6 +120,18 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		else if (LeftReleased && OnLeftRelease != null) {
 			OnLeftRelease();
 		}
+
+		// Action1 button (Also maps to mouse left-click)
+		if (Action1Pressed && OnAction1Press != null) {
+			OnAction1Press();
+			if (!inAction1HoldCoroutine) {
+				StartCoroutine(Action1HoldCoroutine());
+			}
+		}
+		else if (Action1Released && OnAction1Release != null) {
+			OnAction1Release();
+		}
+
 		// Escape button
 		if (EscapePressed && OnEscapePress != null) {
 			OnEscapePress();
@@ -139,6 +179,9 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool LeftPressed {
 		get { return Input.GetKeyDown(KeyCode.A); }
 	}
+	public bool Action1Pressed {
+		get { return Input.GetMouseButtonDown(0); }
+	}
 	public bool EscapePressed {
 		get { return Input.GetKeyDown(KeyCode.Escape); }
 	}
@@ -161,6 +204,9 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	}
 	public bool LeftReleased {
 		get { return Input.GetKeyUp(KeyCode.A); }
+	}
+	public bool Action1Released {
+		get { return Input.GetMouseButtonUp(0); }
 	}
 	public bool EscapeReleased {
 		get { return Input.GetKeyUp(KeyCode.Escape); }
@@ -185,6 +231,9 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool LeftHeld {
 		get { return Input.GetKey(KeyCode.A); }
 	}
+	public bool Action1Held {
+		get { return Input.GetMouseButton(0); }
+	}
 	public bool EscapeHeld {
 		get { return Input.GetKey(KeyCode.Escape); }
 	}
@@ -194,9 +243,84 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool ShiftHeld {
 		get { return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift); }
 	}
+
+	// While stick held
+	public bool LeftStickHeld {
+		get { return LeftStick.magnitude > 0; }
+	}
+	public bool RightStickHeld {
+		get { return RightStick.magnitude > 0; }
+	}
+
+	public Vector2 LeftStick {
+		get {
+			// TODO: Add controller input here
+			Vector2 keyboardInput = Vector2.zero;
+			if (UpHeld) keyboardInput += Vector2.up;
+			if (DownHeld) keyboardInput += Vector2.down;
+			if (RightHeld) keyboardInput += Vector2.right;
+			if (LeftHeld) keyboardInput += Vector2.left;
+			// TODO: Add deadzone
+			if (keyboardInput.magnitude > 1) keyboardInput.Normalize();
+
+			return keyboardInput;
+		}
+	}
+	public Vector2 RightStick {
+		get {
+			// TODO: Add controller input here
+			Vector2 mouseInput = Vector2.zero;
+			mouseInput += Input.GetAxis("Mouse Y") * Vector2.up;
+			mouseInput += Input.GetAxis("Mouse X") * Vector2.right;
+
+			// TODO: Add deadzone
+			// Mouse input is NOT normalized, it can and will go above 1 magnitude
+			// Multiply mouseInput by some value in 0-1 range to bring it in line with controller
+			return mouseInput * 0.35f;
+		}
+	}
 #endregion
 
 #region ButtonHeld Coroutines
+	IEnumerator LeftStickHeldCoroutine() {
+		inLeftStickHeldCoroutine = true;
+
+		float timeHeld = 0;
+		while (LeftStickHeld) {
+			Vector2 leftStick = LeftStick;
+			if (OnLeftStickHeld != null) {
+				OnLeftStickHeld(leftStick);
+			}
+			if (OnLeftStickHeldWithDuration != null) {
+				OnLeftStickHeldWithDuration(leftStick, timeHeld);
+			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
+		}
+
+		inLeftStickHeldCoroutine = false;
+	}
+	IEnumerator RightStickHeldCoroutine() {
+		inRightStickHeldCoroutine = true;
+
+		float timeHeld = 0;
+		while (RightStickHeld) {
+			Vector2 rightStick = RightStick;
+			if (OnRightStickHeld != null) {
+				OnRightStickHeld(RightStick);
+			}
+			if (OnRightStickHeldWithDuration != null) {
+				OnRightStickHeldWithDuration(RightStick, timeHeld);
+			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
+		}
+
+		inRightStickHeldCoroutine = false;
+	}
+
 	IEnumerator UpHoldCoroutine() {
 		inUpHoldCoroutine = true;
 		
@@ -204,10 +328,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (UpHeld) {
 			if (OnUpHeld != null) {
 				OnUpHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inUpHoldCoroutine = false;
@@ -219,10 +343,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (DownHeld) {
 			if (OnDownHeld != null) {
 				OnDownHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inDownHoldCoroutine = false;
@@ -234,10 +358,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (RightHeld) {
 			if (OnRightHeld != null) {
 				OnRightHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inRightHoldCoroutine = false;
@@ -249,13 +373,28 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (LeftHeld) {
 			if (OnLeftHeld != null) {
 				OnLeftHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inLeftHoldCoroutine = false;
+	}
+	IEnumerator Action1HoldCoroutine() {
+		inAction1HoldCoroutine = true;
+
+		float timeHeld = 0;
+		while (Action1Held) {
+			if (OnAction1Held != null) {
+				OnAction1Held(timeHeld);
+			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
+		}
+
+		inAction1HoldCoroutine = false;
 	}
 	IEnumerator EscapeHoldCoroutine() {
 		inEscapeHoldCoroutine = true;
@@ -264,10 +403,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (EscapeHeld) {
 			if (OnEscapeHeld != null) {
 				OnEscapeHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inEscapeHoldCoroutine = false;
@@ -279,10 +418,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (SpaceHeld) {
 			if (OnSpaceHeld != null) {
 				OnSpaceHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inSpaceHoldCoroutine = false;
@@ -294,10 +433,10 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		while (ShiftHeld) {
 			if (OnShiftHeld != null) {
 				OnShiftHeld(timeHeld);
-
-				timeHeld += Time.deltaTime;
-				yield return null;
 			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
 		}
 
 		inShiftHoldCoroutine = false;

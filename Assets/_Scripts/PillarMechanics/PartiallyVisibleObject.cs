@@ -14,6 +14,7 @@ public enum VisibilityState {
 
 
 public class PartiallyVisibleObject : MonoBehaviour {
+	public static bool DEBUG = false;
 	////////////////////////////////////
 	// Techniques for finding pillars //
 	////////////////////////////////////
@@ -177,21 +178,29 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			case MovementDirection.clockwise:
 				if (Angle.IsAngleBetween(onAngle, newAngle, prevAngle)) {
 					HitBySweepingCollider(direction);
-					print(gameObject.name + ":\tHitBySweepingColliderClockwise");
+					if (DEBUG) {
+						print(gameObject.name + ":\tHitBySweepingColliderClockwise");
+					}
 				}
 				if (Angle.IsAngleBetween(offAngle, newAngle, prevAngle)) {
 					SweepingColliderExit(direction);
-					print(gameObject.name + ":\tSweepingColliderExitClockwise");
+					if (DEBUG) {
+						print(gameObject.name + ":\tSweepingColliderExitClockwise");
+					}
 				}
 				break;
 			case MovementDirection.counterclockwise:
 				if (Angle.IsAngleBetween(offAngle, prevAngle, newAngle)) {
 					HitBySweepingCollider(direction);
-					print(gameObject.name + ":\tHitBySweepingColliderCounterclockwise");
+					if (DEBUG) {
+						print(gameObject.name + ":\tHitBySweepingColliderCounterclockwise");
+					}
 				}
 				if (Angle.IsAngleBetween(onAngle, prevAngle, newAngle)) {
 					SweepingColliderExit(direction);
-					print(gameObject.name + ":\tSweepingColliderExitCounterclockwise");
+					if (DEBUG) {
+						print(gameObject.name + ":\tSweepingColliderExitCounterclockwise");
+					}
 				}
 				break;
 		}
@@ -252,14 +261,18 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		switch (direction) {
 			case MovementDirection.clockwise:
 				if (visibilityState == startingVisibilityState) {
-					print("Enter Clockwise, setting visibility state to PartiallyVisible from " + startingVisibilityState);
+					if (DEBUG) {
+						print("Enter Clockwise, setting visibility state to PartiallyVisible from " + startingVisibilityState);
+					}
 					SetVisibilityState(VisibilityState.partiallyVisible);
 					return true;
 				}
 				break;
 			case MovementDirection.counterclockwise:
 				if (visibilityState == oppositeStartingVisibilityState) {
-					print("Enter Counterclockwise, setting visibility state to PartiallyVisible from " + oppositeStartingVisibilityState);
+					if (DEBUG) {
+						print("Enter Counterclockwise, setting visibility state to PartiallyVisible from " + oppositeStartingVisibilityState);
+					}
 					SetVisibilityState(VisibilityState.partiallyVisible);
 					return true;
 				}
@@ -280,11 +293,15 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		if (visibilityState == VisibilityState.partiallyVisible) {
 			switch (direction) {
 				case MovementDirection.clockwise:
-					print("Exit Clockwise, setting visibility state to " + oppositeStartingVisibilityState + " from PartiallyVisible");
+					if (DEBUG) {
+						print("Exit Clockwise, setting visibility state to " + oppositeStartingVisibilityState + " from PartiallyVisible");
+					}
 					SetVisibilityState(oppositeStartingVisibilityState);
 					return true;
 				case MovementDirection.counterclockwise:
-					print("Exit Counterclockwise, setting visibility state to " + startingVisibilityState + " from PartiallyVisible");
+					if (DEBUG) {
+						print("Exit Counterclockwise, setting visibility state to " + startingVisibilityState + " from PartiallyVisible");
+					}
 					SetVisibilityState(startingVisibilityState);
 					return true;
 			}

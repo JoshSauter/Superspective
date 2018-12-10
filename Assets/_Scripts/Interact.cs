@@ -5,9 +5,12 @@ using UnityEngine.UI;
 
 public class Interact : MonoBehaviour {
 	public Image reticle;
+	public Image reticleOutside;
 
 	Color reticleUnselectColor;
 	Color reticleSelectColor = new Color(0.15f,1,0.15f,0.9f);
+	Color reticleOutsideUnselectColor;
+	Color reticleOutsideSelectColor = new Color(0.075f, 0.5f, 0.075f, 0.45f);
 	public float interactionDistance = 5f;
 	Transform cam;
 
@@ -21,6 +24,7 @@ public class Interact : MonoBehaviour {
 
 		cam = transform.GetChild(0);
 		reticleUnselectColor = reticle.color;
+		reticleOutsideUnselectColor = reticleOutside.color;
 		if (cam.GetComponent<Camera>() == null) {
 			Debug.LogError("\"Camera\" object does not have an actual camera component attached, make sure this is the object you want.");
 		}
@@ -31,6 +35,7 @@ public class Interact : MonoBehaviour {
 		InteractableObject obj = FindInteractableObjectSelected();
 		if (obj != null) {
 			reticle.color = reticleSelectColor;
+			reticleOutside.color = reticleOutsideSelectColor;
 			// If the left mouse button is being held down, interact with the object selected
 			if (Input.GetMouseButton(0)) {
 				obj.OnLeftMouseButton();
@@ -46,6 +51,7 @@ public class Interact : MonoBehaviour {
 		}
 		else {
 			reticle.color = reticleUnselectColor;
+			reticleOutside.color = reticleOutsideUnselectColor;
 		}
 
 	}

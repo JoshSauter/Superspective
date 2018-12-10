@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityStandardAssets.ImageEffects;
 using EpitaphUtils;
 
@@ -10,7 +11,7 @@ public class Portal : MonoBehaviour {
 
 	// Only things set in Inspector, everything else should be automatic
 	public Transform otherPortal;
-	public int channel;
+	public int channel = -1;
 	public bool useCameraEdgeDetectionColor = true;
 	public Color portalEdgeDetectionColor = Color.black;
 	public bool teleportOnEnter = true;
@@ -18,6 +19,8 @@ public class Portal : MonoBehaviour {
 	[System.Obsolete("This really shouldn't ever need to be set. Everything should be handled automatically.")]
 	public float colliderOffset = 0;
 	public bool useMeshAsCollider = false;
+
+	public bool isInitialized = false;
 
 	// Transforms
 	[HideInInspector]
@@ -95,16 +98,40 @@ public class Portal : MonoBehaviour {
 
 	int portalLayer;
 
-	// Use this for initialization
-	void Start () {
+	// Returns true is otherPortal is non-null after running, false otherwise
+	bool SetOtherPortalFromChannel() {
+		if (channel == -1) return (otherPortal != null);
 		// If portal lives in another scene, grab reference through channel dictionary
-		if (otherPortal == null) {
-			if (receiversByChannel.ContainsKey(channel)) {
-				otherPortal = receiversByChannel[channel].transform;
-			}
+		if (otherPortal == null && receiversByChannel.ContainsKey(channel)) {
+			otherPortal = receiversByChannel[channel].transform;
 		}
 
+		return otherPortal != null;
+	}
+
+	void HandleActiveSceneChanged(Scene scene, LoadSceneMode mode) {
+		if (this == null) return;
+		if (LevelManager.instance.activeSceneName == gameObject.scene.name) {
+			if (SetOtherPortalFromChannel() && !isInitialized) {
+				InitializePortal();
+			}
+		}
+	}
+
+	// Use this for initialization
+	void Start () {
+		SceneManager.sceneLoaded += HandleActiveSceneChanged;
+
+		SetOtherPortalFromChannel();
+
 		portalLayer = LayerMask.NameToLayer("HideFromPortal");
+
+		if (!isInitialized) {
+			InitializePortal();
+		}
+	}
+
+	void InitializePortal() {
 		portalA = transform;
 		portalB = otherPortal;
 		portalA.gameObject.layer = portalLayer;
@@ -145,6 +172,9 @@ public class Portal : MonoBehaviour {
 			portalCameras[i].cullingMask &= ~(1 << portalLayer | 1 << portalSpecificHiddenLayer);
 
 			// Order of components here matters; it affects the rendering order of the postprocess effects
+			// Initialize Bloom
+			BloomOptimized playerBloom = playerCamera.GetComponent<BloomOptimized>();
+			newPortalCameraObj.PasteComponent(playerBloom);
 			// Initialize SSAO
 			ScreenSpaceAmbientOcclusion playerSSAO = playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
 			newPortalCameraObj.PasteComponent(playerSSAO);
@@ -165,14 +195,23 @@ public class Portal : MonoBehaviour {
 			//PortalCameraNoRenderZone noRenderZone = noRenderZoneObj.AddComponent<PortalCameraNoRenderZone>();
 			//noRenderZone.portalCam = portalCameraTextures[i];
 		}
+
+		isInitialized = true;
 	}
 
 	void InitializePortalTeleporters() {
 		// Create new Teleporter GameObjects
 		for (int i = 0; i < 2; i++) {
 			string name = "PortalTeleporterTrigger" + ((char)('A' + i));
-			GameObject newTeleporterObj = new GameObject(name);
-			newTeleporterObj.transform.SetParent(portals[i], false);
+			Transform newTeleporterTransform = portals[i].Find(name);
+			GameObject newTeleporterObj;
+			if (newTeleporterTransform != null) {
+				newTeleporterObj = newTeleporterTransform.gameObject;
+			}
+			else {
+				newTeleporterObj = new GameObject(name);
+				newTeleporterObj.transform.SetParent(portals[i], false);
+			}
 
 			// Set up trigger colliders
 			if (useMeshAsCollider) {
@@ -221,7 +260,7 @@ public class Portal : MonoBehaviour {
 			}
 			// Set up offsets after other reference intialization is complete
 			for (int i = 0; i < 2; i++) {
-				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2] * portalFrameDepth;
+				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2].normalized * portalFrameDepth / 2f;
 				triggerColliders[i].transform.position += portalForwards[0] * colliderOffset;
 			}
 		}

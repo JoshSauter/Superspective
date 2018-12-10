@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 public class DesirePlatformRiseFall : MonoBehaviour {
 	Rigidbody panelRigidbody;
@@ -50,7 +51,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// </summary>
 	/// <param name="other">Object inside the trigger zone</param>
 	private void OnTriggerEnter(Collider other) {
-		if (playerLook == null && other.tag == "Player") {
+		if (playerLook == null && other.tag.TaggedAsPlayer()) {
 			playerLook = other.transform.GetComponent<PlayerLook>();
 		}
 	}
@@ -60,7 +61,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// </summary>
 	/// <param name="other">Object that has just left the trigger zone</param>
 	private void OnTriggerExit(Collider other) {
-		if (playerLook != null && other.tag == "Player") {
+		if (playerLook != null && other.tag.TaggedAsPlayer()) {
 			playerLook = null;
 		}
 	}

@@ -14,6 +14,8 @@ public class PlayerLook : MonoBehaviour {
     public float rotationY = 0F;
 	private float yClamp = 85;
 
+	private const int lookAmountMultiplier = 14;
+
 	/// <summary>
 	/// Returns the rotationY normalized to the range (-1, 1)
 	/// </summary>
@@ -31,13 +33,16 @@ public class PlayerLook : MonoBehaviour {
         Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		LookHorizontal(Input.GetAxis("Mouse X") * 4 * generalSensitivity * sensitivityX);
-		rotationY += Input.GetAxis("Mouse Y") * 4 * generalSensitivity * sensitivityY;
-        rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
-        LookVertical(rotationY);
+
+	void Update() {
+		Look(PlayerButtonInput.instance.RightStick);
+	}
+
+	private void Look(Vector2 lookDirection) {
+		LookHorizontal(lookDirection.x * lookAmountMultiplier * generalSensitivity * sensitivityX);
+		rotationY += lookDirection.y * lookAmountMultiplier * generalSensitivity * sensitivityY;
+		rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
+		LookVertical(rotationY);
 	}
 
     private void LookVertical(float rotation) {

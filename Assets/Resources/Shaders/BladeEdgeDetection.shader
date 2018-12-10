@@ -159,9 +159,9 @@
 				return uvPositions;
 			}
 
-			fixed4 FinalColor(fixed4 original, half isEdge, half similarDepth, half similarNormals) {
+			fixed4 FinalColor(fixed4 original, half isEdge, half similarDepth, half similarNormals, float depth) {
 				// Return values for normal render mode and debug mode
-				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, _EdgeColor, _EdgeColor.a));
+				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, _EdgeColor, _EdgeColor.a * (1-depth)));
 				// Debug colors are: Red if this is a depth-difference edge, Green if this is a normal-difference edge, yellow if both
 				fixed4 debugColors = (1-similarDepth) * fixed4(1,0,0,1) + (1-similarNormals) * fixed4(0,1,0,1);
 
@@ -229,7 +229,8 @@
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
 				if (allDepthsAreDissimilar > 0) {
-					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 1, 1);
+					return FinalColor(fixed4(0,0,0,1), 0, 1, 1, 0);
+					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 1, 1, 0);
 				}
 #endif
 
@@ -297,7 +298,17 @@
 
 				int isEdge = 1 - (similarDepth * similarNormals);
 
-				return FinalColor(original, isEdge, similarDepth, similarNormals);
+				fixed4 a1 = tex2D(_MainTex, uvPositions.UVs[0]);
+				fixed4 a2 = tex2D(_MainTex, uvPositions.UVs[1]);
+				fixed4 a3 = tex2D(_MainTex, uvPositions.UVs[2]);
+				fixed4 a4 = tex2D(_MainTex, uvPositions.UVs[3]);
+				fixed4 a5 = tex2D(_MainTex, uvPositions.UVs[4]);
+				fixed4 a6 = tex2D(_MainTex, uvPositions.UVs[5]);
+				fixed4 a7 = tex2D(_MainTex, uvPositions.UVs[6]);
+				fixed4 a8 = tex2D(_MainTex, uvPositions.UVs[7]);
+				fixed4 a9 = tex2D(_MainTex, uvPositions.UVs[8]);
+				fixed4 backgroundColor = (a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9) / 9.0;
+				return FinalColor(original, isEdge, similarDepth, similarNormals, depthSamples[0]);
 			}
 			ENDCG
 		}

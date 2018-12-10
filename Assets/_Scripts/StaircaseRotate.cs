@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 public class StaircaseRotate : MonoBehaviour {
 	public bool avoidDoubleRotation = false;
+	public bool staircaseDown = false;
 	public enum RotationAxes {
 		right,
 		left,
@@ -35,29 +37,31 @@ public class StaircaseRotate : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
-        if (other.tag == "Player") {
+        if (other.tag.TaggedAsPlayer()) {
 			float t = GetPlayerLerpPosition(other);
-			float desiredRotation = 90 * t;
+			int staircaseDownMultiplier = staircaseDown ? -1 : 1;
+			float desiredRotation = 90 * t * staircaseDownMultiplier;
+			float amountToRotate = desiredRotation - currentRotation;
 
 			if (!avoidDoubleRotation) {
-				transform.parent.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
+				transform.parent.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), amountToRotate);
 			}
 
 			// Player should rotate around the pivot but without rotating the player's actual rotation (just position)
-			other.transform.position = RotateAroundPivot(other.transform.position, transform.parent.position, Quaternion.Euler(GetRotationAxis(axisOfRotation) * (currentRotation - desiredRotation)));
+			other.transform.position = RotateAroundPivot(other.transform.position, transform.parent.position, Quaternion.Euler(GetRotationAxis(axisOfRotation) * amountToRotate));
 			// Adjust the player's look direction up or down to further the effect
 			PlayerLook playerLook = other.transform.GetComponentInChildren<PlayerLook>();
 			PlayerMovement playerMovement = other.transform.GetComponent<PlayerMovement>();
-			int lookDirection = (axisOfRotation == RotationAxes.right) ? 1 : -1;
+			//int lookDirection = (axisOfRotation == RotationAxes.right) ? 1 : -1;
 			float lookMultiplier = Vector2.Dot(new Vector2(other.transform.forward.x, other.transform.forward.z).normalized, playerMovement.HorizontalVelocity().normalized);
-			playerLook.rotationY += lookDirection * lookMultiplier * Mathf.Abs(currentRotation - desiredRotation);
+			playerLook.rotationY -= lookMultiplier * Mathf.Abs(amountToRotate) * staircaseDownMultiplier;
 
 			// Move the global directional light
-			globalDirectionalLight.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
+			globalDirectionalLight.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), amountToRotate);
 
 			foreach (var obj in otherObjectsToRotate) {
 				// All other objects rotate as well as translate
-				obj.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), currentRotation - desiredRotation);
+				obj.RotateAround(transform.parent.position, GetRotationAxis(axisOfRotation), amountToRotate);
 			}
 
 			currentRotation = desiredRotation;
@@ -173,9 +177,9 @@ public class StaircaseRotate : MonoBehaviour {
 			case RotationAxes.down:
 				return Vector3.down;
 			case RotationAxes.forward:
-				return Vector3.forward;
-			case RotationAxes.back:
 				return Vector3.back;
+			case RotationAxes.back:
+				return Vector3.forward;
 			default:
 				Debug.LogError("Unreachable");
 				return Vector3.zero;

@@ -28,7 +28,7 @@ public class LevelManager : Singleton<LevelManager> {
 
 	Dictionary<Level, string> enumToSceneName;
 	Dictionary<string, List<string>> worldGraph;
-	string activeSceneName;
+	public string activeSceneName;
 	List<string> loadedSceneNames;
 	List<string> currentlyLoadingSceneNames;
 	List<string> currentlyUnloadingSceneNames;
@@ -146,7 +146,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(library, new List<string>() { hexPillarRoom, tutorialHallway });
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
-		worldGraph.Add(axis, new List<string>());
+		worldGraph.Add(axis, new List<string>() { tutorialHallway });
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });

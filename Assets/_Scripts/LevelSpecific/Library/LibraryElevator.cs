@@ -80,7 +80,7 @@ public class LibraryElevator : MonoBehaviour {
 	}
 
 	private void OnCollisionEnter(Collision collision) {
-		if (collision.gameObject.tag == "Player") {
+		if (collision.gameObject.tag.TaggedAsPlayer()) {
 			collision.transform.SetParent(transform);
 			elevatorTeleport.teleportPlayer = false;
 			if (!inElevateCoroutine) {
@@ -90,7 +90,7 @@ public class LibraryElevator : MonoBehaviour {
 	}
 
 	private void OnCollisionExit(Collision collision) {
-		if (collision.gameObject.tag == "Player") {
+		if (collision.gameObject.tag.TaggedAsPlayer()) {
 			collision.transform.SetParent(null);
 			Scene managerScene = SceneManager.GetSceneByName(LevelManager.instance.GetSceneName(Level.managerScene));
 			SceneManager.MoveGameObjectToScene(collision.gameObject, managerScene);

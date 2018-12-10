@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 public class OutOfBoundsTrigger : MonoBehaviour {
 	GameObject outOfBoundsCanvas;
@@ -10,13 +11,13 @@ public class OutOfBoundsTrigger : MonoBehaviour {
 	}
 
 	private void OnTriggerEnter(Collider other) {
-		if (other.tag == "Player") {
+		if (other.tag.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(true);
 		}
 	}
 
 	private void OnTriggerExit(Collider other) {
-		if (other.tag == "Player") {
+		if (other.tag.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(false);
 		}
 	}

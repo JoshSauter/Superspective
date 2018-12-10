@@ -35,6 +35,10 @@ namespace EpitaphUtils {
 			return comp as T;
 		}
 
+		public static bool TaggedAsPlayer(this String tag) {
+			return tag == "Player";
+		}
+
 		public static T PasteComponent<T>(this GameObject go, T toAdd) where T : Component {
 			return go.AddComponent<T>().GetCopyOf(toAdd) as T;
 		}

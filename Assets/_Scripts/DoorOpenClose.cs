@@ -159,7 +159,7 @@ public class DoorOpenClose : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
-		if (other.tag == "Player") {
+		if (other.tag.TaggedAsPlayer()) {
 			if (!doorOpen) {
 				OpenDoor();
 			}
@@ -168,7 +168,7 @@ public class DoorOpenClose : MonoBehaviour {
 	}
 
 	private void OnTriggerExit(Collider other) {
-		if (other.tag == "Player") {
+		if (other.tag.TaggedAsPlayer()) {
 			if (doorOpen) {
 				CloseDoor();
 			}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -49,7 +50,7 @@ public class MagicTrigger : MonoBehaviour {
 	private void OnTriggerStay(Collider other) {
 		if (!enabled) return;
 
-        if (other.gameObject.tag == "Player") {
+        if (other.gameObject.tag.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
@@ -103,7 +104,7 @@ public class MagicTrigger : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
 		if (!enabled) return;
 
-        if (other.gameObject.tag == "Player") {
+        if (other.gameObject.tag.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
@@ -127,7 +128,7 @@ public class MagicTrigger : MonoBehaviour {
 	private void OnTriggerExit(Collider other) {
 		if (!enabled) return;
 
-		if (other.gameObject.tag == "Player") {
+		if (other.gameObject.tag.TaggedAsPlayer()) {
 			if (hasTriggeredOnStay) {
 				hasTriggeredOnStay = false;
 			}
