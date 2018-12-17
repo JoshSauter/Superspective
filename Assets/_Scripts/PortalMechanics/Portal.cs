@@ -260,7 +260,7 @@ public class Portal : MonoBehaviour {
 			}
 			// Set up offsets after other reference intialization is complete
 			for (int i = 0; i < 2; i++) {
-				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2].normalized * portalFrameDepth / 2f;
+				portalTeleportEnters[i].teleportOffset = -portalForwards[(i + 1) % 2].normalized * portalFrameDepth;
 				triggerColliders[i].transform.position += portalForwards[0] * colliderOffset;
 			}
 		}

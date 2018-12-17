@@ -7,7 +7,7 @@ public class TeleportEnter : MonoBehaviour {
 	public bool DEBUG = false;
 	public bool teleportPlayer = true;
     public MagicTrigger trigger;
-	Collider teleportEnter;
+	public Collider teleportEnter;
     public Collider teleportExit;
 	public Vector3 teleportOffset = Vector3.zero;
 	public Transform[] otherObjectsToTeleport;
@@ -29,10 +29,6 @@ public class TeleportEnter : MonoBehaviour {
 		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new Transform[0];
 	}
 
-	private void Start() {
-		Debug.Assert(teleportExit != null, "Please specify the teleport exit for " + gameObject.scene.name + ": " + gameObject.name);
-	}
-
 	private void OnEnable() {
 		trigger.OnMagicTriggerStayOneTime += TeleportTriggered;
 	}
@@ -41,7 +37,9 @@ public class TeleportEnter : MonoBehaviour {
         trigger.OnMagicTriggerStayOneTime -= TeleportTriggered;
     }
 
-    private void TeleportTriggered(Collider other) {
+	private void TeleportTriggered(Collider other) {
+		Debug.Assert(teleportExit != null, "Please specify the teleport exit for " + gameObject.scene.name + ": " + gameObject.name);
+
 		// Handle velocity
 		Vector3 curVelocity = other.GetComponent<Rigidbody>().velocity;
 		Vector3 relativeVelocity = teleportEnter.transform.InverseTransformDirection(curVelocity);

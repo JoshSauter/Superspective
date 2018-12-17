@@ -331,6 +331,7 @@ CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
 #include "UnityCG.cginc"
+
 struct v2f {
     float4 pos : SV_POSITION;
     float4 nz : TEXCOORD0;
@@ -352,6 +353,7 @@ v2f vert( appdata_base v ) {
 }
 
 fixed4 frag(v2f i) : SV_Target {
+	clip(1-i.nz.w);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG

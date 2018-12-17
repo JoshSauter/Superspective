@@ -20,7 +20,8 @@ public enum Level {
 	tutorialHallway,
 	transition2_3,
 	transition3_4,
-	axis
+	axis,
+	fork
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -43,6 +44,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string level3 = "_Level3";
 	private const string level4 = "_Level4";
 	private const string axis = "_Axis";
+	private const string fork = "_Fork";
 
 	private const string tutorialHallway = "_TutorialHallway";
 	private const string transition2_3 = "_Transition2_3";
@@ -128,6 +130,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.level3, level3);
 		enumToSceneName.Add(Level.level4, level4);
 		enumToSceneName.Add(Level.axis, axis);
+		enumToSceneName.Add(Level.fork, fork);
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
 		enumToSceneName.Add(Level.transition2_3, transition2_3);
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
@@ -147,6 +150,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>() { tutorialHallway });
+		worldGraph.Add(fork, new List<string>());
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });

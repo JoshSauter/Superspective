@@ -38,7 +38,7 @@ public class Reticle : MonoBehaviour {
 		}
 		if (input.Action1Held || timeHeld < minTimeHeld) {
 			curRotationSpeed = Mathf.Lerp(curRotationSpeed, maxRotationSpeed, accelerationLerp * Time.deltaTime);
-			thisTransform.Rotate(Vector3.forward * curRotationSpeed * Time.deltaTime);
+			thisTransform.Rotate(Vector3.back * curRotationSpeed * Time.deltaTime);
 			timeHeld += Time.deltaTime;
 		}
 		else {
@@ -65,7 +65,7 @@ public class Reticle : MonoBehaviour {
 		foreach (Quaternion stopRot in stopRotations) {
 			float angleDiff = thisTransform.rotation.eulerAngles.z - stopRot.eulerAngles.z;
 			// Only consider angles which we move forward towards
-			if (angleDiff > 0) continue;
+			if (angleDiff < 0) continue;
 			if (Mathf.Abs(angleDiff) < Mathf.Abs(minAngleDiff)) {
 				minAngleDiff = angleDiff;
 				minAngleStopRotation = stopRot;

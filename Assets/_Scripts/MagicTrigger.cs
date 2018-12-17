@@ -19,7 +19,7 @@ public class MagicTrigger : MonoBehaviour {
 		PlayerMovingAndFacingDirection
     }
     public TriggerConditionType triggerCondition;
-    public float playerFaceThreshold;
+	public float playerFaceThreshold = 0.01f;
 
 	public bool disableScriptOnTrigger = false;
     public bool disableGameObjectOnTrigger = false;
