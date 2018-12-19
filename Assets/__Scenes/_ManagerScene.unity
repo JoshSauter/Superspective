@@ -448,7 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5559bdf01982dac4e9e33c3b5f6df9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingScene: 10
+  startingScene: 11
   activeSceneName: 
 --- !u!1 &437150562
 GameObject:
@@ -676,7 +676,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 3, z: -0.41655123}
+  m_LocalPosition: {x: 0, y: 3, z: 43}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -1160,7 +1160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3490566, g: 0.28484336, b: 0.28484336, a: 0.15294118}
+  m_Color: {r: 0.3490566, g: 0.28484336, b: 0.28484336, a: 0.13333334}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1296,7 +1296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 0.15294118}
+  m_Color: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 0.45490196}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1604,8 +1604,9 @@ GameObject:
   - component: {fileID: 1809741063}
   - component: {fileID: 1809741062}
   - component: {fileID: 1809741068}
-  - component: {fileID: 1809741070}
   - component: {fileID: 1809741071}
+  - component: {fileID: 1809741070}
+  - component: {fileID: 1809741075}
   - component: {fileID: 1809741072}
   - component: {fileID: 1809741061}
   - component: {fileID: 1809741059}
@@ -1617,7 +1618,6 @@ GameObject:
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741060}
   - component: {fileID: 1809741073}
-  - component: {fileID: 1809741075}
   - component: {fileID: 1809741074}
   m_Layer: 14
   m_Name: Main Camera
@@ -1841,7 +1841,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4975a6e437fc3b149a8cd508ce5bdd69, type: 3}
   m_Name: 
@@ -1897,10 +1897,43 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugMode: 0
+  doubleSidedEdges: 0
   depthSensitivity: 5
   normalSensitivity: 3
   sampleDistance: 1
-  edgeColor: {r: 1, g: 1, b: 1, a: 0.101960786}
+  edgeColorMode: 0
+  edgeColor: {r: 1, g: 1, b: 1, a: 1}
+  edgeColorGradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 0, g: 0, b: 0, a: 0}
+    key2: {r: 0.28676468, g: 1, b: 0.5130325, a: 0}
+    key3: {r: 0.1102941, g: 0.9631845, b: 1, a: 0}
+    key4: {r: 0.03676468, g: 0.521704, b: 1, a: 0}
+    key5: {r: 0.41247472, g: 0, b: 0.7205882, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 25829
+    ctime3: 36237
+    ctime4: 46453
+    ctime5: 56476
+    ctime6: 61680
+    ctime7: 65535
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  edgeColorGradientTexture: {fileID: 2800000, guid: 82284d2170c542349a628864662ebf70,
+    type: 3}
 --- !u!114 &1809741072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1949,7 +1982,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cachedEnableState: 0
+  cachedEnableState: 1
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
