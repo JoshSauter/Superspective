@@ -25,9 +25,11 @@ public class EpitaphRenderer : MonoBehaviour {
 	}
 
 	public void SetColor(string colorName, Color color) {
-		r.GetPropertyBlock(propBlock);
-		propBlock.SetColor(colorName, color);
-		r.SetPropertyBlock(propBlock);
+		if (GetMaterial().HasProperty(colorName)) {
+			r.GetPropertyBlock(propBlock);
+			propBlock.SetColor(colorName, color);
+			r.SetPropertyBlock(propBlock);
+		}
 	}
 
 	public void SetMainColor(Color color) {

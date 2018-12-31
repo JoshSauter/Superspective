@@ -14,7 +14,7 @@ public enum VisibilityState {
 
 
 public class PartiallyVisibleObject : MonoBehaviour {
-	public static bool DEBUG = false;
+	public bool DEBUG = false;
 	////////////////////////////////////
 	// Techniques for finding pillars //
 	////////////////////////////////////
@@ -38,6 +38,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
     /////////////////////
     public bool setLayerRecursively = true;
     public bool setMaterialColorOnStart = true;
+	public bool setMaterialColorOnStateChange = true;
     public bool swapRevealDirection = false;
 
     ///////////////////////////////////
@@ -93,7 +94,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		}
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState.visible ? VisibilityState.invisible : VisibilityState.visible;
 
-        if (!setMaterialColorOnStart) {
+        if (!setMaterialColorOnStart && setMaterialColorOnStateChange) {
             Material startingMaterial = renderer.GetMaterial();
             materialColor = startingMaterial.GetColor(EpitaphRenderer.mainColor);
             emissiveColor = startingMaterial.GetColor(emissiveColorKey);
@@ -341,13 +342,17 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			case VisibilityState.partiallyVisible:
 				SetLayer(initialLayer);
 				renderer.SetMaterial(partiallyVisibleMaterial);
-                SetColors(materialColor, emissiveColor);
+				if (setMaterialColorOnStateChange) {
+					SetColors(materialColor, emissiveColor);
+				}
 				break;
 			case VisibilityState.visible:
 				SetLayer(initialLayer);
 				renderer.SetMaterial(visibleMaterial);
-                SetColors(materialColor, emissiveColor);
-                break;
+				if (setMaterialColorOnStateChange) {
+					SetColors(materialColor, emissiveColor);
+				}
+				break;
 		}
 	}
 
@@ -375,6 +380,16 @@ public class PartiallyVisibleObjectEditor : Editor {
 	public override void OnInspectorGUI() {
 		PartiallyVisibleObject script = target as PartiallyVisibleObject;
 		float defaultWidth = EditorGUIUtility.labelWidth;
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.DEBUG = EditorGUILayout.Toggle("Debug mode: ", script.DEBUG);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).DEBUG = script.DEBUG;
+			}
+		}
 
 		EditorGUILayout.Space();
 
@@ -429,6 +444,16 @@ public class PartiallyVisibleObjectEditor : Editor {
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
 				((PartiallyVisibleObject)obj).setLayerRecursively = script.setLayerRecursively;
+			}
+		}
+
+		EditorGUILayout.Space();
+
+		EditorGUI.BeginChangeCheck();
+		script.setMaterialColorOnStateChange = EditorGUILayout.Toggle("Set color on state change? ", script.setMaterialColorOnStateChange);
+		if (EditorGUI.EndChangeCheck()) {
+			foreach (Object obj in targets) {
+				((PartiallyVisibleObject)obj).setMaterialColorOnStateChange = script.setMaterialColorOnStateChange;
 			}
 		}
 

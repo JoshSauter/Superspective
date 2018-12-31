@@ -25,14 +25,13 @@ public class BladeEdgeDetection : MonoBehaviour {
 	public Gradient edgeColorGradient;
 	public Texture2D edgeColorGradientTexture;
 
+	[SerializeField]
 	Shader edgeDetectShader;
 	Material shaderMaterial;
 
 	private const int GRADIENT_ARRAY_SIZE = 10;
 	
 	private void OnEnable () {
-		edgeDetectShader = Shader.Find("Hidden/BladeEdgeDetection");
-
 		SetDepthNormalTextureFlag();
 	}
 	

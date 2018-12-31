@@ -18,16 +18,16 @@ public class Button : MonoBehaviour, InteractableObject {
 	public float timeToDepressButton = 0.5f;
 	public float depressDistance = 1f;
 	protected bool inButtonPressOrDepressCoroutine = false;
-	protected bool buttonPressed = false;
+	public bool buttonPressed = false;
 
 	public bool depressAfterPress = false;
 	public float timeBetweenPressEndDepressStart = 0.5f;
 	public float deadTimeAfterButtonPress = 0;
 	public float deadTimeAfterButtonDepress = 0;
 
-	public void OnLeftMouseButtonDown() { PressButton(); }
+	public void OnLeftMouseButtonDown() {}
 	public void OnLeftMouseButtonUp() {}
-	public void OnLeftMouseButton() {}
+	public void OnLeftMouseButton() { PressButton(); }
 
 	public void PressButton() {
 		if (!inButtonPressOrDepressCoroutine && !buttonPressed) {

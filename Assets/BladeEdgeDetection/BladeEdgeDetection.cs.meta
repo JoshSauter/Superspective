@@ -1,11 +1,11 @@
 fileFormatVersion: 2
 guid: 543dc804960a8c64b9a7d40169eeee43
-timeCreated: 1520146525
-licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - edgeColorGradientTexture: {instanceID: 0}
+  - edgeDetectShader: {fileID: 4800000, guid: 233b38d5c7c0ec549b6341830ccac5b7, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

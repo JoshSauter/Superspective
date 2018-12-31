@@ -49,6 +49,7 @@ public class PortalManager : Singleton<PortalManager> {
 		if (receiverRemoved) {
 			print("Disabling Portal for channel " + channel);
 			// TODO: Disable portal for channel
+			Debug.LogError("Not yet implemented: PortalManager.RemoveReceiver()");
 		}
 		return receiverRemoved;
 	}
@@ -145,9 +146,9 @@ public class PortalManager : Singleton<PortalManager> {
 		Transform camerasParent = cameraContainersByChannel[channel].transform;
 		BladeEdgeDetection[] portalEDs = camerasParent.GetComponentsInChildrenOnly<BladeEdgeDetection>();
 
-		Color temp = playerED.edgeColor;
-		playerED.edgeColor = portalEDs[0].edgeColor;
-		portalEDs.ToList().ForEach(ed => ed.edgeColor = temp);
+		BladeEdgeDetection temp = playerED;
+		playerED = portalEDs[0];
+		portalEDs.ToList().ForEach(ed => ed = temp);
 	}
 
 }

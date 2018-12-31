@@ -11,31 +11,40 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/PrototypeAndTesting/_TestScene.unity
     guid: 332e1962a8c708447a42a2b310b15c5e
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_EmptyRoom.unity
     guid: a47f678a069cb5e459c4212b545eecbc
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_TutorialHallway.unity
     guid: 75960477af1e6df48affe1b53f2792bc
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_HexPillarRoom.unity
     guid: 70a2eec1ab96519458618ddccfb97d74
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_Transition2_3.unity
     guid: 01999cf9d7dd58a4b99cecbdea650515
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_Level3.unity
     guid: ce9ee02a31407d84782da38822a49848
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_Transition3_4.unity
     guid: 74c2830e8c2ed1b4ca4ad7d00d2a1333
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_Level4.unity
     guid: ede387f93d4b4e540bcf46973bb3a244
-  - enabled: 1
+  - enabled: 0
     path: Assets/__Scenes/_Library.unity
     guid: cf7f75d7dafe81d4ba8f03916fde368a
   - enabled: 1
     path: Assets/__Scenes/_Axis.unity
     guid: 5c260b2ae00a61746a917e89bb108ff3
+  - enabled: 1
+    path: Assets/__Scenes/_Fork.unity
+    guid: ccf5d0bd2c960a6438684be8d2981af6
+  - enabled: 1
+    path: Assets/__Scenes/_Fork_BlackRoom.unity
+    guid: c5a4851ab3a17794891bedf2e934377d
+  - enabled: 1
+    path: Assets/__Scenes/_Fork_WhiteRoom.unity
+    guid: e631392a46e83e64caa0d3d47bd14865
   m_configObjects: {}

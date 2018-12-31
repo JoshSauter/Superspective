@@ -10,7 +10,7 @@ public class Interact : MonoBehaviour {
 	Color reticleUnselectColor;
 	Color reticleSelectColor = new Color(0.15f,1,0.15f,0.9f);
 	Color reticleOutsideUnselectColor;
-	Color reticleOutsideSelectColor = new Color(0.075f, 0.5f, 0.075f, 0.45f);
+	Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
 	public float interactionDistance = 5f;
 	Transform cam;
 

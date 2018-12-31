@@ -393,7 +393,55 @@ fixed4 frag(v2f i) : SV_Target {
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG
-    }
+}
+}
+
+SubShader{
+	Tags { "RenderType" = "TransparentWithBorder" }
+	Pass {
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+#include "UnityCG.cginc"
+struct v2f {
+	float4 pos : SV_POSITION;
+	float2 uv : TEXCOORD0;
+	float4 nz : TEXCOORD1;
+	float4 vertexPos : TEXCOORD2;
+	UNITY_VERTEX_OUTPUT_STEREO
+};
+uniform float4 _MainTex_ST;
+v2f vert(appdata_base v) {
+	v2f o;
+	UNITY_SETUP_INSTANCE_ID(v);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+	o.pos = UnityObjectToClipPos(v.vertex);
+	o.vertexPos = v.vertex;
+	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+	o.nz.xyz = COMPUTE_VIEW_NORMAL;
+	o.nz.w = COMPUTE_DEPTH_01;
+	return o;
+}
+uniform sampler2D _MainTex;
+uniform fixed _Cutoff;
+uniform fixed4 _Color;
+fixed4 frag(v2f i) : SV_Target {
+	float3 worldScale = float3(
+        length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x)), // scale x axis
+        length(float3(unity_ObjectToWorld[0].y, unity_ObjectToWorld[1].y, unity_ObjectToWorld[2].y)), // scale y axis
+        length(float3(unity_ObjectToWorld[0].z, unity_ObjectToWorld[1].z, unity_ObjectToWorld[2].z))  // scale z axis
+    );
+	
+	float thresholdBase = .50 - pow(i.nz.w, 2);
+	float inset = 0.025;
+	half isBorderX = abs(i.vertexPos.x) > thresholdBase - (inset / worldScale.x) ? 1 : 0;
+	half isBorderY = abs(i.vertexPos.y) > thresholdBase - (inset / worldScale.y) ? 1 : 0;
+	half isBorderZ = abs(i.vertexPos.z) > thresholdBase - (inset / worldScale.z) ? 1 : 0;
+	clip(isBorderX + isBorderY + isBorderZ - 1.5);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+ENDCG
+}
 }
 
 SubShader {

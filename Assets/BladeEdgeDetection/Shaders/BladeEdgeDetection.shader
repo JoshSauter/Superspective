@@ -16,27 +16,27 @@
 			CGPROGRAM
 			#pragma vertex Vert
 			#pragma fragment Frag
-			
+
 			#include "UnityCG.cginc"
 			float _DebugMode;
 
 			#pragma shader_feature DOUBLE_SIDED_EDGES
-			
+
 			// Constants
 			#define NUM_SAMPLES 9
 #ifdef DOUBLE_SIDED_EDGES
 			#define SAMPLE_RANGE_START 1
 #endif
 #ifndef DOUBLE_SIDED_EDGES
-			#define SAMPLE_RANGE_START 6	// We only consider one direction (samples 6-8) when determining depth difference. This avoids double-thick edges due to adjacent pixels both finding an edge
+			#define SAMPLE_RANGE_START 7	// We only consider one direction (samples 7 & 8) when determining depth difference. This avoids double-thick edges due to adjacent pixels both finding an edge
 #endif
 			#define DEPTH_THRESHOLD_BASELINE 0.0001
 			#define DEPTH_THRESHOLD_CONSTANT 0.054
 			#define NORMAL_THRESHOLD_CONSTANT 0.1
 			#define OBLIQUENESS_FACTOR 100
-			#define OBLIQUENESS_THRESHOLD 0.9
+			#define OBLIQUENESS_THRESHOLD 0.95
 			#define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
-			
+
 			// Artifact checks -- turn off at your own risk to edge quality
 			#define FILL_IN_ARTIFACTS		// Fill in pixels which appear to be an artifact with a neighboring pixel
 			#define OBLIQUENESS_CHECK		// Make it so that surfaces viewed from a highly oblique angle requires much higher depth treshold to be an edge
@@ -48,7 +48,7 @@
 			float _DepthSensitivity;
 			float _NormalSensitivity;
 			int _SampleDistance;
-			
+
 			// Edge Colors
 			int _ColorMode;				// 0 == Simple color, 1 == Gradient from inspector, 2 == Color ramp (gradient) texture
 			fixed4 _EdgeColor;
@@ -71,29 +71,31 @@
 			half4 _CameraDepthNormalsTexture_ST;
 
 			struct UVPositions {
-				/* UVs are laid out as below
-				     -1   0   1
-				
-				    –––––––––––––
-			   -1   | 1 | 2 | 3 |
-				    |–––––––––––|
-				0   | 8 | 0 | 4 |
-				    |–––––––––––|
-				1   | 7 | 6 | 5 |
-				    –––––––––––––
+				/* UVs are laid out as below (0 is center, 1-4 are corner neighbors, 5-8 are cardinal neighbors)
+					 -1   0   1
+
+					–––––––––––––
+			   -1   | 1 | 5 | 2 |
+					|–––––––––––|
+				0   | 8 | 0 | 6 |
+					|–––––––––––|
+				1   | 4 | 7 | 3 |
+					–––––––––––––
 
 				Or, as displacement from center:
-				i:		( x,  y)
+				i:		(col, row)
 				–––––––––––––––––
-				0:		( 0,  0)
-				1:		(-1, -1)
-				2:		( 0, -1)
-				3:		( 1, -1)
-				4:		( 1,  0)
-				5:		( 1,  1)
-				6:		( 0,  1)
-				7:		(-1,  1)
-				8:		(-1,  0)
+				0:		( 0,  0)    >     center
+
+				1:		(-1, -1)    v
+				2:		( 1, -1)    |    corner neighbors
+				3:		( 1,  1)    |
+				4:		(-1,  1)    ^
+
+				5:		( 0, -1)    v
+				6:		( 1,  0)    |    cardinal neighbors
+				7:		( 0,  1)    |
+				8:		(-1,  0)    ^
 
 				*/
 				float4 vertex : SV_POSITION;
@@ -103,13 +105,13 @@
 			float ObliquenessFromNormal(float3 sampleNormal, float2 scrPos) {
 				// Credit to Keijiro Takahashi of Unity Japan (and this thread: https://forum.unity.com/threads/help-with-view-space-normals.454248/)
 				// get the perspective projection
-                float2 p11_22 = float2(unity_CameraProjection._11, unity_CameraProjection._22);
-                // convert the uvs into view space by "undoing" projection
-                float3 viewDir = -normalize(float3((scrPos * 2 - 1) / p11_22, -1));
- 
-                float fresnel = 1.0 - dot(viewDir.xyz, sampleNormal);
- 
-                return fresnel;
+				float2 p11_22 = float2(unity_CameraProjection._11, unity_CameraProjection._22);
+				// convert the uvs into view space by "undoing" projection
+				float3 viewDir = -normalize(float3((scrPos * 2 - 1) / p11_22, -1));
+
+				float fresnel = 1.0 - dot(viewDir.xyz, sampleNormal);
+
+				return fresnel;
 			}
 
 			half DepthsAreSimilar(float a, float b, float obliqueness) {
@@ -157,7 +159,7 @@
 
 			// Gradient here refers to the 2D derivative, not the color gradient
 			// Returns 1 if no discontinuities in normals are detected, 0 otherwise
-			half AllGradientsAreSimilar(half2 original, half2 topLeft, half2 topCenter, half2 topRight, half2 midRight, half2 botRight, half2 botCenter, half2 botLeft, half2 midLeft) {
+			half AllGradientsAreSimilar(half2 original, half2 topLeft, half2 topRight, half2 botRight, half2 botLeft, half2 topCenter, half2 midRight, half2 botCenter, half2 midLeft) {
 				half backslash = NormalsAreSimilar(topLeft - original, original - botRight);
 				half pipe = NormalsAreSimilar(topCenter - original, original - botCenter);
 				half slash = NormalsAreSimilar(topRight - original, original - botLeft);
@@ -166,17 +168,20 @@
 				return backslash * pipe * slash * dash;
 			}
 
-			UVPositions Vert (appdata_img v) {
+			UVPositions Vert(appdata_img v) {
 				// Constant offsets:
 				const half2 uvDisplacements[NUM_SAMPLES] = {
-					half2( 0,  0),
+					// center
+					half2(0,  0),
+					// corner neighbors
 					half2(-1, -1),
-					half2( 0, -1),
-					half2( 1, -1),
-					half2( 1,  0),
-					half2( 1,  1),
-					half2( 0,  1),
+					half2(1, -1),
+					half2(1,  1),
 					half2(-1,  1),
+					// cardinal neighbors
+					half2(0, -1),
+					half2(1,  0),
+					half2(0,  1),
 					half2(-1,  0)
 				};
 				float2 center = MultiplyUV(UNITY_MATRIX_TEXTURE0, v.texcoord);
@@ -199,8 +204,8 @@
 					// inRange is equivalent to "if (depth > _GradientKeyTimes[i-1] && depth <= _GradientKeyTimes[i])"
 					int colorInRange = (1-step(depth, _GradientKeyTimes[i-1])) * step(depth, _GradientKeyTimes[i]);
 					int alphaInRange = (1-step(depth, _GradientAlphaKeyTimes[i-1])) * step(depth, _GradientAlphaKeyTimes[i]);
-					float colorLerpValue = saturate((depth - _GradientKeyTimes[i-1])/(_GradientKeyTimes[i] - _GradientKeyTimes[i-1]) + _GradientMode);
-					float alphaLerpValue = saturate((depth - _GradientAlphaKeyTimes[i-1])/(_GradientAlphaKeyTimes[i] - _GradientAlphaKeyTimes[i-1]) + _GradientMode);
+					float colorLerpValue = saturate((depth - _GradientKeyTimes[i-1]) / (_GradientKeyTimes[i] - _GradientKeyTimes[i-1]) + _GradientMode);
+					float alphaLerpValue = saturate((depth - _GradientAlphaKeyTimes[i-1]) / (_GradientAlphaKeyTimes[i] - _GradientAlphaKeyTimes[i-1]) + _GradientMode);
 
 					colorChosen += colorInRange * lerp(_EdgeColorGradient[i-1], _EdgeColorGradient[i], colorLerpValue);
 					alphaValue += alphaInRange * lerp(_AlphaGradient[i-1], _AlphaGradient[i], alphaLerpValue);
@@ -227,8 +232,8 @@
 
 				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;
 			}
-			
-			fixed4 Frag (UVPositions uvPositions) : SV_Target {
+
+			fixed4 Frag(UVPositions uvPositions) : SV_Target {
 				fixed4 original = tex2D(_MainTex, uvPositions.UVs[0]);
 
 				// Initialize the pixel samples
@@ -243,37 +248,41 @@
 					depthSamples[d] = depthValue;
 					minDepthValue = min(minDepthValue, depthValue);
 				}
+
 				half2 normalSamples[NUM_SAMPLES];
 				for (int n = 0; n < NUM_SAMPLES; n++) {
 					normalSamples[n] = samples[n].xy;
 				}
+				float avgObliqueness = 0;
 				float obliqueness[NUM_SAMPLES];
 				for (int nd = 0; nd < NUM_SAMPLES; nd++) {
 					float dummyDepth;
 					float3 decodedNormal;
 					DecodeDepthNormal(samples[nd], dummyDepth, decodedNormal);
 					obliqueness[nd] = ObliquenessFromNormal(decodedNormal, uvPositions.UVs[nd]);
+					avgObliqueness += obliqueness[nd];
 				}
-				
+				avgObliqueness /= NUM_SAMPLES;
+
 				// Check depth similarity with surrounding samples
 				half similarDepth = 1;
 				half allDepthsAreDissimilar = 1;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
 					float depthDiff = depthSamples[0] - depthSamples[x];
-					half similar = DepthsAreSimilar(depthSamples[0], depthSamples[x], obliqueness[0]);
-					
+					half similar = DepthsAreSimilar(depthSamples[0], depthSamples[x], avgObliqueness);
+
 					// Keep track of whether all depths appear different before any double-checks
-					allDepthsAreDissimilar *= (1-similar);
+					allDepthsAreDissimilar *= (1 - similar);
 					////////////////////////
 					// Depth Double-Check //
 					////////////////////////
 					/* If an edge is detected due to sufficient difference in depth,
 					   double-check with the pixel on the opposite side.
 
-					    -------------------
-					    |  10 | 110 | 210 |  Not an edge, more likely an obliquely viewed surface
 						-------------------
-						
+						|  10 | 110 | 210 |  Not an edge, more likely an obliquely viewed surface
+						-------------------
+
 						-------------------
 						|  10 | 110 |  10 |  Not an edge, more likely to be an artifact from floating point error near two adjacent faces
 						-------------------
@@ -284,15 +293,17 @@
 					*/
 					if (similar < 1) {
 						// If the oppositeDepthDiff is similar to the depthDiff, don't consider this an edge
-						uint halfNumSamples = (NUM_SAMPLES-1)/2;
-						uint oppositeIndex = ((x + (halfNumSamples-1)) % (NUM_SAMPLES-1)) + 1;	// (1 -> 5), (2 -> 6), (3 -> 7), (4 -> 8), (5 -> 1), (6 -> 2), (7 -> 3), (8 -> 4)
+						// (1 -> 3), (2 -> 4), (3 -> 1), (4 -> 2), (5 -> 7), (6 -> 8), (7 -> 5), (8 -> 6)
+						uint oppositeIndex = 4 * step(5, x) + ((x + 1) % 4 + 1);
 						float oppositeDepthDiff = depthSamples[oppositeIndex] - depthSamples[0];
-						similar = (abs(oppositeDepthDiff-depthDiff) * _DepthSensitivity < DEPTH_THRESHOLD_CONSTANT * depthSamples[0] * obliqueness[0]) ? 1 : 0;
+						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6], 1));
+
+						similar = max(isBorder, (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) < DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0);
 					}
 
 					// We only consider one direction (samples SAMPLE_RANGE_START <-> NUM_SAMPLES) when determining depth difference
 					// equivalent to "if (x >= SAMPLE_RANGE_START) similarDepth *= similar;"
-					similarDepth *= max(similar, (1-step(SAMPLE_RANGE_START, x)));
+					similarDepth *= max(similar, (1 - step(SAMPLE_RANGE_START, x)));
 				}
 
 #ifdef FILL_IN_ARTIFACTS
@@ -308,10 +319,10 @@
 #ifdef DEPTH_ARTIFACT_CHECK
 				if (similarDepth < 1) {
 					// If the depths of a +Cross or xCross are similar, don't consider this an edge
-					half crossIsSimilar = FourDepthArtifactCheck(depthSamples[2], depthSamples[4], depthSamples[6], depthSamples[8],
-																  obliqueness[2],  obliqueness[4],  obliqueness[6],  obliqueness[8]);
-					half xCrossIsSimilar = FourDepthArtifactCheck(depthSamples[1], depthSamples[3], depthSamples[5], depthSamples[7],
-					                                               obliqueness[1],  obliqueness[3],  obliqueness[5],  obliqueness[7]);
+					half crossIsSimilar = FourDepthArtifactCheck(depthSamples[5], depthSamples[6], depthSamples[7], depthSamples[8],
+																  obliqueness[5],  obliqueness[6],  obliqueness[7],  obliqueness[8]);
+					half xCrossIsSimilar = FourDepthArtifactCheck(depthSamples[1], depthSamples[2], depthSamples[3], depthSamples[4],
+																   obliqueness[1],  obliqueness[2],  obliqueness[3],  obliqueness[4]);
 
 					similarDepth = max(crossIsSimilar, xCrossIsSimilar);
 				}
@@ -344,8 +355,8 @@
 					half xCrossIsSimilar = 0;
 					half gradientIsSimilar = 0;
 #ifdef NORMAL_ARTIFACT_CHECK
-					crossIsSimilar = FourNormalArtifactCheck(normalSamples[2], normalSamples[4], normalSamples[6], normalSamples[8]);
-					xCrossIsSimilar = FourNormalArtifactCheck(normalSamples[1], normalSamples[3], normalSamples[5], normalSamples[7]);
+					crossIsSimilar = FourNormalArtifactCheck(normalSamples[5], normalSamples[6], normalSamples[7], normalSamples[8]);
+					xCrossIsSimilar = FourNormalArtifactCheck(normalSamples[1], normalSamples[2], normalSamples[3], normalSamples[4]);
 #endif
 					/*  Additionally, if there is a smooth and continuous difference in normals across the samples,
 						it is more likely that this is a smoothly curved object rather than a true edge

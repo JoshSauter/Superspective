@@ -21,14 +21,14 @@ public class StaircaseRotate : MonoBehaviour {
 	public RotationAxes axisOfRotation;
 	public float currentRotation = 0;
 
-    Collider stairCollider;
+    MeshRenderer stairRenderer;
 
 	float startEndGap = 0.25f;
 
 	// Use this for initialization
 	void Start () {
         startRot = transform.parent.rotation.eulerAngles;
-        stairCollider = GetComponent<Collider>();
+        stairRenderer = transform.parent.GetComponent<MeshRenderer>();
 		globalDirectionalLight = GameObject.Find("Directional Light").transform;
 	}
 
@@ -127,17 +127,17 @@ public class StaircaseRotate : MonoBehaviour {
 	float GetStartPosition() {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
-				return stairCollider.bounds.min.z + startEndGap;
+				return stairRenderer.bounds.min.z + startEndGap;
 			case RotationAxes.left:
-				return stairCollider.bounds.max.z - startEndGap;
+				return stairRenderer.bounds.max.z - startEndGap;
 			case RotationAxes.up:
 			case RotationAxes.down:
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
 			case RotationAxes.forward:
-				return stairCollider.bounds.min.x + startEndGap;
+				return stairRenderer.bounds.min.x + startEndGap;
 			case RotationAxes.back:
-				return stairCollider.bounds.max.x - startEndGap;
+				return stairRenderer.bounds.max.x - startEndGap;
 			default:
 				Debug.LogError("Unreachable");
 				return 0;
@@ -147,9 +147,9 @@ public class StaircaseRotate : MonoBehaviour {
 	float GetEndPosition() {
 		switch (axisOfRotation) {
 			case RotationAxes.right:
-				return stairCollider.bounds.max.z - startEndGap;
+				return stairRenderer.bounds.max.z - startEndGap;
 			case RotationAxes.left:
-				return stairCollider.bounds.min.z + startEndGap;
+				return stairRenderer.bounds.min.z + startEndGap;
 			case RotationAxes.up:
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
@@ -157,9 +157,9 @@ public class StaircaseRotate : MonoBehaviour {
 				Debug.LogError("Up/Down not handled yet");
 				return 0;
 			case RotationAxes.forward:
-				return stairCollider.bounds.max.x - startEndGap;
+				return stairRenderer.bounds.max.x - startEndGap;
 			case RotationAxes.back:
-				return stairCollider.bounds.min.x + startEndGap;
+				return stairRenderer.bounds.min.x + startEndGap;
 			default:
 				Debug.LogError("Unreachable");
 				return 0;

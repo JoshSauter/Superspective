@@ -4,11 +4,11 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: WireframeBallCenter-back
   m_Shader: {fileID: 4800000, guid: a4b63b3e692df5f4483e2ecf8241a38e, type: 3}
-  m_ShaderKeywords: _OBJECTSPACE_ON _REMOVEDIAGONAL_ON
+  m_ShaderKeywords: _IGNOREMODELTRANSFORMDIAGONALREMOVAL_ON _OBJECTSPACE_ON _REMOVEDIAGONAL_ON
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
