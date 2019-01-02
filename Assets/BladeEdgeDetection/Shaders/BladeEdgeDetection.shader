@@ -30,7 +30,7 @@
 #ifndef DOUBLE_SIDED_EDGES
 			#define SAMPLE_RANGE_START 7	// We only consider one direction (samples 7 & 8) when determining depth difference. This avoids double-thick edges due to adjacent pixels both finding an edge
 #endif
-			#define DEPTH_THRESHOLD_BASELINE 0.0001
+			#define DEPTH_THRESHOLD_BASELINE 0.001
 			#define DEPTH_THRESHOLD_CONSTANT 0.054
 			#define NORMAL_THRESHOLD_CONSTANT 0.1
 			#define OBLIQUENESS_FACTOR 100
@@ -297,8 +297,9 @@
 						uint oppositeIndex = 4 * step(5, x) + ((x + 1) % 4 + 1);
 						float oppositeDepthDiff = depthSamples[oppositeIndex] - depthSamples[0];
 						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6], 1));
-
-						similar = max(isBorder, (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) < DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0);
+						float ratio = max(abs(depthDiff), abs(oppositeDepthDiff)) / min(abs(depthDiff), abs(oppositeDepthDiff));
+						half similarDiffs = (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) * abs(depthDiff) < abs(oppositeDepthDiff) * DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
+						similar = max(isBorder, similarDiffs);
 					}
 
 					// We only consider one direction (samples SAMPLE_RANGE_START <-> NUM_SAMPLES) when determining depth difference
