@@ -11,13 +11,13 @@ public class OutOfBoundsTrigger : MonoBehaviour {
 	}
 
 	private void OnTriggerEnter(Collider other) {
-		if (other.tag.TaggedAsPlayer()) {
+		if (other.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(true);
 		}
 	}
 
 	private void OnTriggerExit(Collider other) {
-		if (other.tag.TaggedAsPlayer()) {
+		if (other.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(false);
 		}
 	}

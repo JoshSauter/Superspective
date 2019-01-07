@@ -67,7 +67,7 @@ public class PlayerMovement : MonoBehaviour {
 			HandleAirMovement();
 		}
 
-		if (!input.LeftStickHeld && !input.SpaceHeld && ground.collider != null && ground.collider.tag == "Staircase") {
+		if (!input.LeftStickHeld && !input.SpaceHeld && ground.collider != null && ground.collider.CompareTag("Staircase")) {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		}
 		else {
@@ -102,7 +102,7 @@ public class PlayerMovement : MonoBehaviour {
 			thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
 		}
 		else {
-			float adjustedMovespeed = (ground.collider.tag == "Staircase") ? walkSpeed : movespeed;
+			float adjustedMovespeed = (ground.collider.CompareTag("Staircase")) ? walkSpeed : movespeed;
 			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, 0.2f);
 		}
 	}
@@ -217,7 +217,7 @@ public class PlayerMovement : MonoBehaviour {
 			Debug.DrawRay(transform.position, -transform.up * ((transform.localScale.y * thisCollider.height) / 2f + 0.02f), Color.yellow, 0.2f);
 		}
 		foreach (RaycastHit curHitInfo in allHit) {
-			if (!(curHitInfo.collider.tag == "Ground" || curHitInfo.collider.tag == "Staircase")) continue;
+			if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 
 			// Return the first ground-like object hit

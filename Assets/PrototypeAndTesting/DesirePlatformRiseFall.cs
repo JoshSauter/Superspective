@@ -51,7 +51,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// </summary>
 	/// <param name="other">Object inside the trigger zone</param>
 	private void OnTriggerEnter(Collider other) {
-		if (playerLook == null && other.tag.TaggedAsPlayer()) {
+		if (playerLook == null && other.TaggedAsPlayer()) {
 			playerLook = other.transform.GetComponent<PlayerLook>();
 		}
 	}
@@ -61,7 +61,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// </summary>
 	/// <param name="other">Object that has just left the trigger zone</param>
 	private void OnTriggerExit(Collider other) {
-		if (playerLook != null && other.tag.TaggedAsPlayer()) {
+		if (playerLook != null && other.TaggedAsPlayer()) {
 			playerLook = null;
 		}
 	}

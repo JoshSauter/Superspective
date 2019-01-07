@@ -10,7 +10,7 @@ public class EndOfDevelopedAreaMessage : MonoBehaviour {
 	public TMPro.TextMeshProUGUI text;
 
 	private void OnTriggerEnter(Collider other) {
-		if (other.tag.TaggedAsPlayer()) {
+		if (other.TaggedAsPlayer()) {
 			StartCoroutine(DisplayEndOfDevelopedAreaMessage());
 		}
 	}

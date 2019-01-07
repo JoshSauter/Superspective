@@ -65,7 +65,7 @@ public class ObscurePillar : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		mainCamera = Camera.main;
+		mainCamera = EpitaphScreen.instance.playerCamera;
 		pillarRenderer = GetComponent<Renderer>();
 		roomBoundsMask = 1 << LayerMask.NameToLayer("WallOnly") | 1 << LayerMask.NameToLayer("RoomBounds");
 		bottomOfPillar = pillarRenderer.bounds.center - Vector3.up * pillarRenderer.bounds.size.y / 2f;

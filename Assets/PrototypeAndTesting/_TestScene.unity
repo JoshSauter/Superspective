@@ -309,7 +309,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15268
+  m_Name: pb_Mesh1073376
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -469,7 +469,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16044
+  m_Name: pb_Mesh1074150
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -3502,6 +3502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 1758143887}
@@ -3510,6 +3511,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.5736309, b: 0.77254903, a: 1}
@@ -5617,7 +5619,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1424
+  m_Name: pb_Mesh-69022478
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -6385,7 +6387,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14716
+  m_Name: pb_Mesh1072786
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -7196,6 +7198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 252779063}
@@ -7204,6 +7207,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.7463151, a: 1}
@@ -8205,7 +8209,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8478,6 +8482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 695032457}
@@ -8486,6 +8491,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.24435437, a: 1}
@@ -9846,6 +9852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 210051773}
@@ -9854,6 +9861,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.6436782, b: 0.16470587, a: 1}
@@ -10855,7 +10863,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11148,6 +11156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 210051773}
@@ -11156,6 +11165,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 2
   materialColor: {r: 0.77205884, g: 0.16463022, b: 0.16463022, a: 1}
@@ -12157,7 +12167,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12421,6 +12431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 204387609}
@@ -12429,6 +12440,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.39107504, b: 0.16470587, a: 1}
@@ -13430,7 +13442,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13820,7 +13832,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15216
+  m_Name: pb_Mesh1524354
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -15306,6 +15318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 990340506}
@@ -15314,6 +15327,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.54617983, a: 1}
@@ -16315,7 +16329,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16408,6 +16422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 637682690}
@@ -16416,6 +16431,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.5890467, g: 0.16470587, b: 0.77254903, a: 1}
@@ -17417,7 +17433,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -18550,6 +18566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 388961050}
@@ -18558,6 +18575,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 2
   materialColor: {r: 0.77205884, g: 0.16463022, b: 0.16463022, a: 1}
@@ -19063,7 +19081,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16228
+  m_Name: pb_Mesh1074334
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -19962,7 +19980,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15042
+  m_Name: pb_Mesh1073126
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -21166,6 +21184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 258599817}
@@ -21174,6 +21193,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.39107504, b: 0.16470587, a: 1}
@@ -23141,6 +23161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 388961050}
@@ -23149,6 +23170,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.6436782, b: 0.16470587, a: 1}
@@ -24724,7 +24746,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1420
+  m_Name: pb_Mesh1524312
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -24884,7 +24906,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1836
+  m_Name: pb_Mesh-59523670
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -31012,7 +31034,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15394
+  m_Name: pb_Mesh1073502
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -31177,7 +31199,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-15162824
+  m_Name: pb_Mesh1072560
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -31340,7 +31362,6 @@ GameObject:
   - component: {fileID: 541890889}
   - component: {fileID: 541890888}
   - component: {fileID: 541890887}
-  - component: {fileID: 541890886}
   - component: {fileID: 541890885}
   m_Layer: 0
   m_Name: SquarePortal (3)
@@ -31376,48 +31397,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   channel: 1
   useMeshAsCollider: 0
-  portalFrameDepth: 4
+  portalFrameDepth: 0
   useCameraEdgeDetectionColor: 0
   portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
---- !u!114 &541890886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 541890883}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc84244601da3d84aac5053567a98977, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  otherPortal: {fileID: 414700283}
-  channel: 1
-  useCameraEdgeDetectionColor: 0
-  portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
-  teleportOnEnter: 1
-  portalFrameDepth: 1
-  colliderOffset: 0
-  useMeshAsCollider: 1
-  isInitialized: 0
-  portals:
-  - {fileID: 0}
-  - {fileID: 0}
-  triggerColliders:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalForwards:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  portalCameraTextures:
-  - {fileID: 0}
-  - {fileID: 0}
-  playerCamera: {fileID: 0}
-  portalCameras:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalTeleportEnters:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!64 &541890887
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -31739,6 +31721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 188897609}
@@ -31747,6 +31730,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.549831, g: 0.77254903, b: 0.16470587, a: 1}
@@ -32748,7 +32732,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -36580,6 +36564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 953841608}
@@ -36588,6 +36573,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 1
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0, g: 0, b: 0, a: 1}
@@ -37984,7 +37970,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14890
+  m_Name: pb_Mesh1523994
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -38237,7 +38223,6 @@ GameObject:
   - component: {fileID: 597640579}
   - component: {fileID: 597640578}
   - component: {fileID: 597640577}
-  - component: {fileID: 597640576}
   - component: {fileID: 597640575}
   - component: {fileID: 597640582}
   m_Layer: 0
@@ -38253,14 +38238,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 597640573}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 11, y: 0, z: -5.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1686729576}
   m_Father: {fileID: 272869202}
   m_RootOrder: 17
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &597640575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38274,48 +38259,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   channel: 1
   useMeshAsCollider: 0
-  portalFrameDepth: 4
+  portalFrameDepth: 0
   useCameraEdgeDetectionColor: 0
   portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
---- !u!114 &597640576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 597640573}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc84244601da3d84aac5053567a98977, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  otherPortal: {fileID: 414700283}
-  channel: 1
-  useCameraEdgeDetectionColor: 0
-  portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
-  teleportOnEnter: 1
-  portalFrameDepth: 1
-  colliderOffset: 0
-  useMeshAsCollider: 1
-  isInitialized: 0
-  portals:
-  - {fileID: 0}
-  - {fileID: 0}
-  triggerColliders:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalForwards:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  portalCameraTextures:
-  - {fileID: 0}
-  - {fileID: 0}
-  playerCamera: {fileID: 0}
-  portalCameras:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalTeleportEnters:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!64 &597640577
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -38595,7 +38541,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 597640573}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ae61fbe535b6f4656964521aafe95063, type: 3}
   m_Name: 
@@ -39016,7 +38962,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   channel: 2
   useMeshAsCollider: 1
-  portalFrameDepth: 1
+  portalFrameDepth: 0
   useCameraEdgeDetectionColor: 1
   portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!4 &636902677 stripped
@@ -39072,6 +39018,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 729159360}
@@ -39080,6 +39027,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.21081802, g: 0.16470587, b: 0.77254903, a: 1}
@@ -40081,7 +40029,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -42023,7 +41971,7 @@ Prefab:
       objectReference: {fileID: 1190237642}
     - target: {fileID: 1937617952568190, guid: 6a5a7c571b561c04c8d25de9db629132, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114365277599914046, guid: 6a5a7c571b561c04c8d25de9db629132,
         type: 2}
@@ -42550,6 +42498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 414969215}
@@ -42558,6 +42507,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.549831, g: 0.77254903, b: 0.16470587, a: 1}
@@ -44068,6 +44018,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 164908128}
@@ -44076,6 +44027,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.5736309, b: 0.77254903, a: 1}
@@ -45077,7 +45029,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -46046,7 +45998,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3721506
+  m_Name: pb_Mesh1073856
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -57755,7 +57707,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3720682
+  m_Name: pb_Mesh1072930
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -59393,7 +59345,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3720398
+  m_Name: pb_Mesh1072644
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -59589,6 +59541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 1354428411}
@@ -59597,6 +59550,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.16470587, b: 0.60486805, a: 1}
@@ -60651,7 +60605,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3720712
+  m_Name: pb_Mesh1072976
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -61186,7 +61140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &971883688
 Transform:
   m_ObjectHideFlags: 0
@@ -63048,6 +63002,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 543121321}
@@ -63056,6 +63011,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.24435437, a: 1}
@@ -64057,7 +64013,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -64147,6 +64103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 1882871636}
@@ -64155,6 +64112,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 1
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0, g: 0, b: 0, a: 1}
@@ -72298,7 +72256,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1834
+  m_Name: pb_Mesh1074550
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -73125,7 +73083,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1422
+  m_Name: pb_Mesh-69022476
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -73622,7 +73580,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1428901253103242, guid: 206d74d9e5beafe40ab5bc120fed8356, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114199092394019786, guid: 206d74d9e5beafe40ab5bc120fed8356,
         type: 2}
@@ -74529,7 +74487,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3721824
+  m_Name: pb_Mesh1074194
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -75376,7 +75334,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14638
+  m_Name: pb_Mesh1072722
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -77263,6 +77221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 1691367615}
@@ -77271,6 +77230,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.5890467, g: 0.16470587, b: 0.77254903, a: 1}
@@ -78508,7 +78468,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14754
+  m_Name: pb_Mesh1072824
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -79469,7 +79429,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-1838
+  m_Name: pb_Mesh-59523672
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -79799,6 +79759,161 @@ Prefab:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 9bd16d784372b4647bbe7ffe2670373a, type: 2}
   m_IsPrefabAsset: 0
+--- !u!43 &1425294534
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: pb_Mesh-59606544
+  serializedVersion: 9
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 30
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 20
+    localAABB:
+      m_Center: {x: 0, y: 4.875, z: 2}
+      m_Extent: {x: 5, y: 4.875, z: 2}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000001000200000002000300040005000600040006000700080009000a0008000a000b000c000d000e000c000e000f00100011001200100012001300
+  m_VertexData:
+    serializedVersion: 2
+    m_VertexCount: 20
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 24
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 40
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 56
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 64
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 1440
+    _typelessdata: 0000a0c000001c41000000800000803f000000000000000000000000000000000000803f000080bf0000803f0000803f0000803f0000803f0000008000001c4173537d3ff227543e0000a0c000001c41000080400000803f000000000000000000000000000000000000803f000080bf0000803f0000803f0000803f0000803f0000804000001c416c537d3f8cdccf3e0000a0c00000803e000080400000803f000000000000000000000000000000000000803f000080bf0000803f0000803f0000803f0000803f000080400000803e4475043f8cdccf3e0000a0c000000000000000800000803f000000000000000000000000000000000000803f000080bf0000803f0000803f0000803f0000803f00000080000000000247013ff227543e0000a0c000001c41000080400000000000000000000080bf0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c000001c41da40003f98d2613f0000a04000001c41000080400000000000000000000080bf0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a04000001c418912833b98d2613f0000a0400000803e000080400000000000000000000080bf0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0400000803e6f12833bd7e8d13e0000a0c00000803e000080400000000000000000000080bf0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c00000803eda40003fd7e8d13e0000a04000001c4100008040000080bf00000000000000000000000000000000000080bf000080bf0000803f0000803f0000803f0000803f000080c000001c410347013fb8a94f3e0000a04000001c4100000080000080bf00000000000000000000000000000000000080bf000080bf0000803f0000803f0000803f0000803f0000000000001c410a47013f6f12833b0000a0400000000000000080000080bf00000000000000000000000000000000000080bf000080bf0000803f0000803f0000803f0000803f000000000000000076537d3f6f12833b0000a0400000803e00008040000080bf00000000000000000000000000000000000080bf000080bf0000803f0000803f0000803f0000803f000080c00000803e31257a3fb8a94f3e0000a04000001c410000804000000000000080bf00000000000080bf0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c000008040dd40003f8ddccf3e0000a0c000001c410000804000000000000080bf00000000000080bf0000000000000000000080bf0000803f0000803f0000803f0000803f0000a040000080406f12833b87dccf3e0000a0c000001c410000008000000000000080bf00000000000080bf0000000000000000000080bf0000803f0000803f0000803f0000803f0000a040000000007012833bf227543e0000a04000001c410000008000000000000080bf00000000000080bf0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c000000000dd40003ffd27543e0000a04000000000000000800000000060807f3f60807fbd0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a040000000006f12833b6f12833b0000a0c000000000000000800000000060807f3f60807fbd0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c000000000dd40003f6f12833b0000a0c00000803e000080400000000060807f3f60807fbd0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a0c0f03f8040de40003f5f0f503e0000a0400000803e000080400000000060807f3f60807fbd0000803f0000000000000000000080bf0000803f0000803f0000803f0000803f0000a040f03f8040f812833b5f0f503e
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: 4.875, z: 2}
+    m_Extent: {x: 5, y: 4.875, z: 2}
+  m_MeshUsageFlags: 0
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  m_MeshMetrics[0]: 1
+  m_MeshMetrics[1]: 1
+  m_MeshOptimized: 0
 --- !u!1001 &1426222784
 Prefab:
   m_ObjectHideFlags: 0
@@ -80608,7 +80723,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14618
+  m_Name: pb_Mesh1072702
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -80768,7 +80883,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15180
+  m_Name: pb_Mesh1073288
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -81094,7 +81209,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3720310
+  m_Name: pb_Mesh1072542
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -81249,7 +81364,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1021484
+  m_Name: pb_Mesh1074096
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -82837,7 +82952,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1020628
+  m_Name: pb_Mesh1524272
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -83715,7 +83830,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3721750
+  m_Name: pb_Mesh1074120
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -86105,7 +86220,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1020496
+  m_Name: pb_Mesh1524142
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -86626,7 +86741,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1686729576
 Transform:
   m_ObjectHideFlags: 0
@@ -86634,7 +86749,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1686729575}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -8, y: 0, z: 0}
+  m_LocalPosition: {x: -8, y: 0, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 597640574}
@@ -87976,6 +88091,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 63184493}
@@ -87984,6 +88100,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.21081802, g: 0.16470587, b: 0.77254903, a: 1}
@@ -89302,7 +89419,7 @@ GameObject:
   - component: {fileID: 1704315184}
   m_Layer: 10
   m_Name: Room
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -94459,6 +94576,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 1871303251}
@@ -94467,6 +94585,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.7463151, a: 1}
@@ -96234,7 +96353,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14590
+  m_Name: pb_Mesh1072674
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -97989,34 +98108,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc84244601da3d84aac5053567a98977, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  otherPortal: {fileID: 1395830321}
-  channel: -1
-  useCameraEdgeDetectionColor: 1
-  portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
-  teleportOnEnter: 1
-  portalFrameDepth: 0
-  colliderOffset: 0
-  useMeshAsCollider: 0
-  isInitialized: 0
-  portals:
-  - {fileID: 0}
-  - {fileID: 0}
-  triggerColliders:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalForwards:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 0}
-  portalCameraTextures:
-  - {fileID: 0}
-  - {fileID: 0}
-  playerCamera: {fileID: 0}
-  portalCameras:
-  - {fileID: 0}
-  - {fileID: 0}
-  portalTeleportEnters:
-  - {fileID: 0}
-  - {fileID: 0}
+  otherPortal: {fileID: 0}
+  settings: {fileID: 0}
+  teleporter: {fileID: 0}
+  volumetricPortalTrigger: {fileID: 0}
+  volumetricPortal: {fileID: 0}
 --- !u!64 &1870764202
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -98215,6 +98311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 175706838}
@@ -98223,6 +98320,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.16470587, g: 0.77254903, b: 0.54617983, a: 1}
@@ -99351,6 +99449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d0454921691544449a2f1ab4eac2a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   findPillarsTechnique: 0
   whitelist:
   - {fileID: 253832264}
@@ -99359,6 +99458,7 @@ MonoBehaviour:
   pillarSearchBoxSize: {x: 80, y: 80, z: 80}
   setLayerRecursively: 0
   setMaterialColorOnStart: 1
+  setMaterialColorOnStateChange: 1
   swapRevealDirection: 0
   startingVisibilityState: 0
   materialColor: {r: 0.77254903, g: 0.16470587, b: 0.60486805, a: 1}
@@ -100375,7 +100475,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 7b804f9c83f561a49a36b54c380c9503, type: 2}
+  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -100586,6 +100686,66 @@ Prefab:
     m_RemovedComponents:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 9bd16d784372b4647bbe7ffe2670373a, type: 2}
+  m_IsPrefabAsset: 0
+--- !u!1001 &1892212277
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 89181849}
+    m_Modifications:
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4223286437098638, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 64051844785378738, guid: c3da90ca1b3290f458fdee2399242f29,
+        type: 2}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 1425294534}
+    - target: {fileID: 33113587474754294, guid: c3da90ca1b3290f458fdee2399242f29,
+        type: 2}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 1425294534}
+    - target: {fileID: 1596026335220914, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1596026335220914, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
+      propertyPath: m_Name
+      value: Test
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c3da90ca1b3290f458fdee2399242f29, type: 2}
   m_IsPrefabAsset: 0
 --- !u!1001 &1898464469
 Prefab:
@@ -105657,7 +105817,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15454
+  m_Name: pb_Mesh1073562
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -107407,7 +107567,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14734
+  m_Name: pb_Mesh1072804
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -107752,7 +107912,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh14540
+  m_Name: pb_Mesh1072624
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -108106,7 +108266,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3721010
+  m_Name: pb_Mesh1073346
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -109199,7 +109359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   channel: 2
   useMeshAsCollider: 1
-  portalFrameDepth: 1
+  portalFrameDepth: 0
   useCameraEdgeDetectionColor: 1
   portalEdgeDetectionColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1001 &2106399755
@@ -109280,7 +109440,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1020920
+  m_Name: pb_Mesh1073532
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -109435,7 +109595,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-15151494
+  m_Name: pb_Mesh1074374
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -109947,7 +110107,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh3721938
+  m_Name: pb_Mesh1074308
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2

@@ -1,31 +1,35 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class CameraDebugOverlay : MonoBehaviour {
+	[SerializeField]
 	Material mat;
 
 	KeyCode modeSwitchKey = KeyCode.N;
 
+	public enum DebugMode {
+		depth,
+		normals,
+		obliqueness,
+		off
+	}
+	public DebugMode debugMode = DebugMode.off;
+
 	private const int NUM_MODES = 4;
-	private int _mode = NUM_MODES-1;
 	int mode {
 		get {
-			return _mode;
-		}
-		set {
-			if (value > NUM_MODES - 1) _mode = 0;
-			else _mode = value;
+			return (int)debugMode;
 		}
 	}
 
 	void Start() {
 		GetComponent<Camera>().depthTextureMode = DepthTextureMode.DepthNormals;
-		mat = Resources.Load<Material>("Materials/DepthNormalOverlay");
 	}
 
 	private void Update() {
 		if (Input.GetKeyDown(modeSwitchKey)) {
-			mode++;
+			debugMode = (DebugMode)(((int)debugMode + 1) % NUM_MODES);
 		}
 	}
 

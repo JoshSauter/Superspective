@@ -37,7 +37,7 @@ public class StaircaseRotate : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
-        if (other.tag.TaggedAsPlayer()) {
+        if (other.TaggedAsPlayer()) {
 			float t = GetPlayerLerpPosition(other);
 			int staircaseDownMultiplier = staircaseDown ? -1 : 1;
 			float desiredRotation = 90 * t * staircaseDownMultiplier;

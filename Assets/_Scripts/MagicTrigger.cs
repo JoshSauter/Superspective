@@ -41,6 +41,8 @@ public class MagicTrigger : MonoBehaviour {
 	public event MagicAction OnNegativeMagicTriggerStay;
 	public event MagicAction OnNegativeMagicTriggerEnter;
 	public event MagicAction OnNegativeMagicTriggerStayOneTime;
+
+	public event MagicAction OnMagicTriggerExit;
 #endregion
 
 	private bool hasTriggeredOnStay = false;
@@ -50,7 +52,7 @@ public class MagicTrigger : MonoBehaviour {
 	private void OnTriggerStay(Collider other) {
 		if (!enabled) return;
 
-        if (other.gameObject.tag.TaggedAsPlayer()) {
+        if (other.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
@@ -104,7 +106,7 @@ public class MagicTrigger : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
 		if (!enabled) return;
 
-        if (other.gameObject.tag.TaggedAsPlayer()) {
+        if (other.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
             if (DEBUG) {
                 print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
@@ -128,7 +130,11 @@ public class MagicTrigger : MonoBehaviour {
 	private void OnTriggerExit(Collider other) {
 		if (!enabled) return;
 
-		if (other.gameObject.tag.TaggedAsPlayer()) {
+		if (other.TaggedAsPlayer()) {
+			if (OnMagicTriggerExit != null) {
+				OnMagicTriggerExit(other);
+			}
+
 			if (hasTriggeredOnStay) {
 				hasTriggeredOnStay = false;
 			}
