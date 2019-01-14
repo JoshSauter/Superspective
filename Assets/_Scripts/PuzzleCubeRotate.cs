@@ -20,7 +20,6 @@ public class PuzzleCubeRotate : MonoBehaviour {
 	// Use this for initialization
 	IEnumerator DoRotations () {
 		period = GetComponent<ObjectScale>().period;
-		print("Start");
 		int i = startRotate;
 		while (enabled) {
 			yield return new WaitForSeconds((period - rotationTime) / 2f);

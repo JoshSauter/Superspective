@@ -28,6 +28,7 @@ public class BladeEdgeDetection : MonoBehaviour {
 	[SerializeField]
 	Shader edgeDetectShader;
 	Material shaderMaterial;
+	Camera thisCamera;
 
 	private const int GRADIENT_ARRAY_SIZE = 10;
 	
@@ -51,7 +52,8 @@ public class BladeEdgeDetection : MonoBehaviour {
 		else {
 			shaderMaterial.DisableKeyword("DOUBLE_SIDED_EDGES");
 		}
-		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity);
+		// Note: Depth sensitivity originally calibrated for camera with a far plane of 400, this normalizes it for other cameras
+		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity * (thisCamera.farClipPlane/400));
 		shaderMaterial.SetFloat("_NormalSensitivity", normalSensitivity);
 		shaderMaterial.SetInt("_SampleDistance", sampleDistance);
 
@@ -99,7 +101,8 @@ public class BladeEdgeDetection : MonoBehaviour {
 	}
 
 	private void SetDepthNormalTextureFlag () {
-		GetComponent<Camera>().depthTextureMode = DepthTextureMode.DepthNormals;
+		if (thisCamera == null) thisCamera = GetComponent<Camera>();
+		thisCamera.depthTextureMode = DepthTextureMode.DepthNormals;
 	}
 
 	private bool CreateMaterial() {

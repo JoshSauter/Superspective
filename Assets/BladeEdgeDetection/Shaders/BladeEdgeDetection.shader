@@ -31,15 +31,13 @@
 			#define SAMPLE_RANGE_START 7	// We only consider one direction (samples 7 & 8) when determining depth difference. This avoids double-thick edges due to adjacent pixels both finding an edge
 #endif
 			#define DEPTH_THRESHOLD_BASELINE 0.001
-			#define DEPTH_THRESHOLD_CONSTANT 0.054
+			#define DEPTH_THRESHOLD_CONSTANT 0.16
 			#define NORMAL_THRESHOLD_CONSTANT 0.1
-			#define OBLIQUENESS_FACTOR 100
 			#define OBLIQUENESS_THRESHOLD 0.95
 			#define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
 
 			// Artifact checks -- turn off at your own risk to edge quality
 			#define FILL_IN_ARTIFACTS		// Fill in pixels which appear to be an artifact with a neighboring pixel
-			#define OBLIQUENESS_CHECK		// Make it so that surfaces viewed from a highly oblique angle requires much higher depth treshold to be an edge
 			#define DEPTH_ARTIFACT_CHECK	// Checks in a cross and plus pattern around the pixel to check for artifacts from depth-detected edges
 			#define NORMAL_ARTIFACT_CHECK	// Checks in a cross and plus pattern around the pixel to check for artifacts from normal-detected edges
 			#define SMOOTH_SURFACE_CHECK	// Makes it so that rounded edges appear less often as normal-detected edges by checking the gradient of normal changes
@@ -101,6 +99,12 @@
 				float4 vertex : SV_POSITION;
 				float2 UVs[NUM_SAMPLES] : TEXCOORD0;
 			};
+			
+			// Returns the coordinate on the opposite side of the center
+			// (1 -> 3), (2 -> 4), (3 -> 1), (4 -> 2), (5 -> 7), (6 -> 8), (7 -> 5), (8 -> 6)
+			int GetOppositeIndex(int i) {
+				return 4 * step(5, i) + ((i + 1) % 4 + 1);
+			}
 
 			float ObliquenessFromNormal(float3 sampleNormal, float2 scrPos) {
 				// Credit to Keijiro Takahashi of Unity Japan (and this thread: https://forum.unity.com/threads/help-with-view-space-normals.454248/)
@@ -114,18 +118,45 @@
 				return fresnel;
 			}
 
-			half DepthsAreSimilar(float a, float b, float obliqueness) {
-				float obliquenessMultiplier = 1;
-#ifdef OBLIQUENESS_CHECK
-				// Highly oblique angles have more tolerance for differences in depth values
-				// "if (obliqueness > OBLIQUENESS_THRESHOLD) obliqueness = 0;"
-				obliquenessMultiplier = 1 + OBLIQUENESS_FACTOR * (step(OBLIQUENESS_THRESHOLD, obliqueness) * obliqueness);
-#endif
-				// Further values have more tolerance for difference in depth values
-				float depthThreshold = DEPTH_THRESHOLD_BASELINE + obliquenessMultiplier * DEPTH_THRESHOLD_CONSTANT * min(a, b);
-				float depthDiff = abs(a - b);
+			/* Depth edges are detected based on differences in the ratio of depth values between
+				the sample pixel x with the center pixel, and the opposite pixel x' with the center pixel.
+				For example, consider the following made-up depth values below:
+				-------------------
+				|  x  | mid |  x' |  depthRatio = x/mid, oppositeDepthRatio = x'/mid
+				-------------------
 
-				int isSameDepth = depthDiff * _DepthSensitivity < depthThreshold;
+				-------------------
+				|  10 | 110 | 210 |  Not an edge, more likely an obliquely viewed surface
+				-------------------
+
+				-------------------
+				|  10 | 110 |  10 |  Not an edge, more likely to be an artifact from floating point error near two adjacent faces
+				-------------------
+
+				-------------------
+				|  10 | 110 | 120 |  More likely an edge than an obliquely viewed surface
+				-------------------
+			*/
+			half DepthRatiosAreSimilar(float center, float a, float b, float obliqueness) {
+				float depthRatio = max(a, center) / min(a, center);
+				float oppositeDepthRatio = max(b, center) / min(b, center);
+				
+				// Highly oblique angles have more tolerance for differences in depth ratios (due to perspective)
+				float obliquenessModifier = (1-obliqueness);
+
+				// Multiplied by magic number 100 just to keep things from getting too close to underflow levels (DEPTH_THRESHOLD_CONSTANT is 100x higher to compensate)
+				// Lower depth values == higher depth ratio diffs to be considered an edge (2:1 ratio means very different things at low depth values and high depth values)
+				int isSameDepth = 100 * (depthRatio - oppositeDepthRatio) * _DepthSensitivity * center * obliquenessModifier < DEPTH_THRESHOLD_CONSTANT;
+				return isSameDepth ? 1.0 : 0.0;
+			}
+
+			half DepthValuesAreSimilar(float a, float b, float obliqueness) {
+				// Further values have more tolerance for difference in depth values
+				float depthThreshold = DEPTH_THRESHOLD_BASELINE + DEPTH_THRESHOLD_CONSTANT * min(a, b);
+				float depthDiff = abs(a - b);
+				
+				// Multiplied by magic number 100 just to keep things from getting too close to underflow levels (DEPTH_THRESHOLD_CONSTANT is 100x higher to compensate)
+				int isSameDepth = 100 * depthDiff * _DepthSensitivity * (1-obliqueness) < depthThreshold;
 				return isSameDepth ? 1.0 : 0.0;
 			}
 
@@ -148,12 +179,12 @@
 
 			// Returns 1 if all four depths are similar, 0 otherwise
 			half FourDepthArtifactCheck(float a, float b, float c, float d, float obA, float obB, float obC, float obD) {
-				half ab = DepthsAreSimilar(a, b, obA);
-				half ac = DepthsAreSimilar(a, c, obA);
-				half ad = DepthsAreSimilar(a, d, obA);
-				half bc = DepthsAreSimilar(b, c, obB);
-				half bd = DepthsAreSimilar(b, d, obB);
-				half cd = DepthsAreSimilar(c, d, obC);
+				half ab = DepthValuesAreSimilar(a, b, obA);
+				half ac = DepthValuesAreSimilar(a, c, obA);
+				half ad = DepthValuesAreSimilar(a, d, obA);
+				half bc = DepthValuesAreSimilar(b, c, obB);
+				half bd = DepthValuesAreSimilar(b, d, obB);
+				half cd = DepthValuesAreSimilar(c, d, obC);
 				return ab * ac * ad * bc * bd * cd;
 			}
 
@@ -268,38 +299,36 @@
 				half similarDepth = 1;
 				half allDepthsAreDissimilar = 1;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
-					float depthDiff = depthSamples[0] - depthSamples[x];
-					half similar = DepthsAreSimilar(depthSamples[0], depthSamples[x], avgObliqueness);
+					uint oppositeIndex = GetOppositeIndex(x);
+					half similar = DepthRatiosAreSimilar(depthSamples[0], depthSamples[x], depthSamples[oppositeIndex], avgObliqueness);
 
 					// Keep track of whether all depths appear different before any double-checks
 					allDepthsAreDissimilar *= (1 - similar);
-					////////////////////////
-					// Depth Double-Check //
-					////////////////////////
-					/* If an edge is detected due to sufficient difference in depth,
-					   double-check with the pixel on the opposite side.
-
-						-------------------
-						|  10 | 110 | 210 |  Not an edge, more likely an obliquely viewed surface
-						-------------------
-
-						-------------------
-						|  10 | 110 |  10 |  Not an edge, more likely to be an artifact from floating point error near two adjacent faces
-						-------------------
-
-						-------------------
-						|  10 | 110 | 120 |  More likely an edge than an obliquely viewed surface
-						-------------------
+					/////////////////////////
+					// Depth Double-Checks //
+					/////////////////////////
+					/*
+						We perform the following double-checks on depth-detected edges to remove artifacts and de-duplicate nearby edges:
+						1) isBorder check -- If we cannot compare depth ratios due to being on the border of the screen, don't consider this an edge
+						2) similarDiffs -- De-dupes edges detected by ratios on concave corners by comparing depth values rather than ratios
+						3) nextToEdge -- De-dupes edges in single-sided edge mode that appear on the opposite side of normal-detected edges (thus falsely making it double-sided)
 					*/
 					if (similar < 1) {
 						// If the oppositeDepthDiff is similar to the depthDiff, don't consider this an edge
-						// (1 -> 3), (2 -> 4), (3 -> 1), (4 -> 2), (5 -> 7), (6 -> 8), (7 -> 5), (8 -> 6)
-						uint oppositeIndex = 4 * step(5, x) + ((x + 1) % 4 + 1);
+						float depthDiff = depthSamples[0] - depthSamples[x];
 						float oppositeDepthDiff = depthSamples[oppositeIndex] - depthSamples[0];
+						
 						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6], 1));
-						float ratio = max(abs(depthDiff), abs(oppositeDepthDiff)) / min(abs(depthDiff), abs(oppositeDepthDiff));
-						half similarDiffs = (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) * abs(depthDiff) < abs(oppositeDepthDiff) * DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
-						similar = max(isBorder, similarDiffs);
+						
+						float depthRatio = max(depthSamples[0], depthSamples[x]) / min(depthSamples[0], depthSamples[x]);
+						float oppositeDepthRatio = max(depthSamples[0], depthSamples[oppositeIndex]) / min(depthSamples[0], depthSamples[oppositeIndex]);
+						
+						int obliqueModifer = step(OBLIQUENESS_THRESHOLD, obliqueness[0]);
+						// Check if this depth sample is next to an edge by comparing the depth ratios (possibly with obliqueness modifiers)
+						half nextToEdge = depthRatio * 1-(obliqueModifer * obliqueness[0]) < oppositeDepthRatio * 1-(obliqueModifer * (1-obliqueness[0])) ? 1 : 0;
+						
+						half similarDiffs = (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) * abs(depthDiff) < (DEPTH_THRESHOLD_BASELINE/1000) + abs(oppositeDepthDiff) * DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
+						similar = max(isBorder, max(similarDiffs, nextToEdge));
 					}
 
 					// We only consider one direction (samples SAMPLE_RANGE_START <-> NUM_SAMPLES) when determining depth difference
