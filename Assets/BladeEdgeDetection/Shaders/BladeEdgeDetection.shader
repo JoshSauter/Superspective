@@ -20,15 +20,14 @@
 			#include "UnityCG.cginc"
 			float _DebugMode;
 
-			#pragma shader_feature DOUBLE_SIDED_EDGES
+			#pragma multi_compile __ DOUBLE_SIDED_EDGES
 
 			// Constants
 			#define NUM_SAMPLES 9
 #ifdef DOUBLE_SIDED_EDGES
-			#define SAMPLE_RANGE_START 1
-#endif
-#ifndef DOUBLE_SIDED_EDGES
-			#define SAMPLE_RANGE_START 7	// We only consider one direction (samples 7 & 8) when determining depth difference. This avoids double-thick edges due to adjacent pixels both finding an edge
+			#define SAMPLE_RANGE_START 5
+#else
+			#define SAMPLE_RANGE_START 7
 #endif
 			#define DEPTH_THRESHOLD_BASELINE 0.001
 			#define DEPTH_THRESHOLD_CONSTANT 0.16
@@ -38,6 +37,7 @@
 
 			// Artifact checks -- turn off at your own risk to edge quality
 			#define FILL_IN_ARTIFACTS		// Fill in pixels which appear to be an artifact with a neighboring pixel
+			#define DEPTH_DOUBLE_CHECKS		// Double-checks on depth-detected edges to remove artifacts and de-duplicate nearby edges
 			#define DEPTH_ARTIFACT_CHECK	// Checks in a cross and plus pattern around the pixel to check for artifacts from depth-detected edges
 			#define NORMAL_ARTIFACT_CHECK	// Checks in a cross and plus pattern around the pixel to check for artifacts from normal-detected edges
 			#define SMOOTH_SURFACE_CHECK	// Makes it so that rounded edges appear less often as normal-detected edges by checking the gradient of normal changes
@@ -73,11 +73,11 @@
 					 -1   0   1
 
 					–––––––––––––
-			   -1   | 1 | 5 | 2 |
+			    1   | 4 | 7 | 3 |
 					|–––––––––––|
 				0   | 8 | 0 | 6 |
 					|–––––––––––|
-				1   | 4 | 7 | 3 |
+			   -1   | 1 | 5 | 2 |
 					–––––––––––––
 
 				Or, as displacement from center:
@@ -102,9 +102,10 @@
 			
 			// Returns the coordinate on the opposite side of the center
 			// (1 -> 3), (2 -> 4), (3 -> 1), (4 -> 2), (5 -> 7), (6 -> 8), (7 -> 5), (8 -> 6)
-			int GetOppositeIndex(int i) {
+			uint GetOppositeIndex(uint i) {
 				return 4 * step(5, i) + ((i + 1) % 4 + 1);
 			}
+
 
 			float ObliquenessFromNormal(float3 sampleNormal, float2 scrPos) {
 				// Credit to Keijiro Takahashi of Unity Japan (and this thread: https://forum.unity.com/threads/help-with-view-space-normals.454248/)
@@ -146,8 +147,9 @@
 
 				// Multiplied by magic number 100 just to keep things from getting too close to underflow levels (DEPTH_THRESHOLD_CONSTANT is 100x higher to compensate)
 				// Lower depth values == higher depth ratio diffs to be considered an edge (2:1 ratio means very different things at low depth values and high depth values)
-				int isSameDepth = 100 * (depthRatio - oppositeDepthRatio) * _DepthSensitivity * center * obliquenessModifier < DEPTH_THRESHOLD_CONSTANT;
-				return isSameDepth ? 1.0 : 0.0;
+				int isEdge = 100 * (depthRatio - oppositeDepthRatio) * _DepthSensitivity * center * obliquenessModifier > DEPTH_THRESHOLD_CONSTANT;
+
+				return !isEdge;
 			}
 
 			half DepthValuesAreSimilar(float a, float b, float obliqueness) {
@@ -162,8 +164,9 @@
 
 			half NormalsAreSimilar(half2 a, half2 b) {
 				half normalDiff = distance(a, b);
+				half isEdge = normalDiff * _NormalSensitivity > NORMAL_THRESHOLD_CONSTANT;
 
-				return normalDiff * _NormalSensitivity < NORMAL_THRESHOLD_CONSTANT;
+				return !isEdge;
 			}
 
 			// Returns 1 if all four normals are similar, 0 otherwise
@@ -295,15 +298,17 @@
 				}
 				avgObliqueness /= NUM_SAMPLES;
 
-				// Check depth similarity with surrounding samples
+				// Check depth and normal similarity with surrounding samples
 				half similarDepth = 1;
+				half similarNormals = 1;
 				half allDepthsAreDissimilar = 1;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
 					uint oppositeIndex = GetOppositeIndex(x);
-					half similar = DepthRatiosAreSimilar(depthSamples[0], depthSamples[x], depthSamples[oppositeIndex], avgObliqueness);
+					half thisDepthIsSimilar = DepthRatiosAreSimilar(depthSamples[0], depthSamples[x], depthSamples[oppositeIndex], avgObliqueness);
+					half thisNormalIsSimilar = NormalsAreSimilar(normalSamples[0], normalSamples[x]);
 
 					// Keep track of whether all depths appear different before any double-checks
-					allDepthsAreDissimilar *= (1 - similar);
+					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
 					/////////////////////////
 					// Depth Double-Checks //
 					/////////////////////////
@@ -313,7 +318,8 @@
 						2) similarDiffs -- De-dupes edges detected by ratios on concave corners by comparing depth values rather than ratios
 						3) nextToEdge -- De-dupes edges in single-sided edge mode that appear on the opposite side of normal-detected edges (thus falsely making it double-sided)
 					*/
-					if (similar < 1) {
+#ifdef DEPTH_DOUBLE_CHECKS
+					if (thisDepthIsSimilar < 1) {
 						// If the oppositeDepthDiff is similar to the depthDiff, don't consider this an edge
 						float depthDiff = depthSamples[0] - depthSamples[x];
 						float oppositeDepthDiff = depthSamples[oppositeIndex] - depthSamples[0];
@@ -328,12 +334,15 @@
 						half nextToEdge = depthRatio * 1-(obliqueModifer * obliqueness[0]) < oppositeDepthRatio * 1-(obliqueModifer * (1-obliqueness[0])) ? 1 : 0;
 						
 						half similarDiffs = (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) * abs(depthDiff) < (DEPTH_THRESHOLD_BASELINE/1000) + abs(oppositeDepthDiff) * DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
-						similar = max(isBorder, max(similarDiffs, nextToEdge));
+						thisDepthIsSimilar = max(isBorder, max(similarDiffs, nextToEdge));
 					}
+#endif
 
-					// We only consider one direction (samples SAMPLE_RANGE_START <-> NUM_SAMPLES) when determining depth difference
-					// equivalent to "if (x >= SAMPLE_RANGE_START) similarDepth *= similar;"
-					similarDepth *= max(similar, (1 - step(SAMPLE_RANGE_START, x)));
+					// equivalent to "if (x >= SAMPLE_RANGE_START) similarDepth *= thisDepthIsSimilar;"
+					similarDepth *= max(thisDepthIsSimilar, (1 - step(SAMPLE_RANGE_START, x)));
+					
+					// equivalent to "if (x >= SAMPLE_RANGE_START) similarNormals *= thisNormalIsSimilar;"
+					similarNormals *= max(thisNormalIsSimilar, (1 - step(SAMPLE_RANGE_START, x)));
 				}
 
 #ifdef FILL_IN_ARTIFACTS
@@ -357,14 +366,6 @@
 					similarDepth = max(crossIsSimilar, xCrossIsSimilar);
 				}
 #endif
-
-				// Check normal similarity with surrounding samples
-				half similarNormals = 1;
-				for (int y = SAMPLE_RANGE_START; y < NUM_SAMPLES; y++) {
-					half similar = NormalsAreSimilar(normalSamples[0], normalSamples[y]);
-
-					similarNormals *= similar;
-				}
 
 				//////////////////////////////////////////////////
 				// Normal Double-Check A.K.A. The Chyr Maneuver //
