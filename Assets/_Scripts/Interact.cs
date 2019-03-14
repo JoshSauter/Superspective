@@ -22,7 +22,7 @@ public class Interact : MonoBehaviour {
 			return;
 		}
 
-		cam = transform.GetChild(0);
+		cam = EpitaphScreen.instance.playerCamera.transform;
 		reticleUnselectColor = reticle.color;
 		reticleOutsideUnselectColor = reticleOutside.color;
 		if (cam.GetComponent<Camera>() == null) {

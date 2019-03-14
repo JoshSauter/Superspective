@@ -261,7 +261,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 			if (RightHeld) keyboardInput += Vector2.right;
 			if (LeftHeld) keyboardInput += Vector2.left;
 			// TODO: Add deadzone
-			if (keyboardInput.magnitude > 1) keyboardInput.Normalize();
+			Vector3.ClampMagnitude(keyboardInput, 1);
 
 			return keyboardInput;
 		}

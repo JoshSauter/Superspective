@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PortalCameraFollow : MonoBehaviour {
+	public bool DEBUG = false;
+
 	public PortalContainer portalBeingRendered;
 	public bool rotateCamera = false;
 
@@ -42,13 +44,15 @@ public class PortalCameraFollow : MonoBehaviour {
 		Vector3 destinationNormal = teleporterForOtherPortal.portalNormal;
 
 		float dot = Vector3.Dot(teleporterForPortalBeingRendered.portalNormal, playerCamera.transform.position - source.position);
-		if (dot < 0.1f) {
+		// TODO: This calculates from center-to-center, we want edge-to-edge of colliders
+		float distanceFromPlayerToPortal = Vector3.Distance(source.position, playerCamera.transform.position);
+		if (dot < 0.1f || distanceFromPlayerToPortal < 10) {
 			portalCamera.projectionMatrix = originalProjectionMatrix;
 			return;
 		}
 
 		// The leeway is to prevent "slices" at the bottom of the portal that fail to render properly (floating point error)
-		float leeway = Mathf.Lerp(0f, 0, (playerCamera.transform.position - source.position).magnitude / 100f);
+		float leeway = Mathf.Lerp(0f, 0.5f, (playerCamera.transform.position - source.position).magnitude / 100f);
 		float distance = Vector3.Dot(destination.position + destinationNormal * -leeway, -destinationNormal);
 		Vector4 clipPlaneWorldSpace = new Vector4(destinationNormal.x, destinationNormal.y, destinationNormal.z, distance);
 		Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlaneWorldSpace;

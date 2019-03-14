@@ -167,11 +167,11 @@ public class PortalManager : Singleton<PortalManager> {
 		// Copy post-process effects from player's camera
 		// Order of components here matters; it affects the rendering order of the postprocess effects
 		newCameraObj.PasteComponent(playerCam.GetComponent<BloomOptimized>());											// Copy Bloom
-		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO	
 		BladeEdgeDetection edgeDetection = newCameraObj.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 		if (!receiver.useCameraEdgeDetectionColor) {
 			edgeDetection.edgeColor = receiver.portalEdgeDetectionColor;
 		}
+		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 		newCameraObj.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog
 
 		// Initialize PortalCameraRenderTexture component
@@ -205,7 +205,9 @@ public class PortalManager : Singleton<PortalManager> {
 		newTeleporterObj.transform.SetParent(receiver.transform, false);
 		
 		PortalTeleporter newTeleporter = newTeleporterObj.AddComponent<PortalTeleporter>();
-		newTeleporter.teleporter.OnTeleport += SwapEdgeDetectionColorAfterTeleport;
+		if (!receiver.useCameraEdgeDetectionColor) {
+			newTeleporter.teleporter.OnTeleport += SwapEdgeDetectionColorAfterTeleport;
+		}
 		return newTeleporter;
 	}
 
@@ -226,7 +228,7 @@ public class PortalManager : Singleton<PortalManager> {
 
 			Vector3 portalSize = receivers[i].GetComponent<MeshFilter>().mesh.bounds.size;
 			Vector3 volumetricBoxSize = volumetricPortal.GetComponent<MeshFilter>().mesh.bounds.size;
-			volumetricPortal.transform.localScale = new Vector3(portalSize.x / volumetricBoxSize.x, portalSize.y/volumetricBoxSize.y, 1);
+			volumetricPortal.transform.localScale = new Vector3(portalSize.x / volumetricBoxSize.x - 0.01f, portalSize.y/volumetricBoxSize.y - 0.01f, 1);
 
 			volumetricPortals.Add(volumetricPortal);
 		}
@@ -262,9 +264,25 @@ public class PortalManager : Singleton<PortalManager> {
 		Transform camerasParent = cameraContainersByChannel[channel].transform;
 		BladeEdgeDetection[] portalEDs = camerasParent.GetComponentsInChildrenOnly<BladeEdgeDetection>();
 
-		BladeEdgeDetection temp = playerED;
-		playerED = portalEDs[0];
-		portalEDs.ToList().ForEach(ed => ed = temp);
+		BladeEdgeDetection.EdgeColorMode tempEdgeColorMode = playerED.edgeColorMode;
+		Color tempColor = playerED.edgeColor;
+		Gradient tempColorGradient = playerED.edgeColorGradient;
+		Texture2D tempColorGradientTexture = playerED.edgeColorGradientTexture;
+
+		CopyEdgeColors(source: portalEDs[0], dest: playerED);
+		portalEDs.ToList().ForEach(ed => CopyEdgeColors(ed, tempEdgeColorMode, tempColor, tempColorGradient, tempColorGradientTexture));
+		BladeEdgeDetection[] portalEDsAfter = camerasParent.GetComponentsInChildrenOnly<BladeEdgeDetection>();
+	}
+
+	private void CopyEdgeColors(BladeEdgeDetection source, BladeEdgeDetection dest) {
+		CopyEdgeColors(dest, source.edgeColorMode, source.edgeColor, source.edgeColorGradient, source.edgeColorGradientTexture);
+	}
+
+	private void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
+		dest.edgeColorMode = edgeColorMode;
+		dest.edgeColor = edgeColor;
+		dest.edgeColorGradient = edgeColorGradient;
+		dest.edgeColorGradientTexture = edgeColorGradientTexture;
 	}
 
 }

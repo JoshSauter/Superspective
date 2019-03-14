@@ -7,7 +7,7 @@ public class ToggleEdgeDetectionDebug : Singleton<ToggleEdgeDetectionDebug> {
 		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) {
 			ToggleDebugMode();
 		}
-		if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.B)) {
+		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) {
 			ToggleDoubleSidedEdges();
 		}
 	}

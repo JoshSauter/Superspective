@@ -32,7 +32,7 @@ public class PortalTeleporter : MonoBehaviour {
 	void Update () {
 		teleporter.trigger.targetDirection = -portalNormal;
 		
-		teleporter.teleportOffset = otherPortalTeleporter.portalNormal * 1f;
+		teleporter.teleportOffset = otherPortalTeleporter.portalNormal * (2*transform.localPosition.magnitude);
 	}
 	
 	void InitializeCollider() {
@@ -57,5 +57,7 @@ public class PortalTeleporter : MonoBehaviour {
 		}
 
 		transform.parent.GetComponent<Collider>().enabled = false;
+		teleporter.trigger.targetDirection = -portalNormal;
+		transform.position += teleporter.trigger.targetDirection;
 	}
 }

@@ -21,8 +21,15 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 		scriptsToDisable = new MonoBehaviour[0];
 
 		InitializeCollider();
-		OnMagicTriggerExit += TriggerExit;
+
 		gameObject.name = "VolumetricPortalTrigger";
+
+		// Initialize collider for volumetric portal so that we can know when to turn off the volumetric portal (upon exiting its area of rendering)
+		MeshCollider volumetricPortalCollider = volumetricPortal.GetComponent<MeshCollider>();
+		volumetricPortalCollider.enabled = true;
+		volumetricPortalCollider.convex = true;
+		volumetricPortalCollider.isTrigger = true;
+		volumetricPortal.AddComponent<MagicTrigger>().OnMagicTriggerExit += TriggerExit;
 	}
 
 	void InitializeCollider() {
@@ -38,10 +45,9 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 		triggerCondition = TriggerConditionType.PlayerMovingDirection;
 		playerFaceThreshold = 0.01f;
 		transform.position -= targetDirection * 0.4f;
-		portalTeleporter.transform.position += targetDirection * 0.5f;
 	}
 
-	void TriggerExit(Collider c) {
+	void TriggerExit(Collider unused) {
 		DisableEnabledObjects();
 	}
 

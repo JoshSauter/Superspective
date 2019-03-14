@@ -8,8 +8,9 @@ Shader "Custom/ScreenCutout"
 	}
 	SubShader
 	{
-		Tags { "Queue"="Transparent" }
-		//Tags{ "Queue" = "Transparent" "IgnoreProjector" = "False" "RenderType" = "Transparent" }
+		// Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+		//Tags { "Queue"="Transparent" }
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "False" "RenderType" = "Transparent" }
 		Lighting Off
 		Cull Back
 		ZWrite On

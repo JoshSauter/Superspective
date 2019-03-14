@@ -16,19 +16,23 @@ public class MagicSpawnDespawn : MagicTrigger {
         OnMagicTriggerStayOneTime += EnableDisableObjects;
 	}
 
-    protected void EnableDisableObjects(Collider o) {
-        foreach (var objectToEnable in objectsToEnable) {
-            objectToEnable.SetActive(true);
-        }
-        foreach (var objectToDisable in objectsToDisable) {
-            objectToDisable.SetActive(false);
-        }
+	protected void EnableDisableObjects() {
+		foreach (var objectToEnable in objectsToEnable) {
+			objectToEnable.SetActive(true);
+		}
+		foreach (var objectToDisable in objectsToDisable) {
+			objectToDisable.SetActive(false);
+		}
 		foreach (var scriptToEnable in scriptsToEnable) {
 			scriptToEnable.enabled = true;
 		}
 		foreach (var scriptToDisable in scriptsToDisable) {
 			scriptToDisable.enabled = false;
 		}
+	}
+
+    protected void EnableDisableObjects(Collider o) {
+		EnableDisableObjects();
     }
 }
 
