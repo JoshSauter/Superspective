@@ -1390,7 +1390,7 @@ GameObject:
   - component: {fileID: 54329951}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3100,7 +3100,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1649264
+  m_Name: pb_Mesh159274
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -7895,7 +7895,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-41213854
+  m_Name: pb_Mesh158314
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -8813,7 +8813,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16122
+  m_Name: pb_Mesh159004
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -10691,7 +10691,7 @@ GameObject:
   - component: {fileID: 381483376}
   m_Layer: 0
   m_Name: Stairs (1)
-  m_TagString: Untagged
+  m_TagString: Staircase
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17559,7 +17559,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-26042010
+  m_Name: pb_Mesh15772
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -22446,7 +22446,7 @@ GameObject:
   - component: {fileID: 481596186}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -23954,7 +23954,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1649144
+  m_Name: pb_Mesh159126
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -24639,7 +24639,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-41268358
+  m_Name: pb_Mesh159194
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -24794,7 +24794,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh15920
+  m_Name: pb_Mesh81518
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -25606,7 +25606,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16064
+  m_Name: pb_Mesh81676
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -26375,7 +26375,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16254
+  m_Name: pb_Mesh81922
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -27193,7 +27193,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16184
+  m_Name: pb_Mesh159066
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -29028,7 +29028,7 @@ GameObject:
   - component: {fileID: 902103936}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29405,7 +29405,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh16294
+  m_Name: pb_Mesh159216
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -29560,7 +29560,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1649308
+  m_Name: pb_Mesh159318
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -29760,7 +29760,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1648676
+  m_Name: pb_Mesh81374
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -31864,7 +31864,7 @@ GameObject:
   - component: {fileID: 1294645806}
   m_Layer: 0
   m_Name: Cube-clone
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -32913,7 +32913,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh-40769680
+  m_Name: pb_Mesh158808
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -34191,7 +34191,7 @@ GameObject:
   - component: {fileID: 1395381418}
   m_Layer: 0
   m_Name: Stairs (3)
-  m_TagString: Untagged
+  m_TagString: Staircase
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -42494,7 +42494,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1649012
+  m_Name: pb_Mesh158990
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -48341,9 +48341,9 @@ GameObject:
   - component: {fileID: 1630525006}
   - component: {fileID: 1630525005}
   - component: {fileID: 1630525004}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Stairs
-  m_TagString: Untagged
+  m_TagString: Staircase
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -54701,7 +54701,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh1648620
+  m_Name: pb_Mesh158518
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -54939,7 +54939,7 @@ GameObject:
   - component: {fileID: 1815320610}
   m_Layer: 0
   m_Name: Cube-clone
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -55629,10 +55629,8 @@ MonoBehaviour:
   asset_guid: 
   dontDestroyMeshOnDelete: 0
   m_selectedFaces: 
-  m_SelectedEdges:
-  - x: 7
-    y: 5
-  m_selectedTriangles: 0700000005000000
+  m_SelectedEdges: []
+  m_selectedTriangles: 
 --- !u!33 &1826265581
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -56654,7 +56652,7 @@ GameObject:
   - component: {fileID: 2101252298}
   m_Layer: 0
   m_Name: Cube (4)
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -57787,7 +57785,7 @@ GameObject:
   - component: {fileID: 2131299881}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -52,6 +52,7 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 	}
 
 	void OnTeleport() {
+		Debug.LogWarning("TELEPORT");
 		DisableEnabledObjects();
 	}
 

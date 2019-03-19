@@ -25,10 +25,12 @@ public class PlayerMovement : MonoBehaviour {
 	bool grounded = false;
 
 	CapsuleCollider thisCollider;
+	MeshRenderer thisRenderer;
 
 #region IsGrounded characteristics
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
+	public float isGroundedSpherecastDistance = 0.5f;
 #endregion
 
 	private void Awake() {
@@ -40,6 +42,7 @@ public class PlayerMovement : MonoBehaviour {
 		movespeed = walkSpeed;
 		thisRigidbody = GetComponent<Rigidbody>();
 		thisCollider = GetComponent<CapsuleCollider>();
+		thisRenderer = GetComponentInChildren<MeshRenderer>();
 	}
 
 	private void Update() {
@@ -55,8 +58,9 @@ public class PlayerMovement : MonoBehaviour {
 		RaycastHit ground = new RaycastHit();
 		grounded = IsGrounded(out ground);
 
+		Vector3 desiredVelocity = thisRigidbody.velocity;
 		if (grounded) {
-			HandleGroundMovement(ground);
+			desiredVelocity = CalculateGroundMovement(ground);
 
 			// Handle jumping
 			if (input.SpaceHeld && !jumpIsOnCooldown) {
@@ -64,7 +68,7 @@ public class PlayerMovement : MonoBehaviour {
 			}
 		}
 		else {
-			HandleAirMovement();
+			desiredVelocity = CalculateAirMovement();
 		}
 
 		if (!input.LeftStickHeld && !input.SpaceHeld && ground.collider != null && ground.collider.CompareTag("Staircase")) {
@@ -73,14 +77,24 @@ public class PlayerMovement : MonoBehaviour {
 		else {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 		}
+
+		desiredVelocity = DetectStaircase(desiredVelocity);
+
+		thisRigidbody.velocity = desiredVelocity;
+
+		// Apply wind resistance
+		if (!grounded && thisRigidbody.velocity.y < 0) {
+			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
+		}
 	}
 
 	/// <summary>
-	/// Handles player movement when the player is on (or close enough) to the ground.
+	/// Calculates player movement when the player is on (or close enough) to the ground.
 	/// Movement is perpendicular to the ground's normal vector.
 	/// </summary>
 	/// <param name="ground">RaycastHit info for the WalkableObject that passes the IsGrounded test</param>
-	void HandleGroundMovement(RaycastHit ground) {
+	/// <returns>Desired Velocity according to current input</returns>
+	Vector3 CalculateGroundMovement(RaycastHit ground) {
 		Vector3 up = ground.normal;
 		Vector3 right = Vector3.Cross(Vector3.Cross(up, transform.right), up);
 		Vector3 forward = Vector3.Cross(Vector3.Cross(up, transform.forward), up);
@@ -91,7 +105,7 @@ public class PlayerMovement : MonoBehaviour {
 
 		// DEBUG:
 		if (DEBUG) {
-			Debug.DrawRay(ground.point, ground.normal * 10, Color.red, 0.2f);
+			//Debug.DrawRay(ground.point, ground.normal * 10, Color.red, 0.2f);
 			Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.blue, 0.1f);
 		}
 
@@ -99,11 +113,11 @@ public class PlayerMovement : MonoBehaviour {
 		if (!input.LeftStickHeld) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 12 * Time.fixedDeltaTime);
-			thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
+			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
 		}
 		else {
 			float adjustedMovespeed = (ground.collider.CompareTag("Staircase")) ? walkSpeed : movespeed;
-			thisRigidbody.velocity = Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, 0.2f);
+			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, 0.2f);
 		}
 	}
 
@@ -111,7 +125,8 @@ public class PlayerMovement : MonoBehaviour {
 	/// Handles player movement when the player is in the air.
 	/// Movement is perpendicular to Vector3.up.
 	/// </summary>
-	void HandleAirMovement() {
+	/// <returns>Desired Velocity according to current input</returns>
+	Vector3 CalculateAirMovement() {
 		Vector3 moveDirection = input.LeftStick.y * transform.forward + input.LeftStick.x * transform.right;
 
 		Physics.gravity = Vector3.down * Physics.gravity.magnitude;
@@ -126,18 +141,13 @@ public class PlayerMovement : MonoBehaviour {
 		if (!input.LeftStickHeld) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 0.15f);
-			thisRigidbody.velocity = new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
+			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
 		}
 		else {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			Vector2 desiredHorizontalVelocity = new Vector2(moveDirection.x, moveDirection.z);
 			Vector2 newHorizontalVelocity = Vector2.Lerp(horizontalVelocity, desiredHorizontalVelocity, 0.075f);
-			thisRigidbody.velocity = new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y + moveDirection.y, newHorizontalVelocity.y);
-		}
-
-		// Apply wind resistance
-		if (thisRigidbody.velocity.y < 0) {
-			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
+			return new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y + moveDirection.y, newHorizontalVelocity.y);
 		}
 	}
 
@@ -201,6 +211,39 @@ public class PlayerMovement : MonoBehaviour {
 		return new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
 	}
 
+	public Vector3 DetectStaircase(Vector3 desiredVelocity) {
+		float maxStepHeight = 0.6f;
+		Vector3 bottomOfPlayer = new Vector3(transform.position.x, thisRenderer.bounds.min.y, transform.position.z);
+		Vector3 rayLowStartPos = bottomOfPlayer + Vector3.up * 0.01f;
+		Vector3 rayHighStartPos = bottomOfPlayer + Vector3.up * maxStepHeight;
+		Vector3 rayDirection = desiredVelocity;
+		rayDirection.y = 0;
+		if (rayDirection.magnitude < 0.01f) return desiredVelocity;
+		rayDirection.Normalize();
+
+		float approxDistanceThisFrame = new Vector2(desiredVelocity.x, desiredVelocity.z).magnitude * Time.fixedDeltaTime;
+		float rayDistance = thisCollider.radius + approxDistanceThisFrame + 0.1f;
+
+		Debug.DrawRay(rayLowStartPos, rayDirection * rayDistance, Color.red);
+		Debug.DrawRay(rayHighStartPos, rayDirection * rayDistance, Color.yellow);
+
+		RaycastHit bottomRaycast;
+		RaycastHit stepUpRaycast;
+		Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance);
+
+		if (Physics.Raycast(rayLowStartPos, rayDirection, out bottomRaycast, rayDistance) && Mathf.Abs(Vector3.Dot(bottomRaycast.normal, Vector3.up)) < 0.01f) {
+			//print("Wall found: " + bottomRaycast.collider.name);
+			if (!Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance)) {
+				print("Step found: " + bottomRaycast.collider.name);
+				Vector3 projectedVelocity = Vector3.ProjectOnPlane(desiredVelocity, bottomRaycast.normal);
+				projectedVelocity.y = 6f;
+				desiredVelocity = projectedVelocity;
+			}
+		}
+		
+		return desiredVelocity;
+	}
+
 	/// <summary>
 	/// Checks to see if any WalkableObject is below the player and within the threshold to be considered ground.
 	/// </summary>
@@ -212,9 +255,20 @@ public class PlayerMovement : MonoBehaviour {
 			hitInfo = new RaycastHit();
 			return false;
 		}
-		RaycastHit[] allHit = Physics.SphereCastAll(transform.position, thisCollider.radius - 0.02f, -transform.up, (transform.localScale.y * thisCollider.height) / 2f + .02f);
+		float radius = thisCollider.radius - 0.02f;
+		// Transform.position does not give a good y-value, we want to start close to the bottom of the collider
+		Vector3 startPos = transform.position;
+		startPos.y = thisRenderer.bounds.min.y + radius + 0.02f;
+		float distance = isGroundedSpherecastDistance;
+		RaycastHit[] allHit = Physics.SphereCastAll(
+			origin: startPos,
+			radius: radius,
+			direction: -transform.up,
+			maxDistance: distance
+		);
+
 		if (DEBUG) {
-			Debug.DrawRay(transform.position, -transform.up * ((transform.localScale.y * thisCollider.height) / 2f + 0.02f), Color.yellow, 0.2f);
+			Debug.DrawRay(startPos, -transform.up * (distance + radius), Color.yellow, 0.2f);
 		}
 		foreach (RaycastHit curHitInfo in allHit) {
 			if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;

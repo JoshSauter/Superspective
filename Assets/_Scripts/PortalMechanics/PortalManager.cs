@@ -108,6 +108,11 @@ public class PortalManager : Singleton<PortalManager> {
 
 			// VolumetricPortalTrigger references
 			volumetricPortalTrigger.portal = portalContainer;
+
+			if (Vector3.Dot(portalTeleporter.portalNormal, portalTeleporter.transform.forward) > 0)
+				volumetricPortalObject.transform.Rotate(volumetricPortalObject.transform.up * 180);
+
+			print(Vector3.Dot(portalTeleporter.portalNormal, portalTeleporter.transform.forward));
 		}
 	}
 
@@ -222,9 +227,6 @@ public class PortalManager : Singleton<PortalManager> {
 			GameObject volumetricPortal = Instantiate(volumetricPortalPrefab, receivers[i].transform, false);
 			volumetricPortal.name = "VolumetricPortal";
 			volumetricPortal.SetActive(false);
-			if (i == 1) {
-				volumetricPortal.transform.Rotate(volumetricPortal.transform.up * 180);
-			}
 
 			Vector3 portalSize = receivers[i].GetComponent<MeshFilter>().mesh.bounds.size;
 			Vector3 volumetricBoxSize = volumetricPortal.GetComponent<MeshFilter>().mesh.bounds.size;

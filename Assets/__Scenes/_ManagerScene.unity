@@ -1055,6 +1055,7 @@ MonoBehaviour:
   jumpForce: 13
   windResistanceMultiplier: 0.2
   isGroundThreshold: 0.6
+  isGroundedSpherecastDistance: 0.5
 --- !u!114 &623971844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1107,15 +1108,15 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.1, y: 10.3, z: -21.9}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
+  m_LocalPosition: {x: -4, y: 3.2710962, z: -26}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 505772567}
   - {fileID: 1575959553}
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6105,7 +6106,7 @@ Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: pb_Mesh673788
+  m_Name: pb_Mesh16538
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -6455,12 +6456,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugMode: 0
-  doubleSidedEdges: 1
+  doubleSidedEdges: 0
   depthSensitivity: 5
   normalSensitivity: 5
   sampleDistance: 1
   edgeColorMode: 0
-  edgeColor: {r: 1, g: 1, b: 1, a: 1}
+  edgeColor: {r: 0.0754717, g: 0.0754717, b: 0.0754717, a: 1}
   edgeColorGradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
