@@ -8,6 +8,8 @@ public class PortalTeleporter : MonoBehaviour {
 	public TeleportEnter teleporter;
 	PortalTeleporter otherPortalTeleporter;
 
+	public TransformObjectOnRotate[] transformationsBeforeTeleport;
+
 	private MeshFilter portalMeshFilter;
 	public Vector3 portalNormal {
 		get { return transform.TransformVector(portalMeshFilter.mesh.normals[0]); }
@@ -24,6 +26,9 @@ public class PortalTeleporter : MonoBehaviour {
 
 		teleporter.trigger.triggerCondition = MagicTrigger.TriggerConditionType.PlayerMovingDirection;
 		teleporter.trigger.playerFaceThreshold = 0.01f;
+		if (transformationsBeforeTeleport != null && transformationsBeforeTeleport.Length > 0) {
+			teleporter.OnTeleport += TransformObjectsOnTeleport;
+		}
 
 		InitializeCollider();
 	}
@@ -31,6 +36,7 @@ public class PortalTeleporter : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		teleporter.trigger.targetDirection = -portalNormal;
+		portal.volumetricPortalTrigger.targetDirection = teleporter.trigger.targetDirection;
 		
 		teleporter.teleportOffset = otherPortalTeleporter.portalNormal * (2*transform.localPosition.magnitude);
 	}
@@ -59,5 +65,31 @@ public class PortalTeleporter : MonoBehaviour {
 		transform.parent.GetComponent<Collider>().enabled = false;
 		teleporter.trigger.targetDirection = -portalNormal;
 		transform.position += teleporter.trigger.targetDirection;
+	}
+	
+	void TransformObjectsOnTeleport(Collider unused1, Collider unused2, Collider player) {
+		Transform originalPlayerParent = player.transform.parent;
+
+		foreach (var transformation in transformationsBeforeTeleport) {
+			player.transform.parent = transformation.objectToTransform;
+
+			Rigidbody playerRigidbody = player.GetComponent<Rigidbody>();
+			Vector3 playerWorldVelocity = playerRigidbody.velocity;
+			Vector3 playerRelativeVelocity = player.transform.InverseTransformDirection(playerWorldVelocity);
+
+			transformation.objectToTransform.position += transformation.displacement;
+			transformation.objectToTransform.localScale = Vector3.Scale(transformation.objectToTransform.localScale, transformation.scaling);
+			transformation.objectToTransform.RotateAround(transformation.rotationPivot, Vector3.right, transformation.rotation.x);
+			transformation.objectToTransform.RotateAround(transformation.rotationPivot, Vector3.up, transformation.rotation.y);
+			transformation.objectToTransform.RotateAround(transformation.rotationPivot, Vector3.forward, transformation.rotation.z);
+
+			playerRigidbody.velocity = player.transform.TransformDirection(playerRelativeVelocity);
+		}
+
+		teleporter.teleportOffset = otherPortalTeleporter.portalNormal * (2 * transform.localPosition.magnitude);
+
+		// Restore the player to the ManagerScene
+		player.transform.parent = LevelManager.instance.transform;
+		player.transform.parent = originalPlayerParent;
 	}
 }

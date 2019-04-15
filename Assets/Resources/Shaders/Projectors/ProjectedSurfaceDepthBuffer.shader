@@ -40,11 +40,10 @@
 		}
 		ENDCG
 		Pass {
-			ZTest Greater
-			ZWrite On
-			ColorMask 0
+			ZWrite Off
+
 			Stencil {
-				Ref 0
+				Ref 1
 				Comp Always
 				Pass Replace
 			}

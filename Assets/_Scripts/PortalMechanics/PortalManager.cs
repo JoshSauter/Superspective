@@ -110,9 +110,7 @@ public class PortalManager : Singleton<PortalManager> {
 			volumetricPortalTrigger.portal = portalContainer;
 
 			if (Vector3.Dot(portalTeleporter.portalNormal, portalTeleporter.transform.forward) > 0)
-				volumetricPortalObject.transform.Rotate(volumetricPortalObject.transform.up * 180);
-
-			print(Vector3.Dot(portalTeleporter.portalNormal, portalTeleporter.transform.forward));
+				volumetricPortalObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
 		}
 	}
 
@@ -213,6 +211,8 @@ public class PortalManager : Singleton<PortalManager> {
 		if (!receiver.useCameraEdgeDetectionColor) {
 			newTeleporter.teleporter.OnTeleport += SwapEdgeDetectionColorAfterTeleport;
 		}
+		newTeleporter.transformationsBeforeTeleport = receiver.objectsToTransformOnTeleport;
+
 		return newTeleporter;
 	}
 

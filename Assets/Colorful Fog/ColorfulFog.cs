@@ -170,8 +170,8 @@ public class ColorfulFog : MonoBehaviour
         //Camera cam = GetComponent<Camera>();
         if (cam == null)
             cam = this.GetComponent<Camera>();
-        if (!useCustomDepthTexture)
-            cam.depthTextureMode |= DepthTextureMode.Depth;
+        //if (!useCustomDepthTexture)
+        //    cam.depthTextureMode |= DepthTextureMode.Depth;
 
         Transform camtr = cam.transform;
         float camNear = cam.nearClipPlane;

@@ -9,21 +9,24 @@ public class Projector : MonoBehaviour {
 	float currentSize = 1;
 	float frustumSizeChangeSpeed = 1;
 
-	float minRotation = -55;
-	float maxRotation = 55;
+	float minRotation = -40;
+	float maxRotation = 40;
 	float currentRotation = 0;
 	float rotationSpeed = 10;
 
 	float circumferenceRotationSpeed = 10;
 
-	float minHeight = 1.5f;
-	float maxHeight = 40f;
-	float verticalMovespeed = 10;
+	Animator anim;
+	float curAnimTime = 0.15f;
+	float desiredAnimTime = 0.1f;
+	float animLerpSpeed = 0.2f;
+	float verticalMovespeed = .15f;
 
-	// Use this for initialization
-	void Start () {
+	private void Start() {
+		anim = GetComponent<Animator>();
+		desiredAnimTime = curAnimTime;
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetKey("f")) {
@@ -37,6 +40,11 @@ public class Projector : MonoBehaviour {
 		}
 		if (Input.GetKey("j")) {
 			MoveProjectorVertical(Input.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
+		}
+
+		if (anim != null) {
+			curAnimTime = Mathf.Lerp(curAnimTime, desiredAnimTime, animLerpSpeed);
+			GetComponent<Animator>().Play("Projector", 0, curAnimTime);
 		}
 	}
 
@@ -74,14 +82,8 @@ public class Projector : MonoBehaviour {
 
 	void MoveProjectorVertical(float amount) {
 		amount *= Time.deltaTime;
-		float newHeight = transform.localPosition.y + amount;
-		if (newHeight < minHeight) {
-			amount = minHeight - transform.localPosition.y;
+		if (anim != null) {
+			desiredAnimTime = Mathf.Clamp01(desiredAnimTime + amount);
 		}
-		else if (newHeight > maxHeight) {
-			amount = maxHeight - transform.localPosition.y;
-		}
-		transform.localPosition += Vector3.up * amount;
-		transform.localRotation = Quaternion.Euler(transform.localRotation.eulerAngles + Vector3.right * amount * 1.4f);
 	}
 }

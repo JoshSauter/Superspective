@@ -35,53 +35,10 @@
 		// Incrementers
 		Pass {
 			Stencil {
+				Ref 4
 				Comp Always
-				ZFail IncrSat
-			}
-
-			Cull Front
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-		Pass {
-			Stencil {
-				Comp Always
-				ZFail IncrSat
-			}
-
-			Cull Front
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-		Pass {
-			Stencil {
-				Comp Always
-				ZFail IncrSat
-			}
-
-			Cull Front
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-		Pass {
-			Stencil {
-				Comp Always
-				ZFail IncrSat
+				ZFail Replace
+				WriteMask 4
 			}
 
 			Cull Front
@@ -96,53 +53,10 @@
 		// Decrementers
 		Pass {
 			Stencil {
+				Ref 0
 				Comp Always
-				ZFail DecrSat
-			}
-
-			Cull Back
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-		Pass {
-			Stencil {
-				Comp Always
-				ZFail DecrSat
-			}
-
-			Cull Back
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-				Pass {
-			Stencil {
-				Comp Always
-				ZFail DecrSat
-			}
-
-			Cull Back
-			Blend Zero One
-			ZWrite Off
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			ENDCG
-		}
-		Pass {
-			Stencil {
-				Comp Always
-				ZFail DecrSat
+				ZFail Replace
+				WriteMask 4
 			}
 
 			Cull Back

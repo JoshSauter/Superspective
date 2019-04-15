@@ -205,6 +205,8 @@ Shader "Hidden/JG/ColorfulFog"
 
 		SubShader
 	{
+	
+		Tags { "RenderType" = "Transparent" }
 		ZTest Always Cull Off ZWrite Off Fog{ Mode Off }
 			// int mode : 0=solid color, 1 = cubemap, 2 = gradient, 3 >= gradient texture
 			/*passes: 0 - 3 : distance & height,

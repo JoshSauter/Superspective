@@ -35,8 +35,10 @@
 		// Incrementer
 		Pass {
 			Stencil {
+				Ref 1
 				Comp Always
-				ZFail IncrSat
+				ZFail Replace
+				WriteMask 1
 			}
 
 			Cull Front
@@ -51,8 +53,10 @@
 		// Decrementer
 		Pass {
 			Stencil {
+				Ref 0
 				Comp Always
-				ZFail DecrSat
+				ZFail Replace
+				WriteMask 1
 			}
 
 			Cull Back

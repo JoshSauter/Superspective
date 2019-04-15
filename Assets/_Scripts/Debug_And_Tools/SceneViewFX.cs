@@ -74,7 +74,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	public void Update() {
-		if (Application.isPlaying) return;
+		if (Application.isPlaying) UpdateComponents();
 		if (enabled) UpdateComponents();
 	}
 

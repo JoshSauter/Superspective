@@ -61,6 +61,48 @@
 			return fixed4(0,0,0,1);
 		}
 		ENDCG
+		// Read Shadows
+		Pass {
+			Stencil {
+				Ref 128
+				Comp Equal
+				ReadMask 128
+				WriteMask 129
+				Pass Zero
+			}
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment fragRed
+			ENDCG
+		}
+		Pass {
+			Stencil {
+				Ref 64
+				Comp Equal
+				ReadMask 64
+				WriteMask 66
+				Pass Zero
+			}
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment fragGreen
+			ENDCG
+		}
+		Pass {
+			Stencil {
+				Ref 32
+				Comp Equal
+				ReadMask 32
+				WriteMask 36
+				Pass Zero
+			}
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment fragBlue
+			ENDCG
+		}
+
+		// Final Colors
 		Pass {
 			Stencil {
 				Ref 0

@@ -30,8 +30,10 @@ public class PlayerLook : MonoBehaviour {
         playerTransform = gameObject.transform;
         cameraTransform = playerTransform.GetChild(0);
 
-        Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = false;
+		if (!Application.isEditor) {
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
+		}
 	}
 
 	void Update() {

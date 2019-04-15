@@ -1,4 +1,4 @@
-﻿Shader "Custom/Projector/GreenProjector" {
+﻿Shader "Custom/Projector/GreenBlocker" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
 	}
@@ -32,13 +32,13 @@
 		Tags { "RenderType"="Transparent" "Queue"="Geometry+2" }
 		LOD 100
 
-		// Incrementers
+		// Incrementer
 		Pass {
 			Stencil {
-				Ref 2
+				Ref 64
 				Comp Always
 				ZFail Replace
-				WriteMask 2		// 00000010
+				WriteMask 64
 			}
 
 			Cull Front
@@ -56,7 +56,7 @@
 				Ref 0
 				Comp Always
 				ZFail Replace
-				WriteMask 2
+				WriteMask 64
 			}
 
 			Cull Back

@@ -149,7 +149,7 @@ namespace EpitaphUtils {
 		}
 
 		public override string ToString() {
-			return "(" + radius.ToString("0.####") + ", " + (angle.radians / Mathf.PI).ToString("0.####") + "*PI rads)\t(" + y + " y-value)";
+			return "(" + radius.ToString("0.####") + ", " + (angle.radians / Mathf.PI).ToString("0.####") + "π rads)\t(" + y + " y-value)";
 		}
 
 		/// <summary>

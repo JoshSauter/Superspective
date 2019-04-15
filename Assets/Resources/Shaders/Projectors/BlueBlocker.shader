@@ -1,4 +1,4 @@
-﻿Shader "Custom/Projector/GreenProjector" {
+﻿Shader "Custom/Projector/BlueBlocker" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
 	}
@@ -29,16 +29,16 @@
 
 	ENDCG
 	SubShader {
-		Tags { "RenderType"="Transparent" "Queue"="Geometry+2" }
+		Tags { "RenderType"="Transparent" "Queue"="Geometry+3" }
 		LOD 100
 
-		// Incrementers
+		// Incrementer
 		Pass {
 			Stencil {
-				Ref 2
+				Ref 32
 				Comp Always
 				ZFail Replace
-				WriteMask 2		// 00000010
+				WriteMask 32
 			}
 
 			Cull Front
@@ -56,7 +56,7 @@
 				Ref 0
 				Comp Always
 				ZFail Replace
-				WriteMask 2
+				WriteMask 32
 			}
 
 			Cull Back

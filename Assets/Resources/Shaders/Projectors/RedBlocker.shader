@@ -1,4 +1,4 @@
-﻿Shader "Custom/Projector/GreenProjector" {
+﻿Shader "Custom/Projector/RedBlocker" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
 	}
@@ -24,21 +24,21 @@
 	}
 			
 	fixed4 frag (v2f i) : SV_Target {
-		return 0;
+		return fixed4(0.3,.2,.5,1);
 	}
 
 	ENDCG
 	SubShader {
-		Tags { "RenderType"="Transparent" "Queue"="Geometry+2" }
+		Tags { "RenderType"="Transparent" "Queue"="Geometry+1" }
 		LOD 100
 
-		// Incrementers
+		// Incrementer
 		Pass {
 			Stencil {
-				Ref 2
+				Ref 128
 				Comp Always
 				ZFail Replace
-				WriteMask 2		// 00000010
+				WriteMask 128
 			}
 
 			Cull Front
@@ -56,7 +56,7 @@
 				Ref 0
 				Comp Always
 				ZFail Replace
-				WriteMask 2
+				WriteMask 128
 			}
 
 			Cull Back
