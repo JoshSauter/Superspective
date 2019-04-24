@@ -6,4 +6,5 @@ public interface InteractableObject {
 	void OnLeftMouseButtonDown();
 	void OnLeftMouseButton();
 	void OnLeftMouseButtonUp();
+	void OnLeftMouseButtonFocusLost();
 }

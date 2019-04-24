@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PortalContainer : MonoBehaviour {
 	public PortalContainer otherPortal;
+
+    public Camera portalCamera;
 	public PortalSettings settings;
 	public PortalTeleporter teleporter;
 	public VolumetricPortalTrigger volumetricPortalTrigger;

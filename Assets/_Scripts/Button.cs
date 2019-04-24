@@ -25,9 +25,10 @@ public class Button : MonoBehaviour, InteractableObject {
 	public float deadTimeAfterButtonPress = 0;
 	public float deadTimeAfterButtonDepress = 0;
 
-	public void OnLeftMouseButtonDown() {}
-	public void OnLeftMouseButtonUp() {}
-	public void OnLeftMouseButton() { PressButton(); }
+	public virtual void OnLeftMouseButtonDown() {}
+	public virtual void OnLeftMouseButtonUp() {}
+	public virtual void OnLeftMouseButton() { PressButton(); }
+	public virtual void OnLeftMouseButtonFocusLost() {}
 
 	public void PressButton() {
 		if (!inButtonPressOrDepressCoroutine && !buttonPressed) {
@@ -43,7 +44,7 @@ public class Button : MonoBehaviour, InteractableObject {
 		Vector3 startPos = transform.position;
 		Vector3 endPos = startPos + transform.up * depressDistance;
 
-		if (OnButtonPressBegin != null) OnButtonPressBegin(this);
+		TriggerButtonPressBeginEvents();
 
 		float timeElapsed = 0;
 		while (timeElapsed < timeToPressButton) {
@@ -61,7 +62,7 @@ public class Button : MonoBehaviour, InteractableObject {
 		inButtonPressOrDepressCoroutine = false;
 		buttonPressed = true;
 
-		if (OnButtonPressFinish != null) OnButtonPressFinish(this);
+		TriggerButtonPressFinishEvents();
 
 		if (depressAfterPress) {
 			yield return new WaitForSeconds(timeBetweenPressEndDepressStart);
@@ -74,7 +75,7 @@ public class Button : MonoBehaviour, InteractableObject {
 		Vector3 startPos = transform.position;
 		Vector3 endPos = startPos - transform.up * depressDistance;
 
-		if (OnButtonDepressBegin != null) OnButtonDepressBegin(this);
+		TriggerButtonDepressBeginEvents();
 
 		float timeElapsed = 0;
 		while (timeElapsed < timeToDepressButton) {
@@ -92,6 +93,22 @@ public class Button : MonoBehaviour, InteractableObject {
 		inButtonPressOrDepressCoroutine = false;
 		buttonPressed = false;
 
+		TriggerButtonDepressFinishEvents();
+	}
+
+	protected void TriggerButtonPressBeginEvents() {
+		if (OnButtonPressBegin != null) OnButtonPressBegin(this);
+	}
+
+	protected void TriggerButtonPressFinishEvents() {
+		if (OnButtonPressFinish != null) OnButtonPressFinish(this);
+	}
+
+	protected void TriggerButtonDepressBeginEvents() {
+		if (OnButtonDepressBegin != null) OnButtonDepressBegin(this);
+	}
+
+	protected void TriggerButtonDepressFinishEvents() {
 		if (OnButtonDepressFinish != null) OnButtonDepressFinish(this);
 	}
 }

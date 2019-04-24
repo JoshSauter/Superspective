@@ -15,6 +15,7 @@ public enum VisibilityState {
 
 public class PartiallyVisibleObject : MonoBehaviour {
 	public bool DEBUG = false;
+    DebugLogger debug;
 	////////////////////////////////////
 	// Techniques for finding pillars //
 	////////////////////////////////////
@@ -75,10 +76,12 @@ public class PartiallyVisibleObject : MonoBehaviour {
 #endregion
 
 	private void Awake() {
+        debug = new DebugLogger(this, DEBUG);
+
 		invisibleLayer = LayerMask.NameToLayer("Invisible");
 
         if (partiallyVisibleMaterial == null) {
-            Debug.LogError("PartiallyVisibleMaterial for object: " + gameObject.name + " is not set.");
+            debug.LogError("PartiallyVisibleMaterial for object: " + gameObject.name + " is not set.");
             enabled = false;
         }
         if (visibleMaterial == null) {
@@ -179,29 +182,21 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			case MovementDirection.clockwise:
 				if (Angle.IsAngleBetween(onAngle, newAngle, prevAngle)) {
 					HitBySweepingCollider(direction);
-					if (DEBUG) {
-						print(gameObject.name + ":\tHitBySweepingColliderClockwise");
-					}
+					debug.Log(gameObject.name + ":\tHitBySweepingColliderClockwise");
 				}
 				if (Angle.IsAngleBetween(offAngle, newAngle, prevAngle)) {
 					SweepingColliderExit(direction);
-					if (DEBUG) {
-						print(gameObject.name + ":\tSweepingColliderExitClockwise");
-					}
+					debug.Log(gameObject.name + ":\tSweepingColliderExitClockwise");
 				}
 				break;
 			case MovementDirection.counterclockwise:
 				if (Angle.IsAngleBetween(offAngle, prevAngle, newAngle)) {
 					HitBySweepingCollider(direction);
-					if (DEBUG) {
-						print(gameObject.name + ":\tHitBySweepingColliderCounterclockwise");
-					}
+					debug.Log(gameObject.name + ":\tHitBySweepingColliderCounterclockwise");
 				}
 				if (Angle.IsAngleBetween(onAngle, prevAngle, newAngle)) {
 					SweepingColliderExit(direction);
-					if (DEBUG) {
-						print(gameObject.name + ":\tSweepingColliderExitCounterclockwise");
-					}
+					debug.Log(gameObject.name + ":\tSweepingColliderExitCounterclockwise");
 				}
 				break;
 		}
@@ -262,18 +257,14 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		switch (direction) {
 			case MovementDirection.clockwise:
 				if (visibilityState == startingVisibilityState) {
-					if (DEBUG) {
-						print("Enter Clockwise, setting visibility state to PartiallyVisible from " + startingVisibilityState);
-					}
+					debug.Log("Enter Clockwise, setting visibility state to PartiallyVisible from " + startingVisibilityState);
 					SetVisibilityState(VisibilityState.partiallyVisible);
 					return true;
 				}
 				break;
 			case MovementDirection.counterclockwise:
 				if (visibilityState == oppositeStartingVisibilityState) {
-					if (DEBUG) {
-						print("Enter Counterclockwise, setting visibility state to PartiallyVisible from " + oppositeStartingVisibilityState);
-					}
+					debug.Log("Enter Counterclockwise, setting visibility state to PartiallyVisible from " + oppositeStartingVisibilityState);
 					SetVisibilityState(VisibilityState.partiallyVisible);
 					return true;
 				}
@@ -294,15 +285,11 @@ public class PartiallyVisibleObject : MonoBehaviour {
 		if (visibilityState == VisibilityState.partiallyVisible) {
 			switch (direction) {
 				case MovementDirection.clockwise:
-					if (DEBUG) {
-						print("Exit Clockwise, setting visibility state to " + oppositeStartingVisibilityState + " from PartiallyVisible");
-					}
+					debug.Log("Exit Clockwise, setting visibility state to " + oppositeStartingVisibilityState + " from PartiallyVisible");
 					SetVisibilityState(oppositeStartingVisibilityState);
 					return true;
 				case MovementDirection.counterclockwise:
-					if (DEBUG) {
-						print("Exit Counterclockwise, setting visibility state to " + startingVisibilityState + " from PartiallyVisible");
-					}
+					debug.Log("Exit Counterclockwise, setting visibility state to " + startingVisibilityState + " from PartiallyVisible");
 					SetVisibilityState(startingVisibilityState);
 					return true;
 			}

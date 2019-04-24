@@ -38,6 +38,11 @@ public class PlayerLook : MonoBehaviour {
 
 	void Update() {
 		Look(PlayerButtonInput.instance.RightStick);
+
+		if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L)) {
+			Cursor.lockState = (Cursor.lockState != CursorLockMode.Locked) ? CursorLockMode.Locked : CursorLockMode.None;
+			Cursor.visible = !Cursor.visible;
+		}
 	}
 
 	private void Look(Vector2 lookDirection) {

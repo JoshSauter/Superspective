@@ -72,6 +72,7 @@ public class PortalTeleporter : MonoBehaviour {
 
 		foreach (var transformation in transformationsBeforeTeleport) {
 			player.transform.parent = transformation.objectToTransform;
+			DirectionalLightSingleton.instance.transform.parent = transformation.objectToTransform;
 
 			Rigidbody playerRigidbody = player.GetComponent<Rigidbody>();
 			Vector3 playerWorldVelocity = playerRigidbody.velocity;
@@ -91,5 +92,7 @@ public class PortalTeleporter : MonoBehaviour {
 		// Restore the player to the ManagerScene
 		player.transform.parent = LevelManager.instance.transform;
 		player.transform.parent = originalPlayerParent;
+		DirectionalLightSingleton.instance.transform.parent = LevelManager.instance.transform;
+		DirectionalLightSingleton.instance.transform.parent = null;
 	}
 }

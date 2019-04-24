@@ -14,6 +14,8 @@ public class Interact : MonoBehaviour {
 	public float interactionDistance = 5f;
 	Transform cam;
 
+	InteractableObject objectSelected;
+
 	// Use this for initialization
 	void Start () {
 		if (reticle == null) {
@@ -32,21 +34,29 @@ public class Interact : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		InteractableObject obj = FindInteractableObjectSelected();
-		if (obj != null) {
+		InteractableObject newObjectSelected = FindInteractableObjectSelected();
+		// If we lose focus from previous object selected, send an event to that object
+		if (objectSelected != null && newObjectSelected != objectSelected) {
+			objectSelected.OnLeftMouseButtonFocusLost();
+		}
+
+		// Update which object is now selected
+		objectSelected = newObjectSelected;
+
+		if (objectSelected != null) {
 			reticle.color = reticleSelectColor;
 			reticleOutside.color = reticleOutsideSelectColor;
 			// If the left mouse button is being held down, interact with the object selected
 			if (Input.GetMouseButton(0)) {
-				obj.OnLeftMouseButton();
+				objectSelected.OnLeftMouseButton();
 				// If left mouse button was clicked this frame, call OnLeftMouseButtonDown
 				if (Input.GetMouseButtonDown(0)) {
-					obj.OnLeftMouseButtonDown();
+					objectSelected.OnLeftMouseButtonDown();
 				}
 			}
 			// If we released the left mouse button this frame, call OnLeftMouseButtonUp
 			else if (Input.GetMouseButtonUp(0)) {
-				obj.OnLeftMouseButtonUp();
+				objectSelected.OnLeftMouseButtonUp();
 			}
 		}
 		else {

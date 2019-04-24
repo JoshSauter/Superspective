@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -51,7 +52,7 @@ MonoBehaviour:
   m_Material_keys:
   - pbDefaultMaterial
   m_Bool_values: 0001000100010000000101010101
-  m_Int_values: 00000000020000000000000001000000040000000200000002000000000400000100000009000000
+  m_Int_values: 01000000020000000100000001000000040000000200000002000000000400000100000001000000
   m_Float_values:
   - 0
   - 0

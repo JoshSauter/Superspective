@@ -8,6 +8,7 @@ using UnityEditor;
 
 public class MagicTrigger : MonoBehaviour {
     public bool DEBUG;
+    DebugLogger debug;
 
     public enum TriggerConditionType {
         PlayerFacingDirection,
@@ -48,8 +49,11 @@ public class MagicTrigger : MonoBehaviour {
 	private bool hasTriggeredOnStay = false;
 	private bool hasNegativeTriggeredOnStay = false;
 
+    private void Awake() {
+        debug = new DebugLogger(this, DEBUG);
+    }
 
-	private void OnTriggerStay(Collider other) {
+    private void OnTriggerStay(Collider other) {
 		if (!enabled) return;
 
         if (other.TaggedAsPlayer()) {
@@ -59,7 +63,7 @@ public class MagicTrigger : MonoBehaviour {
             }
 			// Magic Events triggered
 			if (facingAmount > playerFaceThreshold) {
-				if (DEBUG) Debug.Log("Triggering MagicTrigger!", this.gameObject);
+				debug.Log("Triggering MagicTrigger!");
 				if (OnMagicTriggerStay != null) {
 					OnMagicTriggerStay(other);
 
@@ -88,7 +92,7 @@ public class MagicTrigger : MonoBehaviour {
 			}
 			// Negative Magic Events triggered (negative triggers cannot turn self off)
 			else if (facingAmount < -playerFaceThreshold) {
-				if (DEBUG) Debug.Log("Triggering NegativeMagicTrigger!");
+				debug.Log("Triggering NegativeMagicTrigger!");
 				if (OnNegativeMagicTriggerStay != null) {
 					OnNegativeMagicTriggerStay(other);
 				}

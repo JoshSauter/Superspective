@@ -1,22 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 public class PortalCameraRenderTexture : MonoBehaviour {
 	public PortalContainer portal;
 	EpitaphRenderer thisPortalRenderer;
 	EpitaphRenderer thisPortalVolumetricRenderer;
 
-	Camera cam;
 	RenderTexture rt;
 	Material cutoutMaterial;
 
+    Camera cam;
+
 	// Use this for initialization
 	void Start () {
-		cam = GetComponent<Camera>();
+        cam = portal.portalCamera;
 		cutoutMaterial = new Material(Shader.Find("Custom/ScreenCutout"));
-		thisPortalRenderer = portal.settings.GetComponent<EpitaphRenderer>();
-		if (thisPortalRenderer == null) thisPortalRenderer = portal.settings.gameObject.AddComponent<EpitaphRenderer>();
+		thisPortalRenderer = GetComponent<EpitaphRenderer>();
+		if (thisPortalRenderer == null) thisPortalRenderer = gameObject.AddComponent<EpitaphRenderer>();
 
 		GameObject volumetricPortal = portal.volumetricPortal;
 		thisPortalVolumetricRenderer = volumetricPortal.GetComponent<EpitaphRenderer>();
@@ -26,7 +28,11 @@ public class PortalCameraRenderTexture : MonoBehaviour {
 		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 	}
 
-	private void HandleScreenResolutionChanged(int newWidth, int newHeight) {
+    private void Update() {
+        cam.enabled = thisPortalRenderer.r.IsVisibleFrom(EpitaphScreen.instance.playerCamera);
+    }
+
+    private void HandleScreenResolutionChanged(int newWidth, int newHeight) {
 		if (rt != null) {
 			rt.Release();
 		}

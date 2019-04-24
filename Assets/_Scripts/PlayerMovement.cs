@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
@@ -271,7 +272,8 @@ public class PlayerMovement : MonoBehaviour {
 			Debug.DrawRay(startPos, -transform.up * (distance + radius), Color.yellow, 0.2f);
 		}
 		foreach (RaycastHit curHitInfo in allHit) {
-			if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;
+            //if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;
+            if (curHitInfo.collider.TaggedAsPlayer()) continue;
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 
 			// Return the first ground-like object hit

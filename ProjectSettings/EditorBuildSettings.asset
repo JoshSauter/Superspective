@@ -47,4 +47,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_Fork_WhiteRoom.unity
     guid: e631392a46e83e64caa0d3d47bd14865
+  - enabled: 1
+    path: Assets/__Scenes/_InvisFloor.unity
+    guid: def97791e1f2f064491b8f2561bab42e
   m_configObjects: {}

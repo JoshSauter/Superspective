@@ -60,6 +60,11 @@ namespace EpitaphUtils {
 			return children;
 		}
 
+        public static bool IsVisibleFrom(this Renderer r, Camera camera) {
+            Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+            return GeometryUtility.TestPlanesAABB(planes, r.bounds);
+        }
+
 		public static void SetColorForRenderer(Renderer r, Color color, string colorPropertyName = "_Color") {
 			MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 			r.GetPropertyBlock(propBlock);
@@ -303,4 +308,26 @@ namespace EpitaphUtils {
 			return angleObj != null && angleObj == this;
 		}
 	}
+
+    public class DebugLogger {
+        public bool enabled;
+        private UnityEngine.Object context;
+        
+        public DebugLogger(UnityEngine.Object context, bool enabled) {
+            this.enabled = enabled;
+            this.context = context;
+        }
+
+        public void Log(object message) {
+            if (enabled) Debug.Log(message, context);
+        }
+
+        public void LogWarning(object message) {
+            if (enabled) Debug.LogWarning(message, context);
+        }
+
+        public void LogError(object message) {
+            if (enabled) Debug.LogError(message, context);
+        }
+    }
 }

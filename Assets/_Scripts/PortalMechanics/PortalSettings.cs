@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using EpitaphUtils;
 
 [System.Serializable]
 public struct TransformObjectOnRotate {
@@ -13,13 +14,19 @@ public struct TransformObjectOnRotate {
 }
 
 public class PortalSettings : MonoBehaviour {
+    DebugLogger debug;
+
 	public int channel;
 	public bool useMeshAsCollider = false;
 	public bool useCameraEdgeDetectionColor = true;
 	public TransformObjectOnRotate[] objectsToTransformOnTeleport;
 	public Color portalEdgeDetectionColor = Color.black;
 
-	private void OnEnable() {
+    private void Awake() {
+        debug = new DebugLogger(this, false);
+    }
+
+    private void OnEnable() {
 		StartCoroutine(AddReceiverCoroutine());
 	}
 
@@ -29,7 +36,7 @@ public class PortalSettings : MonoBehaviour {
 
 	IEnumerator AddReceiverCoroutine() {
 		while (!gameObject.scene.isLoaded) {
-			print("Waiting for scene " + gameObject.scene + " to be loaded before adding receiver...");
+			debug.Log("Waiting for scene " + gameObject.scene + " to be loaded before adding receiver...");
 			yield return null;
 		}
 

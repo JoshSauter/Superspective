@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using EpitaphUtils;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -23,10 +24,12 @@ public enum Level {
 	axis,
 	fork,
 	forkWhiteRoom,
-	forkBlackRoom
+	forkBlackRoom,
+    invisFloor
 }
 
 public class LevelManager : Singleton<LevelManager> {
+    public DebugLogger debug;
 	public Level startingScene;
 
 	Dictionary<Level, string> enumToSceneName;
@@ -49,6 +52,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string fork = "_Fork";
 	private const string forkWhiteRoom = "_Fork_WhiteRoom";
 	private const string forkBlackRoom = "_Fork_BlackRoom";
+    private const string invisFloor = "_InvisFloor";
 
 	private const string tutorialHallway = "_TutorialHallway";
 	private const string transition2_3 = "_Transition2_3";
@@ -57,6 +61,8 @@ public class LevelManager : Singleton<LevelManager> {
 #endregion
 
 	public void Start() {
+        debug = new DebugLogger(this, true);
+
 		loadedSceneNames = new List<string>();
 		currentlyLoadingSceneNames = new List<string>();
 		currentlyUnloadingSceneNames = new List<string>();
@@ -90,12 +96,12 @@ public class LevelManager : Singleton<LevelManager> {
 	/// <param name="levelName">Name of the scene to become active</param>
 	public void SwitchActiveScene(string levelName) {
 		if (!worldGraph.ContainsKey(levelName)) {
-			Debug.LogError("No level name found in world graph with name " + levelName);
+			debug.LogError("No level name found in world graph with name " + levelName);
 			return;
 		}
 
 		if (activeSceneName == levelName) {
-			Debug.LogWarning("Level " + levelName + " already the active scene.");
+			debug.LogWarning("Level " + levelName + " already the active scene.");
 			return;
 		}
 
@@ -140,6 +146,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
 		enumToSceneName.Add(Level.transition2_3, transition2_3);
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
+        enumToSceneName.Add(Level.invisFloor, invisFloor);
 	}
 
 	/// <summary>
@@ -159,6 +166,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom });
 		worldGraph.Add(forkWhiteRoom, new List<string>() { fork });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
+        worldGraph.Add(invisFloor, new List<string>());
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });
@@ -210,7 +218,7 @@ public class LevelManager : Singleton<LevelManager> {
 	/// <param name="unloadedScene">Scene that finished unloading</param>
 	private void FinishUnloadingScene(Scene unloadedScene) {
 		if (unloadedScene.name == activeSceneName) {
-			Debug.LogError("Just unloaded the active scene!");
+			debug.LogError("Just unloaded the active scene!");
 		}
 
 		if (currentlyUnloadingSceneNames.Contains(unloadedScene.name)) {

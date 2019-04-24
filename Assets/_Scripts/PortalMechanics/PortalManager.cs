@@ -6,12 +6,14 @@ using EpitaphUtils;
 using UnityStandardAssets.ImageEffects;
 
 public class PortalManager : Singleton<PortalManager> {
+    DebugLogger debug;
 	Dictionary<int, HashSet<PortalSettings>> receiversByChannel = new Dictionary<int, HashSet<PortalSettings>>();
 	Dictionary<int, GameObject> cameraContainersByChannel = new Dictionary<int, GameObject>();
 
 	GameObject volumetricPortalPrefab;
 
 	private void Awake() {
+        debug = new DebugLogger(this, false);
 		volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 	}
 
@@ -26,7 +28,7 @@ public class PortalManager : Singleton<PortalManager> {
 		}
 
 		if (receiversByChannel[channel].Count == 2) {
-			Debug.LogError("Channel " + channel + " already has two receivers! Check the channels for the following receivers:\n" +
+			debug.LogError("Channel " + channel + " already has two receivers! Check the channels for the following receivers:\n" +
 				string.Join("\n", receiversByChannel[channel].Select(r => r.name).ToArray()) + "\n" + receiver.name);
 			return;
 		}
@@ -34,7 +36,7 @@ public class PortalManager : Singleton<PortalManager> {
 		receiversByChannel[channel].Add(receiver);
 
 		if (receiversByChannel[channel].Count == 2) {
-			print("Enabling Portal for channel " + channel);
+			debug.Log("Enabling Portal for channel " + channel);
 			InitializePortalsForChannel(channel);
 		}
 	}
@@ -47,15 +49,15 @@ public class PortalManager : Singleton<PortalManager> {
 	/// <returns>Returns true if the receiver was successfully found and removed, false otherwise</returns>
 	public bool RemoveReceiver(int channel, PortalSettings receiver) {
 		if (!receiversByChannel.ContainsKey(channel)) {
-			Debug.LogWarning("Trying to remove a receiver for non-existent channel: " + channel);
+			debug.LogWarning("Trying to remove a receiver for non-existent channel: " + channel);
 			return false;
 		}
 
 		bool receiverRemoved = receiversByChannel[channel].Remove(receiver);
 		if (receiverRemoved) {
-			print("Disabling Portal for channel " + channel);
+			debug.Log("Disabling Portal for channel " + channel);
 			// TODO: Disable portal for channel
-			Debug.LogError("Not yet implemented: PortalManager.RemoveReceiver()");
+			debug.LogError("Not yet implemented: PortalManager.RemoveReceiver()");
 		}
 		return receiverRemoved;
 	}
@@ -68,7 +70,7 @@ public class PortalManager : Singleton<PortalManager> {
 		List<PortalContainer> portalContainers = CreatePortalContainers(channel);
 
 		// Create a Portal Camera which renders to a RenderTexture for each Receiver in the channel
-		List<GameObject> portalCameras = CreatePortalCameras(channel);
+		List<PortalCameraFollow> portalCameras = CreatePortalCameras(channel);
 
 		// Create the Portal Teleporters on each PortalSettings
 		List<PortalTeleporter> portalTeleporters = CreatePortalTeleporters(channel);
@@ -84,15 +86,17 @@ public class PortalManager : Singleton<PortalManager> {
 			int other = (i + 1) % 2;
 
 			PortalContainer portalContainer = portalContainers[i];
-			PortalCameraRenderTexture portalCameraRenderTexture = portalCameras[i].GetComponent<PortalCameraRenderTexture>();
-			PortalCameraFollow portalCameraFollow = portalCameras[i].GetComponent<PortalCameraFollow>();
+            PortalSettings portalSettings = settings[i];
+			PortalCameraRenderTexture portalCameraRenderTexture = portalSettings.gameObject.AddComponent<PortalCameraRenderTexture>();
+			PortalCameraFollow portalCameraFollow = portalCameras[i];
 			PortalTeleporter portalTeleporter = portalTeleporters[i];
 			GameObject volumetricPortalObject = volumetricPortalObjects[i];
 			VolumetricPortalTrigger volumetricPortalTrigger = volumetricPortalTriggers[i];
 
 			// PortalContainer references
 			portalContainer.otherPortal = portalContainers[other];
-			portalContainer.settings = settings[i];
+            portalContainer.portalCamera = portalCameraFollow.GetComponent<Camera>();
+			portalContainer.settings = portalSettings;
 			portalContainer.teleporter = portalTeleporters[i];
 			portalContainer.volumetricPortal = volumetricPortalObject;
 			portalContainer.volumetricPortalTrigger = volumetricPortalTrigger;
@@ -141,22 +145,23 @@ public class PortalManager : Singleton<PortalManager> {
 	////////////////////
 	// Portal Cameras //
 	////////////////////
-	private List<GameObject> CreatePortalCameras(int channel) {
+	private List<PortalCameraFollow> CreatePortalCameras(int channel) {
 		// Create parent object to act as a container for the portal cameras
 		GameObject newCameraContainer = new GameObject("Channel" + channel + " Cameras");
 		newCameraContainer.transform.SetParent(transform);
 
 		// Create a new camera for each receiver
 		List<PortalSettings> receiversInChannel = receiversByChannel[channel].ToList();
+        List<PortalCameraFollow> portalCameraFollows = new List<PortalCameraFollow>();
 		for (int i = 0; i < receiversInChannel.Count; i++) {
-			CreatePortalCamera(newCameraContainer.transform, receiversInChannel[i], receiversInChannel[(i + 1) % receiversInChannel.Count]);
+			portalCameraFollows.Add(CreatePortalCamera(newCameraContainer.transform, receiversInChannel[i], receiversInChannel[(i + 1) % receiversInChannel.Count]));
 		}
 
 		cameraContainersByChannel.Add(channel, newCameraContainer);
-		return newCameraContainer.transform.GetComponentsInChildrenOnly<Transform>().Select(x => x.gameObject).ToList();
+		return portalCameraFollows;
 	}
 
-	private GameObject CreatePortalCamera(Transform parentObj, PortalSettings receiver, PortalSettings otherPortal) {
+	private PortalCameraFollow CreatePortalCamera(Transform parentObj, PortalSettings receiver, PortalSettings otherPortal) {
 		GameObject playerCam = EpitaphScreen.instance.playerCamera.gameObject;
 
 		GameObject newCameraObj = new GameObject(receiver.name + " Camera");
@@ -177,15 +182,12 @@ public class PortalManager : Singleton<PortalManager> {
 		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 		newCameraObj.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog
 
-		// Initialize PortalCameraRenderTexture component
-		PortalCameraRenderTexture newPortalCameraRenderTexture = newCameraObj.AddComponent<PortalCameraRenderTexture>();
-
 		// Initialize PortalCameraFollow component
 		PortalCameraFollow newPortalCameraFollow = newCameraObj.AddComponent<PortalCameraFollow>();
 
 		// Fix Camera name
 		newCameraObj.name = receiver.name + " Camera";
-		return newCameraObj;
+		return newPortalCameraFollow;
 	}
 
 	////////////////////////

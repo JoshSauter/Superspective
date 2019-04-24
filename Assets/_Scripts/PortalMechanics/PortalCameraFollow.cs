@@ -14,6 +14,9 @@ public class PortalCameraFollow : MonoBehaviour {
 	Transform source;
 	Transform destination;
 
+    Collider sourceCollider;
+    Collider playerCollider;
+
 	Camera portalCamera;
 
 	Camera playerCamera;
@@ -21,17 +24,25 @@ public class PortalCameraFollow : MonoBehaviour {
 	Matrix4x4 originalProjectionMatrix;
 
 	// Use this for initialization
-	void Start () {
+	IEnumerator Start () {
 		playerCamera = EpitaphScreen.instance.playerCamera;
 
 		source = portalBeingRendered.settings.transform;
 		destination = portalBeingRendered.otherPortal.settings.transform;
 
-		portalCamera = GetComponent<Camera>();
+        sourceCollider = portalBeingRendered.teleporter.GetComponent<Collider>();
+        playerCollider = playerCamera.GetComponentInParent<Collider>();
+
+        portalCamera = GetComponent<Camera>();
 		originalProjectionMatrix = portalCamera.projectionMatrix;
 
 		teleporterForPortalBeingRendered = portalBeingRendered.teleporter;
 		teleporterForOtherPortal = portalBeingRendered.otherPortal.teleporter;
+
+        while (sourceCollider == null) {
+            sourceCollider = portalBeingRendered.teleporter.GetComponent<Collider>();
+            yield return null;
+        }
 	}
 
 	void LateUpdate() {
@@ -44,9 +55,9 @@ public class PortalCameraFollow : MonoBehaviour {
 		Vector3 destinationNormal = teleporterForOtherPortal.portalNormal;
 
 		float dot = Vector3.Dot(teleporterForPortalBeingRendered.portalNormal, playerCamera.transform.position - source.position);
-		// TODO: This calculates from center-to-center, we want edge-to-edge of colliders
-		float distanceFromPlayerToPortal = Vector3.Distance(source.position, playerCamera.transform.position);
-		if (dot < 0.1f || distanceFromPlayerToPortal < 10) {
+        // TODO: This is an approximation of edge-to-edge distance between colliders, maybe improve this to be true edge-to-edge distance?
+        float distanceFromPlayerToPortal = GetDistanceFromPlayerToPortal();
+		if (dot < 0.1f || distanceFromPlayerToPortal < 3) {
 			portalCamera.projectionMatrix = originalProjectionMatrix;
 			return;
 		}
@@ -62,6 +73,14 @@ public class PortalCameraFollow : MonoBehaviour {
 	private void OnPreRender() {
 		Shader.SetGlobalVector("_InvProjParam", InvProjParam(portalCamera.projectionMatrix));
 	}
+
+    private float GetDistanceFromPlayerToPortal() {
+        float distance = float.MaxValue;
+        if (sourceCollider != null) {
+            distance = Vector3.Distance(sourceCollider.ClosestPoint(playerCamera.transform.position), playerCamera.transform.position);
+        }
+        return distance;
+    }
 
 	/// <summary>
 	/// Ref: An Efficient Depth Linearization Method for Oblique View Frustums, Eq. 6.
