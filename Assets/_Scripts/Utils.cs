@@ -60,7 +60,17 @@ namespace EpitaphUtils {
 			return children;
 		}
 
-        public static bool IsVisibleFrom(this Renderer r, Camera camera) {
+		public static T GetComponentInChildrenOnly<T>(this Transform parent) where T : Component {
+			T[] all = parent.GetComponentsInChildren<T>();
+			foreach (T each in all) {
+				if (each.transform != parent) {
+					return each;
+				}
+			}
+			return null;
+		}
+
+		public static bool IsVisibleFrom(this Renderer r, Camera camera) {
             Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
             return GeometryUtility.TestPlanesAABB(planes, r.bounds);
         }
@@ -188,9 +198,13 @@ namespace EpitaphUtils {
 			return degrees + "°";
 		}
 
+
 		// Constructors
 		private Angle(float _radians) {
 			radians = _radians;
+		}
+		private Angle(Angle other) {
+			radians = other.radians;
 		}
 
 		public static Angle Radians(float radians) {
@@ -211,6 +225,14 @@ namespace EpitaphUtils {
 		}
 
 		/// <summary>
+		/// Gives the same normalized angle on the opposite quadrant of the circle
+		/// </summary>
+		/// <returns>A new Angle after being added and normalized (does not modify the original Angle)</returns>
+		public Angle reversed {
+			get { return new Angle(this).Reverse(); }
+		}
+
+		/// <summary>
 		/// Normalizes an angle to [0-2*PI) range
 		/// </summary>
 		/// <returns>This angle after being modified</returns>
@@ -219,16 +241,27 @@ namespace EpitaphUtils {
 		}
 
 		/// <summary>
+		/// Gives the normalized angle within the [0-2*PI) range
+		/// </summary>
+		/// <returns>A new angle that is normalized (does not modify the original Angle)</returns>
+		public Angle normalized {
+			get { return new Angle(this).Normalize(); }
+		}
+
+		/// <summary>
 		/// Normalizes an angle to [startRange, endRange) range
 		/// </summary>
-		/// <param name="startRange">Start of the range to normalize to</param>
-		/// <param name="endRange">End of the range to normalize to</param>
+		/// <param name="startRange">Start of the range to normalize to (inclusive)</param>
+		/// <param name="endRange">End of the range to normalize to (exclusive)</param>
 		/// <returns>This angle after being modified</returns>
 		public Angle Normalize(Angle startRange, Angle endRange) {
 			Angle width = endRange - startRange;
 			Angle offsetValue = this - startRange; // value relative to startRange
 
 			this.radians = offsetValue.radians - Mathf.Floor(offsetValue.radians / width.radians) * width.radians + startRange.radians;
+			if (this == endRange) {
+				this.radians = startRange.radians;
+			}
 			return this;
 		}
 		
@@ -255,6 +288,35 @@ namespace EpitaphUtils {
 		}
 
 		/// <summary>
+		/// Calculates the difference between this angle and another angle.
+		/// Assumes that any difference over 180° is to be wrapped back around to a value < 180°
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns>Difference between two angles, with magnitude < 180°</returns>
+		public Angle WrappedAngleDiff(Angle other) {
+			return WrappedAngleDiff(this, other);
+		}
+
+		/// <summary>
+		/// Calculates the difference between the given angles.
+		/// Assumes that any difference over 180° is to be wrapped back around to a value < 180°
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns>Difference between two angles, with magnitude < 180°</returns>
+		public static Angle WrappedAngleDiff(Angle a, Angle b) {
+			Angle angleDiff = a.normalized - b.normalized;
+			if (angleDiff.degrees > 180) {
+				// Debug.Log("Before: " + angleDiff + "\nAfter: " + -(D360 - angleDiff));
+				angleDiff = -(D360 - angleDiff);
+			}
+			else if (angleDiff.degrees < -180) {
+				// Debug.Log("Before: " + angleDiff + "\nAfter: " + (D360 + angleDiff));
+				angleDiff = D360 + angleDiff;
+			}
+			return angleDiff;
+		}
+
+		/// <summary>
 		/// Determines whether the test angle falls between angles a and b (counter-clockwise from a to b)
 		/// </summary>
 		/// <param name="test"></param>
@@ -262,9 +324,9 @@ namespace EpitaphUtils {
 		/// <param name="b"></param>
 		/// <returns>True if test falls between a and b (counter-clockwise), false otherwise</returns>
 		public static bool IsAngleBetween(Angle test, Angle a, Angle b) {
-			float testNormalized = new Angle(test.radians).Normalize().radians;
-			float aNormalized = new Angle(a.radians).Normalize().radians;
-			float bNormalized = new Angle(b.radians).Normalize().radians;
+			float testNormalized = test.normalized.radians;
+			float aNormalized = a.normalized.radians;
+			float bNormalized = b.normalized.radians;
 
 			if (aNormalized < bNormalized) {
 				return aNormalized <= testNormalized && testNormalized <= bNormalized;
@@ -275,6 +337,9 @@ namespace EpitaphUtils {
 		}
 
 		// Operators
+		public static Angle operator *(int scalar, Angle b) {
+			return new Angle(b.radians * scalar);
+		}
 		public static Angle operator -(Angle a) {
 			return new Angle(-a.radians);
 		}
@@ -291,10 +356,10 @@ namespace EpitaphUtils {
 			return new Angle(a.radians * b.radians);
 		}
 		public static bool operator <(Angle a, Angle b) {
-			return (a - b).radians < 0;
+			return a.radians < b.radians;
 		}
 		public static bool operator >(Angle a, Angle b) {
-			return (b - a).radians < 0;
+			return a.radians > b.radians;
 		}
 		public static bool operator ==(Angle a, Angle b) {
 			return a.radians == b.radians;
@@ -307,6 +372,12 @@ namespace EpitaphUtils {
 			Angle angleObj = obj as Angle;
 			return angleObj != null && angleObj == this;
 		}
+
+		public static Angle D0 = new Angle(0);
+		public static Angle D90 = new Angle(Mathf.PI * 0.5f);
+		public static Angle D180 = new Angle(Mathf.PI);
+		public static Angle D270 = new Angle(Mathf.PI * 1.5f);
+		public static Angle D360 = new Angle(Mathf.PI * 2);
 	}
 
     public class DebugLogger {
@@ -330,4 +401,145 @@ namespace EpitaphUtils {
             if (enabled) Debug.LogError(message, context);
         }
     }
+
+	namespace ShaderUtils {
+		public enum BlendMode {
+			Opaque,
+			Cutout,
+			Fade,   // Old school alpha-blending mode, fresnel does not affect amount of transparency
+			Transparent, // Physically plausible transparency mode, implemented as alpha pre-multiply
+			TransparentWithBorder // Same as above but renders to a different renderType
+		}
+
+		public static class ShaderUtils {
+
+
+			public enum ShaderPropertyType {
+				Color,
+				Vector,
+				Float,
+				Range,
+				Texture
+			}
+			private static readonly Dictionary<string, ShaderPropertyType> knownShaderProperties = new Dictionary<string, ShaderPropertyType> {
+				{ "_Color", ShaderPropertyType.Color },
+				{ "_EmissionColor", ShaderPropertyType.Color },
+				{ "_Dimension", ShaderPropertyType.Float },
+				{ "_MainTex", ShaderPropertyType.Texture },
+				{ "_Cutoff", ShaderPropertyType.Range },
+				{ "_Glossiness", ShaderPropertyType.Range },
+				{ "_GlossMapScale", ShaderPropertyType.Range },
+				{ "_SmoothnessTextureChannel", ShaderPropertyType.Float },
+				{ "_SpecColor", ShaderPropertyType.Color },
+				{ "_SpecGlossMap", ShaderPropertyType.Texture },
+				{ "_SpecularHighlights", ShaderPropertyType.Float },
+				{ "_GlossyReflections", ShaderPropertyType.Float },
+				{ "_BumpScale", ShaderPropertyType.Float },
+				{ "_BumpMap", ShaderPropertyType.Texture },
+				{ "_Parallax", ShaderPropertyType.Range },
+				{ "_ParallaxMap", ShaderPropertyType.Texture },
+				{ "_OcclusionStrength", ShaderPropertyType.Range },
+				{ "_OcclusionMap", ShaderPropertyType.Texture },
+				{ "_EmissionMap", ShaderPropertyType.Texture },
+				{ "_DetailMask", ShaderPropertyType.Texture },
+				{ "_DetailAlbedoMap", ShaderPropertyType.Texture },
+				{ "_DetailNormalMapScale", ShaderPropertyType.Float },
+				{ "_DetailNormalMap", ShaderPropertyType.Texture }
+			};
+
+			public static void CopyMatchingPropertiesFromMaterial(this Material copyInto, Material copyFrom) {
+				foreach (var propertyName in knownShaderProperties.Keys) {
+					// Skip any property not known to both materials
+					if (!copyInto.HasProperty(propertyName) || !copyFrom.HasProperty(propertyName)) continue;
+					switch (knownShaderProperties[propertyName]) {
+						case ShaderPropertyType.Color:
+							copyInto.SetColor(propertyName, copyFrom.GetColor(propertyName));
+							break;
+						case ShaderPropertyType.Vector:
+							copyInto.SetVector(propertyName, copyFrom.GetVector(propertyName));
+							break;
+						case ShaderPropertyType.Float:
+						case ShaderPropertyType.Range:
+							copyInto.SetFloat(propertyName, copyFrom.GetFloat(propertyName));
+							break;
+						case ShaderPropertyType.Texture:
+							copyInto.SetTexture(propertyName, copyFrom.GetTexture(propertyName));
+							copyInto.SetTextureOffset(propertyName, copyFrom.GetTextureOffset(propertyName));
+							copyInto.SetTextureScale(propertyName, copyFrom.GetTextureScale(propertyName));
+							break;
+					}
+				}
+
+				copyInto.shaderKeywords = copyFrom.shaderKeywords;
+				if (copyInto.shader.name == "Custom/DimensionShaders/DimensionObjectSpecular" || copyInto.shader.name == "Custom/DimensionShaders/InverseDimensionObjectSpecular") {
+					switch (copyFrom.GetTag("RenderType", true)) {
+						case "TransparentCutout":
+							SetupMaterialWithBlendMode(ref copyInto, BlendMode.Cutout);
+							break;
+						case "Transparent":
+							SetupMaterialWithBlendMode(ref copyInto, BlendMode.Transparent);
+							break;
+						default:
+							SetupMaterialWithBlendMode(ref copyInto, BlendMode.Opaque);
+							break;
+					}
+				}
+			}
+
+			public static void SetupMaterialWithBlendMode(ref Material material, BlendMode blendMode) {
+				switch (blendMode) {
+					case BlendMode.Opaque:
+						material.SetOverrideTag("RenderType", "");
+						material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+						material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+						material.SetInt("_ZWrite", 1);
+						material.DisableKeyword("_ALPHATEST_ON");
+						material.DisableKeyword("_ALPHABLEND_ON");
+						material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+						material.renderQueue = -1;
+						break;
+					case BlendMode.Cutout:
+						material.SetOverrideTag("RenderType", "TransparentCutout");
+						material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+						material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+						material.SetInt("_ZWrite", 1);
+						material.EnableKeyword("_ALPHATEST_ON");
+						material.DisableKeyword("_ALPHABLEND_ON");
+						material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+						material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+						break;
+					case BlendMode.Fade:
+						material.SetOverrideTag("RenderType", "Transparent");
+						material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+						material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+						material.SetInt("_ZWrite", 0);
+						material.DisableKeyword("_ALPHATEST_ON");
+						material.EnableKeyword("_ALPHABLEND_ON");
+						material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+						material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+						break;
+					case BlendMode.Transparent:
+						material.SetOverrideTag("RenderType", "Transparent");
+						material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+						material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+						material.SetInt("_ZWrite", 0);
+						material.DisableKeyword("_ALPHATEST_ON");
+						material.DisableKeyword("_ALPHABLEND_ON");
+						material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+						material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+						break;
+					case BlendMode.TransparentWithBorder:
+						material.SetOverrideTag("RenderType", "TransparentWithBorder");
+						material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+						material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+						material.SetInt("_ZWrite", 0);
+						material.DisableKeyword("_ALPHATEST_ON");
+						material.DisableKeyword("_ALPHABLEND_ON");
+						material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+						material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+						break;
+				}
+			}
+		}
+	}
 }

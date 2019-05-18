@@ -5,13 +5,24 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class EpitaphRenderer : MonoBehaviour {
 	public const string mainColor = "_Color";
-	MaterialPropertyBlock propBlock;
-	public Renderer r;
+
+	private Renderer lazy_r;
+	public Renderer r {
+		get {
+			if (lazy_r == null) lazy_r = GetComponent<Renderer>();
+			return lazy_r;
+		}
+	}
+	private MaterialPropertyBlock lazy_propBlock;
+	MaterialPropertyBlock propBlock {
+		get {
+			if (lazy_propBlock == null) lazy_propBlock = new MaterialPropertyBlock();
+			return lazy_propBlock;
+		}
+	}
 
 	// Use this for initialization
 	void Awake () {
-		r = GetComponent<Renderer>();
-		propBlock = new MaterialPropertyBlock();
 		SetMainColor(r.material.color);
 	}
 
@@ -44,13 +55,31 @@ public class EpitaphRenderer : MonoBehaviour {
 		Color prevColor = GetMainColor();
 
 		r.material = newMaterial;
-		MaterialPropertyBlock pb = new MaterialPropertyBlock();
 
 		if (keepMainColor) {
-			r.GetPropertyBlock(propBlock);
-			pb.SetColor("_Color", prevColor);
-			r.SetPropertyBlock(pb);
+			SetMainColor(prevColor);
 		}
+	}
+
+	public Material[] GetMaterials() {
+		return r.materials;
+	}
+
+	public void SetMaterials(Material[] newMaterials) {
+		r.materials = newMaterials;
+	}
+
+	public void SetInt(string propName, int value) {
+		if (GetMaterial().HasProperty(propName)) {
+			r.GetPropertyBlock(propBlock);
+			propBlock.SetInt(propName, value);
+			r.SetPropertyBlock(propBlock);
+		}
+	}
+
+	public int GetInt(string propName) {
+		r.GetPropertyBlock(propBlock);
+		return propBlock.GetInt(propName);
 	}
 
 	public Bounds GetRendererBounds() {

@@ -83,8 +83,8 @@ public class ObscurePillar : MonoBehaviour {
 
 	}
 
-	private void HandlePillarVisibilityChange(VisibilityState newState) {
-		if (newState == VisibilityState.visible) {
+	private void HandlePillarVisibilityChange(PartiallyVisibleObject.VisibilityState newState) {
+		if (newState == PartiallyVisibleObject.VisibilityState.visible) {
 			ObscurePillar.activePillar = this;
 		}
 	}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PillarSpawnPanel : Panel {
 	public GameObject pillarBeforeActive;
-	public ObscurePillar pillar;
+	public DimensionPillar pillar;
 
 	override protected void Start() {
 		base.Start();
@@ -15,6 +15,6 @@ public class PillarSpawnPanel : Panel {
 	void SpawnPillar(Button b) {
 		pillar.gameObject.SetActive(true);
 		pillarBeforeActive.SetActive(false);
-		ObscurePillar.activePillar = pillar;
+		DimensionPillar.activePillar = pillar;
 	}
 }

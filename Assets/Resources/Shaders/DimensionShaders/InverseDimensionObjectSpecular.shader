@@ -1,9 +1,10 @@
 ﻿// Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
 
-Shader "Custom/PVOSpecularRed"
+Shader "Custom/DimensionShaders/InverseDimensionObjectSpecular"
 {
 	Properties
 	{
+		_Dimension("Dimension", Int) = 0
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo", 2D) = "white" {}
 
@@ -52,7 +53,7 @@ Shader "Custom/PVOSpecularRed"
 
 			SubShader
 		{
-			Tags { "RenderType" = "Opaque" "PerformanceChecks" = "False" }
+			Tags { "RenderType"="InverseDimensionObject" "PerformanceChecks" = "False" }
 			LOD 300
 
 
@@ -90,15 +91,18 @@ Shader "Custom/PVOSpecularRed"
 			#pragma vertex vertBase
 			#pragma fragment fragBaseNew
 			#include "UnityStandardCoreForward.cginc"
-
-			sampler2D _DiscardTex1;
+			#include "DimensionShaderHelpers.cginc"
+			
+			sampler2D _DimensionMask;
+			int _Dimension;
 			float _ResolutionX;
 			float _ResolutionY;
 
 			half4 fragBaseNew(VertexOutputForwardBase i) : SV_TARGET {
 				float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-				float4 samplePixel = tex2D(_DiscardTex1, viewportVertex);
-				clip(samplePixel.r - 0.5);
+				fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
+				int dimensionValue = ColorToDimensionValue(dimensionTest);
+				clip(-(dimensionValue != -1));
 				return fragBase(i);
 			}
 
@@ -136,15 +140,18 @@ Shader "Custom/PVOSpecularRed"
 			#pragma vertex vertAdd
 			#pragma fragment fragAddNew
 			#include "UnityStandardCoreForward.cginc"
+			#include "DimensionShaderHelpers.cginc"
 			
-			sampler2D _DiscardTex1;
+			sampler2D _DimensionMask;
+			int _Dimension;
 			float _ResolutionX;
 			float _ResolutionY;
 
 			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
 				float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-				float4 samplePixel = tex2D(_DiscardTex1, viewportVertex);
-				clip(samplePixel.r - 0.5);
+				fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
+				int dimensionValue = ColorToDimensionValue(dimensionTest);
+				clip(-(dimensionValue != -1));
 				return fragAdd(i);
 			}
 

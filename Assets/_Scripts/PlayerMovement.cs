@@ -230,9 +230,9 @@ public class PlayerMovement : MonoBehaviour {
 
 		RaycastHit bottomRaycast;
 		RaycastHit stepUpRaycast;
-		Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance);
 
 		if (Physics.Raycast(rayLowStartPos, rayDirection, out bottomRaycast, rayDistance) && Mathf.Abs(Vector3.Dot(bottomRaycast.normal, Vector3.up)) < 0.01f) {
+			if (Physics.GetIgnoreLayerCollision(gameObject.layer, bottomRaycast.collider.gameObject.layer)) return desiredVelocity;
 			//print("Wall found: " + bottomRaycast.collider.name);
 			if (!Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance)) {
 				print("Step found: " + bottomRaycast.collider.name);
@@ -273,7 +273,7 @@ public class PlayerMovement : MonoBehaviour {
 		}
 		foreach (RaycastHit curHitInfo in allHit) {
             //if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;
-            if (curHitInfo.collider.TaggedAsPlayer()) continue;
+            if (curHitInfo.collider.TaggedAsPlayer() || Physics.GetIgnoreLayerCollision(gameObject.layer, curHitInfo.collider.gameObject.layer)) continue;
 			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
 
 			// Return the first ground-like object hit

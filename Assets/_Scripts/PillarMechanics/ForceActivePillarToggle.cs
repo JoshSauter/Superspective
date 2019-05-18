@@ -9,8 +9,8 @@ public class ForceActivePillarToggle : MagicTrigger {
 	public bool forwardSameScenePillar = true;
 	public bool backwardSameScenePillar = true;
 	// Setting up references for pillars in same scene can be done directly
-	public ObscurePillar forwardTriggeredPillar;
-	public ObscurePillar backwardTriggeredPillar;
+	public DimensionPillar forwardTriggeredPillar;
+	public DimensionPillar backwardTriggeredPillar;
 	// Setting up references for pillars in different scenes has to be done through scene + gameObject names
 	public Level forwardPillarLevel;
 	public string forwardPillarName;
@@ -26,23 +26,23 @@ public class ForceActivePillarToggle : MagicTrigger {
 	private void TriggerPillarChangeForward(Collider unused) {
 		if (forwardTriggeredPillar == null && !forwardSameScenePillar) {
 			string pillarKey = PillarKey(forwardPillarLevel, forwardPillarName);
-			if (ObscurePillar.pillars.ContainsKey(pillarKey)) {
-				forwardTriggeredPillar = ObscurePillar.pillars[pillarKey];
+			if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
+				forwardTriggeredPillar = DimensionPillar.pillars[pillarKey];
 			}
 		}
 
-		ObscurePillar.activePillar = forwardTriggeredPillar;
+		DimensionPillar.activePillar = forwardTriggeredPillar;
 	}
 
 	private void TriggerPillarChangeBackward(Collider unused) {
 		if (backwardTriggeredPillar == null && !backwardSameScenePillar) {
 			string pillarKey = PillarKey(backwardPillarLevel, backwardPillarName);
-			if (ObscurePillar.pillars.ContainsKey(pillarKey)) {
-				backwardTriggeredPillar = ObscurePillar.pillars[pillarKey];
+			if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
+				backwardTriggeredPillar = DimensionPillar.pillars[pillarKey];
 			}
 		}
 
-		ObscurePillar.activePillar = backwardTriggeredPillar;
+		DimensionPillar.activePillar = backwardTriggeredPillar;
 	}
 
 	private string PillarKey(Level level, string name) {
@@ -86,7 +86,7 @@ public class ForceActivePillarToggleEditor : MagicTriggerEditor {
 
 		forwardSameScenePillar.boolValue = EditorGUILayout.Toggle("Forward Pillar is in same scene?", forwardSameScenePillar.boolValue);
 		if (forwardSameScenePillar.boolValue) {
-			forwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Forward Pillar: ", forwardTriggeredPillar.objectReferenceValue, typeof(ObscurePillar), true) as ObscurePillar;
+			forwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Forward Pillar: ", forwardTriggeredPillar.objectReferenceValue, typeof(DimensionPillar), true) as DimensionPillar;
 		}
 		else {
 			forwardPillarLevel.enumValueIndex = (int)(Level)EditorGUILayout.EnumPopup("Level of Pillar: ", (Level)forwardPillarLevel.enumValueIndex);
@@ -97,7 +97,7 @@ public class ForceActivePillarToggleEditor : MagicTriggerEditor {
 
 		backwardSameScenePillar.boolValue = EditorGUILayout.Toggle("Backward Pillar is in same scene?", backwardSameScenePillar.boolValue);
 		if (backwardSameScenePillar.boolValue) {
-			backwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Backward Pillar: ", backwardTriggeredPillar.objectReferenceValue, typeof(ObscurePillar), true) as ObscurePillar;
+			backwardTriggeredPillar.objectReferenceValue = EditorGUILayout.ObjectField("Backward Pillar: ", backwardTriggeredPillar.objectReferenceValue, typeof(DimensionPillar), true) as DimensionPillar;
 		}
 		else {
 			backwardPillarLevel.enumValueIndex = (int)(Level)EditorGUILayout.EnumPopup("Level of Pillar: ", (Level)backwardPillarLevel.enumValueIndex);
