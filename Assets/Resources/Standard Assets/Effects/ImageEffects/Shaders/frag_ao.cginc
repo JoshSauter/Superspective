@@ -9,8 +9,6 @@ half frag_ao (v2f_ao i, int sampleCount, float3 samples[INPUT_SAMPLE_COUNT])
     float3 viewNorm;
     float depth;
     DecodeDepthNormal (depthnormal, depth, viewNorm);
-	// Added by Josh to remove SSAO near edge of render distance
-	//if (depth > .9) clip(-1);
     depth *= _ProjectionParams.z;
     float scale = _Params.x / depth;
     

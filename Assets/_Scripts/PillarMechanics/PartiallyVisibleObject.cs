@@ -6,12 +6,14 @@ using EpitaphUtils;
 using UnityEditor;
 #endif
 
+public enum VisibilityState {
+	invisible,
+	partiallyVisible,
+	visible
+};
+
+
 public class PartiallyVisibleObject : MonoBehaviour {
-	public enum VisibilityState {
-		invisible,
-		partiallyVisible,
-		visible
-	};
 	public bool DEBUG = false;
     DebugLogger debug;
 	////////////////////////////////////
@@ -471,7 +473,7 @@ public class PartiallyVisibleObjectEditor : Editor {
 		EditorGUILayout.Space();
 
 		EditorGUI.BeginChangeCheck();
-		script.startingVisibilityState = (PartiallyVisibleObject.VisibilityState)EditorGUILayout.EnumPopup("Starting visibility state: ", script.startingVisibilityState);
+		script.startingVisibilityState = (VisibilityState)EditorGUILayout.EnumPopup("Starting visibility state: ", script.startingVisibilityState);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
 				((PartiallyVisibleObject)obj).startingVisibilityState = script.startingVisibilityState;

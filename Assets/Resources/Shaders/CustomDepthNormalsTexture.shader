@@ -5,7 +5,6 @@
 Shader "Custom/CustomDepthNormalsTexture" {
 Properties {
     _MainTex ("", 2D) = "white" {}
-	_Dimension("Dimension", Int) = 0
 }
 
 CGINCLUDE
@@ -323,98 +322,6 @@ fixed4 frag(v2f i) : SV_Target {
 }
 ENDCG
 	}
-}
-
-// New partially visible objects
-SubShader {
-    Tags { "RenderType"="DimensionObject" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-sampler2D _DimensionMask;
-int _Dimension;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_base v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	clip(-(dimensionValue != _Dimension));
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="InverseDimensionObject" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-sampler2D _DimensionMask;
-int _Dimension;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_base v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	clip(-(dimensionValue != -1));
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
 }
 
 SubShader {
