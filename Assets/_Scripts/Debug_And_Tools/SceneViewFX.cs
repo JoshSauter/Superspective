@@ -88,6 +88,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			var cameraGo = sceneViewCamera.gameObject;
 			for (int i = 0; i < components.Length; i++) {
 				var c = components[i];
+				if (c == null) continue;
 				var cType = c.GetType();
 				var existing = cameraGo.AddComponent(cType);
 				EditorUtility.CopySerialized(c, existing);

@@ -5,8 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Button))]
 public class TogglePillarOnButtonPress : MonoBehaviour {
 	private Button thisButton;
-	public ObscurePillar buttonPressedPillar;
-	public ObscurePillar buttonDepressedPillar;
+	public DimensionPillar buttonPressedPillar;
+	public DimensionPillar buttonDepressedPillar;
 
 	// Use this for initialization
 	void Start () {
@@ -16,9 +16,9 @@ public class TogglePillarOnButtonPress : MonoBehaviour {
 	}
 	
 	void ToggleActivePillarPress(Button b) {
-		ObscurePillar.activePillar = buttonPressedPillar;
+		DimensionPillar.activePillar = buttonPressedPillar;
 	}
 	void ToggleActivePillarDepress(Button b) {
-		ObscurePillar.activePillar = buttonDepressedPillar;
+		DimensionPillar.activePillar = buttonDepressedPillar;
 	}
 }

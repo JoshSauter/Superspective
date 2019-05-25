@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(ObscurePillar))]
+[RequireComponent(typeof(DimensionPillar))]
 [RequireComponent(typeof(EpitaphRenderer))]
 public class ChangeColorsOnPillarActive : MonoBehaviour {
 	public bool changeColorsOnActive;
@@ -11,20 +11,20 @@ public class ChangeColorsOnPillarActive : MonoBehaviour {
 	public Color activeColor = new Color(0.372549f, 0.1215686f, 0.9058824f);
 	public Color inactiveColor = new Color(.2f, .2f, .2f);
 
-	ObscurePillar thisPillar;
+	DimensionPillar thisPillar;
 	EpitaphRenderer thisRenderer;
 	GlassGlow optionalGlass;
 
 	// Use this for initialization
 	void Start () {
-		thisPillar = GetComponent<ObscurePillar>();
+		thisPillar = GetComponent<DimensionPillar>();
 		thisRenderer = GetComponent<EpitaphRenderer>();
 		optionalGlass = GetComponentInChildren<GlassGlow>();
-		ObscurePillar.OnActivePillarChanged += ChangeColors;
+		DimensionPillar.OnActivePillarChanged += ChangeColors;
 	}
 
-	void ChangeColors(ObscurePillar previousPillar) {
-		if (changeColorsOnActive && ObscurePillar.activePillar == thisPillar) {
+	void ChangeColors(DimensionPillar previousPillar) {
+		if (changeColorsOnActive && DimensionPillar.activePillar == thisPillar) {
 			thisRenderer.SetMainColor(activeColor);
 			if (optionalGlass != null) {
 				optionalGlass.enabled = true;
