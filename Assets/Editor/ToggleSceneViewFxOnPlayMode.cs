@@ -17,6 +17,12 @@ public static class ToggleSceneViewFxOnPlayMode  {
 			case PlayModeStateChange.ExitingEditMode:
 				TemporarilyDisableFx();
 				break;
+			case PlayModeStateChange.EnteredPlayMode:
+				RestoreFx();
+				break;
+			case PlayModeStateChange.ExitingPlayMode:
+				TemporarilyDisableFx();
+				break;
 			case PlayModeStateChange.EnteredEditMode:
 				RestoreFx();
 				break;

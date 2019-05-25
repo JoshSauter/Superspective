@@ -14,22 +14,29 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	private SceneView sceneView;
 	private Camera sceneViewCamera;
 	private Camera myCamera;
-	[HideInInspector]
+	//[HideInInspector]
 	public bool cachedEnableState;
 
 	[MenuItem("Custom/SceneFxToggle _F1")]
 	private static void ToggleFx() {
 		if (instance != null) {
 			instance.enabled = !instance.enabled;
+			instance.cachedEnableState = instance.enabled;
 		}
 	}
 
 	private void OnReloadScripts() {
 		// Re-enabling the script prevents the Scene view window bug
+		cachedEnableState = instance.enabled;
 		instance.enabled = false;
 		if (Application.isPlaying) {
 			instance.enabled = true;
 		}
+	}
+
+	[UnityEditor.Callbacks.DidReloadScripts]
+	private static void AfterScriptsReloaded() {
+		instance.enabled = instance.cachedEnableState;
 	}
 
 	private void OnEnable() {
@@ -65,6 +72,10 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			List<Component> excludes = new List<Component>();
 			excludes.Add(myCamera.transform);
 			excludes.Add(myCamera);
+			if (myCamera.GetComponent<AudioListener>()) excludes.Add(myCamera.GetComponent<AudioListener>());
+			if (myCamera.GetComponent<EpitaphScreen>()) excludes.Add(myCamera.GetComponent<EpitaphScreen>());
+			if (myCamera.GetComponent<VisibilityMaskRenderTexture>()) excludes.Add(myCamera.GetComponent<VisibilityMaskRenderTexture>());
+			if (myCamera.GetComponent<SketchOverlay>()) excludes.Add(myCamera.GetComponent<SketchOverlay>());
 			if (myCamera.GetComponent<GUILayer>()) excludes.Add(myCamera.GetComponent<GUILayer>());
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));
 			if (myCamera.GetComponent<SceneViewFX>()) excludes.Add(myCamera.GetComponent<SceneViewFX>());
@@ -75,7 +86,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 
 	public void Update() {
 		if (Application.isPlaying) UpdateComponents();
-		if (enabled) UpdateComponents();
+		else if (enabled) UpdateComponents();
 	}
 
 	// update scene view components

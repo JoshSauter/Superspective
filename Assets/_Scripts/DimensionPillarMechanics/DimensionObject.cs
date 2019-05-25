@@ -451,7 +451,6 @@ public class DimensionObject : MonoBehaviour {
 			case "TextMeshPro/Distance Field":
 				if (normalMaterial.name.Contains("Signika-Regular SDF Material")) {
 					newMaterial = Resources.Load<Material>("Fonts/Signika-Regular SDF DimensionObject");
-					print("YOYOYO: " + newMaterial);
 				}
 				else {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
@@ -478,7 +477,6 @@ public class DimensionObject : MonoBehaviour {
 			case "TextMeshPro/Distance Field":
 				if (normalMaterial.name.Contains("Signika-Regular SDF Material")) {
 					newMaterial = Resources.Load<Material>("Fonts/Signika-Regular SDF InverseDimensionObject");
-					print("YOYOYO: " + newMaterial);
 				}
 				else {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
