@@ -18,7 +18,9 @@ public static class ToggleSceneViewFxOnPlayMode  {
 				TemporarilyDisableFx();
 				break;
 			case PlayModeStateChange.EnteredPlayMode:
-				RestoreFx();
+				if (!maximizeOnPlay) {
+					RestoreFx();
+				}
 				break;
 			case PlayModeStateChange.ExitingPlayMode:
 				TemporarilyDisableFx();
@@ -37,4 +39,20 @@ public static class ToggleSceneViewFxOnPlayMode  {
 	private static void RestoreFx() {
 		SceneViewFX.instance.enabled = SceneViewFX.instance.cachedEnableState;
 	}
+
+	public static bool maximizeOnPlay {
+		get {
+#if UNITY_EDITOR
+			var windows = (EditorWindow[])Resources.FindObjectsOfTypeAll(typeof(EditorWindow));
+			foreach (var window in windows) {
+				if (window != null && window.GetType().FullName == "UnityEditor.GameView") {
+					return window.maximized;
+				}
+			}
+
+			return false;
+#endif
+		}
+	}
+
 }

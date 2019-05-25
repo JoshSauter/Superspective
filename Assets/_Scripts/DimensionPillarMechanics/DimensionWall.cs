@@ -16,7 +16,7 @@ public class DimensionWall : MonoBehaviour {
 		}
 	}
 
-	readonly float radsOffsetForDimensionWall = -0.125f;
+	readonly float radsOffsetForDimensionWall = -0.1f;
 	readonly float dimensionWallWidth = 0.01f;
 	LayerMask roomBoundsMask;
 

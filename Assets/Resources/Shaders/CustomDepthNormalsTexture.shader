@@ -446,7 +446,7 @@ v2f vert( appdata_base v ) {
 }
 
 fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
+	i.nz.w = clamp(i.nz.w, 0, .999);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG

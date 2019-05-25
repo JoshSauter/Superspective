@@ -174,12 +174,12 @@ public class PortalManager : Singleton<PortalManager> {
 
 		// Copy post-process effects from player's camera
 		// Order of components here matters; it affects the rendering order of the postprocess effects
-		newCameraObj.PasteComponent(playerCam.GetComponent<BloomOptimized>());											// Copy Bloom
+		newCameraObj.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
+		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 		BladeEdgeDetection edgeDetection = newCameraObj.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 		if (!receiver.useCameraEdgeDetectionColor) {
 			edgeDetection.edgeColor = receiver.portalEdgeDetectionColor;
 		}
-		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 		newCameraObj.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog
 
 		// Initialize PortalCameraFollow component
