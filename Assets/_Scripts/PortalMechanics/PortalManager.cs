@@ -54,10 +54,9 @@ public class PortalManager : Singleton<PortalManager> {
 		}
 
 		bool receiverRemoved = receiversByChannel[channel].Remove(receiver);
-		if (receiverRemoved) {
+		if (receiverRemoved && receiversByChannel[channel].Count == 1) {
 			debug.Log("Disabling Portal for channel " + channel);
-			// TODO: Disable portal for channel
-			debug.LogError("Not yet implemented: PortalManager.RemoveReceiver()");
+			TeardownPortalsForChannel(channel);
 		}
 		return receiverRemoved;
 	}
@@ -256,6 +255,37 @@ public class PortalManager : Singleton<PortalManager> {
 	}
 
 	#endregion
+
+#region PortalTeardown
+
+	private void TeardownPortalsForChannel(int channel) {
+		List<PortalSettings> portalSettings = receiversByChannel[channel].ToList();
+		GameObject cameraContainerToDestroy = cameraContainersByChannel[channel];
+		cameraContainersByChannel.Remove(channel);
+		Destroy(cameraContainerToDestroy);
+
+		foreach (PortalSettings receiver in portalSettings) {
+			TeardownPortalReceiver(receiver);
+		}
+	}
+
+	private void TeardownPortalReceiver(PortalSettings receiver) {
+		Transform container = receiver.transform.parent;
+		receiver.transform.SetParent(container.parent);
+		Destroy(container.gameObject);
+
+		Destroy(receiver.GetComponent<PortalCameraRenderTexture>());
+
+		PortalTeleporter portalTeleporter = receiver.GetComponentInChildren<PortalTeleporter>();
+		Transform volumetricPortal = receiver.transform.Find("VolumetricPortal");
+		VolumetricPortalTrigger volumetricPortalTrigger = receiver.GetComponentInChildren<VolumetricPortalTrigger>();
+
+		if (portalTeleporter != null) Destroy(portalTeleporter.gameObject);
+		if (volumetricPortal != null) Destroy(volumetricPortal.gameObject);
+		if (volumetricPortalTrigger != null) Destroy(volumetricPortalTrigger.gameObject);
+	}
+
+#endregion
 
 	private void SwapEdgeDetectionColorAfterTeleport(Collider teleportEnter, Collider teleportExit, Collider player) {
 		PortalSettings portalInfo = teleportEnter.GetComponentInParent<PortalSettings>();
