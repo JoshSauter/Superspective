@@ -32,12 +32,16 @@ public static class ToggleSceneViewFxOnPlayMode  {
 	}
 
 	private static void TemporarilyDisableFx() {
-		SceneViewFX.instance.cachedEnableState = SceneViewFX.instance.enabled;
-		SceneViewFX.instance.enabled = false;
+		if (SceneViewFX.instance != null) {
+			SceneViewFX.instance.cachedEnableState = SceneViewFX.instance.enabled;
+			SceneViewFX.instance.enabled = false;
+		}
 	}
 
 	private static void RestoreFx() {
-		SceneViewFX.instance.enabled = SceneViewFX.instance.cachedEnableState;
+		if (SceneViewFX.instance != null) {
+			SceneViewFX.instance.enabled = SceneViewFX.instance.cachedEnableState;
+		}
 	}
 
 	public static bool maximizeOnPlay {
