@@ -275,7 +275,6 @@ public class PortalManager : Singleton<PortalManager> {
 
 		CopyEdgeColors(source: portalEDs[0], dest: playerED);
 		portalEDs.ToList().ForEach(ed => CopyEdgeColors(ed, tempEdgeColorMode, tempColor, tempColorGradient, tempColorGradientTexture));
-		BladeEdgeDetection[] portalEDsAfter = camerasParent.GetComponentsInChildrenOnly<BladeEdgeDetection>();
 	}
 
 	private void CopyEdgeColors(BladeEdgeDetection source, BladeEdgeDetection dest) {

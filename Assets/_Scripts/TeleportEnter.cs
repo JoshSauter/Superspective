@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 [RequireComponent(typeof(MagicTrigger))]
 public class TeleportEnter : MonoBehaviour {
-	public bool DEBUG = true;
+	public bool DEBUG = false;
+	DebugLogger debug;
 	public bool teleportPlayer = true;
     public MagicTrigger trigger;
 	public Collider teleportEnter;
@@ -29,6 +31,7 @@ public class TeleportEnter : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+		debug = new DebugLogger(gameObject, DEBUG);
 		teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
 
@@ -55,9 +58,7 @@ public class TeleportEnter : MonoBehaviour {
 
 		// Handle position and rotation
 		Quaternion rotationTransformation = teleportExit.transform.rotation * Quaternion.Inverse(teleportEnter.transform.rotation);
-		if (DEBUG) {
-			print("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nRotationTransformation: " + rotationTransformation.eulerAngles);
-		}
+		debug.Log("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nRotationTransformation: " + rotationTransformation.eulerAngles);
 
 		foreach (Transform otherObject in otherObjectsToTeleport) {
 			otherObject.transform.position += displacementToCenter;

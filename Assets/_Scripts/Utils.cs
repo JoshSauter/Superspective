@@ -376,6 +376,10 @@ namespace EpitaphUtils {
 			return angleObj != null && angleObj == this;
 		}
 
+		public override int GetHashCode() {
+			return base.GetHashCode();
+		}
+
 		public static Angle D0 = new Angle(0);
 		public static Angle D90 = new Angle(Mathf.PI * 0.5f);
 		public static Angle D180 = new Angle(Mathf.PI);

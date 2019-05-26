@@ -37,8 +37,6 @@ public class LightBlocker : MonoBehaviour {
 		thisMesh.GetVertices(vertices);
 		Vector3 center = thisRenderer.bounds.center;
 		vertices = vertices.Distinct().Select(v => transform.TransformPoint(v * 1.001f)).ToList();
-		
-		Vector3 centerRay = redSource.position - center;
 
 		for (int i = 0; i < blockers.Length; i++) {
 			blockers[i].vertsToUse = GetVertsToUseForSource(blockers[i].source, vertices);

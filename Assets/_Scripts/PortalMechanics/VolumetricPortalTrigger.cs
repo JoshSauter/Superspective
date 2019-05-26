@@ -8,7 +8,7 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 	PortalTeleporter portalTeleporter;
 
 	// Use this for initialization
-	IEnumerator Start () {
+	new IEnumerator Start () {
 		base.Start();
 
 		yield return null;

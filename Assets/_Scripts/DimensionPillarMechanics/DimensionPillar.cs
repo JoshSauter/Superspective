@@ -27,8 +27,6 @@ public class DimensionPillar : MonoBehaviour {
 	public string pillarKey;
 	[SerializeField]
 	GameObject dimensionWallPrefab;
-	[SerializeField]
-	GameObject debugWallPrefab;
 
 	[Range(1, 123)]
 	public int maxDimension;
@@ -121,7 +119,7 @@ public class DimensionPillar : MonoBehaviour {
 				OnDimensionChange(prevDimension, curDimension);
 			}
 
-			print("Shift to dimension " + curDimension);
+			debug.Log("Shift to dimension " + curDimension);
 		}
 	}
 
@@ -149,9 +147,5 @@ public class DimensionPillar : MonoBehaviour {
 	private void InitializeDimensionWall() {
 		GameObject dimensionWallGO = Instantiate(dimensionWallPrefab, transform);
 		dimensionWallGO.name = "Dimension Wall";
-
-		if (DEBUG) {
-			Instantiate(debugWallPrefab, transform);
-		}
 	}
 }

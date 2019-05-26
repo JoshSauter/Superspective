@@ -70,8 +70,7 @@ public class ColorfulFogInspector : Editor
             BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
             if (buildTarget == BuildTarget.Android ||
                 buildTarget == BuildTarget.iOS ||
-                buildTarget == BuildTarget.WP8Player ||
-                buildTarget == BuildTarget.BlackBerry)
+                buildTarget == BuildTarget.WSAPlayer)
             {
                 EditorGUILayout.HelpBox("When targeting platform: " + buildTarget.ToString() +
                     " there's a high chance that Colorful Fog needs a generated depth texture",

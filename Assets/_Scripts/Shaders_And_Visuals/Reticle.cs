@@ -44,18 +44,8 @@ public class Reticle : MonoBehaviour {
 		else {
 			timeHeld = float.MaxValue;
 			Quaternion closestStopRot = GetClosestStopRotation();
-			float angleDiff = thisTransform.rotation.eulerAngles.z - closestStopRot.eulerAngles.z;
 			curRotationSpeed = Mathf.Lerp(curRotationSpeed, 0, deccelerationLerp * Time.deltaTime);
 			thisTransform.rotation = Quaternion.Lerp(thisTransform.rotation, closestStopRot, deccelerationLerp * Time.deltaTime);
-
-			//// Keep rotating forward until we're slow and close enough to lerp directly to startRotation
-			//if (angleDiff > 60) {
-			//	thisTransform.Rotate(Vector3.forward * curRotationSpeed * Time.deltaTime);
-			//}
-			//else {
-			//	curRotationSpeed = 0;
-			//	thisTransform.rotation = Quaternion.Lerp(thisTransform.rotation, closestStopRot, deccelerationLerp * Time.deltaTime);
-			//}
 		}
 	}
 

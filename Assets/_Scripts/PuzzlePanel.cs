@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using PuzzlePanelHelpers;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -80,6 +81,11 @@ public class PuzzlePanel : MonoBehaviour {
 
 	private void CheckIfSolved() {
 		solved = state.currentStateStr == state.solutionStr;
+
+		// This just to suppress warning about unused solution variable
+		if (solution[0, 0]) {
+			solution[0, 0] = true;
+		}
 	}
 
 	private void SetStartingState() {
@@ -150,41 +156,43 @@ public class PuzzlePanel : MonoBehaviour {
 	}
 }
 
-static class PuzzlePanelHelpers {
-	public static bool[,] Deserialize(this string s, Vector2Int expectedSize) {
-		bool[,] matrix = new bool[expectedSize.y, expectedSize.x];
+namespace PuzzlePanelHelpers {
+	static class PuzzlePanelHelpers {
+		public static bool[,] Deserialize(this string s, Vector2Int expectedSize) {
+			bool[,] matrix = new bool[expectedSize.y, expectedSize.x];
 
-		string[] rows = s.Split('\n');
-		if (rows.Length != expectedSize.y) {
-			Debug.LogError("Error converting string to 2D Array:\nFound " + rows.Length + " rows, expected " + expectedSize.y);
-			return null;
-		}
-
-		for (int x = 0; x < rows.Length; x++) {
-			char[] columns = rows[x].ToCharArray();
-			if (columns.Length != expectedSize.x) {
-				Debug.LogError("Error converting string to 2D Array:\nFound " + columns.Length + " columns, expected " + expectedSize.x);
+			string[] rows = s.Split('\n');
+			if (rows.Length != expectedSize.y) {
+				Debug.LogError("Error converting string to 2D Array:\nFound " + rows.Length + " rows, expected " + expectedSize.y);
 				return null;
 			}
-			for (int y = 0; y < columns.Length; y++) {
-				// value is equal to false if s[x,y] == '0', else true
-				bool value = !(columns[y] == '0');
-				matrix[x, y] = value;
+
+			for (int x = 0; x < rows.Length; x++) {
+				char[] columns = rows[x].ToCharArray();
+				if (columns.Length != expectedSize.x) {
+					Debug.LogError("Error converting string to 2D Array:\nFound " + columns.Length + " columns, expected " + expectedSize.x);
+					return null;
+				}
+				for (int y = 0; y < columns.Length; y++) {
+					// value is equal to false if s[x,y] == '0', else true
+					bool value = !(columns[y] == '0');
+					matrix[x, y] = value;
+				}
 			}
+
+			return matrix;
 		}
 
-		return matrix;
-	}
-
-	public static string Serialize(this bool[,] m) {
-		string s = "";
-		for (int i = 0; i < m.GetLength(0); i++) {
-			for (int j = 0; j < m.GetLength(1); j++) {
-				s += m[i, j] ? "1" : "0";
+		public static string Serialize(this bool[,] m) {
+			string s = "";
+			for (int i = 0; i < m.GetLength(0); i++) {
+				for (int j = 0; j < m.GetLength(1); j++) {
+					s += m[i, j] ? "1" : "0";
+				}
+				if (i < m.GetLength(0) - 1)
+					s += "\n";
 			}
-			if (i < m.GetLength(0)-1)
-				s += "\n";
+			return s;
 		}
-		return s;
 	}
 }

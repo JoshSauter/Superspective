@@ -15,7 +15,6 @@ public class StaircaseRotate : MonoBehaviour {
 		back
 	}
 
-    Vector3 startRot;
 	public Transform[] otherObjectsToRotate;
 	Transform globalDirectionalLight;
 	public RotationAxes axisOfRotation;
@@ -27,7 +26,6 @@ public class StaircaseRotate : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        startRot = transform.parent.rotation.eulerAngles;
         stairRenderer = transform.parent.GetComponent<MeshRenderer>();
 		globalDirectionalLight = GameObject.Find("Directional Light").transform;
 	}

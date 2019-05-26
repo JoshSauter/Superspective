@@ -5,7 +5,7 @@ using EpitaphUtils;
 using UnityEngine.Rendering;
 
 public class DimensionWall : MonoBehaviour {
-	Renderer renderer;
+	Renderer thisRenderer;
 	DimensionPillar pillar;
 	Vector3 topOfPillar;
 	Vector3 bottomOfPillar;
@@ -22,7 +22,7 @@ public class DimensionWall : MonoBehaviour {
 
 	void Start() {
 		pillar = GetComponentInParent<DimensionPillar>();
-		renderer = GetComponent<Renderer>();
+		thisRenderer = GetComponent<Renderer>();
 		pillar.OnDimensionChange += HandleDimensionChange;
 
 		roomBoundsMask = 1 << LayerMask.NameToLayer("WallOnly") | 1 << LayerMask.NameToLayer("RoomBounds");
@@ -48,7 +48,7 @@ public class DimensionWall : MonoBehaviour {
 		UpdateWallSize();
 		UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
 
-		renderer.enabled = (pillar == DimensionPillar.activePillar);
+		thisRenderer.enabled = (pillar == DimensionPillar.activePillar);
 	}
 
 	private void UpdateWallPosition(float radsOffset) {

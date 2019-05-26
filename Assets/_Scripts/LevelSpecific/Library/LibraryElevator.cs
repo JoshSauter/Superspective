@@ -68,8 +68,6 @@ public class LibraryElevator : MonoBehaviour {
 		float timeElapsed = 0;
 		float degreesPerSecond = degrees / rotateDuration;
 		while (timeElapsed < rotateDuration) {
-			float t = timeElapsed / rotateDuration;
-
 			transform.parent.Rotate(Vector3.up, degreesPerSecond * Time.fixedDeltaTime);
 
 			timeElapsed += Time.fixedDeltaTime;

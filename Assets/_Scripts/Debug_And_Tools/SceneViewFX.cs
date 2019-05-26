@@ -31,12 +31,15 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		instance.enabled = false;
 		if (Application.isPlaying) {
 			instance.enabled = true;
+			cachedEnableState = instance.enabled;
 		}
 	}
 
 	[UnityEditor.Callbacks.DidReloadScripts]
 	private static void AfterScriptsReloaded() {
-		instance.enabled = instance.cachedEnableState;
+		if (UnityEditorInternal.InternalEditorUtility.isApplicationActive) {
+			instance.enabled = instance.cachedEnableState;
+		}
 	}
 
 	private void OnEnable() {
@@ -76,7 +79,6 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent<EpitaphScreen>()) excludes.Add(myCamera.GetComponent<EpitaphScreen>());
 			if (myCamera.GetComponent<VisibilityMaskRenderTexture>()) excludes.Add(myCamera.GetComponent<VisibilityMaskRenderTexture>());
 			if (myCamera.GetComponent<SketchOverlay>()) excludes.Add(myCamera.GetComponent<SketchOverlay>());
-			if (myCamera.GetComponent<GUILayer>()) excludes.Add(myCamera.GetComponent<GUILayer>());
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));
 			if (myCamera.GetComponent<SceneViewFX>()) excludes.Add(myCamera.GetComponent<SceneViewFX>());
 			result = result.Except(excludes).ToArray();

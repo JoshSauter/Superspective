@@ -15,7 +15,6 @@ public class PortalCameraFollow : MonoBehaviour {
 	Transform destination;
 
     Collider sourceCollider;
-    Collider playerCollider;
 
 	Camera portalCamera;
 
@@ -31,7 +30,6 @@ public class PortalCameraFollow : MonoBehaviour {
 		destination = portalBeingRendered.otherPortal.settings.transform;
 
         sourceCollider = portalBeingRendered.teleporter.GetComponent<Collider>();
-        playerCollider = playerCamera.GetComponentInParent<Collider>();
 
         portalCamera = GetComponent<Camera>();
 		originalProjectionMatrix = portalCamera.projectionMatrix;

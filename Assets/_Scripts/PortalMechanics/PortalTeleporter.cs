@@ -44,7 +44,7 @@ public class PortalTeleporter : MonoBehaviour {
 	void InitializeCollider() {
 		if (portal.settings.useMeshAsCollider) {
 			MeshCollider newMeshCollider = gameObject.AddComponent<MeshCollider>();
-			newMeshCollider.inflateMesh = true;
+			//newMeshCollider.inflateMesh = true;
 			Debug.Assert(portalMeshFilter != null, "Trying to use mesh as collider without a mesh on the portal: " + portal.gameObject.name);
 			newMeshCollider.sharedMesh = portalMeshFilter.mesh;
 			newMeshCollider.convex = true;

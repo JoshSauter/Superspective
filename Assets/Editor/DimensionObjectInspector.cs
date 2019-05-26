@@ -9,7 +9,6 @@ using EpitaphUtils;
 public class DimensionObjectInspector : Editor {
 	SerializedProperty DEBUG;
 
-	SerializedProperty startingVisibilityState;
 	SerializedProperty visibilityState;
 
 	SerializedProperty baseDimension;
@@ -22,7 +21,6 @@ public class DimensionObjectInspector : Editor {
 	protected virtual void OnEnable() {
 		DEBUG = serializedObject.FindProperty("DEBUG");
 
-		startingVisibilityState = serializedObject.FindProperty("startingVisibilityState");
 		visibilityState = serializedObject.FindProperty("visibilityState");
 
 		baseDimension = serializedObject.FindProperty("baseDimension");

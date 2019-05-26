@@ -52,7 +52,6 @@ public class ObscurePillar : MonoBehaviour {
 		}
 	}
 	Vector3 bottomOfPillar;
-	Vector3 topOfPillar;
 
 	void InitializeDictEntry() {
 		if (pillarKey == "") {
@@ -69,7 +68,6 @@ public class ObscurePillar : MonoBehaviour {
 		pillarRenderer = GetComponent<Renderer>();
 		roomBoundsMask = 1 << LayerMask.NameToLayer("WallOnly") | 1 << LayerMask.NameToLayer("RoomBounds");
 		bottomOfPillar = pillarRenderer.bounds.center - Vector3.up * pillarRenderer.bounds.size.y / 2f;
-		topOfPillar = pillarRenderer.bounds.center + Vector3.up * pillarRenderer.bounds.size.y / 2f;
 		
 		InitializeVisibleMaskWall();
 		previousCameraAngleRelativeToPillar = Angle.Radians(-1);

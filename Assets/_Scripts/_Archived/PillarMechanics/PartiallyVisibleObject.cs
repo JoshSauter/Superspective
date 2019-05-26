@@ -56,7 +56,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	public Material visibleMaterial;                    // Defaults to Materials/Unlit/Unlit, can be set in inspector
     public Material partiallyVisibleMaterial;           // Needs to be set in inspector
 	// Material initialMaterial;
-	EpitaphRenderer renderer;                           // EpitaphRenderer used to easily swap materials and colors
+	EpitaphRenderer thisRenderer;                       // EpitaphRenderer used to easily swap materials and colors
 
 	//////////////////////
 	// Visibility state //
@@ -91,14 +91,14 @@ public class PartiallyVisibleObject : MonoBehaviour {
 
 	void OnEnable() {
 		initialLayer = gameObject.layer;
-		renderer = gameObject.GetComponent<EpitaphRenderer>();
-		if (renderer == null) {
-			renderer = gameObject.AddComponent<EpitaphRenderer>();
+		thisRenderer = gameObject.GetComponent<EpitaphRenderer>();
+		if (thisRenderer == null) {
+			thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
 		}
 		oppositeStartingVisibilityState = startingVisibilityState == VisibilityState_old.visible ? VisibilityState_old.invisible : VisibilityState_old.visible;
 
         if (!setMaterialColorOnStart && setMaterialColorOnStateChange) {
-            Material startingMaterial = renderer.GetMaterial();
+            Material startingMaterial = thisRenderer.GetMaterial();
             materialColor = startingMaterial.GetColor(EpitaphRenderer.mainColor);
             emissiveColor = startingMaterial.GetColor(emissiveColorKey);
         }
@@ -212,7 +212,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			return;
 		}
 
-		Vector3[] bounds = new Vector3[] { renderer.GetRendererBounds().min, renderer.GetRendererBounds().max };
+		Vector3[] bounds = new Vector3[] { thisRenderer.GetRendererBounds().min, thisRenderer.GetRendererBounds().max };
 		Vector3[] corners = new Vector3[] {
 			new Vector3(bounds[0].x, bounds[0].y, bounds[0].z),
 			new Vector3(bounds[0].x, bounds[0].y, bounds[1].z),
@@ -224,7 +224,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 			new Vector3(bounds[1].x, bounds[1].y, bounds[1].z)
 		};
 
-		Vector3 centerOfObject = renderer.GetRendererBounds().center;
+		Vector3 centerOfObject = thisRenderer.GetRendererBounds().center;
 		Angle baseAngle = PolarCoordinate.CartesianToPolar(centerOfObject - ObscurePillar.activePillar.transform.position).angle;
 		onAngle = Angle.Radians(baseAngle.radians + .001f);
 		offAngle = Angle.Radians(baseAngle.radians);
@@ -328,14 +328,14 @@ public class PartiallyVisibleObject : MonoBehaviour {
 				break;
 			case VisibilityState_old.partiallyVisible:
 				SetLayer(initialLayer);
-				renderer.SetMaterial(partiallyVisibleMaterial);
+				thisRenderer.SetMaterial(partiallyVisibleMaterial);
 				if (setMaterialColorOnStateChange) {
 					SetColors(materialColor, emissiveColor);
 				}
 				break;
 			case VisibilityState_old.visible:
 				SetLayer(initialLayer);
-				renderer.SetMaterial(visibleMaterial);
+				thisRenderer.SetMaterial(visibleMaterial);
 				if (setMaterialColorOnStateChange) {
 					SetColors(materialColor, emissiveColor);
 				}
@@ -344,8 +344,8 @@ public class PartiallyVisibleObject : MonoBehaviour {
 	}
 
     private void SetColors(Color mainColor, Color emissiveColor) {
-        renderer.SetMainColor(materialColor);
-        renderer.SetColor(emissiveColorKey, emissiveColor);
+        thisRenderer.SetMainColor(materialColor);
+        thisRenderer.SetColor(emissiveColorKey, emissiveColor);
     }
 
 	private void SetLayer(int layer) {

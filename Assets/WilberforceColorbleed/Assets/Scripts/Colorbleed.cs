@@ -373,9 +373,8 @@ namespace Wilberforce.Colorbleed
                 return;
             }
 
-            if (!SystemInfo.supportsImageEffects || !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth) || SystemInfo.graphicsShaderLevel < 30)
+            if (!SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth) || SystemInfo.graphicsShaderLevel < 30)
             {
-                if (!SystemInfo.supportsImageEffects) ReportError("System does not support image effects.");
                 if (!SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth)) ReportError("System does not support depth texture.");
                 if (SystemInfo.graphicsShaderLevel < 30) ReportError("This effect needs at least Shader Model 3.0.");
 

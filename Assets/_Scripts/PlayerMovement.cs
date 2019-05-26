@@ -9,8 +9,9 @@ public class PlayerMovement : MonoBehaviour {
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
 	}
-	float acceleration = 75f;
-	float backwardsSpeed = 0.7f;
+	float accelerationLerpSpeed = 0.2f;
+	float decelerationLerpSpeed = 0.15f;
+	float backwardsSpeed = 0.8f;
 	public float walkSpeed = 12f;
 	public float runSpeed = 18f;
 	public float jumpForce = 30;
@@ -72,6 +73,12 @@ public class PlayerMovement : MonoBehaviour {
 			desiredVelocity = CalculateAirMovement();
 		}
 
+		bool movingBackward = Vector2.Dot(new Vector2(desiredVelocity.x, desiredVelocity.z), new Vector2(transform.forward.x, transform.forward.z)) < -0.5f;
+		if (movingBackward) {
+			desiredVelocity.x *= backwardsSpeed;
+			desiredVelocity.z *= backwardsSpeed;
+		}
+
 		if (!input.LeftStickHeld && !input.SpaceHeld && ground.collider != null && ground.collider.CompareTag("Staircase")) {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		}
@@ -118,7 +125,7 @@ public class PlayerMovement : MonoBehaviour {
 		}
 		else {
 			float adjustedMovespeed = (ground.collider.CompareTag("Staircase")) ? walkSpeed : movespeed;
-			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, 0.2f);
+			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, accelerationLerpSpeed);
 		}
 	}
 
@@ -141,7 +148,7 @@ public class PlayerMovement : MonoBehaviour {
 		// If no keys are pressed, decelerate to a horizontal stop
 		if (!input.LeftStickHeld) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
-			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 0.15f);
+			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, decelerationLerpSpeed);
 			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
 		}
 		else {
@@ -235,7 +242,7 @@ public class PlayerMovement : MonoBehaviour {
 			if (Physics.GetIgnoreLayerCollision(gameObject.layer, bottomRaycast.collider.gameObject.layer)) return desiredVelocity;
 			//print("Wall found: " + bottomRaycast.collider.name);
 			if (!Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance)) {
-				print("Step found: " + bottomRaycast.collider.name);
+				//print("Step found: " + bottomRaycast.collider.name);
 				Vector3 projectedVelocity = Vector3.ProjectOnPlane(desiredVelocity, bottomRaycast.normal);
 				projectedVelocity.y = 6f;
 				desiredVelocity = projectedVelocity;

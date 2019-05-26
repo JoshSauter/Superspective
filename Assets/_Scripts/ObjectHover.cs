@@ -8,8 +8,6 @@ public class ObjectHover : MonoBehaviour {
 	public float maxDisplacementForward = 0f;
 	public float maxDisplacementRight = 0;
 	public float period = 1f;
-
-	Vector3 startPos;
 	Vector3 up;
 	Vector3 forward;
 	Vector3 right;
@@ -22,8 +20,6 @@ public class ObjectHover : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
-		startPos = transform.position;
-
 		up = useLocalCoordinates ? transform.up : Vector3.up;
 		forward = useLocalCoordinates ? transform.forward : Vector3.forward;
 		right = useLocalCoordinates ? transform.right : Vector3.right;

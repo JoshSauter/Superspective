@@ -94,7 +94,6 @@ public class OutOfBounds : MonoBehaviour {
 		Color clear = new Color(0.6509434f, 0.119749f, 0.119749f, 0);
 
 		while (timeLeft >= 0) {
-			float t = 1 - timeLeft / 10;
 			float secondT = 0.5f + 0.5f * -Mathf.Cos((initialTimeLeft - timeLeft) * Mathf.PI * 2);
 			//redBackground.fillAmount = t;
 			redBackground.color = Color.Lerp(clear, red, secondT);
