@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Interact : MonoBehaviour {
+public class Interact : Singleton<Interact> {
 	public Image reticle;
 	public Image reticleOutside;
 
@@ -12,7 +12,7 @@ public class Interact : MonoBehaviour {
 	Color reticleOutsideUnselectColor;
 	Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
 	public float interactionDistance = 5f;
-	Transform cam;
+	Camera cam;
 
 	InteractableObject objectSelected;
 
@@ -24,12 +24,9 @@ public class Interact : MonoBehaviour {
 			return;
 		}
 
-		cam = EpitaphScreen.instance.playerCamera.transform;
+		cam = EpitaphScreen.instance.playerCamera;
 		reticleUnselectColor = reticle.color;
 		reticleOutsideUnselectColor = reticleOutside.color;
-		if (cam.GetComponent<Camera>() == null) {
-			Debug.LogError("\"Camera\" object does not have an actual camera component attached, make sure this is the object you want.");
-		}
 	}
 	
 	// Update is called once per frame
@@ -48,11 +45,11 @@ public class Interact : MonoBehaviour {
 			reticleOutside.color = reticleOutsideSelectColor;
 			// If the left mouse button is being held down, interact with the object selected
 			if (Input.GetMouseButton(0)) {
-				objectSelected.OnLeftMouseButton();
 				// If left mouse button was clicked this frame, call OnLeftMouseButtonDown
 				if (Input.GetMouseButtonDown(0)) {
 					objectSelected.OnLeftMouseButtonDown();
 				}
+				objectSelected.OnLeftMouseButton();
 			}
 			// If we released the left mouse button this frame, call OnLeftMouseButtonUp
 			else if (Input.GetMouseButtonUp(0)) {
@@ -66,9 +63,18 @@ public class Interact : MonoBehaviour {
 
 	}
 
-	InteractableObject FindInteractableObjectSelected() {
+	public RaycastHit GetRaycastHit() {
+		Vector2 reticlePos = Reticle.instance.thisTransformPos;
+		Vector2 screenPos = Vector2.Scale(reticlePos, new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight));
+
+		Ray ray = cam.ScreenPointToRay(screenPos);
 		RaycastHit hitObject;
-		Physics.Raycast(cam.position, cam.transform.forward, out hitObject, interactionDistance);
+		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, ~0, QueryTriggerInteraction.Collide);
+		return hitObject;
+	}
+
+	InteractableObject FindInteractableObjectSelected() {
+		RaycastHit hitObject = GetRaycastHit();
 		if (hitObject.collider != null) {
 			return hitObject.collider.GetComponent<InteractableObject>();
 		}

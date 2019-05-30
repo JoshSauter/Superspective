@@ -4,7 +4,7 @@ using UnityEngine;
 using EpitaphUtils;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : MonoBehaviour {
+public class PlayerMovement : Singleton<PlayerMovement> {
 	public bool DEBUG = false;
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
@@ -28,6 +28,8 @@ public class PlayerMovement : MonoBehaviour {
 
 	CapsuleCollider thisCollider;
 	MeshRenderer thisRenderer;
+
+	bool stopped = false;
 
 #region IsGrounded characteristics
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
@@ -57,6 +59,8 @@ public class PlayerMovement : MonoBehaviour {
 	}
 	
 	void FixedUpdate() {
+		if (stopped) return;
+
 		RaycastHit ground = new RaycastHit();
 		grounded = IsGrounded(out ground);
 
@@ -295,5 +299,14 @@ public class PlayerMovement : MonoBehaviour {
 		hitInfo = new RaycastHit();
 		return false;
 
+	}
+
+	public void StopMovement() {
+		stopped = true;
+		thisRigidbody.velocity = Vector3.zero;
+	}
+
+	public void ResumeMovement() {
+		stopped = false;
 	}
 }

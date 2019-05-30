@@ -109,7 +109,7 @@ public class DimensionPillar : MonoBehaviour {
 				OnDimensionChange(prevDimension, curDimension);
 			}
 
-			print("Shift to dimension " + curDimension);
+			debug.Log("Shift to dimension " + curDimension);
 		}
 		if (shiftDimensionDown) {
 			int prevDimension = curDimension;

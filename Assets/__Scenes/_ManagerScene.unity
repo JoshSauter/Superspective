@@ -472,7 +472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5559bdf01982dac4e9e33c3b5f6df9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingScene: 7
+  startingScene: 13
   activeSceneName: 
 --- !u!4 &505772567
 Transform:
@@ -482,8 +482,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.16959906, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 940225955}
@@ -547,11 +547,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7a5373e2aa26fa4ab83f917defe1bd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   cameraTransform: {fileID: 0}
   generalSensitivity: 0.5
   sensitivityX: 0.5
   sensitivityY: 0.5
   rotationY: 0
+  outsideMultiplier: 1
+  viewLockedObject: {fileID: 0}
 --- !u!54 &623971845
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -606,15 +609,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 5.5, z: -29.5}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -373.06705, y: 10.868078, z: -590.98926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 505772567}
   - {fileID: 1575959553}
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1101,7 +1104,6 @@ GameObject:
   - component: {fileID: 1024018083}
   - component: {fileID: 1024018086}
   - component: {fileID: 1024018085}
-  - component: {fileID: 1024018084}
   m_Layer: 5
   m_Name: ReticleCenter
   m_TagString: Untagged
@@ -1125,22 +1127,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.4975, y: 0.4975}
   m_AnchorMax: {x: 0.5025, y: 0.5025}
-  m_AnchoredPosition: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1024018084
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1024018082}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 942b7acf4cf693a41b61467338f1c81d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  curRotationSpeed: 0
 --- !u!114 &1024018085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1317,7 +1306,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.48, y: 0.48}
   m_AnchorMax: {x: 0.52, y: 0.52}
-  m_AnchoredPosition: {x: 1.0000153, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1127265934
@@ -1770,12 +1759,12 @@ GameObject:
   - component: {fileID: 1809741072}
   - component: {fileID: 1809741068}
   - component: {fileID: 1809741070}
+  - component: {fileID: 1809741075}
   - component: {fileID: 1809741071}
   - component: {fileID: 1809741069}
   - component: {fileID: 1809741066}
   - component: {fileID: 1809741060}
   - component: {fileID: 1809741073}
-  - component: {fileID: 1809741075}
   - component: {fileID: 1809741074}
   - component: {fileID: 1809741057}
   - component: {fileID: 1809741058}
@@ -1876,7 +1865,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 8313911
+    m_Bits: 8297527
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1973,7 +1962,7 @@ MonoBehaviour:
   normalSensitivity: 5
   sampleDistance: 1
   edgeColorMode: 1
-  edgeColor: {r: 1, g: 1, b: 1, a: 1}
+  edgeColor: {r: 0, g: 0, b: 0, a: 1}
   edgeColorGradient:
     serializedVersion: 2
     key0: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
@@ -2051,12 +2040,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -90,7 +90,7 @@ public class LightProjector : MonoBehaviour {
 	}
 
 	// Moves the projector along the circumference of the puzzle area by rotating its parent gameobject's transform
-	void RotateAroundCircumference(float rotation) {
+	public void RotateAroundCircumference(float rotation) {
 		transform.parent.parent.localRotation = Quaternion.Euler(transform.parent.parent.localRotation.eulerAngles + Vector3.up * rotation * Time.deltaTime);
 	}
 

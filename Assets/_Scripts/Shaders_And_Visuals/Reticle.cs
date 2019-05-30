@@ -2,8 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Reticle : MonoBehaviour {
+public class Reticle : Singleton<Reticle> {
 	RectTransform thisTransform;
+	RectTransform centerTransform;
+	Vector2 thisTransformSize {
+		get { return thisTransform.anchorMax - thisTransform.anchorMin; }
+	}
+	Vector2 centerTransformSize {
+		get { return centerTransform.anchorMax - centerTransform.anchorMin; }
+	}
+	public Vector2 thisTransformPos {
+		get { return (thisTransform.anchorMax + thisTransform.anchorMin) / 2f; }
+		set {
+			Vector2 size = thisTransformSize;
+			thisTransform.anchorMax = value + size / 2f;
+			thisTransform.anchorMin = value - size / 2f;
+		}
+	}
+	Vector2 centerTransformPos {
+		get { return (centerTransform.anchorMax + centerTransform.anchorMin) / 2f; }
+		set {
+			Vector2 size = centerTransformSize;
+			centerTransform.anchorMax = value + size / 2f;
+			centerTransform.anchorMin = value - size / 2f;
+		}
+	}
 	PlayerButtonInput input;
 
 	Quaternion startRotation;
@@ -20,6 +43,8 @@ public class Reticle : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		thisTransform = GetComponent<RectTransform>();
+		centerTransform = transform.parent.Find("ReticleCenter").GetComponent<RectTransform>();
+
 		input = PlayerButtonInput.instance;
 		startRotation = thisTransform.rotation;
 
@@ -62,5 +87,12 @@ public class Reticle : MonoBehaviour {
 			}
 		}
 		return minAngleStopRotation;
+	}
+
+	public void MoveReticle(Vector2 destination) {
+		destination.x = Mathf.Clamp01(destination.x);
+		destination.y = Mathf.Clamp01(destination.y);
+		thisTransformPos = destination;
+		centerTransformPos = destination;
 	}
 }

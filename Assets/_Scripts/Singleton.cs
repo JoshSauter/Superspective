@@ -21,7 +21,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
 				}
 
 				if (_instance == null) {
-					Debug.LogError("No Object of type " + typeof(T).Name + " exists. Make sure you add one to the scene.");
+					// Debug.LogError("No Object of type " + typeof(T).Name + " exists. Make sure you add one to the scene.");
 				}
 			}
 
