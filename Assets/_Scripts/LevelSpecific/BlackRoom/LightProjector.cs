@@ -5,59 +5,72 @@ using System.Linq;
 using EpitaphUtils;
 
 public class LightProjector : MonoBehaviour {
+	public bool DEBUG = false;
 	float minSize = .5f;
-	float maxSize = 2;
+	float maxSize = 2.5f;
 	float currentSize = 1;
 	float frustumSizeChangeSpeed = 1;
 
     Animator sideToSideAnim;
-    float curSideToSideAnimTime = 0.5f;
+    public float curSideToSideAnimTime = 0.5f;
     float desiredSideToSideAnimTime = 0.5f;
-    float sideToSideAnimLerpSpeed = 0.2f;
+    float sideToSideAnimLerpSpeed = 10f;
 	float rotationSpeed = .4f;
 
-	float circumferenceRotationSpeed = 10;
+	Quaternion desiredCircumferenceRotation;
+	Quaternion curCircumferenceRotation {
+		get { return transform.parent.parent.localRotation; }
+		set { transform.parent.parent.localRotation = value; }
+	}
+	float circumferenceRotationLerpSpeed = 2.5f;
+	float circumferenceRotationSpeed = 4;
 
 	Animator upAndDownAnim;
-	float curUpAndDownAnimTime = 0.15f;
+	public float curUpAndDownAnimTime = 0.15f;
 	float desiredUpAndDownAnimTime = 0.15f;
-	float upAndDownAnimLerpSpeed = 0.2f;
+	float upAndDownAnimLerpSpeed = 10f;
 	float verticalMovespeed = .15f;
 
 	private void Start() {
 		upAndDownAnim = GetComponent<Animator>();
         sideToSideAnim = transform.parent.GetComponent<Animator>();
 		desiredUpAndDownAnimTime = curUpAndDownAnimTime;
+		desiredCircumferenceRotation = curCircumferenceRotation;
 	}
 
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKey("f")) {
-			if (Input.GetKey(KeyCode.LeftShift)) {
-				DecreaseFrustumSize();
+		// Debug controls
+		if (DEBUG) {
+			if (Input.GetKey("f")) {
+				if (Input.GetKey(KeyCode.LeftShift)) {
+					DecreaseFrustumSize();
+				}
+				else {
+					IncreaseFrustumSize();
+				}
 			}
-			else {
-				IncreaseFrustumSize();
+			if (Input.GetKey("g")) {
+				ChangeAngle(Input.GetKey(KeyCode.LeftShift) ? -rotationSpeed : rotationSpeed);
 			}
-		}
-		if (Input.GetKey("g")) {
-			ChangeAngle(Input.GetKey(KeyCode.LeftShift) ? -rotationSpeed : rotationSpeed);
-		}
-		if (Input.GetKey("h")) {
-			RotateAroundCircumference(Input.GetKey(KeyCode.LeftShift) ? -circumferenceRotationSpeed : circumferenceRotationSpeed);
-		}
-		if (Input.GetKey("j")) {
-			MoveProjectorVertical(Input.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
+			if (Input.GetKey("h")) {
+				RotateAroundCircumference(Input.GetKey(KeyCode.LeftShift) ? -1 : 1);
+			}
+			if (Input.GetKey("j")) {
+				MoveProjectorVertical(Input.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
+			}
 		}
 
 		if (upAndDownAnim != null) {
-			curUpAndDownAnimTime = Mathf.Lerp(curUpAndDownAnimTime, desiredUpAndDownAnimTime, upAndDownAnimLerpSpeed);
+			curUpAndDownAnimTime = Mathf.Lerp(curUpAndDownAnimTime, desiredUpAndDownAnimTime, upAndDownAnimLerpSpeed * Time.deltaTime);
 			upAndDownAnim.Play("ProjectorUpDown", 0, curUpAndDownAnimTime);
 		}
         if (sideToSideAnim != null) {
-            curSideToSideAnimTime = Mathf.Lerp(curSideToSideAnimTime, desiredSideToSideAnimTime, sideToSideAnimLerpSpeed);
+            curSideToSideAnimTime = Mathf.Lerp(curSideToSideAnimTime, desiredSideToSideAnimTime, sideToSideAnimLerpSpeed * Time.deltaTime);
             sideToSideAnim.Play("ProjectorSideToSide", 1, curSideToSideAnimTime);
         }
+
+		curCircumferenceRotation = Quaternion.Lerp(curCircumferenceRotation, desiredCircumferenceRotation, circumferenceRotationLerpSpeed * Time.deltaTime);
 	}
 
 	public void IncreaseFrustumSize() {
@@ -66,6 +79,22 @@ public class LightProjector : MonoBehaviour {
 
 	public void DecreaseFrustumSize() {
 		ChangeFrustumSize(1 - frustumSizeChangeSpeed / 100f);
+	}
+
+	public void RotateAngleLeft() {
+		ChangeAngle(-rotationSpeed);
+	}
+
+	public void RotateAngleRight() {
+		ChangeAngle(rotationSpeed);
+	}
+
+	public void RotateAngleDown() {
+		MoveProjectorVertical(-verticalMovespeed);
+	}
+
+	public void RotateAngleUp() {
+		MoveProjectorVertical(verticalMovespeed);
 	}
 
 	// Stretches the far plane of the frustum within the bounds minSize <-> maxSize
@@ -91,7 +120,7 @@ public class LightProjector : MonoBehaviour {
 
 	// Moves the projector along the circumference of the puzzle area by rotating its parent gameobject's transform
 	public void RotateAroundCircumference(float rotation) {
-		transform.parent.parent.localRotation = Quaternion.Euler(transform.parent.parent.localRotation.eulerAngles + Vector3.up * rotation * Time.deltaTime);
+		desiredCircumferenceRotation = Quaternion.Euler(desiredCircumferenceRotation.eulerAngles + Vector3.up * rotation * circumferenceRotationSpeed * Time.deltaTime);
 	}
 
 	void MoveProjectorVertical(float amount) {

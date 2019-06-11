@@ -5,6 +5,8 @@ using System.Linq;
 using EpitaphUtils;
 
 public class LightBlocker : MonoBehaviour {
+	ColorPuzzle puzzle;
+
 	public bool DEBUG = false;
 	public Gradient DEBUGGRADIENT;
 	[System.Serializable]
@@ -14,6 +16,7 @@ public class LightBlocker : MonoBehaviour {
 		public Material lightBlockerMaterial;
 		public Mesh mesh;
 		public List<Vector3> vertsToUse;
+		public GameObject blocker;
 	}
 
 	public LightSourceBlocker[] blockers;
@@ -28,8 +31,18 @@ public class LightBlocker : MonoBehaviour {
 	void Start () {
 		thisRenderer = GetComponent<MeshRenderer>();
 		thisMesh = GetComponent<MeshFilter>().mesh;
+
+		puzzle = GetComponentInParent<ColorPuzzle>();
 	}
-	
+
+	private void Update() {
+		foreach (var b in blockers) {
+			if (b.blocker != null) {
+				b.blocker.SetActive(puzzle.isActive);
+			}
+		}
+	}
+
 	// Update is called once per frame
 	void LateUpdate () {
 		Bounds bounds = thisRenderer.bounds;
@@ -81,11 +94,13 @@ public class LightBlocker : MonoBehaviour {
 		if (blocker.mesh == null) {
 			Transform source = blocker.source;
 			GameObject go = new GameObject();
+			go.layer = source.gameObject.layer;
 			go.name = gameObject.name + " " + blocker.name;
 			go.transform.SetParent(source, false);
 			blocker.mesh = new Mesh();
 			go.AddComponent<MeshFilter>().mesh = blocker.mesh;
 			go.AddComponent<MeshRenderer>().material = blocker.lightBlockerMaterial;
+			blocker.blocker = go;
 		}
 
 		List<Vector3> vertsToUse = blocker.vertsToUse;

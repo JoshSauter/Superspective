@@ -22,7 +22,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	bool underMinJumpTime = false;				// Used to delay otherwise immediate checks for isGrounded right after jumping
 	float minJumpTime = 0.5f;					// as long as underMinJumpTime
 	float movespeed;
-	private Rigidbody thisRigidbody;
+	public Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
 	bool grounded = false;
 

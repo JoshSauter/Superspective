@@ -33,6 +33,7 @@ public class CameraDebugOverlay : MonoBehaviour {
 		}
 	}
 
+	[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (mode < NUM_MODES - 1) {
 			Graphics.Blit(source, destination, mat, mode);

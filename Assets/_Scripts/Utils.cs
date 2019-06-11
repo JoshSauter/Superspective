@@ -70,6 +70,10 @@ namespace EpitaphUtils {
 			return null;
 		}
 
+		public static Transform[] GetChildren(this Transform parent) {
+			return parent.GetComponentsInChildrenOnly<Transform>();
+		}
+
 		public static bool IsVisibleFrom(this Renderer r, Camera camera) {
             Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
             return GeometryUtility.TestPlanesAABB(planes, r.bounds);

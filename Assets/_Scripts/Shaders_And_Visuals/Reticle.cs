@@ -61,7 +61,7 @@ public class Reticle : Singleton<Reticle> {
 		if (input.Action1Pressed) {
 			timeHeld = 0;
 		}
-		if (input.Action1Held || timeHeld < minTimeHeld) {
+		if (input.Action1Pressed || timeHeld < minTimeHeld) {
 			curRotationSpeed = Mathf.Lerp(curRotationSpeed, maxRotationSpeed, accelerationLerp * Time.deltaTime);
 			thisTransform.Rotate(Vector3.back * curRotationSpeed * Time.deltaTime);
 			timeHeld += Time.deltaTime;

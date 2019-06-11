@@ -29,12 +29,12 @@ TagManager:
   - Pillar
   - Portal
   - HideFromPortal
-  - HideFromPortalA
-  - HideFromPortalB
+  - LightProjectorSurface
+  - 
   - OutlineOnly
-  - 
-  - 
-  - 
+  - LightProjectorRed
+  - LightProjectorGreen
+  - LightProjectorBlue
   - 
   - 
   - 

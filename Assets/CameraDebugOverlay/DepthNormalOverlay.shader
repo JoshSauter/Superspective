@@ -12,6 +12,7 @@ Shader "Custom/DepthNormalOverlay" {
 	#include "UnityCG.cginc"
 
 	sampler2D _CameraDepthNormalsTexture;
+	sampler2D _MainTex;
 
 	struct v2f {
 		float4 pos : SV_POSITION;
@@ -28,10 +29,14 @@ Shader "Custom/DepthNormalOverlay" {
 ENDCG
 
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" }
 
 		// Depth Render Pass
 		Pass {
+			Cull Off
+			ZTest Always
+			ZWrite Off
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -54,6 +59,10 @@ ENDCG
 		}
 		// Normal Render Pass
 		Pass {
+			Cull Off
+			ZTest Always
+			ZWrite Off
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -74,6 +83,10 @@ ENDCG
 		}
 		// FresnelNormal Render Pass
 		Pass {
+			Cull Off
+			ZTest Always
+			ZWrite Off
+
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag

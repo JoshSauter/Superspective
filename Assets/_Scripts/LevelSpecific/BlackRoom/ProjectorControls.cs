@@ -11,12 +11,24 @@ public class ProjectorControls : MonoBehaviour {
 
 	public ValveControl projectorRotateValve;
 
+	public ButtonHold projectorRotateAxisLeftButton;
+	public ButtonHold projectorRotateAxisRightButton;
+
+	public ButtonHold projectorRotateAxisDownButton;
+	public ButtonHold projectorRotateAxisUpButton;
+
 	// Use this for initialization
 	void Start () {
 		projectorSizeIncreaseButton.OnButtonHeld += IncreaseFrustumSize;
 		projectorSizeDecreaseButton.OnButtonHeld += DecreaseFrustumSize;
 
 		projectorRotateValve.OnValveRotate += RotateProjector;
+
+		projectorRotateAxisLeftButton.OnButtonHeld += RotateProjectorLeftOnAxis;
+		projectorRotateAxisRightButton.OnButtonHeld += RotateProjectorRightOnAxis;
+
+		projectorRotateAxisDownButton.OnButtonHeld += RotateProjectorDownOnAxis;
+		projectorRotateAxisUpButton.OnButtonHeld += RotateProjectorUpOnAxis;
 	}
 	
 	// Update is called once per frame
@@ -33,6 +45,22 @@ public class ProjectorControls : MonoBehaviour {
 	}
 
 	void RotateProjector(Angle diff) {
-		projector.RotateAroundCircumference(5 * diff.degrees);
+		projector.RotateAroundCircumference(-diff.degrees);
+	}
+
+	void RotateProjectorLeftOnAxis(Button unused) {
+		projector.RotateAngleLeft();
+	}
+
+	void RotateProjectorRightOnAxis(Button unused) {
+		projector.RotateAngleRight();
+	}
+
+	void RotateProjectorDownOnAxis(Button unused) {
+		projector.RotateAngleDown();
+	}
+
+	void RotateProjectorUpOnAxis(Button unused) {
+		projector.RotateAngleUp();
 	}
 }

@@ -20,9 +20,12 @@ public class PortalSettings : MonoBehaviour {
 	public bool useMeshAsCollider = false;
 	public bool useCameraEdgeDetectionColor = true;
 	public TransformObjectOnRotate[] objectsToTransformOnTeleport;
-	public Color portalEdgeDetectionColor = Color.black;
+	public BladeEdgeDetection.EdgeColorMode edgeColorMode;
+	public Color edgeColor = Color.black;
+	public Gradient edgeColorGradient;
+	public Texture2D edgeColorGradientTexture;
 
-    private void Awake() {
+	private void Awake() {
         debug = new DebugLogger(this, false);
     }
 

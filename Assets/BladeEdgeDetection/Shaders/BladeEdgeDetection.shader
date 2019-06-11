@@ -12,7 +12,9 @@
 	SubShader {
 		Tags { "RenderType" = "Transparent" }
 		Pass {
-			ZTest Always Cull Off ZWrite Off
+			Cull Off
+			ZTest Always
+			ZWrite Off
 
 			CGPROGRAM
 			#pragma vertex Vert

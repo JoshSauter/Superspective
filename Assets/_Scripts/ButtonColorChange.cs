@@ -4,7 +4,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(Button))]
 public class ButtonColorChange : MonoBehaviour {
-	Color startColor;
+	public bool useMaterialAsStartColor = true;
+	public Color startColor;
 	public Color pressColor = Color.white;
 
 	Button thisButton;
@@ -17,7 +18,12 @@ public class ButtonColorChange : MonoBehaviour {
 			r = gameObject.AddComponent<EpitaphRenderer>();
 		}
 
-		startColor = r.GetMainColor();
+		if (useMaterialAsStartColor) {
+			startColor = r.GetMainColor();
+		}
+		else {
+			r.SetMainColor(startColor);
+		}
 		thisButton = GetComponent<Button>();
 		thisButton.OnButtonPressBegin += ButtonPressBegin;
 		thisButton.OnButtonDepressBegin += ButtonDepressBegin;

@@ -93,9 +93,9 @@ public class PlayerLook : Singleton<PlayerLook> {
 		Reticle.instance.MoveReticle(movement);
 	}
 
-	public void SetViewLock(ViewLockObject lockInfo) {
+	public void SetViewLock(ViewLockObject lockObject, ViewLockInfo lockInfo) {
 		if (viewLockedObject == null) {
-			StartCoroutine(LockView(lockInfo));
+			StartCoroutine(LockView(lockObject, lockInfo));
 		}
 	}
 
@@ -107,34 +107,36 @@ public class PlayerLook : Singleton<PlayerLook> {
 
 	bool inLockViewCoroutine = false;
 	Quaternion rotationBeforeViewLock;
-	IEnumerator LockView(ViewLockObject lockInfo) {
-		debug.Log("Locking view for " + lockInfo.gameObject.name);
-		viewLockedObject = lockInfo;
+	IEnumerator LockView(ViewLockObject lockObject, ViewLockInfo lockInfo) {
+		debug.Log("Locking view for " + lockObject.gameObject.name);
+		viewLockedObject = lockObject;
 		PlayerMovement.instance.StopMovement();
 		inLockViewCoroutine = true;
 
 		Vector3 startPos = cameraTransform.position;
 		Quaternion startRot = cameraTransform.rotation;
+		Vector3 endPos = lockObject.transform.TransformPoint(lockInfo.camPosition);
+		Quaternion endRot = lockObject.transform.rotation * Quaternion.Euler(lockInfo.camRotationEuler);
 		rotationBeforeViewLock = startRot;
 
 		float timeElapsed = 0;
-		while (timeElapsed < lockInfo.viewLockTime) {
+		while (timeElapsed < lockObject.viewLockTime) {
 			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / lockInfo.viewLockTime;
+			float t = timeElapsed / lockObject.viewLockTime;
 
 			//Quaternion desiredCameraRotationInSourceSpace = Quaternion.Inverse(lockInfo.transform.rotation) * lockInfo.desiredCamRotation;
-			cameraTransform.position = Vector3.Lerp(startPos, lockInfo.transform.TransformPoint(lockInfo.desiredCamPosition), t);
-			cameraTransform.rotation = Quaternion.Lerp(startRot, lockInfo.transform.rotation * lockInfo.desiredCamRotation, t);
+			cameraTransform.position = Vector3.Lerp(startPos, endPos, t);
+			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
 
 			yield return null;
 		}
 
-		cameraTransform.position = lockInfo.transform.TransformPoint(lockInfo.desiredCamPosition);
-		cameraTransform.rotation = lockInfo.transform.rotation * lockInfo.desiredCamRotation;
+		cameraTransform.position = endPos;
+		cameraTransform.rotation = endRot;
 
 		inLockViewCoroutine = false;
-		lockInfo.focusIsLocked = true;
-		debug.Log("Finished locking view for " + lockInfo.gameObject.name);
+		lockObject.focusIsLocked = true;
+		debug.Log("Finished locking view for " + lockObject.gameObject.name);
 	}
 
 	bool inUnlockViewCoroutine = false;
@@ -144,7 +146,6 @@ public class PlayerLook : Singleton<PlayerLook> {
 
 		Vector3 startPos = cameraTransform.position;
 		Quaternion startRot = cameraTransform.rotation;
-		Vector3 endPos = playerTransform.TransformPoint(cameraInitialLocalPos);
 		Quaternion endRot = rotationBeforeViewLock;
 
 		Vector2 reticleStartPos = Reticle.instance.thisTransformPos;
@@ -155,8 +156,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / viewLockedObject.viewUnlockTime;
 
-			cameraTransform.position = Vector3.Lerp(startPos, endPos, t);
-			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t);
+			cameraTransform.position = Vector3.Lerp(startPos, playerTransform.TransformPoint(cameraInitialLocalPos), t);
+			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
 
 			Reticle.instance.MoveReticle(Vector2.Lerp(reticleStartPos, reticleEndPos, t));
 

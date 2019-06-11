@@ -177,7 +177,10 @@ public class PortalManager : Singleton<PortalManager> {
 		newCameraObj.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 		BladeEdgeDetection edgeDetection = newCameraObj.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 		if (!receiver.useCameraEdgeDetectionColor) {
-			edgeDetection.edgeColor = receiver.portalEdgeDetectionColor;
+			edgeDetection.edgeColorMode = receiver.edgeColorMode;
+			edgeDetection.edgeColor = receiver.edgeColor;
+			edgeDetection.edgeColorGradient = receiver.edgeColorGradient;
+			edgeDetection.edgeColorGradientTexture = receiver.edgeColorGradientTexture;
 		}
 		newCameraObj.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog
 
