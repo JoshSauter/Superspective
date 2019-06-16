@@ -111,6 +111,7 @@ public class PlayerLook : Singleton<PlayerLook> {
 		debug.Log("Locking view for " + lockObject.gameObject.name);
 		viewLockedObject = lockObject;
 		PlayerMovement.instance.StopMovement();
+		Interact.instance.enabled = false;
 		inLockViewCoroutine = true;
 
 		Vector3 startPos = cameraTransform.position;
@@ -136,12 +137,14 @@ public class PlayerLook : Singleton<PlayerLook> {
 
 		inLockViewCoroutine = false;
 		lockObject.focusIsLocked = true;
+		Interact.instance.enabled = true;
 		debug.Log("Finished locking view for " + lockObject.gameObject.name);
 	}
 
 	bool inUnlockViewCoroutine = false;
 	IEnumerator UnlockViewCoroutine() {
 		inUnlockViewCoroutine = true;
+		Interact.instance.enabled = false;
 		debug.Log("Unlocking view");
 
 		Vector3 startPos = cameraTransform.position;
@@ -170,6 +173,7 @@ public class PlayerLook : Singleton<PlayerLook> {
 		viewLockedObject = null;
 		inUnlockViewCoroutine = false;
 		PlayerMovement.instance.ResumeMovement();
+		Interact.instance.enabled = true;
 		debug.Log("Finished unlocking view");
 	}
 }

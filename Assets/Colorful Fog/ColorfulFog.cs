@@ -283,20 +283,20 @@ public class ColorfulFog : MonoBehaviour
 
         GL.Begin(GL.QUADS);
 
-        GL.MultiTexCoord2(0, 0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 3.0f); // BL
+		GL.MultiTexCoord2(0, 0.0f, 0.0f);
+		GL.Vertex3(0.0f, 0.0f, 3.0f); // BL
 
-        GL.MultiTexCoord2(0, 1.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 2.0f); // BR
+		GL.MultiTexCoord2(0, 1.0f, 0.0f);
+		GL.Vertex3(1.0f, 0.0f, 2.0f); // BR
 
-        GL.MultiTexCoord2(0, 1.0f, 1.0f);
-        GL.Vertex3(1.0f, 1.0f, 1.0f); // TR
+		GL.MultiTexCoord2(0, 1.0f, 1.0f);
+		GL.Vertex3(1.0f, 1.0f, 1.0f); // TR
 
-        GL.MultiTexCoord2(0, 0.0f, 1.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.0f); // TL
+		GL.MultiTexCoord2(0, 0.0f, 1.0f);
+		GL.Vertex3(0.0f, 1.0f, 0.0f); // TL
 
-        GL.End();
-        GL.PopMatrix();
+		GL.End();
+       GL.PopMatrix();
     }
 
     //recreates gradient texture from ColorFulFog.gradient

@@ -26,9 +26,11 @@ public class ViewLockObject : MonoBehaviour, InteractableObject {
     }
 
 	public void OnLeftMouseButtonDown() {
-		hitbox.enabled = false;
-		PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
-		PlayerMovement.instance.thisRigidbody.isKinematic = true;
+		if (PlayerLook.instance.viewLockedObject == null) {
+			hitbox.enabled = false;
+			PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
+			PlayerMovement.instance.thisRigidbody.isKinematic = true;
+		}
 	}
 
 	public void OnLeftMouseButton() { }

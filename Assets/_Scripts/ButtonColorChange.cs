@@ -2,17 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Button))]
 public class ButtonColorChange : MonoBehaviour {
 	public bool useMaterialAsStartColor = true;
 	public Color startColor;
+	[ColorUsage(true, true)]
+	public Color startEmission = Color.black;
 	public Color pressColor = Color.white;
+	[ColorUsage(true, true)]
+	public Color pressEmission = Color.black;
 
-	Button thisButton;
+	public Button buttonToReactTo;
 	EpitaphRenderer r;
 
 	// Use this for initialization
 	void Start () {
+		if (buttonToReactTo == null) {
+			buttonToReactTo = GetComponent<Button>();
+		}
+		if (buttonToReactTo == null) {
+			Debug.LogWarning("No button to react to, disabling color change script", gameObject);
+			enabled = false;
+			return;
+		}
+
 		r = GetComponent<EpitaphRenderer>();
 		if (r == null) {
 			r = gameObject.AddComponent<EpitaphRenderer>();
@@ -20,13 +32,15 @@ public class ButtonColorChange : MonoBehaviour {
 
 		if (useMaterialAsStartColor) {
 			startColor = r.GetMainColor();
+			startEmission = r.GetColor("_EmissionColor");
 		}
 		else {
 			r.SetMainColor(startColor);
+			r.SetColor("_EmissionColor", startEmission);
 		}
-		thisButton = GetComponent<Button>();
-		thisButton.OnButtonPressBegin += ButtonPressBegin;
-		thisButton.OnButtonDepressBegin += ButtonDepressBegin;
+
+		buttonToReactTo.OnButtonPressBegin += ButtonPressBegin;
+		buttonToReactTo.OnButtonDepressBegin += ButtonDepressBegin;
 	}
 
 	void ButtonPressBegin(Button b) {
@@ -42,7 +56,8 @@ public class ButtonColorChange : MonoBehaviour {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / b.timeToPressButton;
 
-			r.SetMainColor(Color.Lerp(startColor, pressColor, b.buttonDepressCurve.Evaluate(t)));
+			r.SetMainColor(Color.Lerp(startColor, pressColor, b.buttonPressCurve.Evaluate(t)));
+			r.SetColor("_EmissionColor", Color.Lerp(startEmission, pressEmission, b.buttonPressCurve.Evaluate(t)));
 
 			yield return null;
 		}
@@ -57,6 +72,7 @@ public class ButtonColorChange : MonoBehaviour {
 			float t = timeElapsed / b.timeToPressButton;
 
 			r.SetMainColor(Color.Lerp(pressColor, startColor, b.buttonDepressCurve.Evaluate(t)));
+			r.SetColor("_EmissionColor", Color.Lerp(pressEmission, startEmission, b.buttonDepressCurve.Evaluate(t)));
 
 			yield return null;
 		}

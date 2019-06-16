@@ -327,7 +327,7 @@
 						float depthDiff = depthSamples[0] - depthSamples[x];
 						float oppositeDepthDiff = depthSamples[oppositeIndex] - depthSamples[0];
 						
-						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6], 1));
+						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6].x, 1));
 						
 						float depthRatio = max(depthSamples[0], depthSamples[x]) / min(depthSamples[0], depthSamples[x]);
 						float oppositeDepthRatio = max(depthSamples[0], depthSamples[oppositeIndex]) / min(depthSamples[0], depthSamples[oppositeIndex]);

@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using EpitaphUtils;
 
 public class Interact : Singleton<Interact> {
+	public bool DEBUG = false;
+	DebugLogger debug;
 	public Image reticle;
 	public Image reticleOutside;
 
@@ -18,9 +21,10 @@ public class Interact : Singleton<Interact> {
 
 	// Use this for initialization
 	void Start () {
+		debug = new DebugLogger(gameObject, DEBUG);
 		if (reticle == null) {
 			Debug.LogError("Reticle not set in Interact script, disabling script");
-			this.enabled = false;
+			enabled = false;
 			return;
 		}
 
@@ -69,13 +73,14 @@ public class Interact : Singleton<Interact> {
 
 		Ray ray = cam.ScreenPointToRay(screenPos);
 		RaycastHit hitObject;
-		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, ~0, QueryTriggerInteraction.Collide);
+		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, ~(1 << LayerMask.NameToLayer("Player")), QueryTriggerInteraction.Collide);
 		return hitObject;
 	}
 
 	InteractableObject FindInteractableObjectSelected() {
 		RaycastHit hitObject = GetRaycastHit();
 		if (hitObject.collider != null) {
+			debug.Log("Hovering over " + hitObject.collider.gameObject.name);
 			return hitObject.collider.GetComponent<InteractableObject>();
 		}
 		else return null;

@@ -63,6 +63,9 @@ public class ColorPuzzleNode : MonoBehaviour {
 	bool IsWithinCone(LightProjector projector) {
 		Vector3 testPos = transform.position;
 		Transform cone = projector.transform.GetChild(0);
+		if (!cone.gameObject.activeSelf) {
+			return false;
+		}
 		Vector3 tipToCenterOfBaseWorld = -cone.up * coneHeight * cone.localScale.y;
 		Vector3 tipToEdgeOfBaseWorld = tipToCenterOfBaseWorld + cone.right * coneRadius * cone.localScale.x;
 		Vector3 tipToTestPointWorld = testPos - cone.position;
@@ -80,8 +83,12 @@ public class ColorPuzzleNode : MonoBehaviour {
 	}
 
 	bool IsBlockedByBlocker(LightProjector projector) {
+		Transform lightSphere = projector.transform.GetChild(1);
+		if (!lightSphere.gameObject.activeSelf) {
+			return false;
+		}
 		Vector3 startPos = transform.position;
-		Vector3 diff = projector.transform.GetChild(1).position - startPos;
+		Vector3 diff = lightSphere.position - startPos;
 		Ray toProjector = new Ray(startPos, diff);
 		float distance = diff.magnitude - 4;
 		//Debug.DrawRay(toProjector.origin, toProjector.direction * distance);
