@@ -26,10 +26,10 @@ public class ObjectHover : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update() {
+	void FixedUpdate() {
 		if (!hoveringPaused) {
-			timeElapsed += Time.deltaTime;
-			float t = Time.deltaTime * Mathf.Cos(Mathf.PI * 2 * timeElapsed / period);
+			timeElapsed += Time.fixedDeltaTime;
+			float t = Time.fixedDeltaTime * Mathf.Cos(Mathf.PI * 2 * timeElapsed / period);
 			Vector3 displacementUp = maxDisplacementUp * t * up;
 			Vector3 displacementForward = maxDisplacementForward * t * forward;
 			Vector3 displacementRight = maxDisplacementRight * t * right;

@@ -10,7 +10,7 @@ public class PlayerLook : Singleton<PlayerLook> {
     public Transform cameraTransform;
 	Vector3 cameraInitialLocalPos;
 	[Range(0.01f,1)]
-	public float generalSensitivity = 0.5f;
+	public float generalSensitivity = 0.3f;
 	[Range(0.01f,1)]
 	public float sensitivityX = 0.5f;
 	[Range(0.01f,1)]
@@ -23,6 +23,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 	public float outsideMultiplier = 1f;
 
 	public ViewLockObject viewLockedObject;
+
+	public bool frozen = false;
 
 	/// <summary>
 	/// Returns the rotationY normalized to the range (-1, 1)
@@ -51,6 +53,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 	}
 
 	void Update() {
+		if (frozen) return;
+
 		if (viewLockedObject == null) {
 			Look(PlayerButtonInput.instance.RightStick);
 
@@ -125,7 +129,6 @@ public class PlayerLook : Singleton<PlayerLook> {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / lockObject.viewLockTime;
 
-			//Quaternion desiredCameraRotationInSourceSpace = Quaternion.Inverse(lockInfo.transform.rotation) * lockInfo.desiredCamRotation;
 			cameraTransform.position = Vector3.Lerp(startPos, endPos, t);
 			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
 

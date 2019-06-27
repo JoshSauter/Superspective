@@ -30,7 +30,7 @@ TagManager:
   - Portal
   - HideFromPortal
   - LightProjectorSurface
-  - 
+  - ParticleBounds
   - OutlineOnly
   - LightProjectorRed
   - LightProjectorGreen

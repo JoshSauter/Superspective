@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define TEST_BUILD
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -130,7 +132,7 @@ public class LevelManager : Singleton<LevelManager> {
 	}
 
 	private void PopulateSceneNames() {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || TEST_BUILD
 		enumToSceneName.Add(Level.testScene, testScene);
 #endif
 		enumToSceneName.Add(Level.managerScene, managerScene);
@@ -153,7 +155,7 @@ public class LevelManager : Singleton<LevelManager> {
 	/// Defines the world graph which determines which scenes are adjacent to one another.
 	/// </summary>
 	private void PopulateWorldGraph() {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || TEST_BUILD
 		worldGraph.Add(testScene, new List<string>());
 #endif
 

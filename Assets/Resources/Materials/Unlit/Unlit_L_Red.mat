@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Unlit_L_Red
   m_Shader: {fileID: 4800000, guid: 7d8d42afd39aaba4ba63eb365d7b92c6, type: 3}
   m_ShaderKeywords: 
@@ -72,5 +73,5 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.90668255, g: 0.90697116, b: 0.9485294, a: 1}
+    - _Color: {r: 0.9490196, g: 0.90588236, b: 0.90588236, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
