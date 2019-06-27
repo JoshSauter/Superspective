@@ -50,10 +50,16 @@
 			float _NormalSensitivity;
 			int _SampleDistance;
 
+			// Edge Weights
+			int _WeightedEdgeMode;		// 0 == Constant edge weight, 1 == Varies on depth differences, 2 == Varies on normal differences, 3 == Varies on depth and normal differences
+			float _DepthWeightEffect;
+			float _NormalWeightEffect;
+
 			// Edge Colors
 			int _ColorMode;				// 0 == Simple color, 1 == Gradient from inspector, 2 == Color ramp (gradient) texture
 			fixed4 _EdgeColor;
 			// Edge gradient
+			float3 _FrustumCorners[4];	// Used to convert depth-based gradient to distance-based gradient which doesn't change as camera looks around
 			int _GradientMode;			// 0 == Blend, 1 == Fixed
 			float _GradientAlphaKeyTimes[GRADIENT_RESOLUTION];
 			float _AlphaGradient[GRADIENT_RESOLUTION];
@@ -101,6 +107,7 @@
 				*/
 				float4 vertex : SV_POSITION;
 				float2 UVs[NUM_SAMPLES] : TEXCOORD0;
+				float3 ray : TEXCOORD9;	// Used to replace depth-based gradient with actual distance gradient (i.e. doesn't change when camera looks around)
 			};
 			
 			// Returns the coordinate on the opposite side of the center
@@ -141,7 +148,7 @@
 				|  10 | 110 | 120 |  More likely an edge than an obliquely viewed surface
 				-------------------
 			*/
-			half DepthRatiosAreSimilar(float center, float a, float b, float obliqueness) {
+			float DepthRatio(float center, float a, float b, float obliqueness) {
 				float depthRatio = max(a, center) / min(a, center);
 				float oppositeDepthRatio = max(b, center) / min(b, center);
 				
@@ -150,9 +157,7 @@
 
 				// Multiplied by magic number 100 just to keep things from getting too close to underflow levels (DEPTH_THRESHOLD_CONSTANT is 100x higher to compensate)
 				// Lower depth values == higher depth ratio diffs to be considered an edge (2:1 ratio means very different things at low depth values and high depth values)
-				int isEdge = 100 * (depthRatio - oppositeDepthRatio) * _DepthSensitivity * center * obliquenessModifier > DEPTH_THRESHOLD_CONSTANT;
-
-				return !isEdge;
+				return 100 * (depthRatio - oppositeDepthRatio) * _DepthSensitivity * center * obliquenessModifier;
 			}
 
 			half DepthValuesAreSimilar(float a, float b, float obliqueness) {
@@ -165,15 +170,18 @@
 				return isSameDepth ? 1.0 : 0.0;
 			}
 
-			half NormalsAreSimilar(half2 a, half2 b) {
-				half normalDiff = distance(a, b);
-				half isEdge = normalDiff * _NormalSensitivity > NORMAL_THRESHOLD_CONSTANT;
+			float NormalDiff(float3 a, float3 b) {
+				return distance(a, b) * _NormalSensitivity;
+			}
 
+			half NormalsAreSimilar(float3 a, float3 b) {
+				half isEdge = NormalDiff(a, b) > NORMAL_THRESHOLD_CONSTANT;
+			
 				return !isEdge;
 			}
 
 			// Returns 1 if all four normals are similar, 0 otherwise
-			half FourNormalArtifactCheck(half2 a, half2 b, half2 c, half2 d) {
+			half FourNormalArtifactCheck(float3 a, float3 b, float3 c, float3 d) {
 				half ab = NormalsAreSimilar(a, b);
 				half ac = NormalsAreSimilar(a, c);
 				half ad = NormalsAreSimilar(a, d);
@@ -196,7 +204,7 @@
 
 			// Gradient here refers to the 2D derivative, not the color gradient
 			// Returns 1 if no discontinuities in normals are detected, 0 otherwise
-			half AllGradientsAreSimilar(half2 original, half2 topLeft, half2 topRight, half2 botRight, half2 botLeft, half2 topCenter, half2 midRight, half2 botCenter, half2 midLeft) {
+			half AllGradientsAreSimilar(float3 original, float3 topLeft, float3 topRight, float3 botRight, float3 botLeft, float3 topCenter, float3 midRight, float3 botCenter, float3 midLeft) {
 				half backslash = NormalsAreSimilar(topLeft - original, original - botRight);
 				half pipe = NormalsAreSimilar(topCenter - original, original - botCenter);
 				half slash = NormalsAreSimilar(topRight - original, original - botLeft);
@@ -227,22 +235,24 @@
 				UVPositions uvPositions;
 				uvPositions.vertex = UnityObjectToClipPos(v.vertex);
 				for (int i = 0; i < NUM_SAMPLES; i++) {
-					uvPositions.UVs[i] = UnityStereoScreenSpaceUVAdjust(center + _MainTex_TexelSize.xy * _SampleDistance * uvDisplacements[i], _MainTex_ST);
+					float2 sampleUV = center + _MainTex_TexelSize.xy * _SampleDistance * uvDisplacements[i];
+					uvPositions.UVs[i] = UnityStereoScreenSpaceUVAdjust(sampleUV, _MainTex_ST);
 				}
+				uvPositions.ray = _FrustumCorners[center.x + 2 * center.y];
 
 				return uvPositions;
 			}
 
-			float4 GradientColor(float depth) {
+			float4 GradientColor(float distance) {
 				float4 colorChosen = float4(0,0,0,0);
 				float alphaValue = 0;
-				depth = saturate(depth);
+				distance = saturate(distance);
 				for (int i = 1; i < GRADIENT_RESOLUTION; i++) {
-					// inRange is equivalent to "if (depth > _GradientKeyTimes[i-1] && depth <= _GradientKeyTimes[i])"
-					int colorInRange = (1-step(depth, _GradientKeyTimes[i-1])) * step(depth, _GradientKeyTimes[i]);
-					int alphaInRange = (1-step(depth, _GradientAlphaKeyTimes[i-1])) * step(depth, _GradientAlphaKeyTimes[i]);
-					float colorLerpValue = saturate((depth - _GradientKeyTimes[i-1]) / (_GradientKeyTimes[i] - _GradientKeyTimes[i-1]) + _GradientMode);
-					float alphaLerpValue = saturate((depth - _GradientAlphaKeyTimes[i-1]) / (_GradientAlphaKeyTimes[i] - _GradientAlphaKeyTimes[i-1]) + _GradientMode);
+					// inRange is equivalent to "if (distance > _GradientKeyTimes[i-1] && distance <= _GradientKeyTimes[i])"
+					int colorInRange = (1-step(distance, _GradientKeyTimes[i-1])) * step(distance, _GradientKeyTimes[i]);
+					int alphaInRange = (1-step(distance, _GradientAlphaKeyTimes[i-1])) * step(distance, _GradientAlphaKeyTimes[i]);
+					float colorLerpValue = saturate((distance - _GradientKeyTimes[i-1]) / (_GradientKeyTimes[i] - _GradientKeyTimes[i-1]) + _GradientMode);
+					float alphaLerpValue = saturate((distance - _GradientAlphaKeyTimes[i-1]) / (_GradientAlphaKeyTimes[i] - _GradientAlphaKeyTimes[i-1]) + _GradientMode);
 
 					colorChosen += colorInRange * lerp(_EdgeColorGradient[i-1], _EdgeColorGradient[i], colorLerpValue);
 					alphaValue += alphaInRange * lerp(_AlphaGradient[i-1], _AlphaGradient[i], alphaLerpValue);
@@ -252,20 +262,32 @@
 				return colorChosen;
 			}
 
-			float4 GradientFromTexture(float depth) {
-				return tex2D(_GradientTexture, depth);
+			float4 GradientFromTexture(float distance) {
+				return tex2D(_GradientTexture, distance);
 			}
 
-			fixed4 FinalColor(fixed4 original, half isEdge, half similarDepth, half similarNormals, float depth) {
+			fixed4 FinalColor(fixed4 original, float depthRatio, float normalDiff, float depth, float3 ray) {
+				int depthEdge = depthRatio > DEPTH_THRESHOLD_CONSTANT;
+				int normalEdge = normalDiff > NORMAL_THRESHOLD_CONSTANT;
+				int isEdge = max(depthEdge, normalEdge);
+
+				float depthEdgeWeight = saturate(depthRatio / (0.0001 + _DepthWeightEffect * 100 * DEPTH_THRESHOLD_CONSTANT));
+				float normalEdgeWeight = saturate(normalDiff / (0.0001 + _NormalWeightEffect * 17 * NORMAL_THRESHOLD_CONSTANT));
+				depthEdgeWeight = depthEdge * max(depthEdgeWeight, 1 - (_WeightedEdgeMode & 1));
+				normalEdgeWeight = normalEdge * max(normalEdgeWeight, 1 - (_WeightedEdgeMode & 2));
+
+				float edgeWeight = max(depthEdgeWeight, normalEdgeWeight);
+
 				fixed4 edgeColor = fixed4(0,0,0,0);
+				float distance = saturate((length(ray * depth) - _ProjectionParams.y) / _ProjectionParams.z);
 				if (_ColorMode == 0) edgeColor = _EdgeColor;
-				if (_ColorMode == 1) edgeColor = GradientColor(depth);
-				if (_ColorMode == 2) edgeColor = GradientFromTexture(depth);
-				fixed4 gradientColor = GradientColor(depth);
+				if (_ColorMode == 1) edgeColor = GradientColor(distance);
+				if (_ColorMode == 2) edgeColor = GradientFromTexture(distance);
+
 				// Return values for normal render mode and debug mode
-				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, edgeColor, edgeColor.a));
+				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, edgeColor, edgeColor.a * edgeWeight));
 				// Debug colors are: Red if this is a depth-difference edge, Green if this is a normal-difference edge, yellow if both
-				fixed4 debugColors = (1-similarDepth) * fixed4(1,0,0,1) + (1-similarNormals) * fixed4(0,1,0,1);
+				fixed4 debugColors = depthEdge * fixed4(1,0,0,1) + normalEdge * fixed4(0,1,0,1);
 
 				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;
 			}
@@ -275,43 +297,44 @@
 
 				// Initialize the pixel samples
 				half4 samples[NUM_SAMPLES];
+				float depthSamples[NUM_SAMPLES];
+				float3 normalSamples[NUM_SAMPLES];
+				float obliqueness[NUM_SAMPLES];
 				for (int i = 0; i < NUM_SAMPLES; i++) {
 					samples[i] = tex2D(_CameraDepthNormalsTexture, uvPositions.UVs[i]);
 				}
-				float minDepthValue = 1;
-				float depthSamples[NUM_SAMPLES];
-				for (int d = 0; d < NUM_SAMPLES; d++) {
-					float depthValue = DecodeFloatRG(samples[d].zw);
-					depthSamples[d] = depthValue;
-					minDepthValue = min(minDepthValue, depthValue);
-				}
 
-				half2 normalSamples[NUM_SAMPLES];
-				for (int n = 0; n < NUM_SAMPLES; n++) {
-					normalSamples[n] = samples[n].xy;
-				}
+				float minDepthValue = 1;
 				float avgObliqueness = 0;
-				float obliqueness[NUM_SAMPLES];
-				for (int nd = 0; nd < NUM_SAMPLES; nd++) {
-					float dummyDepth;
-					float3 decodedNormal;
-					DecodeDepthNormal(samples[nd], dummyDepth, decodedNormal);
-					obliqueness[nd] = ObliquenessFromNormal(decodedNormal, uvPositions.UVs[nd]);
-					avgObliqueness += obliqueness[nd];
+				for (int s = 0; s < NUM_SAMPLES; s++) {
+					float depthValue;
+					float3 normalValue;
+					DecodeDepthNormal(samples[s], depthValue, normalValue);
+
+					depthSamples[s] = depthValue;
+					normalSamples[s] = normalValue;
+					obliqueness[s] = ObliquenessFromNormal(normalValue, uvPositions.UVs[s]);
+
+					minDepthValue = min(minDepthValue, depthValue);
+					avgObliqueness += obliqueness[s];
 				}
 				avgObliqueness /= NUM_SAMPLES;
 
 				// Check depth and normal similarity with surrounding samples
-				half similarDepth = 1;
-				half similarNormals = 1;
 				half allDepthsAreDissimilar = 1;
+				float maxDepthRatio = 0;
+				float maxNormalDiff = 0;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
 					uint oppositeIndex = GetOppositeIndex(x);
-					half thisDepthIsSimilar = DepthRatiosAreSimilar(depthSamples[0], depthSamples[x], depthSamples[oppositeIndex], avgObliqueness);
-					half thisNormalIsSimilar = NormalsAreSimilar(normalSamples[0], normalSamples[x]);
+					float depthRatio = DepthRatio(depthSamples[0], depthSamples[x], depthSamples[oppositeIndex], avgObliqueness);
+					float normalDiff = NormalDiff(normalSamples[0], normalSamples[x]);
+
+					half thisDepthIsSimilar = depthRatio < DEPTH_THRESHOLD_CONSTANT;
+					half thisNormalIsSimilar = normalDiff < NORMAL_THRESHOLD_CONSTANT;
 
 					// Keep track of whether all depths appear different before any double-checks
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
+
 					/////////////////////////
 					// Depth Double-Checks //
 					/////////////////////////
@@ -329,44 +352,44 @@
 						
 						half isBorder = 1 - (step(0, uvPositions.UVs[2].y) * step(uvPositions.UVs[7].y, 1) * step(0, uvPositions.UVs[8].x) * step(uvPositions.UVs[6].x, 1));
 						
-						float depthRatio = max(depthSamples[0], depthSamples[x]) / min(depthSamples[0], depthSamples[x]);
-						float oppositeDepthRatio = max(depthSamples[0], depthSamples[oppositeIndex]) / min(depthSamples[0], depthSamples[oppositeIndex]);
+						float rawDepthRatio = max(depthSamples[0], depthSamples[x]) / min(depthSamples[0], depthSamples[x]);
+						float oppositeRawDepthRatio = max(depthSamples[0], depthSamples[oppositeIndex]) / min(depthSamples[0], depthSamples[oppositeIndex]);
 						
 						int obliqueModifer = step(OBLIQUENESS_THRESHOLD, obliqueness[0]);
 						// Check if this depth sample is next to an edge by comparing the depth ratios (possibly with obliqueness modifiers)
-						half nextToEdge = depthRatio * 1-(obliqueModifer * obliqueness[0]) < oppositeDepthRatio * 1-(obliqueModifer * (1-obliqueness[0])) ? 1 : 0;
+						half nextToEdge = rawDepthRatio * 1-(obliqueModifer * obliqueness[0]) < oppositeRawDepthRatio * 1-(obliqueModifer * (1-obliqueness[0])) ? 1 : 0;
 						
 						half similarDiffs = (abs(oppositeDepthDiff - depthDiff) * _DepthSensitivity * (1-avgObliqueness) * abs(depthDiff) < (DEPTH_THRESHOLD_BASELINE/1000) + abs(oppositeDepthDiff) * DEPTH_THRESHOLD_CONSTANT * depthSamples[0]) ? 1 : 0;
 						thisDepthIsSimilar = max(isBorder, max(similarDiffs, nextToEdge));
 					}
 #endif
-
-					// equivalent to "if (x >= SAMPLE_RANGE_START) similarDepth *= thisDepthIsSimilar;"
-					similarDepth *= max(thisDepthIsSimilar, (1 - step(SAMPLE_RANGE_START, x)));
-					
-					// equivalent to "if (x >= SAMPLE_RANGE_START) similarNormals *= thisNormalIsSimilar;"
-					similarNormals *= max(thisNormalIsSimilar, (1 - step(SAMPLE_RANGE_START, x)));
+					// "if (x >= SAMPLE_RANGE_START && thisDepthIsSimilar < 1) maxDepthRatio = max(maxDepthRatio, depthRatio)"
+					maxDepthRatio = max(maxDepthRatio, depthRatio * step(SAMPLE_RANGE_START, x) * (1-thisDepthIsSimilar));
+					// "if (x >= SAMPLE_RANGE_START) maxNormalDiff = max(maxNormalDiff, normalDiff)"
+					maxNormalDiff = max(maxNormalDiff, normalDiff * step(SAMPLE_RANGE_START, x));
 				}
 
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
 				if (allDepthsAreDissimilar > 0) {
-					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 1, 1, minDepthValue);
+					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 0, minDepthValue, uvPositions.ray);
 				}
 #endif
 
 				// If this pixel seems to be an edge when compared to every pixel around it, it is probably an artifact and should not be considered an edge
-				similarDepth = max(similarDepth, allDepthsAreDissimilar);
+				// "if (allDepthsAreDissimilar) maxDepthRatio = 0"
+				maxDepthRatio *= 1-allDepthsAreDissimilar;
 
 #ifdef DEPTH_ARTIFACT_CHECK
-				if (similarDepth < 1) {
+				if (maxDepthRatio > DEPTH_THRESHOLD_CONSTANT) {
 					// If the depths of a +Cross or xCross are similar, don't consider this an edge
 					half crossIsSimilar = FourDepthArtifactCheck(depthSamples[5], depthSamples[6], depthSamples[7], depthSamples[8],
 																  obliqueness[5],  obliqueness[6],  obliqueness[7],  obliqueness[8]);
 					half xCrossIsSimilar = FourDepthArtifactCheck(depthSamples[1], depthSamples[2], depthSamples[3], depthSamples[4],
 																   obliqueness[1],  obliqueness[2],  obliqueness[3],  obliqueness[4]);
 
-					similarDepth = max(crossIsSimilar, xCrossIsSimilar);
+					// "if (crossIsSimilar || xCrossIsSimilar) maxDepthRatio = 0"
+					maxDepthRatio *= 1-max(crossIsSimilar, xCrossIsSimilar);
 				}
 #endif
 
@@ -384,7 +407,7 @@
 					| (1,0,0) | (0,1,0) | (0,1,0) |  More likely an edge than an artifact from close faces/Z-fighting
 					-------------------------------
 				*/
-				if (similarNormals < 1) {
+				if (maxNormalDiff > NORMAL_THRESHOLD_CONSTANT) {
 					half crossIsSimilar = 0;
 					half xCrossIsSimilar = 0;
 					half gradientIsSimilar = 0;
@@ -413,12 +436,12 @@
 						normalSamples[8]
 					);
 #endif
-
-					similarNormals = max(gradientIsSimilar, max(crossIsSimilar, xCrossIsSimilar));
+					
+					// "if (gradientIsSimilar || crossIsSimilar || xCrossIsSimilar) maxNormalDiff = 0"
+					maxNormalDiff *= 1-max(gradientIsSimilar, max(crossIsSimilar, xCrossIsSimilar));
 				}
 
-				int isEdge = 1 - (similarDepth * similarNormals);
-				return FinalColor(original, isEdge, similarDepth, similarNormals, minDepthValue);
+				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray);
 			}
 			ENDCG
 		}

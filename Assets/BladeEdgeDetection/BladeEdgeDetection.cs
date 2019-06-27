@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
@@ -11,6 +12,12 @@ public class BladeEdgeDetection : MonoBehaviour {
 		gradient,
 		colorRampTexture
 	}
+	public enum WeightedEdgeMode {
+		unweighted,
+		weightedByDepth,
+		weightedByNormals,
+		weightedByDepthAndNormals
+	}
 	// In debug mode, red indicates a depth-detected edge, green indicates a normal-detected edge, and yellow indicates that both checks detected an edge
 	public bool debugMode = false;
 
@@ -18,6 +25,11 @@ public class BladeEdgeDetection : MonoBehaviour {
 	public float depthSensitivity = 1;
 	public float normalSensitivity = 1;
 	public int sampleDistance = 1;
+
+	// Weighted edges options
+	public WeightedEdgeMode weightedEdgeMode = WeightedEdgeMode.unweighted;
+	public float depthWeightEffect = 0f;
+	public float normalWeightEffect = 0f;
 
 	// Edge color options
 	public EdgeColorMode edgeColorMode = EdgeColorMode.simpleColor;
@@ -30,10 +42,17 @@ public class BladeEdgeDetection : MonoBehaviour {
 	Material shaderMaterial;
 	Camera thisCamera;
 
+	private const float DEPTH_SENSITIVITY_MULTIPLIER = 40;	// Keeps depth-sensitivity values close to normal-sensitivity values in the inspector
 	private const int GRADIENT_ARRAY_SIZE = 10;
-	
+	[NonSerialized]
+	Vector3[] frustumCorners;
+	[NonSerialized]
+	Vector4[] frustumCornersOrdered;
+
 	private void OnEnable () {
 		SetDepthNormalTextureFlag();
+		frustumCorners = new Vector3[4];
+		frustumCornersOrdered = new Vector4[4];
 	}
 	
 	[ImageEffectOpaque]
@@ -53,7 +72,7 @@ public class BladeEdgeDetection : MonoBehaviour {
 			shaderMaterial.DisableKeyword("DOUBLE_SIDED_EDGES");
 		}
 		// Note: Depth sensitivity originally calibrated for camera with a far plane of 400, this normalizes it for other cameras
-		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity * (thisCamera.farClipPlane/400));
+		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity * DEPTH_SENSITIVITY_MULTIPLIER * (thisCamera.farClipPlane/400));
 		shaderMaterial.SetFloat("_NormalSensitivity", normalSensitivity);
 		shaderMaterial.SetInt("_SampleDistance", sampleDistance);
 
@@ -69,6 +88,10 @@ public class BladeEdgeDetection : MonoBehaviour {
 				shaderMaterial.SetTexture("_GradientTexture", edgeColorGradientTexture);
 				break;
 		}
+
+		shaderMaterial.SetInt("_WeightedEdgeMode", (int)weightedEdgeMode);
+		shaderMaterial.SetFloat("_DepthWeightEffect", depthWeightEffect);
+		shaderMaterial.SetFloat("_NormalWeightEffect", normalWeightEffect);
 
 		Graphics.Blit(source, destination, shaderMaterial);
 	}
@@ -90,6 +113,23 @@ public class BladeEdgeDetection : MonoBehaviour {
 		shaderMaterial.SetFloatArray("_AlphaGradient", GetGradientValues(startAlpha, edgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 
 		shaderMaterial.SetInt("_GradientMode", edgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
+
+		SetFrustumCornersVector();
+	}
+
+	private void SetFrustumCornersVector() {
+		thisCamera.CalculateFrustumCorners(
+			new Rect(0, 0, 1, 1),
+			thisCamera.farClipPlane,
+			thisCamera.stereoActiveEye,
+			frustumCorners
+		);
+
+		frustumCornersOrdered[0] = frustumCorners[0];	// Bottom-left
+		frustumCornersOrdered[1] = frustumCorners[3];	// Bottom-right
+		frustumCornersOrdered[2] = frustumCorners[1];	// Top-left
+		frustumCornersOrdered[3] = frustumCorners[2];	// Top-right
+		shaderMaterial.SetVectorArray("_FrustumCorners", frustumCornersOrdered);
 	}
 
 	private List<T> GetGradientValues<T>(T startValue, IEnumerable<T> middleValues, T endValue) {
@@ -120,5 +160,10 @@ public class BladeEdgeDetection : MonoBehaviour {
 			DestroyImmediate(shaderMaterial);
 			shaderMaterial = null;
 		}
+	}
+
+	private void OnValidate() {
+		depthSensitivity = Mathf.Max(0.0f, depthSensitivity);
+		normalSensitivity = Mathf.Max(0.0f, normalSensitivity);
 	}
 }
