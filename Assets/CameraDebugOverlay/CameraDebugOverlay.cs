@@ -5,6 +5,8 @@ using System.Collections;
 public class CameraDebugOverlay : MonoBehaviour {
 	[SerializeField]
 	Material mat;
+	[SerializeField]
+	Material stencilBufferDebugMat;
 
 	KeyCode modeSwitchKey = KeyCode.N;
 
@@ -12,11 +14,12 @@ public class CameraDebugOverlay : MonoBehaviour {
 		depth,
 		normals,
 		obliqueness,
+		stencilBuffer,
 		off
 	}
 	public DebugMode debugMode = DebugMode.off;
 
-	private const int NUM_MODES = 4;
+	private const int NUM_MODES = 5;
 	int mode {
 		get {
 			return (int)debugMode;
@@ -36,7 +39,12 @@ public class CameraDebugOverlay : MonoBehaviour {
 	[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (mode < NUM_MODES - 1) {
-			Graphics.Blit(source, destination, mat, mode);
+			if (debugMode == DebugMode.stencilBuffer) {
+				Graphics.Blit(source, destination, stencilBufferDebugMat);
+			}
+			else {
+				Graphics.Blit(source, destination, mat, mode);
+			}
 		}
 		else {
 			Graphics.Blit(source, destination);

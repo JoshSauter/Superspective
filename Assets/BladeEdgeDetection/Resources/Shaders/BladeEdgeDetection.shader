@@ -217,16 +217,16 @@
 				// Constant offsets:
 				const half2 uvDisplacements[NUM_SAMPLES] = {
 					// center
-					half2(0,  0),
+					half2( 0,  0),
 					// corner neighbors
 					half2(-1, -1),
-					half2(1, -1),
-					half2(1,  1),
+					half2( 1, -1),
+					half2( 1,  1),
 					half2(-1,  1),
 					// cardinal neighbors
-					half2(0, -1),
-					half2(1,  0),
-					half2(0,  1),
+					half2( 0, -1),
+					half2( 1,  0),
+					half2( 0,  1),
 					half2(-1,  0)
 				};
 				float2 center = MultiplyUV(UNITY_MATRIX_TEXTURE0, v.texcoord);

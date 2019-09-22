@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 
+// NOTE: Assumes that transform.position is centered at the bottom center of the pillar
 public class DimensionPillar : MonoBehaviour {
 	public static Dictionary<string, DimensionPillar> pillars = new Dictionary<string, DimensionPillar>();
 
@@ -23,6 +24,7 @@ public class DimensionPillar : MonoBehaviour {
 
 	public bool DEBUG = false;
 	DebugLogger debug;
+	public bool setAsActiveOnStart = false;
 
 	public string pillarKey;
 	[SerializeField]
@@ -53,6 +55,10 @@ public class DimensionPillar : MonoBehaviour {
 		Initialize();
 		InitializeDimensionWall();
 		InitializeDictEntry();
+
+		if (setAsActiveOnStart) {
+			activePillar = this;
+		}
 	}
 	void InitializeDictEntry() {
 		if (pillarKey == "") {

@@ -5,7 +5,8 @@ Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: BlueProjector
   m_Shader: {fileID: 4800000, guid: 1dd9abd7ed52d2b4c84a107409d92953, type: 3}
   m_ShaderKeywords: 

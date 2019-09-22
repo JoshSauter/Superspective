@@ -15,11 +15,11 @@ public class SpawnDespawnOnButtonPress : MonoBehaviour {
 			button = GetComponent<Button>();
 		}
 
-		button.OnButtonPressBegin += EnableDisableObjects;
-		button.OnButtonDepressBegin += ReverseEnableDisableObjects;
+		button.OnButtonPressBegin += ctx => EnableDisableObjects();
+		button.OnButtonDepressBegin += ctx => ReverseEnableDisableObjects();
 	}
 
-	void EnableDisableObjects(Button unused) {
+	void EnableDisableObjects() {
 		foreach (var objectToEnable in objectsToEnable) {
 			objectToEnable.SetActive(true);
 		}
@@ -34,7 +34,7 @@ public class SpawnDespawnOnButtonPress : MonoBehaviour {
 		}
 	}
 
-	void ReverseEnableDisableObjects(Button unused) {
+	void ReverseEnableDisableObjects() {
 		foreach (var objectToDisable in objectsToEnable) {
 			objectToDisable.SetActive(false);
 		}

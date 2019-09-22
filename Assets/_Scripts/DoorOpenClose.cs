@@ -11,9 +11,17 @@ public class DoorOpenClose : MonoBehaviour {
 	Transform[] doorPieces;
 	Vector3[] originalScales;
 
-	bool inDoorOpenCoroutine = false;
-	bool doorOpen = false;
+	public enum DoorState {
+		closed,
+		opening,
+		open,
+		closing
+	}
+	public DoorState state = DoorState.closed;
+	bool queueDoorClose = false;
+
 	// Has to be re-asserted every physics timestep, else will close the door
+	bool playerWasInTriggerZoneLastFrame = false;
 	bool playerInTriggerZoneThisFrame = false;
 
 	public float timeBetweenEachDoorPiece = 0.4f;
@@ -24,8 +32,10 @@ public class DoorOpenClose : MonoBehaviour {
 
 #region events
 	public delegate void DoorAction(DoorOpenClose door);
-	public event DoorAction OnDoorOpen;
-	public event DoorAction OnDoorClose;
+	public event DoorAction OnDoorOpenStart;
+	public event DoorAction OnDoorCloseStart;
+	public event DoorAction OnDoorOpenEnd;
+	public event DoorAction OnDoorCloseEnd;
 #endregion
 
 	// Use this for initialization
@@ -41,24 +51,30 @@ public class DoorOpenClose : MonoBehaviour {
 	void Update () {
 		if (!DEBUG) return;
 
-		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && !inDoorOpenCoroutine) {
+		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && state != DoorState.opening && state != DoorState.closing) {
 			ResetDoorPieceScales();
 		}
 
-		else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O) && !inDoorOpenCoroutine) {
+		else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O) && state != DoorState.opening && state != DoorState.closing) {
 			StartCoroutine(DoorCloseCoroutine());
 		}
 
-		else if (Input.GetKeyDown(KeyCode.O) && !inDoorOpenCoroutine) {
+		else if (Input.GetKeyDown(KeyCode.O) && state != DoorState.opening && state != DoorState.closing) {
 			StartCoroutine(DoorOpenCoroutine());
 		}
 	}
 
 	private void FixedUpdate() {
-		if (doorOpen && !playerInTriggerZoneThisFrame) {
+		if ((state == DoorState.open || state == DoorState.opening) && playerWasInTriggerZoneLastFrame && !playerInTriggerZoneThisFrame) {
+			queueDoorClose = true;
+		}
+
+		if (queueDoorClose && state == DoorState.open) {
 			CloseDoor();
 		}
+
 		// Need to re-assert this every physics timestep, reset state
+		playerWasInTriggerZoneLastFrame = playerInTriggerZoneThisFrame;
 		playerInTriggerZoneThisFrame = false;
 	}
 
@@ -68,21 +84,25 @@ public class DoorOpenClose : MonoBehaviour {
 		}
 	}
 
-	void OpenDoor() {
-		if (!inDoorOpenCoroutine && !doorOpen) {
+	public void OpenDoor() {
+		if (state == DoorState.closed) {
 			StartCoroutine(DoorOpenCoroutine());
 		}
 	}
 
-	void CloseDoor() {
-		if (!inDoorOpenCoroutine && doorOpen) {
+	public void CloseDoor() {
+		if (state == DoorState.open) {
+			queueDoorClose = false;
 			StartCoroutine(DoorCloseCoroutine());
 		}
 	}
 
 	IEnumerator DoorOpenCoroutine() {
-		inDoorOpenCoroutine = true;
-		
+		state = DoorState.opening;
+		if (OnDoorOpenStart != null) {
+			OnDoorOpenStart(this);
+		}
+
 		int i = 0;
 		while (i < doorPieces.Length) {
 
@@ -94,11 +114,10 @@ public class DoorOpenClose : MonoBehaviour {
 
 		// Allow time for the last door piece to open before marking the coroutine complete
 		yield return new WaitForSeconds(timeForEachDoorPieceToOpen);
-		inDoorOpenCoroutine = false;
-		doorOpen = true;
+		state = DoorState.open;
 
-		if (OnDoorOpen != null) {
-			OnDoorOpen(this);
+		if (OnDoorOpenEnd != null) {
+			OnDoorOpenEnd(this);
 		}
 	}
 
@@ -120,7 +139,10 @@ public class DoorOpenClose : MonoBehaviour {
 	}
 
 	IEnumerator DoorCloseCoroutine() {
-		inDoorOpenCoroutine = true;
+		state = DoorState.closing;
+		if (OnDoorCloseStart != null) {
+			OnDoorCloseStart(this);
+		}
 
 		int i = 0;
 		while (i < doorPieces.Length) {
@@ -133,11 +155,10 @@ public class DoorOpenClose : MonoBehaviour {
 
 		// Allow time for the last door piece to open before marking the coroutine complete
 		yield return new WaitForSeconds(timeForEachDoorPieceToClose);
-		inDoorOpenCoroutine = false;
-		doorOpen = false;
+		state = DoorState.closed;
 
-		if (OnDoorClose != null) {
-			OnDoorClose(this);
+		if (OnDoorCloseEnd != null) {
+			OnDoorCloseEnd(this);
 		}
 	}
 
@@ -160,7 +181,7 @@ public class DoorOpenClose : MonoBehaviour {
 
 	private void OnTriggerStay(Collider other) {
 		if (other.TaggedAsPlayer()) {
-			if (!doorOpen) {
+			if (state == DoorState.closed) {
 				OpenDoor();
 			}
 			playerInTriggerZoneThisFrame = true;
@@ -169,7 +190,7 @@ public class DoorOpenClose : MonoBehaviour {
 
 	private void OnTriggerExit(Collider other) {
 		if (other.TaggedAsPlayer()) {
-			if (doorOpen) {
+			if (state == DoorState.open) {
 				CloseDoor();
 			}
 		}

@@ -6,15 +6,22 @@ using EpitaphUtils;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : Singleton<PlayerMovement> {
 	public bool DEBUG = false;
+
+	private float scale { get { return transform.localScale.y; } }
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
 	}
 	float accelerationLerpSpeed = 0.2f;
 	float decelerationLerpSpeed = 0.15f;
-	float backwardsSpeed = 0.8f;
-	public float walkSpeed = 12f;
-	public float runSpeed = 18f;
-	public float jumpForce = 30;
+	float backwardsSpeed = 1f;
+	private float _walkSpeed = 10f;
+	public float walkSpeed { get { return _walkSpeed * scale; } }
+	private float _runSpeed = 18f;
+	public float runSpeed { get { return _runSpeed * scale; } }
+	private float desiredMovespeedLerpSpeed = 10;
+
+	private float _jumpForce = 936;
+	public float jumpForce { get { return _jumpForce * scale; } }
 	public float windResistanceMultiplier = 0.2f;
 
 	bool jumpIsOnCooldown = false;				// Prevents player from jumping again while true
@@ -26,12 +33,22 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	private PlayerButtonInput input;
 	bool grounded = false;
 
+	// Staircase handling characteristics
+	float _maxStepHeight = 0.6f;
+	float maxStepHeight { get { return _maxStepHeight * scale; } }
+	// How far do we move into the step before raycasting down?
+	float _stepOverbiteMagnitude = 0.15f;
+	float stepOverbiteMagnitude { get { return _stepOverbiteMagnitude * scale; } }
+
 	CapsuleCollider thisCollider;
 	MeshRenderer thisRenderer;
 
 	bool stopped = false;
 
-#region IsGrounded characteristics
+	List<ContactPoint> allContactThisFrame = new List<ContactPoint>();
+	public Vector3 bottomOfPlayer { get { return new Vector3(transform.position.x, thisRenderer.bounds.min.y, transform.position.z); } }
+
+	#region IsGrounded characteristics
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
 	public float isGroundedSpherecastDistance = 0.5f;
@@ -51,17 +68,17 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	private void Update() {
 		if (input.ShiftHeld) {
-			movespeed = walkSpeed;
+			movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
 		}
 		else {
-			movespeed = runSpeed;
+			movespeed = Mathf.Lerp(movespeed, walkSpeed, desiredMovespeedLerpSpeed * Time.deltaTime); ;
 		}
 	}
-	
+
 	void FixedUpdate() {
 		if (stopped) return;
 
-		RaycastHit ground = new RaycastHit();
+		ContactPoint ground = new ContactPoint();
 		grounded = IsGrounded(out ground);
 
 		Vector3 desiredVelocity = thisRigidbody.velocity;
@@ -77,20 +94,25 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			desiredVelocity = CalculateAirMovement();
 		}
 
-		bool movingBackward = Vector2.Dot(new Vector2(desiredVelocity.x, desiredVelocity.z), new Vector2(transform.forward.x, transform.forward.z)) < -0.5f;
-		if (movingBackward) {
-			desiredVelocity.x *= backwardsSpeed;
-			desiredVelocity.z *= backwardsSpeed;
+		float movingBackward = Vector2.Dot(new Vector2(desiredVelocity.x, desiredVelocity.z), new Vector2(transform.forward.x, transform.forward.z));
+		if (movingBackward < -0.5f) {
+			float slowdownAmount = Mathf.InverseLerp(-.5f, -1, movingBackward);
+			desiredVelocity.x *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
+			desiredVelocity.z *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
 		}
 
-		if (!input.LeftStickHeld && !input.SpaceHeld && ground.collider != null && ground.collider.CompareTag("Staircase")) {
+		if (!input.LeftStickHeld && !input.SpaceHeld && ground.otherCollider != null && ground.otherCollider.CompareTag("Staircase")) {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		}
 		else {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 		}
 
-		desiredVelocity = DetectStaircase(desiredVelocity);
+		StepFound stepFound = DetectStep(desiredVelocity, ground);
+		if (stepFound != null) {
+			transform.Translate(stepFound.stepOffset, Space.World);
+		}
+		thisRigidbody.useGravity = stepFound == null;
 
 		thisRigidbody.velocity = desiredVelocity;
 
@@ -98,6 +120,12 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		if (!grounded && thisRigidbody.velocity.y < 0) {
 			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
 		}
+
+		allContactThisFrame.Clear();
+	}
+
+	private void OnCollisionStay(Collision collision) {
+		allContactThisFrame.AddRange(collision.contacts);
 	}
 
 	/// <summary>
@@ -106,7 +134,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// </summary>
 	/// <param name="ground">RaycastHit info for the WalkableObject that passes the IsGrounded test</param>
 	/// <returns>Desired Velocity according to current input</returns>
-	Vector3 CalculateGroundMovement(RaycastHit ground) {
+	Vector3 CalculateGroundMovement(ContactPoint ground) {
 		Vector3 up = ground.normal;
 		Vector3 right = Vector3.Cross(Vector3.Cross(up, transform.right), up);
 		Vector3 forward = Vector3.Cross(Vector3.Cross(up, transform.forward), up);
@@ -128,7 +156,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
 		}
 		else {
-			float adjustedMovespeed = (ground.collider.CompareTag("Staircase")) ? walkSpeed : movespeed;
+			float adjustedMovespeed = (ground.otherCollider.CompareTag("Staircase")) ? walkSpeed : movespeed;
 			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, accelerationLerpSpeed);
 		}
 	}
@@ -185,6 +213,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	IEnumerator PrintMaxHeight(float startHeight) {
 		float maxHeight = startHeight;
+		yield return new WaitForSeconds(minJumpTime/2f);
 		while (!grounded) {
 			if (transform.position.y > maxHeight) {
 				maxHeight = transform.position.y;
@@ -223,82 +252,92 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		return new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
 	}
 
-	public Vector3 DetectStaircase(Vector3 desiredVelocity) {
-		float maxStepHeight = 0.6f;
-		Vector3 bottomOfPlayer = new Vector3(transform.position.x, thisRenderer.bounds.min.y, transform.position.z);
-		Vector3 rayLowStartPos = bottomOfPlayer + Vector3.up * 0.01f;
-		Vector3 rayHighStartPos = bottomOfPlayer + Vector3.up * maxStepHeight;
-		Vector3 rayDirection = desiredVelocity;
-		rayDirection.y = 0;
-		if (rayDirection.magnitude < 0.01f) return desiredVelocity;
-		rayDirection.Normalize();
+	class StepFound {
+		public ContactPoint contact;
+		public Vector3 stepOffset;
 
-		float approxDistanceThisFrame = new Vector2(desiredVelocity.x, desiredVelocity.z).magnitude * Time.fixedDeltaTime;
-		float rayDistance = thisCollider.radius + approxDistanceThisFrame + 0.1f;
-
-		Debug.DrawRay(rayLowStartPos, rayDirection * rayDistance, Color.red);
-		Debug.DrawRay(rayHighStartPos, rayDirection * rayDistance, Color.yellow);
-
-		RaycastHit bottomRaycast;
-		RaycastHit stepUpRaycast;
-
-		if (Physics.Raycast(rayLowStartPos, rayDirection, out bottomRaycast, rayDistance) && Mathf.Abs(Vector3.Dot(bottomRaycast.normal, Vector3.up)) < 0.01f) {
-			if (Physics.GetIgnoreLayerCollision(gameObject.layer, bottomRaycast.collider.gameObject.layer)) return desiredVelocity;
-			//print("Wall found: " + bottomRaycast.collider.name);
-			if (!Physics.Raycast(rayHighStartPos, rayDirection, out stepUpRaycast, rayDistance)) {
-				//print("Step found: " + bottomRaycast.collider.name);
-				Vector3 projectedVelocity = Vector3.ProjectOnPlane(desiredVelocity, bottomRaycast.normal);
-				projectedVelocity.y = 6f;
-				desiredVelocity = projectedVelocity;
-			}
+		public StepFound(ContactPoint contact, Vector3 stepOffset) {
+			this.contact = contact;
+			this.stepOffset = stepOffset;
 		}
-		
-		return desiredVelocity;
 	}
 
-	/// <summary>
-	/// Checks to see if any WalkableObject is below the player and within the threshold to be considered ground.
-	/// </summary>
-	/// <param name="hitInfo">RaycastHit info about the WalkableObject that's hit by the raycast and passes the Dot test with Vector3.up</param>
-	/// <returns>True if the player is grounded, otherwise false.</returns>
-	public bool IsGrounded(out RaycastHit hitInfo) {
-		// If the player just jumped, don't consider them grounded no matter what
-		if (underMinJumpTime) {
-			hitInfo = new RaycastHit();
-			return false;
+	StepFound DetectStep(Vector3 desiredVelocity, ContactPoint ground) {
+		// If player is not moving, don't do any raycasts, just return
+		if (desiredVelocity.magnitude < 0.1f) {
+			return null;
 		}
-		float radius = thisCollider.radius - 0.02f;
-		// Transform.position does not give a good y-value, we want to start close to the bottom of the collider
-		Vector3 startPos = transform.position;
-		startPos.y = thisRenderer.bounds.min.y + radius + 0.02f;
-		float distance = isGroundedSpherecastDistance;
-		RaycastHit[] allHit = Physics.SphereCastAll(
-			origin: startPos,
-			radius: radius,
-			direction: -transform.up,
-			maxDistance: distance
-		);
 
-		if (DEBUG) {
-			Debug.DrawRay(startPos, -transform.up * (distance + radius), Color.yellow, 0.2f);
-		}
-		foreach (RaycastHit curHitInfo in allHit) {
-            //if (!(curHitInfo.collider.CompareTag("Ground") || curHitInfo.collider.CompareTag("Staircase"))) continue;
-            if (curHitInfo.collider.TaggedAsPlayer() || Physics.GetIgnoreLayerCollision(gameObject.layer, curHitInfo.collider.gameObject.layer)) continue;
-			float groundTest = Vector3.Dot(curHitInfo.normal, transform.up);
-
-			// Return the first ground-like object hit
-			if (groundTest > isGroundThreshold) {
-				hitInfo = curHitInfo;
-				return true;
+		foreach (ContactPoint contact in allContactThisFrame) {
+			bool isBelowMaxStepHeight = (Vector3.Dot(contact.point, transform.up) - Vector3.Dot(ground.point, transform.up)) < maxStepHeight;
+			// Basically all this nonsense is to get the contact surface's normal rather than the "contact normal" which is different
+			RaycastHit hitInfo = default(RaycastHit);
+			bool rayHit = false;
+			if (isBelowMaxStepHeight) {
+				Vector3 rayLowStartPos = bottomOfPlayer + Vector3.up * 0.01f;
+				Vector3 rayDirection = new Vector3(contact.point.x - transform.position.x, 0, contact.point.z - transform.position.z).normalized;
+				if (rayDirection.magnitude > 0) {
+					Debug.DrawRay(rayLowStartPos, rayDirection * thisCollider.radius * 2, Color.blue);
+					rayHit = contact.otherCollider.Raycast(new Ray(rayLowStartPos, rayDirection), out hitInfo, thisCollider.radius * 2);
+				}
 			}
-			else {
-				continue;
+			bool isWallNormal = rayHit && Mathf.Abs(Vector3.Dot(hitInfo.normal, Vector3.up)) < 0.1f;
+			bool isInDirectionOfMovement = rayHit && Vector3.Dot(-hitInfo.normal, desiredVelocity.normalized) > 0f;
+			//if (ground.otherCollider == null || contact.otherCollider.gameObject != ground.otherCollider.gameObject) {
+			//	float t = Vector3.Dot(-hitInfo.normal, desiredVelocity.normalized);
+			//	if (Mathf.Abs(t) > 0.1f) {
+			//		Debug.LogWarning(t);
+			//	}
+			//}
+
+			StepFound step;
+			if (isBelowMaxStepHeight && isWallNormal && isInDirectionOfMovement && GetStepInfo(out step, contact, ground)) {
+				return step;
 			}
 		}
-		hitInfo = new RaycastHit();
-		return false;
 
+		return null;
+	}
+
+	bool GetStepInfo(out StepFound step, ContactPoint contact, ContactPoint ground) {
+		step = null;
+		RaycastHit stepTest;
+
+		Vector3 stepOverbite = -new Vector3(contact.normal.x, 0, contact.normal.z).normalized * stepOverbiteMagnitude;
+
+		// Start the raycast position directly above the contact point with the step
+		Vector3 raycastStartPos = new Vector3(contact.point.x, ground.point.y + maxStepHeight, contact.point.z);
+		// Move the raycast inwards towards the stair (we will be raycasting down at the stair)
+		raycastStartPos += stepOverbite;
+		Vector3 direction = -transform.up;
+
+		Debug.DrawRay(raycastStartPos, direction * maxStepHeight, Color.green, 10);
+		bool stepFound = contact.otherCollider.Raycast(new Ray(raycastStartPos, direction), out stepTest, maxStepHeight);
+		if (stepFound) {
+			float stepHeight = stepTest.point.y - ground.point.y;
+			Vector3 stepOffset = stepOverbite + transform.up * (stepHeight + 0.02f);
+			step = new StepFound(contact, stepOffset);
+			if (DEBUG) {
+				Debug.Log("Step: " + contact + "\n" + stepOffset);
+			}
+		}
+
+		return stepFound;
+	}
+
+	public bool IsGrounded(out ContactPoint ground) {
+		ground = default(ContactPoint);
+		float maxGroundTest = isGroundThreshold;	// Amount upwards-facing the most ground-like object is
+		foreach (ContactPoint contact in allContactThisFrame) {
+			float groundTest = Vector3.Dot(contact.normal, transform.up);
+			if (groundTest > maxGroundTest) {
+				ground = contact;
+				maxGroundTest = groundTest;
+			}
+		}
+
+		// Was a ground object found?
+		return (maxGroundTest > isGroundThreshold) && !underMinJumpTime;
 	}
 
 	public void StopMovement() {

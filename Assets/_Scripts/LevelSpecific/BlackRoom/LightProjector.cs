@@ -9,7 +9,7 @@ public class LightProjector : MonoBehaviour {
 	float minSize = .5f;
 	float maxSize = 2.5f;
 	float currentSize = 1;
-	float frustumSizeChangeSpeed = 1;
+	float frustumSizeChangeSpeed = 200;
 
     Animator sideToSideAnim;
     public float curSideToSideAnimTime = 0.5f;
@@ -74,11 +74,11 @@ public class LightProjector : MonoBehaviour {
 	}
 
 	public void IncreaseFrustumSize() {
-		ChangeFrustumSize(1 + frustumSizeChangeSpeed / 100f);
+		ChangeFrustumSize(1 + frustumSizeChangeSpeed * Time.deltaTime / 100f);
 	}
 
 	public void DecreaseFrustumSize() {
-		ChangeFrustumSize(1 - frustumSizeChangeSpeed / 100f);
+		ChangeFrustumSize(1 - frustumSizeChangeSpeed * Time.deltaTime / 100f);
 	}
 
 	public void RotateAngleLeft() {
@@ -102,12 +102,10 @@ public class LightProjector : MonoBehaviour {
 		currentSize *= multiplier;
 		if (currentSize < minSize || currentSize > maxSize) {
 			currentSize = Mathf.Clamp(currentSize, minSize, maxSize);
+			transform.GetChild(0).localScale = new Vector3(currentSize, transform.GetChild(0).localScale.y, currentSize);
 			return;
 		}
-		Vector3 curScale = transform.GetChild(0).localScale;
-		curScale.x *= multiplier;
-		curScale.z *= multiplier;
-		transform.GetChild(0).localScale = curScale;
+		transform.GetChild(0).localScale = new Vector3(currentSize, transform.GetChild(0).localScale.y, currentSize);
 	}
 
 	// Rotates the projector along the y-axis of rotation, within the bounds minRotation <-> maxRotation
@@ -115,12 +113,14 @@ public class LightProjector : MonoBehaviour {
 		rotation *= Time.deltaTime;
         if (sideToSideAnim != null) {
             desiredSideToSideAnimTime = Mathf.Clamp01(desiredSideToSideAnimTime + rotation);
+			// Prevent animation wrap-around
+			if (desiredSideToSideAnimTime == 1) desiredSideToSideAnimTime = 0.9999f;
         }
 	}
 
 	// Moves the projector along the circumference of the puzzle area by rotating its parent gameobject's transform
 	public void RotateAroundCircumference(float rotation) {
-		desiredCircumferenceRotation = Quaternion.Euler(desiredCircumferenceRotation.eulerAngles + Vector3.up * rotation * circumferenceRotationSpeed * Time.deltaTime);
+		desiredCircumferenceRotation = Quaternion.Euler(desiredCircumferenceRotation.eulerAngles + Vector3.up * rotation);
 	}
 
 	void MoveProjectorVertical(float amount) {

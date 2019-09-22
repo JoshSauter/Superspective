@@ -44,6 +44,11 @@ public class BladeEdgeDetection : MonoBehaviour {
 
 	private const float DEPTH_SENSITIVITY_MULTIPLIER = 40;	// Keeps depth-sensitivity values close to normal-sensitivity values in the inspector
 	private const int GRADIENT_ARRAY_SIZE = 10;
+
+	// Allocate once to save GC every frame
+	private float[] floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
+	private Color[] colorGradientBuffer = new Color[GRADIENT_ARRAY_SIZE];
+
 	[NonSerialized]
 	Vector3[] frustumCorners;
 	[NonSerialized]
@@ -107,10 +112,10 @@ public class BladeEdgeDetection : MonoBehaviour {
 		float startAlpha = startColor.a;
 		float endAlpha = endColor.a;
 
-		shaderMaterial.SetFloatArray("_GradientKeyTimes", GetGradientValues(0f, edgeColorGradient.colorKeys.Select(x => x.time), 1f));
-		shaderMaterial.SetColorArray("_EdgeColorGradient", GetGradientValues(startColor, edgeColorGradient.colorKeys.Select(x => x.color), endColor));
-		shaderMaterial.SetFloatArray("_GradientAlphaKeyTimes", GetGradientValues(0f, edgeColorGradient.alphaKeys.Select(x => x.time), 1f));
-		shaderMaterial.SetFloatArray("_AlphaGradient", GetGradientValues(startAlpha, edgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
+		shaderMaterial.SetFloatArray("_GradientKeyTimes", GetGradientFloatValues(0f, edgeColorGradient.colorKeys.Select(x => x.time), 1f));
+		shaderMaterial.SetColorArray("_EdgeColorGradient", GetGradientColorValues(startColor, edgeColorGradient.colorKeys.Select(x => x.color), endColor));
+		shaderMaterial.SetFloatArray("_GradientAlphaKeyTimes", GetGradientFloatValues(0f, edgeColorGradient.alphaKeys.Select(x => x.time), 1f));
+		shaderMaterial.SetFloatArray("_AlphaGradient", GetGradientFloatValues(startAlpha, edgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 
 		shaderMaterial.SetInt("_GradientMode", edgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
 
@@ -125,19 +130,37 @@ public class BladeEdgeDetection : MonoBehaviour {
 			frustumCorners
 		);
 
-		frustumCornersOrdered[0] = frustumCorners[0];	// Bottom-left
-		frustumCornersOrdered[1] = frustumCorners[3];	// Bottom-right
-		frustumCornersOrdered[2] = frustumCorners[1];	// Top-left
-		frustumCornersOrdered[3] = frustumCorners[2];	// Top-right
+		frustumCornersOrdered[0] = frustumCorners[0];   // Bottom-left
+		frustumCornersOrdered[1] = frustumCorners[3];   // Bottom-right
+		frustumCornersOrdered[2] = frustumCorners[1];   // Top-left
+		frustumCornersOrdered[3] = frustumCorners[2];   // Top-right
 		shaderMaterial.SetVectorArray("_FrustumCorners", frustumCornersOrdered);
 	}
 
-	private List<T> GetGradientValues<T>(T startValue, IEnumerable<T> middleValues, T endValue) {
-		List<T> gradientValues = new List<T> { startValue };
-		gradientValues.AddRange(middleValues);
-		int numElementsToBackfill = GRADIENT_ARRAY_SIZE - gradientValues.Count;
-		gradientValues.AddRange(Enumerable.Repeat(endValue, numElementsToBackfill));
-		return gradientValues;
+	// Actually just populates the float buffer with the values provided, then returns a reference to the float buffer
+	private float[] GetGradientFloatValues(float startValue, IEnumerable<float> middleValues, float endValue) {
+		float[] middleValuesArray = middleValues.ToArray();
+		floatGradientBuffer[0] = startValue;
+		for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+			floatGradientBuffer[i] = middleValuesArray[i - 1];
+		}
+		for (int j = middleValuesArray.Length + 1; j < GRADIENT_ARRAY_SIZE; j++) {
+			floatGradientBuffer[j] = endValue;
+		}
+		return floatGradientBuffer;
+	}
+
+	// Actually just populates the color buffer with the values provided, then returns a reference to the color buffer
+	private Color[] GetGradientColorValues(Color startValue, IEnumerable<Color> middleValues, Color endValue) {
+		Color[] middleValuesArray = middleValues.ToArray();
+		colorGradientBuffer[0] = startValue;
+		for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+			colorGradientBuffer[i] = middleValuesArray[i - 1];
+		}
+		for (int j = middleValuesArray.Length + 1; j < GRADIENT_ARRAY_SIZE; j++) {
+			colorGradientBuffer[j] = endValue;
+		}
+		return colorGradientBuffer;
 	}
 
 	private void SetDepthNormalTextureFlag () {

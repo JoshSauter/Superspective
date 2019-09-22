@@ -15,6 +15,7 @@ public class DimensionObjectInspector : Editor {
 
 	SerializedProperty reverseVisibilityStates;
 	SerializedProperty treatChildrenAsOneObjectRecursively;
+	SerializedProperty continuouslyUpdateOnOffAngles;
 
 	SerializedProperty overrideOnOffAngles;
 
@@ -25,8 +26,9 @@ public class DimensionObjectInspector : Editor {
 
 		baseDimension = serializedObject.FindProperty("baseDimension");
 
-		treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
 		reverseVisibilityStates = serializedObject.FindProperty("reverseVisibilityStates");
+		treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
+		continuouslyUpdateOnOffAngles = serializedObject.FindProperty("continuouslyUpdateOnOffAngles");
 
 		overrideOnOffAngles = serializedObject.FindProperty("overrideOnOffAngles");
 	}
@@ -106,6 +108,8 @@ public class DimensionObjectInspector : Editor {
 		EditorGUIUtility.labelWidth = 200;
 		reverseVisibilityStates.boolValue = EditorGUILayout.Toggle("Reverse visibility states?", reverseVisibilityStates.boolValue);
 		treatChildrenAsOneObjectRecursively.boolValue = EditorGUILayout.Toggle("Treat children as one object?", treatChildrenAsOneObjectRecursively.boolValue);
+		continuouslyUpdateOnOffAngles.boolValue = EditorGUILayout.Toggle("Continuously Update OnOff Angles?", continuouslyUpdateOnOffAngles.boolValue);
+
 		EditorGUIUtility.labelWidth = defaultWidth;
 
 		AddSeparator();

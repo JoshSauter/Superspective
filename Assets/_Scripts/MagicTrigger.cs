@@ -21,6 +21,7 @@ public class MagicTrigger : MonoBehaviour {
     }
     public TriggerConditionType triggerCondition;
 	public float playerFaceThreshold = 0.01f;
+	public bool useLocalCoordinates = false;
 
 	public bool disableScriptOnTrigger = false;
     public bool disableGameObjectOnTrigger = false;
@@ -151,9 +152,11 @@ public class MagicTrigger : MonoBehaviour {
     private float FacingAmount(Collider player) {
 		Transform cameraTransform = player.transform.Find("Main Camera");
 
+		Vector3 realTargetDirection = targetDirection;
         switch (triggerCondition) {
             case TriggerConditionType.PlayerFacingDirection:
-                return Vector3.Dot(cameraTransform.forward, targetDirection.normalized);
+				realTargetDirection = (useLocalCoordinates) ? transform.TransformDirection(targetDirection) : targetDirection;
+                return Vector3.Dot(cameraTransform.forward, realTargetDirection.normalized);
 
             case TriggerConditionType.PlayerFacingObject: {
                 // TODO: Handle player being inside of object as a "always false" case
@@ -178,14 +181,16 @@ public class MagicTrigger : MonoBehaviour {
             }
 
             case TriggerConditionType.PlayerMovingDirection: {
-                PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
-                return Vector3.Dot(playerMovement.curVelocity.normalized, targetDirection.normalized);
+				realTargetDirection = (useLocalCoordinates) ? transform.TransformDirection(targetDirection) : targetDirection;
+				PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
+                return Vector3.Dot(playerMovement.curVelocity.normalized, realTargetDirection.normalized);
             }
 
 			case TriggerConditionType.PlayerMovingAndFacingDirection: {
+				realTargetDirection = (useLocalCoordinates) ? transform.TransformDirection(targetDirection) : targetDirection;
 				PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
-				float movingDirection = Vector3.Dot(playerMovement.curVelocity.normalized, targetDirection.normalized);
-				float facingDirection = Vector3.Dot(cameraTransform.forward, targetDirection.normalized);
+				float movingDirection = Vector3.Dot(playerMovement.curVelocity.normalized, realTargetDirection.normalized);
+				float facingDirection = Vector3.Dot(cameraTransform.forward, realTargetDirection.normalized);
 				return Mathf.Min(movingDirection, facingDirection);
 			}
 
@@ -208,6 +213,7 @@ public class MagicTriggerEditor : Editor {
 	SerializedProperty targetPosition;
 	SerializedProperty allowTriggeringWhileInsideObject;
 	SerializedProperty playerFaceThreshold;
+	SerializedProperty useLocalCoordinates;
 
 	SerializedProperty disableGameObjectOnTrigger;
 	SerializedProperty disableScriptOnTrigger;
@@ -221,6 +227,7 @@ public class MagicTriggerEditor : Editor {
 		targetPosition = serializedObject.FindProperty("targetPosition");
 		allowTriggeringWhileInsideObject = serializedObject.FindProperty("allowTriggeringWhileInsideObject");
 		playerFaceThreshold = serializedObject.FindProperty("playerFaceThreshold");
+		useLocalCoordinates = serializedObject.FindProperty("useLocalCoordinates");
 
 		disableGameObjectOnTrigger = serializedObject.FindProperty("disableGameObjectOnTrigger");
 		disableScriptOnTrigger = serializedObject.FindProperty("disableScriptOnTrigger");
@@ -253,6 +260,7 @@ public class MagicTriggerEditor : Editor {
 
         switch (currentTriggerCondition) {
             case MagicTrigger.TriggerConditionType.PlayerFacingDirection:
+				useLocalCoordinates.boolValue = EditorGUILayout.Toggle("Use local coordinates?", useLocalCoordinates.boolValue);
 				EditorGUILayout.PropertyField(targetDirection);
                 //targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player facing direction: ", targetDirection.vector3Value);
                 break;
@@ -271,9 +279,11 @@ public class MagicTriggerEditor : Editor {
                 targetPosition.vector3Value = EditorGUILayout.Vector3Field("Player facing position: ", targetPosition.vector3Value);
                 break;
             case MagicTrigger.TriggerConditionType.PlayerMovingDirection:
-                targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player moving towards: ", targetDirection.vector3Value);
+				useLocalCoordinates.boolValue = EditorGUILayout.Toggle("Use local coordinates?", useLocalCoordinates.boolValue);
+				targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player moving towards: ", targetDirection.vector3Value);
                 break;
 			case MagicTrigger.TriggerConditionType.PlayerMovingAndFacingDirection:
+				useLocalCoordinates.boolValue = EditorGUILayout.Toggle("Use local coordinates?", useLocalCoordinates.boolValue);
 				targetDirection.vector3Value = EditorGUILayout.Vector3Field("Player moving and facing towards: ", targetDirection.vector3Value);
 				break;
         }

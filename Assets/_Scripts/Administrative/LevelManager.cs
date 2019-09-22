@@ -78,7 +78,7 @@ public class LevelManager : Singleton<LevelManager> {
 		PopulateAlreadyLoadedScenes();
 #endif
 
-		SceneManager.sceneLoaded += FinishLoadingScene;
+		SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
 
 		SwitchActiveScene(startingScene);
@@ -199,8 +199,7 @@ public class LevelManager : Singleton<LevelManager> {
 	/// Removes scene name from currentlyLoadingSceneNames and adds it to loadedSceneNames.
 	/// </summary>
 	/// <param name="loadedScene">Scene that finished loading</param>
-	/// <param name="mode">(Unused) Additive or Single</param>
-	private void FinishLoadingScene(Scene loadedScene, LoadSceneMode mode) {
+	private void FinishLoadingScene(Scene loadedScene) {
 		if (loadedScene.name == activeSceneName) {
 			SceneManager.SetActiveScene(loadedScene);
 		}

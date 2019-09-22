@@ -23,6 +23,11 @@ public class PlayerLook : Singleton<PlayerLook> {
 	public float outsideMultiplier = 1f;
 
 	public ViewLockObject viewLockedObject;
+	public delegate void ViewLockAction();
+	public event ViewLockAction OnViewLockBegin;
+	public event ViewLockAction OnViewLockEnd;
+	public event ViewLockAction OnViewUnlockBegin;
+	public event ViewLockAction OnViewUnlockEnd;
 
 	public bool frozen = false;
 
@@ -64,7 +69,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 			}
 		}
 		else {
-			MoveCursor(PlayerButtonInput.instance.RightStick);
+			Vector2 moveDirection = Vector2.Scale(PlayerButtonInput.instance.RightStick, new Vector2(sensitivityX, sensitivityY)) * generalSensitivity * lookAmountMultiplier;
+			MoveCursor(moveDirection);
 		}
 	}
 
@@ -90,11 +96,9 @@ public class PlayerLook : Singleton<PlayerLook> {
 #endif
 	}
 
+	// TODO: Make this work with a controller too, not just a mouse pointer
 	void MoveCursor(Vector2 direction) {
-		Vector2 movement = direction * Time.deltaTime;
-		movement.y *= (float)EpitaphScreen.currentWidth / EpitaphScreen.currentHeight;
-		movement += Reticle.instance.thisTransformPos;
-		Reticle.instance.MoveReticle(movement);
+		Reticle.instance.MoveReticle(new Vector2(Input.mousePosition.x / EpitaphScreen.currentWidth, Input.mousePosition.y / EpitaphScreen.currentHeight));
 	}
 
 	public void SetViewLock(ViewLockObject lockObject, ViewLockInfo lockInfo) {
@@ -117,6 +121,9 @@ public class PlayerLook : Singleton<PlayerLook> {
 		PlayerMovement.instance.StopMovement();
 		Interact.instance.enabled = false;
 		inLockViewCoroutine = true;
+		if (OnViewLockBegin != null) {
+			OnViewLockBegin();
+		}
 
 		Vector3 startPos = cameraTransform.position;
 		Quaternion startRot = cameraTransform.rotation;
@@ -141,6 +148,12 @@ public class PlayerLook : Singleton<PlayerLook> {
 		inLockViewCoroutine = false;
 		lockObject.focusIsLocked = true;
 		Interact.instance.enabled = true;
+		//Going directly from Locked to Confined does not work
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.lockState = CursorLockMode.Confined;
+		if (OnViewLockEnd != null) {
+			OnViewLockEnd();
+		}
 		debug.Log("Finished locking view for " + lockObject.gameObject.name);
 	}
 
@@ -149,6 +162,9 @@ public class PlayerLook : Singleton<PlayerLook> {
 		inUnlockViewCoroutine = true;
 		Interact.instance.enabled = false;
 		debug.Log("Unlocking view");
+		if (OnViewUnlockBegin != null) {
+			OnViewUnlockBegin();
+		}
 
 		Vector3 startPos = cameraTransform.position;
 		Quaternion startRot = cameraTransform.rotation;
@@ -177,6 +193,10 @@ public class PlayerLook : Singleton<PlayerLook> {
 		inUnlockViewCoroutine = false;
 		PlayerMovement.instance.ResumeMovement();
 		Interact.instance.enabled = true;
+		Cursor.lockState = CursorLockMode.Locked;
+		if (OnViewUnlockEnd != null) {
+			OnViewUnlockEnd();
+		}
 		debug.Log("Finished unlocking view");
 	}
 }

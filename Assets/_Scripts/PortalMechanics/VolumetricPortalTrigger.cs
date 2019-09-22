@@ -29,7 +29,7 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 		volumetricPortalCollider.enabled = true;
 		volumetricPortalCollider.convex = true;
 		volumetricPortalCollider.isTrigger = true;
-		volumetricPortal.AddComponent<MagicTrigger>().OnMagicTriggerExit += TriggerExit;
+		volumetricPortal.AddComponent<MagicTrigger>().OnMagicTriggerExit += ctx => TriggerExit();
 	}
 
 	void InitializeCollider() {
@@ -47,7 +47,7 @@ public class VolumetricPortalTrigger : MagicSpawnDespawn {
 		transform.position -= targetDirection * 0.4f;
 	}
 
-	void TriggerExit(Collider unused) {
+	void TriggerExit() {
 		DisableEnabledObjects();
 	}
 

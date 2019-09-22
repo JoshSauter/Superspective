@@ -27,7 +27,7 @@ public class PortalTeleporter : MonoBehaviour {
 		teleporter.trigger.triggerCondition = MagicTrigger.TriggerConditionType.PlayerMovingDirection;
 		teleporter.trigger.playerFaceThreshold = 0.01f;
 		if (transformationsBeforeTeleport != null && transformationsBeforeTeleport.Length > 0) {
-			teleporter.OnTeleport += TransformObjectsOnTeleport;
+			teleporter.OnTeleport += (enter, exit, player) => TransformObjectsOnTeleport(player);
 		}
 
 		InitializeCollider();
@@ -67,7 +67,7 @@ public class PortalTeleporter : MonoBehaviour {
 		transform.position += teleporter.trigger.targetDirection;
 	}
 	
-	void TransformObjectsOnTeleport(Collider unused1, Collider unused2, Collider player) {
+	void TransformObjectsOnTeleport(Collider player) {
 		Transform originalPlayerParent = player.transform.parent;
 
 		foreach (var transformation in transformationsBeforeTeleport) {

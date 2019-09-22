@@ -18,6 +18,7 @@ public class Interact : Singleton<Interact> {
 	Camera cam;
 
 	InteractableObject objectSelected;
+	int layerMask;
 
 	// Use this for initialization
 	void Start () {
@@ -31,6 +32,8 @@ public class Interact : Singleton<Interact> {
 		cam = EpitaphScreen.instance.playerCamera;
 		reticleUnselectColor = reticle.color;
 		reticleOutsideUnselectColor = reticleOutside.color;
+
+		layerMask = ~(1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("Ignore Raycast"));
 	}
 	
 	// Update is called once per frame
@@ -73,7 +76,7 @@ public class Interact : Singleton<Interact> {
 
 		Ray ray = cam.ScreenPointToRay(screenPos);
 		RaycastHit hitObject;
-		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, ~(1 << LayerMask.NameToLayer("Player")), QueryTriggerInteraction.Collide);
+		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, layerMask, QueryTriggerInteraction.Collide);
 		return hitObject;
 	}
 

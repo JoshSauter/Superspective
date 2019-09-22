@@ -5,11 +5,15 @@ using EpitaphUtils;
 
 public class PortalCameraRenderTexture : MonoBehaviour {
 	public PortalContainer portal;
+	public bool pauseRendering = false;
 	EpitaphRenderer thisPortalRenderer;
 	EpitaphRenderer thisPortalVolumetricRenderer;
 
 	RenderTexture rt;
 	Material cutoutMaterial;
+
+	float minRenderDistance = 10;       // Portal will always be rendering when Player is this many units or closer
+	float maxRenderDistance = 200;		// Portal will never render when Player is this many units or further
 
     Camera cam;
 
@@ -29,7 +33,12 @@ public class PortalCameraRenderTexture : MonoBehaviour {
 	}
 
     private void Update() {
-        cam.enabled = thisPortalRenderer.r.IsVisibleFrom(EpitaphScreen.instance.playerCamera);
+		Camera playerCam = EpitaphScreen.instance.playerCamera;
+		Vector3 camToPortal = playerCam.transform.position - transform.position;
+		bool playerInFrontOfPortal = Vector3.Dot(camToPortal, portal.teleporter.portalNormal) > 0;
+		bool playerCloseToPortal = camToPortal.sqrMagnitude < minRenderDistance * minRenderDistance;
+		bool playerFarFromPortal = camToPortal.sqrMagnitude > maxRenderDistance * maxRenderDistance;
+		cam.enabled = !playerFarFromPortal && !pauseRendering && (playerCloseToPortal || (playerInFrontOfPortal && thisPortalRenderer.r.IsVisibleFrom(EpitaphScreen.instance.playerCamera)));
     }
 
     private void HandleScreenResolutionChanged(int newWidth, int newHeight) {

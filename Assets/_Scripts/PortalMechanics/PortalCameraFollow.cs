@@ -61,7 +61,7 @@ public class PortalCameraFollow : MonoBehaviour {
 		}
 
 		// The leeway is to prevent "slices" at the bottom of the portal that fail to render properly (floating point error)
-		float leeway = Mathf.Lerp(0f, 0.5f, (playerCamera.transform.position - source.position).magnitude / 100f);
+		float leeway = Mathf.Lerp(0f, 2.5f, distanceFromPlayerToPortal / 100f);
 		float distance = Vector3.Dot(destination.position + destinationNormal * -leeway, -destinationNormal);
 		Vector4 clipPlaneWorldSpace = new Vector4(destinationNormal.x, destinationNormal.y, destinationNormal.z, distance);
 		Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlaneWorldSpace;

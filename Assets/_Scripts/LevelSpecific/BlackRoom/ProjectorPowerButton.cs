@@ -4,27 +4,39 @@ using UnityEngine;
 
 [RequireComponent(typeof(Button))]
 public class ProjectorPowerButton : MonoBehaviour {
+	public PowerTrail powerTrail;
 	public bool lightTurnedOn = false;
 	public LightProjector projector;
 	Button b;
 
-    void Start() {
+    IEnumerator Start() {
+		yield return null;
 		b = GetComponent<Button>();
-		b.OnButtonPressBegin += TurnOnProjector;
-		b.OnButtonDepressBegin += TurnOffProjector;
+		b.OnButtonPressBegin += ctx => TurnOnPowerTrail();
+		b.OnButtonDepressBegin += ctx => TurnOffPowerTrail();
+		powerTrail.OnPowerFinish += TurnOnProjector;
+		powerTrail.OnDepowerBegin += TurnOffProjector;
 
 		if (lightTurnedOn) {
 			b.PressButton();
 		}
     }
 
-	void TurnOnProjector(Button unused) {
+	void TurnOnPowerTrail() {
+		powerTrail.powerIsOn = true;
+	}
+
+	void TurnOffPowerTrail() {
+		powerTrail.powerIsOn = false;
+	}
+
+	void TurnOnProjector() {
 		foreach (Transform child in projector.transform) {
 			child.gameObject.SetActive(true);
 		}
 		lightTurnedOn = true;
 	}
-	void TurnOffProjector(Button unused) {
+	void TurnOffProjector() {
 		foreach (Transform child in projector.transform) {
 			child.gameObject.SetActive(false);
 		}

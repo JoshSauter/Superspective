@@ -11,7 +11,7 @@ using UnityEngine;
 /// </summary>
 public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
-#region events
+	#region events
 	public delegate void StickHeldEvent(Vector2 dir);
 	public delegate void StickHeldDurationEvent(Vector2 dir, float durationHeld);
 
@@ -168,80 +168,80 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 #region Combined inputs
 	// On first press
 	public bool UpPressed {
-		get { return Input.GetKeyDown(KeyCode.W); }
+		get { return KeyboardAndMouseInputs.Up.Pressed; }
 	}
 	public bool DownPressed {
-		get { return Input.GetKeyDown(KeyCode.S); }
+		get { return KeyboardAndMouseInputs.Down.Pressed; }
 	}
 	public bool RightPressed {
-		get { return Input.GetKeyDown(KeyCode.D); }
+		get { return KeyboardAndMouseInputs.Right.Pressed; }
 	}
 	public bool LeftPressed {
-		get { return Input.GetKeyDown(KeyCode.A); }
+		get { return KeyboardAndMouseInputs.Left.Pressed; }
 	}
 	public bool Action1Pressed {
-		get { return Input.GetMouseButtonDown(0); }
+		get { return KeyboardAndMouseInputs.Action1.Pressed; }
 	}
 	public bool EscapePressed {
-		get { return Input.GetKeyDown(KeyCode.Escape); }
+		get { return KeyboardAndMouseInputs.Escape.Pressed; }
 	}
 	public bool SpacePressed {
-		get { return Input.GetKeyDown(KeyCode.Space); }
+		get { return KeyboardAndMouseInputs.Space.Pressed; }
 	}
 	public bool ShiftPressed {
-		get { return Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift); }
+		get { return KeyboardAndMouseInputs.Shift.Pressed; }
 	}
 
 	// On button release
 	public bool UpReleased {
-		get { return Input.GetKeyUp(KeyCode.W); }
+		get { return KeyboardAndMouseInputs.Up.Released; }
 	}
 	public bool DownReleased {
-		get { return Input.GetKeyUp(KeyCode.S); }
+		get { return KeyboardAndMouseInputs.Down.Released; }
 	}
 	public bool RightReleased {
-		get { return Input.GetKeyUp(KeyCode.D); }
+		get { return KeyboardAndMouseInputs.Right.Released; }
 	}
 	public bool LeftReleased {
-		get { return Input.GetKeyUp(KeyCode.A); }
+		get { return KeyboardAndMouseInputs.Left.Released; }
 	}
 	public bool Action1Released {
-		get { return Input.GetMouseButtonUp(0); }
+		get { return KeyboardAndMouseInputs.Action1.Released; }
 	}
 	public bool EscapeReleased {
-		get { return Input.GetKeyUp(KeyCode.Escape); }
+		get { return KeyboardAndMouseInputs.Escape.Released; }
 	}
 	public bool SpaceReleased {
-		get { return Input.GetKeyUp(KeyCode.Space); }
+		get { return KeyboardAndMouseInputs.Space.Released; }
 	}
 	public bool ShiftReleased {
-		get { return Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift); }
+		get { return KeyboardAndMouseInputs.Shift.Released; }
 	}
 
 	// While button held
 	public bool UpHeld {
-		get { return Input.GetKey(KeyCode.W); }
+		get { return KeyboardAndMouseInputs.Up.Held; }
 	}
 	public bool DownHeld {
-		get { return Input.GetKey(KeyCode.S); }
+		get { return KeyboardAndMouseInputs.Down.Held; }
 	}
 	public bool RightHeld {
-		get { return Input.GetKey(KeyCode.D); }
+		get { return KeyboardAndMouseInputs.Right.Held; }
 	}
 	public bool LeftHeld {
-		get { return Input.GetKey(KeyCode.A); }
+		get { return KeyboardAndMouseInputs.Left.Held; }
 	}
 	public bool Action1Held {
-		get { return Input.GetMouseButton(0); }
+		get { return KeyboardAndMouseInputs.Action1.Held; }
 	}
 	public bool EscapeHeld {
-		get { return Input.GetKey(KeyCode.Escape); }
+		get { return KeyboardAndMouseInputs.Escape.Held; }
 	}
 	public bool SpaceHeld {
-		get { return Input.GetKey(KeyCode.Space); }
+		get { return KeyboardAndMouseInputs.Space.Held; }
 	}
 	public bool ShiftHeld {
-		get { return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift); }
+		get { return KeyboardAndMouseInputs.Shift.Held; }
 	}
 
 	// While stick held

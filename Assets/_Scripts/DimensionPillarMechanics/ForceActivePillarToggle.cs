@@ -19,11 +19,11 @@ public class ForceActivePillarToggle : MagicTrigger {
 
 	// Use this for initialization
 	protected virtual void Start () {
-		OnMagicTriggerStayOneTime += TriggerPillarChangeForward;
-		OnNegativeMagicTriggerStayOneTime += TriggerPillarChangeBackward;
+		OnMagicTriggerStayOneTime += ctx => TriggerPillarChangeForward();
+		OnNegativeMagicTriggerStayOneTime += ctx => TriggerPillarChangeBackward();
 	}
 	
-	private void TriggerPillarChangeForward(Collider unused) {
+	private void TriggerPillarChangeForward() {
 		if (forwardTriggeredPillar == null && !forwardSameScenePillar) {
 			string pillarKey = PillarKey(forwardPillarLevel, forwardPillarName);
 			if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
@@ -34,7 +34,7 @@ public class ForceActivePillarToggle : MagicTrigger {
 		DimensionPillar.activePillar = forwardTriggeredPillar;
 	}
 
-	private void TriggerPillarChangeBackward(Collider unused) {
+	private void TriggerPillarChangeBackward() {
 		if (backwardTriggeredPillar == null && !backwardSameScenePillar) {
 			string pillarKey = PillarKey(backwardPillarLevel, backwardPillarName);
 			if (DimensionPillar.pillars.ContainsKey(pillarKey)) {

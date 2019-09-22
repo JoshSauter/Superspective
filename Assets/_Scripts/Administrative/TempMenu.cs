@@ -36,7 +36,6 @@ public class TempMenu : MonoBehaviour {
 			else {
 				Cursor.lockState = cachedLockMode;
 			}
-			print(Cursor.visible + " " + Cursor.lockState);
 		}
 	}
 }

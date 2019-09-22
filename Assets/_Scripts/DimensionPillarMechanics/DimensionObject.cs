@@ -4,7 +4,6 @@ using UnityEngine;
 using EpitaphUtils;
 using EpitaphUtils.ShaderUtils;
 using System.Linq;
-using System;
 
 public enum VisibilityState {
 	invisible,
@@ -16,6 +15,7 @@ public enum VisibilityState {
 public class DimensionObject : MonoBehaviour {
 	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
+	public bool continuouslyUpdateOnOffAngles = false;
 	DebugLogger debug;
 
 	[Range(0, 7)]
@@ -24,14 +24,7 @@ public class DimensionObject : MonoBehaviour {
 	public int objectEndDimension;
 	public bool reverseVisibilityStates = false;
 	int curDimensionSetInMaterial;
-	public bool existsInNextDimension {
-		get {
-			if (DimensionPillar.activePillar != null) {
-				return Angle.IsAngleBetween(DimensionPillar.activePillar.dimensionShiftAngle, offAngle, onAngle);
-			}
-			else return false;
-		}
-	}
+
 	////////////////////////////////////
 	// Techniques for finding pillars //
 	////////////////////////////////////
@@ -56,6 +49,7 @@ public class DimensionObject : MonoBehaviour {
 	public bool overrideOnOffAngles = false;
 	public Angle onAngle;
 	public Angle offAngle;
+	private Angle centralAngle;	// Used for continuous on/off angle updating for knowing when the object changes quadrants
 
 	EpitaphRenderer[] renderers;
 	Material dimensionObjectMaterial, inverseDimensionObjectMaterial, dimensionObjectSpecularMaterial, inverseDimensionObjectSpecularMaterial;
@@ -70,6 +64,11 @@ public class DimensionObject : MonoBehaviour {
 		{ VisibilityState.partiallyInvisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } }
 	};
 
+	#region events
+	public delegate void DimensionObjectAction();
+	public event DimensionObjectAction OnBaseDimensionChange;
+	#endregion
+
 	void Start() {
 		debug = new DebugLogger(gameObject, DEBUG);
 
@@ -81,7 +80,18 @@ public class DimensionObject : MonoBehaviour {
 		FindRelevantPillars();
 		DimensionPillar.OnActivePillarChanged += HandleActivePillarChanged;
 		SwitchVisibilityState(visibilityState, true);
+
+		if (GetComponent<Rigidbody>() != null && GetComponent<IgnoreCollisionsWithOtherDimensions>() == null) {
+			gameObject.AddComponent<IgnoreCollisionsWithOtherDimensions>();
+		}
     }
+
+	private void SetBaseDimension(int newBaseDimension) {
+		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
+			OnBaseDimensionChange();
+		}
+		baseDimension = newBaseDimension;
+	}
 
 	void HandlePillarDimensionChange(int prevDimension, int curDimension) {
 		if (IsRelevantDimension(curDimension)) {
@@ -93,16 +103,67 @@ public class DimensionObject : MonoBehaviour {
 		return (dimension == objectStartDimension) || (dimension == objectEndDimension);
 	}
 
-	// Note: Unlike the Angle method of the same name, this one just compares straight radians values
-	private bool IsAngleBetween(Angle test, Angle a, Angle b) {
-		return (test > a && test < b);
-	}
-
 	void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
 		VisibilityState nextState = DetermineState(dimension, angle);
+
 		if (nextState != visibilityState) {
-			SwitchVisibilityState(nextState);
+			// If in one fixedUpdate frame we move through both onAngle and offAngle, ignore the state change rules
+			bool ignoreVisibilityStateChangeRules = IgnoreVisibilityStateChangeRules(DimensionPillar.activePillar.cameraAngleRelativeToPillar, angle);
+			SwitchVisibilityState(nextState, ignoreVisibilityStateChangeRules);
 			SetDimensionValueInMaterials(dimension);
+		}
+	}
+
+	// Returns true if both onAngle and offAngle were covered between prevAngleOfPlayer and angleOfPlayer
+	private bool IgnoreVisibilityStateChangeRules(Angle prevAngleOfPlayer, Angle angleOfPlayer) {
+		// If in one fixedUpdate frame we move through both onAngle and offAngle, ignore the state change rules
+		Angle startAngleForIngoreRulesTest = Angle.IsClockwise(prevAngleOfPlayer, angleOfPlayer) ? prevAngleOfPlayer : angleOfPlayer;
+		Angle endAngleForIngoreRulesTest = Angle.IsClockwise(prevAngleOfPlayer, angleOfPlayer) ? angleOfPlayer : prevAngleOfPlayer;
+
+		return Angle.IsAngleBetween(onAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest) &&
+			Angle.IsAngleBetween(offAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest);
+	}
+
+	private void FixedUpdate() {
+		if (continuouslyUpdateOnOffAngles && pillarsFound.Contains(DimensionPillar.activePillar)) {
+			HandleThisObjectMoving();
+		}
+	}
+
+	// Updates on/off positions for this object, then
+	// Updates baseDimension if this object passed the dimensionShift angle, then
+	// Updates state based on current cameraAngleRelativeToPillar
+	void HandleThisObjectMoving() {
+		Angle prevAvgAngleOfObject = centralAngle;
+		Angle.Quadrant prevQuadrantOfObject = prevAvgAngleOfObject.quadrant;
+		RecalculateOnOffPositions();
+		Angle avgAngleOfObject = centralAngle;
+		Angle.Quadrant quadrantOfObject = avgAngleOfObject.quadrant;
+
+		//print(prevAvgAngleOfObject + ", " + avgAngleOfObject);// + "\nOn: " + onAngle + ", Off: " + offAngle);
+		if (prevQuadrantOfObject != quadrantOfObject) {
+			print("Prev Quadrant: " + prevQuadrantOfObject + ", Next Quadrant: " + quadrantOfObject);
+		}
+
+		bool clockwise = Angle.IsClockwise(prevAvgAngleOfObject, avgAngleOfObject);
+		if (prevAvgAngleOfObject != avgAngleOfObject) {
+			if (clockwise && prevQuadrantOfObject == Angle.Quadrant.IV && quadrantOfObject == Angle.Quadrant.I) {
+				// Bump baseDimension up
+				print("Bumping baseDimension up");
+				SetBaseDimension((baseDimension + 1) % (DimensionPillar.activePillar.maxDimension + 1));
+			}
+			else if (!clockwise && prevQuadrantOfObject == Angle.Quadrant.I && quadrantOfObject == Angle.Quadrant.IV) {
+				// Bump baseDimension down
+				print("Bumping baseDimension down");
+				SetBaseDimension((baseDimension == 0) ? DimensionPillar.activePillar.maxDimension : baseDimension - 1);
+			}
+
+			VisibilityState nextState = DetermineState(DimensionPillar.activePillar.curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar);
+
+			if (nextState != visibilityState) {
+				SwitchVisibilityState(nextState);
+				SetDimensionValueInMaterials(DimensionPillar.activePillar.curDimension);
+			}
 		}
 	}
 
@@ -187,9 +248,9 @@ public class DimensionObject : MonoBehaviour {
 		};
 
 		Vector3 centerOfObject = (min + max) / 2f;
-		Angle baseAngle = DimensionPillar.activePillar.PillarAngleOfPoint(centerOfObject);
-		onAngle = Angle.Radians(baseAngle.radians - .001f);
-		offAngle = Angle.Radians(baseAngle.radians);
+		centralAngle = DimensionPillar.activePillar.PillarAngleOfPoint(centerOfObject);
+		onAngle = Angle.Radians(centralAngle.radians - .001f);
+		offAngle = Angle.Radians(centralAngle.radians);
 		foreach (var corner in corners) {
 			Angle cornerAngle = DimensionPillar.activePillar.PillarAngleOfPoint(corner);
 			if (!Angle.IsAngleBetween(cornerAngle, onAngle, offAngle)) {
@@ -249,7 +310,10 @@ public class DimensionObject : MonoBehaviour {
 	}
 
 	VisibilityState DetermineState(int dimension, Angle angle) {
+		Angle prevAngleOfPlayer = DimensionPillar.activePillar.cameraAngleRelativeToPillar.normalized;
 		Angle angleOfPlayer = angle.normalized;
+		if (prevAngleOfPlayer == angleOfPlayer) return visibilityState;
+
 		Angle angleOppositeToPlayer = (angleOfPlayer + Angle.D180).normalized;
 
 		bool playerIsOnFirstHalf = angleOfPlayer < Angle.D180;

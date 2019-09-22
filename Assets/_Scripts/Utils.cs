@@ -107,47 +107,53 @@ namespace EpitaphUtils {
 		}
 
 		// Subvectors of Vector3
-		public static Vector2 xy(Vector3 v3) {
+		public static Vector2 xy(this Vector3 v3) {
 			return new Vector2(v3.x, v3.y);
 		}
-		public static Vector2 xz(Vector3 v3) {
+		public static Vector2 xz(this Vector3 v3) {
 			return new Vector2(v3.x, v3.z);
 		}
-		public static Vector2 yz(Vector3 v3) {
+		public static Vector2 yz(this Vector3 v3) {
 			return new Vector2(v3.y, v3.z);
 		}
 
 		// Subvectors of Vector4
-		public static Vector2 xy(Vector4 v4) {
+		public static Vector2 xy(this Vector4 v4) {
 			return new Vector2(v4.x, v4.y);
 		}
-		public static Vector2 xz(Vector4 v4) {
+		public static Vector2 xz(this Vector4 v4) {
 			return new Vector2(v4.x, v4.z);
 		}
-		public static Vector2 xw(Vector4 v4) {
+		public static Vector2 xw(this Vector4 v4) {
 			return new Vector2(v4.x, v4.w);
 		}
-		public static Vector2 yz(Vector4 v4) {
+		public static Vector2 yz(this Vector4 v4) {
 			return new Vector2(v4.y, v4.z);
 		}
-		public static Vector2 yw(Vector4 v4) {
+		public static Vector2 yw(this Vector4 v4) {
 			return new Vector2(v4.y, v4.w);
 		}
-		public static Vector2 zw(Vector4 v4) {
+		public static Vector2 zw(this Vector4 v4) {
 			return new Vector2(v4.z, v4.w);
 		}
 
-		public static Vector3 xyz(Vector4 v4) {
+		public static Vector3 xyz(this Vector4 v4) {
 			return new Vector3(v4.x, v4.y, v4.z);
 		}
-		public static Vector3 xyw(Vector4 v4) {
+		public static Vector3 xyw(this Vector4 v4) {
 			return new Vector3(v4.x, v4.y, v4.w);
 		}
-		public static Vector3 xzw(Vector4 v4) {
+		public static Vector3 xzw(this Vector4 v4) {
 			return new Vector3(v4.x, v4.z, v4.w);
 		}
-		public static Vector3 yzw(Vector4 v4) {
+		public static Vector3 yzw(this Vector4 v4) {
 			return new Vector3(v4.y, v4.z, v4.w);
+		}
+
+		public static float Vector3InverseLerp(Vector3 a, Vector3 b, Vector3 value) {
+			Vector3 AB = b - a;
+			Vector3 AV = value - a;
+			return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
 		}
 	}
 
@@ -189,13 +195,126 @@ namespace EpitaphUtils {
 			return new PolarCoordinate(radius, cart);
 		}
 	}
+  
+	public static class ExtDebug {
+		//Draws just the box at where it is currently hitting.
+		public static void DrawBoxCastOnHit(Vector3 origin, Vector3 halfExtents, Quaternion orientation, Vector3 direction, float hitInfoDistance, Color color) {
+			origin = CastCenterOnCollision(origin, direction, hitInfoDistance);
+			DrawBox(origin, halfExtents, orientation, color);
+		}
+
+		//Draws the full box from start of cast to its end distance. Can also pass in hitInfoDistance instead of full distance
+		public static void DrawBoxCastBox(Vector3 origin, Vector3 halfExtents, Quaternion orientation, Vector3 direction, float distance, Color color) {
+			direction.Normalize();
+			Box bottomBox = new Box(origin, halfExtents, orientation);
+			Box topBox = new Box(origin + (direction * distance), halfExtents, orientation);
+
+			Debug.DrawLine(bottomBox.backBottomLeft, topBox.backBottomLeft, color);
+			Debug.DrawLine(bottomBox.backBottomRight, topBox.backBottomRight, color);
+			Debug.DrawLine(bottomBox.backTopLeft, topBox.backTopLeft, color);
+			Debug.DrawLine(bottomBox.backTopRight, topBox.backTopRight, color);
+			Debug.DrawLine(bottomBox.frontTopLeft, topBox.frontTopLeft, color);
+			Debug.DrawLine(bottomBox.frontTopRight, topBox.frontTopRight, color);
+			Debug.DrawLine(bottomBox.frontBottomLeft, topBox.frontBottomLeft, color);
+			Debug.DrawLine(bottomBox.frontBottomRight, topBox.frontBottomRight, color);
+
+			DrawBox(bottomBox, color);
+			DrawBox(topBox, color);
+		}
+
+		public static void DrawBox(Vector3 origin, Vector3 halfExtents, Quaternion orientation, Color color) {
+			DrawBox(new Box(origin, halfExtents, orientation), color);
+		}
+		public static void DrawBox(Box box, Color color) {
+			Debug.DrawLine(box.frontTopLeft, box.frontTopRight, color);
+			Debug.DrawLine(box.frontTopRight, box.frontBottomRight, color);
+			Debug.DrawLine(box.frontBottomRight, box.frontBottomLeft, color);
+			Debug.DrawLine(box.frontBottomLeft, box.frontTopLeft, color);
+
+			Debug.DrawLine(box.backTopLeft, box.backTopRight, color);
+			Debug.DrawLine(box.backTopRight, box.backBottomRight, color);
+			Debug.DrawLine(box.backBottomRight, box.backBottomLeft, color);
+			Debug.DrawLine(box.backBottomLeft, box.backTopLeft, color);
+
+			Debug.DrawLine(box.frontTopLeft, box.backTopLeft, color);
+			Debug.DrawLine(box.frontTopRight, box.backTopRight, color);
+			Debug.DrawLine(box.frontBottomRight, box.backBottomRight, color);
+			Debug.DrawLine(box.frontBottomLeft, box.backBottomLeft, color);
+		}
+
+		public struct Box {
+			public Vector3 localFrontTopLeft { get; private set; }
+			public Vector3 localFrontTopRight { get; private set; }
+			public Vector3 localFrontBottomLeft { get; private set; }
+			public Vector3 localFrontBottomRight { get; private set; }
+			public Vector3 localBackTopLeft { get { return -localFrontBottomRight; } }
+			public Vector3 localBackTopRight { get { return -localFrontBottomLeft; } }
+			public Vector3 localBackBottomLeft { get { return -localFrontTopRight; } }
+			public Vector3 localBackBottomRight { get { return -localFrontTopLeft; } }
+
+			public Vector3 frontTopLeft { get { return localFrontTopLeft + origin; } }
+			public Vector3 frontTopRight { get { return localFrontTopRight + origin; } }
+			public Vector3 frontBottomLeft { get { return localFrontBottomLeft + origin; } }
+			public Vector3 frontBottomRight { get { return localFrontBottomRight + origin; } }
+			public Vector3 backTopLeft { get { return localBackTopLeft + origin; } }
+			public Vector3 backTopRight { get { return localBackTopRight + origin; } }
+			public Vector3 backBottomLeft { get { return localBackBottomLeft + origin; } }
+			public Vector3 backBottomRight { get { return localBackBottomRight + origin; } }
+
+			public Vector3 origin { get; private set; }
+
+			public Box(Vector3 origin, Vector3 halfExtents, Quaternion orientation) : this(origin, halfExtents) {
+				Rotate(orientation);
+			}
+			public Box(Vector3 origin, Vector3 halfExtents) {
+				this.localFrontTopLeft = new Vector3(-halfExtents.x, halfExtents.y, -halfExtents.z);
+				this.localFrontTopRight = new Vector3(halfExtents.x, halfExtents.y, -halfExtents.z);
+				this.localFrontBottomLeft = new Vector3(-halfExtents.x, -halfExtents.y, -halfExtents.z);
+				this.localFrontBottomRight = new Vector3(halfExtents.x, -halfExtents.y, -halfExtents.z);
+
+				this.origin = origin;
+			}
+
+
+			public void Rotate(Quaternion orientation) {
+				localFrontTopLeft = RotatePointAroundPivot(localFrontTopLeft, Vector3.zero, orientation);
+				localFrontTopRight = RotatePointAroundPivot(localFrontTopRight, Vector3.zero, orientation);
+				localFrontBottomLeft = RotatePointAroundPivot(localFrontBottomLeft, Vector3.zero, orientation);
+				localFrontBottomRight = RotatePointAroundPivot(localFrontBottomRight, Vector3.zero, orientation);
+			}
+		}
+
+		//This should work for all cast types
+		public static Vector3 CastCenterOnCollision(Vector3 origin, Vector3 direction, float hitInfoDistance) {
+			return origin + (direction.normalized * hitInfoDistance);
+		}
+
+		static Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Quaternion rotation) {
+			Vector3 direction = point - pivot;
+			return pivot + rotation * direction;
+		}
+	}
 
 	[Serializable]
 	public class Angle {
+		public enum Quadrant {
+			I,		// [0 - 90)
+			II,     // [90 - 180)
+			III,    // [180 - 270)
+			IV      // [270 - 360)
+		}
+
 		public float radians;
 		public float degrees {
 			get { return Mathf.Rad2Deg * radians; }
 			set { radians = Mathf.Deg2Rad * value; }
+		}
+		public Quadrant quadrant {
+			get {
+				float normalizedDegrees = degrees;
+				while (normalizedDegrees < 0) normalizedDegrees += 360;
+				while (normalizedDegrees >= 360) normalizedDegrees -= 360;
+				return (Quadrant)((int)normalizedDegrees / 90); }
 		}
 
 		public override string ToString() {
@@ -292,6 +411,20 @@ namespace EpitaphUtils {
 		}
 
 		/// <summary>
+		/// Determines whether movement from a to b is clockwise or counter-clockwise.
+		/// Note that clockwise movement generally corresponds to the Angle value increasing.
+		/// </summary>
+		/// <param name="a">Starting Angle</param>
+		/// <param name="b">Ending Angle</param>
+		/// <returns>True if movement from a1 to a2 is clockwise, false otherwise</returns>
+		public static bool IsClockwise(Angle a, Angle b) {
+			float aMinusB = (a - b).Normalize().radians;
+			float bMinusA = (b - a).Normalize().radians;
+
+			return aMinusB > bMinusA;
+		}
+
+		/// <summary>
 		/// Calculates the difference between this angle and another angle.
 		/// Assumes that any difference over 180° is to be wrapped back around to a value < 180°
 		/// </summary>
@@ -321,12 +454,12 @@ namespace EpitaphUtils {
 		}
 
 		/// <summary>
-		/// Determines whether the test angle falls between angles a and b (counter-clockwise from a to b)
+		/// Determines whether the test angle falls between angles a and b (clockwise from a to b)
 		/// </summary>
 		/// <param name="test"></param>
 		/// <param name="a"></param>
 		/// <param name="b"></param>
-		/// <returns>True if test falls between a and b (counter-clockwise), false otherwise</returns>
+		/// <returns>True if test falls between a and b (clockwise), false otherwise</returns>
 		public static bool IsAngleBetween(Angle test, Angle a, Angle b) {
 			float testNormalized = test.normalized.radians;
 			float aNormalized = a.normalized.radians;
@@ -358,6 +491,9 @@ namespace EpitaphUtils {
 		}
 		public static Angle operator /(Angle a, Angle b) {
 			return new Angle(a.radians / b.radians);
+		}
+		public static Angle operator /(Angle a, float b) {
+			return new Angle(a.radians / b);
 		}
 		public static Angle operator *(Angle a, Angle b) {
 			return new Angle(a.radians * b.radians);

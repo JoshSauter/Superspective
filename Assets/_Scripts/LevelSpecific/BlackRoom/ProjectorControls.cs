@@ -17,18 +17,21 @@ public class ProjectorControls : MonoBehaviour {
 	public ButtonHold projectorRotateAxisDownButton;
 	public ButtonHold projectorRotateAxisUpButton;
 
+	// How many rotations of the valve does it take to rotate the light around the circumference once?
+	private float valveToLightRotationRatio = 8;
+
 	// Use this for initialization
 	void Start () {
-		projectorSizeIncreaseButton.OnButtonHeld += IncreaseFrustumSize;
-		projectorSizeDecreaseButton.OnButtonHeld += DecreaseFrustumSize;
+		projectorSizeIncreaseButton.OnButtonHeld += ctx => IncreaseFrustumSize();
+		projectorSizeDecreaseButton.OnButtonHeld += ctx => DecreaseFrustumSize();
 
 		projectorRotateValve.OnValveRotate += RotateProjector;
 
-		projectorRotateAxisLeftButton.OnButtonHeld += RotateProjectorLeftOnAxis;
-		projectorRotateAxisRightButton.OnButtonHeld += RotateProjectorRightOnAxis;
+		projectorRotateAxisLeftButton.OnButtonHeld += ctx => RotateProjectorLeftOnAxis();
+		projectorRotateAxisRightButton.OnButtonHeld += ctx => RotateProjectorRightOnAxis();
 
-		projectorRotateAxisDownButton.OnButtonHeld += RotateProjectorDownOnAxis;
-		projectorRotateAxisUpButton.OnButtonHeld += RotateProjectorUpOnAxis;
+		projectorRotateAxisDownButton.OnButtonHeld += ctx => RotateProjectorDownOnAxis();
+		projectorRotateAxisUpButton.OnButtonHeld += ctx => RotateProjectorUpOnAxis();
 	}
 	
 	// Update is called once per frame
@@ -36,31 +39,31 @@ public class ProjectorControls : MonoBehaviour {
 		
 	}
 
-	void IncreaseFrustumSize(Button unused) {
+	void IncreaseFrustumSize() {
 		projector.IncreaseFrustumSize();
 	}
 
-	void DecreaseFrustumSize(Button unused) {
+	void DecreaseFrustumSize() {
 		projector.DecreaseFrustumSize();
 	}
 
 	void RotateProjector(Angle diff) {
-		projector.RotateAroundCircumference(-diff.degrees);
+		projector.RotateAroundCircumference(-diff.degrees / valveToLightRotationRatio);
 	}
 
-	void RotateProjectorLeftOnAxis(Button unused) {
+	void RotateProjectorLeftOnAxis() {
 		projector.RotateAngleLeft();
 	}
 
-	void RotateProjectorRightOnAxis(Button unused) {
+	void RotateProjectorRightOnAxis() {
 		projector.RotateAngleRight();
 	}
 
-	void RotateProjectorDownOnAxis(Button unused) {
+	void RotateProjectorDownOnAxis() {
 		projector.RotateAngleDown();
 	}
 
-	void RotateProjectorUpOnAxis(Button unused) {
+	void RotateProjectorUpOnAxis() {
 		projector.RotateAngleUp();
 	}
 }
