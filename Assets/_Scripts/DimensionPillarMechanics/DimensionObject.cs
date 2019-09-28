@@ -67,6 +67,8 @@ public class DimensionObject : MonoBehaviour {
 	#region events
 	public delegate void DimensionObjectAction();
 	public event DimensionObjectAction OnBaseDimensionChange;
+	public delegate void DimensionObjectStateChangeAction(VisibilityState visibilityState);
+	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
 	void Start() {
@@ -158,7 +160,7 @@ public class DimensionObject : MonoBehaviour {
 				SetBaseDimension((baseDimension == 0) ? DimensionPillar.activePillar.maxDimension : baseDimension - 1);
 			}
 
-			VisibilityState nextState = DetermineState(DimensionPillar.activePillar.curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar);
+			VisibilityState nextState = DetermineState(DimensionPillar.activePillar.curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar, forceCalculations: true);
 
 			if (nextState != visibilityState) {
 				SwitchVisibilityState(nextState);
@@ -303,16 +305,20 @@ public class DimensionObject : MonoBehaviour {
 		if (setDimension > 0) {
 			SetDimensionValueInMaterials(setDimension);
 		}
+
+		if (OnStateChange != null) {
+			OnStateChange(nextState);
+		}
 	}
 
 	private bool IsValidNextState(VisibilityState nextState) {
 		return nextStates[visibilityState].Contains(nextState);
 	}
 
-	VisibilityState DetermineState(int dimension, Angle angle) {
+	VisibilityState DetermineState(int dimension, Angle angle, bool forceCalculations = false) {
 		Angle prevAngleOfPlayer = DimensionPillar.activePillar.cameraAngleRelativeToPillar.normalized;
 		Angle angleOfPlayer = angle.normalized;
-		if (prevAngleOfPlayer == angleOfPlayer) return visibilityState;
+		if (prevAngleOfPlayer == angleOfPlayer && !forceCalculations) return visibilityState;
 
 		Angle angleOppositeToPlayer = (angleOfPlayer + Angle.D180).normalized;
 

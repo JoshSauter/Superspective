@@ -70,6 +70,18 @@ namespace EpitaphUtils {
 			return null;
 		}
 
+		public static DimensionObject FindDimensionObjectRecursively(Transform go) {
+			DimensionObject dimensionObj = go.GetComponent<DimensionObject>();
+			Transform parent = go.parent;
+			if (dimensionObj != null) {
+				return dimensionObj;
+			}
+			else if (parent != null) {
+				return FindDimensionObjectRecursively(parent);
+			}
+			else return null;
+		}
+
 		public static Transform[] GetChildren(this Transform parent) {
 			return parent.GetComponentsInChildrenOnly<Transform>();
 		}

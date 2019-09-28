@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	DimensionObject thisDimensionObject;
@@ -31,9 +32,8 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	}
 
 	private void OnTriggerEnter(Collider other) {
-		DimensionObject otherDimensionObj = FindDimensionObjectRecursively(other.gameObject.transform);
+		DimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
 		if (otherDimensionObj != null && otherDimensionObj.baseDimension != thisDimensionObject.baseDimension) {
-			print("Uh oh spaghettios!");
 			if (!collidersBeingIgnored.Contains(other)) {
 				collidersBeingIgnored.Add(other);
 				Physics.IgnoreCollision(thisCollider, other, true);
@@ -58,17 +58,5 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 		float maxScale = Mathf.Max(thisTrigger.transform.lossyScale.x, thisTrigger.transform.lossyScale.y, thisTrigger.transform.lossyScale.z, 0.01f);
 
 		thisTrigger.radius = Mathf.Max(minTriggerRadius, maxBounds * triggerZoneSize) / maxScale;
-	}
-
-	private DimensionObject FindDimensionObjectRecursively(Transform go) {
-		DimensionObject dimensionObj = go.GetComponent<DimensionObject>();
-		Transform parent = go.parent;
-		if (dimensionObj != null) {
-			return dimensionObj;
-		}
-		else if (parent != null) {
-			return FindDimensionObjectRecursively(parent);
-		}
-		else return null;
 	}
 }

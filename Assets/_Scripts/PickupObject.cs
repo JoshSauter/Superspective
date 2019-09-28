@@ -39,6 +39,11 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 		positionLastPhysicsFrame = transform.position;
 		thisRenderer = GetComponent<Renderer>();
 		PlayerButtonInput.instance.OnAction1Press += Drop;
+
+		DimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
+		if (thisDimensionObject != null) {
+			thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
+		}
 	}
 
 	private void Update() {
@@ -69,6 +74,12 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 				newVelocity = Vector3.ProjectOnPlane(newVelocity, -cubeToPlayer.normalized);
 			}
 			thisRigidbody.velocity = newVelocity;
+		}
+	}
+
+	void HandleDimensionObjectStateChange(VisibilityState nextState) {
+		if (nextState == VisibilityState.invisible && isHeld) {
+			Drop();
 		}
 	}
 
