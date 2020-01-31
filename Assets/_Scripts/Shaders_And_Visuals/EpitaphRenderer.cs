@@ -71,6 +71,19 @@ public class EpitaphRenderer : MonoBehaviour {
 		r.materials = newMaterials;
 	}
 
+	public void SetFloat(string propName, float value) {
+		if (GetMaterial().HasProperty(propName)) {
+			r.GetPropertyBlock(propBlock);
+			propBlock.SetFloat(propName, value);
+			r.SetPropertyBlock(propBlock);
+		}
+	}
+
+	public float GetFloat(string propName) {
+		r.GetPropertyBlock(propBlock);
+		return propBlock.GetFloat(propName);
+	}
+
 	public void SetInt(string propName, int value) {
 		if (GetMaterial().HasProperty(propName)) {
 			r.GetPropertyBlock(propBlock);

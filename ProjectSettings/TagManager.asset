@@ -31,11 +31,11 @@ TagManager:
   - HideFromPortal
   - LightProjectorSurface
   - ParticleBounds
-  - OutlineOnly
+  - InvertMask
   - LightProjectorRed
   - LightProjectorGreen
   - LightProjectorBlue
-  - 
+  - CollideWithPlayerOnly
   - 
   - 
   - 

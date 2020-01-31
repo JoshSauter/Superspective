@@ -1,3 +1,7 @@
+float _ResolutionX;
+float _ResolutionY;
+sampler2D _DimensionMask;
+
 // Supports dimension values from [0-123] (444 in base 5 - 1)
 fixed4 DimensionValueToColor(int dimensionValue) {
 	// Avoid (0,0,0) as a color by adding 1
@@ -11,4 +15,18 @@ fixed4 DimensionValueToColor(int dimensionValue) {
 // Returns dimension values from [0-123] (444 in base 5 - 1)
 int ColorToDimensionValue(fixed4 color) {
 	return round((color.r * 100) + (color.g * 20) + (color.b * 4.0) - 1);
+}
+
+void ClipDimensionObject(float2 vertex, int dimension) {
+	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
+	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
+	int dimensionValue = ColorToDimensionValue(dimensionTest);
+	clip(-(dimensionValue != dimension));
+}
+
+void ClipInverseDimensionObject(float2 vertex, int dimension) {
+	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
+	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
+	int dimensionValue = ColorToDimensionValue(dimensionTest);
+	clip(-(dimensionValue != -1));
 }

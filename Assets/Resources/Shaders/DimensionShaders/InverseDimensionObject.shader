@@ -14,10 +14,6 @@
 
 		Pass
 		{
-			Stencil {
-				Ref 0
-				Comp Equal
-			}
 			ZWrite On
 			ZTest LEqual
 
@@ -44,10 +40,7 @@
 
 			float4 _Color;
 			float4 _EmissionColor;
-			float _ResolutionX;
-			float _ResolutionY;
 			
-			sampler2D _DimensionMask;
 			int _Dimension;
 
 			v2f vert (appdata v)
@@ -58,22 +51,17 @@
 				return o;
 			}
 			
-			fixed4 frag (v2f i) : SV_Target
-			{
+			fixed4 frag (v2f i) : SV_Target {
+				ClipInverseDimensionObject(i.vertex, _Dimension);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog
 				col += _EmissionColor;
 				UNITY_APPLY_FOG(i.fogCoord, col);
-				float2 viewportVertex = float2(i.vertex.x / _ResolutionX, i.vertex.y / _ResolutionY);
-				fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-				int dimensionValue = ColorToDimensionValue(dimensionTest);
-				clip(-(dimensionValue != -1));
+
 				return col;
 			}
 			ENDCG
 		}
 	}
-
-	Fallback "VertexLit"
 }

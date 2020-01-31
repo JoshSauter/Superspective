@@ -11,9 +11,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	public void OnLeftMouseButtonDown() {
 		Pickup();
 	}
-	public void OnLeftMouseButtonUp() {
-
-	}
+	public void OnLeftMouseButtonUp() { }
 
 	public bool isHeld = false;
 	public float pickupDropCooldown = 0.1f;
@@ -27,9 +25,15 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	Transform player;
 	Transform playerCam;
 	Transform originalParent;
-	Rigidbody thisRigidbody;
+	public Rigidbody thisRigidbody;
 	Renderer thisRenderer;
 
+	public delegate void PickupObjectSimpleAction();
+	public delegate void PickupObjectAction(PickupObject obj);
+	public PickupObjectSimpleAction OnPickupSimple;
+	public PickupObjectSimpleAction OnDropSimple;
+	public PickupObjectAction OnPickup;
+	public PickupObjectAction OnDrop;
 
 	void Start() {
 		thisRigidbody = GetComponent<Rigidbody>();
@@ -40,7 +44,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 		thisRenderer = GetComponent<Renderer>();
 		PlayerButtonInput.instance.OnAction1Press += Drop;
 
-		DimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
+		PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
 		if (thisDimensionObject != null) {
 			thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 		}
@@ -83,24 +87,30 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 		}
 	}
 
-	void Pickup() {
+	public void Pickup() {
 		if (!isHeld && !onCooldown) {
 			//transform.parent = Player.instance.transform;
 			positionLastPhysicsFrame = transform.position;
 			thisRigidbody.useGravity = false;
-			//thisRigidbody.isKinematic = true;
+			thisRigidbody.isKinematic = false;
 			isHeld = true;
 			currentCooldown = pickupDropCooldown;
+
+			OnPickupSimple?.Invoke();
+			OnPickup?.Invoke(this);
 		}
 	}
 
-	void Drop() {
+	public void Drop() {
 		if (isHeld && !onCooldown) {
 			//transform.parent = originalParent;
 			thisRigidbody.useGravity = true;
 			//thisRigidbody.isKinematic = false;
 			isHeld = false;
 			currentCooldown = pickupDropCooldown;
+
+			OnDropSimple?.Invoke();
+			OnDrop?.Invoke(this);
 		}
 	}
 }

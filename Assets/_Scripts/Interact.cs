@@ -33,7 +33,7 @@ public class Interact : Singleton<Interact> {
 		reticleUnselectColor = reticle.color;
 		reticleOutsideUnselectColor = reticleOutside.color;
 
-		layerMask = ~(1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("Ignore Raycast"));
+		layerMask = ~(1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("Ignore Raycast") | 1 << LayerMask.NameToLayer("CollideWithPlayerOnly"));
 	}
 	
 	// Update is called once per frame

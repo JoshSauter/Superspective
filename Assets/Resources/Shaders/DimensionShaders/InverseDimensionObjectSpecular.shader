@@ -93,16 +93,10 @@ Shader "Custom/DimensionShaders/InverseDimensionObjectSpecular"
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
 			
-			sampler2D _DimensionMask;
 			int _Dimension;
-			float _ResolutionX;
-			float _ResolutionY;
 
 			half4 fragBaseNew(VertexOutputForwardBase i) : SV_TARGET {
-				float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-				fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-				int dimensionValue = ColorToDimensionValue(dimensionTest);
-				clip(-(dimensionValue != -1));
+				ClipInverseDimensionObject(i.pos, _Dimension);
 				return fragBase(i);
 			}
 
@@ -142,16 +136,10 @@ Shader "Custom/DimensionShaders/InverseDimensionObjectSpecular"
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
 			
-			sampler2D _DimensionMask;
 			int _Dimension;
-			float _ResolutionX;
-			float _ResolutionY;
 
 			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
-				float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-				fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-				int dimensionValue = ColorToDimensionValue(dimensionTest);
-				clip(-(dimensionValue != -1));
+				ClipInverseDimensionObject(i.pos, _Dimension);
 				return fragAdd(i);
 			}
 
@@ -367,7 +355,5 @@ Shader "Custom/DimensionShaders/InverseDimensionObjectSpecular"
 				ENDCG
 			}
 		}
-
-			FallBack "VertexLit"
-			CustomEditor "StandardShaderGUI"
+		CustomEditor "StandardShaderGUI"
 }

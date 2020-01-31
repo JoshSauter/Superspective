@@ -5,14 +5,7 @@ using EpitaphUtils;
 using EpitaphUtils.ShaderUtils;
 using System.Linq;
 
-public enum VisibilityState {
-	invisible,
-	partiallyVisible,
-	visible,
-	partiallyInvisible,
-};
-
-public class DimensionObject : MonoBehaviour {
+public class PillarDimensionObject : MonoBehaviour {
 	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	public bool continuouslyUpdateOnOffAngles = false;
@@ -23,6 +16,7 @@ public class DimensionObject : MonoBehaviour {
 	public int objectStartDimension;
 	public int objectEndDimension;
 	public bool reverseVisibilityStates = false;
+	public bool ignoreMaterialChanges = false;
 	int curDimensionSetInMaterial;
 
 	////////////////////////////////////
@@ -51,8 +45,7 @@ public class DimensionObject : MonoBehaviour {
 	public Angle offAngle;
 	private Angle centralAngle;	// Used for continuous on/off angle updating for knowing when the object changes quadrants
 
-	EpitaphRenderer[] renderers;
-	Material dimensionObjectMaterial, inverseDimensionObjectMaterial, dimensionObjectSpecularMaterial, inverseDimensionObjectSpecularMaterial;
+	public EpitaphRenderer[] renderers;
 	Dictionary<EpitaphRenderer, Material[]> startingMaterials;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
@@ -88,14 +81,14 @@ public class DimensionObject : MonoBehaviour {
 		}
     }
 
-	private void SetBaseDimension(int newBaseDimension) {
+	public void SetBaseDimension(int newBaseDimension) {
 		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
 			OnBaseDimensionChange();
 		}
 		baseDimension = newBaseDimension;
 	}
 
-	void HandlePillarDimensionChange(int prevDimension, int curDimension) {
+	protected virtual void HandlePillarDimensionChange(int prevDimension, int curDimension) {
 		if (IsRelevantDimension(curDimension)) {
 			SetDimensionValueInMaterials(curDimension);
 		}
@@ -105,7 +98,7 @@ public class DimensionObject : MonoBehaviour {
 		return (dimension == objectStartDimension) || (dimension == objectEndDimension);
 	}
 
-	void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
+	protected virtual void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
 		VisibilityState nextState = DetermineState(dimension, angle);
 
 		if (nextState != visibilityState) {
@@ -142,21 +135,21 @@ public class DimensionObject : MonoBehaviour {
 		Angle avgAngleOfObject = centralAngle;
 		Angle.Quadrant quadrantOfObject = avgAngleOfObject.quadrant;
 
-		//print(prevAvgAngleOfObject + ", " + avgAngleOfObject);// + "\nOn: " + onAngle + ", Off: " + offAngle);
+		//debug.Log(prevAvgAngleOfObject + ", " + avgAngleOfObject);// + "\nOn: " + onAngle + ", Off: " + offAngle);
 		if (prevQuadrantOfObject != quadrantOfObject) {
-			print("Prev Quadrant: " + prevQuadrantOfObject + ", Next Quadrant: " + quadrantOfObject);
+			debug.Log("Prev Quadrant: " + prevQuadrantOfObject + ", Next Quadrant: " + quadrantOfObject);
 		}
 
 		bool clockwise = Angle.IsClockwise(prevAvgAngleOfObject, avgAngleOfObject);
 		if (prevAvgAngleOfObject != avgAngleOfObject) {
 			if (clockwise && prevQuadrantOfObject == Angle.Quadrant.IV && quadrantOfObject == Angle.Quadrant.I) {
 				// Bump baseDimension up
-				print("Bumping baseDimension up");
+				debug.Log("Bumping baseDimension up");
 				SetBaseDimension((baseDimension + 1) % (DimensionPillar.activePillar.maxDimension + 1));
 			}
 			else if (!clockwise && prevQuadrantOfObject == Angle.Quadrant.I && quadrantOfObject == Angle.Quadrant.IV) {
 				// Bump baseDimension down
-				print("Bumping baseDimension down");
+				debug.Log("Bumping baseDimension down");
 				SetBaseDimension((baseDimension == 0) ? DimensionPillar.activePillar.maxDimension : baseDimension - 1);
 			}
 
@@ -169,7 +162,7 @@ public class DimensionObject : MonoBehaviour {
 		}
 	}
 
-	void HandleActivePillarChanged(DimensionPillar prevPillar) {
+	protected virtual void HandleActivePillarChanged(DimensionPillar prevPillar) {
 		if (prevPillar != null && pillarsFound.Contains(prevPillar)) {
 			prevPillar.OnDimensionChange -= HandlePillarDimensionChange;
 			prevPillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
@@ -275,7 +268,7 @@ public class DimensionObject : MonoBehaviour {
 	// State Change Logic //
 	////////////////////////
 	#region stateChange
-	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
+	public virtual void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
 		if (!ignoreTransitionRules && !IsValidNextState(nextState)) return;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
@@ -298,12 +291,14 @@ public class DimensionObject : MonoBehaviour {
 				break;
 		}
 
-		foreach (var r in renderers) {
-			SetMaterials(r);
+		if (!ignoreMaterialChanges) {
+			foreach (var r in renderers) {
+				SetMaterials(r);
 
-		}
-		if (setDimension > 0) {
-			SetDimensionValueInMaterials(setDimension);
+			}
+			if (setDimension > 0) {
+				SetDimensionValueInMaterials(setDimension);
+			}
 		}
 
 		if (OnStateChange != null) {
@@ -482,7 +477,7 @@ public class DimensionObject : MonoBehaviour {
 
 	void SetEpitaphRenderersRecursively(Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
 		// Children who have DimensionObject scripts are treated on only by their own settings
-		if (parent != transform && parent.GetComponent<DimensionObject>() != null) return;
+		if (parent != transform && parent.GetComponent<PillarDimensionObject>() != null) return;
 
 		EpitaphRenderer thisRenderer = parent.GetComponent<EpitaphRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
@@ -513,6 +508,7 @@ public class DimensionObject : MonoBehaviour {
 		Material newMaterial = null;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
+			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
 				break;
 			case "Standard (Specular setup)":
@@ -526,19 +522,31 @@ public class DimensionObject : MonoBehaviour {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
 				}
 				break;
+			case "Hidden/Raymarching":
+			case "Hidden/RaymarchingDissolve":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionRaymarching"));
+				break;
+			case "Custom/InvertColorsObject":
+			case "Custom/InvertColorsObjectDissolve":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionInvertColorsObject"));
+				break;
 			default:
 				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
 		}
 
-		newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
-		return newMaterial;
+		if (newMaterial != null && normalMaterial != null) {
+			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
+		}
+		// ?? means: return (newMaterial != null) ? newMaterial : normalMaterial;
+		return newMaterial ?? normalMaterial;
 	}
 
 	private Material GetInverseDimensionObjectMaterial(Material normalMaterial) {
 		Material newMaterial = null;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
+			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionObject"));
 				break;
 			case "Standard (Specular setup)":
@@ -552,13 +560,24 @@ public class DimensionObject : MonoBehaviour {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
 				}
 				break;
+			case "Hidden/Raymarching":
+			case "Hidden/RaymarchingDissolve":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionRaymarching"));
+				break;
+			case "Custom/InvertColorsObject":
+			case "Custom/InvertColorsObjectDissolve":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionInvertColorsObject"));
+				break;
 			default:
 				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
 		}
 
-		newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
-		return newMaterial;
+		if (newMaterial != null && normalMaterial != null) {
+			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
+		}
+		// ?? means: return (newMaterial != null) ? newMaterial : normalMaterial;
+		return newMaterial ?? normalMaterial;
 	}
 	#endregion
 }

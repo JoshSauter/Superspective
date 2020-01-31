@@ -6,6 +6,7 @@ using EpitaphUtils;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : Singleton<PlayerMovement> {
 	public bool DEBUG = false;
+	DebugLogger debug;
 
 	private float scale { get { return transform.localScale.y; } }
 	public Vector3 curVelocity {
@@ -56,6 +57,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	private void Awake() {
 		input = PlayerButtonInput.instance;
+		debug = new DebugLogger(gameObject, DEBUG);
 	}
 
 	// Use this for initialization
@@ -80,18 +82,24 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 		ContactPoint ground = new ContactPoint();
 		grounded = IsGrounded(out ground);
+		bool standingOnHeldObject = grounded && IsStandingOnHeldObject(ground);
 
 		Vector3 desiredVelocity = thisRigidbody.velocity;
 		if (grounded) {
 			desiredVelocity = CalculateGroundMovement(ground);
 
 			// Handle jumping
-			if (input.SpaceHeld && !jumpIsOnCooldown) {
+			if (input.SpaceHeld && !jumpIsOnCooldown && !standingOnHeldObject) {
 				StartCoroutine(Jump());
 			}
 		}
 		else {
 			desiredVelocity = CalculateAirMovement();
+		}
+
+		// Prevent player from floating around on cubes they're holding...
+		if (standingOnHeldObject) {
+			desiredVelocity += 4*Physics.gravity * Time.fixedDeltaTime;
 		}
 
 		float movingBackward = Vector2.Dot(new Vector2(desiredVelocity.x, desiredVelocity.z), new Vector2(transform.forward.x, transform.forward.z));
@@ -220,9 +228,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			}
 			yield return new WaitForFixedUpdate();
 		}
-		if (DEBUG) {
-			print("Highest jump height: " + (maxHeight - startHeight));
-		}
+		debug.Log("Highest jump height: " + (maxHeight - startHeight));
 	}
 
 	/// <summary>
@@ -317,9 +323,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			float stepHeight = stepTest.point.y - ground.point.y;
 			Vector3 stepOffset = stepOverbite + transform.up * (stepHeight + 0.02f);
 			step = new StepFound(contact, stepOffset);
-			if (DEBUG) {
-				Debug.Log("Step: " + contact + "\n" + stepOffset);
-			}
+			debug.Log("Step: " + contact + "\n" + stepOffset);
 		}
 
 		return stepFound;
@@ -329,6 +333,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		ground = default(ContactPoint);
 		float maxGroundTest = isGroundThreshold;	// Amount upwards-facing the most ground-like object is
 		foreach (ContactPoint contact in allContactThisFrame) {
+
 			float groundTest = Vector3.Dot(contact.normal, transform.up);
 			if (groundTest > maxGroundTest) {
 				ground = contact;
@@ -338,6 +343,14 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 		// Was a ground object found?
 		return (maxGroundTest > isGroundThreshold) && !underMinJumpTime;
+	}
+
+	bool IsStandingOnHeldObject(ContactPoint contact) {
+		PickupObject maybeCube1 = contact.thisCollider.GetComponent<PickupObject>();
+		PickupObject maybeCube2 = contact.otherCollider.GetComponent<PickupObject>();
+		bool cube1IsHeld = maybeCube1 != null && maybeCube1.isHeld;
+		bool cube2IsHeld = maybeCube2 != null && maybeCube2.isHeld;
+		return (cube1IsHeld || cube2IsHeld);
 	}
 
 	public void StopMovement() {

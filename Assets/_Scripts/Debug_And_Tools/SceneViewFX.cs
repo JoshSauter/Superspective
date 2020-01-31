@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
+using EpitaphUtils;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
 public class SceneViewFX : Singleton<SceneViewFX> {
+	public bool DEBUG = false;
+	DebugLogger debug;
 
 #if UNITY_EDITOR
 	private SceneView sceneView;
@@ -19,6 +23,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 
 	[MenuItem("Custom/SceneFxToggle _F1")]
 	private static void ToggleFx() {
+		DebugPrintState("ToggleFx()");
 		if (instance != null) {
 			instance.enabled = !instance.enabled;
 			instance.cachedEnableState = instance.enabled;
@@ -26,8 +31,10 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	private void OnReloadScripts() {
+		DebugPrintState("OnReloadScripts()");
 		// Re-enabling the script prevents the Scene view window bug
 		cachedEnableState = instance.enabled;
+		debug.Log("Cached enabled state after: " + cachedEnableState);
 		instance.enabled = false;
 		if (Application.isPlaying) {
 			instance.enabled = true;
@@ -37,14 +44,19 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 
 	[UnityEditor.Callbacks.DidReloadScripts]
 	private static void AfterScriptsReloaded() {
+		DebugPrintState("AfterScriptsReloaded()");
 		if (UnityEditorInternal.InternalEditorUtility.isApplicationActive) {
 			instance.enabled = instance.cachedEnableState;
+			instance?.debug?.Log("SceneViewFX: " + ((instance.enabled) ? "On" : "Off"));
 		}
 	}
 
 	private void OnEnable() {
+		debug = new DebugLogger(gameObject, DEBUG);
+
+		DebugPrintState("OnEnable()");
 		if (instance != null && instance != this) {
-			Debug.LogError("Cannot add SceneViewFX. Already one active in this scene");
+			debug.LogError("Cannot add SceneViewFX. Already one active in this scene");
 			DestroyImmediate(this);
 			return;
 		}
@@ -57,9 +69,9 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	private void OnDisable() {
+		DebugPrintState("OnDisable()");
 		ClearCurrentEffects();
 	}
-
 
 	private Camera GetCamera() {
 		myCamera = GetComponent<Camera>();
@@ -77,7 +89,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			excludes.Add(myCamera);
 			if (myCamera.GetComponent<AudioListener>()) excludes.Add(myCamera.GetComponent<AudioListener>());
 			if (myCamera.GetComponent<EpitaphScreen>()) excludes.Add(myCamera.GetComponent<EpitaphScreen>());
-			if (myCamera.GetComponent<VisibilityMaskRenderTexture>()) excludes.Add(myCamera.GetComponent<VisibilityMaskRenderTexture>());
+			if (myCamera.GetComponent<MaskBufferRenderTextures>()) excludes.Add(myCamera.GetComponent<MaskBufferRenderTextures>());
 			if (myCamera.GetComponent<SketchOverlay>()) excludes.Add(myCamera.GetComponent<SketchOverlay>());
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));
 			if (myCamera.GetComponent<SceneViewFX>()) excludes.Add(myCamera.GetComponent<SceneViewFX>());
@@ -127,6 +139,10 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (compsOnCam[i] is Camera) continue;
 			DestroyImmediate(compsOnCam[i]);
 		}
+	}
+
+	private static void DebugPrintState(string methodName) {
+		instance?.debug?.Log("SceneViewFX." + methodName + "\nEnabled: " + instance.enabled + "\nCachedEnableState: " + instance.cachedEnableState);
 	}
 
 #endif

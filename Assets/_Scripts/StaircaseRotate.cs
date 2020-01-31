@@ -41,6 +41,7 @@ public class StaircaseRotate : MonoBehaviour {
 	void Start () {
 		debug = new DebugLogger(gameObject, DEBUG);
         stairRenderer = transform.parent.GetComponent<MeshRenderer>();
+
 		initialBounds = transform.parent.GetComponent<MeshFilter>().mesh.bounds;
 	}
 

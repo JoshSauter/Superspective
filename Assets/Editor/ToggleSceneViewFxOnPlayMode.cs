@@ -1,13 +1,19 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections;
+using System.Threading.Tasks;
 
 [InitializeOnLoad]
 public static class ToggleSceneViewFxOnPlayMode  {
 
+	static SceneViewFXController controller = null;
+
 	static ToggleSceneViewFxOnPlayMode() {
 		EditorApplication.playModeStateChanged += HandlePlayModeStateChange;
+		EditorApplication.pauseStateChanged += HandlePauseStateChange;
 		EditorApplication.projectChanged += TemporarilyDisableFx;
+
+		controller = SceneViewFXController.instance;
 	}
 
 	private static void HandlePlayModeStateChange(PlayModeStateChange newState) {
@@ -18,7 +24,7 @@ public static class ToggleSceneViewFxOnPlayMode  {
 				TemporarilyDisableFx();
 				break;
 			case PlayModeStateChange.EnteredPlayMode:
-				if (!maximizeOnPlay) {
+				if (!GameWindow.instance.maximizeOnPlay) {
 					RestoreFx();
 				}
 				break;
@@ -28,6 +34,22 @@ public static class ToggleSceneViewFxOnPlayMode  {
 			case PlayModeStateChange.EnteredEditMode:
 				RestoreFx();
 				break;
+		}
+	}
+
+	// On Pause, if we were maximized and the cachedEnableState is on, enable the SceneViewFX
+	// On Unpause, if we were maximized and the SceneViewFX is on, cache their state and turn SceneViewFX off
+	private static void HandlePauseStateChange(PauseState pauseStatus) {
+		if (GameWindow.instance.maximizeOnPlay && EditorApplication.isPlaying) {
+			// Paused
+			if (pauseStatus == PauseState.Paused) {
+				controller = SceneViewFXController.instance;
+				RestoreFxAsync(1500);
+			}
+			// Unpaused
+			else {
+				TemporarilyDisableFx();
+			}
 		}
 	}
 
@@ -43,20 +65,8 @@ public static class ToggleSceneViewFxOnPlayMode  {
 			SceneViewFX.instance.enabled = SceneViewFX.instance.cachedEnableState;
 		}
 	}
-
-	public static bool maximizeOnPlay {
-		get {
-#if UNITY_EDITOR
-			var windows = (EditorWindow[])Resources.FindObjectsOfTypeAll(typeof(EditorWindow));
-			foreach (var window in windows) {
-				if (window != null && window.GetType().FullName == "UnityEditor.GameView") {
-					return window.maximized;
-				}
-			}
-
-			return false;
-#endif
-		}
+	async private static void RestoreFxAsync(int delayMs) {
+		await Task.Delay(delayMs).ConfigureAwait(false);
+		controller.needsToBeRestored = true;
 	}
-
 }

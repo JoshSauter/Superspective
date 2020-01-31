@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using EpitaphUtils;
 
-[CustomEditor(typeof(DimensionObject))]
+[CustomEditor(typeof(PillarDimensionObject))]
 [CanEditMultipleObjects]
 public class DimensionObjectInspector : Editor {
 	SerializedProperty DEBUG;
@@ -14,6 +14,7 @@ public class DimensionObjectInspector : Editor {
 	SerializedProperty baseDimension;
 
 	SerializedProperty reverseVisibilityStates;
+	SerializedProperty ignoreMaterialChanges;
 	SerializedProperty treatChildrenAsOneObjectRecursively;
 	SerializedProperty continuouslyUpdateOnOffAngles;
 
@@ -27,6 +28,7 @@ public class DimensionObjectInspector : Editor {
 		baseDimension = serializedObject.FindProperty("baseDimension");
 
 		reverseVisibilityStates = serializedObject.FindProperty("reverseVisibilityStates");
+		ignoreMaterialChanges = serializedObject.FindProperty("ignoreMaterialChanges");
 		treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
 		continuouslyUpdateOnOffAngles = serializedObject.FindProperty("continuouslyUpdateOnOffAngles");
 
@@ -34,7 +36,7 @@ public class DimensionObjectInspector : Editor {
 	}
 
 	public override void OnInspectorGUI() {
-		DimensionObject script = target as DimensionObject;
+		PillarDimensionObject script = target as PillarDimensionObject;
 		float defaultWidth = EditorGUIUtility.labelWidth;
 		serializedObject.Update();
 
@@ -46,9 +48,9 @@ public class DimensionObjectInspector : Editor {
 		script.startingVisibilityState = (VisibilityState)EditorGUILayout.EnumPopup("Starting visibility state: ", script.startingVisibilityState);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
-				((DimensionObject)obj).startingVisibilityState = script.startingVisibilityState;
+				((PillarDimensionObject)obj).startingVisibilityState = script.startingVisibilityState;
 				if (!Application.isPlaying) {
-					((DimensionObject)obj).visibilityState = script.startingVisibilityState;
+					((PillarDimensionObject)obj).visibilityState = script.startingVisibilityState;
 				}
 			}
 		}
@@ -59,26 +61,26 @@ public class DimensionObjectInspector : Editor {
 		GUILayout.Label("Config:", EditorStyles.miniBoldLabel);
 
 		EditorGUI.BeginChangeCheck();
-		script.findPillarsTechnique = (DimensionObject.FindPillarsTechnique)EditorGUILayout.EnumPopup("Find pillars by: ", script.findPillarsTechnique);
+		script.findPillarsTechnique = (PillarDimensionObject.FindPillarsTechnique)EditorGUILayout.EnumPopup("Find pillars by: ", script.findPillarsTechnique);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
-				((DimensionObject)obj).findPillarsTechnique = script.findPillarsTechnique;
+				((PillarDimensionObject)obj).findPillarsTechnique = script.findPillarsTechnique;
 			}
 		}
 
 		EditorGUILayout.Space();
 		switch (script.findPillarsTechnique) {
-			case DimensionObject.FindPillarsTechnique.whitelist:
+			case PillarDimensionObject.FindPillarsTechnique.whitelist:
 				SerializedProperty whitelist = serializedObject.FindProperty("whitelist");
 				EditorGUI.BeginChangeCheck();
 				EditorGUILayout.PropertyField(whitelist, new GUIContent("Whitelist: "), true);
 				if (EditorGUI.EndChangeCheck())
 					serializedObject.ApplyModifiedProperties();
 				break;
-			case DimensionObject.FindPillarsTechnique.automaticSphere:
+			case PillarDimensionObject.FindPillarsTechnique.automaticSphere:
 				UpdateSearchRadiusForAll(script);
 				break;
-			case DimensionObject.FindPillarsTechnique.automaticSphereWithBlacklist: {
+			case PillarDimensionObject.FindPillarsTechnique.automaticSphereWithBlacklist: {
 					UpdateSearchRadiusForAll(script);
 					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
 					EditorGUI.BeginChangeCheck();
@@ -87,10 +89,10 @@ public class DimensionObjectInspector : Editor {
 						serializedObject.ApplyModifiedProperties();
 				}
 				break;
-			case DimensionObject.FindPillarsTechnique.automaticBox:
+			case PillarDimensionObject.FindPillarsTechnique.automaticBox:
 				UpdateSearchBoxSizeForAll(script);
 				break;
-			case DimensionObject.FindPillarsTechnique.automaticBoxWithBlacklist: {
+			case PillarDimensionObject.FindPillarsTechnique.automaticBoxWithBlacklist: {
 					UpdateSearchBoxSizeForAll(script);
 					SerializedProperty blacklist = serializedObject.FindProperty("blacklist");
 					EditorGUI.BeginChangeCheck();
@@ -107,6 +109,7 @@ public class DimensionObjectInspector : Editor {
 		EditorGUILayout.Space();
 		EditorGUIUtility.labelWidth = 200;
 		reverseVisibilityStates.boolValue = EditorGUILayout.Toggle("Reverse visibility states?", reverseVisibilityStates.boolValue);
+		ignoreMaterialChanges.boolValue = EditorGUILayout.Toggle("Ignore material changes?", ignoreMaterialChanges.boolValue);
 		treatChildrenAsOneObjectRecursively.boolValue = EditorGUILayout.Toggle("Treat children as one object?", treatChildrenAsOneObjectRecursively.boolValue);
 		continuouslyUpdateOnOffAngles.boolValue = EditorGUILayout.Toggle("Continuously Update OnOff Angles?", continuouslyUpdateOnOffAngles.boolValue);
 
@@ -126,8 +129,8 @@ public class DimensionObjectInspector : Editor {
 			script.offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
 			if (EditorGUI.EndChangeCheck()) {
 				foreach (Object obj in targets) {
-					((DimensionObject)obj).onAngle = Angle.Degrees(EditorGUILayout.FloatField("On Angle Degrees: ", script.onAngle.degrees));
-					((DimensionObject)obj).offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
+					((PillarDimensionObject)obj).onAngle = Angle.Degrees(EditorGUILayout.FloatField("On Angle Degrees: ", script.onAngle.degrees));
+					((PillarDimensionObject)obj).offAngle = Angle.Degrees(EditorGUILayout.FloatField("Off Angle Degrees: ", script.offAngle.degrees));
 				}
 			}
 		}
@@ -139,22 +142,22 @@ public class DimensionObjectInspector : Editor {
 		serializedObject.ApplyModifiedProperties();
 	}
 
-	private void UpdateSearchRadiusForAll(DimensionObject script) {
+	private void UpdateSearchRadiusForAll(PillarDimensionObject script) {
 		EditorGUI.BeginChangeCheck();
 		script.pillarSearchRadius = EditorGUILayout.FloatField("Search radius: ", script.pillarSearchRadius);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
-				((DimensionObject)obj).pillarSearchRadius = script.pillarSearchRadius;
+				((PillarDimensionObject)obj).pillarSearchRadius = script.pillarSearchRadius;
 			}
 		}
 	}
 
-	private void UpdateSearchBoxSizeForAll(DimensionObject script) {
+	private void UpdateSearchBoxSizeForAll(PillarDimensionObject script) {
 		EditorGUI.BeginChangeCheck();
 		script.pillarSearchBoxSize = EditorGUILayout.Vector3Field("Search box size: ", script.pillarSearchBoxSize);
 		if (EditorGUI.EndChangeCheck()) {
 			foreach (Object obj in targets) {
-				((DimensionObject)obj).pillarSearchBoxSize = script.pillarSearchBoxSize;
+				((PillarDimensionObject)obj).pillarSearchBoxSize = script.pillarSearchBoxSize;
 			}
 		}
 	}

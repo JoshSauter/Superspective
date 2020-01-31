@@ -4,7 +4,7 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
-	DimensionObject thisDimensionObject;
+	PillarDimensionObject thisDimensionObject;
 	Collider thisCollider;
 	SphereCollider thisTrigger;
 
@@ -14,7 +14,7 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	HashSet<Collider> collidersBeingIgnored = new HashSet<Collider>();
 
     void Start() {
-		thisDimensionObject = GetComponent<DimensionObject>();
+		thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
 		thisCollider = GetComponent<Collider>();
 
 		thisDimensionObject.OnBaseDimensionChange += HandleBaseDimensionChange;
@@ -31,8 +31,8 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 		SetTriggerZoneSize();
 	}
 
-	private void OnTriggerEnter(Collider other) {
-		DimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
+	private void OnTriggerStay(Collider other) {
+		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
 		if (otherDimensionObj != null && otherDimensionObj.baseDimension != thisDimensionObject.baseDimension) {
 			if (!collidersBeingIgnored.Contains(other)) {
 				collidersBeingIgnored.Add(other);

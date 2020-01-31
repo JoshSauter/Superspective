@@ -10,296 +10,7 @@ Properties {
 
 CGINCLUDE
 #include "UnityCG.cginc"
-
-sampler2D _DiscardTex1;
-sampler2D _DiscardTex2;
-float _ResolutionX;
-float _ResolutionY;
-
-struct ObscuredObjectFragIn {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-
-float4 SampleDiscardPixel1(ObscuredObjectFragIn i) {
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	return tex2D(_DiscardTex1, viewportVertex);
-}
-float4 SampleDiscardPixel2(ObscuredObjectFragIn i) {
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	return tex2D(_DiscardTex2, viewportVertex);
-}
-
-ObscuredObjectFragIn ObscuredObjectVert( appdata_base v ) {
-    ObscuredObjectFragIn o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-// NEW VISIBILITY SHADERS
-fixed4 RedFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(SampleDiscardPixel1(i).r-0.5);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-fixed4 GreenFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(SampleDiscardPixel1(i).g-0.5);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-fixed4 BlueFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(SampleDiscardPixel1(i).b-0.5);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-fixed4 NegRedFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(0.5-SampleDiscardPixel1(i).r);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-fixed4 NegGreenFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(0.5-SampleDiscardPixel1(i).g);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-fixed4 NegBlueFrag(ObscuredObjectFragIn i) : SV_Target {
-	clip(0.5-SampleDiscardPixel1(i).b);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-
-// DISCARD TEXTURE 1
-fixed4 RminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.r-samplePixel.g);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 RminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.r-samplePixel.b);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 GminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.g-samplePixel.r);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 GminusB1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.g-samplePixel.b);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 BminusR1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.b-samplePixel.r);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 BminusG1_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel1(i);
-	clip(samplePixel.b-samplePixel.g);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-// DISCARD TEXTURE 2
-fixed4 GminusR2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.g-samplePixel.r);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 GminusB2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.g-samplePixel.b);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 RminusG2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.r-samplePixel.g);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 RminusB2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.r-samplePixel.b);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 BminusR2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.b-samplePixel.r);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-fixed4 BminusG2_frag(ObscuredObjectFragIn i) : SV_Target {
-	float4 samplePixel = SampleDiscardPixel2(i);
-	clip(samplePixel.b-samplePixel.g);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-
 ENDCG
-
-// NEW VISIBILITY SHADERS
-SubShader {
-	Tags { "RenderType"="Red1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment RedFrag
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="Green1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GreenFrag
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="Blue1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment BlueFrag
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="NegRed1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment NegRedFrag
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="NegGreen1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment NegGreenFrag
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="NegBlue1" }
-	Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment NegBlueFrag
-ENDCG
-	}
-}
-
-
-// DISCARD TEXTURE 1 SUBSHADERS
-SubShader {
-    Tags { "RenderType"="RedMinusGreen1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment RminusG1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="RedMinusBlue1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment RminusB1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusRed1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusR1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusBlue1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusB1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="BlueMinusRed1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment BminusR1_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="BlueMinusGreen1" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment BminusG1_frag
-ENDCG
-    }
-}
-
-
-// DISCARD TEXTURE 2 SUBSHADERS
-SubShader {
-    Tags { "RenderType"="RedMinusGreen2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment RminusG2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="RedMinusBlue2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment RminusB2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusRed2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusR2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="GreenMinusBlue2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment GminusB2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="BlueMinusRed2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment BminusR2_frag
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="BlueMinusGreen2" }
-    Pass {
-CGPROGRAM
-#pragma vertex ObscuredObjectVert
-#pragma fragment BminusG2_frag
-ENDCG
-    }
-}
 
 SubShader {
 	Tags { "RenderType"="HideDepthNormal"}
@@ -324,7 +35,116 @@ fixed4 frag(v2f i) : SV_Target {
 ENDCG
 	}
 }
+SubShader {
+    Tags { "RenderType"="DissolveDoubleSided" }
+    Pass {
 
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+#include "UnityCG.cginc"
+
+fixed4 _Color;
+fixed4 _Color2;
+sampler2D _MainTex;
+float4 _MainTex_ST;
+sampler2D _BumpMap;
+sampler2D _BurnRamp;
+fixed4 _BurnColor;
+float _BurnSize;
+float _DissolveValue;
+
+struct v2f {
+    float4 pos : SV_POSITION;
+	float2 texcoord : TEXCOORD0;
+    float4 nz : TEXCOORD1;
+	float4 worldPos : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+float rand(float2 co){
+    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+v2f vert( appdata_full v ) {
+    v2f o;
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+    o.pos = UnityObjectToClipPos(v.vertex);
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+    o.nz.xyz = COMPUTE_VIEW_NORMAL;
+    o.nz.w = COMPUTE_DEPTH_01;
+    return o;
+}
+
+fixed4 frag(v2f i) : SV_Target {
+	if (i.nz.w > 1) i.nz.w = 1;
+
+    half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
+	if (_Color.a == 0) clip(-test);
+	if (_Color2.a == 0) clip(test);
+
+	if (test < 0) {
+		if (_Color2.a == 0) clip(-1);
+	}
+	else {
+		if (_Color.a == 0) clip(-1);
+	}
+
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+ENDCG
+    }
+}
+SubShader {
+    Tags { "RenderType"="Dissolve" }
+    Pass {
+
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+#include "UnityCG.cginc"
+
+sampler2D _MainTex;
+float4 _MainTex_ST;
+sampler2D _BumpMap;
+sampler2D _BurnRamp;
+fixed4 _BurnColor;
+float _BurnSize;
+float _DissolveValue;
+
+struct v2f {
+    float4 pos : SV_POSITION;
+	float2 texcoord : TEXCOORD0;
+    float4 nz : TEXCOORD1;
+	float4 worldPos : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+float rand(float2 co){
+    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+v2f vert( appdata_full v ) {
+    v2f o;
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+    o.pos = UnityObjectToClipPos(v.vertex);
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+    o.nz.xyz = COMPUTE_VIEW_NORMAL;
+    o.nz.w = COMPUTE_DEPTH_01;
+    return o;
+}
+
+fixed4 frag(v2f i) : SV_Target {
+	if (i.nz.w > 1) i.nz.w = 1;
+
+	half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
+	clip(test);
+
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+ENDCG
+    }
+}
 // New partially visible objects
 SubShader {
     Tags { "RenderType"="DimensionObject" }
@@ -336,7 +156,6 @@ CGPROGRAM
 #include "UnityCG.cginc"
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
-sampler2D _DimensionMask;
 int _Dimension;
 
 struct v2f {
@@ -381,7 +200,6 @@ CGPROGRAM
 #include "UnityCG.cginc"
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
-sampler2D _DimensionMask;
 int _Dimension;
 
 struct v2f {

@@ -46,6 +46,23 @@ namespace EpitaphUtils {
 			return go.AddComponent<T>().GetCopyOf(toAdd) as T;
 		}
 
+		public static T[] GetComponentsInChildrenRecursively<T>(this Transform parent) where T : Component {
+			List<T> components = new List<T>();
+			GetComponentsInChildrenRecursivelyHelper(parent, ref components);
+			return components.ToArray();
+		}
+
+		private static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar) {
+			T maybeComponent = parent.GetComponent<T>();
+			if (maybeComponent != null) {
+				componentsSoFar.Add(maybeComponent);
+			}
+
+			foreach (Transform child in parent) {
+				GetComponentsInChildrenRecursivelyHelper(child, ref componentsSoFar);
+			}
+		}
+
 		public static T[] GetComponentsInChildrenOnly<T>(this Transform parent) where T : Component {
 			T[] all = parent.GetComponentsInChildren<T>();
 			T[] children = new T[parent.childCount];
@@ -70,8 +87,8 @@ namespace EpitaphUtils {
 			return null;
 		}
 
-		public static DimensionObject FindDimensionObjectRecursively(Transform go) {
-			DimensionObject dimensionObj = go.GetComponent<DimensionObject>();
+		public static PillarDimensionObject FindDimensionObjectRecursively(Transform go) {
+			PillarDimensionObject dimensionObj = go.GetComponent<PillarDimensionObject>();
 			Transform parent = go.parent;
 			if (dimensionObj != null) {
 				return dimensionObj;

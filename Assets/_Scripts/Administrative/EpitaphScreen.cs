@@ -6,7 +6,7 @@ using EpitaphUtils;
 public class EpitaphScreen : Singleton<EpitaphScreen> {
 	public Camera playerCamera;
 	public Camera dimensionCamera;
-	public Camera outlineCamera;
+	public Camera invertMaskCamera;
 	public static int currentWidth;
 	public static int currentHeight;
 
@@ -21,7 +21,7 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 		playerCamera = GetComponent<Camera>();
 		Camera[] childrenCams = transform.GetComponentsInChildrenOnly<Camera>();
 		dimensionCamera = childrenCams[0];
-		outlineCamera = childrenCams[1];
+		invertMaskCamera = childrenCams[1];
 	}
 
 	// Update is called once per frame
