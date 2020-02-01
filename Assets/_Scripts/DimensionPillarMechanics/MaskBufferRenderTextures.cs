@@ -4,11 +4,14 @@ using UnityEngine;
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
-	public RenderTexture visibilityMaskTexture;
+	public const int numVisibilityMaskChannels = 2;
+	public RenderTexture[] visibilityMaskTextures;
 	public RenderTexture invertMaskTexture;
 
 	// Use this for initialization
 	void Start () {
+		visibilityMaskTextures = new RenderTexture[numVisibilityMaskChannels];
+
 		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 		CreateAllRenderTextures(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
 	}
@@ -25,18 +28,25 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	// Update is called once per frame
 	void Update () {
 		// Will write to global texture named _DimensionMask
-		Shader.SetGlobalTexture("_DimensionMask", visibilityMaskTexture);
+		for (int i = 0; i < numVisibilityMaskChannels; i++) {
+			Shader.SetGlobalTexture("_DimensionMask" + i, visibilityMaskTextures[i]);
+		}
+
 		// Will write to global texture named _InvertMask
 		Shader.SetGlobalTexture("_InvertMask", invertMaskTexture);
 	}
 
 	void ReleaseAllTextures() {
-		visibilityMaskTexture.Release();
+		for (int i = 0; i < numVisibilityMaskChannels; i++) {
+			visibilityMaskTextures[i].Release();
+		}
 		invertMaskTexture.Release();
 	}
 
 	void CreateAllRenderTextures(int currentWidth, int currentHeight) {
-		CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTexture, EpitaphScreen.instance.dimensionCamera);
+		for (int i = 0; i < numVisibilityMaskChannels; i++) {
+			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], EpitaphScreen.instance.dimensionCameras[i]);
+		}
 		CreateRenderTexture(currentWidth, currentHeight, out invertMaskTexture, EpitaphScreen.instance.invertMaskCamera);
 	}
 

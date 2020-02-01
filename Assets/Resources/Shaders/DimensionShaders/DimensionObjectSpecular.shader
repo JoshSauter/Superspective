@@ -5,6 +5,7 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 	Properties
 	{
 		_Dimension("Dimension", Int) = 0
+		_Channel("Channel", Int) = 0
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo", 2D) = "white" {}
 
@@ -94,9 +95,10 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#include "DimensionShaderHelpers.cginc"
 			
 			int _Dimension;
+			int _Channel;
 
 			half4 fragBaseNew(VertexOutputForwardBase i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Dimension);
+				ClipDimensionObject(i.pos, _Dimension, _Channel);
 				return fragBase(i);
 			}
 
@@ -137,9 +139,10 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#include "DimensionShaderHelpers.cginc"
 			
 			int _Dimension;
+			int _Channel;
 
 			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Dimension);
+				ClipDimensionObject(i.pos, _Dimension, _Channel);
 				return fragAdd(i);
 			}
 

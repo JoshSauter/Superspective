@@ -58,7 +58,7 @@ Material:
     - _SketchTex:
         m_Texture: {fileID: 2800000, guid: 38ede315f46b0427cb797696f8df43f1, type: 3}
         m_Scale: {x: 0.4, y: 0.4}
-        m_Offset: {x: 0.31207246, y: 0.32761547}
+        m_Offset: {x: 0.27172795, y: 0.16847874}
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5

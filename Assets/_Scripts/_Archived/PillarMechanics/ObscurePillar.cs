@@ -201,7 +201,7 @@ public class ObscurePillar : MonoBehaviour {
 		InitializeWallTransform(visibleMaskWall.transform);
 		visibleMaskWall.name = "VisibleMaskWall";
 
-		visibleMaskWall.gameObject.layer = LayerMask.NameToLayer("VisibilityMask");
+		visibleMaskWall.gameObject.layer = LayerMask.NameToLayer("VisibilityMask0");
 		visibleMaskWall.GetComponent<Collider>().enabled = false;
 		visibleMaskWall.material = Resources.Load<Material>("Materials/Unlit/ObscureShader/OSRed");
 	}

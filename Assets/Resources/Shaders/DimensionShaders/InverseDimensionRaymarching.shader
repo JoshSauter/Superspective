@@ -7,6 +7,7 @@ Shader "Custom/DimensionShaders/InverseDimensionRaymarching"
     {
         _MainTex ("Texture", 2D) = "white" {}
 		_Dimension("Dimension", Int) = 0
+		_Channel("Channel", Int) = 0
     }
     SubShader
     {
@@ -22,6 +23,7 @@ Shader "Custom/DimensionShaders/InverseDimensionRaymarching"
 			#include "DimensionShaderHelpers.cginc"
 			
 			int _Dimension;
+			int _Channel;
 
             struct v2f
             {
@@ -141,7 +143,7 @@ Shader "Custom/DimensionShaders/InverseDimensionRaymarching"
             }
 
             fixed4 frag (v2f i) : SV_Target {
-				ClipInverseDimensionObject(i.clipPos, _Dimension);
+				ClipInverseDimensionObject(i.clipPos, _Dimension, _Channel);
 
                 float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
                 float depth = 100;

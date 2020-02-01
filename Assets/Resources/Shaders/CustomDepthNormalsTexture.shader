@@ -157,6 +157,7 @@ CGPROGRAM
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
 int _Dimension;
+int _Channel;
 
 struct v2f {
     float4 pos : SV_POSITION;
@@ -180,10 +181,7 @@ v2f vert( appdata_base v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	clip(-(dimensionValue != _Dimension));
+	ClipDimensionObject(i.pos.xy, _Dimension, _Channel);
 
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
@@ -201,6 +199,7 @@ CGPROGRAM
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
 int _Dimension;
+int _Channel;
 
 struct v2f {
     float4 pos : SV_POSITION;
@@ -224,10 +223,7 @@ v2f vert( appdata_base v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	float2 viewportVertex = float2(i.pos.x / _ResolutionX, i.pos.y / _ResolutionY);
-	fixed4 dimensionTest = tex2D(_DimensionMask, viewportVertex);
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	clip(-(dimensionValue != -1));
+	ClipInverseDimensionObject(i.pos.xy, _Dimension, _Channel);
 
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }

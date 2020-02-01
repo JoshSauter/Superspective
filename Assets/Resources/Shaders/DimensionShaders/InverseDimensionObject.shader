@@ -6,6 +6,7 @@
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 		_Dimension("Dimension", Int) = 0
+		_Channel("Channel", Int) = 0
 	}
 	SubShader
 	{
@@ -42,9 +43,9 @@
 			float4 _EmissionColor;
 			
 			int _Dimension;
+			int _Channel;
 
-			v2f vert (appdata v)
-			{
+			v2f vert (appdata v) {
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
@@ -52,7 +53,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipInverseDimensionObject(i.vertex, _Dimension);
+				ClipInverseDimensionObject(i.vertex, _Dimension, _Channel);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog

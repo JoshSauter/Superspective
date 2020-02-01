@@ -11,6 +11,7 @@
 
 		Pass
         {
+			Blend One One
 			ZWrite Off
 
             CGPROGRAM

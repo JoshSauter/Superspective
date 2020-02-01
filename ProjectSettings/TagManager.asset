@@ -21,7 +21,7 @@ TagManager:
   - WalkableObject
   - WallOnly
   - Scenery
-  - VisibilityMask
+  - VisibilityMask0
   - Player
   - NoClip
   - Invisible
@@ -36,7 +36,7 @@ TagManager:
   - LightProjectorGreen
   - LightProjectorBlue
   - CollideWithPlayerOnly
-  - 
+  - VisibilityMask1
   - 
   - 
   - 

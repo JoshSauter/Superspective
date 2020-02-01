@@ -7,6 +7,7 @@
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 		_Dimension("Dimension", Int) = 0
+		_Channel("Channel", Int) = 0
 	}
 	SubShader
 	{
@@ -32,6 +33,7 @@
 			float4 _Color;
 			
 			int _Dimension;
+			int _Channel;
 
 			struct appdata
 			{
@@ -55,7 +57,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Dimension);
+				ClipDimensionObject(i.vertex, _Dimension, _Channel);
 
 				return _Color;
 			}

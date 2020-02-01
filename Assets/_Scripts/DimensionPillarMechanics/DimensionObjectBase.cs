@@ -15,20 +15,24 @@ public enum VisibilityState {
 public class DimensionObjectBase : MonoBehaviour {
 	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
-	DebugLogger debug;
+	protected DebugLogger debug;
 
+	protected bool initialized = false;
+
+	[Range(0, 1)]
+	public int channel;
 	[Range(0, 7)]
 	public int baseDimension = 1;
 	public bool reverseVisibilityStates = false;
 	public bool ignoreMaterialChanges = false;
-	int curDimensionSetInMaterial;
+	protected int curDimensionSetInMaterial;
 
 	public EpitaphRenderer[] renderers;
-	Dictionary<EpitaphRenderer, Material[]> startingMaterials;
+	public Dictionary<EpitaphRenderer, Material[]> startingMaterials;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
 	public VisibilityState visibilityState = VisibilityState.visible;
-	static Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
+	protected static Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
 		{ VisibilityState.invisible, new HashSet<VisibilityState> { VisibilityState.partiallyVisible, VisibilityState.partiallyInvisible } },
 		{ VisibilityState.partiallyVisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } },
 		{ VisibilityState.visible, new HashSet<VisibilityState> { VisibilityState.partiallyVisible, VisibilityState.partiallyInvisible } },
@@ -42,16 +46,29 @@ public class DimensionObjectBase : MonoBehaviour {
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
-	void Start() {
-		debug = new DebugLogger(gameObject, DEBUG);
-
-		renderers = GetAllEpitaphRenderers().ToArray();
-		startingMaterials = GetAllStartingMaterials(renderers);
-
-		SwitchVisibilityState(visibilityState, true);
+	protected virtual void Start() {
+		Init();
 	}
 
-	public void SetBaseDimension(int newBaseDimension) {
+	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
+		startingMaterials = newStartingMaterials;
+	}
+
+	public virtual void Init() {
+		if (!initialized) {
+			debug = new DebugLogger(gameObject, DEBUG);
+
+			renderers = GetAllEpitaphRenderers().ToArray();
+			startingMaterials = GetAllStartingMaterials(renderers);
+			SetChannelValuesInMaterials();
+
+			SwitchVisibilityState(startingVisibilityState, true);
+
+			initialized = true;
+		}
+	}
+
+	public virtual void SetBaseDimension(int newBaseDimension) {
 		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
 			OnBaseDimensionChange();
 		}
@@ -91,8 +108,9 @@ public class DimensionObjectBase : MonoBehaviour {
 
 			}
 			if (setDimension > 0) {
-				SetDimensionValueInMaterials(setDimension);
+				SetDimensionValuesInMaterials(setDimension);
 			}
+			SetChannelValuesInMaterials();
 		}
 
 		if (OnStateChange != null) {
@@ -142,7 +160,7 @@ public class DimensionObjectBase : MonoBehaviour {
 		renderer.SetMaterials(newMaterials);
 	}
 
-	void SetDimensionValueInMaterials(int newDimensionValue) {
+	protected void SetDimensionValuesInMaterials(int newDimensionValue) {
 		if (curDimensionSetInMaterial != newDimensionValue && (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible)) {
 			foreach (var r in renderers) {
 				r.SetInt("_Dimension", newDimensionValue);
@@ -151,7 +169,13 @@ public class DimensionObjectBase : MonoBehaviour {
 		}
 	}
 
-	List<EpitaphRenderer> GetAllEpitaphRenderers() {
+	protected void SetChannelValuesInMaterials() {
+		foreach (var r in renderers) {
+			r.SetInt("_Channel", channel);
+		}
+	}
+
+	protected List<EpitaphRenderer> GetAllEpitaphRenderers() {
 		List<EpitaphRenderer> allRenderers = new List<EpitaphRenderer>();
 		if (!treatChildrenAsOneObjectRecursively) {
 			EpitaphRenderer thisRenderer = GetComponent<EpitaphRenderer>();
@@ -188,7 +212,7 @@ public class DimensionObjectBase : MonoBehaviour {
 		}
 	}
 
-	Dictionary<EpitaphRenderer, Material[]> GetAllStartingMaterials(EpitaphRenderer[] renderers) {
+	protected Dictionary<EpitaphRenderer, Material[]> GetAllStartingMaterials(EpitaphRenderer[] renderers) {
 		Dictionary<EpitaphRenderer, Material[]> dict = new Dictionary<EpitaphRenderer, Material[]>();
 		foreach (var r in renderers) {
 			dict.Add(r, r.GetMaterials());
