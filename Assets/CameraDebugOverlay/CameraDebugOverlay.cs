@@ -36,7 +36,6 @@ public class CameraDebugOverlay : MonoBehaviour {
 		}
 	}
 
-	[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (mode < NUM_MODES - 1) {
 			if (debugMode == DebugMode.stencilBuffer) {

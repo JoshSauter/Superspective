@@ -6,6 +6,8 @@ using EpitaphUtils;
 public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	PillarDimensionObject thisDimensionObject;
 	Collider thisCollider;
+	Collider invertColorsCollider;
+	Collider kinematicCollider;
 	SphereCollider thisTrigger;
 
 	float triggerZoneSize = 1.5f;
@@ -16,8 +18,12 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
     void Start() {
 		thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
 		thisCollider = GetComponent<Collider>();
+		invertColorsCollider = transform.Find("InvertColors")?.GetComponent<Collider>();
+		kinematicCollider = invertColorsCollider?.transform.Find("KinematicCollider").GetComponent<Collider>();
 
-		thisDimensionObject.OnBaseDimensionChange += HandleBaseDimensionChange;
+		if (thisDimensionObject != null) {
+			thisDimensionObject.OnBaseDimensionChange += HandleBaseDimensionChange;
+		}
 
 		CreateTriggerZone();
     }
@@ -37,6 +43,8 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 			if (!collidersBeingIgnored.Contains(other)) {
 				collidersBeingIgnored.Add(other);
 				Physics.IgnoreCollision(thisCollider, other, true);
+				if (invertColorsCollider != null) Physics.IgnoreCollision(invertColorsCollider, other, true);
+				if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, other, true);
 			}
 		}
 	}
@@ -44,6 +52,8 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	void HandleBaseDimensionChange() {
 		foreach (var collider in collidersBeingIgnored) {
 			Physics.IgnoreCollision(thisCollider, collider, false);
+			if (invertColorsCollider != null) Physics.IgnoreCollision(invertColorsCollider, collider, false);
+			if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, collider, false);
 		}
 		collidersBeingIgnored.Clear();
 	}

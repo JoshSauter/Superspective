@@ -210,11 +210,14 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		RaycastHit obstacle = new RaycastHit();
 		Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
 		
-		if (obstacle.collider == null || obstacle.collider.isTrigger) {
+		if (obstacle.collider == null || obstacle.collider.isTrigger || (obstacle.collider.gameObject.GetComponent<PickupObject>()?.isHeld ?? false)) {
 			return movementVector;
 		}
 		else {
 			Vector3 newMovementVector = Vector3.ProjectOnPlane(movementVector, obstacle.normal);
+			if (newMovementVector.y > 0) {
+				debug.LogWarning("movementVector:" + movementVector + "\nnewMovementVector:" + newMovementVector);
+			}
 			return newMovementVector;
 		}
 	}

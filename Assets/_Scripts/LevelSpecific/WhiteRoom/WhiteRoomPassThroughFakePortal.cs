@@ -4,22 +4,30 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
+	public MagicTrigger restoreFakePortalTrigger;
+
 	public DimensionObjectBase ceilingDropDown;
 	public PillarDimensionObject ceilingDropDownAfterPassingThrough;
 	MagicTrigger trigger;
 
     void Start() {
 		trigger = GetComponent<MagicTrigger>();
-		trigger.OnMagicTriggerEnter += OnMagicTriggerEnter;
+		trigger.OnMagicTriggerStayOneTime += OnMagicTriggerStayOneTime;
+		trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
     }
 
-	private void OnMagicTriggerEnter(Collider other) {
+	private void OnMagicTriggerStayOneTime(Collider other) {
 		if (other.TaggedAsPlayer()) {
-			ceilingDropDown.enabled = false;
-			ceilingDropDownAfterPassingThrough.enabled = true;
-			ceilingDropDownAfterPassingThrough.Init();
+			ceilingDropDownAfterPassingThrough.Start();
 			ceilingDropDownAfterPassingThrough.OverrideStartingMaterials(ceilingDropDown.startingMaterials);
 			ceilingDropDownAfterPassingThrough.SwitchVisibilityState(ceilingDropDownAfterPassingThrough.visibilityState, true);
+		}
+	}
+
+	private void OnNegativeMagicTriggerStayOneTime(Collider other) {
+		if (other.TaggedAsPlayer()) {
+			restoreFakePortalTrigger.gameObject.SetActive(true);
+			gameObject.SetActive(false);
 		}
 	}
 }

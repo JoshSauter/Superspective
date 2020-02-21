@@ -27,7 +27,8 @@ public enum Level {
 	fork,
 	forkWhiteRoom,
 	forkBlackRoom,
-    invisFloor
+    invisFloor,
+	metaEdgeDetection
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -59,6 +60,8 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string tutorialHallway = "_TutorialHallway";
 	private const string transition2_3 = "_Transition2_3";
 	private const string transition3_4 = "_Transition3_4";
+
+	private const string metaEdgeDetection = "_Meta_EdgeDetection";
 
 #endregion
 
@@ -149,6 +152,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.transition2_3, transition2_3);
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
         enumToSceneName.Add(Level.invisFloor, invisFloor);
+		enumToSceneName.Add(Level.metaEdgeDetection, metaEdgeDetection);
 	}
 
 	/// <summary>
@@ -166,13 +170,15 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>() { tutorialHallway });
 		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom });
-		worldGraph.Add(forkWhiteRoom, new List<string>() { fork });
+		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
         worldGraph.Add(invisFloor, new List<string>());
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });
 		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
+
+		worldGraph.Add(metaEdgeDetection, new List<string>() { forkWhiteRoom });
 	}
 
 	/// <summary>

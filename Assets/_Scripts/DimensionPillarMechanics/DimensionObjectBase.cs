@@ -17,8 +17,6 @@ public class DimensionObjectBase : MonoBehaviour {
 	public bool treatChildrenAsOneObjectRecursively = false;
 	protected DebugLogger debug;
 
-	protected bool initialized = false;
-
 	[Range(0, 1)]
 	public int channel;
 	[Range(0, 7)]
@@ -29,6 +27,7 @@ public class DimensionObjectBase : MonoBehaviour {
 
 	public EpitaphRenderer[] renderers;
 	public Dictionary<EpitaphRenderer, Material[]> startingMaterials;
+	public Dictionary<EpitaphRenderer, int> startingLayers;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
 	public VisibilityState visibilityState = VisibilityState.visible;
@@ -46,26 +45,23 @@ public class DimensionObjectBase : MonoBehaviour {
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
-	protected virtual void Start() {
-		Init();
+	public virtual void Start() {
+		debug = new DebugLogger(gameObject, DEBUG);
+
+		renderers = GetAllEpitaphRenderers().ToArray();
+		if (renderers.Length == 0) {
+			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
+			enabled = false;
+		}
+		startingMaterials = GetAllStartingMaterials(renderers);
+		startingLayers = GetAllStartingLayers(renderers);
+		SetChannelValuesInMaterials();
+
+		SwitchVisibilityState(startingVisibilityState, true);
 	}
 
 	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
 		startingMaterials = newStartingMaterials;
-	}
-
-	public virtual void Init() {
-		if (!initialized) {
-			debug = new DebugLogger(gameObject, DEBUG);
-
-			renderers = GetAllEpitaphRenderers().ToArray();
-			startingMaterials = GetAllStartingMaterials(renderers);
-			SetChannelValuesInMaterials();
-
-			SwitchVisibilityState(startingVisibilityState, true);
-
-			initialized = true;
-		}
 	}
 
 	public virtual void SetBaseDimension(int newBaseDimension) {
@@ -79,8 +75,13 @@ public class DimensionObjectBase : MonoBehaviour {
 	// State Change Logic //
 	////////////////////////
 	#region stateChange
+
 	public virtual void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		if (!ignoreTransitionRules && !IsValidNextState(nextState)) return;
+		StartCoroutine(SwitchVisibilityStateCoroutine(nextState, ignoreTransitionRules));
+	}
+
+	public virtual IEnumerator SwitchVisibilityStateCoroutine(VisibilityState nextState, bool ignoreTransitionRules = false) {
+		if (!ignoreTransitionRules && !IsValidNextState(nextState)) yield break;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
 
@@ -99,6 +100,7 @@ public class DimensionObjectBase : MonoBehaviour {
 			case VisibilityState.partiallyInvisible:
 				visibilityState = VisibilityState.partiallyInvisible;
 				setDimension = (DimensionPillar.activePillar != null) ? DimensionPillar.activePillar.curDimension : baseDimension;
+				if (reverseVisibilityStates) setDimension = DimensionPillar.activePillar?.NextDimension(setDimension) ?? setDimension;
 				break;
 		}
 
@@ -107,15 +109,15 @@ public class DimensionObjectBase : MonoBehaviour {
 				SetMaterials(r);
 
 			}
-			if (setDimension > 0) {
+			if (setDimension >= 0) {
 				SetDimensionValuesInMaterials(setDimension);
 			}
 			SetChannelValuesInMaterials();
 		}
 
-		if (OnStateChange != null) {
-			OnStateChange(nextState);
-		}
+		// Give a frame to let new materials switch before calling state change event
+		yield return null;
+		OnStateChange?.Invoke(nextState);
 	}
 
 	private bool IsValidNextState(VisibilityState nextState) {
@@ -155,18 +157,23 @@ public class DimensionObjectBase : MonoBehaviour {
 
 		bool invisibleLayer = visibilityState == VisibilityState.invisible;
 		if (reverseVisibilityStates) invisibleLayer = visibilityState == VisibilityState.visible;
-		renderer.gameObject.layer = LayerMask.NameToLayer(invisibleLayer ? "Invisible" : "Default");
+		renderer.gameObject.layer = invisibleLayer ? LayerMask.NameToLayer("Invisible") : startingLayers[renderer];
 
 		renderer.SetMaterials(newMaterials);
 	}
 
 	protected void SetDimensionValuesInMaterials(int newDimensionValue) {
-		if (curDimensionSetInMaterial != newDimensionValue && (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible)) {
+		bool isDimensionShader = (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible);
+		if (curDimensionSetInMaterial != newDimensionValue && isDimensionShader && IsRelevantDimension(newDimensionValue)) {
 			foreach (var r in renderers) {
 				r.SetInt("_Dimension", newDimensionValue);
 			}
 			curDimensionSetInMaterial = newDimensionValue;
 		}
+	}
+
+	protected virtual bool IsRelevantDimension(int dimension) {
+		return dimension == baseDimension || (reverseVisibilityStates && visibilityState == VisibilityState.partiallyInvisible && dimension == baseDimension+1);
 	}
 
 	protected void SetChannelValuesInMaterials() {
@@ -221,6 +228,15 @@ public class DimensionObjectBase : MonoBehaviour {
 		return dict;
 	}
 
+	protected Dictionary<EpitaphRenderer, int> GetAllStartingLayers(EpitaphRenderer[] renderers) {
+		Dictionary<EpitaphRenderer, int> dict = new Dictionary<EpitaphRenderer, int>();
+		foreach (var r in renderers) {
+			dict.Add(r, r.gameObject.layer);
+		}
+
+		return dict;
+	}
+
 	private Material GetDimensionObjectMaterial(Material normalMaterial) {
 		Material newMaterial = null;
 		switch (normalMaterial.shader.name) {
@@ -246,6 +262,9 @@ public class DimensionObjectBase : MonoBehaviour {
 			case "Custom/InvertColorsObject":
 			case "Custom/InvertColorsObjectDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionInvertColorsObject"));
+				break;
+			case "Custom/Water":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionWater"));
 				break;
 			default:
 				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
@@ -285,8 +304,11 @@ public class DimensionObjectBase : MonoBehaviour {
 			case "Custom/InvertColorsObjectDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionInvertColorsObject"));
 				break;
+			case "Custom/Water":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionWater"));
+				break;
 			default:
-				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
+				Debug.LogWarning("No matching inverseDimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
 		}
 

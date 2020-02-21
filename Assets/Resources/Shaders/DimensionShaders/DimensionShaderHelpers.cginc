@@ -27,7 +27,7 @@ int ColorToDimensionValue(fixed4 color) {
 	return round((color.r * 100) + (color.g * 20) + (color.b * 4.0) - 1);
 }
 
-void ClipDimensionObject(float2 vertex, int dimension, int channel) {
+fixed4 ClipDimensionObject(float2 vertex, int dimension, int channel) {
 	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
 	fixed4 dimensionTest = fixed4(0,0,0,0);
 	if (channel == 0) {
@@ -39,9 +39,10 @@ void ClipDimensionObject(float2 vertex, int dimension, int channel) {
 
 	int dimensionValue = ColorToDimensionValue(dimensionTest);
 	clip(-(dimensionValue != dimension));
+	return dimensionTest;
 }
 
-void ClipInverseDimensionObject(float2 vertex, int dimension, int channel) {
+fixed4 ClipInverseDimensionObject(float2 vertex, int dimension, int channel) {
 	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
 	fixed4 dimensionTest = fixed4(0,0,0,0);
 	if (channel == 0) {
@@ -53,4 +54,33 @@ void ClipInverseDimensionObject(float2 vertex, int dimension, int channel) {
 
 	int dimensionValue = ColorToDimensionValue(dimensionTest);
 	clip(-(dimensionValue != -1));
+	return dimensionTest;
+}
+
+fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, int dimension, int channel) {
+	fixed4 dimensionTest = fixed4(0,0,0,0);
+	if (channel == 0) {
+		dimensionTest = tex2D(_DimensionMask0, screenPos);
+	}
+	else /*if (channel == 1)*/ {
+		dimensionTest = tex2D(_DimensionMask1, screenPos);
+	}
+
+	int dimensionValue = ColorToDimensionValue(dimensionTest);
+	clip(-(dimensionValue != dimension));
+	return dimensionTest;
+}
+
+fixed4 ClipInverseDimensionObjectFromScreenSpaceCoords(float2 screenPos, int dimension, int channel) {
+	fixed4 dimensionTest = fixed4(0,0,0,0);
+	if (channel == 0) {
+		dimensionTest = tex2D(_DimensionMask0, screenPos);
+	}
+	else /*if (channel == 1)*/ {
+		dimensionTest = tex2D(_DimensionMask1, screenPos);
+	}
+
+	int dimensionValue = ColorToDimensionValue(dimensionTest);
+	clip(-(dimensionValue != -1));
+	return dimensionTest;
 }

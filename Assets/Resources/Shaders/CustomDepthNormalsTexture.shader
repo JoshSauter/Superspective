@@ -36,6 +36,70 @@ ENDCG
 	}
 }
 SubShader {
+    Tags { "RenderType"="DimensionDissolveDoubleSided" }
+    Pass {
+
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+#include "UnityCG.cginc"
+
+fixed4 _Color;
+fixed4 _Color2;
+sampler2D _MainTex;
+float4 _MainTex_ST;
+sampler2D _BumpMap;
+sampler2D _BurnRamp;
+fixed4 _BurnColor;
+float _BurnSize;
+float _DissolveValue;
+
+int _Dimension;
+int _Channel;
+
+struct v2f {
+    float4 pos : SV_POSITION;
+	float2 texcoord : TEXCOORD0;
+    float4 nz : TEXCOORD1;
+	float4 worldPos : TEXCOORD2;
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+float rand(float2 co){
+    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+v2f vert( appdata_full v ) {
+    v2f o;
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+    o.pos = UnityObjectToClipPos(v.vertex);
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+    o.nz.xyz = COMPUTE_VIEW_NORMAL;
+    o.nz.w = COMPUTE_DEPTH_01;
+    return o;
+}
+
+fixed4 frag(v2f i) : SV_Target {
+	if (i.nz.w > 1) i.nz.w = 1;
+	ClipDimensionObject(i.pos.xy, _Dimension, _Channel);
+
+    half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
+	if (_Color.a == 0) clip(-test);
+	if (_Color2.a == 0) clip(test);
+
+	if (test < 0) {
+		if (_Color2.a == 0) clip(-1);
+	}
+	else {
+		if (_Color.a == 0) clip(-1);
+	}
+
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+ENDCG
+    }
+}
+SubShader {
     Tags { "RenderType"="DissolveDoubleSided" }
     Pass {
 

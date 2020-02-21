@@ -37,7 +37,7 @@ TagManager:
   - LightProjectorBlue
   - CollideWithPlayerOnly
   - VisibilityMask1
-  - 
+  - VisibleButNoPlayerCollision
   - 
   - 
   m_SortingLayers:

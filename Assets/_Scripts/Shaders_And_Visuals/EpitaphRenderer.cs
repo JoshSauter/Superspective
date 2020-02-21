@@ -1,9 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
 [RequireComponent(typeof(Renderer))]
 public class EpitaphRenderer : MonoBehaviour {
+	public enum PropBlockType {
+		Color,
+		Float,
+		Int
+	}
+	[Button("Print Property Block Value")]
+	void PrintLookupValueCallback() {
+		PrintPropBlockValue(lookupType, lookupString);
+	}
+	public bool printLookupValue = false;
+	public PropBlockType lookupType = PropBlockType.Int;
+	public string lookupString = "_Dimension";
 	public const string mainColor = "_Color";
 
 	private Renderer lazy_r;
@@ -99,5 +112,19 @@ public class EpitaphRenderer : MonoBehaviour {
 
 	public Bounds GetRendererBounds() {
 		return r.bounds;
+	}
+
+	void PrintPropBlockValue(PropBlockType pbType, string key) {
+		switch (pbType) {
+			case PropBlockType.Color:
+				Debug.Log(key + ": " + propBlock.GetColor(key));
+				break;
+			case PropBlockType.Float:
+				Debug.Log(key + ": " + propBlock.GetFloat(key));
+				break;
+			case PropBlockType.Int:
+				Debug.Log(key + ": " + propBlock.GetInt(key));
+				break;
+		}
 	}
 }

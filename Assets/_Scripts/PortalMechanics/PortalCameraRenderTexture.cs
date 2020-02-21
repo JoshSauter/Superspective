@@ -29,7 +29,14 @@ public class PortalCameraRenderTexture : MonoBehaviour {
 		if (thisPortalVolumetricRenderer == null) thisPortalVolumetricRenderer = volumetricPortal.AddComponent<EpitaphRenderer>();
 
 		CreateRenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
+	}
+
+	void OnEnable() {
 		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
+	}
+
+	void OnDisable() {
+		EpitaphScreen.instance.OnScreenResolutionChanged -= HandleScreenResolutionChanged;
 	}
 
     private void Update() {

@@ -87,6 +87,7 @@ namespace EpitaphUtils {
 			return null;
 		}
 
+		// Recursively search up the transform tree through parents to find a DimensionObject
 		public static PillarDimensionObject FindDimensionObjectRecursively(Transform go) {
 			PillarDimensionObject dimensionObj = go.GetComponent<PillarDimensionObject>();
 			Transform parent = go.parent;
@@ -620,7 +621,27 @@ namespace EpitaphUtils {
 				{ "_DetailMask", ShaderPropertyType.Texture },
 				{ "_DetailAlbedoMap", ShaderPropertyType.Texture },
 				{ "_DetailNormalMapScale", ShaderPropertyType.Float },
-				{ "_DetailNormalMap", ShaderPropertyType.Texture }
+				{ "_DetailNormalMap", ShaderPropertyType.Texture },
+				{ "_Metallic", ShaderPropertyType.Range },
+				// Dissolve shader properties
+				{ "_Color2", ShaderPropertyType.Texture },
+				{ "_DissolveValue", ShaderPropertyType.Range },
+				{ "_BurnSize", ShaderPropertyType.Range },
+				{ "_BurnRamp", ShaderPropertyType.Texture },
+				{ "_BurnColor", ShaderPropertyType.Color },
+				{ "_EmissionAmount", ShaderPropertyType.Float },
+				// Water shader properties
+				{ "_FlowMap", ShaderPropertyType.Texture },
+				{ "_DerivHeightMap", ShaderPropertyType.Texture },
+				{ "_HeightScale", ShaderPropertyType.Float },
+				{ "_HeightScaleModulated", ShaderPropertyType.Float },
+				{ "_Tiling", ShaderPropertyType.Float },
+				{ "_Speed", ShaderPropertyType.Float },
+				{ "_FlowStrength", ShaderPropertyType.Float },
+				{ "_FlowOffset", ShaderPropertyType.Range },
+				{ "_WaterFogColor", ShaderPropertyType.Color },
+				{ "_WaterFogDensity", ShaderPropertyType.Range },
+				{ "_RefractionStrength", ShaderPropertyType.Range }
 			};
 
 			public static void CopyMatchingPropertiesFromMaterial(this Material copyInto, Material copyFrom) {

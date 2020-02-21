@@ -118,9 +118,6 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 				var cType = c.GetType();
 				var existing = cameraGo.AddComponent(cType);
 				EditorUtility.CopySerialized(c, existing);
-				if (existing is BladeEdgeDetection) {
-					(existing as BladeEdgeDetection).depthSensitivity = .2f;
-				}
 			}
 		}
 		sceneViewCamera.allowHDR = myCamera.allowHDR;

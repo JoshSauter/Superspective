@@ -19,9 +19,9 @@ public class PickupCubeDimensionShift : MonoBehaviour, InteractableObject {
 
 	const string defaultLayerName = "Default";
 	const string propName = "_DissolveValue";
-	float outlineFadeInTime = 0.5f;
+	float outlineFadeInTime = 5f;
 	float invertColorsDelay = 0.4f;
-	float invertColorsFadeOutTime = 0.5f;
+	float invertColorsFadeOutTime = 5f;
 
 	bool inOtherDimension;
 

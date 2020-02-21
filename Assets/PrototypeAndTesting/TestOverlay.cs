@@ -13,7 +13,7 @@ public class TestOverlay : MonoBehaviour {
 		}
 	}
 
-	[ImageEffectOpaque]
+	//[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (mat != null) {
 			Graphics.Blit(source, destination, mat);

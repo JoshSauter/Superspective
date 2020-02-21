@@ -109,7 +109,7 @@ public class DimensionPillar : MonoBehaviour {
 		bool shiftDimensionDown = !clockwise && Angle.IsAngleBetween(curDimension * Angle.D360, newAngle, prevAngle);
 		if (shiftDimensionUp) {
 			int prevDimension = curDimension;
-			curDimension = (curDimension < maxDimension ? curDimension + 1 : 0);
+			curDimension = NextDimension(curDimension);
 
 			if (OnDimensionChange != null) {
 				OnDimensionChange(prevDimension, curDimension);
@@ -119,7 +119,7 @@ public class DimensionPillar : MonoBehaviour {
 		}
 		if (shiftDimensionDown) {
 			int prevDimension = curDimension;
-			curDimension = (curDimension > 0 ? curDimension - 1 : maxDimension);
+			curDimension = PrevDimension(curDimension);
 
 			if (OnDimensionChange != null) {
 				OnDimensionChange(prevDimension, curDimension);
@@ -150,8 +150,29 @@ public class DimensionPillar : MonoBehaviour {
 		return PillarAngleOfPoint(playerCamera.transform.position);
 	}
 
+	// Wrap-around logic for incrementing dimension values
+	public int NextDimension(int fromDimension) {
+		return fromDimension < maxDimension ? fromDimension + 1 : 0;
+	}
+
+	// Wrap-around logic for decrementing dimension values
+	public int PrevDimension(int fromDimension) {
+		return fromDimension > 0 ? fromDimension - 1 : maxDimension;
+	}
+
 	private void InitializeDimensionWall() {
 		GameObject dimensionWallGO = Instantiate(dimensionWallPrefab, transform);
 		dimensionWallGO.name = "Dimension Wall";
+	}
+
+	[ContextMenu("Print active pillar details")]
+	void PrintActivePillarName() {
+		if (DimensionPillar.activePillar == null) {
+			Debug.Log("Active pillar is null");
+		}
+		else {
+			Debug.Log("Active pillar is: " + activePillar.gameObject.name + " in Scene: " + activePillar.gameObject.scene.name +
+				"\nThis pillar is active? " + (activePillar == this), activePillar.gameObject);
+		}
 	}
 }

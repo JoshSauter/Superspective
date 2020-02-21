@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ArtificialLowFramerate : MonoBehaviour {
+	[Header("Toggle with Shift+F5")]
 	public float targetFramerate = 60;
 	private int numOperations = 0;
 	private long sum = long.MinValue;

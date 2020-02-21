@@ -7,8 +7,9 @@ using UnityEngine.Rendering;
 public class DimensionWall : MonoBehaviour {
 	Renderer thisRenderer;
 	DimensionPillar pillar;
-	Vector3 topOfPillar;
-	Vector3 bottomOfPillar;
+	Renderer pillarRenderer;
+	Vector3 topOfPillar { get { return pillarRenderer.bounds.center + Vector3.up * pillarRenderer.bounds.size.y / 2f; } }
+	Vector3 bottomOfPillar { get { return pillarRenderer.bounds.center - Vector3.up * pillarRenderer.bounds.size.y / 2f; } }
 
 	float pillarHeight {
 		get {
@@ -22,14 +23,11 @@ public class DimensionWall : MonoBehaviour {
 
 	void Start() {
 		pillar = GetComponentInParent<DimensionPillar>();
+		pillarRenderer = pillar.GetComponent<Renderer>();
 		thisRenderer = GetComponent<Renderer>();
 		pillar.OnDimensionChange += HandleDimensionChange;
 
 		roomBoundsMask = 1 << LayerMask.NameToLayer("WallOnly") | 1 << LayerMask.NameToLayer("RoomBounds");
-
-		Renderer pillarRenderer = pillar.GetComponent<Renderer>();
-		topOfPillar = pillarRenderer.bounds.center + Vector3.up * pillarRenderer.bounds.size.y / 2f;
-		bottomOfPillar = pillarRenderer.bounds.center - Vector3.up * pillarRenderer.bounds.size.y / 2f;
 
 		InitializeWallTransform();
 
@@ -58,6 +56,7 @@ public class DimensionWall : MonoBehaviour {
 			y = transform.position.y
 		};
 		transform.position = oppositePolar.PolarToCartesian() + new Vector3(bottomOfPillar.x, 0, bottomOfPillar.z);
+		transform.localPosition = new Vector3(transform.localPosition.x, pillarHeight / 2f, transform.localPosition.z);
 	}
 
 	private void UpdateWallRotation() {

@@ -101,6 +101,9 @@ public class DimensionObjectInspector : Editor {
 						serializedObject.ApplyModifiedProperties();
 				}
 				break;
+			case PillarDimensionObject.FindPillarsTechnique.anyPillar:
+				GUILayout.Label("This object will interact with any active pillar", EditorStyles.miniBoldLabel);
+				break;
 		}
 
 		EditorGUILayout.Space();

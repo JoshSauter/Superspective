@@ -50,4 +50,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_InvisFloor.unity
     guid: def97791e1f2f064491b8f2561bab42e
+  - enabled: 1
+    path: Assets/__Scenes/Meta/_Meta_EdgeDetection.unity
+    guid: ec213527003ee5342932eb31bf5c7304
   m_configObjects: {}

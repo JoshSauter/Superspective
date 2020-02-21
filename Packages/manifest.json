@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.dbrizov.naughtyattributes": "https://github.com/dbrizov/NaughtyAttributes.git#upm",
     "com.unity.ads": "2.0.8",
     "com.unity.analytics": "3.3.2",
     "com.unity.collab-proxy": "1.2.16",
@@ -41,5 +42,11 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "registry": "http://staging-packages.unity.com"
+  "registry": "http://staging-packages.unity.com",
+  "lock": {
+    "com.dbrizov.naughtyattributes": {
+      "hash": "0373a0987a7e09eacbe42d2f5ef8a8857bcbbdf5",
+      "revision": "upm"
+    }
+  }
 }

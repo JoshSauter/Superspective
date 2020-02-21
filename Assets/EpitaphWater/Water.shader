@@ -17,12 +17,10 @@
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
 	SubShader {
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		Tags { "RenderType"="Transparent" "Queue"="Transparent+1" }
 		LOD 200
 
 		GrabPass { "_WaterBackground" }
-
-		//Cull Off
 
 		CGPROGRAM
 		#pragma surface surf Standard alpha finalcolor:ResetAlpha
@@ -119,7 +117,6 @@
 			flow.xy = flow.xy * 2 - 1;
 			flow *= _FlowStrength;
 
-
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
 			float time = _Time.y * _Speed + noise;
 			float3 uvw1 = FlowUVW(IN.uv_MainTex, flow.xy, time, 0);
@@ -133,7 +130,6 @@
 			fixed4 color1 = tex2D(_MainTex, uvw1.xy) * uvw1.z;
 			fixed4 color2 = tex2D(_MainTex, uvw2.xy) * uvw2.z;
 			fixed4 c = (color1 + color2) * _Color;
-
 
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;

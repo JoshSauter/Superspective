@@ -13,6 +13,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	}
 	public void OnLeftMouseButtonUp() { }
 
+	public bool interactable = true;
 	public bool isHeld = false;
 	public float pickupDropCooldown = 0.1f;
 	float currentCooldown = 0;
@@ -35,9 +36,12 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	public PickupObjectAction OnPickup;
 	public PickupObjectAction OnDrop;
 
-	void Start() {
+	void Awake() {
 		thisRigidbody = GetComponent<Rigidbody>();
 		originalParent = transform.parent;
+	}
+
+	void Start() {
 		player = Player.instance.transform;
 		playerCam = EpitaphScreen.instance.playerCamera.transform;
 		positionLastPhysicsFrame = transform.position;
@@ -54,6 +58,11 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 		if (currentCooldown > 0) {
 			currentCooldown -= Time.deltaTime;
 		}
+	}
+
+	void OnCollisionStay(Collision other) {
+		PillarDimensionObject thisDimensionObj = GetComponent<PillarDimensionObject>();
+		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
 	}
 
 	void FixedUpdate() {
@@ -77,7 +86,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 			if (cubeToPlayer.magnitude < minDistanceFromPlayer && movingTowardsPlayer) {
 				newVelocity = Vector3.ProjectOnPlane(newVelocity, -cubeToPlayer.normalized);
 			}
-			thisRigidbody.velocity = newVelocity;
+			thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
 		}
 	}
 
@@ -88,7 +97,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	}
 
 	public void Pickup() {
-		if (!isHeld && !onCooldown) {
+		if (!isHeld && !onCooldown && interactable) {
 			//transform.parent = Player.instance.transform;
 			positionLastPhysicsFrame = transform.position;
 			thisRigidbody.useGravity = false;
@@ -102,7 +111,7 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	}
 
 	public void Drop() {
-		if (isHeld && !onCooldown) {
+		if (isHeld && !onCooldown && interactable) {
 			//transform.parent = originalParent;
 			thisRigidbody.useGravity = true;
 			//thisRigidbody.isKinematic = false;

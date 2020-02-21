@@ -19,7 +19,8 @@ public class PillarDimensionObject : DimensionObjectBase {
 		automaticSphere,
 		automaticSphereWithBlacklist,
 		automaticBox,
-		automaticBoxWithBlacklist
+		automaticBoxWithBlacklist,
+		anyPillar
 	}
 	public FindPillarsTechnique findPillarsTechnique;
 	private List<DimensionPillar> pillarsFound = new List<DimensionPillar>();
@@ -37,41 +38,58 @@ public class PillarDimensionObject : DimensionObjectBase {
 	public Angle offAngle;
 	private Angle centralAngle;	// Used for continuous on/off angle updating for knowing when the object changes quadrants
 
-	protected override void Start() {
-		Init();
-    }
+	public override void Start() {
+		debug = new DebugLogger(gameObject, DEBUG);
 
-	public override void Init() {
-		if (!initialized) {
-			debug = new DebugLogger(gameObject, DEBUG);
+		objectStartDimension = baseDimension;
+		objectEndDimension = baseDimension;
+		renderers = GetAllEpitaphRenderers().ToArray();
+		startingMaterials = GetAllStartingMaterials(renderers);
+		startingLayers = GetAllStartingLayers(renderers);
 
-			objectStartDimension = baseDimension;
-			objectEndDimension = baseDimension;
-			renderers = GetAllEpitaphRenderers().ToArray();
-			startingMaterials = GetAllStartingMaterials(renderers);
+		FindRelevantPillars();
+		SwitchVisibilityState(visibilityState, true);
 
-			FindRelevantPillars();
-			DimensionPillar.OnActivePillarChanged += HandleActivePillarChanged;
-			SwitchVisibilityState(visibilityState, true);
+		if (DimensionPillar.activePillar != null) {
+			HandleActivePillarChanged(null);
+		}
 
-			if (DimensionPillar.activePillar != null) {
-				HandleActivePillarChanged(null);
-			}
+		if (GetComponent<Rigidbody>() != null && GetComponent<IgnoreCollisionsWithOtherDimensions>() == null) {
+			gameObject.AddComponent<IgnoreCollisionsWithOtherDimensions>();
+		}
+	}
 
-			if (GetComponent<Rigidbody>() != null && GetComponent<IgnoreCollisionsWithOtherDimensions>() == null) {
-				gameObject.AddComponent<IgnoreCollisionsWithOtherDimensions>();
-			}
+	void OnEnable() {
+		DimensionPillar.OnActivePillarChanged += HandleActivePillarChanged;
+		StartCoroutine(WaitOneFrameToSetup());
+	}
+
+	IEnumerator WaitOneFrameToSetup() {
+		yield return null;
+		HandleActivePillarChanged(DimensionPillar.activePillar);
+	}
+
+	private void OnDisable() {
+		DimensionPillar.OnActivePillarChanged -= HandleActivePillarChanged;
+		if (DimensionPillar.activePillar != null && PillarIsRelevant(DimensionPillar.activePillar)) {
+			TeardownEventListeners(DimensionPillar.activePillar);
 		}
 	}
 
 	protected virtual void HandlePillarDimensionChange(int prevDimension, int curDimension) {
+		DetermineState(curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar, true);
 		if (IsRelevantDimension(curDimension)) {
 			SetDimensionValuesInMaterials(curDimension);
 		}
 	}
 
-	private bool IsRelevantDimension(int dimension) {
-		return (dimension == objectStartDimension) || (dimension == objectEndDimension);
+	protected override bool IsRelevantDimension(int dimension) {
+		HashSet<int> acceptableDimensions = new HashSet<int>() { objectStartDimension, objectEndDimension };
+		if (DimensionPillar.activePillar != null && reverseVisibilityStates && visibilityState == VisibilityState.partiallyInvisible) {
+			acceptableDimensions.Add(DimensionPillar.activePillar.NextDimension(objectStartDimension));
+			acceptableDimensions.Add(DimensionPillar.activePillar.NextDimension(objectEndDimension));
+		}
+		return acceptableDimensions.Contains(dimension);
 	}
 
 	protected virtual void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
@@ -94,11 +112,15 @@ public class PillarDimensionObject : DimensionObjectBase {
 		return Angle.IsAngleBetween(onAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest) &&
 			Angle.IsAngleBetween(offAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest);
 	}
-
+	
 	private void FixedUpdate() {
-		if (continuouslyUpdateOnOffAngles && pillarsFound.Contains(DimensionPillar.activePillar)) {
+		if (continuouslyUpdateOnOffAngles && PillarIsRelevant(DimensionPillar.activePillar)) {
 			HandleThisObjectMoving();
 		}
+	}
+
+	private bool PillarIsRelevant(DimensionPillar pillar) {
+		return (findPillarsTechnique == FindPillarsTechnique.anyPillar && pillar != null) || (pillarsFound.Contains(pillar));
 	}
 
 	// Updates on/off positions for this object, then
@@ -139,18 +161,26 @@ public class PillarDimensionObject : DimensionObjectBase {
 	}
 
 	protected virtual void HandleActivePillarChanged(DimensionPillar prevPillar) {
-		if (prevPillar != null && pillarsFound.Contains(prevPillar)) {
-			prevPillar.OnDimensionChange -= HandlePillarDimensionChange;
-			prevPillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
+		if (prevPillar != null && PillarIsRelevant(prevPillar)) {
+			TeardownEventListeners(prevPillar);
 		}
 		FindRelevantPillars();
 
-		if (DimensionPillar.activePillar != null && pillarsFound.Contains(DimensionPillar.activePillar)) {
+		if (DimensionPillar.activePillar != null && PillarIsRelevant(DimensionPillar.activePillar)) {
 			RecalculateOnOffPositions();
-			DimensionPillar.activePillar.OnDimensionChange += HandlePillarDimensionChange;
-			DimensionPillar.activePillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
+			SetupEventListeners(DimensionPillar.activePillar);
 			HandlePillarDimensionChange(-1, DimensionPillar.activePillar.curDimension);
 		}
+	}
+
+	void SetupEventListeners(DimensionPillar pillar) {
+		pillar.OnDimensionChange += HandlePillarDimensionChange;
+		pillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
+	}
+
+	void TeardownEventListeners(DimensionPillar pillar) {
+		pillar.OnDimensionChange -= HandlePillarDimensionChange;
+		pillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
 	}
 
 	////////////////////////////
@@ -177,6 +207,8 @@ public class PillarDimensionObject : DimensionObjectBase {
 			case FindPillarsTechnique.automaticBoxWithBlacklist:
 				SearchForPillarsInBox(blacklist);
 				break;
+			case FindPillarsTechnique.anyPillar:
+				break;
 		}
 	}
 	private void SearchForPillarsInSphere(List<DimensionPillar> blacklist) {
@@ -199,6 +231,12 @@ public class PillarDimensionObject : DimensionObjectBase {
 
 	private void RecalculateOnOffPositions() {
 		if (overrideOnOffAngles) return;
+
+		if (renderers.Length == 0) {
+			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
+			enabled = false;
+			return;
+		}
 
 		if (DimensionPillar.activePillar == null) {
 			onAngle = null; offAngle = null;
