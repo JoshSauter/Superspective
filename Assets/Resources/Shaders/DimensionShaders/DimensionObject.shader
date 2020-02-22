@@ -7,6 +7,7 @@
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
+		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader
 	{
@@ -44,6 +45,7 @@
 			
 			int _Dimension;
 			int _Channel;
+			int _Inverse;
 			
 			v2f vert (appdata v)
 			{
@@ -54,7 +56,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Dimension, _Channel);
+				ClipDimensionObject(i.vertex, _Dimension, _Channel, _Inverse);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog
@@ -82,6 +84,7 @@
 
 			int _Dimension;
 			int _Channel;
+			int _Inverse;
 
 			struct v2f {
 				V2F_SHADOW_CASTER;
@@ -98,7 +101,7 @@
 			}
 
 			float4 frag( v2f i ) : SV_Target {
-				ClipDimensionObject(i.pos.xy, _Dimension, _Channel);
+				ClipDimensionObject(i.pos.xy, _Dimension, _Channel, _Inverse);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

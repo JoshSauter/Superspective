@@ -14,6 +14,7 @@
         _EmissionAmount("Emission amount", float) = 2.0
 		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
+		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader
 	{
@@ -30,6 +31,7 @@
 			#pragma multi_compile_fog
 			
 			#include "UnityCG.cginc"
+			#include "DimensionShaderHelpers.cginc"
 
 			fixed4 _Color;
 			fixed4 _Color2;
@@ -41,6 +43,10 @@
 			float _BurnSize;
 			float _DissolveValue;
 			float _EmissionAmount;
+
+			int _Dimension;
+			int _Channel;
+			int _Inverse;
 
 			struct v2f
 			{
@@ -59,6 +65,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
+				ClipDimensionObject(i.vertex, _Dimension, _Channel, _Inverse);
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);
@@ -97,12 +104,20 @@
 			#include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
 
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			int _Dimension;
 			int _Channel;
+			int _Inverse;
+			float _DissolveValue;
+			fixed4 _Color;
+			fixed4 _Color2;
 
 			struct v2f {
 				V2F_SHADOW_CASTER;
 				UNITY_VERTEX_OUTPUT_STEREO
+				
+				float2 texcoord : TEXCOORD0;
 			};
 
 			v2f vert( appdata_base v )
@@ -111,11 +126,15 @@
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+				o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
 				return o;
 			}
 
 			float4 frag( v2f i ) : SV_Target {
-				ClipDimensionObject(i.pos.xy, _Dimension, _Channel);
+				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
+				if (_Color.a == 0) clip(-test);
+				if (_Color2.a == 0) clip(test);
+				ClipDimensionObject(i.pos.xy, _Dimension, _Channel, _Inverse);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

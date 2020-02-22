@@ -17,6 +17,7 @@
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
+		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader {
 		Tags { "RenderType"="Transparent" "Queue"="Transparent+1" }
@@ -59,6 +60,7 @@
 		
 		int _Dimension;
 		int _Channel;
+		int _Inverse;
 
 		void ResetAlpha(Input IN, SurfaceOutputStandard o, inout fixed4 color) {
 			color.a = 1;
@@ -121,7 +123,7 @@
 
 		void surf(Input IN, inout SurfaceOutputStandard o) {
 			float2 coords = IN.screenPos.xy / IN.screenPos.w;
-			ClipDimensionObjectFromScreenSpaceCoords(coords, _Dimension, _Channel);
+			ClipDimensionObjectFromScreenSpaceCoords(coords, _Dimension, _Channel, _Inverse);
 			
 			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
 			flow.xy = flow.xy * 2 - 1;

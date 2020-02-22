@@ -132,12 +132,14 @@ public class DimensionObjectBase : MonoBehaviour {
 	void SetMaterials(EpitaphRenderer renderer) {
 		Material[] normalMaterials = startingMaterials[renderer];
 		Material[] newMaterials;
+		bool inverseShader = false;
 		if (!reverseVisibilityStates) {
 			if (visibilityState == VisibilityState.partiallyVisible) {
 				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
 			}
 			else if (visibilityState == VisibilityState.partiallyInvisible) {
-				newMaterials = normalMaterials.Select(m => GetInverseDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				inverseShader = true;
 			}
 			else {
 				newMaterials = normalMaterials;
@@ -145,7 +147,8 @@ public class DimensionObjectBase : MonoBehaviour {
 		}
 		else {
 			if (visibilityState == VisibilityState.partiallyVisible) {
-				newMaterials = normalMaterials.Select(m => GetInverseDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				inverseShader = true;
 			}
 			else if (visibilityState == VisibilityState.partiallyInvisible) {
 				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
@@ -160,6 +163,7 @@ public class DimensionObjectBase : MonoBehaviour {
 		renderer.gameObject.layer = invisibleLayer ? LayerMask.NameToLayer("Invisible") : startingLayers[renderer];
 
 		renderer.SetMaterials(newMaterials);
+		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
 	}
 
 	protected void SetDimensionValuesInMaterials(int newDimensionValue) {
@@ -241,8 +245,10 @@ public class DimensionObjectBase : MonoBehaviour {
 		Material newMaterial = null;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
-			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
+				break;
+			case "Custom/UnlitDissolve":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolve"));
 				break;
 			case "Standard (Specular setup)":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObjectSpecular"));
@@ -268,47 +274,6 @@ public class DimensionObjectBase : MonoBehaviour {
 				break;
 			default:
 				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
-				break;
-		}
-
-		if (newMaterial != null && normalMaterial != null) {
-			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
-		}
-		// ?? means: return (newMaterial != null) ? newMaterial : normalMaterial;
-		return newMaterial ?? normalMaterial;
-	}
-
-	private Material GetInverseDimensionObjectMaterial(Material normalMaterial) {
-		Material newMaterial = null;
-		switch (normalMaterial.shader.name) {
-			case "Custom/Unlit":
-			case "Custom/UnlitDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionObject"));
-				break;
-			case "Standard (Specular setup)":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionObjectSpecular"));
-				break;
-			case "TextMeshPro/Distance Field":
-				if (normalMaterial.name.Contains("Signika-Regular SDF Material")) {
-					newMaterial = Resources.Load<Material>("Fonts/Signika-Regular SDF InverseDimensionObject");
-				}
-				else {
-					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
-				}
-				break;
-			case "Hidden/Raymarching":
-			case "Hidden/RaymarchingDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionRaymarching"));
-				break;
-			case "Custom/InvertColorsObject":
-			case "Custom/InvertColorsObjectDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionInvertColorsObject"));
-				break;
-			case "Custom/Water":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/InverseDimensionWater"));
-				break;
-			default:
-				Debug.LogWarning("No matching inverseDimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
 		}
 

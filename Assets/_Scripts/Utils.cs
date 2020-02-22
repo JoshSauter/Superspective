@@ -624,7 +624,7 @@ namespace EpitaphUtils {
 				{ "_DetailNormalMap", ShaderPropertyType.Texture },
 				{ "_Metallic", ShaderPropertyType.Range },
 				// Dissolve shader properties
-				{ "_Color2", ShaderPropertyType.Texture },
+				{ "_Color2", ShaderPropertyType.Color },
 				{ "_DissolveValue", ShaderPropertyType.Range },
 				{ "_BurnSize", ShaderPropertyType.Range },
 				{ "_BurnRamp", ShaderPropertyType.Texture },

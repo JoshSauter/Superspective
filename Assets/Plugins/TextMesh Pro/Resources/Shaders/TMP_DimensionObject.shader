@@ -84,6 +84,7 @@ Shader "TextMeshPro/Distance Field_DimensionObject" {
 		_ColorMask("Color Mask", Float) = 15
 		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
+		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 
 		SubShader{
@@ -159,6 +160,7 @@ Shader "TextMeshPro/Distance Field_DimensionObject" {
 			
 				int _Dimension;
 				int _Channel;
+				int _Inverse;
 
 				pixel_t VertShader(vertex_t input)
 				{
@@ -230,7 +232,7 @@ Shader "TextMeshPro/Distance Field_DimensionObject" {
 
 				fixed4 PixShader(pixel_t input) : SV_Target
 				{
-					ClipDimensionObject(input.position, _Dimension, _Channel);
+					ClipDimensionObject(input.position, _Dimension, _Channel, _Inverse);
 
 					float c = tex2D(_MainTex, input.atlas).a;
 

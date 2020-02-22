@@ -38,6 +38,7 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
+		if (thisDimensionObject == null) return;
 		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
 		if (otherDimensionObj != null && otherDimensionObj.baseDimension != thisDimensionObject.baseDimension) {
 			if (!collidersBeingIgnored.Contains(other)) {

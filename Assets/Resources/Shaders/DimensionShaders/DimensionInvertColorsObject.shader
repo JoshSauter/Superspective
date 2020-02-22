@@ -8,6 +8,7 @@
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
+		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader
 	{
@@ -34,6 +35,7 @@
 			
 			int _Dimension;
 			int _Channel;
+			int _Inverse;
 
 			struct appdata
 			{
@@ -57,7 +59,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Dimension, _Channel);
+				ClipDimensionObject(i.vertex, _Dimension, _Channel, _Inverse);
 
 				return _Color;
 			}
