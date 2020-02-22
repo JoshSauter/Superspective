@@ -57,7 +57,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	private void Awake() {
 		input = PlayerButtonInput.instance;
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 	}
 
 	// Use this for initialization

@@ -13,7 +13,7 @@ public class PortalManager : Singleton<PortalManager> {
 	GameObject volumetricPortalPrefab;
 
 	private void Awake() {
-        debug = new DebugLogger(this, false);
+        debug = new DebugLogger(this, () => false);
 		volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 	}
 

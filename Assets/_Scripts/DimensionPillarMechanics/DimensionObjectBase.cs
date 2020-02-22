@@ -46,7 +46,7 @@ public class DimensionObjectBase : MonoBehaviour {
 	#endregion
 
 	public virtual void Start() {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 
 		renderers = GetAllEpitaphRenderers().ToArray();
 		if (renderers.Length == 0) {

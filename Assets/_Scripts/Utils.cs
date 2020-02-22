@@ -557,25 +557,25 @@ namespace EpitaphUtils {
 		public static Angle D360 = new Angle(Mathf.PI * 2);
 	}
 
-    public class DebugLogger {
-        public bool enabled;
+	public class DebugLogger {
+		public Func<bool> enabled;
         private UnityEngine.Object context;
         
-        public DebugLogger(UnityEngine.Object context, bool enabled) {
+        public DebugLogger(UnityEngine.Object context, Func<bool> enabled) {
             this.enabled = enabled;
             this.context = context;
         }
 
         public void Log(object message) {
-            if (enabled) Debug.Log(message, context);
+            if (enabled.Invoke()) Debug.Log(message, context);
         }
 
         public void LogWarning(object message) {
-            if (enabled) Debug.LogWarning(message, context);
+            if (enabled.Invoke()) Debug.LogWarning(message, context);
         }
 
         public void LogError(object message) {
-            if (enabled) Debug.LogError(message, context);
+            if (enabled.Invoke()) Debug.LogError(message, context);
         }
     }
 

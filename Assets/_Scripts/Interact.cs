@@ -22,7 +22,7 @@ public class Interact : Singleton<Interact> {
 
 	// Use this for initialization
 	void Start () {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 		if (reticle == null) {
 			Debug.LogError("Reticle not set in Interact script, disabling script");
 			enabled = false;

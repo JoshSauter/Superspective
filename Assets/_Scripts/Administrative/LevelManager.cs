@@ -32,6 +32,7 @@ public enum Level {
 }
 
 public class LevelManager : Singleton<LevelManager> {
+	public bool DEBUG = false;
     public DebugLogger debug;
 	public Level startingScene;
 
@@ -66,7 +67,7 @@ public class LevelManager : Singleton<LevelManager> {
 #endregion
 
 	public void Start() {
-        debug = new DebugLogger(this, true);
+        debug = new DebugLogger(this, () => DEBUG);
 
 		loadedSceneNames = new List<string>();
 		currentlyLoadingSceneNames = new List<string>();

@@ -76,7 +76,7 @@ public class PartiallyVisibleObject : MonoBehaviour {
 #endregion
 
 	private void Awake() {
-        debug = new DebugLogger(this, DEBUG);
+        debug = new DebugLogger(this, () => DEBUG);
 
 		invisibleLayer = LayerMask.NameToLayer("Invisible");
 

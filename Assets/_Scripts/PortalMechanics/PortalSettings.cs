@@ -26,7 +26,7 @@ public class PortalSettings : MonoBehaviour {
 	public Texture2D edgeColorGradientTexture;
 
 	private void Awake() {
-        debug = new DebugLogger(this, false);
+        debug = new DebugLogger(this, () => false);
     }
 
     private void OnEnable() {

@@ -51,7 +51,7 @@ public class MagicTrigger : MonoBehaviour {
 	private bool hasNegativeTriggeredOnStay = false;
 
     private void Awake() {
-        debug = new DebugLogger(this, DEBUG);
+        debug = new DebugLogger(this, () => DEBUG);
     }
 
     private void OnTriggerStay(Collider other) {

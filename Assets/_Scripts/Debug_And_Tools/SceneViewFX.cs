@@ -52,7 +52,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	private void OnEnable() {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 
 		DebugPrintState("OnEnable()");
 		if (instance != null && instance != this) {

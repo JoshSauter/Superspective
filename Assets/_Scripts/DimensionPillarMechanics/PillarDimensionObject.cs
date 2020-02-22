@@ -39,7 +39,7 @@ public class PillarDimensionObject : DimensionObjectBase {
 	private Angle centralAngle;	// Used for continuous on/off angle updating for knowing when the object changes quadrants
 
 	public override void Start() {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 
 		objectStartDimension = baseDimension;
 		objectEndDimension = baseDimension;

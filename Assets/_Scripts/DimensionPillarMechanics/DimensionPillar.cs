@@ -76,7 +76,7 @@ public class DimensionPillar : MonoBehaviour {
     }
 
 	private void Initialize() {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 
 		playerCamera = EpitaphScreen.instance.playerCamera;
 		if (!overrideDimensionShiftAngle) {

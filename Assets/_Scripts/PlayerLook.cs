@@ -42,7 +42,7 @@ public class PlayerLook : Singleton<PlayerLook> {
 
     // Use this for initialization
     void Start () {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 
         playerTransform = gameObject.transform;
         cameraTransform = playerTransform.GetChild(0);

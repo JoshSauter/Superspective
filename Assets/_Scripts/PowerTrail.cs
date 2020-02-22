@@ -85,7 +85,7 @@ public class PowerTrail : MonoBehaviour {
 
 	private void Start() {
 		PopulateTrailInfo();
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 	}
 
 	void PopulateTrailInfo() {

@@ -31,7 +31,7 @@ public class TeleportEnter : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		debug = new DebugLogger(gameObject, DEBUG);
+		debug = new DebugLogger(this, () => DEBUG);
 		teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
 
