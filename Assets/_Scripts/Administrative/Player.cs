@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : Singleton<Player> {
 	public PlayerLook look;
 	public PlayerMovement movement;
+	public Headbob headbob;
 
 	public Collider collider;
 	public Renderer renderer;
@@ -15,5 +16,6 @@ public class Player : Singleton<Player> {
 		collider = GetComponentInChildren<Collider>();
 		look = GetComponent<PlayerLook>();
 		movement = GetComponent<PlayerMovement>();
+		headbob = GetComponent<Headbob>();
 	}
 }

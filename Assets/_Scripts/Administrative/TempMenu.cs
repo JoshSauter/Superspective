@@ -8,6 +8,7 @@ public class TempMenu : MonoBehaviour {
 	public Slider generalSensitivitySlider;
 	public Slider xSensitivitySlider;
 	public Slider ySensitivitySlider;
+	public Slider headbobSlider;
 
 	private CursorLockMode cachedLockMode;
 
@@ -20,6 +21,9 @@ public class TempMenu : MonoBehaviour {
 		});
 		ySensitivitySlider.onValueChanged.AddListener(delegate {
 			PlayerLook.instance.sensitivityY = ySensitivitySlider.value;
+		});
+		headbobSlider.onValueChanged.AddListener(delegate {
+			Player.instance.headbob.headbobAmount = headbobSlider.value;
 		});
     }
 

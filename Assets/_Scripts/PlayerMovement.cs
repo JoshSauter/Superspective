@@ -32,7 +32,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	float movespeed;
 	public Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
-	bool grounded = false;
+	public bool grounded = false;
 
 	// Staircase handling characteristics
 	float _maxStepHeight = 0.6f;

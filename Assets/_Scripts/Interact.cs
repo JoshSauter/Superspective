@@ -17,6 +17,7 @@ public class Interact : Singleton<Interact> {
 	public float interactionDistance = 5f;
 	Camera cam;
 
+	public RaycastHit lastLookRay;
 	InteractableObject objectHovered;
 	int layerMask;
 
@@ -83,8 +84,20 @@ public class Interact : Singleton<Interact> {
 		return hitObject;
 	}
 
+	public RaycastHit GetAnyDistanceRaycastHit() {
+		Vector2 reticlePos = Reticle.instance.thisTransformPos;
+		Vector2 screenPos = Vector2.Scale(reticlePos, new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight));
+
+		Ray ray = cam.ScreenPointToRay(screenPos);
+		RaycastHit hitObject;
+		Physics.Raycast(ray.origin, ray.direction, out hitObject, float.MaxValue, layerMask, QueryTriggerInteraction.Collide);
+		return hitObject;
+	}
+
 	InteractableObject FindInteractableObjectHovered() {
 		RaycastHit hitObject = GetRaycastHit();
+		lastLookRay = GetAnyDistanceRaycastHit();
+
 		if (hitObject.collider != null) {
 			debug.Log("Hovering over " + hitObject.collider.gameObject.name);
 			return hitObject.collider.GetComponent<InteractableObject>();
