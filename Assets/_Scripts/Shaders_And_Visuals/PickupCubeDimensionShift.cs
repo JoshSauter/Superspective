@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 
-public class PickupCubeDimensionShift : MonoBehaviour, InteractableObject {
+public class PickupCubeDimensionShift : MonoBehaviour {
+	InteractableObject interactableObject;
 	public PickupObject pickupCube;
 	public PillarDimensionObject pickupCubeDimensionObject, invertColorsDimensionObject;
 	public EpitaphRenderer cubeOutlineRenderer, invertColorsRenderer, raymarchRenderer;
@@ -25,13 +26,10 @@ public class PickupCubeDimensionShift : MonoBehaviour, InteractableObject {
 
 	bool inOtherDimension;
 
-	public void OnLeftMouseButton() { }
-	public void OnLeftMouseButtonFocusLost() { }
 	public void OnLeftMouseButtonDown() {
 		Materialize();
 		pickupCube.Pickup();
 	}
-	public void OnLeftMouseButtonUp() { }
 
 	void SetupKinematicCollider() {
 		GameObject kinematicGameObject = new GameObject("KinematicCollider");
@@ -60,6 +58,14 @@ public class PickupCubeDimensionShift : MonoBehaviour, InteractableObject {
 		detectWhenPlayerIsNearCollider.isTrigger = true;
 
 		triggerGameObject.AddComponent<FreezeRigidbodyWhenPlayerIsNear>().pickupCubeDimensionShift = this;
+	}
+
+	void Awake() {
+		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+		}
 	}
 
 	void Start() {

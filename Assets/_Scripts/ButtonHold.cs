@@ -10,11 +10,18 @@ public class ButtonHold : Button {
 	public event ButtonAction OnButtonHeld;
 	#endregion
 
-	public override void OnLeftMouseButtonUp() {
+	override public void Awake() {
+		base.Awake();
+
+		interactableObject.OnLeftMouseButtonUp += OnLeftMouseButtonUp;
+		interactableObject.OnMouseHoverExit += OnLeftMouseButtonFocusLost;
+	}
+
+	public void OnLeftMouseButtonUp() {
 		ButtonNoLongerHeld();
 	}
 
-	public override void OnLeftMouseButtonFocusLost() {
+	public void OnLeftMouseButtonFocusLost() {
 		ButtonNoLongerHeld();
 	}
 

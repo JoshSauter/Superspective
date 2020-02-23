@@ -4,14 +4,11 @@ using UnityEngine;
 using EpitaphUtils;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PickupObject : MonoBehaviour, InteractableObject {
-
-	public void OnLeftMouseButton() { }
-	public void OnLeftMouseButtonFocusLost() { }
+public class PickupObject : MonoBehaviour {
+	InteractableObject interactableObject;
 	public void OnLeftMouseButtonDown() {
 		Pickup();
 	}
-	public void OnLeftMouseButtonUp() { }
 
 	public bool interactable = true;
 	public bool isHeld = false;
@@ -39,6 +36,12 @@ public class PickupObject : MonoBehaviour, InteractableObject {
 	void Awake() {
 		thisRigidbody = GetComponent<Rigidbody>();
 		originalParent = transform.parent;
+
+		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+		}
 	}
 
 	void Start() {

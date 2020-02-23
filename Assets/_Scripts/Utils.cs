@@ -52,9 +52,9 @@ namespace EpitaphUtils {
 			return components.ToArray();
 		}
 
-		private static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar) {
+		private static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar) where T : Component {
 			T maybeComponent = parent.GetComponent<T>();
-			if (maybeComponent != null) {
+			if (maybeComponent != default(T)) {
 				componentsSoFar.Add(maybeComponent);
 			}
 

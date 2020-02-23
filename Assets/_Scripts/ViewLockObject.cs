@@ -9,7 +9,8 @@ public struct ViewLockInfo {
 }
 
 [RequireComponent(typeof(Collider))]
-public class ViewLockObject : MonoBehaviour, InteractableObject {
+public class ViewLockObject : MonoBehaviour {
+	InteractableObject interactableObject;
 	public ViewLockInfo[] viewLockOptions;
 	public float viewLockTime = 0.75f;
 	public float viewUnlockTime = 0.25f;
@@ -17,6 +18,14 @@ public class ViewLockObject : MonoBehaviour, InteractableObject {
 	public bool focusIsLocked = false;
 	public Collider hitbox;
 	Transform playerCamera;
+
+	void Awake() {
+		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+		}
+	}
 
     void Start() {
 		hitbox = GetComponent<Collider>();
@@ -32,10 +41,6 @@ public class ViewLockObject : MonoBehaviour, InteractableObject {
 			PlayerMovement.instance.thisRigidbody.isKinematic = true;
 		}
 	}
-
-	public void OnLeftMouseButton() { }
-	public void OnLeftMouseButtonUp() { }
-	public void OnLeftMouseButtonFocusLost() { }
 
 	void Update() {
 		if (focusIsLocked && PlayerButtonInput.instance.LeftStickHeld) {

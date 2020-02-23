@@ -17,7 +17,7 @@ public class Interact : Singleton<Interact> {
 	public float interactionDistance = 5f;
 	Camera cam;
 
-	InteractableObject objectSelected;
+	InteractableObject objectHovered;
 	int layerMask;
 
 	// Use this for initialization
@@ -38,29 +38,32 @@ public class Interact : Singleton<Interact> {
 	
 	// Update is called once per frame
 	void Update () {
-		InteractableObject newObjectSelected = FindInteractableObjectSelected();
+		InteractableObject newObjectHovered = FindInteractableObjectHovered();
 		// If we lose focus from previous object selected, send an event to that object
-		if (objectSelected != null && newObjectSelected != objectSelected) {
-			objectSelected.OnLeftMouseButtonFocusLost();
+		if (newObjectHovered != null && newObjectHovered != objectHovered) {
+			newObjectHovered.OnMouseHover?.Invoke();
+		}
+		if (objectHovered != null && newObjectHovered != objectHovered) {
+			objectHovered.OnMouseHoverExit?.Invoke();
 		}
 
 		// Update which object is now selected
-		objectSelected = newObjectSelected;
+		objectHovered = newObjectHovered;
 
-		if (objectSelected != null) {
+		if (objectHovered != null) {
 			reticle.color = reticleSelectColor;
 			reticleOutside.color = reticleOutsideSelectColor;
 			// If the left mouse button is being held down, interact with the object selected
 			if (Input.GetMouseButton(0)) {
 				// If left mouse button was clicked this frame, call OnLeftMouseButtonDown
 				if (Input.GetMouseButtonDown(0)) {
-					objectSelected.OnLeftMouseButtonDown();
+					objectHovered.OnLeftMouseButtonDown?.Invoke();
 				}
-				objectSelected.OnLeftMouseButton();
+				objectHovered.OnLeftMouseButton?.Invoke();
 			}
 			// If we released the left mouse button this frame, call OnLeftMouseButtonUp
 			else if (Input.GetMouseButtonUp(0)) {
-				objectSelected.OnLeftMouseButtonUp();
+				objectHovered.OnLeftMouseButtonUp?.Invoke();
 			}
 		}
 		else {
@@ -80,7 +83,7 @@ public class Interact : Singleton<Interact> {
 		return hitObject;
 	}
 
-	InteractableObject FindInteractableObjectSelected() {
+	InteractableObject FindInteractableObjectHovered() {
 		RaycastHit hitObject = GetRaycastHit();
 		if (hitObject.collider != null) {
 			debug.Log("Hovering over " + hitObject.collider.gameObject.name);

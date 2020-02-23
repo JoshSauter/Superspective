@@ -94,6 +94,8 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));
 			if (myCamera.GetComponent<SceneViewFX>()) excludes.Add(myCamera.GetComponent<SceneViewFX>());
 			if (myCamera.GetComponent<CameraFollow>()) excludes.Add(myCamera.GetComponent<CameraFollow>());
+			if (myCamera.GetComponent<InteractableGlowController>()) excludes.Add(myCamera.GetComponent<InteractableGlowController>());
+			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
 			result = result.Except(excludes).ToArray();
 		}
 		return result;

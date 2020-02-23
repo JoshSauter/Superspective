@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Button : MonoBehaviour, InteractableObject {
-
+public class Button : MonoBehaviour {
+	protected InteractableObject interactableObject;
 #region events
 	public delegate void ButtonAction(Button button);
 	public event ButtonAction OnButtonPressBegin;
@@ -25,10 +25,15 @@ public class Button : MonoBehaviour, InteractableObject {
 	public float deadTimeAfterButtonPress = 0;
 	public float deadTimeAfterButtonDepress = 0;
 
-	public virtual void OnLeftMouseButtonDown() {}
-	public virtual void OnLeftMouseButtonUp() {}
 	public virtual void OnLeftMouseButton() { PressButton(); }
-	public virtual void OnLeftMouseButtonFocusLost() {}
+
+	public virtual void Awake() {
+		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject.OnLeftMouseButton += OnLeftMouseButton;
+		}
+	}
 
 	public void PressButton() {
 		if (!inButtonPressOrDepressCoroutine && !buttonPressed) {

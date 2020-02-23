@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 
-public class ValveControl : MonoBehaviour, InteractableObject {
+public class ValveControl : MonoBehaviour {
+	InteractableObject interactableObject;
 	PlayerLook playerLook;
 	float lookSpeedMultiplier = 0.5f;
 	bool isActive = false;
@@ -12,7 +13,15 @@ public class ValveControl : MonoBehaviour, InteractableObject {
 	public delegate void ValveRotate(Angle diff);
 	public event ValveRotate OnValveRotate;
 
-    void Start() {
+	public void Awake() {
+		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+		}
+	}
+
+	void Start() {
 		playerLook = PlayerLook.instance;
     }
 
@@ -39,17 +48,12 @@ public class ValveControl : MonoBehaviour, InteractableObject {
 		}
 	}
 
-	public void OnLeftMouseButton() {}
-
 	public void OnLeftMouseButtonDown() {
 		isActive = true;
 		playerLook.outsideMultiplier = lookSpeedMultiplier;
 		Interact.instance.enabled = false;
 		prevAngle = GetAngleOfMouse();
 	}
-	public void OnLeftMouseButtonUp() {}
-
-	public void OnLeftMouseButtonFocusLost() {}
 
 	Angle GetAngleOfMouse() {
 		Vector3 mouseLocation = Interact.instance.GetRaycastHit().point;

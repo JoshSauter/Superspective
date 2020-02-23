@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using NaughtyAttributes;
 
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
 public class DimensionPillar : MonoBehaviour {
