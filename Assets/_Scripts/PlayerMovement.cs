@@ -53,7 +53,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
 	public float isGroundedSpherecastDistance = 0.5f;
-#endregion
+	#endregion
+
+	public SoundSettings jumpSound;
 
 	private void Awake() {
 		input = PlayerButtonInput.instance;
@@ -73,7 +75,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
 		}
 		else {
-			movespeed = Mathf.Lerp(movespeed, walkSpeed, desiredMovespeedLerpSpeed * Time.deltaTime); ;
+			movespeed = Mathf.Lerp(movespeed, walkSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
 		}
 	}
 
@@ -239,6 +241,8 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// then waits jumpCooldown seconds to be ready again.
 	/// </summary>
 	IEnumerator Jump() {
+		SoundManager.instance.Play("PlayerJumpShoes", jumpSound);
+
 		jumpIsOnCooldown = true;
 		underMinJumpTime = true;
 		grounded = false;

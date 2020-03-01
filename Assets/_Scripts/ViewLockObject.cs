@@ -23,8 +23,8 @@ public class ViewLockObject : MonoBehaviour {
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
-			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 		}
+		interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 	}
 
     void Start() {

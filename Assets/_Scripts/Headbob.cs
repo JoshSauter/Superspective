@@ -11,8 +11,8 @@ public class Headbob : MonoBehaviour {
 	float curBobAmount = 0f;
 
 	// Time in the animation curve
-	float t = 0f;
-	float curPeriod = 1f;
+	public float t = 0f;
+	public float curPeriod = 1f;
 	float minPeriod = .24f;
 	float maxPeriod = .87f;
 	public float headbobAmount = .5f;
@@ -29,7 +29,7 @@ public class Headbob : MonoBehaviour {
     void Update() {
 		Vector2 playerVelocity = playerMovement.HorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
-		if (playerMovement.grounded && playerSpeed > 0.1f) {
+		if (playerMovement.grounded && playerSpeed > 0.2f) {
 			curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
 			curAmplitude = headbobAmount * Mathf.Lerp(minAmplitude, maxAmplitude, Mathf.InverseLerp(0, 20f, playerSpeed));
 
@@ -47,7 +47,7 @@ public class Headbob : MonoBehaviour {
 		}
 		else {
 			t = 0;
-			float nextBobAmount = Mathf.Lerp(curBobAmount, 0f, 10f * Time.deltaTime);
+			float nextBobAmount = Mathf.Lerp(curBobAmount, 0f, 4f * Time.deltaTime);
 			float thisFrameOffset = nextBobAmount - curBobAmount;
 
 			playerCam.transform.position += Vector3.up * thisFrameOffset;

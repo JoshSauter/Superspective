@@ -187,6 +187,37 @@ namespace EpitaphUtils {
 		}
 	}
 
+	public class RunningAverage {
+		private List<float> samples;
+		private int maxSize;
+
+		public RunningAverage(int maxSize) {
+			samples = new List<float>();
+			this.maxSize = maxSize;
+		}
+
+		public void AddValue(float value) {
+			if (samples.Count == maxSize) {
+				samples.RemoveAt(0);
+			}
+			samples.Add(value);
+		}
+
+		public float Average() {
+			return Average(maxSize);
+		}
+
+		public float Average(int lastNSamples) {
+			float sum = 0;
+			int maxIndex = Mathf.Min(lastNSamples, samples.Count);
+			for (int i = 0; i < maxIndex; i++) {
+				sum += samples[i];
+			}
+
+			return sum / maxIndex;
+		}
+	}
+
 	public class PolarCoordinate {
 		public float radius;
 		public Angle angle;

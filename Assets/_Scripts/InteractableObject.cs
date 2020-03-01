@@ -13,6 +13,7 @@ public class InteractableObject : MonoBehaviour {
 	public InteractAction OnMouseHover;
 
 	public GameObject thisRendererParent;
+	public bool recursiveChildRenderers = true;
 
 	public void Awake() {
 		if (thisRendererParent == null) {
@@ -22,6 +23,7 @@ public class InteractableObject : MonoBehaviour {
 		if (thisRendererParent != null) {
 			// gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
 			InteractableGlow glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
+			glow.recursiveChildRenderers = recursiveChildRenderers;
 			glow.GlowColor = glowColor;
 			glow.interactableObject = this;
 		}

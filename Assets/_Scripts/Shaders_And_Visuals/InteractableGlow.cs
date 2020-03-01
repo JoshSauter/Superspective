@@ -6,6 +6,7 @@ public class InteractableGlow : MonoBehaviour {
 	public InteractableObject interactableObject;
 	public Color GlowColor;
 	public float LerpFactor = 10;
+	public bool recursiveChildRenderers = true;
 
 	public Renderer[] Renderers {
 		get;
@@ -18,7 +19,12 @@ public class InteractableGlow : MonoBehaviour {
 	private Color _targetColor;
 
 	void Start() {
-		Renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
+		if (recursiveChildRenderers) {
+			Renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
+		}
+		else {
+			Renderers = new Renderer[1] { GetComponent<Renderer>() };
+		}
 		InteractableGlowController.instance.Add(this);
 		interactableObject.OnMouseHover += OnMouseHover;
 		interactableObject.OnMouseHoverExit += OnMouseHoverExit;

@@ -75,29 +75,12 @@ Shader "Hidden/GlowComposite"
 			fixed4 frag (v2f i) : SV_Target
 			{
 				fixed4 col = tex2D(_MainTex, i.uv0);
-				float maxLuminance = luminance(col);
 				fixed4 maxColor = col;
 				fixed4 avgColor = col;
 
-				fixed4 glowCol = max(0, tex2D(_GlowBlurredTex, i.uv1) - tex2D(_GlowPrePassTex, i.uv1));
-				float maxGlowLuminance = luminance(glowCol);
-				fixed4 maxGlow = glowCol;
 				for (int j = 0; j < 4; j++) {
 					fixed4 sample = tex2D(_MainTex, i.cornerSamples[j]);
 					avgColor += sample;
-					float sampleLum = luminance(sample);
-					if (sampleLum > maxLuminance) {
-						maxLuminance = sampleLum;
-						maxColor = sample;
-					}
-
-					
-					fixed4 glowSample = max(0, tex2D(_GlowBlurredTex, i.cornerSamples[j]) - tex2D(_GlowPrePassTex, i.cornerSamples[j]));
-					float glowSampleLum = luminance(glowSample);
-					if (glowSampleLum > maxGlowLuminance) {
-						maxGlowLuminance = glowSampleLum;
-						maxGlow = glowSample;
-					}
 				}
 				avgColor /= 5.0;
 				float avgLuminance = luminance(avgColor);
@@ -115,7 +98,7 @@ Shader "Hidden/GlowComposite"
 				//return glow;
 				//return col + glow * _Intensity;
 				//fixed4 finalColor = lerp(col, maxColor, length(2*i.uv0-1) - 0.5);
-				fixed4 glowColor = step(.5, maxLuminance) * darkGlow + (1-step(.5, maxLuminance)) * brightGlow;
+				fixed4 glowColor = lerp(brightGlow, darkGlow, luminance(col));
 
 				//return lerp(col, glowColor, glowLuminance);
 				return lerp(col, col + glowColor, glowLuminance);
