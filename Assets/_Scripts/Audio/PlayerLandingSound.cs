@@ -49,7 +49,7 @@ public class PlayerLandingSound : MonoBehaviour {
 		float volume = startVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
 		shoeSound.volume = volume;
 
-		SoundManager.instance.Play("PlayerLandingShoes", shoeSound);
+		//SoundManager.instance.Play("PlayerLandingShoes", shoeSound);
 
 		if (simulatedSpeedOfImpact < 2 * minSpeed) yield break;
 

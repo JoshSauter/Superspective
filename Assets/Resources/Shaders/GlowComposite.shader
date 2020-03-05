@@ -5,6 +5,7 @@ Shader "Hidden/GlowComposite"
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_GlowIntensity ("Glow Intensity", Range(0,10)) = 1.0
 	}
 	SubShader
 	{
@@ -36,6 +37,8 @@ Shader "Hidden/GlowComposite"
 			half4 _MainTex_ST;
 			float2 _MainTex_TexelSize;
 
+			float _GlowIntensity;
+
 			v2f vert (appdata v)
 			{
 				v2f o;
@@ -66,7 +69,6 @@ Shader "Hidden/GlowComposite"
 			sampler2D _GlowPrePassTex;
 			sampler2D _GlowBlurredTex;
 			sampler2D _TempTex0;
-			float _Intensity;
 
 			float luminance(fixed4 c) {
 				return c.r * .3 + c.g * .59 + c.b * .11;
@@ -86,25 +88,11 @@ Shader "Hidden/GlowComposite"
 				float avgLuminance = luminance(avgColor);
 				//fixed4 glow = maxGlow;
 				//float glowLuminance = maxGlowLuminance;
+				//fixed4 blur = tex2D(_GlowBlurredTex, i.uv1);
+				//fixed4 prepass = tex2D(_GlowPrePassTex, i.uv1);
 				fixed4 glow = max(0, tex2D(_GlowBlurredTex, i.uv1) - tex2D(_GlowPrePassTex, i.uv1));
-				float glowLuminance = luminance(glow);
 
-				fixed4 darkGlow =  -glowLuminance * fixed4(1,1,1,1) * 10 *_Intensity;
-				fixed4 brightGlow = glowLuminance * fixed4(1,1,1,1) * 10 *_Intensity;
-
-				//return maxGlow;
-				//return darkGlow;
-				//return glowLuminance * fixed4(1,1,1,1);
-				//return glow;
-				//return col + glow * _Intensity;
-				//fixed4 finalColor = lerp(col, maxColor, length(2*i.uv0-1) - 0.5);
-				fixed4 glowColor = lerp(brightGlow, darkGlow, luminance(col));
-
-				//return lerp(col, glowColor, glowLuminance);
-				return lerp(col, col + glowColor, glowLuminance);
-				//return col + length(glow) * fixed4(1,1,1,1) * -_Intensity;
-				//return glow * _Intensity;
-				//return col - length(glow) * fixed4(1,1,1,1) * -_Intensity;
+				return lerp(col, glow, min(1, _GlowIntensity*glow.a));
 			}
 			ENDCG
 		}

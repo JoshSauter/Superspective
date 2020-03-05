@@ -13,7 +13,7 @@ public class GlowComposite : MonoBehaviour {
 	}
 
 	void OnRenderImage(RenderTexture src, RenderTexture dst) {
-		_compositeMat.SetFloat("_Intensity", Intensity);
+		_compositeMat.SetFloat("_GlowIntensity", Intensity);
 		Graphics.Blit(src, dst, _compositeMat, 0);
 	}
 }

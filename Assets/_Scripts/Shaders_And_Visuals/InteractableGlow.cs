@@ -44,7 +44,7 @@ public class InteractableGlow : MonoBehaviour {
 	}
 
 	private void OnMouseHoverExit() {
-		_targetColor = Color.black;
+		_targetColor = Color.clear;
 		enabled = true;
 	}
 
@@ -54,7 +54,7 @@ public class InteractableGlow : MonoBehaviour {
 	private void Update() {
 		_currentColor = Color.Lerp(_currentColor, _targetColor, Time.deltaTime * LerpFactor);
 
-		if (ColorsAreCloseEnough(_currentColor, Color.black)) {
+		if (ColorsAreCloseEnough(_currentColor, Color.clear)) {
 			_currentColor = _targetColor;
 			enabled = false;
 		}
@@ -62,8 +62,8 @@ public class InteractableGlow : MonoBehaviour {
 
 	bool ColorsAreCloseEnough(Color c1, Color c2) {
 		float deltaAllowed = 0.0001f;
-		var v1 = new Vector3(c1.r, c1.g, c1.b);
-		var v2 = new Vector3(c2.r, c2.g, c2.b);
+		var v1 = new Vector4(c1.r, c1.g, c1.b, c1.a);
+		var v2 = new Vector4(c2.r, c2.g, c2.b, c2.a);
 
 		return (v2 - v1).magnitude < deltaAllowed;
 	}

@@ -5,6 +5,8 @@ using UnityEngine.Rendering;
 
 public class InteractableGlowController : Singleton<InteractableGlowController> {
 
+	private Camera thisCamera;
+	private BladeEdgeDetection edgeDetection;
 	private CommandBuffer _commandBuffer;
 
 	private HashSet<InteractableGlow> _glowableObjects = new HashSet<InteractableGlow>();
@@ -12,6 +14,7 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 	public int blurIterations = 4;
 
 	private Material prePassMaterial;
+	private Material prePassMaterialLarger;
 	private Material _blurMaterial;
 	private Vector2 _blurTexelSize;
 
@@ -34,6 +37,7 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 	/// </summary>
 	private void Awake() {
 		prePassMaterial = new Material(Shader.Find("Hidden/GlowCmdShader"));
+		prePassMaterialLarger = new Material(Shader.Find("Hidden/GlowCmdShaderLarger"));
 		_blurMaterial = new Material(Shader.Find("Hidden/Blur"));
 
 		_prePassRenderTexID = Shader.PropertyToID("_GlowPrePassTex");
@@ -44,7 +48,9 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 
 		_commandBuffer = new CommandBuffer();
 		_commandBuffer.name = "Glowing Objects Buffer"; // This name is visible in the Frame Debugger, so make it a descriptive!
-		GetComponent<Camera>().AddCommandBuffer(CameraEvent.BeforeImageEffects, _commandBuffer);
+		thisCamera = GetComponent<Camera>();
+		edgeDetection = thisCamera.GetComponent<BladeEdgeDetection>();
+		thisCamera.AddCommandBuffer(CameraEvent.BeforeImageEffects, _commandBuffer);
 	}
 
 	/// <summary>
@@ -53,14 +59,26 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 	/// </summary>
 	private void RebuildCommandBuffer() {
 		_commandBuffer.Clear();
+		_commandBuffer.GetTemporaryRT(_blurPassRenderTexID, Screen.width >> 1, Screen.height >> 1, 0, FilterMode.Bilinear);
+		_commandBuffer.SetRenderTarget(_blurPassRenderTexID);
+		_commandBuffer.ClearRenderTarget(true, true, Color.clear);
 
+		// Blur 0-th iteration
+		foreach (var glowObject in _glowableObjects) {
+			_commandBuffer.SetGlobalColor(_glowColorID, GetColor(glowObject));
+
+			for (int j = 0; j < glowObject.Renderers.Length; j++) {
+				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
+				_commandBuffer.DrawRenderer(glowObject.Renderers[j], prePassMaterialLarger);
+			}
+		}
+
+		// Prepass
 		_commandBuffer.GetTemporaryRT(_prePassRenderTexID, Screen.width, Screen.height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, QualitySettings.antiAliasing);
 		_commandBuffer.SetRenderTarget(_prePassRenderTexID);
 		_commandBuffer.ClearRenderTarget(true, true, Color.clear);
-
-		//Debug.Log("Glowable obj count: " + _glowableObjects.Count);
 		foreach (var glowObject in _glowableObjects) {
-			_commandBuffer.SetGlobalColor(_glowColorID, glowObject.CurrentColor);
+			_commandBuffer.SetGlobalColor(_glowColorID, GetColor(glowObject));
 
 			for (int j = 0; j < glowObject.Renderers.Length; j++) {
 				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
@@ -68,9 +86,7 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 			}
 		}
 
-		_commandBuffer.GetTemporaryRT(_blurPassRenderTexID, Screen.width >> 1, Screen.height >> 1, 0, FilterMode.Bilinear);
 		_commandBuffer.GetTemporaryRT(_tempRenderTexID, Screen.width >> 1, Screen.height >> 1, 0, FilterMode.Bilinear);
-		_commandBuffer.Blit(_prePassRenderTexID, _blurPassRenderTexID);
 
 		_blurTexelSize = new Vector2(1.5f / (Screen.width >> 1), 1.5f / (Screen.height >> 1));
 		_commandBuffer.SetGlobalVector(_blurSizeID, _blurTexelSize);
@@ -90,5 +106,36 @@ public class InteractableGlowController : Singleton<InteractableGlowController> 
 	/// </summary>
 	private void Update() {
 		RebuildCommandBuffer();
+	}
+
+	private Color GetColor(InteractableGlow objGlow) {
+		Color color = new Color();
+		if (edgeDetection == null) {
+			color = objGlow.CurrentColor;
+		}
+		else {
+			switch (edgeDetection.edgeColorMode) {
+				case BladeEdgeDetection.EdgeColorMode.colorRampTexture:
+					color = objGlow.CurrentColor;
+					break;
+				case BladeEdgeDetection.EdgeColorMode.gradient:
+					color = ColorOfGradient(edgeDetection.edgeColorGradient);
+					color.a = objGlow.CurrentColor.a;
+					break;
+				case BladeEdgeDetection.EdgeColorMode.simpleColor:
+					color = edgeDetection.edgeColor;
+					color.a = objGlow.CurrentColor.a;
+					break;
+				default:
+					color = objGlow.CurrentColor;
+					break;
+			}
+		}
+
+		return color;
+	}
+
+	private Color ColorOfGradient(Gradient gradient) {
+		return gradient.Evaluate(Interact.instance.interactionDistance / thisCamera.farClipPlane);
 	}
 }

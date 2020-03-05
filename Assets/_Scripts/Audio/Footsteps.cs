@@ -11,8 +11,13 @@ public class Footsteps : MonoBehaviour {
 	bool playerWasHeadingDownLastFrame = false;
 	float timeSinceLastHit = 0f;
 
+	// Alternates between true and false so we only play a sound every other step
+	bool shouldForceStepSound = true;
+
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
+		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
+
 		bob = GetComponent<Headbob>();
 		defaultVolume = sound.volume;
 
@@ -35,17 +40,28 @@ public class Footsteps : MonoBehaviour {
 			curBobAmountUnamplified = thisFrameBobAmount;
 			bool playerIsHeadingUpThisFrame = thisFrameOffset > 0;
 			if (playerWasHeadingDownLastFrame && playerIsHeadingUpThisFrame) {
-				SoundManager.instance.Play("footstep", sound, shouldForcePlay);
+				PlayFootstep(shouldForcePlay);
 				timeSinceLastHit = 0f;
 			}
 			playerWasHeadingDownLastFrame = !playerIsHeadingUpThisFrame;
 		}
 		else {
 			if (playerWasHeadingDownLastFrame) {
-				SoundManager.instance.Play("footstep", sound, shouldForcePlay);
+				PlayFootstep(shouldForcePlay);
 				timeSinceLastHit = 0f;
 			}
 			playerWasHeadingDownLastFrame = false;
 		}
+	}
+
+	void PlayFootstepAtVolume(bool shouldForcePlay, float tempVolume) {
+		float tmp = sound.volume;
+		sound.volume = tempVolume;
+		PlayFootstep(shouldForcePlay);
+		sound.volume = tmp;
+	}
+
+	void PlayFootstep(bool shouldForcePlay) {
+		SoundManager.instance.Play("footstep", sound, shouldForcePlay);
 	}
 }

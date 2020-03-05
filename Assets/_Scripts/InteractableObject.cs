@@ -4,7 +4,7 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class InteractableObject : MonoBehaviour {
-	public Color glowColor = Color.green;
+	public Color glowColor = new Color(.6f, .35f, .25f, 1f);
 	public delegate void InteractAction();
 	public InteractAction OnLeftMouseButtonDown;
 	public InteractAction OnLeftMouseButton;

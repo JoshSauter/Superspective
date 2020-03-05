@@ -57,6 +57,13 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	public SoundSettings jumpSound;
 
+	#region events
+	public delegate void PlayerMovementAction();
+	public PlayerMovementAction OnJump;
+	public PlayerMovementAction OnJumpLanding;
+	public PlayerMovementAction OnStaircaseStepUp;
+	#endregion
+
 	private void Awake() {
 		input = PlayerButtonInput.instance;
 		debug = new DebugLogger(this, () => DEBUG);
@@ -121,6 +128,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		StepFound stepFound = DetectStep(desiredVelocity, ground);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
+			OnStaircaseStepUp?.Invoke();
 		}
 		thisRigidbody.useGravity = stepFound == null;
 
@@ -241,6 +249,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// then waits jumpCooldown seconds to be ready again.
 	/// </summary>
 	IEnumerator Jump() {
+		OnJump?.Invoke();
 		SoundManager.instance.Play("PlayerJumpShoes", jumpSound);
 
 		jumpIsOnCooldown = true;
@@ -254,6 +263,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		yield return new WaitForSeconds(minJumpTime);
 		underMinJumpTime = false;
 		yield return new WaitUntil(() => grounded);
+		OnJumpLanding?.Invoke();
 		yield return new WaitForSeconds(jumpCooldown);
 
 		if (p != null)

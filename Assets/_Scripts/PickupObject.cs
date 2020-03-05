@@ -101,6 +101,8 @@ public class PickupObject : MonoBehaviour {
 
 	public void Pickup() {
 		if (!isHeld && !onCooldown && interactable) {
+			DontDestroyOnLoad(gameObject);
+
 			//transform.parent = Player.instance.transform;
 			positionLastPhysicsFrame = transform.position;
 			thisRigidbody.useGravity = false;
