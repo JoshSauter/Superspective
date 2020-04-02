@@ -13,6 +13,10 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 	public delegate void ScreenResolutionChangedAction(int newWidth, int newHeight);
 	public event ScreenResolutionChangedAction OnScreenResolutionChanged;
 
+	// Used for receiving OnPreRender instructions from scripts not attached to the main camera
+	public delegate void OnPreRenderAction();
+	public event OnPreRenderAction OnPlayerCamPreRender;
+
 	// Use this for initialization
 	void Awake () {
 		currentWidth = Screen.width;
@@ -39,5 +43,10 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 				OnScreenResolutionChanged(currentWidth, currentHeight);
 			}
 		}
+	}
+
+	private void OnPreRender() {
+		//Debug.LogError("OnPreRender");
+		OnPlayerCamPreRender?.Invoke();
 	}
 }

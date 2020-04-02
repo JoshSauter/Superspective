@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EpitaphUtils;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
 public class CameraFollow : MonoBehaviour {
@@ -14,6 +15,7 @@ public class CameraFollow : MonoBehaviour {
 		relativeStartPosition = transform.localPosition;
 		worldPositionLastFrame = transform.position;
 		TeleportEnter.OnAnyTeleportSimple += ResetPosition;
+		Portal.OnAnyPortalTeleportSimple += (obj) => { if (obj.TaggedAsPlayer()) ResetPosition(); };
 		Player.instance.look.OnViewLockBegin += HandleViewLockBegin;
 		Player.instance.look.OnViewUnlockEnd += HandleViewUnlockEnd;
 	}

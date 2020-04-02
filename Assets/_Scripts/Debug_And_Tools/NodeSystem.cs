@@ -28,7 +28,7 @@ public class NodeSystem : MonoBehaviour {
 				values = new List<Node>();
 			}
 
-			Debug.LogWarning("Recreating allNodes dict from keys and values lists");
+			//Debug.LogWarning("Recreating allNodes dict from keys and values lists");
 			allNodes = new Dictionary<int, Node>();
 			for (int i = 0; i < keys.Count; i++) {
 				allNodes.Add(keys[i], values[i]);

@@ -28,7 +28,8 @@ public enum Level {
 	forkWhiteRoom,
 	forkBlackRoom,
     invisFloor,
-	metaEdgeDetection
+	metaEdgeDetection,
+	portalTestScene
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -63,6 +64,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string transition3_4 = "_Transition3_4";
 
 	private const string metaEdgeDetection = "_Meta_EdgeDetection";
+	private const string portalTestScene = "PortalTestScene";
 
 #endregion
 
@@ -154,6 +156,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
         enumToSceneName.Add(Level.invisFloor, invisFloor);
 		enumToSceneName.Add(Level.metaEdgeDetection, metaEdgeDetection);
+		enumToSceneName.Add(Level.portalTestScene, portalTestScene);
 	}
 
 	/// <summary>
@@ -180,6 +183,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
 
 		worldGraph.Add(metaEdgeDetection, new List<string>() { forkWhiteRoom });
+		worldGraph.Add(portalTestScene, new List<string>());
 	}
 
 	/// <summary>

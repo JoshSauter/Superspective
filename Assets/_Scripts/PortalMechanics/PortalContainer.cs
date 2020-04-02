@@ -5,7 +5,7 @@ using UnityEngine;
 public class PortalContainer : MonoBehaviour {
 	public PortalContainer otherPortal;
 
-    public Camera portalCamera;
+    public Camera portalCamera;				// Should be shared with otherPortal.portalCamera
 	public PortalSettings settings;
 	public PortalTeleporter teleporter;
 	public VolumetricPortalTrigger volumetricPortalTrigger;

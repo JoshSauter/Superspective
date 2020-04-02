@@ -17,6 +17,10 @@ public class PortalManager : Singleton<PortalManager> {
 		volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 	}
 
+	private void Start() {
+		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
+	}
+
 	/// <summary>
 	/// Adds a receiver to the portal dictionary for this channel, and if the portal has two receivers, instantiate the portal
 	/// </summary>
@@ -321,4 +325,20 @@ public class PortalManager : Singleton<PortalManager> {
 		dest.edgeColorGradientTexture = edgeColorGradientTexture;
 	}
 
+	/// <summary>
+	/// Updates the RecursivePortalCamera script's temp RenderTextures with the new resolution.
+	/// (need to do this from a static/singleton place so it doesn't happen for every portal camera)
+	/// </summary>
+	/// <param name="newWidth"></param>
+	/// <param name="newHeight"></param>
+	private void HandleScreenResolutionChanged(int newWidth, int newHeight) {
+		if (RecursivePortalCamera.tmp1 != null) {
+			RecursivePortalCamera.tmp1.Release();
+			RecursivePortalCamera.tmp1 = new RenderTexture(newWidth, newHeight, 24, RenderTextureFormat.ARGB32);
+		}
+		if (RecursivePortalCamera.tmp2 != null) {
+			RecursivePortalCamera.tmp2.Release();
+			RecursivePortalCamera.tmp2 = new RenderTexture(newWidth, newHeight, 24, RenderTextureFormat.ARGB32);
+		}
+	}
 }

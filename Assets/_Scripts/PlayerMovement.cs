@@ -6,6 +6,7 @@ using EpitaphUtils;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : Singleton<PlayerMovement> {
 	public bool DEBUG = false;
+	public bool autoRun = false;
 	DebugLogger debug;
 
 	private float scale { get { return transform.localScale.y; } }
@@ -78,7 +79,11 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	}
 
 	private void Update() {
-		if (input.ShiftHeld) {
+		if (Input.GetKeyDown(KeyCode.Tilde)) {
+			autoRun = !autoRun;
+		}
+
+		if (input.ShiftHeld || autoRun) {
 			movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
 		}
 		else {
@@ -158,6 +163,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		Vector3 forward = Vector3.Cross(Vector3.Cross(up, transform.forward), up);
 
 		Vector3 moveDirection = forward * input.LeftStick.y + right * input.LeftStick.x;
+		if (autoRun) {
+			moveDirection = forward;
+		}
 
 		Physics.gravity = -up * Physics.gravity.magnitude;
 
@@ -168,7 +176,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		}
 
 		// If no keys are pressed, decelerate to a stop
-		if (!input.LeftStickHeld) {
+		if (!input.LeftStickHeld && !autoRun) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 12 * Time.fixedDeltaTime);
 			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
@@ -186,6 +194,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// <returns>Desired Velocity according to current input</returns>
 	Vector3 CalculateAirMovement() {
 		Vector3 moveDirection = input.LeftStick.y * transform.forward + input.LeftStick.x * transform.right;
+		if (autoRun) {
+			moveDirection = transform.forward;
+		}
 
 		Physics.gravity = Vector3.down * Physics.gravity.magnitude;
 
@@ -196,7 +207,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		moveDirection = AirCollisionMovementAdjustment(moveDirection * movespeed);
 
 		// If no keys are pressed, decelerate to a horizontal stop
-		if (!input.LeftStickHeld) {
+		if (!input.LeftStickHeld && !autoRun) {
 			Vector2 horizontalVelocity = HorizontalVelocity();
 			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, decelerationLerpSpeed);
 			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);

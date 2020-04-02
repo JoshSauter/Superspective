@@ -5,8 +5,8 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - mat: {fileID: 2100000, guid: 6b261d643a85b40499f473b7cbe7b7d7, type: 2}
-  - stencilBufferDebugMat: {fileID: 2100000, guid: 80ed28938840f4247848563d99ff7ad4,
-      type: 2}
+  - stencilBufferDebugShader: {fileID: 4800000, guid: e28bc19a48586e64e929bdc75b885618,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
