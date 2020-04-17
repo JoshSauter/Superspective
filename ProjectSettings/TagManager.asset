@@ -18,8 +18,8 @@ TagManager:
   - 
   - ObscureShader1
   - ObscureShader2
-  - WalkableObject
-  - WallOnly
+  - GlowObject
+  - PortalCopy
   - Scenery
   - VisibilityMask0
   - Player

@@ -25,7 +25,7 @@ namespace UnityStandardAssets.ImageEffects
         public SunShaftsResolution resolution = SunShaftsResolution.Normal;
         public ShaftsScreenBlendMode screenBlendMode = ShaftsScreenBlendMode.Screen;
 
-        public Transform sunTransform;
+        public UnityEngine.Transform sunTransform;
         public int radialBlurIterations = 2;
         public Color sunColor = Color.white;
         public Color sunThreshold = new Color(0.87f,0.74f,0.65f);

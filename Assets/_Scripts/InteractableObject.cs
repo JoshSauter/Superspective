@@ -11,6 +11,7 @@ public class InteractableObject : MonoBehaviour {
 	public InteractAction OnLeftMouseButtonUp;
 	public InteractAction OnMouseHoverExit;
 	public InteractAction OnMouseHover;
+	public InteractAction OnMouseHoverEnter;
 
 	public GameObject thisRendererParent;
 	public bool recursiveChildRenderers = true;

@@ -13,8 +13,8 @@ public class StaircaseRotate : MonoBehaviour {
 	public RotationAxes localAxisOfRotation;
 	public bool avoidDoubleRotation = false;
 	public bool staircaseDown = false;
-	public Transform parentToRotate;
-	public Transform[] otherObjectsToRotate;
+	public UnityEngine.Transform parentToRotate;
+	public UnityEngine.Transform[] otherObjectsToRotate;
 	float rotateLerpSpeed = 15f;
 	float startEndGap = 0.25f;
 
@@ -22,7 +22,7 @@ public class StaircaseRotate : MonoBehaviour {
 	public float currentRotation = 0;
 
 	// Miscellaneous
-	private Transform playerInZone;
+	private UnityEngine.Transform playerInZone;
 	private Vector3 pivot { get { return transform.parent.position; } }
 	private Vector3 globalAxis { get { return GetRotationAxis(localAxisOfRotation); } }
 	private MeshRenderer stairRenderer;
@@ -81,7 +81,7 @@ public class StaircaseRotate : MonoBehaviour {
 		int staircaseDownMultiplier = staircaseDown ? -1 : 1;
 
 		// Player should rotate around the pivot but without rotating the player's actual rotation (just position)
-		Transform player = PlayerMovement.instance.transform;
+		UnityEngine.Transform player = PlayerMovement.instance.transform;
 		Vector3 bottomOfPlayer = PlayerMovement.instance.bottomOfPlayer;
 		Quaternion tempRotation = player.rotation;
 		player.transform.position = (player.position - bottomOfPlayer) + RotateAroundPivot(bottomOfPlayer, pivot, Quaternion.Euler(globalAxis * amountToRotate));
@@ -89,7 +89,7 @@ public class StaircaseRotate : MonoBehaviour {
 
 		// Adjust the player's look direction up or down to further the effect
 		PlayerLook playerLook = player.GetComponentInChildren<PlayerLook>();
-		float lookMultiplier = Vector2.Dot(new Vector2(player.forward.x, player.forward.z).normalized, PlayerMovement.instance.HorizontalVelocity().normalized);
+		float lookMultiplier = Vector2.Dot(new Vector2(player.forward.x, player.forward.z).normalized, PlayerMovement.instance.ProjectedHorizontalVelocity().normalized);
 		playerLook.rotationY -= lookMultiplier * Mathf.Abs(amountToRotate) * staircaseDownMultiplier;
 
 		DirectionalLightSingleton.instance.transform.RotateAround(pivot, globalAxis, amountToRotate);
@@ -109,7 +109,7 @@ public class StaircaseRotate : MonoBehaviour {
 		}
 
 		CameraFollow playerCam = player.GetComponentInChildren<CameraFollow>();
-		playerCam.ResetPosition();
+		playerCam.RecalculateWorldPositionLastFrame();
 	}
 
 	Vector3 RotateAroundPivot(Vector3 point, Vector3 pivot, Quaternion angle) {

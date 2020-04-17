@@ -12,7 +12,7 @@ public class LightBlocker : MonoBehaviour {
 	[System.Serializable]
 	public struct LightSourceBlocker {
 		public string name;
-		public Transform source;
+		public UnityEngine.Transform source;
 		public Material lightBlockerMaterial;
 		public Mesh mesh;
 		public List<Vector3> vertsToUse;
@@ -20,9 +20,9 @@ public class LightBlocker : MonoBehaviour {
 	}
 
 	public LightSourceBlocker[] blockers;
-	public Transform redSource;
-	public Transform greenSource;
-	public Transform blueSource;
+	public UnityEngine.Transform redSource;
+	public UnityEngine.Transform greenSource;
+	public UnityEngine.Transform blueSource;
 
 	Mesh thisMesh;
 	MeshRenderer thisRenderer;
@@ -57,7 +57,7 @@ public class LightBlocker : MonoBehaviour {
 		}
 	}
 
-	List<Vector3> GetVertsToUseForSource(Transform lightSource, List<Vector3> vertices) {
+	List<Vector3> GetVertsToUseForSource(UnityEngine.Transform lightSource, List<Vector3> vertices) {
 		return vertices.Where(v => {
 			Vector3 ray = v - lightSource.position;
 			RaycastHit hitInfo;
@@ -92,7 +92,7 @@ public class LightBlocker : MonoBehaviour {
 
 	void BuildMeshForBlocker(ref LightSourceBlocker blocker) {
 		if (blocker.mesh == null) {
-			Transform source = blocker.source;
+			UnityEngine.Transform source = blocker.source;
 			GameObject go = new GameObject();
 			go.layer = source.gameObject.layer;
 			go.name = gameObject.name + " " + blocker.name;

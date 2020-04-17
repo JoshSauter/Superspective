@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using EpitaphUtils;
+using EpitaphUtils.PortalUtils;
 
 public class Interact : Singleton<Interact> {
 	public bool DEBUG = false;
+	public LayerMask layerMask;
 	DebugLogger debug;
 	public Image reticle;
 	public Image reticleOutside;
@@ -17,9 +19,8 @@ public class Interact : Singleton<Interact> {
 	public float interactionDistance = 5f;
 	Camera cam;
 
-	public RaycastHit lastLookRay;
-	InteractableObject objectHovered;
-	int layerMask;
+	public InteractableObject objectHovered;
+	//int layerMask;
 
 	// Use this for initialization
 	void Start () {
@@ -33,23 +34,27 @@ public class Interact : Singleton<Interact> {
 		cam = EpitaphScreen.instance.playerCamera;
 		reticleUnselectColor = reticle.color;
 		reticleOutsideUnselectColor = reticleOutside.color;
-
-		layerMask = ~(1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("Ignore Raycast") | 1 << LayerMask.NameToLayer("CollideWithPlayerOnly"));
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		InteractableObject newObjectHovered = FindInteractableObjectHovered();
-		// If we lose focus from previous object selected, send an event to that object
-		if (newObjectHovered != null && newObjectHovered != objectHovered) {
-			newObjectHovered.OnMouseHover?.Invoke();
-		}
+
+		// If we were previously hovering over a different object, send a MouseHoverExit event to that object
 		if (objectHovered != null && newObjectHovered != objectHovered) {
+			//Debug.LogWarning(objectHovered.name + ".OnMouseHoverExit()");
 			objectHovered.OnMouseHoverExit?.Invoke();
+		}
+
+		// If we are hovering a new object that's not already hovered, send a MouseHover event to that object
+		if (newObjectHovered != null && newObjectHovered != objectHovered) {
+			//Debug.LogWarning(newObjectHovered.name + ".OnMouseHover()");
+			newObjectHovered.OnMouseHoverEnter?.Invoke();
 		}
 
 		// Update which object is now selected
 		objectHovered = newObjectHovered;
+		objectHovered?.OnMouseHover?.Invoke();
 
 		if (objectHovered != null) {
 			reticle.color = reticleSelectColor;
@@ -74,33 +79,28 @@ public class Interact : Singleton<Interact> {
 
 	}
 
-	public RaycastHit GetRaycastHit() {
+	public RaycastHits GetRaycastHits() {
 		Vector2 reticlePos = Reticle.instance.thisTransformPos;
 		Vector2 screenPos = Vector2.Scale(reticlePos, new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight));
 
 		Ray ray = cam.ScreenPointToRay(screenPos);
-		RaycastHit hitObject;
-		Physics.Raycast(ray.origin, ray.direction, out hitObject, interactionDistance, layerMask, QueryTriggerInteraction.Collide);
-		return hitObject;
+		return PortalUtils.RaycastThroughPortals(ray.origin, ray.direction, interactionDistance, layerMask);
 	}
 
-	public RaycastHit GetAnyDistanceRaycastHit() {
+	public RaycastHits GetAnyDistanceRaycastHits() {
 		Vector2 reticlePos = Reticle.instance.thisTransformPos;
 		Vector2 screenPos = Vector2.Scale(reticlePos, new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight));
 
 		Ray ray = cam.ScreenPointToRay(screenPos);
-		RaycastHit hitObject;
-		Physics.Raycast(ray.origin, ray.direction, out hitObject, float.MaxValue, layerMask, QueryTriggerInteraction.Collide);
-		return hitObject;
+		return PortalUtils.RaycastThroughPortals(ray.origin, ray.direction, float.MaxValue, layerMask);
 	}
 
 	InteractableObject FindInteractableObjectHovered() {
-		RaycastHit hitObject = GetRaycastHit();
-		lastLookRay = GetAnyDistanceRaycastHit();
+		RaycastHits hitObject = GetRaycastHits();
 
-		if (hitObject.collider != null) {
-			debug.Log("Hovering over " + hitObject.collider.gameObject.name);
-			return hitObject.collider.GetComponent<InteractableObject>();
+		if (hitObject.raycastWasAHit && hitObject.lastRaycast.hitInfo.collider != null) {
+			debug.Log("Hovering over " + hitObject.lastRaycast.hitInfo.collider.gameObject.name);
+			return hitObject.lastRaycast.hitInfo.collider.GetComponent<InteractableObject>();
 		}
 		else return null;
 	}

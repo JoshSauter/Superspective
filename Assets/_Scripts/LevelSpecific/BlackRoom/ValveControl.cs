@@ -56,7 +56,7 @@ public class ValveControl : MonoBehaviour {
 	}
 
 	Angle GetAngleOfMouse() {
-		Vector3 mouseLocation = Interact.instance.GetRaycastHit().point;
+		Vector3 mouseLocation = Interact.instance.GetRaycastHits().lastRaycast.hitInfo.point;
 		Vector3 localMouseLocation = transform.InverseTransformPoint(mouseLocation);
 		return PolarCoordinate.CartesianToPolar(localMouseLocation).angle;
 	}

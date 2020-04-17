@@ -9,7 +9,7 @@ public class RisingBridge : MonoBehaviour {
 	public bool DEBUG = false;
 	public AnimationCurve bridgePieceRiseCurve;
 
-	Transform[] bridgePieces;
+	UnityEngine.Transform[] bridgePieces;
 	Vector3[] originalPositions;
 
 	bool inBridgeRiseCoroutine = false;
@@ -21,7 +21,7 @@ public class RisingBridge : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
-		bridgePieces = transform.GetComponentsInChildrenOnly<Transform>();
+		bridgePieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();
 		if (DEBUG) {
 			originalPositions = new Vector3[bridgePieces.Length];
 			for (int i = 0; i < bridgePieces.Length; i++) {
@@ -75,7 +75,7 @@ public class RisingBridge : MonoBehaviour {
 		inBridgeRiseCoroutine = false;
 	}
 
-	IEnumerator BridgePieceRise(Transform piece) {
+	IEnumerator BridgePieceRise(UnityEngine.Transform piece) {
 		Vector3 startPosition = piece.position;
 		Vector3 endPosition = startPosition + Vector3.up * distanceForEachPieceToRise;
 

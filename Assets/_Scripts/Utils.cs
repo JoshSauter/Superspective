@@ -13,6 +13,24 @@ namespace EpitaphUtils {
 			y = _y;
 		}
 	}
+
+	public struct TransformInfo {
+		public Vector3 position;
+		public Quaternion rotation;
+		public Vector3 scale;
+
+		public TransformInfo(Transform t) {
+			this.position = t.position;
+			this.rotation = t.rotation;
+			this.scale = t.localScale;
+		}
+
+		public void ApplyToTransform(Transform t) {
+			t.position = position;
+			t.rotation = rotation;
+			t.localScale = scale;
+		}
+	}
 	
 	public static class Utils {
 		public static T GetCopyOf<T>(this Component comp, T other) where T : Component {
@@ -46,24 +64,24 @@ namespace EpitaphUtils {
 			return go.AddComponent<T>().GetCopyOf(toAdd) as T;
 		}
 
-		public static T[] GetComponentsInChildrenRecursively<T>(this Transform parent) where T : Component {
+		public static T[] GetComponentsInChildrenRecursively<T>(this UnityEngine.Transform parent) where T : Component {
 			List<T> components = new List<T>();
 			GetComponentsInChildrenRecursivelyHelper(parent, ref components);
 			return components.ToArray();
 		}
 
-		private static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar) where T : Component {
+		private static void GetComponentsInChildrenRecursivelyHelper<T>(UnityEngine.Transform parent, ref List<T> componentsSoFar) where T : Component {
 			T maybeComponent = parent.GetComponent<T>();
 			if (maybeComponent != default(T)) {
 				componentsSoFar.Add(maybeComponent);
 			}
 
-			foreach (Transform child in parent) {
+			foreach (UnityEngine.Transform child in parent) {
 				GetComponentsInChildrenRecursivelyHelper(child, ref componentsSoFar);
 			}
 		}
 
-		public static T[] GetComponentsInChildrenOnly<T>(this Transform parent) where T : Component {
+		public static T[] GetComponentsInChildrenOnly<T>(this UnityEngine.Transform parent) where T : Component {
 			T[] all = parent.GetComponentsInChildren<T>();
 			T[] children = new T[parent.childCount];
 			int index = 0;
@@ -77,7 +95,7 @@ namespace EpitaphUtils {
 			return children;
 		}
 
-		public static T GetComponentInChildrenOnly<T>(this Transform parent) where T : Component {
+		public static T GetComponentInChildrenOnly<T>(this UnityEngine.Transform parent) where T : Component {
 			T[] all = parent.GetComponentsInChildren<T>();
 			foreach (T each in all) {
 				if (each.transform != parent) {
@@ -88,9 +106,9 @@ namespace EpitaphUtils {
 		}
 
 		// Recursively search up the transform tree through parents to find a DimensionObject
-		public static PillarDimensionObject FindDimensionObjectRecursively(Transform go) {
+		public static PillarDimensionObject FindDimensionObjectRecursively(UnityEngine.Transform go) {
 			PillarDimensionObject dimensionObj = go.GetComponent<PillarDimensionObject>();
-			Transform parent = go.parent;
+			UnityEngine.Transform parent = go.parent;
 			if (dimensionObj != null) {
 				return dimensionObj;
 			}
@@ -100,8 +118,8 @@ namespace EpitaphUtils {
 			else return null;
 		}
 
-		public static Transform[] GetChildren(this Transform parent) {
-			return parent.GetComponentsInChildrenOnly<Transform>();
+		public static UnityEngine.Transform[] GetChildren(this UnityEngine.Transform parent) {
+			return parent.GetComponentsInChildrenOnly<UnityEngine.Transform>();
 		}
 
 		public static bool IsVisibleFrom(this Renderer r, Camera camera) {
@@ -119,7 +137,7 @@ namespace EpitaphUtils {
 		public static void SetLayerRecursively(GameObject obj, int layer) {
 			obj.layer = layer;
 
-			foreach (Transform child in obj.transform) {
+			foreach (UnityEngine.Transform child in obj.transform) {
 				SetLayerRecursively(child.gameObject, layer);
 			}
 		}
@@ -766,6 +784,118 @@ namespace EpitaphUtils {
 						material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
 						material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 						break;
+				}
+			}
+		}
+	}
+
+	namespace PortalUtils {
+		public class RaycastHits {
+			public bool raycastWasAHit = false;
+			public bool raycastHitAnyPortal = false;
+			public Vector3 finalPosition {
+				get {
+					if (raycastWasAHit) {
+						return lastRaycast.hitInfo.point;
+					}
+					else {
+						return lastRaycast.ray.origin + lastRaycast.ray.direction * lastRaycast.distance;
+					}
+				}
+			}
+			public float totalDistance;
+			public List<RaycastThroughPortalInfo> hitInfos = new List<RaycastThroughPortalInfo>();
+			public RaycastThroughPortalInfo firstRaycast { get { return hitInfos[0]; } }
+			public RaycastThroughPortalInfo lastRaycast { get { return hitInfos[hitInfos.Count - 1]; } }
+
+			public void AddHitInfo(RaycastThroughPortalInfo hitInfo) {
+				hitInfos.Add(hitInfo);
+				if (hitInfo.portalHit != null) {
+					raycastHitAnyPortal = true;
+				}
+			}
+		}
+
+		public struct RaycastThroughPortalInfo {
+			public Ray ray;
+			public float distance;
+			public RaycastHit hitInfo;
+			public Portal portalHit;
+
+			public RaycastThroughPortalInfo(Ray ray, float distance, RaycastHit raycastHit, Portal portalHit) {
+				this.ray = ray;
+				this.distance = distance;
+				this.hitInfo = raycastHit;
+				this.portalHit = portalHit;
+			}
+		}
+
+		public static class PortalUtils {
+			public static RaycastHits RaycastThroughPortals(Vector3 start, Vector3 direction, float maxDistance, int layermask) {
+				return RaycastThroughPortalsHelper(start, direction, maxDistance, layermask, 0, new RaycastHits());
+			}
+
+			private static RaycastHits RaycastThroughPortalsHelper(Vector3 start, Vector3 direction, float maxDistance, int layermask, float distanceTraveledSoFar, RaycastHits raycastHits) {
+				//Debug.Log("Distance travelled: " + distanceTraveledSoFar);
+				// Bad distance value
+				if (distanceTraveledSoFar > maxDistance) {
+					raycastHits.raycastWasAHit = false;
+					raycastHits.totalDistance = maxDistance;
+					return raycastHits;
+				}
+
+				RaycastHit thisHitInfo = new RaycastHit();
+				float rayDistance = (maxDistance - distanceTraveledSoFar);
+				Ray testRay = new Ray(start, direction);
+
+				bool raycastResult = false;
+				if (raycastHits.hitInfos.Count > 0 && raycastHits.lastRaycast.portalHit != null) {
+					GameObject outPortalOfLastRaycastHit = raycastHits.lastRaycast.portalHit.otherPortal.gameObject;
+					int tempLayer = outPortalOfLastRaycastHit.layer;
+					outPortalOfLastRaycastHit.layer = LayerMask.NameToLayer("Ignore Raycast");
+					raycastResult = Physics.Raycast(testRay, out thisHitInfo, rayDistance, layermask, QueryTriggerInteraction.Collide);
+					outPortalOfLastRaycastHit.layer = tempLayer;
+				}
+				else {
+					raycastResult = Physics.Raycast(testRay, out thisHitInfo, rayDistance, layermask, QueryTriggerInteraction.Collide);
+				}
+
+				// Raycast hit something
+				if (raycastResult) {
+					Debug.DrawLine(testRay.origin, testRay.origin + testRay.direction * rayDistance, Color.green, 0.1f);
+					float newTotalDistanceTraveled = distanceTraveledSoFar + thisHitInfo.distance;
+
+					raycastHits.totalDistance = newTotalDistanceTraveled;
+
+					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>();
+					// Raycast hit a portal, fire a new one on the other side of the portal
+					if (portalHit != null && portalHit.isEnabled) {
+						Vector3 localPositionOfNewStart = portalHit.transform.InverseTransformPoint(thisHitInfo.point);
+						localPositionOfNewStart = Quaternion.Euler(0f, 180f, 0f) * localPositionOfNewStart;
+						Vector3 newStart = portalHit.otherPortal.transform.TransformPoint(localPositionOfNewStart);
+
+						Vector3 newDirection = portalHit.transform.InverseTransformDirection(direction);
+						newDirection = Quaternion.Euler(0f, 180f, 0f) * newDirection;
+						newDirection = portalHit.otherPortal.transform.TransformDirection(newDirection);
+
+						raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, portalHit));
+
+						return RaycastThroughPortalsHelper(newStart, newDirection, maxDistance, layermask, newTotalDistanceTraveled, raycastHits);
+					}
+					// Raycast hit a non-portal object, return that info
+					else {
+						raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, null));
+						raycastHits.raycastWasAHit = true;
+						return raycastHits;
+					}
+				}
+				// Raycast didn't hit anything
+				else {
+					Debug.DrawLine(testRay.origin, testRay.origin + testRay.direction * rayDistance, Color.red, 0.1f);
+					raycastHits.raycastWasAHit = false;
+					raycastHits.totalDistance = maxDistance;
+					raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, null));
+					return raycastHits;
 				}
 			}
 		}

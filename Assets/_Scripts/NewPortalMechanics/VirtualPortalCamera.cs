@@ -14,7 +14,7 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 	public int MaxDepth = 6;
 	public int MaxRenderSteps = 24;
 	public float MaxRenderDistance = 400;
-	public float distanceToStartCheckingPortalBounds = 12;
+	public float distanceToStartCheckingPortalBounds = 5f;
 	public float clearSpaceBehindPortal = 0.49f;
 
 	int renderSteps;
@@ -32,9 +32,13 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 		mainCamera = EpitaphScreen.instance.playerCamera;
 		portalCamera = GetComponent<Camera>();
 		EpitaphScreen.instance.OnPlayerCamPreRender += RenderPortals;
-		EpitaphScreen.instance.OnScreenResolutionChanged += (width, height) => renderStepTextures.Clear();
+		EpitaphScreen.instance.OnScreenResolutionChanged += (width, height) => Test();
 
 		renderStepTextures = new List<RenderTexture>();
+	}
+
+	void Test() {
+		renderStepTextures.Clear();
 	}
 
 	/// <summary>
@@ -75,7 +79,8 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 		foreach (var finishedPortalTexture in finishedPortalTextures) {
 			finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value);
 		}
-		debug.LogWarning("End of frame: renderSteps: " + renderSteps);
+
+		debug.LogError("End of frame: renderSteps: " + renderSteps);
 	}
 
 	RenderTexture RenderPortalDepth(int depth, Portal portal, Rect portalScreenBounds, string tree) {
@@ -99,9 +104,7 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 		foreach (var visiblePortalTuple in visiblePortals) {
 			Portal visiblePortal = visiblePortalTuple.Key;
 
-			bool isWithinRenderDistance = Vector3.Distance(visiblePortal.transform.position, portalCamera.transform.position) < MaxRenderDistance;
-
-			if (depth < MaxDepth - 1 && isWithinRenderDistance) {
+			if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
 				string nextTree = tree + ", " + visiblePortal.name;
 				Rect visiblePortalRect = visiblePortalTuple.Value;
 				Rect nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalRect);
@@ -120,9 +123,8 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 		// RESTORE STATE
 		foreach (var visiblePortalKeyVal in visiblePortals) {
 			Portal visiblePortal = visiblePortalKeyVal.Key;
-			bool isWithinRenderDistance = Vector3.Distance(visiblePortal.transform.position, portalCamera.transform.position) < MaxRenderDistance;
 
-			if (depth < MaxDepth - 1 && isWithinRenderDistance) {
+			if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
 				// Restore the RenderTextures that were in use at this stage
 				visiblePortal.SetTexture(visiblePortalTextures[visiblePortalKeyVal.Key]);
 			}
@@ -133,15 +135,24 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 		SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix);
 
 		while (renderStepTextures.Count <= index) {
-			renderStepTextures.Add(new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32));
+			renderStepTextures.Add(new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.ARGB32));
 		}
 
 		debug.Log("Rendering: " + index + " to " + portal.name + "'s RenderTexture, depth: " + depth);
 		portalCamera.targetTexture = renderStepTextures[index];
+
 		portalCamera.Render();
 
 		portal.SetTexture(renderStepTextures[index]);
 		return renderStepTextures[index];
+	}
+
+	private bool ShouldRenderRecursively(int depth, Portal portal, Portal visiblePortal) {
+		return depth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && portal.renderRecursivePortals;
+	}
+
+	private bool IsWithinRenderDistance(Portal portal, Camera camera) {
+		return Vector3.Distance(portal.transform.position, camera.transform.position) < MaxRenderDistance;
 	}
 
 	/// <summary>
@@ -186,8 +197,8 @@ public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 	}
 
 	void SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
-		Transform inTransform = inPortal.transform;
-		Transform outTransform = outPortal.transform;
+		UnityEngine.Transform inTransform = inPortal.transform;
+		UnityEngine.Transform outTransform = outPortal.transform;
 		// Position the camera behind the other portal.
 		Vector3 relativePos = inTransform.InverseTransformPoint(portalCamera.transform.position);
 		relativePos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativePos;

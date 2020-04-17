@@ -8,11 +8,12 @@
     {
 		Tags 
 		{ 
-			"RenderType" = "PortalSurface" "Queue" = "Transparent"
+			"RenderType" = "PortalSurface" "Queue" = "Transparent-1"
 		}
 
         Pass
         {
+			ZWrite Off
 			Stencil
 			{
 				Ref 1

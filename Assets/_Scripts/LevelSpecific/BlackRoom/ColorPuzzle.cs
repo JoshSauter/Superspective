@@ -5,12 +5,12 @@ using System.Linq;
 using EpitaphUtils;
 
 public class ColorPuzzle : MonoBehaviour {
-	public Transform smallPuzzleParent;
+	public UnityEngine.Transform smallPuzzleParent;
 	public bool solved = false;
 	public bool isActive = false;
 	ColorPuzzleNode[] solutionNodes;
 	LightBlocker[] lightBlockers;
-	Transform smallPuzzle;
+	UnityEngine.Transform smallPuzzle;
 
 	Vector3 activePos;
 	Vector3 inactivePos;
@@ -48,7 +48,7 @@ public class ColorPuzzle : MonoBehaviour {
 		GameObject bigPuzzle = Instantiate(this, smallPuzzleParent, false).gameObject;
 		DestroyImmediate(bigPuzzle.GetComponent<ColorPuzzle>());
 
-		foreach (Transform t in bigPuzzle.transform) {
+		foreach (UnityEngine.Transform t in bigPuzzle.transform) {
 			ColorPuzzleNode node = t.GetComponent<ColorPuzzleNode>();
 			LightBlocker lightBlocker = t.GetComponent<LightBlocker>();
 			if (node != null) DestroyImmediate(node);

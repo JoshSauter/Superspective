@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PuzzleCube : MonoBehaviour {
 	public PuzzlePanel puzzle;
-	Transform cubesParent;
+	UnityEngine.Transform cubesParent;
 
 	// Use this for initialization
 	void Start () {

@@ -27,7 +27,7 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
 			selectionSoFar.Add(curNode);
 		}
 
-		foreach (Transform child in curNode.transform) {
+		foreach (UnityEngine.Transform child in curNode.transform) {
 			if (child.gameObject != curNode) {
 				SelectAllChildrenRecusivelyWithName(child.gameObject, ref selectionSoFar);
 			}

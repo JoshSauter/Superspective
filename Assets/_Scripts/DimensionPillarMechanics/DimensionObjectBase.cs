@@ -203,7 +203,7 @@ public class DimensionObjectBase : MonoBehaviour {
 		return allRenderers;
 	}
 
-	void SetEpitaphRenderersRecursively(Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
+	void SetEpitaphRenderersRecursively(UnityEngine.Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
 		// Children who have DimensionObject scripts are treated on only by their own settings
 		if (parent != transform && parent.GetComponent<PillarDimensionObject>() != null) return;
 
@@ -217,7 +217,7 @@ public class DimensionObjectBase : MonoBehaviour {
 		}
 
 		if (parent.childCount > 0) {
-			foreach (Transform child in parent) {
+			foreach (UnityEngine.Transform child in parent) {
 				SetEpitaphRenderersRecursively(child, ref renderersSoFar);
 			}
 		}

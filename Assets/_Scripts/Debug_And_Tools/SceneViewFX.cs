@@ -94,7 +94,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));
 			if (myCamera.GetComponent<SceneViewFX>()) excludes.Add(myCamera.GetComponent<SceneViewFX>());
 			if (myCamera.GetComponent<CameraFollow>()) excludes.Add(myCamera.GetComponent<CameraFollow>());
-			if (myCamera.GetComponent<InteractableGlowController>()) excludes.Add(myCamera.GetComponent<InteractableGlowController>());
+			if (myCamera.GetComponent<InteractableGlowManager>()) excludes.Add(myCamera.GetComponent<InteractableGlowManager>());
 			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
 			result = result.Except(excludes).ToArray();
 		}
@@ -134,7 +134,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			// these components are default on the SceneView camera...
 			if (sceneViewCamera.GetComponent("HaloLayer") == compsOnCam[i]) continue;
 			if (sceneViewCamera.GetComponent("FlareLayer") == compsOnCam[i]) continue;
-			if (compsOnCam[i] is Transform) continue;
+			if (compsOnCam[i] is UnityEngine.Transform) continue;
 			if (compsOnCam[i] is Camera) continue;
 			DestroyImmediate(compsOnCam[i]);
 		}

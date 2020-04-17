@@ -164,7 +164,7 @@ public class PortalManager : Singleton<PortalManager> {
 		return portalCameraFollows;
 	}
 
-	private PortalCameraFollow CreatePortalCamera(Transform parentObj, PortalSettings receiver, PortalSettings otherPortal) {
+	private PortalCameraFollow CreatePortalCamera(UnityEngine.Transform parentObj, PortalSettings receiver, PortalSettings otherPortal) {
 		GameObject playerCam = EpitaphScreen.instance.playerCamera.gameObject;
 
 		GameObject newCameraObj = new GameObject(receiver.name + " Camera");
@@ -277,14 +277,14 @@ public class PortalManager : Singleton<PortalManager> {
 	}
 
 	private void TeardownPortalReceiver(PortalSettings receiver) {
-		Transform container = receiver.transform.parent;
+		UnityEngine.Transform container = receiver.transform.parent;
 		receiver.transform.SetParent(container.parent);
 		Destroy(container.gameObject);
 
 		Destroy(receiver.GetComponent<PortalCameraRenderTexture>());
 
 		PortalTeleporter portalTeleporter = receiver.GetComponentInChildren<PortalTeleporter>();
-		Transform volumetricPortal = receiver.transform.Find("VolumetricPortal");
+		UnityEngine.Transform volumetricPortal = receiver.transform.Find("VolumetricPortal");
 		VolumetricPortalTrigger volumetricPortalTrigger = receiver.GetComponentInChildren<VolumetricPortalTrigger>();
 
 		if (portalTeleporter != null) Destroy(portalTeleporter.gameObject);
@@ -302,7 +302,7 @@ public class PortalManager : Singleton<PortalManager> {
 
 	private void SwapEdgeDetectionColors(int channel) {
 		BladeEdgeDetection playerED = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
-		Transform camerasParent = cameraContainersByChannel[channel].transform;
+		UnityEngine.Transform camerasParent = cameraContainersByChannel[channel].transform;
 		BladeEdgeDetection[] portalEDs = camerasParent.GetComponentsInChildrenOnly<BladeEdgeDetection>();
 
 		BladeEdgeDetection.EdgeColorMode tempEdgeColorMode = playerED.edgeColorMode;

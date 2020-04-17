@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 
+[ExecuteInEditMode]
 public class EpitaphScreen : Singleton<EpitaphScreen> {
 	public Camera playerCamera;
 	public Camera[] dimensionCameras;
@@ -14,8 +15,9 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 	public event ScreenResolutionChangedAction OnScreenResolutionChanged;
 
 	// Used for receiving OnPreRender instructions from scripts not attached to the main camera
-	public delegate void OnPreRenderAction();
-	public event OnPreRenderAction OnPlayerCamPreRender;
+	public delegate void OnRenderAction();
+	public event OnRenderAction OnPlayerCamPreRender;
+	public event OnRenderAction OnPlayerCamPostRender;
 
 	// Use this for initialization
 	void Awake () {
@@ -46,7 +48,11 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 	}
 
 	private void OnPreRender() {
-		//Debug.LogError("OnPreRender");
 		OnPlayerCamPreRender?.Invoke();
+	}
+
+	private IEnumerator OnPostRender() {
+		yield return new WaitForEndOfFrame();
+		OnPlayerCamPostRender?.Invoke();
 	}
 }

@@ -11,8 +11,8 @@ public class PortalCameraFollow : MonoBehaviour {
 	PortalTeleporter teleporterForPortalBeingRendered;
 	PortalTeleporter teleporterForOtherPortal;
 
-	Transform source;
-	Transform destination;
+	UnityEngine.Transform source;
+	UnityEngine.Transform destination;
 
     Collider sourceCollider;
 

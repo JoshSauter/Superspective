@@ -91,7 +91,8 @@ Shader "Hidden/GlowComposite"
 				//fixed4 blur = tex2D(_GlowBlurredTex, i.uv1);
 				//fixed4 prepass = tex2D(_GlowPrePassTex, i.uv1);
 				fixed4 glow = max(0, tex2D(_GlowBlurredTex, i.uv1) - tex2D(_GlowPrePassTex, i.uv1));
-
+				
+				//return glow;
 				return lerp(col, glow, min(1, _GlowIntensity*glow.a));
 			}
 			ENDCG

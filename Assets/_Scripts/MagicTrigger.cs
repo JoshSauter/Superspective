@@ -150,7 +150,7 @@ public class MagicTrigger : MonoBehaviour {
 	}
 
     private float FacingAmount(Collider player) {
-		Transform cameraTransform = player.transform.Find("Main Camera");
+		UnityEngine.Transform cameraTransform = player.transform.Find("Main Camera");
 
 		Vector3 realTargetDirection = targetDirection;
         switch (triggerCondition) {

@@ -12,7 +12,7 @@ namespace UnityStandardAssets.ImageEffects
         public float focalLength = 10.0f;
         public float focalSize = 0.05f;
         public float aperture = 0.5f;
-        public Transform focalTransform = null;
+        public UnityEngine.Transform focalTransform = null;
         public float maxBlurSize = 2.0f;
         public bool  highResolution = false;
 

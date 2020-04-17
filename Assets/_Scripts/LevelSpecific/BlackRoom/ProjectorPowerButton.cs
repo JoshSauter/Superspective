@@ -31,13 +31,13 @@ public class ProjectorPowerButton : MonoBehaviour {
 	}
 
 	void TurnOnProjector() {
-		foreach (Transform child in projector.transform) {
+		foreach (UnityEngine.Transform child in projector.transform) {
 			child.gameObject.SetActive(true);
 		}
 		lightTurnedOn = true;
 	}
 	void TurnOffProjector() {
-		foreach (Transform child in projector.transform) {
+		foreach (UnityEngine.Transform child in projector.transform) {
 			child.gameObject.SetActive(false);
 		}
 		lightTurnedOn = false;

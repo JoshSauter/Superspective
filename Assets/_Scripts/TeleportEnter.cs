@@ -12,7 +12,7 @@ public class TeleportEnter : MonoBehaviour {
 	public Collider teleportEnter;
     public Collider teleportExit;
 	public Vector3 teleportOffset = Vector3.zero;
-	public Transform[] otherObjectsToTeleport;
+	public UnityEngine.Transform[] otherObjectsToTeleport;
 
 #region events
 	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, Collider player);
@@ -35,7 +35,7 @@ public class TeleportEnter : MonoBehaviour {
 		teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
 
-		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new Transform[0];
+		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new UnityEngine.Transform[0];
 	}
 
 	private void OnEnable() {
@@ -60,7 +60,7 @@ public class TeleportEnter : MonoBehaviour {
 		Quaternion rotationTransformation = teleportExit.transform.rotation * Quaternion.Inverse(teleportEnter.transform.rotation);
 		debug.Log("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nRotationTransformation: " + rotationTransformation.eulerAngles);
 
-		foreach (Transform otherObject in otherObjectsToTeleport) {
+		foreach (UnityEngine.Transform otherObject in otherObjectsToTeleport) {
 			otherObject.transform.position += displacementToCenter;
 			otherObject.transform.rotation = rotationTransformation * otherObject.transform.rotation;
 			otherObject.transform.position += teleportDisplacement;

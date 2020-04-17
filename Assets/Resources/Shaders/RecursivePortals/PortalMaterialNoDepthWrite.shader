@@ -8,11 +8,12 @@
     {
 		Tags 
 		{ 
-			"RenderType" = "Transparent" "Queue" = "Transparent"
+			"RenderType" = "Transparent" "Queue" = "Transparent-1"
 		}
 
         Pass
         {
+			ZWrite Off
 			Stencil
 			{
 				Ref 1

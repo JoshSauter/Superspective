@@ -49,7 +49,7 @@ namespace UnityStandardAssets.ImageEffects
             }
 
             Camera cam = GetComponent<Camera>();
-            Transform camtr = cam.transform;
+			UnityEngine.Transform camtr = cam.transform;
 
             Vector3[] frustumCorners = new Vector3[4];
             cam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), cam.farClipPlane, cam.stereoActiveEye, frustumCorners);

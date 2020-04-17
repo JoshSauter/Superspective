@@ -17,7 +17,7 @@ public class ViewLockObject : MonoBehaviour {
 
 	public bool focusIsLocked = false;
 	public Collider hitbox;
-	Transform playerCamera;
+	UnityEngine.Transform playerCamera;
 
 	void Awake() {
 		interactableObject = GetComponent<InteractableObject>();

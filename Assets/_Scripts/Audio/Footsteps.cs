@@ -9,6 +9,7 @@ public class Footsteps : MonoBehaviour {
 	float defaultVolume;
 	float curBobAmountUnamplified = 0;
 	bool playerWasHeadingDownLastFrame = false;
+	float minTimeBetweenHits = 0.25f;
 	float timeSinceLastHit = 0f;
 
 	// Alternates between true and false so we only play a sound every other step
@@ -29,9 +30,9 @@ public class Footsteps : MonoBehaviour {
 
     void LateUpdate() {
 		timeSinceLastHit += Time.deltaTime;
-		bool shouldForcePlay = timeSinceLastHit > 0.25f;
+		bool shouldForcePlay = timeSinceLastHit > minTimeBetweenHits;
 
-		Vector2 playerVelocity = playerMovement.HorizontalVelocity();
+		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
 		sound.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
 		if (playerMovement.grounded && playerSpeed > 0.2f) {

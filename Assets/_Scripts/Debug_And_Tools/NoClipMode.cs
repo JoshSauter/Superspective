@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 public class NoClipMode : MonoBehaviour {
-	Transform playerCamera;
+	UnityEngine.Transform playerCamera;
 	PlayerMovement playerMovement;
 	Rigidbody playerRigidbody;
 	Collider playerCollider;

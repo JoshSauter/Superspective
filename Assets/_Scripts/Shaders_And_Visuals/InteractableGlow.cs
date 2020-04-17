@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using EpitaphUtils;
 
 [ExecuteInEditMode]
@@ -8,6 +9,8 @@ public class InteractableGlow : MonoBehaviour {
 	public float LerpFactor = 10;
 	public bool recursiveChildRenderers = true;
 
+	InteractableGlowManager playerCamGlowController;
+
 	public Renderer[] Renderers {
 		get;
 		private set;
@@ -16,34 +19,40 @@ public class InteractableGlow : MonoBehaviour {
 		get { return _currentColor; }
 	}
 	private Color _currentColor;
+	// Target color must be set every frame or it turns off
 	private Color _targetColor;
 
-	void Start() {
+	void Awake() {
+		playerCamGlowController = InteractableGlowManager.instance;
+
 		if (recursiveChildRenderers) {
 			Renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
 		}
 		else {
 			Renderers = new Renderer[1] { GetComponent<Renderer>() };
 		}
-		InteractableGlowController.instance.Add(this);
-		interactableObject.OnMouseHover += OnMouseHover;
-		interactableObject.OnMouseHoverExit += OnMouseHoverExit;
+		playerCamGlowController?.Add(this);
+
+		interactableObject = GetComponent<InteractableObject>();
+		interactableObject.OnMouseHover += TurnOnGlow;
+		interactableObject.OnMouseHoverExit += TurnOffGlow;
 	}
 
 	public void OnEnable() {
-		InteractableGlowController.instance.Add(this);
+		playerCamGlowController = InteractableGlowManager.instance;
+		playerCamGlowController?.Add(this);
 	}
 
 	public void OnDisable() {
-		InteractableGlowController.instance.Remove(this);
+		playerCamGlowController?.Remove(this);
 	}
 
-	private void OnMouseHover() {
+	public void TurnOnGlow() {
 		_targetColor = GlowColor;
 		enabled = true;
 	}
 
-	private void OnMouseHoverExit() {
+	public void TurnOffGlow() {
 		_targetColor = Color.clear;
 		enabled = true;
 	}
@@ -58,6 +67,10 @@ public class InteractableGlow : MonoBehaviour {
 			_currentColor = _targetColor;
 			enabled = false;
 		}
+	}
+
+	private void LateUpdate() {
+		_targetColor = Color.clear;
 	}
 
 	bool ColorsAreCloseEnough(Color c1, Color c2) {

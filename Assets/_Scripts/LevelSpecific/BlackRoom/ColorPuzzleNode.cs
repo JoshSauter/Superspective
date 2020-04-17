@@ -62,7 +62,7 @@ public class ColorPuzzleNode : MonoBehaviour {
 
 	bool IsWithinCone(LightProjector projector) {
 		Vector3 testPos = transform.position;
-		Transform cone = projector.transform.GetChild(0);
+		UnityEngine.Transform cone = projector.transform.GetChild(0);
 		if (!cone.gameObject.activeSelf) {
 			return false;
 		}
@@ -83,7 +83,7 @@ public class ColorPuzzleNode : MonoBehaviour {
 	}
 
 	bool IsBlockedByBlocker(LightProjector projector) {
-		Transform lightSphere = projector.transform.GetChild(1);
+		UnityEngine.Transform lightSphere = projector.transform.GetChild(1);
 		if (!lightSphere.gameObject.activeSelf) {
 			return false;
 		}

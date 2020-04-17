@@ -8,7 +8,7 @@ public class DoorOpenClose : MonoBehaviour {
 	public AnimationCurve doorOpenCurve;
 	public AnimationCurve doorCloseCurve;
 
-	Transform[] doorPieces;
+	UnityEngine.Transform[] doorPieces;
 	Vector3[] originalScales;
 
 	public enum DoorState {
@@ -40,7 +40,7 @@ public class DoorOpenClose : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
-		doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
+		doorPieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();
 		originalScales = new Vector3[doorPieces.Length];
 		for (int i = 0; i < doorPieces.Length; i++) {
 			originalScales[i] = doorPieces[i].localScale;
@@ -121,7 +121,7 @@ public class DoorOpenClose : MonoBehaviour {
 		}
 	}
 
-	IEnumerator DoorPieceOpen(Transform piece) {
+	IEnumerator DoorPieceOpen(UnityEngine.Transform piece) {
 		Vector3 startScale = piece.localScale;
 		Vector3 endScale = new Vector3(targetLocalXScale, startScale.y, startScale.z);
 

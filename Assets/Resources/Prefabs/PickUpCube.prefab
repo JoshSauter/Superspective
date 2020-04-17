@@ -91,6 +91,8 @@ GameObject:
   - component: {fileID: 8395247311086515879}
   - component: {fileID: 4725270764708023329}
   - component: {fileID: 7982744811521786668}
+  - component: {fileID: 5694432929352241937}
+  - component: {fileID: 5678607679450239003}
   m_Layer: 0
   m_Name: PickUpCube
   m_TagString: Untagged
@@ -199,6 +201,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c585d99796d38d4a8097086e2c1ddcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactable: 1
   isHeld: 0
   pickupDropCooldown: 0.1
   holdDistance: 3
+  thisGravity: {fileID: 0}
+  thisRigidbody: {fileID: 0}
+  grabbedThroughPortal: {fileID: 0}
+--- !u!114 &5694432929352241937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdacce54b553d1349a94f6f1fafa007b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sittingInPortal: {fileID: 0}
+  fakeCopyPrefab: {fileID: 2734226514055083633, guid: 0a97a235d72e22445b7d8d87bd12fac4,
+    type: 3}
+  fakeCopyInstance: {fileID: 0}
+--- !u!114 &5678607679450239003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisRigidbody: {fileID: 0}
+  useGravity: 1
+  gravityDirection: {x: 0, y: -1, z: 0}
+  gravityMagnitude: 32

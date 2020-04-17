@@ -6,7 +6,7 @@ using EpitaphUtils;
 public class DesirePlatformRiseFall : MonoBehaviour {
 	Rigidbody panelRigidbody;
 	PlayerLook playerLook;
-	Transform lookPanel;
+	UnityEngine.Transform lookPanel;
 	Vector3 notchStartPos;
 
 
@@ -21,7 +21,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	float maxPanelYPosition = 0;
 	float minPanelYPosition = -3;
 
-	Transform notch;
+	UnityEngine.Transform notch;
 	Renderer notchRenderer;
 	float maxNotchOffset = 0.5f;
 	Color notchGreen = new Color(0.09812928f, 0.8897059f, 0.1035884f);

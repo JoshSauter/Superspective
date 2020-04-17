@@ -53,7 +53,7 @@ namespace UnityStandardAssets.ImageEffects
         private float focalEndCurve = 2.0f;
         private float focalDistance01 = 0.1f;
 
-        public Transform objectFocus = null;
+        public UnityEngine.Transform objectFocus = null;
         public float focalSize = 0.0f;
 
         public DofBlurriness bluriness = DofBlurriness.High;

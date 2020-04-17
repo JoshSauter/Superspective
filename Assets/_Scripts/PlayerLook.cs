@@ -6,8 +6,8 @@ using EpitaphUtils;
 public class PlayerLook : Singleton<PlayerLook> {
 	public bool DEBUG = false;
 	DebugLogger debug;
-    Transform playerTransform;
-    public Transform cameraTransform;
+	UnityEngine.Transform playerTransform;
+    public UnityEngine.Transform cameraTransform;
 	Vector3 cameraInitialLocalPos;
 	[Range(0.01f,1)]
 	public float generalSensitivity = 0.3f;

@@ -20,24 +20,30 @@ public class Portal : MonoBehaviour {
 	public Texture2D edgeColorGradientTexture;
 
 	public bool writePortalSurfaceToDepthBuffer = false;
+	public bool renderRecursivePortals = false;
 
 	private GameObject volumetricPortalPrefab;
 	private Renderer volumetricPortal;
 	private Material portalMaterial;
 	private Material fallbackMaterial;
-	private new Renderer renderer;
+	public new Renderer renderer;
 	private new Collider collider;
+	private Transform playerCamera;
+	private CameraFollow playerCameraFollow;
 
 	[HorizontalLine]
 
 	public Portal otherPortal;
+	public HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
+	[ShowNativeProperty]
+	public int numObjectsInPortal => objectsInPortal.Count;
 
 	private RenderTexture internalRenderTextureCopy;
 
 	public bool isEnabled { get { return otherPortal != null; } }
 
 #region Events
-	public delegate void PortalTeleportAction(Portal inPortal, Portal outPortal, Collider objectTeleported);
+	public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
 	public delegate void SimplePortalTeleportAction(Collider objectTeleported);
 
 	public event PortalTeleportAction BeforePortalTeleport;
@@ -58,18 +64,47 @@ public class Portal : MonoBehaviour {
 		renderer = GetComponent<Renderer>();
 		collider = GetComponent<Collider>();
 
-		internalRenderTextureCopy = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
 
 		string depthWriteShaderPath = "Shaders/RecursivePortals/PortalMaterial";
 		string noDepthWriteShaderPath = "Shaders/RecursivePortals/PortalMaterialNoDepthWrite";
 		portalMaterial = new Material(Resources.Load<Shader>(writePortalSurfaceToDepthBuffer ? depthWriteShaderPath : noDepthWriteShaderPath));
 		fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
-		portalMaterial.mainTexture = internalRenderTextureCopy;
 
 		volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 		volumetricPortal = Instantiate(volumetricPortalPrefab, transform, false).GetComponent<Renderer>();
 
 		volumetricPortal.enabled = false;
+	}
+
+	void CreateRenderTexture(int width, int height) {
+		internalRenderTextureCopy = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+		portalMaterial.mainTexture = internalRenderTextureCopy;
+	}
+
+	private void Start() {
+		playerCamera = EpitaphScreen.instance.playerCamera.transform;
+		playerCameraFollow = playerCamera.GetComponent<CameraFollow>();
+		CreateRenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
+		EpitaphScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
+	}
+
+	bool test = false;
+	void FixedUpdate() {
+
+		bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position)) < 0.99f;
+		if (playerIsCloseToPortal && !test) {
+			test = true;
+			//Debug.Break();
+		}
+		else if (!playerIsCloseToPortal) {
+			test = false;
+		}
+	}
+
+	private void LateUpdate() {
+		foreach (var portalableObj in objectsInPortal) {
+			portalableObj.EnableAndUpdatePortalCopy(this);
+		}
 	}
 
 	private void OnEnable() {
@@ -85,19 +120,53 @@ public class Portal : MonoBehaviour {
 		if (other.TaggedAsPlayer()) {
 			EnableVolumetricPortal();
 		}
+		else {
+			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			if (portalableObj != null) {
+				objectsInPortal.Add(portalableObj);
+				portalableObj.EnableAndUpdatePortalCopy(this);
+				portalableObj.sittingInPortal = this;
+			}
+		}
 	}
 
 	private void OnTriggerExit(Collider other) {
 		if (other.TaggedAsPlayer()) {
 			DisableVolumetricPortal();
 		}
+		else {
+			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
+				objectsInPortal.Remove(portalableObj);
+				portalableObj.DisablePortalCopy();
+				portalableObj.sittingInPortal = null;
+			}
+		}
 	}
 
 	private void OnTriggerStay(Collider other) {
-		if (!other.TaggedAsPlayer() || !isEnabled) return;
+		if (!isEnabled) return;
 
-		if (!teleportingPlayer && Mathf.Sign(Vector3.Dot(transform.forward, (other.transform.position - transform.position).normalized)) > 0) {
-			StartCoroutine(TeleportPlayer(other.transform));
+		bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(transform.forward, (other.transform.position - transform.position).normalized)) > 0;
+		if (!objectShouldBeTeleported) return;
+
+		if (!other.TaggedAsPlayer()) {
+			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
+				TeleportObject(portalableObj);
+
+				// Swap state to the other portal
+				otherPortal.objectsInPortal.Add(portalableObj);
+				objectsInPortal.Remove(portalableObj);
+				portalableObj.EnableAndUpdatePortalCopy(otherPortal);
+				portalableObj.sittingInPortal = otherPortal;
+			}
+		}
+		else  {
+			playerCameraFollow.currentLerpSpeed = 4500f;
+			if (!teleportingPlayer) {
+				StartCoroutine(TeleportPlayer(other.transform));
+			}
 		}
 	}
 
@@ -192,6 +261,39 @@ public class Portal : MonoBehaviour {
 		collider.isTrigger = true;
 	}
 
+	public void TeleportObject(PortalableObject portalableObject, bool transformVelocity = true) {
+		portalableObject.BeforeObjectTeleported?.Invoke(this);
+
+		TransformObject(portalableObject.transform, transformVelocity);
+
+		portalableObject.OnObjectTeleported?.Invoke(this);
+	}
+
+	/// <summary>
+	/// Does the work of TeleportObject without invoking teleport events
+	/// </summary>
+	/// <param name="objToTransform"></param>
+	/// <param name="transformVelocity"></param>
+	public void TransformObject(Transform objToTransform, bool transformVelocity = true) {
+		// Position
+		Vector3 relativeObjPos = transform.InverseTransformPoint(objToTransform.position);
+		relativeObjPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeObjPos;
+		objToTransform.position = otherPortal.transform.TransformPoint(relativeObjPos);
+
+		// Rotation
+		Quaternion relativeRot = Quaternion.Inverse(transform.rotation) * objToTransform.rotation;
+		relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
+		objToTransform.rotation = otherPortal.transform.rotation * relativeRot;
+
+		// Velocity?
+		Rigidbody objRigidbody = objToTransform.GetComponent<Rigidbody>();
+		if (transformVelocity && objRigidbody != null) {
+			Vector3 objRelativeVelocity = transform.InverseTransformDirection(objRigidbody.velocity);
+			objRelativeVelocity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * objRelativeVelocity;
+			objRigidbody.velocity = otherPortal.transform.TransformDirection(objRelativeVelocity);
+		}
+	}
+
 	private bool teleportingPlayer = false;
 	/// <summary>
 	/// Frame 1: Do nothing (but ensure that this is not called twice)
@@ -199,7 +301,7 @@ public class Portal : MonoBehaviour {
 	/// </summary>
 	/// <param name="player"></param>
 	/// <returns></returns>
-	IEnumerator TeleportPlayer(Transform player) {
+	IEnumerator TeleportPlayer(UnityEngine.Transform player) {
 		teleportingPlayer = true;
 
 		if (DEBUG) Debug.Break();
@@ -221,6 +323,9 @@ public class Portal : MonoBehaviour {
 		playerRelativeVelocity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * playerRelativeVelocity;
 		playerRigidbody.velocity = otherPortal.transform.TransformDirection(playerRelativeVelocity);
 
+		//Physics.gravity = Physics.gravity.magnitude * -player.up;
+		//PlayerMovement.instance.enabled = false;
+
 		TriggerEventsAfterTeleport(player.GetComponent<Collider>());
 		otherPortal.EnableVolumetricPortal();
 		DisableVolumetricPortal();
@@ -229,15 +334,15 @@ public class Portal : MonoBehaviour {
 	}
 
 	void TriggerEventsBeforeTeleport(Collider objBeingTeleported) {
-		BeforePortalTeleport?.Invoke(this, otherPortal, objBeingTeleported);
-		BeforeAnyPortalTeleport?.Invoke(this, otherPortal, objBeingTeleported);
+		BeforePortalTeleport?.Invoke(this, objBeingTeleported);
+		BeforeAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 		BeforePortalTeleportSimple?.Invoke(objBeingTeleported);
 		BeforeAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
 	}
 
 	void TriggerEventsAfterTeleport(Collider objBeingTeleported) {
-		OnPortalTeleport?.Invoke(this, otherPortal, objBeingTeleported);
-		OnAnyPortalTeleport?.Invoke(this, otherPortal, objBeingTeleported);
+		OnPortalTeleport?.Invoke(this, objBeingTeleported);
+		OnAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 		OnPortalTeleportSimple?.Invoke(objBeingTeleported);
 		OnAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
 	}

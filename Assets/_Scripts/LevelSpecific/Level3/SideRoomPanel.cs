@@ -4,7 +4,7 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class SideRoomPanel : Panel {
-	Transform[] laserParents;
+	UnityEngine.Transform[] laserParents;
 	public ParticleSystem laser;
 
 	public Renderer roomRenderer;
@@ -20,7 +20,7 @@ public class SideRoomPanel : Panel {
 	// Use this for initialization
 	override protected void Start () {
 		base.Start();
-		List<Transform> laserParentsList = new List<Transform>(laser.transform.parent.GetComponentsInChildrenOnly<Transform>());
+		List<UnityEngine.Transform> laserParentsList = new List<UnityEngine.Transform>(laser.transform.parent.GetComponentsInChildrenOnly<UnityEngine.Transform>());
 		laserParents = laserParentsList.FindAll(x => x != laser.transform).ToArray();
 
 

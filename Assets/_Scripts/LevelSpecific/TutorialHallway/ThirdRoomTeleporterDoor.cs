@@ -7,11 +7,11 @@ public class ThirdRoomTeleporterDoor : MonoBehaviour {
 	public Button circleButton;
 	public Button hexagonButton;
 	int numButtonsLeft = 2;
-	Transform[] doorPieces;
+	UnityEngine.Transform[] doorPieces;
 
 	// Use this for initialization
 	void Start () {
-		doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
+		doorPieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();
 
 		circleButton.OnButtonPressFinish += HandleButtonPress;
 		hexagonButton.OnButtonPressFinish += HandleButtonPress;
@@ -32,7 +32,7 @@ public class ThirdRoomTeleporterDoor : MonoBehaviour {
 		}
 	}
 
-	IEnumerator MoveDoorPiece(Transform doorPiece) {
+	IEnumerator MoveDoorPiece(UnityEngine.Transform doorPiece) {
 		float timeElapsed = 0;
 		while (timeElapsed < 1) {
 			timeElapsed += Time.deltaTime;

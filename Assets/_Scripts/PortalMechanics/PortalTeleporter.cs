@@ -68,7 +68,7 @@ public class PortalTeleporter : MonoBehaviour {
 	}
 	
 	void TransformObjectsOnTeleport(Collider player) {
-		Transform originalPlayerParent = player.transform.parent;
+		UnityEngine.Transform originalPlayerParent = player.transform.parent;
 
 		foreach (var transformation in transformationsBeforeTeleport) {
 			player.transform.parent = transformation.objectToTransform;

@@ -4,17 +4,17 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class MenuRoom3D : MonoBehaviour {
-	Transform[] pieces;
+	UnityEngine.Transform[] pieces;
 
 	public AnimationCurve buildAnimationCurve;
 	private float maxPieceSpawnDelay = 0.5f;
 	private float buildTime = 0.5f;
 
     IEnumerator Start() {
-		pieces = transform.GetComponentsInChildrenOnly<Transform>();
+		pieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();
 		yield return new WaitForSeconds(1);
 
-		foreach (Transform piece in pieces) {
+		foreach (UnityEngine.Transform piece in pieces) {
 			StartCoroutine(SpawnPiece(piece));
 		}
 	}
@@ -23,7 +23,7 @@ public class MenuRoom3D : MonoBehaviour {
         
     }
 
-	IEnumerator SpawnPiece(Transform piece) {
+	IEnumerator SpawnPiece(UnityEngine.Transform piece) {
 		piece.localScale = Vector3.zero;
 		Vector3 offset = piece.localPosition;
 		piece.localPosition += Random.insideUnitSphere * Random.Range(0f, 3f);

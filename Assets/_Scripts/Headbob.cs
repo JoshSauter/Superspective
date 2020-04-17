@@ -8,7 +8,8 @@ public class Headbob : MonoBehaviour {
 	CameraFollow cameraFollow;
 
 	Camera playerCam;
-	float curBobAmount = 0f;
+	// This value is read from CameraFollow to apply the camera transform offset in one place
+	public float curBobAmount = 0f;
 
 	// Time in the animation curve
 	public float t = 0f;
@@ -27,7 +28,7 @@ public class Headbob : MonoBehaviour {
     }
 
     void Update() {
-		Vector2 playerVelocity = playerMovement.HorizontalVelocity();
+		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
 		if (playerMovement.grounded && playerSpeed > 0.2f) {
 			curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
@@ -36,23 +37,13 @@ public class Headbob : MonoBehaviour {
 			t += Time.deltaTime / curPeriod;
 			t = Mathf.Repeat(t, 1f);
 
-			//Vector3 camToFocusedObj = Interact.instance.lastObjectHoveredAnyDistance.transform.position - playerCam.transform.position;
-
 			float thisFrameBobAmount = viewBobCurve.Evaluate(t) * curAmplitude;
-			float thisFrameOffset = thisFrameBobAmount - curBobAmount;
 			curBobAmount = thisFrameBobAmount;
-			playerCam.transform.position += Vector3.up * thisFrameOffset;
-			cameraFollow.worldPositionLastFrame += Vector3.up * thisFrameOffset;
-			cameraFollow.relativePositionLastFrame += Vector3.up * thisFrameOffset;
 		}
 		else {
 			t = 0;
 			float nextBobAmount = Mathf.Lerp(curBobAmount, 0f, 4f * Time.deltaTime);
-			float thisFrameOffset = nextBobAmount - curBobAmount;
 
-			playerCam.transform.position += Vector3.up * thisFrameOffset;
-			cameraFollow.worldPositionLastFrame += Vector3.up * thisFrameOffset;
-			cameraFollow.relativePositionLastFrame += Vector3.up * thisFrameOffset;
 			curBobAmount = nextBobAmount;
 		}
     }

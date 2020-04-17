@@ -8,7 +8,7 @@ public class ShrinkGrowHallway : MonoBehaviour {
 	public float targetScale = 1;
 	float scaleLerpSpeed = 5f;
 	public TransitionTrigger triggerZone;
-	public Transform objectToTransform;
+	public UnityEngine.Transform objectToTransform;
 
     void Start() {
 		triggerZone.OnTransitionTrigger += SetScale;

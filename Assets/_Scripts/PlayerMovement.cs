@@ -13,8 +13,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
 	}
-	float accelerationLerpSpeed = 0.2f;
-	float decelerationLerpSpeed = 0.15f;
+	float accelerationLerpSpeed = 15f;
+	float airspeedControlFactor = 0.4f;
+	float decelerationLerpSpeed = 12f;
 	float backwardsSpeed = 1f;
 	private float _walkSpeed = 10f;
 	public float walkSpeed { get { return _walkSpeed * scale; } }
@@ -24,7 +25,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 	private float _jumpForce = 936;
 	public float jumpForce { get { return _jumpForce * scale; } }
-	public float windResistanceMultiplier = 0.2f;
+	public float windResistanceMultiplier = 0.4f;
 
 	bool jumpIsOnCooldown = false;				// Prevents player from jumping again while true
 	float jumpCooldown = 0.2f;					// Time after landing before jumping is available again
@@ -48,7 +49,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	bool stopped = false;
 
 	List<ContactPoint> allContactThisFrame = new List<ContactPoint>();
-	public Vector3 bottomOfPlayer { get { return new Vector3(transform.position.x, thisRenderer.bounds.min.y, transform.position.z); } }
+	public Vector3 bottomOfPlayer { get { return transform.position - transform.up * 2.5f; } }
 
 	#region IsGrounded characteristics
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
@@ -130,9 +131,10 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 		}
 
-		StepFound stepFound = DetectStep(desiredVelocity, ground);
+		StepFound stepFound = DetectStep(desiredVelocity, ground, grounded);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
+			Player.instance.cameraFollow.currentLerpSpeed = 15f;
 			OnStaircaseStepUp?.Invoke();
 		}
 		thisRigidbody.useGravity = stepFound == null;
@@ -140,8 +142,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		thisRigidbody.velocity = desiredVelocity;
 
 		// Apply wind resistance
-		if (!grounded && thisRigidbody.velocity.y < 0) {
-			thisRigidbody.AddForce(Vector3.up * (-thisRigidbody.velocity.y) * windResistanceMultiplier);
+		Vector3 projectedVertVelocity = ProjectedVerticalVelocity();
+		if (!grounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0) {
+			thisRigidbody.AddForce(transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * windResistanceMultiplier);
 		}
 
 		allContactThisFrame.Clear();
@@ -155,7 +158,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// Calculates player movement when the player is on (or close enough) to the ground.
 	/// Movement is perpendicular to the ground's normal vector.
 	/// </summary>
-	/// <param name="ground">RaycastHit info for the WalkableObject that passes the IsGrounded test</param>
+	/// <param name="ground">RaycastHit info for the walkable object that passes the IsGrounded test</param>
 	/// <returns>Desired Velocity according to current input</returns>
 	Vector3 CalculateGroundMovement(ContactPoint ground) {
 		Vector3 up = ground.normal;
@@ -177,13 +180,13 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 		// If no keys are pressed, decelerate to a stop
 		if (!input.LeftStickHeld && !autoRun) {
-			Vector2 horizontalVelocity = HorizontalVelocity();
-			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, 12 * Time.fixedDeltaTime);
-			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
+			Vector3 horizontalVelocity = ProjectedHorizontalVelocity();
+			Vector3 desiredHorizontalVelocity = Vector3.Lerp(horizontalVelocity, Vector3.zero, decelerationLerpSpeed * Time.fixedDeltaTime);
+			return desiredHorizontalVelocity + (thisRigidbody.velocity - horizontalVelocity);
 		}
 		else {
 			float adjustedMovespeed = (ground.otherCollider.CompareTag("Staircase")) ? walkSpeed : movespeed;
-			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, accelerationLerpSpeed);
+			return Vector3.Lerp(thisRigidbody.velocity, moveDirection * adjustedMovespeed, accelerationLerpSpeed * Time.fixedDeltaTime);
 		}
 	}
 
@@ -198,7 +201,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			moveDirection = transform.forward;
 		}
 
-		Physics.gravity = Vector3.down * Physics.gravity.magnitude;
+		Physics.gravity = -transform.up * Physics.gravity.magnitude;
 
 		// DEBUG:
 		Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.green, 0.1f);
@@ -208,15 +211,14 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 
 		// If no keys are pressed, decelerate to a horizontal stop
 		if (!input.LeftStickHeld && !autoRun) {
-			Vector2 horizontalVelocity = HorizontalVelocity();
-			horizontalVelocity = Vector2.Lerp(horizontalVelocity, Vector2.zero, decelerationLerpSpeed);
-			return new Vector3(horizontalVelocity.x, thisRigidbody.velocity.y, horizontalVelocity.y);
+			Vector3 horizontalVelocity = ProjectedHorizontalVelocity();
+			Vector3 desiredHorizontalVelocity = Vector3.Lerp(horizontalVelocity, Vector3.zero, decelerationLerpSpeed * Time.fixedDeltaTime);
+			return desiredHorizontalVelocity + (thisRigidbody.velocity - horizontalVelocity);
 		}
 		else {
-			Vector2 horizontalVelocity = HorizontalVelocity();
-			Vector2 desiredHorizontalVelocity = new Vector2(moveDirection.x, moveDirection.z);
-			Vector2 newHorizontalVelocity = Vector2.Lerp(horizontalVelocity, desiredHorizontalVelocity, 0.075f);
-			return new Vector3(newHorizontalVelocity.x, thisRigidbody.velocity.y + moveDirection.y, newHorizontalVelocity.y);
+			Vector3 horizontalVelocity = ProjectedHorizontalVelocity();
+			Vector3 desiredHorizontalVelocity = Vector3.Lerp(horizontalVelocity, moveDirection, airspeedControlFactor * accelerationLerpSpeed * Time.fixedDeltaTime);
+			return desiredHorizontalVelocity + (thisRigidbody.velocity - horizontalVelocity);
 		}
 	}
 
@@ -236,23 +238,24 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		}
 		else {
 			Vector3 newMovementVector = Vector3.ProjectOnPlane(movementVector, obstacle.normal);
-			if (newMovementVector.y > 0) {
+			if (Vector3.Dot(ProjectedVerticalVelocity(), newMovementVector) > 0) {
 				debug.LogWarning("movementVector:" + movementVector + "\nnewMovementVector:" + newMovementVector);
 			}
 			return newMovementVector;
 		}
 	}
 
-	IEnumerator PrintMaxHeight(float startHeight) {
-		float maxHeight = startHeight;
+	IEnumerator PrintMaxHeight(Vector3 startPosition) {
+		float maxHeight = 0;
 		yield return new WaitForSeconds(minJumpTime/2f);
 		while (!grounded) {
-			if (transform.position.y > maxHeight) {
-				maxHeight = transform.position.y;
+			float height = Vector3.Dot(transform.up, transform.position - startPosition);
+			if (height > maxHeight) {
+				maxHeight = height;
 			}
 			yield return new WaitForFixedUpdate();
 		}
-		debug.Log("Highest jump height: " + (maxHeight - startHeight));
+		debug.Log("Highest jump height: " + maxHeight);
 	}
 
 	/// <summary>
@@ -269,8 +272,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		
 		Vector3 jumpVector = -Physics.gravity.normalized * jumpForce;
 		thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
-		float startHeight = transform.position.y;
-		Coroutine p = StartCoroutine(PrintMaxHeight(startHeight));
+		Coroutine p = StartCoroutine(PrintMaxHeight(transform.position));
 		yield return new WaitForSeconds(minJumpTime);
 		underMinJumpTime = false;
 		yield return new WaitUntil(() => grounded);
@@ -282,8 +284,12 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		jumpIsOnCooldown = false;
 	}
 
-	public Vector2 HorizontalVelocity() {
-		return new Vector2(thisRigidbody.velocity.x, thisRigidbody.velocity.z);
+	public Vector3 ProjectedHorizontalVelocity() {
+		return Vector3.ProjectOnPlane(thisRigidbody.velocity, transform.up);
+	}
+
+	public Vector3 ProjectedVerticalVelocity() {
+		return thisRigidbody.velocity - ProjectedHorizontalVelocity();
 	}
 
 	class StepFound {
@@ -296,7 +302,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		}
 	}
 
-	StepFound DetectStep(Vector3 desiredVelocity, ContactPoint ground) {
+	StepFound DetectStep(Vector3 desiredVelocity, ContactPoint ground, bool isGrounded) {
 		// If player is not moving, don't do any raycasts, just return
 		if (desiredVelocity.magnitude < 0.1f) {
 			return null;
@@ -308,14 +314,15 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			RaycastHit hitInfo = default(RaycastHit);
 			bool rayHit = false;
 			if (isBelowMaxStepHeight) {
-				Vector3 rayLowStartPos = bottomOfPlayer + Vector3.up * 0.01f;
-				Vector3 rayDirection = new Vector3(contact.point.x - transform.position.x, 0, contact.point.z - transform.position.z).normalized;
+				Vector3 rayLowStartPos = bottomOfPlayer + transform.up * 0.01f;
+				Vector3 bottomOfPlayerToContactPoint = contact.point - transform.position;
+				Vector3 rayDirection = Vector3.ProjectOnPlane(bottomOfPlayerToContactPoint, transform.up).normalized;
 				if (rayDirection.magnitude > 0) {
 					Debug.DrawRay(rayLowStartPos, rayDirection * thisCollider.radius * 2, Color.blue);
 					rayHit = contact.otherCollider.Raycast(new Ray(rayLowStartPos, rayDirection), out hitInfo, thisCollider.radius * 2);
 				}
 			}
-			bool isWallNormal = rayHit && Mathf.Abs(Vector3.Dot(hitInfo.normal, Vector3.up)) < 0.1f;
+			bool isWallNormal = rayHit && Mathf.Abs(Vector3.Dot(hitInfo.normal, transform.up)) < 0.1f;
 			bool isInDirectionOfMovement = rayHit && Vector3.Dot(-hitInfo.normal, desiredVelocity.normalized) > 0f;
 			//if (ground.otherCollider == null || contact.otherCollider.gameObject != ground.otherCollider.gameObject) {
 			//	float t = Vector3.Dot(-hitInfo.normal, desiredVelocity.normalized);
@@ -325,7 +332,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			//}
 
 			StepFound step;
-			if (isBelowMaxStepHeight && isWallNormal && isInDirectionOfMovement && GetStepInfo(out step, contact, ground)) {
+			if (isBelowMaxStepHeight && isWallNormal && isInDirectionOfMovement && GetStepInfo(out step, contact, ground, isGrounded)) {
 				return step;
 			}
 		}
@@ -333,14 +340,14 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		return null;
 	}
 
-	bool GetStepInfo(out StepFound step, ContactPoint contact, ContactPoint ground) {
+	bool GetStepInfo(out StepFound step, ContactPoint contact, ContactPoint ground, bool isGrounded) {
 		step = null;
 		RaycastHit stepTest;
 
-		Vector3 stepOverbite = -new Vector3(contact.normal.x, 0, contact.normal.z).normalized * stepOverbiteMagnitude;
+		Vector3 stepOverbite = Vector3.ProjectOnPlane(-contact.normal.normalized, transform.up).normalized * stepOverbiteMagnitude;
 
 		// Start the raycast position directly above the contact point with the step
-		Vector3 raycastStartPos = new Vector3(contact.point.x, ground.point.y + maxStepHeight, contact.point.z);
+		Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight;
 		// Move the raycast inwards towards the stair (we will be raycasting down at the stair)
 		raycastStartPos += stepOverbite;
 		Vector3 direction = -transform.up;
@@ -348,7 +355,8 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		Debug.DrawRay(raycastStartPos, direction * maxStepHeight, Color.green, 10);
 		bool stepFound = contact.otherCollider.Raycast(new Ray(raycastStartPos, direction), out stepTest, maxStepHeight);
 		if (stepFound) {
-			float stepHeight = stepTest.point.y - ground.point.y;
+			Vector3 groundPointOrBottomOfPlayer = isGrounded ? ground.point : bottomOfPlayer;
+			float stepHeight = Vector3.Dot(transform.up, stepTest.point - groundPointOrBottomOfPlayer);
 			Vector3 stepOffset = stepOverbite + transform.up * (stepHeight + 0.02f);
 			step = new StepFound(contact, stepOffset);
 			debug.Log("Step: " + contact + "\n" + stepOffset);

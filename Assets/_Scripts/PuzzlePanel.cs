@@ -100,8 +100,8 @@ public class PuzzlePanel : MonoBehaviour {
 
 	private Button[] CreateButtonsForPanel() {
 		GameObject buttonParentGO = new GameObject("Buttons");
-		Transform buttonParent = buttonParentGO.transform;
-		Transform sign = transform.Find("Sign");
+		UnityEngine.Transform buttonParent = buttonParentGO.transform;
+		UnityEngine.Transform sign = transform.Find("Sign");
 		buttonParent.SetParent(sign, false);
 
 		// Floating point Vector2 representation of gridSize to be used in the math below

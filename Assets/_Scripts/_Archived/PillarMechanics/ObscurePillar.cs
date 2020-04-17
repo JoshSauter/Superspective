@@ -163,7 +163,7 @@ public class ObscurePillar : MonoBehaviour {
 		return PolarCoordinate.CartesianToPolar(pillarToCamera);
 	}
 
-	private void UpdateWallPosition(Transform wallTransform, float radsOffset) {
+	private void UpdateWallPosition(UnityEngine.Transform wallTransform, float radsOffset) {
 		PolarCoordinate cameraPolar = CameraToPillar();
 		float colliderLength = wallTransform.lossyScale.z;
 		PolarCoordinate oppositePolar = new PolarCoordinate(colliderLength/2f, Angle.Radians(cameraPolar.angle.radians + radsOffset));
@@ -171,11 +171,11 @@ public class ObscurePillar : MonoBehaviour {
 		wallTransform.position = oppositePolar.PolarToCartesian() + new Vector3(bottomOfPillar.x, 0, bottomOfPillar.z);
 	}
 
-	private void UpdateWallRotation(Transform wallTransform) {
+	private void UpdateWallRotation(UnityEngine.Transform wallTransform) {
 		wallTransform.LookAt(new Vector3(bottomOfPillar.x, wallTransform.position.y, bottomOfPillar.z));
 	}
 
-	private void UpdateWallSize(Transform wallTransform) {
+	private void UpdateWallSize(UnityEngine.Transform wallTransform) {
 		RaycastHit hitInfo;
 
 		Vector3 origin = new Vector3(bottomOfPillar.x, wallTransform.position.y, bottomOfPillar.z);
@@ -206,7 +206,7 @@ public class ObscurePillar : MonoBehaviour {
 		visibleMaskWall.material = Resources.Load<Material>("Materials/Unlit/ObscureShader/OSRed");
 	}
 
-	private void InitializeWallTransform(Transform wallTransform) {
+	private void InitializeWallTransform(UnityEngine.Transform wallTransform) {
 		wallTransform.SetParent(transform);
 		wallTransform.localScale = new Vector3(visibilityMaskWidth / transform.localScale.x, pillarHeight / transform.localScale.y, 1 / transform.localScale.z);
 		wallTransform.position = new Vector3(0, pillarHeight / 2f + bottomOfPillar.y, 0);

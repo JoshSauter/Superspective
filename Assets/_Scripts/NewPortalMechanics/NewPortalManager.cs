@@ -13,11 +13,8 @@ public class NewPortalManager : Singleton<NewPortalManager> {
 	public List<Portal> activePortals = new List<Portal>();
 	Camera portalCamera;
 
-	GameObject volumetricPortalPrefab;
-
 	private void Awake() {
 		debug = new DebugLogger(this, () => DEBUG);
-		volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 	}
 
 	private void Start() {
@@ -103,7 +100,7 @@ public class NewPortalManager : Singleton<NewPortalManager> {
 		portalCamera.CopyFrom(playerCam);
 		portalCamera.cullingMask &= ~hideFromPortalCamera;
 
-		portalCamera.gameObject.AddComponent<VirtualPortalCamera>();
+		portalCamera.gameObject.AddComponent<VirtualPortalCamera>().DEBUG = DEBUG;
 
 		// Copy post-process effects from player's camera
 		// Order of components here matters; it affects the rendering order of the postprocess effects

@@ -140,7 +140,7 @@ public class PowerTrail : MonoBehaviour {
 		if (prevDistance <= info.startDistance && nextDistance > info.startDistance) {
 			debug.Log("Powering node: " + info.parent.id + " <-> " + info.child.id);
 			info.maskGO = Instantiate(powerTrailMaskPrefab);
-			Transform power = info.maskGO.transform;
+			UnityEngine.Transform power = info.maskGO.transform;
 			power.SetParent(transform);
 			power.position = transform.TransformPoint(info.parent.pos);
 			power.localScale = new Vector3(powerTrailSize, powerTrailSize, 0);
@@ -153,7 +153,7 @@ public class PowerTrail : MonoBehaviour {
 		}
 
 		if (info.maskGO != null) {
-			Transform power = info.maskGO.transform;
+			UnityEngine.Transform power = info.maskGO.transform;
 			float t = Mathf.InverseLerp(info.startDistance, info.endDistance, nextDistance);
 
 			Vector3 childPos = transform.TransformPoint(info.child.pos);

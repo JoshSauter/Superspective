@@ -6,7 +6,7 @@ using EpitaphUtils;
 
 [System.Serializable]
 public struct TransformObjectOnRotate {
-	public Transform objectToTransform;
+	public UnityEngine.Transform objectToTransform;
 	public Vector3 displacement;
 	public Vector3 scaling;
 	public Vector3 rotation;

@@ -6,6 +6,7 @@ public class Player : Singleton<Player> {
 	public PlayerLook look;
 	public PlayerMovement movement;
 	public Headbob headbob;
+	public CameraFollow cameraFollow;
 
 	public Collider collider;
 	public Renderer renderer;
@@ -17,5 +18,6 @@ public class Player : Singleton<Player> {
 		look = GetComponent<PlayerLook>();
 		movement = GetComponent<PlayerMovement>();
 		headbob = GetComponent<Headbob>();
+		cameraFollow = GetComponentInChildren<CameraFollow>();
 	}
 }

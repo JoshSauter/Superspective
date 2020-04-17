@@ -128,7 +128,7 @@ public class OutOfBounds : MonoBehaviour {
 		countdownText.enabled = false;
 		returnToPlayzoneText.enabled = false;
 
-		Transform player = GameObject.FindGameObjectWithTag("Player").transform;
+		UnityEngine.Transform player = GameObject.FindGameObjectWithTag("Player").transform;
 		player.position = new Vector3(0, 10, -15);
 		player.rotation = new Quaternion(0, 0, 0, 1);
 		player.GetComponent<PlayerLook>().rotationY = -45;
