@@ -8,6 +8,7 @@
 	{
 		Tags { "RenderType"="Opaque" "Queue"="Geometry+4" }
 		LOD 100
+		Blend One One
 
 		CGINCLUDE
 		// make fog work
@@ -58,7 +59,7 @@
 			return fixed4(1,0,0,1);
 		}
 		fixed4 fragBlack (v2f i) : SV_Target {
-			return fixed4(0,0,0,1);
+			return fixed4(0,0,0,0);
 		}
 		ENDCG
 		// Read Shadows

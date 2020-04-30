@@ -64,6 +64,13 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
 
 		int typesFound = returnVal.Count;
 		if (typesFound > 1) {
+			List<Type> exactMatches = returnVal.FindAll(t => t.FullName == className);
+			if (exactMatches.Count > 0) {
+				returnVal = exactMatches;
+			}
+		}
+		typesFound = returnVal.Count;
+		if (typesFound > 1) {
 			string exceptionMsg = "Found " + typesFound + " types matching the name " + className + ". Try including a namespace to narrow the search.\n";
 			foreach (Type found in returnVal) {
 				exceptionMsg += found.ToString() + "\n";

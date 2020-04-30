@@ -170,8 +170,6 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 			moveDirection = forward;
 		}
 
-		Physics.gravity = -up * Physics.gravity.magnitude;
-
 		// DEBUG:
 		if (DEBUG) {
 			//Debug.DrawRay(ground.point, ground.normal * 10, Color.red, 0.2f);
@@ -200,8 +198,6 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		if (autoRun) {
 			moveDirection = transform.forward;
 		}
-
-		Physics.gravity = -transform.up * Physics.gravity.magnitude;
 
 		// DEBUG:
 		Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.green, 0.1f);

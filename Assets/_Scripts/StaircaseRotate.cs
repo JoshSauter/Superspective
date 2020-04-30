@@ -2,207 +2,124 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using NaughtyAttributes;
 
-// NOTE: There is an assumption that rotating staircases are always in the default vertex layout provided by the ProBuilder Create Staircase tool
-// If a staircase needs to be rotated, do not modify or mirror the mesh, instead rotate the staircase as needed with its Transform
 public class StaircaseRotate : MonoBehaviour {
-	public bool DEBUG = false;
-	public DebugLogger debug;
+	public bool DEBUG;
 
-	// Settings
-	public RotationAxes localAxisOfRotation;
-	public bool avoidDoubleRotation = false;
-	public bool staircaseDown = false;
-	public UnityEngine.Transform parentToRotate;
-	public UnityEngine.Transform[] otherObjectsToRotate;
-	float rotateLerpSpeed = 15f;
+	// Solves a problem where the t value never hit 0 or 1 (because bottom of player was marginally too high to be exactly floor level)
 	float startEndGap = 0.25f;
+	[ShowNativeProperty]
+	public Vector3 currentGravity => Physics.gravity;
+	private Vector3 pivotPoint { get { return transform.parent.position; } }
 
-	// State
-	public float currentRotation = 0;
+	[ShowIf("DEBUG")]
+	[ReadOnly]
+	public bool treatedAsADownStair;
 
-	// Miscellaneous
-	private UnityEngine.Transform playerInZone;
-	private Vector3 pivot { get { return transform.parent.position; } }
-	private Vector3 globalAxis { get { return GetRotationAxis(localAxisOfRotation); } }
-	private MeshRenderer stairRenderer;
-	private Bounds initialBounds;
+	[ShowIf("DEBUG")]
+	[ReadOnly]
+	public float t;
 
-	public enum RotationAxes {
-		right,
-		left,
-		up,
-		down,
-		forward,
-		back
-	}
+	[ShowIf("DEBUG")][ReadOnly]
+	public Vector3 startPosition;
+	[ShowIf("DEBUG")][ReadOnly]
+	public Vector3 endPosition;
 
-	// Use this for initialization
-	void Start () {
-		debug = new DebugLogger(this, () => DEBUG);
-        stairRenderer = transform.parent.GetComponent<MeshRenderer>();
+	public Vector3 startGravityDirection = Vector3.zero;
+	public Vector3 endGravityDirection = Vector3.zero;
 
-		initialBounds = transform.parent.GetComponent<MeshFilter>().mesh.bounds;
-	}
+	PlayerMovement playerMovement;
+
+    void Start() {
+		playerMovement = PlayerMovement.instance;
+
+		if (startGravityDirection == Vector3.zero) {
+			startGravityDirection = -transform.parent.up;
+		}
+		if (endGravityDirection == Vector3.zero) {
+			endGravityDirection = transform.parent.forward;
+		}
+
+		Bounds initialBounds = transform.parent.GetComponent<Renderer>().bounds;
+
+		startPosition = pivotPoint - endGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, endGravityDirection));
+		endPosition = pivotPoint - startGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, startGravityDirection));
+
+		Vector3 stairLine = endPosition - startPosition;
+		startPosition += stairLine.normalized * startEndGap;
+		endPosition -= stairLine.normalized * startEndGap;
+    }
 
 	private void OnTriggerEnter(Collider other) {
+		GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
+		float testLerpValue = 0;
 		if (other.TaggedAsPlayer()) {
-			playerInZone = other.transform;
-			currentRotation = 0;
-			SetAxisOfRotationBasedOnPlayerPosition(PlayerMovement.instance.bottomOfPlayer);
-			StartCoroutine(UpdateTargetRotation());
+			testLerpValue = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
+		}
+		else if (gravityObj != null) {
+			testLerpValue = GetLerpPositionOfPoint(other.transform.position);
+		}
+		Vector3 testGravityDirection1 = Vector3.Lerp(startGravityDirection, endGravityDirection, testLerpValue).normalized;
+		Vector3 testGravityDirection2 = Vector3.Lerp(startGravityDirection, endGravityDirection, 1 - testLerpValue).normalized;
+
+		treatedAsADownStair = Vector3.Angle(testGravityDirection1, Physics.gravity.normalized) > Vector3.Angle(testGravityDirection2, Physics.gravity.normalized);
+	}
+
+	private void OnTriggerStay(Collider other) {
+		GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
+		if (other.TaggedAsPlayer()) {
+			t = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
+			if (treatedAsADownStair) {
+				t = 1 - t;
+			}
+			Physics.gravity = Physics.gravity.magnitude * Vector3.Lerp(startGravityDirection, endGravityDirection, t).normalized;
+
+			float angleBetween = Vector3.Angle(playerMovement.transform.up, -Physics.gravity.normalized);
+			if (treatedAsADownStair) {
+				angleBetween = -angleBetween;
+			}
+			playerMovement.transform.rotation = Quaternion.FromToRotation(playerMovement.transform.up, -Physics.gravity.normalized) * playerMovement.transform.rotation;
+
+			PlayerLook playerLook = PlayerLook.instance;
+			playerLook.rotationY -= angleBetween * Vector3.Dot(playerMovement.transform.forward, playerMovement.ProjectedHorizontalVelocity().normalized);
+		}
+		else if (gravityObj != null) {
+			float objT = GetLerpPositionOfPoint(other.transform.position);
+			gravityObj.gravityDirection = Vector3.Lerp(startGravityDirection, endGravityDirection, objT).normalized;
 		}
 	}
 
 	private void OnTriggerExit(Collider other) {
+		float angleToStartDirection = Vector3.Angle(startGravityDirection, Physics.gravity.normalized);
+		float angleToEndDirection = Vector3.Angle(endGravityDirection, Physics.gravity.normalized);
+
+		Vector3 exitGravity = angleToStartDirection < angleToEndDirection ? startGravityDirection : endGravityDirection;
+
+		GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
 		if (other.TaggedAsPlayer()) {
-			float closestMultipleOf90 = Mathf.RoundToInt(currentRotation / 90f) * 90;
-			RotateObjects(closestMultipleOf90 - currentRotation);
-			currentRotation = closestMultipleOf90;
-			playerInZone = null;
+			Physics.gravity = Physics.gravity.magnitude * exitGravity;
+
+			float angleBetween = Vector3.Angle(playerMovement.transform.up, -Physics.gravity.normalized);
+			if (treatedAsADownStair) {
+				angleBetween = -angleBetween;
+			}
+			playerMovement.transform.rotation = Quaternion.FromToRotation(playerMovement.transform.up, -Physics.gravity.normalized) * playerMovement.transform.rotation;
+
+			PlayerLook playerLook = PlayerLook.instance;
+			playerLook.rotationY -= angleBetween * Vector3.Dot(playerMovement.transform.forward, playerMovement.ProjectedHorizontalVelocity().normalized);
+		}
+		else if (gravityObj != null) {
+			gravityObj.gravityDirection = exitGravity;
 		}
 	}
 
-	IEnumerator UpdateTargetRotation() {
-		while (playerInZone != null) {
-			float t = GetPlayerLerpPosition(PlayerMovement.instance.bottomOfPlayer);
-
-			int staircaseDownMultiplier = staircaseDown ? -1 : 1;
-			float desiredRotation = 90 * t * staircaseDownMultiplier;
-
-			RotateObjects(desiredRotation - currentRotation);
-			currentRotation = desiredRotation;
-
-			yield return new WaitForFixedUpdate();
-		}
-	}
-
-	void RotateObjects(float amountToRotate) {
-		int staircaseDownMultiplier = staircaseDown ? -1 : 1;
-
-		// Player should rotate around the pivot but without rotating the player's actual rotation (just position)
-		UnityEngine.Transform player = PlayerMovement.instance.transform;
-		Vector3 bottomOfPlayer = PlayerMovement.instance.bottomOfPlayer;
-		Quaternion tempRotation = player.rotation;
-		player.transform.position = (player.position - bottomOfPlayer) + RotateAroundPivot(bottomOfPlayer, pivot, Quaternion.Euler(globalAxis * amountToRotate));
-		player.rotation = tempRotation;
-
-		// Adjust the player's look direction up or down to further the effect
-		PlayerLook playerLook = player.GetComponentInChildren<PlayerLook>();
-		float lookMultiplier = Vector2.Dot(new Vector2(player.forward.x, player.forward.z).normalized, PlayerMovement.instance.ProjectedHorizontalVelocity().normalized);
-		playerLook.rotationY -= lookMultiplier * Mathf.Abs(amountToRotate) * staircaseDownMultiplier;
-
-		DirectionalLightSingleton.instance.transform.RotateAround(pivot, globalAxis, amountToRotate);
-
-		Vector3 worldPosBefore = parentToRotate.position;
-		parentToRotate.RotateAround(pivot, globalAxis, amountToRotate);
-		Vector3 worldPosAfter = parentToRotate.position;
-		foreach (var obj in otherObjectsToRotate) {
-			// All other objects rotate as well as translate
-			obj.RotateAround(pivot, globalAxis, amountToRotate);
-		}
-
-		parentToRotate.position -= (worldPosAfter - worldPosBefore);
-		player.position -= (worldPosAfter - worldPosBefore);
-		foreach (var obj in otherObjectsToRotate) {
-			obj.position -= (worldPosAfter - worldPosBefore);
-		}
-
-		CameraFollow playerCam = player.GetComponentInChildren<CameraFollow>();
-		playerCam.RecalculateWorldPositionLastFrame();
-	}
-
-	Vector3 RotateAroundPivot(Vector3 point, Vector3 pivot, Quaternion angle) {
-		return angle * (point - pivot) + pivot;
-	}
-
-	void SetAxisOfRotationBasedOnPlayerPosition(Vector3 playerPos) {
-		if (GetPlayerLerpPosition(playerPos) > 0.5) {
-			// Swap right/left, up/down, or forward/back
-			localAxisOfRotation = (RotationAxes)((((int)localAxisOfRotation % 2) * -2 + 1) + (int)localAxisOfRotation);
-		}
-	}
-
-	float GetPlayerLerpPosition(Vector3 playerPos) {
-		Vector3 stairStartPos = GetStartPosition();
-		Vector3 stairEndPos = GetEndPosition();
-		Vector3 diff = stairEndPos - stairStartPos;
-		stairStartPos += diff.normalized * startEndGap;
-		stairEndPos -= diff.normalized * startEndGap;
-		Vector3 projectedPlayerPos = ClosestPointOnLine(stairStartPos, stairEndPos, playerPos);
-
-		if (DEBUG) {
-			Debug.DrawRay(pivot, stairStartPos - pivot, Color.red);
-			Debug.DrawRay(pivot, stairEndPos - pivot, Color.green);
-			Debug.DrawRay(pivot, projectedPlayerPos - pivot, Color.blue);
-		}
-
-		float t = Utils.Vector3InverseLerp(stairStartPos, stairEndPos, projectedPlayerPos);
+	float GetLerpPositionOfPoint(Vector3 point) {
+		Vector3 projectedPlayerPos = ClosestPointOnLine(startPosition, endPosition, point);
+		float t = Utils.Vector3InverseLerp(startPosition, endPosition, projectedPlayerPos);
 
 		//debug.Log("StartPos: " + stairStartPos + ", EndPos: " + stairEndPos + ", PlayerPos: " + playerPos + ", t=" + t);
 		return t;
-	}
-
-	Vector3 GetStartPosition() {
-		switch (localAxisOfRotation) {
-			case RotationAxes.right:
-				return pivot + -transform.parent.forward * initialBounds.size.z;
-			case RotationAxes.left:
-				return pivot + transform.parent.up * initialBounds.size.y;
-			case RotationAxes.up:
-			case RotationAxes.down:
-				Debug.LogError("Up/Down not handled yet");
-				return Vector3.zero;
-			case RotationAxes.forward:
-				return pivot + transform.parent.up * initialBounds.size.y;
-			case RotationAxes.back:
-				return pivot + -transform.parent.forward * initialBounds.size.x;
-			default:
-				Debug.LogError("Unreachable");
-				return Vector3.zero;
-		}
-	}
-
-	Vector3 GetEndPosition() {
-		switch (localAxisOfRotation) {
-			case RotationAxes.right:
-				return pivot + transform.parent.up * initialBounds.size.y;
-			case RotationAxes.left:
-				return pivot + -transform.parent.forward * initialBounds.size.z;
-			case RotationAxes.up:
-				Debug.LogError("Up/Down not handled yet");
-				return Vector3.zero;
-			case RotationAxes.down:
-				Debug.LogError("Up/Down not handled yet");
-				return Vector3.zero;
-			case RotationAxes.forward:
-				return pivot + -transform.parent.forward * initialBounds.size.x;
-			case RotationAxes.back:
-				return pivot + transform.parent.up * initialBounds.size.y;
-			default:
-				Debug.LogError("Unreachable");
-				return Vector3.zero;
-		}
-	}
-
-	Vector3 GetRotationAxis(RotationAxes axisOfRotation) {
-		switch (axisOfRotation) {
-			case RotationAxes.right:
-				return transform.parent.TransformDirection(Vector3.right);
-			case RotationAxes.left:
-				return transform.parent.TransformDirection(Vector3.left);
-			case RotationAxes.up:
-				return transform.parent.TransformDirection(Vector3.up);
-			case RotationAxes.down:
-				return transform.parent.TransformDirection(Vector3.down);
-			case RotationAxes.forward:
-				return transform.parent.TransformDirection(Vector3.back);
-			case RotationAxes.back:
-				return transform.parent.TransformDirection(Vector3.forward);
-			default:
-				Debug.LogError("Unreachable");
-				return Vector3.zero;
-		}
 	}
 
 	Vector3 ClosestPointOnLine(Vector3 vA, Vector3 vB, Vector3 vPoint) {
@@ -224,5 +141,4 @@ public class StaircaseRotate : MonoBehaviour {
 
 		return vClosestPoint;
 	}
-
 }

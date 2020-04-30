@@ -167,7 +167,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7702703061741439296}
-  m_Material: {fileID: 13400000, guid: 84c98f3c1ebbe4f44804bc431f4737be, type: 2}
+  m_Material: {fileID: 13400000, guid: 08f9397c9cb96ca41be3b639e17bcfce, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -207,7 +207,6 @@ MonoBehaviour:
   holdDistance: 3
   thisGravity: {fileID: 0}
   thisRigidbody: {fileID: 0}
-  grabbedThroughPortal: {fileID: 0}
 --- !u!114 &5694432929352241937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,6 +220,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sittingInPortal: {fileID: 0}
+  hoveredThroughPortal: {fileID: 0}
+  grabbedThroughPortal: {fileID: 0}
   fakeCopyPrefab: {fileID: 2734226514055083633, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
   fakeCopyInstance: {fileID: 0}

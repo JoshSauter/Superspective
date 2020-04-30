@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using PortalMechanics;
 
 namespace EpitaphUtils {
 	[Serializable]
@@ -793,6 +794,16 @@ namespace EpitaphUtils {
 		public class RaycastHits {
 			public bool raycastWasAHit = false;
 			public bool raycastHitAnyPortal = false;
+			public GameObject objectHit {
+				get {
+					if (raycastWasAHit) {
+						return lastRaycast.hitInfo.collider.gameObject;
+					}
+					else {
+						return null;
+					}
+				}
+			}
 			public Vector3 finalPosition {
 				get {
 					if (raycastWasAHit) {
@@ -869,7 +880,7 @@ namespace EpitaphUtils {
 
 					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>();
 					// Raycast hit a portal, fire a new one on the other side of the portal
-					if (portalHit != null && portalHit.isEnabled) {
+					if (portalHit != null && portalHit.portalIsEnabled) {
 						Vector3 localPositionOfNewStart = portalHit.transform.InverseTransformPoint(thisHitInfo.point);
 						localPositionOfNewStart = Quaternion.Euler(0f, 180f, 0f) * localPositionOfNewStart;
 						Vector3 newStart = portalHit.otherPortal.transform.TransformPoint(localPositionOfNewStart);

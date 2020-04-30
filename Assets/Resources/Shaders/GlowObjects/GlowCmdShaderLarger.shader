@@ -16,6 +16,7 @@
 			struct appdata
 			{
 				float4 vertex : POSITION;
+				float3 normal : NORMAL;
 			};
 
 			struct v2f
@@ -26,7 +27,7 @@
 			v2f vert (appdata v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex * 1.01);//+ .01*sign(v.vertex));
+				o.vertex = UnityObjectToClipPos(v.vertex + v.normal * .005);//+ .01*sign(v.vertex));
 				return o;
 			}
 			

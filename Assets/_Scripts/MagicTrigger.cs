@@ -59,9 +59,8 @@ public class MagicTrigger : MonoBehaviour {
 
         if (other.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
-            if (DEBUG) {
-                print("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
-            }
+            debug.Log("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
+			
 			// Magic Events triggered
 			if (facingAmount > playerFaceThreshold) {
 				debug.Log("Triggering MagicTrigger!");

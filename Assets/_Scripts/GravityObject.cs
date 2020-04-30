@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PortalMechanics;
 
 [RequireComponent(typeof(Rigidbody))]
 public class GravityObject : MonoBehaviour {

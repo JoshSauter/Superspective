@@ -22,7 +22,7 @@ public class PickupCubeDimensionShift : MonoBehaviour {
 	const string propName = "_DissolveValue";
 	float outlineFadeInTime = 5f;
 	float invertColorsDelay = 0.4f;
-	float invertColorsFadeOutTime = 5f;
+	float invertColorsFadeOutTime = .5f;
 
 	bool inOtherDimension;
 

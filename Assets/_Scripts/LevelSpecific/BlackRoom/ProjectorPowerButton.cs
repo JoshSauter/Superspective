@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PowerTrailMechanics;
 
 [RequireComponent(typeof(Button))]
 public class ProjectorPowerButton : MonoBehaviour {
-	public PowerTrail powerTrail;
+	public PowerTrailMechanics.PowerTrail powerTrail;
 	public bool lightTurnedOn = false;
 	public LightProjector projector;
 	Button b;

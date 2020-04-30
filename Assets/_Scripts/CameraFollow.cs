@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using PortalMechanics;
 
-// TODO: This 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
 public class CameraFollow : MonoBehaviour {
 	bool shouldFollow = true;

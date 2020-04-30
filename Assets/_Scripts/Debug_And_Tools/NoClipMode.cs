@@ -37,7 +37,7 @@ public class NoClipMode : MonoBehaviour {
 			float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
 			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = middleMouseScroll * Vector3.up * middleMouseVerticalSpeed;
+			Vector3 verticalScroll = middleMouseScroll * transform.up * middleMouseVerticalSpeed;
 
 			transform.position += (verticalScroll + moveDirection) * Time.deltaTime * speed;
 		}

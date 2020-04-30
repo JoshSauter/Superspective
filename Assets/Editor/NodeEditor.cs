@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEditor;
 using UnityEngine;
+using PowerTrailMechanics;
 
 [CustomEditor(typeof(NodeSystem))]
 public class NodeEditor : Editor {
@@ -74,7 +75,7 @@ public class NodeEditor : Editor {
 		Vector3 oc = ray.origin - center;
 		float a = Vector3.Dot(ray.direction, ray.direction);
 		float b = 2.0f * Vector3.Dot(oc, ray.direction);
-		float c = Vector3.Dot(oc, oc) - PowerTrail.gizmoSphereSize * PowerTrail.gizmoSphereSize;
+		float c = Vector3.Dot(oc, oc) - PowerTrailMechanics.PowerTrail.gizmoSphereSize * PowerTrailMechanics.PowerTrail.gizmoSphereSize;
 		float discriminant = b * b - 4 * a * c;
 		return (discriminant > 0);
 	}

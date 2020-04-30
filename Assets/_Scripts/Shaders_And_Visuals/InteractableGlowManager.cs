@@ -16,6 +16,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 	private Material prePassMaterial;
 	private Material prePassMaterialLarger;
+	private Material prePassMaterialSmaller;
 	private Material blurMaterial;
 	private Vector2 blurTexelSize;
 
@@ -41,6 +42,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	private void Awake() {
 		prePassMaterial = new Material(Shader.Find("Hidden/GlowCmdShader"));
 		prePassMaterialLarger = new Material(Shader.Find("Hidden/GlowCmdShaderLarger"));
+		prePassMaterialSmaller = new Material(Shader.Find("Hidden/GlowCmdShaderSmaller"));
 		blurMaterial = new Material(Shader.Find("Hidden/Blur"));
 
 		prePassRenderTexID = Shader.PropertyToID("_GlowPrePassTex");
@@ -61,11 +63,9 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// </summary>
 	private void RebuildCommandBuffer() {
 		commandBuffer.Clear();
-		commandBuffer.GetTemporaryRT(blurPassRenderTexID, Screen.width >> 1, Screen.height >> 1, 0, FilterMode.Bilinear);
+		commandBuffer.GetTemporaryRT(blurPassRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(blurPassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
-
-		// TODO: Temporarily move glowable objects to their projected position/rotation for rendering if they are being hovered through a portal
 
 		// Blur 0-th iteration
 		foreach (var glowObject in glowableObjects) {
@@ -73,12 +73,12 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 			for (int j = 0; j < glowObject.Renderers.Length; j++) {
 				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.Renderers[j], prePassMaterialLarger);
+				commandBuffer.DrawRenderer(glowObject.Renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterialLarger : prePassMaterial);
 			}
 		}
 
 		// Prepass
-		commandBuffer.GetTemporaryRT(prePassRenderTexID, Screen.width, Screen.height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, QualitySettings.antiAliasing);
+		commandBuffer.GetTemporaryRT(prePassRenderTexID, EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, QualitySettings.antiAliasing);
 		commandBuffer.SetRenderTarget(prePassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
 		foreach (var glowObject in glowableObjects) {
@@ -86,13 +86,13 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 			for (int j = 0; j < glowObject.Renderers.Length; j++) {
 				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.Renderers[j], prePassMaterial);
+				commandBuffer.DrawRenderer(glowObject.Renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterial : prePassMaterialSmaller);
 			}
 		}
 
-		commandBuffer.GetTemporaryRT(tempRenderTexID, Screen.width >> 1, Screen.height >> 1, 0, FilterMode.Bilinear);
+		commandBuffer.GetTemporaryRT(tempRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 
-		blurTexelSize = new Vector2(1.5f / (Screen.width >> 1), 1.5f / (Screen.height >> 1));
+		blurTexelSize = new Vector2(1.5f / (EpitaphScreen.currentWidth >> 1), 1.5f / (EpitaphScreen.currentHeight >> 1));
 		commandBuffer.SetGlobalVector(blurSizeID, blurTexelSize);
 
 		for (int i = 0; i < blurIterations; i++) {
@@ -115,35 +115,12 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	}
 
 	private void OnPostRender() {
-		Dictionary<PickupObject, TransformInfo> cachedTransforms = new Dictionary<PickupObject, TransformInfo>();
-		foreach (var glowObject in glowableObjects) {
-			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
-
-			// WTF
-			PickupObject pickupCube = glowObject.GetComponent<PickupObject>();
-			if (pickupCube != null && pickupCube.grabbedThroughPortal != null) {
-				//pickupCube.grabbedThroughPortal.otherPortal.TransformObject(glowObject.transform);
-				cachedTransforms.Add(pickupCube, new TransformInfo(pickupCube.transform));
-				//pickupCube.transform.position -= Vector3.one * 0.1f;
-			}
-		}
-
 		Graphics.ExecuteCommandBuffer(commandBuffer);
-
-		foreach (var glowObject in glowableObjects) {
-			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
-
-			PickupObject pickupCube = glowObject.GetComponent<PickupObject>();
-			if (pickupCube != null && pickupCube.grabbedThroughPortal != null) {
-				//pickupCube.grabbedThroughPortal.TransformObject(glowObject.transform);
-				cachedTransforms[pickupCube].ApplyToTransform(pickupCube.transform);
-			}
-		}
 	}
 
 	private Color GetColor(InteractableGlow objGlow) {
 		Color color = new Color();
-		if (edgeDetection == null) {
+		if (edgeDetection == null || objGlow.overrideGlowColor) {
 			color = objGlow.CurrentColor;
 		}
 		else {

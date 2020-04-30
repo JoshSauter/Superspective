@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using EpitaphUtils;
+using NaughtyAttributes;
 
 [ExecuteInEditMode]
 public class InteractableGlow : MonoBehaviour {
 	public InteractableObject interactableObject;
+	public bool useLargerPrepassMaterial = true;
+	public bool overrideGlowColor = false;
+	[ShowIf("overrideGlowColor")]
 	public Color GlowColor;
 	public float LerpFactor = 10;
 	public bool recursiveChildRenderers = true;
@@ -17,12 +21,13 @@ public class InteractableGlow : MonoBehaviour {
 	}
 	public Color CurrentColor {
 		get { return _currentColor; }
+		set { _currentColor = value; }
 	}
 	private Color _currentColor;
 	// Target color must be set every frame or it turns off
 	private Color _targetColor;
 
-	void Awake() {
+	void Start() {
 		playerCamGlowController = InteractableGlowManager.instance;
 
 		if (recursiveChildRenderers) {
@@ -33,7 +38,9 @@ public class InteractableGlow : MonoBehaviour {
 		}
 		playerCamGlowController?.Add(this);
 
-		interactableObject = GetComponent<InteractableObject>();
+		if (interactableObject == null) {
+			interactableObject = GetComponent<InteractableObject>();
+		}
 		interactableObject.OnMouseHover += TurnOnGlow;
 		interactableObject.OnMouseHoverExit += TurnOffGlow;
 	}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 using EpitaphUtils.PortalUtils;
+using PortalMechanics;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PickupObject : MonoBehaviour {
@@ -29,6 +30,7 @@ public class PickupObject : MonoBehaviour {
 	public GravityObject thisGravity;
 	public Rigidbody thisRigidbody;
 	Renderer thisRenderer;
+
 	PortalableObject portalableObject;
 
 	public delegate void PickupObjectSimpleAction();
@@ -37,9 +39,6 @@ public class PickupObject : MonoBehaviour {
 	public PickupObjectSimpleAction OnDropSimple;
 	public PickupObjectAction OnPickup;
 	public PickupObjectAction OnDrop;
-
-	public Portal hoveredThroughPortal;
-	public Portal grabbedThroughPortal;
 
 	void Awake() {
 		thisRigidbody = GetComponent<Rigidbody>();
@@ -51,8 +50,6 @@ public class PickupObject : MonoBehaviour {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
 		}
 		interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
-		interactableObject.OnMouseHoverEnter += () => hoveredThroughPortal = DetermineHoveredThroughPortal();
-		interactableObject.OnMouseHoverExit += () => hoveredThroughPortal = null;
 
 		interactableGlow = GetComponent<InteractableGlow>();
 		if (interactableGlow == null) {
@@ -65,29 +62,15 @@ public class PickupObject : MonoBehaviour {
 		playerCam = EpitaphScreen.instance.playerCamera.transform;
 		positionLastPhysicsFrame = transform.position;
 		thisRenderer = GetComponent<Renderer>();
-		portalableObject = GetComponent<PortalableObject>();
-		if (portalableObject != null) {
-			portalableObject.BeforeObjectTeleported += (Portal inPortal) => ToggleGrabbedThroughPortalIfRelevant(inPortal, false);
-		}
-		Portal.BeforeAnyPortalTeleport += (Portal inPortal, Collider objBeingTeleported) => ToggleGrabbedThroughPortalIfRelevant(inPortal, true);
+
 		PlayerButtonInput.instance.OnAction1Press += Drop;
 
 		PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
 		if (thisDimensionObject != null) {
 			thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 		}
-	}
 
-	void ToggleGrabbedThroughPortalIfRelevant(Portal inPortal, bool playerTeleported) {
-		if (isHeld) {
-			Portal compareTo = playerTeleported ? inPortal : inPortal.otherPortal;
-			if (grabbedThroughPortal == compareTo) {
-				grabbedThroughPortal = null;
-			}
-			else {
-				grabbedThroughPortal = playerTeleported ? inPortal.otherPortal : inPortal;
-			}
-		}
+		portalableObject = GetComponent<PortalableObject>();
 	}
 
 	private void Update() {
@@ -95,55 +78,16 @@ public class PickupObject : MonoBehaviour {
 			currentCooldown -= Time.deltaTime;
 		}
 
-		if (hoveredThroughPortal != null || grabbedThroughPortal != null) {
-			Portal portal = grabbedThroughPortal ?? hoveredThroughPortal;
-			portalableObject.EnableAndUpdatePortalCopy(portal.otherPortal);
-			portalableObject.fakeCopyInstance.GetComponent<InteractableGlow>().TurnOnGlow();
-		}
-		else if (portalableObject != null && portalableObject.fakeCopyInstance != null) {
-			portalableObject.fakeCopyInstance?.GetComponent<InteractableGlow>().TurnOffGlow();
-			portalableObject.DisablePortalCopy();
-		}
-
 		if (isHeld) {
 			interactableGlow.TurnOnGlow();
-
-			if (hoveredThroughPortal == null && grabbedThroughPortal != null) {
-				Drop();
-			}
 		}
 	}
 
 	void FixedUpdate() {
 		if (isHeld) {
-			int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
-			int layerMask = ~(1 << ignoreRaycastLayer | 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible"));
-			int tempLayer = gameObject.layer;
-			gameObject.layer = ignoreRaycastLayer;
+			RaycastHits raycastHits;
+			Vector3 targetPos = (portalableObject == null) ? TargetHoldPosition(out raycastHits) : TargetHoldPositionThroughPortal(out raycastHits);
 
-			int tempLayerPortalCopy = 0;
-			if (portalableObject?.fakeCopyInstance != null) {
-				tempLayerPortalCopy = portalableObject.fakeCopyInstance.layer;
-				portalableObject.fakeCopyInstance.layer = ignoreRaycastLayer;
-			}
-
-			RaycastHits raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
-			Vector3 targetPos = raycastHits.finalPosition;
-
-			bool throughOutPortalToInPortal = grabbedThroughPortal != null && grabbedThroughPortal.isEnabled && !raycastHits.raycastHitAnyPortal;
-			bool throughInPortalToOutPortal = grabbedThroughPortal == null && raycastHits.raycastHitAnyPortal;
-			if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
-				Portal inPortal = throughOutPortalToInPortal ? grabbedThroughPortal : raycastHits.firstRaycast.portalHit.otherPortal;
-
-				Vector3 localTargetPos = inPortal.transform.InverseTransformPoint(targetPos);
-				localTargetPos = Quaternion.Euler(0, 180f, 0) * localTargetPos;
-				targetPos = inPortal.otherPortal.transform.TransformPoint(localTargetPos);
-			}
-
-			gameObject.layer = tempLayer;
-			if (portalableObject?.fakeCopyInstance != null) {
-				portalableObject.fakeCopyInstance.layer = tempLayerPortalCopy;
-			}
 			Vector3 diff = targetPos - thisRigidbody.position;
 			Vector3 newVelocity = Vector3.Lerp(thisRigidbody.velocity, followSpeed * diff, followLerpSpeed * Time.fixedDeltaTime);
 			bool movingTowardsPlayer = Vector3.Dot(newVelocity.normalized, -raycastHits.lastRaycast.ray.direction) > 0.5f;
@@ -154,33 +98,66 @@ public class PickupObject : MonoBehaviour {
 		}
 	}
 
+	Vector3 TargetHoldPosition(out RaycastHits raycastHits) {
+		// TODO: Don't work with strings every frame, clean this up
+		int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+		int layerMask = ~(1 << ignoreRaycastLayer | 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("CollideWithPlayerOnly"));
+		int tempLayer = gameObject.layer;
+		gameObject.layer = ignoreRaycastLayer;
+
+		raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
+		Vector3 targetPos = raycastHits.finalPosition;
+		gameObject.layer = tempLayer;
+
+		return targetPos;
+	}
+
+	Vector3 TargetHoldPositionThroughPortal(out RaycastHits raycastHits) {
+		// TODO: Don't work with strings every frame, clean this up
+		int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
+		int layerMask = ~(1 << ignoreRaycastLayer | 1 << LayerMask.NameToLayer("Player") | 1 << LayerMask.NameToLayer("Invisible") | 1 << LayerMask.NameToLayer("CollideWithPlayerOnly"));
+		int tempLayer = gameObject.layer;
+		gameObject.layer = ignoreRaycastLayer;
+
+		int tempLayerPortalCopy = 0;
+		if (portalableObject.copyIsEnabled) {
+			tempLayerPortalCopy = portalableObject.fakeCopyInstance.layer;
+			portalableObject.fakeCopyInstance.layer = ignoreRaycastLayer;
+		}
+
+		raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
+		Vector3 targetPos = raycastHits.finalPosition;
+
+		gameObject.layer = tempLayer;
+		if (portalableObject.copyIsEnabled) {
+			portalableObject.fakeCopyInstance.layer = tempLayerPortalCopy;
+		}
+
+		bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null && portalableObject.grabbedThroughPortal.portalIsEnabled && !raycastHits.raycastHitAnyPortal;
+		bool throughInPortalToOutPortal = portalableObject.grabbedThroughPortal == null && raycastHits.raycastHitAnyPortal;
+		if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
+			Portal inPortal = throughOutPortalToInPortal ? portalableObject.grabbedThroughPortal : raycastHits.firstRaycast.portalHit.otherPortal;
+
+			Vector3 localTargetPos = inPortal.transform.InverseTransformPoint(targetPos);
+			localTargetPos = Quaternion.Euler(0, 180f, 0) * localTargetPos;
+			targetPos = inPortal.otherPortal.transform.TransformPoint(localTargetPos);
+		}
+
+		return targetPos;
+	}
+
 	void HandleDimensionObjectStateChange(VisibilityState nextState) {
 		if (nextState == VisibilityState.invisible && isHeld) {
 			Drop();
 		}
 	}
 
-	Portal DetermineHoveredThroughPortal() {
-		RaycastHits reticleHitInfo = Interact.instance.GetRaycastHits();
-		bool portalCopyExists = portalableObject.fakeCopyInstance != null;
-		bool clickedOnPortalCopy = portalCopyExists && reticleHitInfo.raycastWasAHit && reticleHitInfo.lastRaycast.hitInfo.collider.gameObject == portalableObject.fakeCopyInstance.gameObject;
-		Portal hoveredThroughPortal = Interact.instance.GetRaycastHits().firstRaycast.portalHit;
-		if (portalableObject.sittingInPortal == hoveredThroughPortal) {
-			hoveredThroughPortal = null;
-		}
-		else if (clickedOnPortalCopy) {
-			hoveredThroughPortal = portalableObject.sittingInPortal?.otherPortal;
-		}
-
-		return hoveredThroughPortal;
-	}
-
 	public void Pickup() {
 		if (!isHeld && !onCooldown && interactable) {
-			if (portalableObject != null) {
-				grabbedThroughPortal = DetermineHoveredThroughPortal();
-			}
 
+			if (transform.parent != null) {
+				transform.SetParent(null);
+			}
 			DontDestroyOnLoad(gameObject);
 
 			//transform.parent = Player.instance.transform;
@@ -198,11 +175,9 @@ public class PickupObject : MonoBehaviour {
 	public void Drop() {
 		if (isHeld && !onCooldown && interactable) {
 			thisGravity.gravityDirection = Physics.gravity.normalized;
-			if (grabbedThroughPortal) {
-				thisGravity.ReorientGravityAfterPortaling(grabbedThroughPortal);
+			if (portalableObject?.grabbedThroughPortal != null) {
+				thisGravity.ReorientGravityAfterPortaling(portalableObject.grabbedThroughPortal);
 			}
-
-			grabbedThroughPortal = null;
 
 			//transform.parent = originalParent;
 			thisGravity.useGravity = true;

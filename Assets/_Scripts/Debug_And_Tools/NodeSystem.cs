@@ -7,6 +7,31 @@ using System.Linq;
 using UnityEditor;
 #endif
 
+[System.Serializable]
+public class Node {
+	public int id;
+	public int parentId = -1;
+	public List<int> childrenIds = new List<int>();
+	public Vector3 pos;
+
+	public Node(int id, Vector3 pos) {
+		this.childrenIds = new List<int>();
+		this.pos = pos;
+		this.id = id;
+	}
+
+	public Node AddNewChild(int id) {
+		Node newNode = new Node(id, pos);
+		newNode.parentId = this.id;
+		this.childrenIds.Add(newNode.id);
+
+		return newNode;
+	}
+
+	public bool isRootNode { get { return parentId == -1; } }
+	public bool isLeafNode { get { return childrenIds.Count == 0; } }
+}
+
 [ExecuteInEditMode]
 public class NodeSystem : MonoBehaviour {
 	private int _curId = 0;
@@ -16,6 +41,7 @@ public class NodeSystem : MonoBehaviour {
 	public Dictionary<int, Node> allNodes;
 	public Node parentNode;
 	public Node selectedNode;
+	public int Count { get { return keys.Count; } }
 
 	private void OnEnable() {
 		if (allNodes == null) {
@@ -35,7 +61,7 @@ public class NodeSystem : MonoBehaviour {
 			}
 		}
 		if (parentNode == null) {
-			parentNode = new Node(_curId++, transform.localPosition);
+			parentNode = new Node(_curId++, Vector3.zero);
 			keys.Add(parentNode.id);
 			values.Add(parentNode);
 			allNodes.Add(parentNode.id, parentNode);
@@ -128,13 +154,13 @@ public class NodeSystem : MonoBehaviour {
 	[MenuItem("Custom/Power Trails/Add Child _F2")]
 	public static void AddChild() {
 		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null && s.selectedNode != null) {
-				Node newNode = s.selectedNode.AddNewChild(s._curId++);
-				s.keys.Add(newNode.id);
-				s.values.Add(newNode);
-				s.allNodes.Add(newNode.id, newNode);
-				s.selectedNode = newNode;
+			NodeSystem ns = selected.GetComponent<NodeSystem>();
+			if (ns != null && ns.selectedNode != null) {
+				Node newNode = ns.selectedNode.AddNewChild(ns._curId++);
+				ns.keys.Add(newNode.id);
+				ns.values.Add(newNode);
+				ns.allNodes.Add(newNode.id, newNode);
+				ns.selectedNode = newNode;
 			}
 		}
 	}
@@ -152,26 +178,4 @@ public class NodeSystem : MonoBehaviour {
 		values.RemoveAll(n => n.id == curNode.id);
 	}
 #endif
-}
-
-[System.Serializable]
-public class Node {
-	public int id;
-	public int parentId = -1;
-	public List<int> childrenIds = new List<int>();
-	public Vector3 pos;
-
-	public Node(int id, Vector3 pos) {
-		this.childrenIds = new List<int>();
-		this.pos = pos;
-		this.id = id;
-	}
-
-	public Node AddNewChild(int id) {
-		Node newNode = new Node(id, pos);
-		newNode.parentId = this.id;
-		this.childrenIds.Add(newNode.id);
-
-		return newNode;
-	}
 }

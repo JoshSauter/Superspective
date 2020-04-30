@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using NaughtyAttributes;
 
 public class InteractableObject : MonoBehaviour {
+	public bool useLargerPrepassMaterial = true;
+	public bool overrideGlowColor = false;
+	[ShowIf("overrideGlowColor")]
 	public Color glowColor = new Color(.6f, .35f, .25f, 1f);
 	public delegate void InteractAction();
 	public InteractAction OnLeftMouseButtonDown;
@@ -25,6 +29,8 @@ public class InteractableObject : MonoBehaviour {
 			// gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
 			InteractableGlow glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
 			glow.recursiveChildRenderers = recursiveChildRenderers;
+			glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
+			glow.overrideGlowColor = overrideGlowColor;
 			glow.GlowColor = glowColor;
 			glow.interactableObject = this;
 		}

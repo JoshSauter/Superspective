@@ -1,15 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PowerTrailMechanics;
 
 public class ColorChangeOnPower : MonoBehaviour {
 	public bool useMaterialAsStartColor = true;
 	public Color depoweredColor;
 	[ColorUsage(true, true)]
-	public Color depoweredEmission = Color.black;
-	public Color poweredColor = Color.white;
+	public Color depoweredEmission;
+	public Color poweredColor;
 	[ColorUsage(true, true)]
-	public Color poweredEmission = Color.black;
+	public Color poweredEmission;
 
 	public AnimationCurve colorChangeAnimationCurve;
 	public float timeToChangeColor = 0.25f;

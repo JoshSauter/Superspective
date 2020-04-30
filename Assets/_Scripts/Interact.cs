@@ -76,7 +76,6 @@ public class Interact : Singleton<Interact> {
 			reticle.color = reticleUnselectColor;
 			reticleOutside.color = reticleOutsideUnselectColor;
 		}
-
 	}
 
 	public RaycastHits GetRaycastHits() {

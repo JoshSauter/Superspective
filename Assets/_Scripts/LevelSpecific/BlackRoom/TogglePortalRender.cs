@@ -1,28 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PortalMechanics;
 
 public class TogglePortalRender : MonoBehaviour {
 	public DoorOpenClose enableDoor;
 	public MagicTrigger disableTrigger;
-	PortalCameraRenderTexture portal;
+	Portal portal;
 
     IEnumerator Start() {
         while (portal == null) {
-			portal = GetComponent<PortalCameraRenderTexture>();
+			portal = GetComponent<Portal>();
 			yield return null;
 		}
 
-		portal.pauseRendering = true;
+		PausePortalRendering();
 		enableDoor.OnDoorOpenStart += ctx => ResumePortalRendering();
 		disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
     }
 
 	void ResumePortalRendering() {
-		portal.pauseRendering = false;
+		portal.pauseRenderingAndLogic = false;
+		portal.otherPortal.pauseRenderingAndLogic = false;
 	}
 
 	void PausePortalRendering() {
-		portal.pauseRendering = true;
+		portal.pauseRenderingAndLogic = true;
+		portal.otherPortal.pauseRenderingAndLogic = true;
 	}
 }

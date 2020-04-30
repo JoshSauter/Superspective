@@ -21,6 +21,7 @@ public enum Level {
 	level3,
 	level4,
 	tutorialHallway,
+	tutorialRoom,
 	transition2_3,
 	transition3_4,
 	axis,
@@ -60,6 +61,7 @@ public class LevelManager : Singleton<LevelManager> {
     private const string invisFloor = "_InvisFloor";
 
 	private const string tutorialHallway = "_TutorialHallway";
+	private const string tutorialRoom = "_TutorialRoom";
 	private const string transition2_3 = "_Transition2_3";
 	private const string transition3_4 = "_Transition3_4";
 
@@ -152,6 +154,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.forkWhiteRoom, forkWhiteRoom);
 		enumToSceneName.Add(Level.forkBlackRoom, forkBlackRoom);
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
+		enumToSceneName.Add(Level.tutorialRoom, tutorialRoom);
 		enumToSceneName.Add(Level.transition2_3, transition2_3);
 		enumToSceneName.Add(Level.transition3_4, transition3_4);
         enumToSceneName.Add(Level.invisFloor, invisFloor);
@@ -172,13 +175,14 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(library, new List<string>() { hexPillarRoom, tutorialHallway });
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
-		worldGraph.Add(axis, new List<string>() { tutorialHallway });
+		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
 		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom });
 		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
         worldGraph.Add(invisFloor, new List<string>());
 
-		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, hexPillarRoom, axis });
+		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, tutorialRoom });
+		worldGraph.Add(tutorialRoom, new List<string>() { tutorialHallway, axis });
 		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });
 		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
 
