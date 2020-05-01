@@ -105,7 +105,7 @@ namespace PortalMechanics {
 
 			// Copy post-process effects from player's camera
 			// Order of components here matters; it affects the rendering order of the postprocess effects
-			// portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
+			portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
 			portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ScreenSpaceAmbientOcclusion>());                             // Copy SSAO
 			BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 			portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog

@@ -310,10 +310,10 @@ namespace PortalMechanics {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		IEnumerator TeleportPlayer(UnityEngine.Transform player) {
+		IEnumerator TeleportPlayer(Transform player) {
 			teleportingPlayer = true;
 
-			if (DEBUG) Debug.Break();
+			//if (DEBUG) Debug.Break();
 			TriggerEventsBeforeTeleport(player.GetComponent<Collider>());
 
 			// Position
@@ -335,7 +335,9 @@ namespace PortalMechanics {
 			Physics.gravity = Physics.gravity.magnitude * -player.up;
 			//PlayerMovement.instance.enabled = false;
 
-			SwapEdgeDetectionColors();
+			if (changeCameraEdgeDetection) {
+				SwapEdgeDetectionColors();
+			}
 
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
 			otherPortal.EnableVolumetricPortal();
@@ -396,15 +398,25 @@ namespace PortalMechanics {
 
 		private void SwapEdgeDetectionColors() {
 			BladeEdgeDetection playerED = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
-			BladeEdgeDetection portalED = VirtualPortalCamera.instance.GetComponent<BladeEdgeDetection>();
 
-			BladeEdgeDetection.EdgeColorMode tempEdgeColorMode = playerED.edgeColorMode;
+   			BladeEdgeDetection.EdgeColorMode tempEdgeColorMode = playerED.edgeColorMode;
 			Color tempColor = playerED.edgeColor;
 			Gradient tempColorGradient = playerED.edgeColorGradient;
 			Texture2D tempColorGradientTexture = playerED.edgeColorGradientTexture;
 
-			VirtualPortalCamera.instance.CopyEdgeColors(source: portalED, dest: playerED);
-			VirtualPortalCamera.instance.CopyEdgeColors(portalED, tempEdgeColorMode, tempColor, tempColorGradient, tempColorGradientTexture);
+			CopyEdgeColors(dest: playerED, edgeColorMode, edgeColor, edgeColorGradient, edgeColorGradientTexture);
+
+			edgeColorMode = tempEdgeColorMode;
+			edgeColor = tempColor;
+			edgeColorGradient = tempColorGradient;
+			edgeColorGradientTexture = tempColorGradientTexture;
+		}
+
+		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
+			dest.edgeColorMode = edgeColorMode;
+			dest.edgeColor = edgeColor;
+			dest.edgeColorGradient = edgeColorGradient;
+			dest.edgeColorGradientTexture = edgeColorGradientTexture;
 		}
 		#endregion
 	}

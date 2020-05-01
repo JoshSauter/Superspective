@@ -6,7 +6,7 @@ using NaughtyAttributes;
 [ExecuteInEditMode]
 public class InteractableGlow : MonoBehaviour {
 	public InteractableObject interactableObject;
-	public bool useLargerPrepassMaterial = true;
+	public bool useLargerPrepassMaterial = false;
 	public bool overrideGlowColor = false;
 	[ShowIf("overrideGlowColor")]
 	public Color GlowColor;

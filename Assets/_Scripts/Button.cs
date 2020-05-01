@@ -31,8 +31,8 @@ public class Button : MonoBehaviour {
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
-			interactableObject.OnLeftMouseButton += OnLeftMouseButton;
 		}
+		interactableObject.OnLeftMouseButton += OnLeftMouseButton;
 	}
 
 	public void PressButton() {

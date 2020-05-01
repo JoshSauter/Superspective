@@ -11,6 +11,7 @@ using UnityEditor;
 
 // When adding a new Level to this enum, make sure you also add it under level names region,
 // PopulateSceneNames function, PopulateWorldGraph function, and add the scene to Build Settings as well
+// ALSO NOTE: You MUST append any new additions to the END of the enum, else it fucks with serializataion
 [Serializable]
 public enum Level {
 	managerScene,

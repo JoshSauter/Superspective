@@ -31,6 +31,11 @@ public class StaircaseRotate : MonoBehaviour {
 
 	PlayerMovement playerMovement;
 
+	// Gravity amplification is use to stop players from "flying" over down-stairs
+	float minDistanceForGravAmplification = 4f;
+	float maxDistanceForGravAmplification = 8f;
+	float gravAmplificationMagnitude = 8f;
+
     void Start() {
 		playerMovement = PlayerMovement.instance;
 
@@ -73,7 +78,16 @@ public class StaircaseRotate : MonoBehaviour {
 			if (treatedAsADownStair) {
 				t = 1 - t;
 			}
-			Physics.gravity = Physics.gravity.magnitude * Vector3.Lerp(startGravityDirection, endGravityDirection, t).normalized;
+
+			float gravAmplificationFactor = 1;
+			if (treatedAsADownStair) {
+				Vector3 projectedPlayerPos = ClosestPointOnLine(startPosition, endPosition, playerMovement.bottomOfPlayer);
+				float distanceFromPlayerToStairs = Vector3.Distance(playerMovement.bottomOfPlayer, projectedPlayerPos);
+				gravAmplificationFactor = 1 + gravAmplificationMagnitude * Mathf.InverseLerp(minDistanceForGravAmplification, maxDistanceForGravAmplification, distanceFromPlayerToStairs);
+			}
+			// TODO: Maybe store this information when player first enters zone
+			float baseGravMagnitude = 32f;
+			Physics.gravity = (baseGravMagnitude * gravAmplificationFactor) * Vector3.Lerp(startGravityDirection, endGravityDirection, t).normalized;
 
 			float angleBetween = Vector3.Angle(playerMovement.transform.up, -Physics.gravity.normalized);
 			if (treatedAsADownStair) {
