@@ -2,111 +2,206 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
+using NaughtyAttributes;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-[System.Serializable]
+[Serializable]
+public struct SerializableNode {
+	public Vector3 pos;
+	public int indexOfParent;
+	public int childCount;
+	public int indexOfFirstChild;
+}
 public class Node {
-	public int id;
-	public int parentId = -1;
-	public List<int> childrenIds = new List<int>();
+	private const float distanceToSpawnNewNodeAt = 0.5f;
+	public Node parent;
+	public List<Node> children = new List<Node>();
 	public Vector3 pos;
 
-	public Node(int id, Vector3 pos) {
-		this.childrenIds = new List<int>();
+	public Node(Vector3 pos) {
+		this.children = new List<Node>();
 		this.pos = pos;
-		this.id = id;
 	}
 
-	public Node AddNewChild(int id) {
-		Node newNode = new Node(id, pos);
-		newNode.parentId = this.id;
-		this.childrenIds.Add(newNode.id);
+	public Node AddNewChild() {
+		Vector3 grandparentToParent = Vector3.forward;
+		if (parent != null) {
+			grandparentToParent = (pos - parent.pos).normalized;
+		}
+		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt);
+		newNode.parent = this;
+		this.children.Add(newNode);
 
 		return newNode;
 	}
 
-	public bool isRootNode { get { return parentId == -1; } }
-	public bool isLeafNode { get { return childrenIds.Count == 0; } }
+	public bool isRootNode { get { return parent == null; } }
+	public bool isLeafNode { get { return children.Count == 0; } }
 }
 
 [ExecuteInEditMode]
-public class NodeSystem : MonoBehaviour {
-	private int _curId = 0;
-	public List<int> keys = new List<int>();
-	public List<Node> values = new List<Node>();
+public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
+	// DEBUG used for special logic around repositioning nodes/placing new nodes
+	public bool DEBUG = false;
+	public bool showNodes = true;
+	public List<Node> allNodes;
+	[HideInInspector]
+	public Node rootNode;
+	public int selectedNodeIndex = -1;
+	public List<SerializableNode> serializedNodes;
 
-	public Dictionary<int, Node> allNodes;
-	public Node parentNode;
-	public Node selectedNode;
-	public int Count { get { return keys.Count; } }
+	public void OnBeforeSerialize() {
+		// Unity is about to read the serializedNodes field's contents.
+		// The correct data must now be written into that field "just in time".
+		if (serializedNodes == null) serializedNodes = new List<SerializableNode>();
+		if (rootNode == null) rootNode = new Node(Vector3.forward);
+		serializedNodes.Clear();
+		AddNodeToSerializedNodesRecursively(rootNode, -1);
+		// Now Unity is free to serialize this field, and we should get back the expected 
+		// data when it is deserialized later.
+	}
 
-	private void OnEnable() {
-		if (allNodes == null) {
-			if (keys == null) {
-				Debug.LogWarning("Recreating keys list");
-				keys = new List<int>();
-			}
-			if (values == null) {
-				Debug.LogWarning("Recreating values list");
-				values = new List<Node>();
-			}
-
-			//Debug.LogWarning("Recreating allNodes dict from keys and values lists");
-			allNodes = new Dictionary<int, Node>();
-			for (int i = 0; i < keys.Count; i++) {
-				allNodes.Add(keys[i], values[i]);
-			}
+	void AddNodeToSerializedNodesRecursively(Node n, int parentId) {
+		Vector3 pos = n.pos;
+		int thisIndex = serializedNodes.Count;
+		var serializedNode = new SerializableNode() {
+			indexOfParent = parentId,
+			pos = pos,
+			childCount = n.children.Count,
+			indexOfFirstChild = serializedNodes.Count + 1
+		};
+		serializedNodes.Add(serializedNode);
+		if (serializedNode.pos == selectedNode?.pos) {
+			selectedNodeIndex = thisIndex;
 		}
-		if (parentNode == null) {
-			parentNode = new Node(_curId++, Vector3.zero);
-			keys.Add(parentNode.id);
-			values.Add(parentNode);
-			allNodes.Add(parentNode.id, parentNode);
-			selectedNode = parentNode;
+		foreach (var child in n.children) {
+			AddNodeToSerializedNodesRecursively(child, thisIndex);
 		}
 	}
 
-	public Node GetNode(int id) {
-		if (allNodes != null && allNodes.ContainsKey(id)) {
-			return allNodes[id];
+	public void OnAfterDeserialize() {
+		//Unity has just written new data into the serializedNodes field.
+		//let's populate our actual runtime data with those new values.
+		if (serializedNodes.Count > 0) {
+			ReadNodeFromSerializedNodesRecursively(0, out rootNode);
 		}
-		else return null;
+		else {
+			rootNode = new Node(Vector3.forward);
+		}
+	}
+
+	int ReadNodeFromSerializedNodesRecursively(int index, out Node node) {
+		var serializedNode = serializedNodes[index];
+		// Transfer the deserialized data into the internal Node class
+		Node newNode = new Node(serializedNode.pos);
+
+		// The tree needs to be read in depth-first, since that's how we wrote it out.
+		for (int i = 0; i != serializedNode.childCount; i++) {
+			Node childNode;
+			index = ReadNodeFromSerializedNodesRecursively(++index, out childNode);
+			childNode.parent = newNode;
+			newNode.children.Add(childNode);
+		}
+		node = newNode;
+		return index;
+	}
+
+	private Node _selectedNode;
+	public Node selectedNode {
+		get {
+			if (_selectedNode == null && rootNode != null) {
+				_selectedNode = rootNode;
+			}
+			return _selectedNode;
+		}
+		set {
+			_selectedNode = value;
+		}
+	}
+
+	[ShowNativeProperty]
+	public int Count => allNodes.Count;
+
+	private void OnEnable() {
+		Initialize();
+	}
+
+	void Initialize() {
+		if (allNodes == null) {
+			//Debug.LogWarning("Recreating allNodes dict from keys and values lists");
+			allNodes = new List<Node>();
+			if (rootNode != null) {
+				allNodes = GetAllNodes();
+			}
+		}
+		if (rootNode == null) {
+			// Spawn at not-the-origin so it can be selected with the handle
+			rootNode = new Node(Vector3.forward);
+			allNodes.Add(rootNode);
+			selectedNode = rootNode;
+		}
+	}
+
+	public Node AddNewChildToSelected() {
+		Node newNode = null;
+		if (selectedNode != null) {
+			newNode = selectedNode.AddNewChild();
+			allNodes.Add(newNode);
+
+			selectedNode = newNode;
+		}
+
+		return newNode;
+	}
+
+	public void RemoveSelected() {
+		if (selectedNode != null) {
+			RemoveNodeRecursively(selectedNode);
+		}
+	}
+
+	void RemoveNodeRecursively(Node curNode) {
+		curNode.parent?.children.Remove(curNode);
+		allNodes.Remove(curNode);
+		foreach (var child in curNode.children) {
+			RemoveNodeRecursively(child);
+		}
 	}
 
 	public List<Node> GetAllNodes() {
 		List<Node> nodes = new List<Node>();
-		GetAllNodesRecursively(parentNode, ref nodes);
+		GetAllNodesRecursively(rootNode, ref nodes);
 		return nodes;
 	}
 
 	void GetAllNodesRecursively(Node curNode, ref List<Node> nodesSoFar) {
 		nodesSoFar.Add(curNode);
-		foreach (int childId in curNode.childrenIds) {
-			Node child = GetNode(childId);
+		foreach (Node child in curNode.children) {
 			if (child != null) {
-				GetAllNodesRecursively(GetNode(childId), ref nodesSoFar);
+				GetAllNodesRecursively(child, ref nodesSoFar);
 			}
 		}
 	}
 
-	private static float gizmoSphereSize = 0.05f;
+	private static float gizmoSphereSize = 0.15f;
 	private void OnDrawGizmos() {
-		if (parentNode == null) return;
+		if (rootNode == null) return;
 
-		DrawGizmosRecursively(parentNode);
+		DrawGizmosRecursively(rootNode);
 	}
 
 	Color unselectedColor = new Color(.15f, .85f, .25f);
 	Color selectedColor = new Color(.95f, .95f, .15f);
 	void DrawGizmosRecursively(Node curNode) {
+		if (!showNodes) return;
 		Gizmos.color = (curNode == selectedNode) ? selectedColor : unselectedColor;
 		Gizmos.DrawSphere(transform.TransformPoint(curNode.pos), gizmoSphereSize);
 
-		foreach (int childId in curNode.childrenIds) {
-			Node child = GetNode(childId);
+		foreach (Node child in curNode.children) {
 			if (child != null) {
 				DrawGizmosRecursively(child);
 			}
@@ -119,18 +214,17 @@ public class NodeSystem : MonoBehaviour {
 		foreach (var selected in Selection.gameObjects) {
 			NodeSystem s = selected.GetComponent<NodeSystem>();
 			if (s != null) {
-				ResetTransformRecursively(s, s.parentNode);
+				ResetTransformRecursively(s, s.rootNode);
 			}
 		}
 	}
 
-	static void ResetTransformRecursively(NodeSystem s, Node curNode) {
-		curNode.pos = s.transform.InverseTransformPoint(curNode.pos);
+	static void ResetTransformRecursively(NodeSystem nodeSystem, Node curNode) {
+		curNode.pos = nodeSystem.transform.InverseTransformPoint(curNode.pos);
 
-		foreach (int childId in curNode.childrenIds) {
-			Node child = s.GetNode(childId);
+		foreach (Node child in curNode.children) {
 			if (child != null) {
-				ResetTransformRecursively(s, child);
+				ResetTransformRecursively(nodeSystem, child);
 			}
 		}
 	}
@@ -138,44 +232,37 @@ public class NodeSystem : MonoBehaviour {
 	[MenuItem("Custom/Power Trails/Clear Nodes")]
 	public static void ClearNodes() {
 		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				s.UnregisterNodesRecursively(s.parentNode);
-				Node newParentNode = new Node(s._curId++, s.transform.localPosition);
-				s.keys.Add(newParentNode.id);
-				s.values.Add(newParentNode);
-				s.allNodes.Add(newParentNode.id, newParentNode);
-				s.parentNode = newParentNode;
-				s.selectedNode = newParentNode;
+			NodeSystem nodeSystem = selected.GetComponent<NodeSystem>();
+			if (nodeSystem != null) {
+				nodeSystem.allNodes = new List<Node>();
+				nodeSystem.rootNode = null;
+				nodeSystem.Initialize();
 			}
 		}
 	}
 
+	static bool temp = false;
 	[MenuItem("Custom/Power Trails/Add Child _F2")]
 	public static void AddChild() {
 		foreach (var selected in Selection.gameObjects) {
 			NodeSystem ns = selected.GetComponent<NodeSystem>();
 			if (ns != null && ns.selectedNode != null) {
-				Node newNode = ns.selectedNode.AddNewChild(ns._curId++);
-				ns.keys.Add(newNode.id);
-				ns.values.Add(newNode);
-				ns.allNodes.Add(newNode.id, newNode);
-				ns.selectedNode = newNode;
+				Node newNode = ns.AddNewChildToSelected();
+				// Make it easy to do staircases:
+				//newNode.pos += 0.5f * (temp ? Vector3.down : Vector3.left);
+				temp = !temp;
 			}
 		}
 	}
 
-	void UnregisterNodesRecursively(Node curNode) {
-		foreach (int childId in curNode.childrenIds) {
-			Node child = GetNode(childId);
-			if (child != null) {
-				UnregisterNodesRecursively(child);
+	[MenuItem("Custom/Power Trails/Remove Child _F3")]
+	public static void RemoveNode() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem ns = selected.GetComponent<NodeSystem>();
+			if (ns != null && ns.selectedNode != null) {
+				ns.RemoveSelected();
 			}
 		}
-
-		allNodes.Remove(curNode.id);
-		keys.Remove(curNode.id);
-		values.RemoveAll(n => n.id == curNode.id);
 	}
 #endif
 }

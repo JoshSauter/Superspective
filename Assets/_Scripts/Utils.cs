@@ -878,7 +878,7 @@ namespace EpitaphUtils {
 
 					raycastHits.totalDistance = newTotalDistanceTraveled;
 
-					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>();
+					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>() ?? thisHitInfo.collider.gameObject.transform.parent?.GetComponent<Portal>();
 					// Raycast hit a portal, fire a new one on the other side of the portal
 					if (portalHit != null && portalHit.portalIsEnabled) {
 						Vector3 localPositionOfNewStart = portalHit.transform.InverseTransformPoint(thisHitInfo.point);

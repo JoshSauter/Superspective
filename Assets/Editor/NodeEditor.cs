@@ -17,7 +17,7 @@ public class NodeEditor : Editor {
 			sceneViewCam = sv.camera;
 		}
 
-		if (t == null || t.parentNode == null) {
+		if (t == null || t.rootNode == null) {
 			return;
 		}
 
@@ -36,7 +36,7 @@ public class NodeEditor : Editor {
 			}
 		}
 
-		DrawLinesRecursively(t, t.parentNode);
+		DrawLinesRecursively(t, t.rootNode);
 		EditorGUI.BeginChangeCheck();
 		Vector3 newPosition = t.transform.TransformPoint(t.selectedNode.pos);
 		if (t.selectedNode != null) {
@@ -49,8 +49,7 @@ public class NodeEditor : Editor {
 	}
 
 	void DrawLinesRecursively(NodeSystem system, Node curNode) {
-		foreach (int childId in curNode.childrenIds) {
-			Node child = system.GetNode(childId);
+		foreach (Node child in curNode.children) {
 			if (child != null) {
 				Handles.DrawLine(system.transform.TransformPoint(curNode.pos), system.transform.TransformPoint(child.pos));
 				DrawLinesRecursively(system, child);
@@ -75,7 +74,7 @@ public class NodeEditor : Editor {
 		Vector3 oc = ray.origin - center;
 		float a = Vector3.Dot(ray.direction, ray.direction);
 		float b = 2.0f * Vector3.Dot(oc, ray.direction);
-		float c = Vector3.Dot(oc, oc) - PowerTrailMechanics.PowerTrail.gizmoSphereSize * PowerTrailMechanics.PowerTrail.gizmoSphereSize;
+		float c = Vector3.Dot(oc, oc) - PowerTrail.gizmoSphereSize * PowerTrail.gizmoSphereSize;
 		float discriminant = b * b - 4 * a * c;
 		return (discriminant > 0);
 	}

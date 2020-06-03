@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 3903490613809608143}
   - component: {fileID: 4503830786312040949}
   - component: {fileID: 4293474071263431062}
+  - component: {fileID: 8888495365991536659}
   m_Layer: 11
   m_Name: PickUpCubePortalCopy
   m_TagString: Untagged
@@ -169,3 +170,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8888495365991536659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2734226514055083633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6aad3a791318b34cac8d0396b09740d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  original: {fileID: 0}
+  originalPortalableObj: {fileID: 0}
+  copyEnabled: 1

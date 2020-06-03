@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Reflection;
+using System.Linq;
 using EpitaphUtils;
 
 public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
@@ -64,7 +65,7 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
 
 		int typesFound = returnVal.Count;
 		if (typesFound > 1) {
-			List<Type> exactMatches = returnVal.FindAll(t => t.FullName == className);
+			List<Type> exactMatches = returnVal.FindAll(t => t.FullName.Split('.').Last() == className);
 			if (exactMatches.Count > 0) {
 				returnVal = exactMatches;
 			}

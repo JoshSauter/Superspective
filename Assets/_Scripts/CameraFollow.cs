@@ -3,20 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 using PortalMechanics;
+using NaughtyAttributes;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
 public class CameraFollow : MonoBehaviour {
 	bool shouldFollow = true;
-	public float currentLerpSpeed = 45f;		// Can be set by external scripts to slow the camera's lerp speed for a short time
-	float desiredLerpSpeed = 45f;				// currentLerpSpeed will approach this value after not being changed for a while
+	[SerializeField]
+	[ReadOnly]
+	float currentLerpSpeed = 4500f;				// Can be set by external scripts to slow the camera's lerp speed for a short time
+	float desiredLerpSpeed = 4500f;				// currentLerpSpeed will approach this value after not being changed for a while
 	public Vector3 relativeStartPosition;
 	public Vector3 relativePositionLastFrame;	// Used in restoring position of camera after jump-cut movement of player
 	public Vector3 worldPositionLastFrame;
+
+	float timeSinceCurrentLerpSpeedWasModified = 0f;
 
 	Headbob headbob;
 
 	// DEBUG:
 	//float maxFollowDistance = 0f;
+
+	public void SetLerpSpeed(float lerpSpeed) {
+		currentLerpSpeed = lerpSpeed;
+		timeSinceCurrentLerpSpeedWasModified = 0f;
+	}
 
 	private void Start() {
 		headbob = transform.parent.GetComponent<Headbob>();
@@ -50,7 +60,11 @@ public class CameraFollow : MonoBehaviour {
 
 		transform.position -= headbob.curBobAmount * -Player.instance.transform.up;
 
-		currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, desiredLerpSpeed, Time.deltaTime);
+		if (timeSinceCurrentLerpSpeedWasModified > 0.5f) {
+			currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, desiredLerpSpeed, Time.deltaTime);
+		}
+
+		timeSinceCurrentLerpSpeedWasModified += Time.deltaTime;
     }
 
 	// Restore the relative offset of worldPositionLastFrame after a jump-cut movement of the player

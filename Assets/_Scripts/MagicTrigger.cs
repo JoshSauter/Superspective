@@ -59,11 +59,11 @@ public class MagicTrigger : MonoBehaviour {
 
         if (other.TaggedAsPlayer()) {
             float facingAmount = FacingAmount(other);
-            debug.Log("Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
+            debug.Log(gameObject.name + ": Amount facing: " + facingAmount + "\nThreshold: " + playerFaceThreshold + "\nPass?: " + (facingAmount > playerFaceThreshold));
 			
 			// Magic Events triggered
 			if (facingAmount > playerFaceThreshold) {
-				debug.Log("Triggering MagicTrigger!");
+				debug.Log("Triggering MagicTrigger for " + gameObject.name + "!");
 				if (OnMagicTriggerStay != null) {
 					OnMagicTriggerStay(other);
 
@@ -83,9 +83,11 @@ public class MagicTrigger : MonoBehaviour {
 
 						if (disableScriptOnTrigger) {
 							enabled = false;
+							hasTriggeredOnStay = false;
 						}
 						if (disableGameObjectOnTrigger) {
 							gameObject.SetActive(false);
+							hasTriggeredOnStay = false;
 						}
 					}
 				}

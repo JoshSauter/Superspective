@@ -2743,7 +2743,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  startingScene: 12
+  startingScene: 13
   activeSceneName: 
 --- !u!1 &394815695
 GameObject:
@@ -4323,6 +4323,7 @@ MonoBehaviour:
   movement: {fileID: 0}
   headbob: {fileID: 0}
   cameraFollow: {fileID: 0}
+  heldObject: {fileID: 0}
   collider: {fileID: 0}
   renderer: {fileID: 0}
 --- !u!4 &623971849
@@ -4333,8 +4334,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0.99990195, z: -0, w: -0.014005732}
-  m_LocalPosition: {x: -0.06025492, y: -392.22684, z: -25.341599}
+  m_LocalRotation: {x: 0, y: 0.6947902, z: 0, w: 0.7192125}
+  m_LocalPosition: {x: 95, y: 738, z: -123.625}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -4342,7 +4343,7 @@ Transform:
   - {fileID: 1308027151}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 181.605, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 88.021, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0

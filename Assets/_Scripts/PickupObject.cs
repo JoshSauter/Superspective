@@ -7,7 +7,8 @@ using PortalMechanics;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PickupObject : MonoBehaviour {
-
+	public bool DEBUG = false;
+	DebugLogger debug;
 	InteractableObject interactableObject;
 	InteractableGlow interactableGlow;
 	public void OnLeftMouseButtonDown() {
@@ -22,14 +23,11 @@ public class PickupObject : MonoBehaviour {
 	public float holdDistance = 3;
 	float minDistanceFromPlayer = 0.25f;
 	float followSpeed = 15;
-	float followLerpSpeed = 25;
-	Vector3 positionLastPhysicsFrame;
+	float followLerpSpeed = 15;
 	Transform player;
 	Transform playerCam;
-	Transform originalParent;
 	public GravityObject thisGravity;
 	public Rigidbody thisRigidbody;
-	Renderer thisRenderer;
 
 	PortalableObject portalableObject;
 
@@ -39,11 +37,17 @@ public class PickupObject : MonoBehaviour {
 	public PickupObjectSimpleAction OnDropSimple;
 	public PickupObjectAction OnPickup;
 	public PickupObjectAction OnDrop;
+	public static PickupObjectSimpleAction OnAnyPickupSimple;
+	public static PickupObjectSimpleAction OnAnyDropSimple;
+	public static PickupObjectAction OnAnyPickup;
+	public static PickupObjectAction OnAnyDrop;
+
+	Vector3 playerPosLastFrame;
 
 	void Awake() {
+		debug = new DebugLogger(gameObject, () => DEBUG);
 		thisRigidbody = GetComponent<Rigidbody>();
 		thisGravity = GetComponent<GravityObject>();
-		originalParent = transform.parent;
 
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
@@ -60,8 +64,6 @@ public class PickupObject : MonoBehaviour {
 	void Start() {
 		player = Player.instance.transform;
 		playerCam = EpitaphScreen.instance.playerCamera.transform;
-		positionLastPhysicsFrame = transform.position;
-		thisRenderer = GetComponent<Renderer>();
 
 		PlayerButtonInput.instance.OnAction1Press += Drop;
 
@@ -71,6 +73,10 @@ public class PickupObject : MonoBehaviour {
 		}
 
 		portalableObject = GetComponent<PortalableObject>();
+		playerPosLastFrame = Player.instance.transform.position;
+
+		Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
+		TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
 	}
 
 	private void Update() {
@@ -83,10 +89,27 @@ public class PickupObject : MonoBehaviour {
 		}
 	}
 
+	void UpdatePlayerPositionLastFrameAfterPortal(Portal inPortal, Collider objPortaled) {
+		if (objPortaled.gameObject == Player.instance.gameObject) {
+			playerPosLastFrame = inPortal.TransformPoint(playerPosLastFrame);
+		}
+	}
+
+	void UpdatePlayerPositionLastFrameAfterTeleport() {
+		// TODO:
+	}
+
 	void FixedUpdate() {
 		if (isHeld) {
 			RaycastHits raycastHits;
 			Vector3 targetPos = (portalableObject == null) ? TargetHoldPosition(out raycastHits) : TargetHoldPositionThroughPortal(out raycastHits);
+
+			Vector3 playerPositionalDiff = Player.instance.transform.position - playerPosLastFrame;
+			if (portalableObject.grabbedThroughPortal != null) {
+				playerPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerPositionalDiff);
+			}
+			debug.Log("Positional diff: " + playerPositionalDiff.ToString("F3"));
+			thisRigidbody.MovePosition(transform.position + playerPositionalDiff);
 
 			Vector3 diff = targetPos - thisRigidbody.position;
 			Vector3 newVelocity = Vector3.Lerp(thisRigidbody.velocity, followSpeed * diff, followLerpSpeed * Time.fixedDeltaTime);
@@ -94,8 +117,13 @@ public class PickupObject : MonoBehaviour {
 			if (raycastHits.totalDistance < minDistanceFromPlayer && movingTowardsPlayer) {
 				newVelocity = Vector3.ProjectOnPlane(newVelocity, raycastHits.lastRaycast.ray.direction);
 			}
+
+			Vector3 velBefore = thisRigidbody.velocity;
 			thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
+			//debug.Log("Before: " + velBefore.ToString("F3") + "\nAfter: " + thisRigidbody.velocity.ToString("F3"));
 		}
+
+		playerPosLastFrame = Player.instance.transform.position;
 	}
 
 	Vector3 TargetHoldPosition(out RaycastHits raycastHits) {
@@ -121,8 +149,8 @@ public class PickupObject : MonoBehaviour {
 
 		int tempLayerPortalCopy = 0;
 		if (portalableObject.copyIsEnabled) {
-			tempLayerPortalCopy = portalableObject.fakeCopyInstance.layer;
-			portalableObject.fakeCopyInstance.layer = ignoreRaycastLayer;
+			tempLayerPortalCopy = portalableObject.fakeCopyInstance.gameObject.layer;
+			portalableObject.fakeCopyInstance.gameObject.layer = ignoreRaycastLayer;
 		}
 
 		raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
@@ -130,7 +158,7 @@ public class PickupObject : MonoBehaviour {
 
 		gameObject.layer = tempLayer;
 		if (portalableObject.copyIsEnabled) {
-			portalableObject.fakeCopyInstance.layer = tempLayerPortalCopy;
+			portalableObject.fakeCopyInstance.gameObject.layer = tempLayerPortalCopy;
 		}
 
 		bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null && portalableObject.grabbedThroughPortal.portalIsEnabled && !raycastHits.raycastHitAnyPortal;
@@ -154,14 +182,11 @@ public class PickupObject : MonoBehaviour {
 
 	public void Pickup() {
 		if (!isHeld && !onCooldown && interactable) {
-
 			if (transform.parent != null) {
 				transform.SetParent(null);
 			}
 			DontDestroyOnLoad(gameObject);
 
-			//transform.parent = Player.instance.transform;
-			positionLastPhysicsFrame = transform.position;
 			thisGravity.useGravity = false;
 			thisRigidbody.isKinematic = false;
 			isHeld = true;
@@ -169,6 +194,8 @@ public class PickupObject : MonoBehaviour {
 
 			OnPickupSimple?.Invoke();
 			OnPickup?.Invoke(this);
+			OnAnyPickupSimple?.Invoke();
+			OnAnyPickup?.Invoke(this);
 		}
 	}
 
@@ -187,6 +214,8 @@ public class PickupObject : MonoBehaviour {
 
 			OnDropSimple?.Invoke();
 			OnDrop?.Invoke(this);
+			OnAnyDropSimple?.Invoke();
+			OnAnyDrop?.Invoke(this);
 		}
 	}
 }

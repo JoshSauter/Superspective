@@ -1,0 +1,6 @@
+Mechanics:
+ - Pillars and DimensionObjects
+ - Non-pillar DimensionObjects
+ - Portals
+ - PickupCubes which can travel through Portals and around Pillars
+ - Can stand on PickupCubes in other dimension

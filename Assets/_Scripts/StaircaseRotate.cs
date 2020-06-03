@@ -11,7 +11,7 @@ public class StaircaseRotate : MonoBehaviour {
 	float startEndGap = 0.25f;
 	[ShowNativeProperty]
 	public Vector3 currentGravity => Physics.gravity;
-	private Vector3 pivotPoint { get { return transform.parent.position; } }
+	public Vector3 pivotPoint { get { return transform.parent.position; } }
 
 	[ShowIf("DEBUG")]
 	[ReadOnly]

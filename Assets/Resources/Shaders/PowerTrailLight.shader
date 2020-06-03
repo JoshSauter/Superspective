@@ -9,6 +9,7 @@
         //_CapsuleRadius ("Capsule Radius", Range(0,1)) = 0
     }
     SubShader {
+		Tags { "RenderType"="Opaque" }
 	    CGPROGRAM
 	    #pragma surface surf Standard fullforwardshadows
 		
@@ -29,7 +30,7 @@
 	    fixed4 _EmissionColor;
 
         // Power trail info
-        #define MAX_NODES 128
+        #define MAX_NODES 512
         uniform float3 _NodePositions[MAX_NODES];
         uniform int _StartPositionIDs[MAX_NODES];
         uniform int _EndPositionIDs[MAX_NODES];
@@ -63,7 +64,7 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o) {
             // DEBUG
-            float test = worldSdf(IN.worldPos);
+            //float test = worldSdf(IN.worldPos);
             // ENDDEBUG
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;

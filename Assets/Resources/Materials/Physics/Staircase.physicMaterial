@@ -7,7 +7,7 @@ PhysicMaterial:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Staircase
-  dynamicFriction: 0.5
+  dynamicFriction: 0.7
   staticFriction: 0.9
   bounciness: 0
   frictionCombine: 3

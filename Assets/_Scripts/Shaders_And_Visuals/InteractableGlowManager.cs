@@ -71,9 +71,9 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		foreach (var glowObject in glowableObjects) {
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
-			for (int j = 0; j < glowObject.Renderers.Length; j++) {
+			for (int j = 0; j < glowObject.renderers.Count; j++) {
 				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.Renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterialLarger : prePassMaterial);
+				commandBuffer.DrawRenderer(glowObject.renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterialLarger : prePassMaterial);
 			}
 		}
 
@@ -84,9 +84,9 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		foreach (var glowObject in glowableObjects) {
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
-			for (int j = 0; j < glowObject.Renderers.Length; j++) {
+			for (int j = 0; j < glowObject.renderers.Count; j++) {
 				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.Renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterial : prePassMaterialSmaller);
+				commandBuffer.DrawRenderer(glowObject.renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterial : prePassMaterialSmaller);
 			}
 		}
 
@@ -121,23 +121,23 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	private Color GetColor(InteractableGlow objGlow) {
 		Color color = new Color();
 		if (edgeDetection == null || objGlow.overrideGlowColor) {
-			color = objGlow.CurrentColor;
+			color = objGlow.currentColor;
 		}
 		else {
 			switch (edgeDetection.edgeColorMode) {
 				case BladeEdgeDetection.EdgeColorMode.colorRampTexture:
-					color = objGlow.CurrentColor;
+					color = objGlow.currentColor;
 					break;
 				case BladeEdgeDetection.EdgeColorMode.gradient:
 					color = ColorOfGradient(edgeDetection.edgeColorGradient);
-					color.a = objGlow.CurrentColor.a;
+					color.a = objGlow.currentColor.a;
 					break;
 				case BladeEdgeDetection.EdgeColorMode.simpleColor:
 					color = edgeDetection.edgeColor;
-					color.a = objGlow.CurrentColor.a;
+					color.a = objGlow.currentColor.a;
 					break;
 				default:
-					color = objGlow.CurrentColor;
+					color = objGlow.currentColor;
 					break;
 			}
 		}

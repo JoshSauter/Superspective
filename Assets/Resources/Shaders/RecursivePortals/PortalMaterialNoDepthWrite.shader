@@ -8,17 +8,12 @@
     {
 		Tags 
 		{ 
-			"RenderType" = "Transparent" "Queue" = "Transparent+1"
+			"RenderType" = "Transparent" "Queue" = "Transparent"
 		}
 
         Pass
         {
 			ZWrite Off
-			Stencil
-			{
-				Ref 1
-				Pass replace
-			}
 
 			CGPROGRAM
 				#pragma vertex vert

@@ -4,6 +4,7 @@ using EpitaphUtils;
 using EpitaphUtils.ShaderUtils;
 using EpitaphUtils.PortalUtils;
 using System.Linq;
+using NaughtyAttributes;
 
 namespace PortalMechanics {
 	public class PortalableObject : MonoBehaviour {
@@ -14,20 +15,40 @@ namespace PortalMechanics {
 		InteractableObject interact;
 		PickupObject pickupObject;
 
+		[HideInInspector]
+		public Collider[] colliders;
 		Renderer[] renderers;
-		Renderer[] portalCopyObjRenderers;
 
+		public Portal portalInteractingWith {
+			get {
+				// This long-form code is necessary because C# null propagation does not work properly with Unity Objects
+				bool useOtherPortal = false;
+				Portal portal = sittingInPortal;
+				if (portal == null) {
+					portal = hoveredThroughPortal;
+					useOtherPortal = true;
+				}
+				if (portal == null) {
+					portal = grabbedThroughPortal;
+					useOtherPortal = true;
+				}
+
+				return useOtherPortal ? portal.otherPortal : portal;
+			}
+		}
+		[ShowNativeProperty]
 		public bool copyShouldBeEnabled { get { return sittingInPortal != null || hoveredThroughPortal != null || grabbedThroughPortal != null; } }
-		public bool copyIsEnabled { get { return fakeCopyInstance != null && fakeCopyInstance.activeSelf; } }
+		[ShowNativeProperty]
+		public bool copyIsEnabled { get { return fakeCopyInstance != null && fakeCopyInstance.copyEnabled; } }
 		Dictionary<Renderer, Material[]> originalMaterials;
 		Dictionary<Renderer, Material[]> portalCopyMaterials;
 
-		public GameObject fakeCopyPrefab;
-		public GameObject fakeCopyInstance;
+		public PortalCopy fakeCopyPrefab;
+		public PortalCopy fakeCopyInstance;
 
 		public delegate void PortalObjectAction(Portal inPortal);
-		public PortalObjectAction OnObjectTeleported;
 		public PortalObjectAction BeforeObjectTeleported;
+		public PortalObjectAction OnObjectTeleported;
 
 		RaycastHits thisFrameRaycastHits;
 
@@ -39,6 +60,7 @@ namespace PortalMechanics {
 			portalCopyMaterials = new Dictionary<Renderer, Material[]>();
 
 			renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
+			colliders = transform.GetComponentsInChildrenRecursively<Collider>();
 			foreach (var r in renderers) {
 				originalMaterials[r] = r.materials;
 				portalCopyMaterials[r] = GetPortalCopyMaterials(r.materials);
@@ -59,13 +81,31 @@ namespace PortalMechanics {
 			RecalculateHoveredThroughPortal();
 
 			if (copyShouldBeEnabled) {
-				Portal portal = sittingInPortal ?? grabbedThroughPortal ?? hoveredThroughPortal;
-				EnableAndUpdatePortalCopy(portal.otherPortal);
-				fakeCopyInstance.GetComponent<InteractableGlow>().CurrentColor = GetComponent<InteractableGlow>().CurrentColor;
+				if (fakeCopyInstance == null) {
+					fakeCopyInstance = Instantiate(fakeCopyPrefab);
+					fakeCopyInstance.original = gameObject;
+					fakeCopyInstance.originalPortalableObj = this;
+					fakeCopyInstance.transform.localScale = transform.localScale;
+
+					fakeCopyInstance.OnPortalCopyEnabled += () => SetMaterials(true);
+					fakeCopyInstance.OnPortalCopyDisabled += () => SetMaterials(false);
+				}
+				//fakeCopyInstance.GetComponent<InteractableGlow>().CurrentColor = GetComponent<InteractableGlow>().CurrentColor;
 			}
-			else if (copyIsEnabled) {
-				fakeCopyInstance.GetComponent<InteractableGlow>().TurnOffGlow();
-				DisablePortalCopy();
+
+			if (copyShouldBeEnabled) {
+				UpdateMaterialProperties(portalInteractingWith);
+			}
+
+			if (sittingInPortal != null) {
+				foreach (var r in renderers) {
+					r.enabled = sittingInPortal.portalIsEnabled;
+				}
+			}
+			else {
+				foreach (var r in renderers) {
+					r.enabled = true;
+				}
 			}
 
 			if (!thisFrameRaycastHits.raycastHitAnyPortal && grabbedThroughPortal != null) {
@@ -108,7 +148,7 @@ namespace PortalMechanics {
 		void RecalculateHoveredThroughPortal() {
 			bool hoveredOnPickupObj = thisFrameRaycastHits.raycastWasAHit && thisFrameRaycastHits.objectHit == this.gameObject;
 			bool hoveredOnPortalCopy = thisFrameRaycastHits.raycastWasAHit && copyIsEnabled && thisFrameRaycastHits.objectHit == fakeCopyInstance.gameObject;
-			hoveredThroughPortal = grabbedThroughPortal ?? (hoveredOnPickupObj || hoveredOnPortalCopy) ? InteractedThroughPortal() : null;
+			hoveredThroughPortal = grabbedThroughPortal != null ? grabbedThroughPortal : (hoveredOnPickupObj || hoveredOnPortalCopy) ? InteractedThroughPortal() : null;
 		}
 
 		void HandleDrop() {
@@ -128,57 +168,11 @@ namespace PortalMechanics {
 			return hoveredThroughPortal;
 		}
 
-		public void EnableAndUpdatePortalCopy(Portal inPortal) {
-			bool copyWasDisabled = !copyIsEnabled;
-
-			if (fakeCopyInstance == null) {
-				fakeCopyInstance = Instantiate(fakeCopyPrefab);
-				portalCopyObjRenderers = fakeCopyInstance.transform.GetComponentsInChildrenRecursively<Renderer>();
-
-				InteractableObject maybeInteractableObj = GetComponent<InteractableObject>();
-				if (maybeInteractableObj != null) {
-					InteractableObject fakeCopyInteractableObj = fakeCopyInstance.GetComponent<InteractableObject>();
-					if (fakeCopyInteractableObj == null) fakeCopyInteractableObj = fakeCopyInstance.AddComponent<InteractableObject>();
-
-					fakeCopyInteractableObj.OnLeftMouseButton += maybeInteractableObj.OnLeftMouseButton;
-					fakeCopyInteractableObj.OnLeftMouseButtonDown += maybeInteractableObj.OnLeftMouseButtonDown;
-					fakeCopyInteractableObj.OnLeftMouseButtonUp += maybeInteractableObj.OnLeftMouseButtonUp;
-					fakeCopyInteractableObj.OnMouseHover += maybeInteractableObj.OnMouseHover;
-					fakeCopyInteractableObj.OnMouseHoverEnter += maybeInteractableObj.OnMouseHoverEnter;
-					fakeCopyInteractableObj.OnMouseHoverExit += maybeInteractableObj.OnMouseHoverExit;
-				}
-
-			}
-
-			if (copyWasDisabled) {
-				SetMaterials(true);
-			}
-
-			UpdatePortalCopyMaterialShaderValues(inPortal);
-
-			TransformCopy(inPortal);
-			fakeCopyInstance.SetActive(true);
-		}
-
-		public void DisablePortalCopy() {
-			if (copyIsEnabled) {
-				SetMaterials(false);
-			}
-			fakeCopyInstance?.SetActive(false);
-		}
-
-		void UpdatePortalCopyMaterialShaderValues(Portal inPortal) {
+		void UpdateMaterialProperties(Portal inPortal) {
 			foreach (var r in renderers) {
 				foreach (var m in r.materials) {
 					m.SetVector("_PortalPos", inPortal.transform.position - inPortal.transform.forward * 0.00001f);
 					m.SetVector("_PortalNormal", inPortal.transform.forward);
-				}
-			}
-
-			foreach (var r in portalCopyObjRenderers) {
-				foreach (var m in r.materials) {
-					m.SetVector("_PortalPos", inPortal.otherPortal.transform.position - inPortal.otherPortal.transform.forward * 0.00001f);
-					m.SetVector("_PortalNormal", inPortal.otherPortal.transform.forward);
 				}
 			}
 		}
@@ -189,8 +183,6 @@ namespace PortalMechanics {
 
 				r.materials = usePortalCopyMaterials ? portalCopyMaterials[r] : originalMaterials[r];
 				if (usePortalCopyMaterials) {
-					Renderer portalCopyObjRenderer = portalCopyObjRenderers[i];
-					portalCopyObjRenderer.materials = r.materials;
 
 					for (int j = 0; j < r.materials.Length; j++) {
 						r.materials[j].CopyMatchingPropertiesFromMaterial(originalMaterials[r][j]);

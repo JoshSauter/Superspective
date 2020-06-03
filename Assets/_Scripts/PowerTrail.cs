@@ -4,9 +4,9 @@ using UnityEngine;
 using EpitaphUtils;
 using System.Net.Mime;
 using System.Linq;
+using System;
 
 namespace PowerTrailMechanics {
-	[System.Serializable]
 	public class NodeTrailInfo {
 		public Node parent;
 		public Node thisNode;
@@ -29,10 +29,10 @@ namespace PowerTrailMechanics {
 		public List<NodeTrailInfo> trailInfo = new List<NodeTrailInfo>();
 
 		// Data to be sent to the GPU. Positions are not repeated. Index order matches node ID
-		const int MAX_NODES = 128;
+		const int MAX_NODES = 512;
 		Vector4[] nodePositions;        // Positions of each node. w value is unused and ignored
-		int[] endPositionIDs;
-		int[] startPositionIDs;
+		int[] endNodeIndex;
+		int[] startNodeIndex;
 		float[] interpolationValues;    // [0-1] interpolation value between startPosition and endPosition for each trail. Only GPU data that changes at runtime
 		const string nodePositionsKey = "_NodePositions";
 		const string startPositionIDsKey = "_StartPositionIDs";
@@ -42,7 +42,7 @@ namespace PowerTrailMechanics {
 
 
 		public float speed = 1f;
-		float powerTrailRadius = 0.15f;
+		public float powerTrailRadius = 0.15f;
 
 		#region events
 		public delegate void PowerTrailAction();
@@ -78,6 +78,7 @@ namespace PowerTrailMechanics {
 				_state = value;
 			}
 		}
+		bool isInitialized = false;
 
 		private void Awake() {
 			if (powerNodes == null) {
@@ -90,6 +91,18 @@ namespace PowerTrailMechanics {
 			debug = new DebugLogger(this, () => DEBUG);
 			PopulateTrailInfo();
 			PopulateStaticGPUInfo();
+
+			SetStartState();
+		}
+
+		void SetStartState() {
+			isInitialized = false;
+			if (state == PowerTrailState.powered) {
+				distance = maxDistance;
+			}
+			else if (state == PowerTrailState.depowered) {
+				distance = 0;
+			}
 		}
 
 		void Update() {
@@ -99,7 +112,8 @@ namespace PowerTrailMechanics {
 
 			float prevDistance = distance;
 			float nextDistance = NextDistance();
-			if (nextDistance == prevDistance) return;
+			if (nextDistance == prevDistance && isInitialized) return;
+			isInitialized = true;
 
 			// DEBUG: Remove this from Update after debugging
 			PopulateStaticGPUInfo();
@@ -113,33 +127,34 @@ namespace PowerTrailMechanics {
 		void PopulateStaticGPUInfo() {
 			nodePositions = new Vector4[MAX_NODES];
 			interpolationValues = new float[MAX_NODES];
-			startPositionIDs = new int[MAX_NODES];
-			endPositionIDs = new int[MAX_NODES];
+			startNodeIndex = new int[MAX_NODES];
+			endNodeIndex = new int[MAX_NODES];
 
 			for (int i = 0; i < MAX_NODES && i < powerNodes.Count; i++) {
-				nodePositions[i] = transform.TransformPoint(powerNodes.GetNode(i).pos);
+				Node nodeAtIndex = powerNodes.allNodes[i];
+				nodePositions[i] = transform.TransformPoint(nodeAtIndex.pos);
 			}
 			material.SetVectorArray(nodePositionsKey, nodePositions);
 
 			for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
 				NodeTrailInfo trailInfoAtIndex = trailInfo[i];
 
-				startPositionIDs[i] = trailInfoAtIndex.parent.id;
-				endPositionIDs[i] = trailInfoAtIndex.thisNode.id;
+				startNodeIndex[i] = powerNodes.allNodes.IndexOf(trailInfoAtIndex.parent);
+				endNodeIndex[i] = powerNodes.allNodes.IndexOf(trailInfoAtIndex.thisNode);
 			}
 
-			material.SetFloatArray(startPositionIDsKey, startPositionIDs.Select(i => (float)i).ToArray());
-			material.SetFloatArray(endPositionIDsKey, endPositionIDs.Select(i => (float)i).ToArray());
+			material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
+			material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
 			material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
 		}
 
 		void PopulateTrailInfo() {
-			PopulateTrailInfoRecursively(powerNodes.parentNode, 0);
+			PopulateTrailInfoRecursively(powerNodes.rootNode, 0);
 		}
 
 		void PopulateTrailInfoRecursively(Node curNode, float curDistance) {
 			if (!curNode.isRootNode) {
-				Node parentNode = powerNodes.GetNode(curNode.parentId);
+				Node parentNode = curNode.parent;
 				// If there is a parent node, add trail info here
 				NodeTrailInfo info = new NodeTrailInfo {
 					parent = parentNode,
@@ -156,15 +171,15 @@ namespace PowerTrailMechanics {
 
 				// Recurse for each child
 				if (!curNode.isLeafNode) {
-					foreach (int childId in curNode.childrenIds) {
-						PopulateTrailInfoRecursively(powerNodes.GetNode(childId), info.endDistance);
+					foreach (Node child in curNode.children) {
+						PopulateTrailInfoRecursively(child, info.endDistance);
 					}
 				}
 			}
 			// Base case of root parent node
 			else {
-				foreach (int childId in curNode.childrenIds) {
-					PopulateTrailInfoRecursively(powerNodes.GetNode(childId), curDistance);
+				foreach (Node child in curNode.children) {
+					PopulateTrailInfoRecursively(child, curDistance);
 				}
 			}
 		}
@@ -208,15 +223,15 @@ namespace PowerTrailMechanics {
 
 		#region EditorGizmos
 		bool editorGizmosEnabled = false;
-		public static float gizmoSphereSize = 0.05f;
+		public static float gizmoSphereSize = 0.15f;
 		private void OnDrawGizmos() {
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
 
-			if (powerNodes == null || powerNodes.parentNode == null || !editorGizmosEnabled) return;
+			if (powerNodes == null || powerNodes.rootNode == null || !editorGizmosEnabled) return;
 
-			DrawGizmosRecursively(powerNodes.parentNode);
+			DrawGizmosRecursively(powerNodes.rootNode);
 		}
 
 		Color unselectedColor = new Color(.15f, .85f, .25f);
@@ -224,14 +239,12 @@ namespace PowerTrailMechanics {
 		void DrawGizmosRecursively(Node curNode) {
 			Gizmos.color = (curNode == powerNodes.selectedNode) ? selectedColor : unselectedColor;
 
-			foreach (int childId in curNode.childrenIds) {
-				Node child = powerNodes.GetNode(childId);
+			foreach (Node child in curNode.children) {
 				if (child != null) {
 					DrawWireBox(curNode.pos, child.pos);
 				}
 			}
-			foreach (int childId in curNode.childrenIds) {
-				Node child = powerNodes.GetNode(childId);
+			foreach (Node child in curNode.children) {
 				if (child != null) {
 					DrawGizmosRecursively(child);
 				}

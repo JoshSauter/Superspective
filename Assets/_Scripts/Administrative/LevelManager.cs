@@ -31,7 +31,8 @@ public enum Level {
 	forkBlackRoom,
     invisFloor,
 	metaEdgeDetection,
-	portalTestScene
+	portalTestScene,
+	forkWhiteRoom2
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -58,6 +59,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string axis = "_Axis";
 	private const string fork = "_Fork";
 	private const string forkWhiteRoom = "_Fork_WhiteRoom";
+	private const string forkWhiteRoom2 = "_Fork_WhiteRoom2";
 	private const string forkBlackRoom = "_Fork_BlackRoom";
     private const string invisFloor = "_InvisFloor";
 
@@ -153,6 +155,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.axis, axis);
 		enumToSceneName.Add(Level.fork, fork);
 		enumToSceneName.Add(Level.forkWhiteRoom, forkWhiteRoom);
+		enumToSceneName.Add(Level.forkWhiteRoom2, forkWhiteRoom2);
 		enumToSceneName.Add(Level.forkBlackRoom, forkBlackRoom);
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
 		enumToSceneName.Add(Level.tutorialRoom, tutorialRoom);
@@ -178,7 +181,8 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
 		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom });
-		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection });
+		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection, forkWhiteRoom2 });
+		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
         worldGraph.Add(invisFloor, new List<string>());
 
@@ -188,7 +192,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
 
 		worldGraph.Add(metaEdgeDetection, new List<string>() { forkWhiteRoom });
-		worldGraph.Add(portalTestScene, new List<string>());
+		worldGraph.Add(portalTestScene, new List<string>() { });
 	}
 
 	/// <summary>

@@ -1,40 +1,42 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using System.Collections;
 using EpitaphUtils;
 using NaughtyAttributes;
+using System.Linq;
 
 [ExecuteInEditMode]
 public class InteractableGlow : MonoBehaviour {
+	public bool DEBUG = false;
+	InteractableGlowManager playerCamGlowController;
+
 	public InteractableObject interactableObject;
 	public bool useLargerPrepassMaterial = false;
 	public bool overrideGlowColor = false;
 	[ShowIf("overrideGlowColor")]
-	public Color GlowColor;
-	public float LerpFactor = 10;
+	public Color glowColor = Color.white;
+
+	[Range(0.0f, 1.0f)]
+	public float glowAmount = 0;
+	public float glowSpeed = 5f;
 	public bool recursiveChildRenderers = true;
 
-	InteractableGlowManager playerCamGlowController;
-
-	public Renderer[] Renderers {
+	public List<Renderer> renderers;
+	public Color currentColor {
 		get;
 		private set;
 	}
-	public Color CurrentColor {
-		get { return _currentColor; }
-		set { _currentColor = value; }
-	}
-	private Color _currentColor;
-	// Target color must be set every frame or it turns off
-	private Color _targetColor;
+	// Target glow amount must be set every frame or it turns off
+	private float targetGlowAmount;
 
 	void Start() {
 		playerCamGlowController = InteractableGlowManager.instance;
 
 		if (recursiveChildRenderers) {
-			Renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
+			renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform).ToList();
 		}
 		else {
-			Renderers = new Renderer[1] { GetComponent<Renderer>() };
+			renderers = new List<Renderer> { GetComponent<Renderer>() };
 		}
 		playerCamGlowController?.Add(this);
 
@@ -55,12 +57,12 @@ public class InteractableGlow : MonoBehaviour {
 	}
 
 	public void TurnOnGlow() {
-		_targetColor = GlowColor;
+		targetGlowAmount = 1.0f;
 		enabled = true;
 	}
 
 	public void TurnOffGlow() {
-		_targetColor = Color.clear;
+		targetGlowAmount = 0f;
 		enabled = true;
 	}
 
@@ -68,23 +70,20 @@ public class InteractableGlow : MonoBehaviour {
 	/// Update color, disable self if we reach our target color.
 	/// </summary>
 	private void Update() {
-		_currentColor = Color.Lerp(_currentColor, _targetColor, Time.deltaTime * LerpFactor);
+		float diff = targetGlowAmount - glowAmount;
+		float glowAmountDelta = Time.deltaTime * glowSpeed;
+		glowAmount += glowAmountDelta * Mathf.Sign(diff);
+		if (Mathf.Sign(targetGlowAmount - glowAmount) != Mathf.Sign(diff)) {
+			glowAmount = targetGlowAmount;
+		}
+		currentColor = Color.Lerp(Color.clear, glowColor, glowAmount);
 
-		if (ColorsAreCloseEnough(_currentColor, Color.clear)) {
-			_currentColor = _targetColor;
+		if (glowAmount == 0) {
 			enabled = false;
 		}
 	}
 
 	private void LateUpdate() {
-		_targetColor = Color.clear;
-	}
-
-	bool ColorsAreCloseEnough(Color c1, Color c2) {
-		float deltaAllowed = 0.0001f;
-		var v1 = new Vector4(c1.r, c1.g, c1.b, c1.a);
-		var v2 = new Vector4(c2.r, c2.g, c2.b, c2.a);
-
-		return (v2 - v1).magnitude < deltaAllowed;
+		targetGlowAmount = 0f;
 	}
 }

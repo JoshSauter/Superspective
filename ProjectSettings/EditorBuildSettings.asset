@@ -59,4 +59,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_TutorialRoom.unity
     guid: 92a782b16196bbd4abebbc33358f460d
+  - enabled: 1
+    path: Assets/__Scenes/_Fork_WhiteRoom2.unity
+    guid: ee0eefa70af100f498feb6b01474c914
   m_configObjects: {}

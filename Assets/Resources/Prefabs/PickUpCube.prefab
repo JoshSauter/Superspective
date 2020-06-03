@@ -222,7 +222,7 @@ MonoBehaviour:
   sittingInPortal: {fileID: 0}
   hoveredThroughPortal: {fileID: 0}
   grabbedThroughPortal: {fileID: 0}
-  fakeCopyPrefab: {fileID: 2734226514055083633, guid: 0a97a235d72e22445b7d8d87bd12fac4,
+  fakeCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
   fakeCopyInstance: {fileID: 0}
 --- !u!114 &5678607679450239003

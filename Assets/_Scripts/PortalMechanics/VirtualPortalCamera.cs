@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
-using System;
+using System.Linq;
 using NaughtyAttributes;
 
 namespace PortalMechanics {
@@ -29,7 +29,7 @@ namespace PortalMechanics {
 		[ShowIf("DEBUG")]
 		public List<RenderTexture> finishedTex = new List<RenderTexture>();
 
-		private Rect fullScreenRect = new Rect(0, 0, 1, 1);
+		private static Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
 		void Start() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
@@ -72,7 +72,7 @@ namespace PortalMechanics {
 				if (!p.portalIsEnabled) continue;
 
 				float distanceFromPortalToCam = Vector3.Distance(mainCamera.transform.position, p.ClosestPoint(mainCamera.transform.position));
-				Rect portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds) ? p.GetScreenRect(mainCamera) : fullScreenRect;
+				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds) ? p.GetScreenRects(mainCamera) : fullScreenRect;
 
 				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
 				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
@@ -94,7 +94,7 @@ namespace PortalMechanics {
 			debug.LogError("End of frame: renderSteps: " + renderSteps);
 		}
 
-		RenderTexture RenderPortalDepth(int depth, Portal portal, Rect portalScreenBounds, string tree) {
+		RenderTexture RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, string tree) {
 			if (depth == MaxDepth || renderSteps >= MaxRenderSteps) return null;
 
 			var index = renderSteps;
@@ -107,7 +107,7 @@ namespace PortalMechanics {
 			Matrix4x4 modifiedCamProjectionMatrix = portalCamera.projectionMatrix;
 
 			// Key == Visible Portal, Value == visible portal screen bounds
-			Dictionary<Portal, Rect> visiblePortals = new Dictionary<Portal, Rect>();
+			Dictionary<Portal, Rect[]> visiblePortals = new Dictionary<Portal, Rect[]>();
 			if (portal.renderRecursivePortals) {
 				visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
 			}
@@ -120,8 +120,8 @@ namespace PortalMechanics {
 
 				if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
 					string nextTree = tree + ", " + visiblePortal.name;
-					Rect visiblePortalRect = visiblePortalTuple.Value;
-					Rect nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalRect);
+					Rect[] visiblePortalRects = visiblePortalTuple.Value;
+					Rect[] nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalRects);
 
 					// Remember state
 					visiblePortalTextures[visiblePortal] = RenderPortalDepth(depth + 1, visiblePortal, nextPortalBounds, nextTree);
@@ -175,15 +175,15 @@ namespace PortalMechanics {
 		/// <param name="portal">The "in" portal</param>
 		/// <param name="portalScreenBounds">The screen bounds of the "in" portal, [0-1]</param>
 		/// <returns>A dictionary where each key is a visible portal and each value is the screen bounds of that portal</returns>
-		Dictionary<Portal, Rect> GetVisiblePortalsAndTheirScreenBounds(Portal portal, Rect portalScreenBounds) {
-			Dictionary<Portal, Rect> visiblePortals = new Dictionary<Portal, Rect>();
+		Dictionary<Portal, Rect[]> GetVisiblePortalsAndTheirScreenBounds(Portal portal, Rect[] portalScreenBounds) {
+			Dictionary<Portal, Rect[]> visiblePortals = new Dictionary<Portal, Rect[]>();
 			foreach (var p in PortalManager.instance.activePortals) {
 				// Ignore the portal we're looking through
 				if (p == portal.otherPortal) continue;
 				// Ignore disabled portals
 				if (!p.portalIsEnabled) continue;
 
-				Rect testPortalBounds = p.GetScreenRect(portalCamera);
+				Rect[] testPortalBounds = p.GetScreenRects(portalCamera);
 				if (PortalIsSeenByCamera(p, portalCamera, portalScreenBounds, testPortalBounds)) {
 					visiblePortals.Add(p, testPortalBounds);
 				}
@@ -192,10 +192,10 @@ namespace PortalMechanics {
 			return visiblePortals;
 		}
 
-		bool PortalIsSeenByCamera(Portal testPortal, Camera cam, Rect portalScreenBounds, Rect testPortalBounds) {
+		bool PortalIsSeenByCamera(Portal testPortal, Camera cam, Rect[] parentPortalScreenBounds, Rect[] testPortalBounds) {
 			bool isInCameraFrustum = testPortal.IsVisibleFrom(cam);
-			bool isWithinParentPortalScreenBounds = portalScreenBounds.Overlaps(testPortalBounds);
-			bool isFacingCamera = Vector3.Dot(testPortal.transform.forward, (cam.transform.position - testPortal.transform.position).normalized) < 0.05f;
+			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
+			bool isFacingCamera = Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
 			return isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera;
 		}
 
@@ -203,6 +203,18 @@ namespace PortalMechanics {
 			cam.transform.position = position;
 			cam.transform.rotation = rotation;
 			cam.projectionMatrix = projectionMatrix;
+		}
+
+		Rect[] IntersectionOfBounds(Rect[] boundsA, Rect[] boundsB) {
+			List<Rect> intersection = new List<Rect>();
+			foreach (var a in boundsA) {
+				foreach (var b in boundsB) {
+					if (a.Overlaps(b)) {
+						intersection.Add(IntersectionOfBounds(a, b));
+					}
+				}
+			}
+			return intersection.ToArray();
 		}
 
 		Rect IntersectionOfBounds(Rect a, Rect b) {
@@ -213,8 +225,9 @@ namespace PortalMechanics {
 		}
 
 		void SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
-			UnityEngine.Transform inTransform = inPortal.transform;
-			UnityEngine.Transform outTransform = outPortal.transform;
+			Transform inTransform = inPortal.transform;
+			Transform outTransform = outPortal.transform;
+
 			// Position the camera behind the other portal.
 			Vector3 relativePos = inTransform.InverseTransformPoint(portalCamera.transform.position);
 			relativePos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativePos;
@@ -229,7 +242,9 @@ namespace PortalMechanics {
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(mainCamera.transform.position, inPortal.ClosestPoint(mainCamera.transform.position)) < 2*clearSpaceBehindPortal;
 			if (!shouldUseDefaultProjectionMatrix) {
-				Plane p = new Plane(-outTransform.forward, outTransform.position + clearSpaceBehindPortal * outTransform.forward);
+				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position);
+
+				Plane p = new Plane(-outPortal.PortalNormal(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.PortalNormal());
 				Vector4 clipPlane = new Vector4(p.normal.x, p.normal.y, p.normal.z, p.distance);
 				Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlane;
 

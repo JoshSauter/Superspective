@@ -31,7 +31,7 @@ public class InteractableObject : MonoBehaviour {
 			glow.recursiveChildRenderers = recursiveChildRenderers;
 			glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
 			glow.overrideGlowColor = overrideGlowColor;
-			glow.GlowColor = glowColor;
+			glow.glowColor = glowColor;
 			glow.interactableObject = this;
 		}
 	}

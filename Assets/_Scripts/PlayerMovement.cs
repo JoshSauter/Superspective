@@ -134,7 +134,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		StepFound stepFound = DetectStep(desiredVelocity, ground, grounded);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
-			Player.instance.cameraFollow.currentLerpSpeed = 15f;
+			Player.instance.cameraFollow.SetLerpSpeed(15f);
 			OnStaircaseStepUp?.Invoke();
 		}
 		thisRigidbody.useGravity = stepFound == null;

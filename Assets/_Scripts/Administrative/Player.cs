@@ -7,6 +7,8 @@ public class Player : Singleton<Player> {
 	public PlayerMovement movement;
 	public Headbob headbob;
 	public CameraFollow cameraFollow;
+	public PickupObject heldObject;
+	public bool isHoldingSomething { get { return heldObject != null; } }
 
 	public Collider collider;
 	public Renderer renderer;
@@ -19,5 +21,8 @@ public class Player : Singleton<Player> {
 		movement = GetComponent<PlayerMovement>();
 		headbob = GetComponent<Headbob>();
 		cameraFollow = GetComponentInChildren<CameraFollow>();
+
+		PickupObject.OnAnyPickup += (PickupObject objPickedUp) => heldObject = objPickedUp;
+		PickupObject.OnAnyDrop += (PickupObject objDropped) => { if (objDropped == heldObject) heldObject = null; };
 	}
 }
