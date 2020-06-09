@@ -7,6 +7,7 @@ using System.Reflection;
 using EpitaphUtils;
 
 public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
+	public bool selectInactive = true;
 	public string nameToMatch;
 
 	[MenuItem("My Tools/Select All Children With Name Recursively")]
@@ -27,7 +28,7 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
 			selectionSoFar.Add(curNode);
 		}
 
-		foreach (UnityEngine.Transform child in curNode.transform) {
+		foreach (var child in curNode.transform.GetComponentsInChildren<Transform>(selectInactive)) {
 			if (child.gameObject != curNode) {
 				SelectAllChildrenRecusivelyWithName(child.gameObject, ref selectionSoFar);
 			}

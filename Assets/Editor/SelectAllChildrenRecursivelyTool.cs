@@ -8,14 +8,21 @@ using System.Linq;
 using EpitaphUtils;
 
 public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
+	private const string nameKey = "SelectAllChildrenRecursivelyTypeName";
+	public bool selectInactive = true;
 	public string typeName;
+
+	private bool hasLoadedName = false;
 
 	[MenuItem("My Tools/Select All Children Recursively")]
 	static void SelectAllChildren() {
-		DisplayWizard<SelectAllChildrenRecursivelyTool>("Select All Children Recursively", "Select All of Type");
+		DisplayWizard<SelectAllChildrenRecursivelyTool>("Select All Children Recursively", "Select All of Type").typeName = PlayerPrefs.GetString(nameKey, "");
 	}
 
+	// Called when user clicks "Create" button (may be renamed)
 	private void OnWizardCreate() {
+		PlayerPrefs.SetString(nameKey, typeName);
+		PlayerPrefs.Save();
 		var type = GetTypeByName(typeName);
 		if (type == null) {
 			return;
@@ -39,7 +46,7 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
 			selectionSoFar.Add(curNode);
 		}
 
-		foreach (T child in curNode.transform.GetComponentsInChildren<T>()) {
+		foreach (T child in curNode.transform.GetComponentsInChildren<T>(selectInactive)) {
 			if (child.gameObject != curNode) {
 				SelectAllChildrenRecusively<T>(child.gameObject, ref selectionSoFar);
 			}
