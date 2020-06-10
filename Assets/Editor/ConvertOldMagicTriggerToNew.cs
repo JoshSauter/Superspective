@@ -55,7 +55,11 @@ public class ConvertOldMagicTriggerToNew : ScriptableWizard {
 				forwardSameScenePillar = pillarTrigger.forwardSameScenePillar,
 				forwardPillar = pillarTrigger.forwardTriggeredPillar,
 				forwardPillarLevel = pillarTrigger.forwardPillarLevel,
-				forwardPillarName = pillarTrigger.forwardPillarName
+				forwardPillarName = pillarTrigger.forwardPillarName,
+				backwardSameScenePillar = pillarTrigger.backwardSameScenePillar,
+				backwardPillar = pillarTrigger.backwardTriggeredPillar,
+				backwardPillarLevel = pillarTrigger.backwardPillarLevel,
+				backwardPillarName = pillarTrigger.backwardPillarName
 			});
 		}
 		else if (oldTrigger is LevelChangeTrigger) {
