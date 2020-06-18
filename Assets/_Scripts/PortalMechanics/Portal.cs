@@ -84,10 +84,10 @@ namespace PortalMechanics {
 			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
-					colliders = GetComponentsInChildren<Collider>().Where(c => !(c is MeshCollider)).ToArray();
+					colliders = GetComponentsInChildren<Collider>();
 				}
 				else {
-					colliders = new Collider[] { GetComponent<Collider>() }.Where(c => !(c is MeshCollider)).ToArray();
+					colliders = new Collider[] { GetComponent<Collider>() };
 				}
 			}
 

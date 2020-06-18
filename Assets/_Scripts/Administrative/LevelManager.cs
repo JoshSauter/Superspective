@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using EpitaphUtils;
+using Boo.Lang.Runtime;
 #if UNITY_EDITOR
 using UnityEditor;
+using NaughtyAttributes;
 #endif
 
 // When adding a new Level to this enum, make sure you also add it under level names region,
@@ -37,8 +39,142 @@ public enum Level {
 
 public class LevelManager : Singleton<LevelManager> {
 	public bool DEBUG = false;
-    public DebugLogger debug;
+	public DebugLogger debug;
 	public Level startingScene;
+
+#region PlayerDefaultLocations
+	private const string positionKeyPrefix = "playerStartingPositions";
+	private const string rotationKeyPrefix = "playerStartingRotations";
+	public bool defaultPlayerPosition = false;
+	private bool hasLoadedDefaultPlayerPosition = false;
+
+#if UNITY_EDITOR
+	[ShowNativeProperty]
+	public Vector3 startingPositionForScene {
+		get {
+			string sceneName = GetSceneName();
+			string key = $"{positionKeyPrefix}.{sceneName}";
+			if (HasVector3(key)) {
+				return GetVector3(key);
+			}
+			else {
+				return Vector3.zero;
+			}
+		}
+	}
+
+	[Button("Set default player position")]
+	private void SetDefaultPlayerPositionForScene() {
+		string sceneName = GetSceneName();
+		SetVector3($"{positionKeyPrefix}.{sceneName}", Player.instance.transform.position);
+		SetVector3($"{rotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
+
+		if (DEBUG) {
+			Debug.Log($"Starting position for player set to {Player.instance.transform.position} for scene {sceneName}");
+		}
+	}
+
+	[Button("Remove default player position for this scene")]
+	private void UnsetDefaultPlayerPositionForScene() {
+		string sceneName = GetSceneName();
+		string positionKey = $"{positionKeyPrefix}.{sceneName}";
+		string rotationKey = $"{rotationKeyPrefix}.{sceneName}";
+
+		if (HasVector3(positionKey)) {
+			RemoveVector3(positionKey);
+		}
+		if (HasVector3(rotationKey)) {
+			RemoveVector3(rotationKey);
+		}
+	}
+#endif
+
+	private bool HasVector3(string key) {
+		string xKey = $"{key}.x";
+		string yKey = $"{key}.y";
+		string zKey = $"{key}.z";
+
+		return (PlayerPrefs.HasKey(xKey) && PlayerPrefs.HasKey(yKey) && PlayerPrefs.HasKey(zKey));
+	}
+
+	private void RemoveVector3(string key) {
+		string xKey = $"{key}.x";
+		string yKey = $"{key}.y";
+		string zKey = $"{key}.z";
+
+		PlayerPrefs.DeleteKey(xKey);
+		PlayerPrefs.DeleteKey(yKey);
+		PlayerPrefs.DeleteKey(zKey);
+	}
+
+	private void SetVector3(string key, Vector3 value) {
+		PlayerPrefs.SetFloat($"{key}.x", value.x);
+		PlayerPrefs.SetFloat($"{key}.y", value.y);
+		PlayerPrefs.SetFloat($"{key}.z", value.z);
+	}
+
+	private Vector3 GetVector3(string key) {
+		Vector3 returnVector = Vector3.zero;
+		string xKey = $"{key}.x";
+		string yKey = $"{key}.y";
+		string zKey = $"{key}.z";
+
+		// X
+		if (PlayerPrefs.HasKey(xKey)) {
+			returnVector.x = PlayerPrefs.GetFloat(xKey);
+		}
+		else {
+			throw new RuntimeException($"No PlayerPrefs key for {key}");
+		}
+
+		// Y
+		if (PlayerPrefs.HasKey(yKey)) {
+			returnVector.y = PlayerPrefs.GetFloat(yKey);
+		}
+		else {
+			throw new RuntimeException($"No PlayerPrefs key for {key}");
+		}
+
+		// Z
+		if (PlayerPrefs.HasKey(zKey)) {
+			returnVector.z = PlayerPrefs.GetFloat(zKey);
+		}
+		else {
+			throw new RuntimeException($"No PlayerPrefs key for {key}");
+		}
+
+		return returnVector;
+	}
+
+	private string GetSceneName() {
+		string sceneName = activeSceneName;
+		if (!Application.isPlaying) {
+			if (enumToSceneName == null) {
+				enumToSceneName = new Dictionary<Level, string>();
+				PopulateSceneNames();
+			}
+			sceneName = enumToSceneName[startingScene];
+		}
+		return sceneName;
+	}
+
+	[Button("Load default player position")]
+	private void LoadDefaultPlayerPosition() {
+		string sceneName = GetSceneName();
+		string positionKey = $"{positionKeyPrefix}.{sceneName}";
+		string rotationKey = $"{rotationKeyPrefix}.{sceneName}";
+
+		if (HasVector3(positionKey) && HasVector3(rotationKey)) {
+			Vector3 pos = GetVector3(positionKey);
+			Vector3 eulerRot = GetVector3(rotationKey);
+
+			Player.instance.transform.position = pos;
+			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
+		}
+
+		hasLoadedDefaultPlayerPosition = true;
+	}
+#endregion
 
 	Dictionary<Level, string> enumToSceneName;
 	Dictionary<string, List<string>> worldGraph;
@@ -90,6 +226,7 @@ public class LevelManager : Singleton<LevelManager> {
 #endif
 
 		SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
+		SceneManager.sceneLoaded += (scene, mode) => { if (defaultPlayerPosition && !hasLoadedDefaultPlayerPosition) LoadDefaultPlayerPosition(); };
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
 
 		SwitchActiveScene(startingScene);

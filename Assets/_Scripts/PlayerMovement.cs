@@ -343,7 +343,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		Vector3 stepOverbite = Vector3.ProjectOnPlane(-contact.normal.normalized, transform.up).normalized * stepOverbiteMagnitude;
 
 		// Start the raycast position directly above the contact point with the step
-		Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight;
+		Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight * 0.99f;
 		// Move the raycast inwards towards the stair (we will be raycasting down at the stair)
 		raycastStartPos += stepOverbite;
 		Vector3 direction = -transform.up;
@@ -378,8 +378,13 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	}
 
 	bool IsStandingOnHeldObject(ContactPoint contact) {
-		PickupObject maybeCube1 = contact.thisCollider.GetComponent<PickupObject>();
-		PickupObject maybeCube2 = contact.otherCollider.GetComponent<PickupObject>();
+		PickupObject maybeCube1 = null, maybeCube2 = null;
+		if (contact.thisCollider != null) {
+			maybeCube1 = contact.thisCollider.GetComponent<PickupObject>();
+		}
+		if (contact.otherCollider != null) {
+			maybeCube2 = contact.otherCollider.GetComponent<PickupObject>();
+		}
 		bool cube1IsHeld = maybeCube1 != null && maybeCube1.isHeld;
 		bool cube2IsHeld = maybeCube2 != null && maybeCube2.isHeld;
 		return (cube1IsHeld || cube2IsHeld);

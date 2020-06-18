@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using MagicTriggerMechanics;
 
 public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
-	public MagicTrigger restoreFakePortalTrigger;
+	public MagicTriggerNew restoreFakePortalTrigger;
 
 	public DimensionObjectBase ceilingDropDown;
 	public PillarDimensionObject ceilingDropDownAfterPassingThrough;
-	MagicTrigger trigger;
+	MagicTriggerNew trigger;
 
     void Start() {
-		trigger = GetComponent<MagicTrigger>();
+		trigger = GetComponent<MagicTriggerNew>();
 		trigger.OnMagicTriggerStayOneTime += OnMagicTriggerStayOneTime;
 		trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
     }

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PortalMechanics;
+using MagicTriggerMechanics;
 
 public class TogglePortalRender : MonoBehaviour {
 	public DoorOpenClose enableDoor;
-	public MagicTrigger disableTrigger;
+	public MagicTriggerNew disableTrigger;
 	Portal portal;
 
     IEnumerator Start() {

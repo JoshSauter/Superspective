@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
+using MagicTriggerMechanics;
 
 public class FogToggle : MonoBehaviour {
 	public bool disableFog = true;
 	
 	public GlobalFog fog;
-	private MagicTrigger trigger;
+	private MagicTriggerNew trigger;
 
 	private void Awake() {
-		trigger = GetComponent<MagicTrigger>();
+		trigger = GetComponent<MagicTriggerNew>();
 	}
 
 	private void Start() {

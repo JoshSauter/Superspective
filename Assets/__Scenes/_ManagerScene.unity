@@ -2743,7 +2743,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  startingScene: 13
+  startingScene: 14
+  defaultPlayerPosition: 1
   activeSceneName: 
 --- !u!1 &394815695
 GameObject:
@@ -4334,8 +4335,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0.6947902, z: 0, w: 0.7192125}
-  m_LocalPosition: {x: 95, y: 738, z: -123.625}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 2, y: -36.5, z: 18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 505772567}
@@ -4343,7 +4344,7 @@ Transform:
   - {fileID: 1308027151}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 88.021, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11241,7 +11242,7 @@ MonoBehaviour:
   weightedEdgeMode: 3
   depthWeightEffect: 0.5
   normalWeightEffect: 0.5
-  edgeColorMode: 0
+  edgeColorMode: 1
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
   edgeColorGradient:
     serializedVersion: 2

@@ -65,9 +65,7 @@ public class DimensionPillar : MonoBehaviour {
 		if (pillarKey == "") {
 			pillarKey = gameObject.scene.name + " " + gameObject.name;
 		}
-		if (!pillars.ContainsKey(pillarKey)) {
-			pillars[pillarKey] = this;
-		}
+		pillars[pillarKey] = this;
 	}
 
 	void FixedUpdate() {

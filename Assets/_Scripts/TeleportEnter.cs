@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using MagicTriggerMechanics;
 
-[RequireComponent(typeof(MagicTrigger))]
+[RequireComponent(typeof(MagicTriggerNew))]
 public class TeleportEnter : MonoBehaviour {
 	public bool DEBUG = false;
 	DebugLogger debug;
 	public bool teleportPlayer = true;
-    public MagicTrigger trigger;
+    public MagicTriggerNew trigger;
 	public Collider teleportEnter;
     public Collider teleportExit;
 	public Vector3 teleportOffset = Vector3.zero;
@@ -33,7 +34,7 @@ public class TeleportEnter : MonoBehaviour {
 	void Awake () {
 		debug = new DebugLogger(this, () => DEBUG);
 		teleportEnter = GetComponent<Collider>();
-        trigger = GetComponent<MagicTrigger>();
+        trigger = GetComponent<MagicTriggerNew>();
 
 		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new UnityEngine.Transform[0];
 	}
