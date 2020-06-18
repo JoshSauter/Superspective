@@ -48,7 +48,7 @@ namespace MagicTriggerMechanics {
 		public Level backwardPillarLevel;
 		public string backwardPillarName;
 
-		public void Execute(MagicTriggerNew triggerScript) {
+		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
 			switch (action) {
 				case TriggerActionType.DisableSelfScript:

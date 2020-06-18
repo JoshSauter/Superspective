@@ -8,7 +8,7 @@ using UnityEditor;
 #endif
 
 namespace MagicTriggerMechanics {
-	public class MagicTriggerNew : MonoBehaviour {
+	public class MagicTrigger : MonoBehaviour {
 		public bool DEBUG;
 		public DebugLogger debug;
 

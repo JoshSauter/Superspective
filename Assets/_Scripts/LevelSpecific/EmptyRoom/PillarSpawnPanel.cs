@@ -6,7 +6,7 @@ using MagicTriggerMechanics;
 public class PillarSpawnPanel : Panel {
 	public GameObject pillarBeforeActive;
 	public DimensionPillar pillar;
-	public MagicTriggerNew pillarActiveTrigger;
+	public MagicTrigger pillarActiveTrigger;
 
 	override protected void Start() {
 		base.Start();

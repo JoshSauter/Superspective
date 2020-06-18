@@ -8,10 +8,10 @@ public class FogToggle : MonoBehaviour {
 	public bool disableFog = true;
 	
 	public GlobalFog fog;
-	private MagicTriggerNew trigger;
+	private MagicTrigger trigger;
 
 	private void Awake() {
-		trigger = GetComponent<MagicTriggerNew>();
+		trigger = GetComponent<MagicTrigger>();
 	}
 
 	private void Start() {

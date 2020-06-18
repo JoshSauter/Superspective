@@ -5,14 +5,14 @@ using EpitaphUtils;
 using MagicTriggerMechanics;
 
 public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
-	public MagicTriggerNew restoreFakePortalTrigger;
+	public MagicTrigger restoreFakePortalTrigger;
 
 	public DimensionObjectBase ceilingDropDown;
 	public PillarDimensionObject ceilingDropDownAfterPassingThrough;
-	MagicTriggerNew trigger;
+	MagicTrigger trigger;
 
     void Start() {
-		trigger = GetComponent<MagicTriggerNew>();
+		trigger = GetComponent<MagicTrigger>();
 		trigger.OnMagicTriggerStayOneTime += OnMagicTriggerStayOneTime;
 		trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
     }

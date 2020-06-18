@@ -6,7 +6,7 @@ using MagicTriggerMechanics;
 
 public class TogglePortalRender : MonoBehaviour {
 	public DoorOpenClose enableDoor;
-	public MagicTriggerNew disableTrigger;
+	public MagicTrigger disableTrigger;
 	Portal portal;
 
     IEnumerator Start() {
