@@ -31,6 +31,36 @@ namespace PortalMechanics {
 
 		private static Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
+		// Container for memoizing edge detection color state
+		private struct EDColors {
+			public BladeEdgeDetection.EdgeColorMode edgeColorMode;
+			public Color edgeColor;
+			public Gradient edgeColorGradient;
+			public Texture2D edgeColorGradientTexture;
+
+			public EDColors(BladeEdgeDetection edgeDetection) {
+				this.edgeColorMode = edgeDetection.edgeColorMode;
+				this.edgeColor = edgeDetection.edgeColor;
+
+				this.edgeColorGradient = new Gradient();
+				this.edgeColorGradient.alphaKeys = edgeDetection.edgeColorGradient.alphaKeys;
+				this.edgeColorGradient.colorKeys = edgeDetection.edgeColorGradient.colorKeys;
+				this.edgeColorGradient.mode = edgeDetection.edgeColorGradient.mode;
+
+				this.edgeColorGradientTexture = edgeDetection.edgeColorGradientTexture;
+			}
+
+			public EDColors(BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
+				this.edgeColorMode = edgeColorMode;
+				this.edgeColor = edgeColor;
+				this.edgeColorGradient = new Gradient();
+				this.edgeColorGradient.alphaKeys = edgeColorGradient.alphaKeys;
+				this.edgeColorGradient.colorKeys = edgeColorGradient.colorKeys;
+				this.edgeColorGradient.mode = edgeColorGradient.mode;
+				this.edgeColorGradientTexture = edgeColorGradientTexture;
+			}
+		}
+
 		void Start() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
 			mainCamera = EpitaphScreen.instance.playerCamera;
@@ -59,7 +89,8 @@ namespace PortalMechanics {
 			Vector3 camPosition = mainCamera.transform.position;
 			Quaternion camRotation = mainCamera.transform.rotation;
 			Matrix4x4 camProjectionMatrix = mainCamera.projectionMatrix;
-			SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix);
+			EDColors edgeColors = new EDColors(mainCameraEdgeDetection);
+			SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix, edgeColors);
 
 			if (DEBUG) {
 				portalOrder.Clear();
@@ -76,7 +107,7 @@ namespace PortalMechanics {
 
 				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
 				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
-					SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix);
+					SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix, edgeColors);
 
 					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.name);
 
@@ -105,6 +136,7 @@ namespace PortalMechanics {
 			Vector3 modifiedCamPosition = portalCamera.transform.position;
 			Quaternion modifiedCamRotation = portalCamera.transform.rotation;
 			Matrix4x4 modifiedCamProjectionMatrix = portalCamera.projectionMatrix;
+			EDColors edgeColors = new EDColors(portalCameraEdgeDetection);
 
 			// Key == Visible Portal, Value == visible portal screen bounds
 			Dictionary<Portal, Rect[]> visiblePortals = new Dictionary<Portal, Rect[]>();
@@ -112,7 +144,7 @@ namespace PortalMechanics {
 				visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
 			}
 
-			debug.Log("Depth (Index): " + depth + " (" + index + ")\nPortal: " + portal.name + "\nNumVisible: " + visiblePortals.Count + "\nPortalCamPos: " + portalCamera.transform.position + "\nTree: " + tree + "\nScreenBounds: " + portalScreenBounds);
+			debug.Log("Depth (Index): " + depth + " (" + index + ")\nPortal: " + portal.name + "\nNumVisible: " + visiblePortals.Count + "\nPortalCamPos: " + portalCamera.transform.position + "\nTree: " + tree + "\nScreenBounds: " + string.Join(", ", portalScreenBounds));
 
 			Dictionary<Portal, RenderTexture> visiblePortalTextures = new Dictionary<Portal, RenderTexture>();
 			foreach (var visiblePortalTuple in visiblePortals) {
@@ -131,7 +163,7 @@ namespace PortalMechanics {
 				}
 
 				// RESTORE STATE
-				SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix);
+				SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix, edgeColors);
 			}
 
 			// RESTORE STATE
@@ -146,7 +178,7 @@ namespace PortalMechanics {
 					visiblePortal.DefaultMaterial();
 				}
 			}
-			SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix);
+			SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix, edgeColors);
 
 			while (renderStepTextures.Count <= index) {
 				renderStepTextures.Add(new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.ARGB32));
@@ -199,10 +231,12 @@ namespace PortalMechanics {
 			return isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera;
 		}
 
-		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix) {
+		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix, EDColors edgeColors) {
 			cam.transform.position = position;
 			cam.transform.rotation = rotation;
 			cam.projectionMatrix = projectionMatrix;
+
+			CopyEdgeColors(portalCameraEdgeDetection, edgeColors);
 		}
 
 		Rect[] IntersectionOfBounds(Rect[] boundsA, Rect[] boundsB) {
@@ -257,16 +291,17 @@ namespace PortalMechanics {
 			}
 
 			// Modify the camera's edge detection if necessary
-			if (inPortal.changeCameraEdgeDetection) {
+			if (inPortal != null && inPortal.changeCameraEdgeDetection) {
 				CopyEdgeColors(portalCameraEdgeDetection, inPortal.edgeColorMode, inPortal.edgeColor, inPortal.edgeColorGradient, inPortal.edgeColorGradientTexture);
-			}
-			else {
-				CopyEdgeColors(mainCameraEdgeDetection, portalCameraEdgeDetection);
 			}
 		}
 
-		public void CopyEdgeColors(BladeEdgeDetection source, BladeEdgeDetection dest) {
+		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection source) {
 			CopyEdgeColors(dest, source.edgeColorMode, source.edgeColor, source.edgeColorGradient, source.edgeColorGradientTexture);
+		}
+
+		private void CopyEdgeColors(BladeEdgeDetection dest, EDColors edgeColors) {
+			CopyEdgeColors(dest, edgeColors.edgeColorMode, edgeColors.edgeColor, edgeColors.edgeColorGradient, edgeColors.edgeColorGradientTexture);
 		}
 
 		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {

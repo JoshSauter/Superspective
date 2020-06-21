@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace PortalMechanics {
 	public class Portal : MonoBehaviour {
-		[Header("Make sure the portal's render surface normal is opposite the portal's forward direction")]
+		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
 		public bool DEBUG = false;
 		public string channel = "<Not set>";
 

@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using EpitaphUtils;
 using Boo.Lang.Runtime;
+using NaughtyAttributes;
 #if UNITY_EDITOR
 using UnityEditor;
-using NaughtyAttributes;
 #endif
 
 // When adding a new Level to this enum, make sure you also add it under level names region,
@@ -210,6 +210,7 @@ public class LevelManager : Singleton<LevelManager> {
 #endregion
 
 	public void Start() {
+		hasLoadedDefaultPlayerPosition = false;
         debug = new DebugLogger(this, () => DEBUG);
 
 		loadedSceneNames = new List<string>();
@@ -264,6 +265,11 @@ public class LevelManager : Singleton<LevelManager> {
 		if (!(loadedSceneNames.Contains(levelName) || currentlyLoadingSceneNames.Contains(levelName))) {
 			currentlyLoadingSceneNames.Add(levelName);
 			SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
+		}
+		else {
+			if (!hasLoadedDefaultPlayerPosition) {
+				LoadDefaultPlayerPosition();
+			}
 		}
 
 		// Then load the adjacent scenes if they're not already loaded
