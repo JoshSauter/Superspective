@@ -32,6 +32,9 @@ public class Node {
 		if (parent != null) {
 			grandparentToParent = (pos - parent.pos).normalized;
 		}
+		if (NodeSystem.buildAsStaircase) {
+			grandparentToParent = Vector3.zero;
+		}
 		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt);
 		newNode.parent = this;
 		this.children.Add(newNode);
@@ -45,8 +48,8 @@ public class Node {
 
 [ExecuteInEditMode]
 public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
-	// DEBUG used for special logic around repositioning nodes/placing new nodes
-	public bool DEBUG = false;
+	// Used for special logic around repositioning nodes/placing new nodes
+	public static bool buildAsStaircase = true;
 	public bool showNodes = true;
 	public List<Node> allNodes;
 	[HideInInspector]
@@ -249,7 +252,9 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			if (ns != null && ns.selectedNode != null) {
 				Node newNode = ns.AddNewChildToSelected();
 				// Make it easy to do staircases:
-				//newNode.pos += 0.5f * (temp ? Vector3.down : Vector3.left);
+				if (buildAsStaircase) {
+					newNode.pos += 0.5f * (temp ? Vector3.right : Vector3.up);
+				}
 				temp = !temp;
 			}
 		}

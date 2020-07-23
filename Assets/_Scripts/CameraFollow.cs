@@ -29,7 +29,7 @@ public class CameraFollow : MonoBehaviour {
 	}
 
 	private void Start() {
-		headbob = transform.parent.GetComponent<Headbob>();
+		headbob = Player.instance.GetComponent<Headbob>();
 
 		relativeStartPosition = transform.localPosition;
 		worldPositionLastFrame = transform.position;

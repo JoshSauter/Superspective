@@ -15,7 +15,14 @@ public class PickupObject : MonoBehaviour {
 		Pickup();
 	}
 
-	public bool interactable = true;
+	private bool _interactable = true;
+	public bool interactable {
+		get { return _interactable; }
+		set {
+			interactableObject.interactable = value;
+			_interactable = value;
+		}
+	}
 	public bool isHeld = false;
 	public float pickupDropCooldown = 0.1f;
 	float currentCooldown = 0;
@@ -105,7 +112,7 @@ public class PickupObject : MonoBehaviour {
 			Vector3 targetPos = (portalableObject == null) ? TargetHoldPosition(out raycastHits) : TargetHoldPositionThroughPortal(out raycastHits);
 
 			Vector3 playerPositionalDiff = Player.instance.transform.position - playerPosLastFrame;
-			if (portalableObject.grabbedThroughPortal != null) {
+			if (portalableObject != null && portalableObject.grabbedThroughPortal != null) {
 				playerPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerPositionalDiff);
 			}
 			debug.Log("Positional diff: " + playerPositionalDiff.ToString("F3"));

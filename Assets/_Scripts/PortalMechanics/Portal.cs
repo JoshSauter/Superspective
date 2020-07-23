@@ -500,10 +500,11 @@ namespace PortalMechanics {
 
 			CopyEdgeColors(dest: playerED, edgeColorMode, edgeColor, edgeColorGradient, edgeColorGradientTexture);
 
-			edgeColorMode = tempEdgeColorMode;
-			edgeColor = tempColor;
-			edgeColorGradient = tempColorGradient;
-			edgeColorGradientTexture = tempColorGradientTexture;
+			otherPortal.changeCameraEdgeDetection = true;
+			otherPortal.edgeColorMode = tempEdgeColorMode;
+			otherPortal.edgeColor = tempColor;
+			otherPortal.edgeColorGradient = tempColorGradient;
+			otherPortal.edgeColorGradientTexture = tempColorGradientTexture;
 		}
 
 		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {

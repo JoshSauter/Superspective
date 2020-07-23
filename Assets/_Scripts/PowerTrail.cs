@@ -24,7 +24,8 @@ namespace PowerTrailMechanics {
 			powered
 		}
 
-		Material material;
+		public Renderer[] renderers;
+		Material[] materials;
 		public NodeSystem powerNodes;
 		public List<NodeTrailInfo> trailInfo = new List<NodeTrailInfo>();
 
@@ -34,12 +35,13 @@ namespace PowerTrailMechanics {
 		int[] endNodeIndex;
 		int[] startNodeIndex;
 		float[] interpolationValues;    // [0-1] interpolation value between startPosition and endPosition for each trail. Only GPU data that changes at runtime
+		public bool reverseVisibility = false;
 		const string nodePositionsKey = "_NodePositions";
 		const string startPositionIDsKey = "_StartPositionIDs";
 		const string endPositionIDsKey = "_EndPositionIDs";
 		const string interpolationValuesKey = "_InterpolationValues";
 		const string sdfCapsuleRadiusKey = "_CapsuleRadius";
-
+		const string reverseVisibilityKey = "_ReverseVisibility";
 
 		public float speed = 1f;
 		public float powerTrailRadius = 0.15f;
@@ -55,6 +57,7 @@ namespace PowerTrailMechanics {
 		///////////
 		// State //
 		///////////
+		public float duration { get { return maxDistance / speed; } }
 		public float distance = 0f;
 		public float maxDistance = 0f;
 		public bool powerIsOn = false;
@@ -87,7 +90,10 @@ namespace PowerTrailMechanics {
 		}
 
 		void Start() {
-			material = GetComponent<Renderer>().material;
+			if (renderers == null || renderers.Length == 0) {
+				renderers = GetComponents<Renderer>();
+			}
+			materials = renderers.Select(r => r.material).ToArray();
 			debug = new DebugLogger(this, () => DEBUG);
 			PopulateTrailInfo();
 			PopulateStaticGPUInfo();
@@ -116,7 +122,7 @@ namespace PowerTrailMechanics {
 			isInitialized = true;
 
 			// DEBUG: Remove this from Update after debugging
-			PopulateStaticGPUInfo();
+			//PopulateStaticGPUInfo();
 
 			UpdateInterpolationValues(nextDistance);
 
@@ -134,7 +140,9 @@ namespace PowerTrailMechanics {
 				Node nodeAtIndex = powerNodes.allNodes[i];
 				nodePositions[i] = transform.TransformPoint(nodeAtIndex.pos);
 			}
-			material.SetVectorArray(nodePositionsKey, nodePositions);
+			foreach (var material in materials) {
+				material.SetVectorArray(nodePositionsKey, nodePositions);
+			}
 
 			for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
 				NodeTrailInfo trailInfoAtIndex = trailInfo[i];
@@ -143,9 +151,11 @@ namespace PowerTrailMechanics {
 				endNodeIndex[i] = powerNodes.allNodes.IndexOf(trailInfoAtIndex.thisNode);
 			}
 
-			material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
-			material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
-			material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
+			foreach (var material in materials) {
+				material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
+				material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
+				material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
+			}
 		}
 
 		void PopulateTrailInfo() {
@@ -185,11 +195,17 @@ namespace PowerTrailMechanics {
 		}
 
 		void UpdateInterpolationValues(float newDistance) {
+			if (reverseVisibility) {
+				newDistance = maxDistance - newDistance;
+			}
 			for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
 				NodeTrailInfo infoAtIndex = trailInfo[i];
 				interpolationValues[i] = Mathf.Clamp01(Mathf.InverseLerp(infoAtIndex.startDistance, infoAtIndex.endDistance, newDistance));
 			}
-			material.SetFloatArray(interpolationValuesKey, interpolationValues);
+			foreach (var material in materials) {
+				material.SetInt(reverseVisibilityKey, reverseVisibility ? 1 : 0);
+				material.SetFloatArray(interpolationValuesKey, interpolationValues);
+			}
 		}
 
 		void UpdateState(float prevDistance, float nextDistance) {

@@ -39,6 +39,9 @@ public class Interact : Singleton<Interact> {
 	// Update is called once per frame
 	void Update () {
 		InteractableObject newObjectHovered = FindInteractableObjectHovered();
+		if (newObjectHovered != null && !newObjectHovered.interactable) {
+			newObjectHovered = null;
+		}
 
 		// If we were previously hovering over a different object, send a MouseHoverExit event to that object
 		if (objectHovered != null && newObjectHovered != objectHovered) {

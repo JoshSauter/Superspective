@@ -17,9 +17,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	float airspeedControlFactor = 0.4f;
 	float decelerationLerpSpeed = 12f;
 	float backwardsSpeed = 1f;
-	private float _walkSpeed = 10f;
+	private float _walkSpeed = 9f;
 	public float walkSpeed { get { return _walkSpeed * scale; } }
-	private float _runSpeed = 18f;
+	private float _runSpeed = 14f;
 	public float runSpeed { get { return _runSpeed * scale; } }
 	private float desiredMovespeedLerpSpeed = 10;
 
@@ -305,13 +305,13 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		}
 
 		foreach (ContactPoint contact in allContactThisFrame) {
-			bool isBelowMaxStepHeight = (Vector3.Dot(contact.point, transform.up) - Vector3.Dot(ground.point, transform.up)) < maxStepHeight;
+			bool isBelowMaxStepHeight = Mathf.Abs((Vector3.Dot(contact.point, transform.up) - Vector3.Dot(ground.point, transform.up))) < maxStepHeight;
 			// Basically all this nonsense is to get the contact surface's normal rather than the "contact normal" which is different
 			RaycastHit hitInfo = default(RaycastHit);
 			bool rayHit = false;
 			if (isBelowMaxStepHeight) {
 				Vector3 rayLowStartPos = bottomOfPlayer + transform.up * 0.01f;
-				Vector3 bottomOfPlayerToContactPoint = contact.point - transform.position;
+				Vector3 bottomOfPlayerToContactPoint = contact.point - bottomOfPlayer;
 				Vector3 rayDirection = Vector3.ProjectOnPlane(bottomOfPlayerToContactPoint, transform.up).normalized;
 				if (rayDirection.magnitude > 0) {
 					Debug.DrawRay(rayLowStartPos, rayDirection * thisCollider.radius * 2, Color.blue);

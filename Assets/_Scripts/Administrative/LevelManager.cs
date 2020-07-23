@@ -150,7 +150,6 @@ public class LevelManager : Singleton<LevelManager> {
 		string sceneName = activeSceneName;
 		if (!Application.isPlaying) {
 			if (enumToSceneName == null) {
-				enumToSceneName = new Dictionary<Level, string>();
 				PopulateSceneNames();
 			}
 			sceneName = enumToSceneName[startingScene];
@@ -160,6 +159,8 @@ public class LevelManager : Singleton<LevelManager> {
 
 	[Button("Load default player position")]
 	private void LoadDefaultPlayerPosition() {
+		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
+
 		string sceneName = GetSceneName();
 		string positionKey = $"{positionKeyPrefix}.{sceneName}";
 		string rotationKey = $"{rotationKeyPrefix}.{sceneName}";
@@ -172,11 +173,15 @@ public class LevelManager : Singleton<LevelManager> {
 			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
 		}
 
+		// Hijacking this to display level banner on load, even when it's already the active scene
+		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[sceneName]);
+
 		hasLoadedDefaultPlayerPosition = true;
 	}
 #endregion
 
 	Dictionary<Level, string> enumToSceneName;
+	Dictionary<string, Level> sceneNameToEnum;
 	Dictionary<string, List<string>> worldGraph;
 	public string activeSceneName;
 	List<string> loadedSceneNames;
@@ -217,7 +222,6 @@ public class LevelManager : Singleton<LevelManager> {
 		currentlyLoadingSceneNames = new List<string>();
 		currentlyUnloadingSceneNames = new List<string>();
 
-		enumToSceneName = new Dictionary<Level, string>();
 		PopulateSceneNames();
 		worldGraph = new Dictionary<string, List<string>>();
 		PopulateWorldGraph();
@@ -227,7 +231,7 @@ public class LevelManager : Singleton<LevelManager> {
 #endif
 
 		SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
-		SceneManager.sceneLoaded += (scene, mode) => { if (defaultPlayerPosition && !hasLoadedDefaultPlayerPosition) LoadDefaultPlayerPosition(); };
+		SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
 
 		SwitchActiveScene(startingScene);
@@ -258,6 +262,8 @@ public class LevelManager : Singleton<LevelManager> {
 
 		activeSceneName = levelName;
 
+		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[activeSceneName]);
+
 		// First unload any scene no longer needed
 		DeactivateUnrelatedScenes(levelName);
 
@@ -286,6 +292,9 @@ public class LevelManager : Singleton<LevelManager> {
 	}
 
 	private void PopulateSceneNames() {
+		enumToSceneName = new Dictionary<Level, string>();
+		sceneNameToEnum = new Dictionary<string, Level>();
+
 #if UNITY_EDITOR || TEST_BUILD
 		enumToSceneName.Add(Level.testScene, testScene);
 #endif
@@ -307,6 +316,10 @@ public class LevelManager : Singleton<LevelManager> {
         enumToSceneName.Add(Level.invisFloor, invisFloor);
 		enumToSceneName.Add(Level.metaEdgeDetection, metaEdgeDetection);
 		enumToSceneName.Add(Level.portalTestScene, portalTestScene);
+
+		foreach (var kv in enumToSceneName) {
+			sceneNameToEnum[kv.Value] = kv.Key;
+		}
 	}
 
 	/// <summary>

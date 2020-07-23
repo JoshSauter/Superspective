@@ -273,7 +273,7 @@ public class DimensionObjectBase : MonoBehaviour {
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionWater"));
 				break;
 			default:
-				Debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
+				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
 		}
 

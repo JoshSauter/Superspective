@@ -35,11 +35,11 @@ namespace MagicTriggerMechanics {
 		private bool hasTriggeredOnStay = false;
 		private bool hasNegativeTriggeredOnStay = false;
 
-		private void Awake() {
+		protected virtual void Awake() {
 			debug = new DebugLogger(this, () => DEBUG);
 		}
 
-		private void OnTriggerStay(Collider other) {
+		protected void OnTriggerStay(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
@@ -80,7 +80,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		private void OnTriggerEnter(Collider other) {
+		protected void OnTriggerEnter(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
@@ -101,7 +101,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		private void OnTriggerExit(Collider other) {
+		protected void OnTriggerExit(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {

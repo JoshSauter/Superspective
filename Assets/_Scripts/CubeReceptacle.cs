@@ -146,8 +146,9 @@ public class CubeReceptacle : MonoBehaviour {
 			yield return new WaitForFixedUpdate();
 		}
 
+		PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
 		cubeInReceptacle = null;
-		OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
+		OnCubeReleaseEnd?.Invoke(this, cubeThatWasInReceptacle);
 		OnCubeReleaseEndSimple?.Invoke();
 	}
 

@@ -5,6 +5,7 @@ using EpitaphUtils;
 using NaughtyAttributes;
 
 public class InteractableObject : MonoBehaviour {
+	public bool interactable = true;
 	public bool useLargerPrepassMaterial = false;
 	public bool overrideGlowColor = false;
 	[ShowIf("overrideGlowColor")]

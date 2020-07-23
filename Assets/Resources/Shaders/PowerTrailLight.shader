@@ -36,6 +36,7 @@
         uniform int _EndPositionIDs[MAX_NODES];
         uniform float _InterpolationValues[MAX_NODES];
         uniform float _CapsuleRadius;
+        uniform int _ReverseVisibility;
 
         // p is the test position, pointA is the center of the sphere at one end of the capsule, pointB is the center of the sphere at the other end
         float sdfCapsule(float3 p, float3 pointA, float3 pointB, float radius) {
@@ -74,7 +75,11 @@
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
             // Only turn on emission if worldSDF <= 0
-		    o.Emission = _EmissionColor * step(worldSdf(IN.worldPos), 0);
+            float emissionEnabled = step(worldSdf(IN.worldPos), 0);
+            if (_ReverseVisibility > 0) {
+                emissionEnabled = 1 - emissionEnabled;     
+			}
+		    o.Emission = _EmissionColor * emissionEnabled;
         }
         ENDCG
     }
