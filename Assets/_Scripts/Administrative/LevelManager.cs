@@ -34,7 +34,9 @@ public enum Level {
     invisFloor,
 	metaEdgeDetection,
 	portalTestScene,
-	forkWhiteRoom2
+	forkWhiteRoom2,
+	forkWhiteRoomBlackHallway,
+	forkWhiteRoom3
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -201,6 +203,8 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string fork = "_Fork";
 	private const string forkWhiteRoom = "_Fork_WhiteRoom";
 	private const string forkWhiteRoom2 = "_Fork_WhiteRoom2";
+	private const string forkWhiteRoomBlackHallway = "_WhiteRoom_BlackHallway";
+	private const string forkWhiteRoom3 = "_Fork_WhiteRoom3";
 	private const string forkBlackRoom = "_Fork_BlackRoom";
     private const string invisFloor = "_InvisFloor";
 
@@ -308,6 +312,8 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.fork, fork);
 		enumToSceneName.Add(Level.forkWhiteRoom, forkWhiteRoom);
 		enumToSceneName.Add(Level.forkWhiteRoom2, forkWhiteRoom2);
+		enumToSceneName.Add(Level.forkWhiteRoomBlackHallway, forkWhiteRoomBlackHallway);
+		enumToSceneName.Add(Level.forkWhiteRoom3, forkWhiteRoom3);
 		enumToSceneName.Add(Level.forkBlackRoom, forkBlackRoom);
 		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
 		enumToSceneName.Add(Level.tutorialRoom, tutorialRoom);
@@ -338,7 +344,9 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
 		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom });
 		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection, forkWhiteRoom2 });
-		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom });
+		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom, forkWhiteRoomBlackHallway });
+		worldGraph.Add(forkWhiteRoomBlackHallway, new List<string>() { forkWhiteRoom2, forkWhiteRoom3 });
+		worldGraph.Add(forkWhiteRoom3, new List<string>() { forkWhiteRoomBlackHallway });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
         worldGraph.Add(invisFloor, new List<string>());
 
