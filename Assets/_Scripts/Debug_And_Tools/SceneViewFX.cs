@@ -45,7 +45,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	[UnityEditor.Callbacks.DidReloadScripts]
 	private static void AfterScriptsReloaded() {
 		DebugPrintState("AfterScriptsReloaded()");
-		if (UnityEditorInternal.InternalEditorUtility.isApplicationActive) {
+		if (instance != null && UnityEditorInternal.InternalEditorUtility.isApplicationActive) {
 			instance.enabled = instance.cachedEnableState;
 			instance?.debug?.Log("SceneViewFX: " + ((instance.enabled) ? "On" : "Off"));
 		}

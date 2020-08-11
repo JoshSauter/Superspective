@@ -42,10 +42,9 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "registry": "http://staging-packages.unity.com",
   "lock": {
     "com.dbrizov.naughtyattributes": {
-      "hash": "0373a0987a7e09eacbe42d2f5ef8a8857bcbbdf5",
+      "hash": "8361c4c50a4f375cfac3cdb67ebd3babf15c42d8",
       "revision": "upm"
     }
   }

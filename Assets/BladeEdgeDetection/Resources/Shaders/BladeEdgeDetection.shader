@@ -24,6 +24,7 @@
 			float _DebugMode;
 
 			#pragma multi_compile __ DOUBLE_SIDED_EDGES
+			#pragma multi_compile __ CHECK_PORTAL_DEPTH
 
 			// Constants
 			#define NUM_SAMPLES 9
@@ -67,6 +68,11 @@
 			fixed4 _EdgeColorGradient[GRADIENT_RESOLUTION];
 			// Edge gradient from texture
 			sampler2D _GradientTexture;
+
+#ifdef CHECK_PORTAL_DEPTH
+			// If enabled, will check if all samples are within a portal. If so, don't draw an edge here
+			sampler2D _PortalMask;
+#endif
 
 			// Source texture information, screen before edge detection is applied
 			sampler2D _MainTex;
@@ -300,8 +306,15 @@
 				float depthSamples[NUM_SAMPLES];
 				float3 normalSamples[NUM_SAMPLES];
 				float obliqueness[NUM_SAMPLES];
+#ifdef CHECK_PORTAL_DEPTH
+				half4 portalSamples[NUM_SAMPLES];
+				float portalDepthSamples[NUM_SAMPLES];
+#endif
 				for (int i = 0; i < NUM_SAMPLES; i++) {
 					samples[i] = tex2D(_CameraDepthNormalsTexture, uvPositions.UVs[i]);
+#ifdef CHECK_PORTAL_DEPTH
+					portalSamples[i] = tex2D(_PortalMask, uvPositions.UVs[i]);
+#endif
 				}
 
 				float minDepthValue = 1;
@@ -317,11 +330,18 @@
 
 					minDepthValue = min(minDepthValue, depthValue);
 					avgObliqueness += obliqueness[s];
+#ifdef CHECK_PORTAL_DEPTH
+					DecodeDepthNormal(portalSamples[s], depthValue, normalValue);
+					portalDepthSamples[s] = depthValue;
+#endif
 				}
 				avgObliqueness /= NUM_SAMPLES;
 
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
+#ifdef CHECK_PORTAL_DEPTH
+				half allSamplesBehindPortal = depthSamples[0] > portalDepthSamples[0]-0.0045 && portalDepthSamples[0] > 0;
+#endif
 				float maxDepthRatio = 0;
 				float maxNormalDiff = 0;
 				for (int x = 1; x < NUM_SAMPLES; x++) {
@@ -334,6 +354,10 @@
 
 					// Keep track of whether all depths appear different before any double-checks
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
+
+#ifdef CHECK_PORTAL_DEPTH
+					allSamplesBehindPortal *= depthSamples[x] > portalDepthSamples[x]-0.0045 && portalDepthSamples[x] > 0;
+#endif
 
 					/////////////////////////
 					// Depth Double-Checks //
@@ -368,6 +392,16 @@
 					// "if (x >= SAMPLE_RANGE_START) maxNormalDiff = max(maxNormalDiff, normalDiff)"
 					maxNormalDiff = max(maxNormalDiff, normalDiff * step(SAMPLE_RANGE_START, x));
 				}
+#ifdef CHECK_PORTAL_DEPTH
+				// return portalDepthSamples[0];
+				//return fixed4(allSamplesBehindPortal, allSamplesBehindPortal, allSamplesBehindPortal, 1);
+				if (allSamplesBehindPortal > 0) {
+					//return fixed4(1,1,.7,1);
+					//clip(-1);
+					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray);
+				}
+				//clip(-allSamplesOnPortal);
+#endif
 
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)

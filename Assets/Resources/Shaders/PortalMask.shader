@@ -1,8 +1,8 @@
-﻿Shader "Hidden/PortalDepth"
+﻿Shader "Hidden/PortalMask"
 {
     SubShader
     {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "True" }
 
         Pass
         {
@@ -46,6 +46,7 @@
 				DecodeDepthNormal(sample, sampleDepthValue, sampleNormalValue);
 
 				i.nz.w = clamp(i.nz.w, 0, .999);
+				return fixed4(i.nz.w, i.nz.w, i.nz.w, 1);
 				return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 			}
             ENDCG

@@ -23,7 +23,6 @@ namespace PortalMechanics {
 		[ShowIf("changeCameraEdgeDetection")]
 		public Texture2D edgeColorGradientTexture;
 
-		public bool writePortalSurfaceToDepthBuffer = false;
 		public bool renderRecursivePortals = false;
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
@@ -82,6 +81,9 @@ namespace PortalMechanics {
 					renderers = new Renderer[] { GetComponent<Renderer>() };
 				}
 			}
+			foreach (var r in renderers) {
+				r.gameObject.layer = LayerMask.NameToLayer("Portal");
+			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
 					colliders = GetComponentsInChildren<Collider>();
@@ -102,9 +104,8 @@ namespace PortalMechanics {
 				}
 			}
 
-			string depthWriteShaderPath = "Shaders/RecursivePortals/PortalMaterial";
-			string noDepthWriteShaderPath = "Shaders/RecursivePortals/PortalMaterialNoDepthWrite";
-			portalMaterial = new Material(Resources.Load<Shader>(writePortalSurfaceToDepthBuffer ? depthWriteShaderPath : noDepthWriteShaderPath));
+			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
+			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
 			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
 
 			volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");

@@ -22,6 +22,7 @@ public class BladeEdgeDetection : MonoBehaviour {
 	public bool debugMode = false;
 
 	public bool doubleSidedEdges = false;
+	public bool checkPortalDepth = false;
 	public float depthSensitivity = 1;
 	public float normalSensitivity = 1;
 	public int sampleDistance = 1;
@@ -60,7 +61,6 @@ public class BladeEdgeDetection : MonoBehaviour {
 		frustumCornersOrdered = new Vector4[4];
 	}
 	
-	[ImageEffectOpaque]
 	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (shaderMaterial == null && !CreateMaterial()) {
 			Debug.LogError("Failed to create shader material!");
@@ -75,6 +75,12 @@ public class BladeEdgeDetection : MonoBehaviour {
 		}
 		else {
 			shaderMaterial.DisableKeyword("DOUBLE_SIDED_EDGES");
+		}
+		if (checkPortalDepth) {
+			shaderMaterial.EnableKeyword("CHECK_PORTAL_DEPTH");
+		}
+		else {
+			shaderMaterial.DisableKeyword("CHECK_PORTAL_DEPTH");
 		}
 		// Note: Depth sensitivity originally calibrated for camera with a far plane of 400, this normalizes it for other cameras
 		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity * DEPTH_SENSITIVITY_MULTIPLIER * (thisCamera.farClipPlane/400));

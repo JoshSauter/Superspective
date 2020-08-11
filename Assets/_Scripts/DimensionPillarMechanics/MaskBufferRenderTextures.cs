@@ -6,7 +6,7 @@ using UnityEngine;
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	public const int numVisibilityMaskChannels = 2;
 	public RenderTexture[] visibilityMaskTextures;
-	public RenderTexture invertMaskTexture;
+	public RenderTexture portalMaskTexture;
 
 	// Use this for initialization
 	void Start () {
@@ -14,6 +14,8 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 
 		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 		CreateAllRenderTextures(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
+
+		EpitaphScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
 	}
 
 	private void OnDisable() {
@@ -32,25 +34,26 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 			Shader.SetGlobalTexture("_DimensionMask" + i, visibilityMaskTextures[i]);
 		}
 
-		// Will write to global texture named _InvertMask
-		Shader.SetGlobalTexture("_InvertMask", invertMaskTexture);
+		// Will write to global texture named _PortalMask
+		Shader.SetGlobalTexture("_PortalMask", portalMaskTexture);
 	}
 
 	void ReleaseAllTextures() {
 		for (int i = 0; i < numVisibilityMaskChannels; i++) {
 			visibilityMaskTextures[i].Release();
 		}
-		invertMaskTexture.Release();
+		portalMaskTexture.Release();
 	}
 
 	void CreateAllRenderTextures(int currentWidth, int currentHeight) {
 		for (int i = 0; i < numVisibilityMaskChannels; i++) {
 			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], EpitaphScreen.instance.dimensionCameras[i]);
 		}
-		CreateRenderTexture(currentWidth, currentHeight, out invertMaskTexture, EpitaphScreen.instance.invertMaskCamera);
+		RenderTexture portals = CreateRenderTexture(currentWidth, currentHeight, out portalMaskTexture, EpitaphScreen.instance.portalMaskCamera);
+		portals.format = RenderTextureFormat.Depth;
 	}
 
-	void CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {
+	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {
 		rt = new RenderTexture(currentWidth, currentHeight, 24);
 		rt.enableRandomWrite = true;
 		rt.Create();
@@ -59,5 +62,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		Shader.SetGlobalFloat("_ResolutionY", currentHeight);
 
 		targetCamera.targetTexture = rt;
+
+		return rt;
 	}
 }

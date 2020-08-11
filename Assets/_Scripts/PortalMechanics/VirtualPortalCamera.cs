@@ -29,7 +29,7 @@ namespace PortalMechanics {
 		[ShowIf("DEBUG")]
 		public List<RenderTexture> finishedTex = new List<RenderTexture>();
 
-		private static Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
+		private static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
 		// Container for memoizing edge detection color state
 		private struct EDColors {
@@ -90,6 +90,7 @@ namespace PortalMechanics {
 			Quaternion camRotation = mainCamera.transform.rotation;
 			Matrix4x4 camProjectionMatrix = mainCamera.projectionMatrix;
 			EDColors edgeColors = new EDColors(mainCameraEdgeDetection);
+			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(transform, false);
 			SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix, edgeColors);
 
 			if (DEBUG) {
@@ -121,6 +122,10 @@ namespace PortalMechanics {
 			foreach (var finishedPortalTexture in finishedPortalTextures) {
 				finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value);
 			}
+
+			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
+			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+			Shader.SetGlobalTexture("_PortalMask", MaskBufferRenderTextures.instance.portalMaskTexture);
 
 			debug.LogError("End of frame: renderSteps: " + renderSteps);
 		}
@@ -187,6 +192,8 @@ namespace PortalMechanics {
 			debug.Log("Rendering: " + index + " to " + portal.name + "'s RenderTexture, depth: " + depth);
 			portalCamera.targetTexture = renderStepTextures[index];
 
+			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+			Shader.SetGlobalTexture("_PortalMask", MaskBufferRenderTextures.instance.portalMaskTexture);
 			portalCamera.Render();
 
 			portal.SetTexture(renderStepTextures[index]);

@@ -1,21 +1,15 @@
-﻿Shader "Portals/PortalMaterial"
-{
-    Properties
-    {
+﻿Shader "Portals/PortalMaterial" {
+    Properties {
 		_MainTex("Main Texture", 2D) = "white" {}
     }
-    SubShader
-    {
-		Tags 
-		{ 
-			"RenderType" = "PortalSurface" "Queue" = "Transparent-1"
+    SubShader {
+		Tags  { 
+			"RenderType" = "Transparent" "Queue" = "Transparent" "PortalTag" = "True"
 		}
 
-        Pass
-        {
+        Pass {
 			ZWrite Off
-			Stencil
-			{
+			Stencil {
 				Ref 1
 				Pass replace
 			}
@@ -26,19 +20,16 @@
 
 				#include "UnityCG.cginc"
 
-				struct appdata
-				{
+				struct appdata {
 					float4 vertex : POSITION;
 				};
 
-				struct v2f
-				{
+				struct v2f {
 					float4 vertex : SV_POSITION;
 					float4 screenPos : TEXCOORD0;
 				};
 
-				v2f vert(appdata v)
-				{
+				v2f vert(appdata v) {
 					v2f o;
 					o.vertex = UnityObjectToClipPos(v.vertex);
 					o.screenPos = ComputeScreenPos(o.vertex);
@@ -47,9 +38,9 @@
 
 				uniform sampler2D _MainTex;
 
-				fixed4 frag(v2f i) : SV_Target
-				{
+				fixed4 frag(v2f i) : SV_Target {
 					float2 uv = i.screenPos.xy / i.screenPos.w;
+
 					fixed4 col = tex2D(_MainTex, uv);
 					return col;
 				}
