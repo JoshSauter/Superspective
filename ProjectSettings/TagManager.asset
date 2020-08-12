@@ -28,7 +28,7 @@ TagManager:
   - RoomBounds
   - Pillar
   - Portal
-  - HideFromPortal
+  - VolumetricPortal
   - LightProjectorSurface
   - ParticleBounds
   - InvertMask

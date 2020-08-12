@@ -103,8 +103,10 @@ namespace PortalMechanics {
 				// Ignore disabled portals
 				if (!p.portalIsEnabled) continue;
 
+				float portalSurfaceArea = GetPortalSurfaceArea(p);
 				float distanceFromPortalToCam = Vector3.Distance(mainCamera.transform.position, p.ClosestPoint(mainCamera.transform.position));
-				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds) ? p.GetScreenRects(mainCamera) : fullScreenRect;
+				// Assumes an 8x8 portal is average size
+				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds * portalSurfaceArea/64f) ? p.GetScreenRects(mainCamera) : fullScreenRect;
 
 				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
 				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
@@ -316,6 +318,29 @@ namespace PortalMechanics {
 			dest.edgeColor = edgeColor;
 			dest.edgeColorGradient = edgeColorGradient;
 			dest.edgeColorGradientTexture = edgeColorGradientTexture;
+		}
+
+		private float GetPortalSurfaceArea(Portal p) {
+			float area = 0f;
+			foreach (var c in p.colliders) {
+				float product = 1f;
+				BoxCollider box = c as BoxCollider;
+				if (box != null) {
+					Vector3 size = box.bounds.size;
+					if (size.x > 1) {
+						product *= size.x;
+					}
+					if (size.y > 1) {
+						product *= size.y;
+					}
+					if (size.z > 1) {
+						product *= size.z;
+					}
+				}
+				area += product;
+			}
+
+			return area;
 		}
 	}
 }

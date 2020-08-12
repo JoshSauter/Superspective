@@ -174,10 +174,20 @@ public class LevelManager : Singleton<LevelManager> {
 			Player.instance.transform.position = pos;
 			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
 		}
+		if (DEBUG) {
+			if (!HasVector3(positionKey)) {
+				Debug.LogError($"No position key found for {positionKey}");
+			}
+			if (!HasVector3(rotationKey)) {
+				Debug.LogError($"No rotation key found for {rotationKey}");
+			}
+		}
 
 		// Hijacking this to display level banner on load, even when it's already the active scene
 		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[sceneName]);
-
+#if UNITY_EDITOR
+		if (EditorApplication.isPlaying)
+#endif
 		hasLoadedDefaultPlayerPosition = true;
 	}
 #endregion

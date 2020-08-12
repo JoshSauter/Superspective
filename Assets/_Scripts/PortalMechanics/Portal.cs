@@ -32,7 +32,7 @@ namespace PortalMechanics {
 		private Material portalMaterial;
 		private Material fallbackMaterial;
 		public Renderer[] renderers;
-		private Collider[] colliders;
+		public Collider[] colliders;
 		private Transform playerCamera;
 		private CameraFollow playerCameraFollow;
 

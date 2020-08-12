@@ -10,8 +10,8 @@ public class PortalToBlackHallway : MonoBehaviour {
     public Collider[] blackHallwayLoopTeleporters;
 
     IEnumerator Start() {
-        yield return null;
         portal = GetComponent<Portal>();
+        yield return new WaitUntil(() => portal.otherPortal != null);
         portal.changeCameraEdgeDetection = false;
         portal.otherPortal.changeCameraEdgeDetection = false;
 
