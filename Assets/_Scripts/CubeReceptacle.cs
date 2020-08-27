@@ -10,6 +10,7 @@ public class CubeReceptacle : MonoBehaviour {
 
 	float rotateTime = 0.25f;
 	float translateTime = 0.5f;
+	float afterReleaseCooldown = 0.5f;
 
 	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 	public delegate void CubeReceptacleActionSimple();
@@ -107,11 +108,12 @@ public class CubeReceptacle : MonoBehaviour {
 		triggerZone.isTrigger = true;
 	}
 
-	private void OnTriggerEnter(Collider other) {
+	private void OnTriggerStay(Collider other) {
 		PickupObject cube = other.gameObject.GetComponent<PickupObject>();
 		if (cube != null && cubeInReceptacle == null) {
 			Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
 			cube.Drop();
+			cube.interactable = false;
 			cubeRigidbody.isKinematic = true;
 			cubeInReceptacle = cube;
 			cubeInReceptacle.OnPickupSimple += OnPickupFromReceptacle;
@@ -129,11 +131,13 @@ public class CubeReceptacle : MonoBehaviour {
 		OnCubeReleaseStart?.Invoke(this, cubeInReceptacle);
 		OnCubeReleaseStartSimple?.Invoke();
 
+		cube.interactable = false;
+
 		const float timeToRelease = .25f;
 		float timeElapsed = 0;
 
 		Vector3 startPos = cube.transform.position;
-		Vector3 endPos = transform.TransformPoint(0, 1f, 0);
+		Vector3 endPos = transform.TransformPoint(0, 1.5f, 0);
 		Quaternion startRot = cube.transform.rotation;
 
 		while (timeElapsed < timeToRelease) {
@@ -148,8 +152,15 @@ public class CubeReceptacle : MonoBehaviour {
 
 		PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
 		cubeInReceptacle = null;
+		cube.interactable = true;
+		triggerZone.enabled = false;
+		Invoke("RestoreTriggerZoneAfterCooldown", afterReleaseCooldown);
 		OnCubeReleaseEnd?.Invoke(this, cubeThatWasInReceptacle);
 		OnCubeReleaseEndSimple?.Invoke();
+	}
+
+	void RestoreTriggerZoneAfterCooldown() {
+		triggerZone.enabled = true;
 	}
 
 	IEnumerator SnapCubeToPosition() {
@@ -185,6 +196,8 @@ public class CubeReceptacle : MonoBehaviour {
 
 			yield return null;
 		}
+
+		cubeInReceptacle.interactable = true;
 
 		OnCubeHoldEnd?.Invoke(this, cubeInReceptacle);
 		OnCubeHoldEndSimple?.Invoke();
