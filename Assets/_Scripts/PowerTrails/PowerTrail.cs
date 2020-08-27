@@ -45,10 +45,17 @@ namespace PowerTrailMechanics {
 		const string reverseVisibilityKey = "_ReverseVisibility";
 
 		public bool useDurationInsteadOfSpeed = false;
+		public bool useSeparateSpeedsForPowerOnOff = false;
+		// Just used for NaughtyAttributes
+		private bool useSameSpeedsForPowerOnOff => !useSeparateSpeedsForPowerOnOff;
 		[ShowIf("useDurationInsteadOfSpeed")]
 		public float targetDuration = 3f;
+		[ShowIf(EConditionOperator.And, "useDurationInsteadOfSpeed", "useSeparateSpeedsForPowerOnOff")]
+		public float targetDurationPowerOff = 3f;
 		[HideIf("useDurationInsteadOfSpeed")]
-		public float speed = 1f;
+		public float speed = 15f;
+		[HideIf(EConditionOperator.Or, "useDurationInsteadOfSpeed", "useSameSpeedsForPowerOnOff")]
+		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
 
 		#region events
@@ -63,6 +70,7 @@ namespace PowerTrailMechanics {
 		// State //
 		///////////
 		public float duration { get { return maxDistance / speed; } }
+		public float durationOff { get { return useSeparateSpeedsForPowerOnOff ? maxDistance / speedPowerOff : duration; } }
 		public float distance = 0f;
 		public float maxDistance = 0f;
 		public bool powerIsOn = false;
@@ -103,6 +111,9 @@ namespace PowerTrailMechanics {
 			PopulateTrailInfo();
 			if (useDurationInsteadOfSpeed) {
 				speed = maxDistance / targetDuration;
+				if (useSeparateSpeedsForPowerOnOff) {
+					speedPowerOff = maxDistance / targetDurationPowerOff;
+				}
 			}
 
 			PopulateStaticGPUInfo();
@@ -238,11 +249,12 @@ namespace PowerTrailMechanics {
 		}
 
 		float NextDistance() {
+			float effectiveSpeed = useSeparateSpeedsForPowerOnOff && !powerIsOn ? speedPowerOff : speed;
 			if (powerIsOn && distance < maxDistance) {
-				return Mathf.Min(maxDistance, distance + Time.deltaTime * speed);
+				return Mathf.Min(maxDistance, distance + Time.deltaTime * effectiveSpeed);
 			}
 			else if (!powerIsOn && distance > 0) {
-				return Mathf.Max(0, distance - Time.deltaTime * speed);
+				return Mathf.Max(0, distance - Time.deltaTime * effectiveSpeed);
 			}
 			else return distance;
 		}

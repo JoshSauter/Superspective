@@ -10,7 +10,7 @@ public class CubeReceptacle : MonoBehaviour {
 
 	float rotateTime = 0.25f;
 	float translateTime = 0.5f;
-	float afterReleaseCooldown = 0.5f;
+	float afterReleaseCooldown = 1f;
 
 	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 	public delegate void CubeReceptacleActionSimple();
