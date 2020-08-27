@@ -17,7 +17,7 @@ public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
 		trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
     }
 
-	private void OnMagicTriggerStayOneTime(Collider other) {
+	private void OnMagicTriggerStayOneTime(GameObject other) {
 		if (other.TaggedAsPlayer()) {
 			ceilingDropDownAfterPassingThrough.Start();
 			ceilingDropDownAfterPassingThrough.OverrideStartingMaterials(ceilingDropDown.startingMaterials);
@@ -25,7 +25,7 @@ public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
 		}
 	}
 
-	private void OnNegativeMagicTriggerStayOneTime(Collider other) {
+	private void OnNegativeMagicTriggerStayOneTime(GameObject other) {
 		if (other.TaggedAsPlayer()) {
 			restoreFakePortalTrigger.gameObject.SetActive(true);
 			gameObject.SetActive(false);

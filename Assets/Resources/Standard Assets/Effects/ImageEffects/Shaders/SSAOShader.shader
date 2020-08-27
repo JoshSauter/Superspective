@@ -266,11 +266,18 @@ v2f vert (appdata_img v)
 }
 
 
-half4 frag( v2f i ) : SV_Target
-{
+half4 frag( v2f i ) : SV_Target {
+	half4 depthNormalSample = tex2D(_CameraDepthNormalsTexture, i.uv[0]);
+	float depthValue;
+	float3 normalValue;
+	DecodeDepthNormal(depthNormalSample, depthValue, normalValue);
+	clip(-depthValue+.999);
+
 	half4 c = tex2D (_MainTex, i.uv[0]);
 	half ao = tex2D (_SSAO, i.uv[1]).r;
 	ao = pow (ao, _Params.w);
+	// Fade out the SSAO effect at long range to avoid seeing "clip ins" of distant objects
+	ao = min(1.0, ao + depthValue/2.0);
 	c.rgb *= ao;
 	return c;
 }

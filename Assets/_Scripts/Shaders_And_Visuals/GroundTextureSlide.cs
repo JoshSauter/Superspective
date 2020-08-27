@@ -19,7 +19,7 @@ public class GroundTextureSlide : MonoBehaviour {
         groundMat.mainTextureOffset = Vector2.zero;
     }
 
-	void SlideByTeleport(Collider teleportEnter, Collider teleportExit, Collider player) {
+	void SlideByTeleport(Collider teleportEnter, Collider teleportExit, GameObject player) {
 		Vector3 teleportDisplacement = teleportEnter.transform.position - teleportExit.transform.position;
 		Slide(teleportDisplacement);
 	}

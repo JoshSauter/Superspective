@@ -18,63 +18,69 @@ namespace MagicTriggerMechanics {
 		public List<TriggerAction> actionsToTrigger = new List<TriggerAction>();
 
 		#region events
-		public delegate void MagicAction(Collider other);
+		public delegate void MagicAction(GameObject player);
 		// These events are fired when the trigger condition specified is met
-		public event MagicAction OnMagicTriggerStay;
-		public event MagicAction OnMagicTriggerEnter;
-		public event MagicAction OnMagicTriggerStayOneTime;
+		public MagicAction OnMagicTriggerStay;
+		public MagicAction OnMagicTriggerEnter;
+		public MagicAction OnMagicTriggerStayOneTime;
 		// These events are fired whenever the opposite of the trigger condition is met (does not necessarily form a complete set with the events above, something may not be fired)
-		public event MagicAction OnNegativeMagicTriggerStay;
-		public event MagicAction OnNegativeMagicTriggerEnter;
-		public event MagicAction OnNegativeMagicTriggerStayOneTime;
+		public MagicAction OnNegativeMagicTriggerStay;
+		public MagicAction OnNegativeMagicTriggerEnter;
+		public MagicAction OnNegativeMagicTriggerStayOneTime;
 
 		// OnMagicTriggerExit always fire on OnTriggerExit regardless of trigger conditions
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
-		private bool hasTriggeredOnStay = false;
-		private bool hasNegativeTriggeredOnStay = false;
+		protected bool hasTriggeredOnStay = false;
+		protected bool hasNegativeTriggeredOnStay = false;
 
 		protected virtual void Awake() {
 			debug = new DebugLogger(this, () => DEBUG);
+		}
+
+		private void OnDisable() {
+			hasTriggeredOnStay = false;
+			hasNegativeTriggeredOnStay = false;
 		}
 
 		protected void OnTriggerStay(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
+				GameObject player = other.gameObject;
 				if (DEBUG) {
-					PrintDebugInfo(other);
+					PrintDebugInfo(player);
 				}
 
-				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, other));
-				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, other));
+				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, player));
+				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
 				// Magic Events triggered
 				if (allConditionsSatisfied) {
 					debug.Log($"Triggering MagicTrigger for {gameObject.name}!");
 
 					ExecuteActionsForTiming(ActionTiming.EveryFrameOnStay);
-					OnMagicTriggerStay?.Invoke(other);
+					OnMagicTriggerStay?.Invoke(player);
 					if (!hasTriggeredOnStay) {
 						hasTriggeredOnStay = true;
 						hasNegativeTriggeredOnStay = false;
 
 						ExecuteActionsForTiming(ActionTiming.OnceWhileOnStay);
-						OnMagicTriggerStayOneTime?.Invoke(other);
+						OnMagicTriggerStayOneTime?.Invoke(player);
 					}
 				}
 				// Negative Magic Events triggered (negative triggers cannot turn self off)
 				else if (allConditionsNegativelySatisfied) {
 					debug.Log("Triggering NegativeMagicTrigger!");
 					ExecuteNegativeActionsForTiming(ActionTiming.EveryFrameOnStay);
-					OnNegativeMagicTriggerStay?.Invoke(other);
+					OnNegativeMagicTriggerStay?.Invoke(player);
 
 					if (!hasNegativeTriggeredOnStay) {
 						hasNegativeTriggeredOnStay = true;
 						hasTriggeredOnStay = false;
 
 						ExecuteNegativeActionsForTiming(ActionTiming.OnceWhileOnStay);
-						OnNegativeMagicTriggerStayOneTime?.Invoke(other);
+						OnNegativeMagicTriggerStayOneTime?.Invoke(player);
 					}
 				}
 			}
@@ -84,19 +90,20 @@ namespace MagicTriggerMechanics {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
+				GameObject player = other.gameObject;
 				if (DEBUG) {
-					PrintDebugInfo(other);
+					PrintDebugInfo(player);
 				}
 
-				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, other));
-				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, other));
+				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, player));
+				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
 				if (allConditionsSatisfied) {
 					ExecuteActionsForTiming(ActionTiming.OnEnter);
-					OnMagicTriggerEnter?.Invoke(other);
+					OnMagicTriggerEnter?.Invoke(player);
 				}
 				else if (allConditionsNegativelySatisfied) {
 					ExecuteNegativeActionsForTiming(ActionTiming.OnEnter);
-					OnNegativeMagicTriggerEnter?.Invoke(other);
+					OnNegativeMagicTriggerEnter?.Invoke(player);
 				}
 			}
 		}
@@ -105,9 +112,10 @@ namespace MagicTriggerMechanics {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
+				GameObject player = other.gameObject;
 				ExecuteActionsForTiming(ActionTiming.OnExit);
 				ExecuteNegativeActionsForTiming(ActionTiming.OnExit);
-				OnMagicTriggerExit?.Invoke(other);
+				OnMagicTriggerExit?.Invoke(player);
 
 				if (hasTriggeredOnStay) {
 					hasTriggeredOnStay = false;
@@ -118,18 +126,18 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		private void ExecuteActionsForTiming(ActionTiming timing) {
+		protected void ExecuteActionsForTiming(ActionTiming timing) {
 			foreach (var action in actionsToTrigger.Where(tc => tc.actionTiming.HasFlag(timing))) {
 				action.Execute(this);
 			}
 		}
-		private void ExecuteNegativeActionsForTiming(ActionTiming timing) {
+		protected void ExecuteNegativeActionsForTiming(ActionTiming timing) {
 			foreach (var action in actionsToTrigger.Where(tc => tc.actionTiming.HasFlag(timing))) {
 				action.NegativeExecute();
 			}
 		}
 
-		private void PrintDebugInfo(Collider player) {
+		protected void PrintDebugInfo(GameObject player) {
 			string debugString = $"{gameObject.name}:\n";
 			foreach (var condition in triggerConditions) {
 				float triggerValue = condition.Evaluate(transform, player);

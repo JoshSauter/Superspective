@@ -6,6 +6,7 @@ using EpitaphUtils;
 [ExecuteInEditMode]
 public class EpitaphScreen : Singleton<EpitaphScreen> {
 	public Camera playerCamera;
+	public MonoBehaviour[] postProcessEffects;
 	public Camera[] dimensionCameras;
 	public Camera portalMaskCamera;
 	public static int currentWidth;
@@ -41,9 +42,7 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 			currentWidth = Screen.width;
 			currentHeight = Screen.height;
 
-			if (OnScreenResolutionChanged != null) {
-				OnScreenResolutionChanged(currentWidth, currentHeight);
-			}
+			OnScreenResolutionChanged?.Invoke(currentWidth, currentHeight);
 		}
 	}
 

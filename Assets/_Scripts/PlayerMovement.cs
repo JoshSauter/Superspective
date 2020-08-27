@@ -34,7 +34,6 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	float movespeed;
 	public Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
-	public bool grounded = false;
 
 	// Staircase handling characteristics
 	float _maxStepHeight = 0.6f;
@@ -52,6 +51,10 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	public Vector3 bottomOfPlayer { get { return transform.position - transform.up * 2.5f; } }
 
 	#region IsGrounded characteristics
+	public bool grounded = false;
+	private int framesWaitedAfterLeavingGround = 0;
+	private const int framesToWaitAfterLeavingGround = 3;
+	ContactPoint ground;
 	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
 	public float isGroundedSpherecastDistance = 0.5f;
@@ -95,8 +98,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	void FixedUpdate() {
 		if (stopped) return;
 
-		ContactPoint ground = new ContactPoint();
-		grounded = IsGrounded(out ground);
+		grounded = IsGrounded(ref ground);
 		bool standingOnHeldObject = grounded && IsStandingOnHeldObject(ground);
 
 		Vector3 desiredVelocity = thisRigidbody.velocity;
@@ -361,20 +363,42 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		return stepFound;
 	}
 
-	public bool IsGrounded(out ContactPoint ground) {
-		ground = default(ContactPoint);
-		float maxGroundTest = isGroundThreshold;	// Amount upwards-facing the most ground-like object is
+	public bool IsGrounded(ref ContactPoint ground) {
+		ContactPoint groundNow = default(ContactPoint);
+		float maxGroundTest = isGroundThreshold;    // Amount upwards-facing the most ground-like object is
 		foreach (ContactPoint contact in allContactThisFrame) {
 
 			float groundTest = Vector3.Dot(contact.normal, transform.up);
 			if (groundTest > maxGroundTest) {
-				ground = contact;
+				groundNow = contact;
 				maxGroundTest = groundTest;
 			}
 		}
 
 		// Was a ground object found?
-		return (maxGroundTest > isGroundThreshold) && !underMinJumpTime;
+		bool isGroundedNow = (maxGroundTest > isGroundThreshold) && !underMinJumpTime;
+		if (isGroundedNow) {
+			framesWaitedAfterLeavingGround = 0;
+			ground = groundNow;
+			return true;
+		}
+		// If we were grounded last FixedUpdate and not grounded now
+		else if (grounded) {
+			// Wait a few fixed updates before saying that the player is ungrounded
+			if (framesWaitedAfterLeavingGround >= framesToWaitAfterLeavingGround) {
+				ground = default(ContactPoint);
+				framesWaitedAfterLeavingGround = 0;
+				return false;
+			}
+			else {
+				framesWaitedAfterLeavingGround++;
+				return true;
+			}
+		}
+		else {
+			ground = default(ContactPoint);
+			return false;
+		}
 	}
 
 	bool IsStandingOnHeldObject(ContactPoint contact) {

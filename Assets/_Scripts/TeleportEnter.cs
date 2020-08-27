@@ -16,7 +16,7 @@ public class TeleportEnter : MonoBehaviour {
 	public UnityEngine.Transform[] otherObjectsToTeleport;
 
 #region events
-	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, Collider player);
+	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, GameObject player);
 	public delegate void SimpleTeleportAction();
 
 	public event TeleportAction BeforeTeleport;
@@ -47,7 +47,7 @@ public class TeleportEnter : MonoBehaviour {
         trigger.OnMagicTriggerStayOneTime -= TeleportTriggered;
     }
 
-	private void TeleportTriggered(Collider player) {
+	private void TeleportTriggered(GameObject player) {
 		Debug.Assert(teleportExit != null, "Please specify the teleport exit for " + gameObject.scene.name + ": " + gameObject.name);
 
 		TriggerEventsBeforeTeleport(player);
@@ -83,7 +83,7 @@ public class TeleportEnter : MonoBehaviour {
 		return teleportExit.transform.position - teleportEnter.transform.position;
 	}
 
-	void TeleportPlayer(Collider player) {
+	void TeleportPlayer(GameObject player) {
 		// Handle velocity
 		Rigidbody playerRigidbody = player.GetComponent<Rigidbody>();
 		Vector3 playerWorldVelocity = playerRigidbody.velocity;
@@ -103,7 +103,7 @@ public class TeleportEnter : MonoBehaviour {
 		player.transform.rotation = rotationTransformation * player.transform.rotation;
 	}
 
-	void TriggerEventsBeforeTeleport(Collider player) {
+	void TriggerEventsBeforeTeleport(GameObject player) {
 		if (BeforeTeleport != null) {
 			BeforeTeleport(teleportEnter, teleportExit, player);
 		}
@@ -118,7 +118,7 @@ public class TeleportEnter : MonoBehaviour {
 		}
 	}
 
-	void TriggerEventsAfterTeleport(Collider player) {
+	void TriggerEventsAfterTeleport(GameObject player) {
 		if (OnTeleport != null) {
 			OnTeleport(teleportEnter, teleportExit, player);
 		}

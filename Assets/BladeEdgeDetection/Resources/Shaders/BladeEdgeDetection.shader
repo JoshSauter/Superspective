@@ -340,7 +340,7 @@
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
 #ifdef CHECK_PORTAL_DEPTH
-				half allSamplesBehindPortal = depthSamples[0] > portalDepthSamples[0]-0.0045 && portalDepthSamples[0] > 0;
+				half allSamplesBehindPortal = depthSamples[0] > portalDepthSamples[0]-0.00373 && portalDepthSamples[0] < 1;
 #endif
 				float maxDepthRatio = 0;
 				float maxNormalDiff = 0;
@@ -356,7 +356,7 @@
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
 
 #ifdef CHECK_PORTAL_DEPTH
-					allSamplesBehindPortal *= depthSamples[x] > portalDepthSamples[x]-0.0045 && portalDepthSamples[x] > 0;
+					allSamplesBehindPortal *= depthSamples[x] > portalDepthSamples[x]-0.00373 && portalDepthSamples[x] < 1;
 #endif
 
 					/////////////////////////
@@ -392,6 +392,8 @@
 					// "if (x >= SAMPLE_RANGE_START) maxNormalDiff = max(maxNormalDiff, normalDiff)"
 					maxNormalDiff = max(maxNormalDiff, normalDiff * step(SAMPLE_RANGE_START, x));
 				}
+
+				
 #ifdef CHECK_PORTAL_DEPTH
 				// return portalDepthSamples[0];
 				//return fixed4(allSamplesBehindPortal, allSamplesBehindPortal, allSamplesBehindPortal, 1);

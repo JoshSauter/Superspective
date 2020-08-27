@@ -29,6 +29,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonPressEvent OnRightPress;
 	public event ButtonPressEvent OnLeftPress;
 	public event ButtonPressEvent OnAction1Press;
+	public event ButtonPressEvent OnAction2Press;
 	public event ButtonPressEvent OnEscapePress;
 	public event ButtonPressEvent OnSpacePress;
 	public event ButtonPressEvent OnShiftPress;
@@ -38,6 +39,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonReleaseEvent OnRightRelease;
 	public event ButtonReleaseEvent OnLeftRelease;
 	public event ButtonReleaseEvent OnAction1Release;
+	public event ButtonReleaseEvent OnAction2Release;
 	public event ButtonReleaseEvent OnEscapeRelease;
 	public event ButtonReleaseEvent OnSpaceRelease;
 	public event ButtonReleaseEvent OnShiftRelease;
@@ -47,6 +49,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonHeldEvent OnRightHeld;
 	public event ButtonHeldEvent OnLeftHeld;
 	public event ButtonHeldEvent OnAction1Held;
+	public event ButtonHeldEvent OnAction2Held;
 	public event ButtonHeldEvent OnEscapeHeld;
 	public event ButtonHeldEvent OnSpaceHeld;
 	public event ButtonHeldEvent OnShiftHeld;
@@ -61,6 +64,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	private bool inRightHoldCoroutine = false;
 	private bool inLeftHoldCoroutine = false;
 	private bool inAction1HoldCoroutine = false;
+	private bool inAction2HoldCoroutine = false;
 	private bool inEscapeHoldCoroutine = false;
 	private bool inSpaceHoldCoroutine = false;
 	private bool inShiftHoldCoroutine = false;
@@ -132,6 +136,17 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 			OnAction1Release();
 		}
 
+		// Action2 button (Also maps to mouse right-click)
+		if (Action2Pressed && OnAction2Press != null) {
+			OnAction2Press();
+			if (!inAction2HoldCoroutine) {
+				StartCoroutine(Action2HoldCoroutine());
+			}
+		}
+		else if (Action2Released && OnAction2Release != null) {
+			OnAction2Release();
+		}
+
 		// Escape button
 		if (EscapePressed && OnEscapePress != null) {
 			OnEscapePress();
@@ -167,90 +182,70 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 #region Combined inputs
 	// On first press
-	public bool UpPressed {
-		get { return KeyboardAndMouseInputs.Up.Pressed; }
-	}
-	public bool DownPressed {
-		get { return KeyboardAndMouseInputs.Down.Pressed; }
-	}
-	public bool RightPressed {
-		get { return KeyboardAndMouseInputs.Right.Pressed; }
-	}
-	public bool LeftPressed {
-		get { return KeyboardAndMouseInputs.Left.Pressed; }
-	}
-	public bool Action1Pressed {
-		get { return KeyboardAndMouseInputs.Action1.Pressed; }
-	}
-	public bool EscapePressed {
-		get { return KeyboardAndMouseInputs.Escape.Pressed; }
-	}
-	public bool SpacePressed {
-		get { return KeyboardAndMouseInputs.Space.Pressed; }
-	}
-	public bool ShiftPressed {
-		get { return KeyboardAndMouseInputs.Shift.Pressed; }
-	}
+	public bool UpPressed => KeyboardAndMouseInputs.Up.Pressed;
+	
+	public bool DownPressed => KeyboardAndMouseInputs.Down.Pressed;
+	
+	public bool RightPressed => KeyboardAndMouseInputs.Right.Pressed;
+	
+	public bool LeftPressed => KeyboardAndMouseInputs.Left.Pressed;
+	
+	public bool Action1Pressed => KeyboardAndMouseInputs.Action1.Pressed;
+
+	public bool Action2Pressed => KeyboardAndMouseInputs.Action2.Pressed;
+	
+	public bool EscapePressed => KeyboardAndMouseInputs.Escape.Pressed;
+	
+	public bool SpacePressed => KeyboardAndMouseInputs.Space.Pressed;
+	
+	public bool ShiftPressed => KeyboardAndMouseInputs.Shift.Pressed;
+	
 
 	// On button release
-	public bool UpReleased {
-		get { return KeyboardAndMouseInputs.Up.Released; }
-	}
-	public bool DownReleased {
-		get { return KeyboardAndMouseInputs.Down.Released; }
-	}
-	public bool RightReleased {
-		get { return KeyboardAndMouseInputs.Right.Released; }
-	}
-	public bool LeftReleased {
-		get { return KeyboardAndMouseInputs.Left.Released; }
-	}
-	public bool Action1Released {
-		get { return KeyboardAndMouseInputs.Action1.Released; }
-	}
-	public bool EscapeReleased {
-		get { return KeyboardAndMouseInputs.Escape.Released; }
-	}
-	public bool SpaceReleased {
-		get { return KeyboardAndMouseInputs.Space.Released; }
-	}
-	public bool ShiftReleased {
-		get { return KeyboardAndMouseInputs.Shift.Released; }
-	}
+	public bool UpReleased => KeyboardAndMouseInputs.Up.Released;
+	
+	public bool DownReleased => KeyboardAndMouseInputs.Down.Released;
+	
+	public bool RightReleased => KeyboardAndMouseInputs.Right.Released;
+	
+	public bool LeftReleased => KeyboardAndMouseInputs.Left.Released;
+	
+	public bool Action1Released => KeyboardAndMouseInputs.Action1.Released;
+
+	public bool Action2Released => KeyboardAndMouseInputs.Action2.Released;
+
+	public bool EscapeReleased => KeyboardAndMouseInputs.Escape.Released;
+	
+	public bool SpaceReleased => KeyboardAndMouseInputs.Space.Released;
+	
+	public bool ShiftReleased => KeyboardAndMouseInputs.Shift.Released;
+	
 
 	// While button held
-	public bool UpHeld {
-		get { return KeyboardAndMouseInputs.Up.Held; }
-	}
-	public bool DownHeld {
-		get { return KeyboardAndMouseInputs.Down.Held; }
-	}
-	public bool RightHeld {
-		get { return KeyboardAndMouseInputs.Right.Held; }
-	}
-	public bool LeftHeld {
-		get { return KeyboardAndMouseInputs.Left.Held; }
-	}
-	public bool Action1Held {
-		get { return KeyboardAndMouseInputs.Action1.Held; }
-	}
-	public bool EscapeHeld {
-		get { return KeyboardAndMouseInputs.Escape.Held; }
-	}
-	public bool SpaceHeld {
-		get { return KeyboardAndMouseInputs.Space.Held; }
-	}
-	public bool ShiftHeld {
-		get { return KeyboardAndMouseInputs.Shift.Held; }
-	}
+	public bool UpHeld => KeyboardAndMouseInputs.Up.Held;
+	
+	public bool DownHeld => KeyboardAndMouseInputs.Down.Held;
+	
+	public bool RightHeld => KeyboardAndMouseInputs.Right.Held;
+	
+	public bool LeftHeld => KeyboardAndMouseInputs.Left.Held;
+	
+	public bool Action1Held => KeyboardAndMouseInputs.Action1.Held;
+	
+	public bool Action2Held => KeyboardAndMouseInputs.Action2.Held;
+	
+	public bool EscapeHeld => KeyboardAndMouseInputs.Escape.Held;
+	
+	public bool SpaceHeld => KeyboardAndMouseInputs.Space.Held;
+	
+	public bool ShiftHeld => KeyboardAndMouseInputs.Shift.Held;
+	
 
 	// While stick held
-	public bool LeftStickHeld {
-		get { return LeftStick.magnitude > 0; }
-	}
-	public bool RightStickHeld {
-		get { return RightStick.magnitude > 0; }
-	}
+	public bool LeftStickHeld => LeftStick.magnitude > 0;
+	
+	public bool RightStickHeld => RightStick.magnitude > 0;
+	
 
 	public Vector2 LeftStick {
 		get {
@@ -395,6 +390,21 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		}
 
 		inAction1HoldCoroutine = false;
+	}
+	IEnumerator Action2HoldCoroutine() {
+		inAction2HoldCoroutine = true;
+
+		float timeHeld = 0;
+		while (Action2Held) {
+			if (OnAction2Held != null) {
+				OnAction2Held(timeHeld);
+			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
+		}
+
+		inAction2HoldCoroutine = false;
 	}
 	IEnumerator EscapeHoldCoroutine() {
 		inEscapeHoldCoroutine = true;

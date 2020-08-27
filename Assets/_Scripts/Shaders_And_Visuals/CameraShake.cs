@@ -3,16 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraShake : Singleton<CameraShake> {
+	public bool DEBUG = false;
 	bool inShakeCoroutine = false;
+
+	float returnToCenterLerpSpeed = 2f;
+	public Vector2 totalOffsetApplied = Vector2.zero;
 
 #if UNITY_EDITOR
 	private void Update() {
-		if (Input.GetKeyDown("c")) {
-			Shake(2, 1, 0);
+		if (DEBUG && Input.GetKeyDown("c")) {
+			if (!inShakeCoroutine) {
+				Shake(2, 1, 0);
+			}
+			else {
+				CancelShake();
+			}
 		}
 
 		if (!inShakeCoroutine) {
-			transform.localPosition = Vector3.Lerp(transform.localPosition, Vector3.zero, Time.deltaTime);
+			if (totalOffsetApplied.magnitude > 0.001f) {
+				Vector2 nextTotalOffsetApplied = Vector2.Lerp(totalOffsetApplied, Vector2.zero, returnToCenterLerpSpeed * Time.deltaTime);
+				Vector2 offset = nextTotalOffsetApplied - totalOffsetApplied;
+				transform.localPosition += new Vector3(offset.x, offset.y, 0);
+				totalOffsetApplied = nextTotalOffsetApplied;
+			}
+			else if (totalOffsetApplied.magnitude > 0f) {
+				transform.localPosition -= new Vector3(totalOffsetApplied.x, totalOffsetApplied.y, 0);
+				totalOffsetApplied = Vector2.zero;
+			}
 		}
 	}
 #endif
@@ -49,11 +67,13 @@ public class CameraShake : Singleton<CameraShake> {
 
 			appliedOffset += offset;
 			transform.localPosition += new Vector3(offset.x, offset.y, 0);
+			totalOffsetApplied += offset;
 
 			timeElapsed += Time.deltaTime;
 			yield return null;
 		}
 		transform.localPosition -= new Vector3(appliedOffset.x, appliedOffset.y, 0);
+		totalOffsetApplied -= appliedOffset;
 
 		inShakeCoroutine = false;
 	}
@@ -72,11 +92,13 @@ public class CameraShake : Singleton<CameraShake> {
 
 			appliedOffset += offset;
 			transform.localPosition += new Vector3(offset.x, offset.y, 0);
+			totalOffsetApplied += offset;
 
 			timeElapsed += Time.deltaTime;
 			yield return null;
 		}
 		transform.localPosition -= new Vector3(appliedOffset.x, appliedOffset.y, 0);
+		totalOffsetApplied -= appliedOffset;
 
 		inShakeCoroutine = false;
 	}

@@ -4,35 +4,91 @@ using UnityEngine;
 using EpitaphUtils;
 using System.Linq;
 using NaughtyAttributes;
+using System;
+using UnityStandardAssets.ImageEffects;
 
 namespace PortalMechanics {
 	public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
+
+		[Serializable]
+		public class CameraSettings {
+			public Vector3 camPosition;
+			public Quaternion camRotation;
+			public Matrix4x4 camProjectionMatrix;
+			[HideInInspector]
+			public EDColors edgeColors;
+		}
+
+		[Serializable]
+		public class RenderTreeNodeInfo {
+			public bool shouldRenderPortal;
+			public int depth;
+			public int renderStep;
+			public Portal portal;
+			public Rect[] portalScreenBounds;
+			public CameraSettings cameraSettings;
+		}
+		public class RenderTreeNode {
+			public RenderTreeNode parent;
+			public List<RenderTreeNode> children;
+			public RenderTreeNodeInfo info;
+			public bool isRoot => parent == null;
+			public bool isLeaf => children == null || children.Count == 0;
+		}
+
+		public class RenderTree {
+			public int depth;
+			public int renderSteps;
+			public RenderTreeNode root;
+		}
+
+		[Serializable]
+		public class RecursiveTextures {
+			public RenderTexture mainTexture;
+			public RenderTexture depthNormalsTexture;
+
+			public static RecursiveTextures CreateTextures() {
+				RecursiveTextures recursiveTextures = new RecursiveTextures {
+					mainTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.ARGB32),
+					depthNormalsTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat)
+				};
+				return recursiveTextures;
+			}
+
+			public void Release() {
+				mainTexture.Release();
+				depthNormalsTexture.Release();
+			}
+		}
+
 		public bool DEBUG = false;
 		DebugLogger debug;
-		Camera portalCamera;
+		public Camera portalCamera;
 		Camera mainCamera;
 
 		BladeEdgeDetection mainCameraEdgeDetection;
 		BladeEdgeDetection portalCameraEdgeDetection;
 
-		public int MaxDepth = 6;
-		public int MaxRenderSteps = 24;
+		public int MaxDepth = 4;
+		public int MaxRenderSteps = 12;
 		public float MaxRenderDistance = 400;
 		public float distanceToStartCheckingPortalBounds = 5f;
 		public float clearSpaceBehindPortal = 0.49f;
 
+		public RenderTreeNode rootRenderTreeNode;
 		int renderSteps;
-		public List<RenderTexture> renderStepTextures;
+		public List<RecursiveTextures> renderStepTextures;
+		public RenderTexture recursiveDepthNormalsTexture;
 
 		[ShowIf("DEBUG")]
 		public List<Portal> portalOrder = new List<Portal>();
 		[ShowIf("DEBUG")]
-		public List<RenderTexture> finishedTex = new List<RenderTexture>();
+		public List<RecursiveTextures> finishedTex = new List<RecursiveTextures>();
 
 		private static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
 		// Container for memoizing edge detection color state
-		private struct EDColors {
+		public struct EDColors {
 			public BladeEdgeDetection.EdgeColorMode edgeColorMode;
 			public Color edgeColor;
 			public Gradient edgeColorGradient;
@@ -69,14 +125,114 @@ namespace PortalMechanics {
 			portalCameraEdgeDetection = GetComponent<BladeEdgeDetection>();
 
 			EpitaphScreen.instance.OnPlayerCamPreRender += RenderPortals;
+			//EpitaphScreen.instance.OnPlayerCamPreRender += RenderPortals2;
 			EpitaphScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
 
-			renderStepTextures = new List<RenderTexture>();
+			renderStepTextures = new List<RecursiveTextures>();
+			recursiveDepthNormalsTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat);
 		}
 
 		void ClearRenderTextures() {
 			renderStepTextures.ForEach(rt => rt.Release());
 			renderStepTextures.Clear();
+			recursiveDepthNormalsTexture.Release();
+		}
+
+		void RenderPortals2() {
+			RenderTree renderTree = BuildRenderTree();
+
+			Debug.Log(renderTree);
+
+			while (renderStepTextures.Count < renderTree.renderSteps) {
+				renderStepTextures.Add(RecursiveTextures.CreateTextures());
+			}
+
+			RenderPortalDepthNormals(renderTree);
+			RenderPortalMaterials(renderTree);
+			//RenderPortalDepthNormals(renderTree);
+		}
+
+		void RenderPortalMaterials(RenderTree tree) {
+			RenderPortalMaterialsRecursively(tree.root);
+		}
+
+		RecursiveTextures RenderPortalMaterialsRecursively(RenderTreeNode renderNode) {
+			Dictionary<RenderTreeNode, RecursiveTextures> textureState = new Dictionary<RenderTreeNode, RecursiveTextures>();
+			foreach (var child in renderNode.children) {
+				if (child.info.shouldRenderPortal) {
+					// Remember texture result to restore to portal material before this render step
+					textureState[child] = RenderPortalMaterialsRecursively(child);
+				}
+				else {
+					child.info.portal.DefaultMaterial();
+				}
+			}
+
+			if (renderNode.isRoot) return null;
+			SetCameraSettings(portalCamera, renderNode.info.cameraSettings);
+			// Restore state for each visible portal
+			foreach (var child in renderNode.children) {
+				if (child.info.shouldRenderPortal) {
+					child.info.portal.SetTexture(textureState[child].mainTexture);
+				}
+				else {
+					child.info.portal.DefaultMaterial();
+				}
+			}
+
+			portalCamera.targetTexture = renderStepTextures[renderNode.info.renderStep].mainTexture;
+
+			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+			Shader.SetGlobalTexture("_PortalMask", MaskBufferRenderTextures.instance.portalMaskTexture);
+			portalCamera.Render();
+
+			renderNode.info.portal.SetTexture(renderStepTextures[renderNode.info.renderStep].mainTexture);
+			return renderStepTextures[renderNode.info.renderStep];
+		}
+
+		void RenderPortalDepthNormals(RenderTree tree) {
+			RenderPortalDepthNormalsRecursively(tree.root);
+
+			SetCameraSettings(portalCamera, tree.root.info.cameraSettings);
+			portalCamera.targetTexture = recursiveDepthNormalsTexture;
+
+			// TODO: Don't find the shader every time
+			portalCamera.RenderWithShader(Shader.Find("Custom/CustomDepthNormalsTexture"), "RenderType");
+
+			Shader.SetGlobalTexture("_CameraDepthNormalsTexture", recursiveDepthNormalsTexture);
+		}
+
+		RecursiveTextures RenderPortalDepthNormalsRecursively(RenderTreeNode renderNode) {
+			Dictionary<RenderTreeNode, RecursiveTextures> textureState = new Dictionary<RenderTreeNode, RecursiveTextures>();
+			foreach (var child in renderNode.children) {
+				if (child.info.shouldRenderPortal) {
+					// Remember texture result to restore to portal material before this render step
+					textureState[child] = RenderPortalDepthNormalsRecursively(child);
+				}
+				else {
+					child.info.portal.DefaultMaterial();
+				}
+			}
+
+			if (renderNode.isRoot) return null;
+			SetCameraSettings(portalCamera, renderNode.info.cameraSettings);
+			// Restore state for each visible portal
+			foreach (var child in renderNode.children) {
+				if (child.info.shouldRenderPortal) {
+					child.info.portal.SetDepthNormalsTexture(textureState[child].depthNormalsTexture);
+				}
+				else {
+					child.info.portal.DefaultMaterial();
+				}
+			}
+
+			portalCamera.targetTexture = renderStepTextures[renderNode.info.renderStep].depthNormalsTexture;
+			// TODO: Don't find the shader every time
+			portalCamera.RenderWithShader(Shader.Find("Custom/CustomDepthNormalsTexture"), "RenderType");
+
+			renderNode.info.portal.SetDepthNormalsTexture(renderStepTextures[renderNode.info.renderStep].depthNormalsTexture);
+			//Shader.SetGlobalTexture("_CameraDepthNormalsTexture", renderStepTextures[renderNode.info.renderStep].depthNormalsTexture);
+			return renderStepTextures[renderNode.info.renderStep];
 		}
 
 		/// <summary>
@@ -84,7 +240,7 @@ namespace PortalMechanics {
 		/// </summary>
 		void RenderPortals() {
 			List<Portal> allActivePortals = PortalManager.instance.activePortals;
-			Dictionary<Portal, RenderTexture> finishedPortalTextures = new Dictionary<Portal, RenderTexture>();
+			Dictionary<Portal, RecursiveTextures> finishedPortalTextures = new Dictionary<Portal, RecursiveTextures>();
 
 			Vector3 camPosition = mainCamera.transform.position;
 			Quaternion camRotation = mainCamera.transform.rotation;
@@ -108,8 +264,9 @@ namespace PortalMechanics {
 				// Assumes an 8x8 portal is average size
 				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds * portalSurfaceArea/64f) ? p.GetScreenRects(mainCamera) : fullScreenRect;
 
+				bool portalRenderingIsPaused = p.pauseRenderingAndLogic || p.pauseRenderingOnly;
 				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
-				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
+				if ((PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) && !portalRenderingIsPaused) {
 					SetCameraSettings(portalCamera, camPosition, camRotation, camProjectionMatrix, edgeColors);
 
 					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.name);
@@ -122,7 +279,7 @@ namespace PortalMechanics {
 			}
 
 			foreach (var finishedPortalTexture in finishedPortalTextures) {
-				finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value);
+				finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value.mainTexture);
 			}
 
 			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
@@ -132,7 +289,7 @@ namespace PortalMechanics {
 			debug.LogError("End of frame: renderSteps: " + renderSteps);
 		}
 
-		RenderTexture RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, string tree) {
+		RecursiveTextures RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, string tree) {
 			if (depth == MaxDepth || renderSteps >= MaxRenderSteps) return null;
 
 			var index = renderSteps;
@@ -153,7 +310,7 @@ namespace PortalMechanics {
 
 			debug.Log("Depth (Index): " + depth + " (" + index + ")\nPortal: " + portal.name + "\nNumVisible: " + visiblePortals.Count + "\nPortalCamPos: " + portalCamera.transform.position + "\nTree: " + tree + "\nScreenBounds: " + string.Join(", ", portalScreenBounds));
 
-			Dictionary<Portal, RenderTexture> visiblePortalTextures = new Dictionary<Portal, RenderTexture>();
+			Dictionary<Portal, RecursiveTextures> visiblePortalTextures = new Dictionary<Portal, RecursiveTextures>();
 			foreach (var visiblePortalTuple in visiblePortals) {
 				Portal visiblePortal = visiblePortalTuple.Key;
 
@@ -179,7 +336,8 @@ namespace PortalMechanics {
 
 				if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
 					// Restore the RenderTextures that were in use at this stage
-					visiblePortal.SetTexture(visiblePortalTextures[visiblePortalKeyVal.Key]);
+					visiblePortal.SetTexture(visiblePortalTextures[visiblePortalKeyVal.Key].mainTexture);
+					visiblePortal.SetDepthNormalsTexture(visiblePortalTextures[visiblePortalKeyVal.Key].depthNormalsTexture);
 				}
 				else {
 					visiblePortal.DefaultMaterial();
@@ -188,22 +346,180 @@ namespace PortalMechanics {
 			SetCameraSettings(portalCamera, modifiedCamPosition, modifiedCamRotation, modifiedCamProjectionMatrix, edgeColors);
 
 			while (renderStepTextures.Count <= index) {
-				renderStepTextures.Add(new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.ARGB32));
+				renderStepTextures.Add(RecursiveTextures.CreateTextures());
 			}
 
+			portalCamera.targetTexture = renderStepTextures[index].depthNormalsTexture;
+			// TODO: Don't find the shader every time
+			portalCamera.GetComponent<BloomOptimized>().enabled = false;
+			portalCamera.GetComponent<ColorfulFog>().enabled = false;
+			portalCamera.GetComponent<BladeEdgeDetection>().enabled = false;
+			portalCamera.RenderWithShader(Shader.Find("Custom/CustomDepthNormalsTexture"), "RenderType");
+			portal.SetDepthNormalsTexture(renderStepTextures[index].depthNormalsTexture);
+
 			debug.Log("Rendering: " + index + " to " + portal.name + "'s RenderTexture, depth: " + depth);
-			portalCamera.targetTexture = renderStepTextures[index];
+			portalCamera.GetComponent<BloomOptimized>().enabled = true;
+			portalCamera.GetComponent<ColorfulFog>().enabled = true;
+			portalCamera.GetComponent<BladeEdgeDetection>().enabled = true;
+			portalCamera.targetTexture = renderStepTextures[index].mainTexture;
 
 			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
 			Shader.SetGlobalTexture("_PortalMask", MaskBufferRenderTextures.instance.portalMaskTexture);
 			portalCamera.Render();
 
-			portal.SetTexture(renderStepTextures[index]);
+			portal.SetTexture(renderStepTextures[index].mainTexture);
 			return renderStepTextures[index];
 		}
 
-		private bool ShouldRenderRecursively(int depth, Portal portal, Portal visiblePortal) {
-			return depth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && portal.renderRecursivePortals;
+		int renderStepsThisFrame;
+		int depthThisFrame;
+		private RenderTree BuildRenderTree() {
+			RenderTree tree = new RenderTree();
+
+			renderStepsThisFrame = 0;
+			depthThisFrame = -1;
+			RenderTreeNode root = new RenderTreeNode();
+			RenderTreeNodeInfo info = new RenderTreeNodeInfo();
+			CameraSettings camSettings = new CameraSettings();
+			camSettings.camPosition = mainCamera.transform.position;
+			camSettings.camRotation = mainCamera.transform.rotation;
+			camSettings.camProjectionMatrix = mainCamera.projectionMatrix;
+			camSettings.edgeColors = new EDColors(mainCameraEdgeDetection);
+
+			info.shouldRenderPortal = false;
+			info.depth = -1;
+			info.renderStep = -1;
+			info.portal = null;
+			info.portalScreenBounds = fullScreenRect;
+			info.cameraSettings = camSettings;
+
+			root.info = info;
+
+			tree.root = BuildRenderTreeRecursively(root);
+			tree.renderSteps = renderStepsThisFrame;
+			tree.depth = depthThisFrame;
+
+			SetCameraSettings(portalCamera, camSettings);
+
+			return tree;
+		}
+
+		private RenderTreeNode BuildRenderTreeRecursively(RenderTreeNode parent) {
+			depthThisFrame = Mathf.Max(parent.info.depth, depthThisFrame);
+
+			// Base case: At max depth or max render steps already
+			if (parent.info.depth == MaxDepth || renderStepsThisFrame >= MaxRenderSteps) {
+				parent.children = new List<RenderTreeNode>();
+				return parent;
+			}
+
+			Dictionary<Portal, Rect[]> visiblePortals;
+			if (parent.isRoot) {
+				RenderTreeNode root = parent;
+				visiblePortals = GetVisiblePortalsAndTheirScreenBoundsFromMainCamera();
+
+				parent.children = new List<RenderTreeNode>();
+				foreach (var visiblePortal in visiblePortals) {
+					SetCameraSettings(portalCamera, parent.info.cameraSettings);
+
+					Portal p = visiblePortal.Key;
+					Rect[] screenBounds = visiblePortal.Value;
+
+					// Move the portal camera behind the parent portal and see what portals are visible from here
+					SetupPortalCameraForPortal(p, p.otherPortal, parent.info.depth+1);
+					CameraSettings cameraBehindPortal = new CameraSettings();
+					cameraBehindPortal.camPosition = portalCamera.transform.position;
+					cameraBehindPortal.camRotation = portalCamera.transform.rotation;
+					cameraBehindPortal.camProjectionMatrix = portalCamera.projectionMatrix;
+					cameraBehindPortal.edgeColors = new EDColors(portalCameraEdgeDetection);
+
+					RenderTreeNode child = new RenderTreeNode();
+					RenderTreeNodeInfo childInfo = new RenderTreeNodeInfo();
+					CameraSettings childCamSettings = cameraBehindPortal;
+
+					// Remember which portals should not be rendered so we can change the material to invisible before rendering them
+					childInfo.shouldRenderPortal = ShouldRenderRecursively(parent.info.depth, parent.info.portal, p);
+					childInfo.depth = 0;
+					childInfo.renderStep = ++renderStepsThisFrame - 1;
+					childInfo.portal = p;
+					childInfo.portalScreenBounds = screenBounds;
+					childInfo.cameraSettings = childCamSettings;
+
+					child.info = childInfo;
+					child.parent = root;
+
+					parent.children.Add(BuildRenderTreeRecursively(child));
+
+					// If we've run out of render steps, stop trying to add portals to the tree
+					if (renderSteps >= MaxRenderSteps) break;
+				}
+			}
+			else {
+				visiblePortals = GetVisiblePortalsAndTheirScreenBounds(parent.info.portal, parent.info.portalScreenBounds);
+
+				parent.children = new List<RenderTreeNode>();
+				foreach (var visiblePortal in visiblePortals) {
+					SetCameraSettings(portalCamera, parent.info.cameraSettings);
+
+					Portal p = visiblePortal.Key;
+					Rect[] screenBounds = visiblePortal.Value;
+
+					// Move the portal camera behind the portal and see what portals are visible from here
+					SetupPortalCameraForPortal(p, p.otherPortal, parent.info.depth);
+					CameraSettings cameraBehindPortal = new CameraSettings();
+					cameraBehindPortal.camPosition = portalCamera.transform.position;
+					cameraBehindPortal.camRotation = portalCamera.transform.rotation;
+					cameraBehindPortal.camProjectionMatrix = portalCamera.projectionMatrix;
+					cameraBehindPortal.edgeColors = new EDColors(portalCameraEdgeDetection);
+
+					RenderTreeNode child = new RenderTreeNode();
+					RenderTreeNodeInfo childInfo = new RenderTreeNodeInfo();
+					CameraSettings childCamSettings = cameraBehindPortal;
+
+					// Remember which portals should not be rendered so we can change the material to invisible before rendering them
+					childInfo.shouldRenderPortal = ShouldRenderRecursively(parent.info.depth, parent.info.portal, p);
+					childInfo.depth = parent.info.depth + 1;
+					childInfo.renderStep = ++renderStepsThisFrame - 1;
+					childInfo.portal = p;
+					childInfo.portalScreenBounds = screenBounds;
+					childInfo.cameraSettings = childCamSettings;
+
+					child.info = childInfo;
+					child.parent = parent;
+
+					parent.children.Add(BuildRenderTreeRecursively(child));
+
+					// If we've run out of render steps, stop trying to add portals to the tree
+					if (renderSteps >= MaxRenderSteps) break;
+				}
+			}
+			return parent;
+		}
+
+		private Dictionary<Portal, Rect[]> GetVisiblePortalsAndTheirScreenBoundsFromMainCamera() {
+			Dictionary<Portal, Rect[]> portalsVisibleFromMainCamera = new Dictionary<Portal, Rect[]>();
+			foreach (var p in PortalManager.instance.activePortals) {
+				if (!p.portalIsEnabled || p.pauseRenderingOnly) continue;
+
+				float portalSurfaceArea = GetPortalSurfaceArea(p);
+				float distanceFromPortalToCam = Vector3.Distance(mainCamera.transform.position, p.ClosestPoint(mainCamera.transform.position));
+				// Assumes an 8x8 portal is average size
+				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds * portalSurfaceArea / 64f) ? p.GetScreenRects(mainCamera) : fullScreenRect;
+				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds)) {
+					portalsVisibleFromMainCamera.Add(p, portalScreenBounds);
+				}
+			}
+
+			return portalsVisibleFromMainCamera;
+		}
+
+		private bool ShouldRenderRecursively(int parentDepth, Portal parentPortal, Portal visiblePortal) {
+			bool parentRendersRecursively = true;
+			if (parentPortal != null) {
+				parentRendersRecursively = parentPortal.renderRecursivePortals;
+			}
+			bool pausedRendering = visiblePortal.pauseRenderingAndLogic || visiblePortal.pauseRenderingOnly;
+			return parentDepth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && parentRendersRecursively && !pausedRendering;
 		}
 
 		private bool IsWithinRenderDistance(Portal portal, Camera camera) {
@@ -223,6 +539,8 @@ namespace PortalMechanics {
 				if (p == portal.otherPortal) continue;
 				// Ignore disabled portals
 				if (!p.portalIsEnabled) continue;
+				// Don't render through paused rendering portals
+				if (p.pauseRenderingOnly) continue;
 
 				Rect[] testPortalBounds = p.GetScreenRects(portalCamera);
 				if (PortalIsSeenByCamera(p, portalCamera, portalScreenBounds, testPortalBounds)) {
@@ -238,6 +556,10 @@ namespace PortalMechanics {
 			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
 			bool isFacingCamera = Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
 			return isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera;
+		}
+
+		void SetCameraSettings(Camera cam, CameraSettings settings) {
+			SetCameraSettings(cam, settings.camPosition, settings.camRotation, settings.camProjectionMatrix, settings.edgeColors);
 		}
 
 		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix, EDColors edgeColors) {
@@ -268,18 +590,11 @@ namespace PortalMechanics {
 		}
 
 		void SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
-			Transform inTransform = inPortal.transform;
-			Transform outTransform = outPortal.transform;
-
 			// Position the camera behind the other portal.
-			Vector3 relativePos = inTransform.InverseTransformPoint(portalCamera.transform.position);
-			relativePos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativePos;
-			portalCamera.transform.position = outTransform.TransformPoint(relativePos);
+			portalCamera.transform.position = inPortal.TransformPoint(portalCamera.transform.position);
 
 			// Rotate the camera to look through the other portal.
-			Quaternion relativeRot = Quaternion.Inverse(inTransform.rotation) * portalCamera.transform.rotation;
-			relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
-			portalCamera.transform.rotation = outTransform.rotation * relativeRot;
+			portalCamera.transform.rotation = inPortal.TransformRotation(portalCamera.transform.rotation);
 
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal

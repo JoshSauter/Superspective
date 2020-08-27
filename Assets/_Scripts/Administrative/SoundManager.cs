@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using EpitaphUtils;
 
 public enum SoundType {
 	EffectAtLocation,
@@ -38,7 +39,13 @@ public class SoundSettings {
 	public float maxDistance = 500f;
 }
 public class SoundManager : Singleton<SoundManager> {
+	public bool DEBUG = false;
+	DebugLogger debug;
 	Dictionary<string, AudioSource> knownAudioSources;
+
+	private void Awake() {
+		debug = new DebugLogger(gameObject, () => DEBUG);
+	}
 
 	//public AudioSource GetAvailableAudioSource() {
 	//	if (availableAudioSources.Count > 0) {
@@ -63,6 +70,7 @@ public class SoundManager : Singleton<SoundManager> {
 			knownAudioSources[soundName] = audioSource;
 		}
 		if (!audioSource.isPlaying || forcePlay) {
+			debug.Log($"Playing {soundName} (forced:{forcePlay})");
 			StartCoroutine(PlayAudio(soundName, audioSource, soundSettings));
 		}
 	}

@@ -118,13 +118,9 @@ public class PortalCopy : MonoBehaviour {
 
     private void TransformCopy(Portal inPortal) {
         // Position
-        Vector3 relativeObjPos = inPortal.transform.InverseTransformPoint(original.transform.position);
-        relativeObjPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeObjPos;
-        transform.position = inPortal.otherPortal.transform.TransformPoint(relativeObjPos);
+        transform.position = inPortal.TransformPoint(original.transform.position);
 
         // Rotation
-        Quaternion relativeRot = Quaternion.Inverse(inPortal.transform.rotation) * original.transform.rotation;
-        relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
-        transform.rotation = inPortal.otherPortal.transform.rotation * relativeRot;
+        transform.rotation = inPortal.TransformRotation(original.transform.rotation);
     }
 }

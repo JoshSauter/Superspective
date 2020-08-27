@@ -58,7 +58,7 @@ Material:
     - _SketchTex:
         m_Texture: {fileID: 2800000, guid: 38ede315f46b0427cb797696f8df43f1, type: 3}
         m_Scale: {x: 0.4, y: 0.4}
-        m_Offset: {x: 0.31330633, y: 0.30085436}
+        m_Offset: {x: 0.20257683, y: 0.2123141}
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -80,3 +80,4 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

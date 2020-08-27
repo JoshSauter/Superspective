@@ -61,6 +61,7 @@ public class BladeEdgeDetection : MonoBehaviour {
 		frustumCornersOrdered = new Vector4[4];
 	}
 	
+	[ImageEffectOpaque]
 	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (shaderMaterial == null && !CreateMaterial()) {
 			Debug.LogError("Failed to create shader material!");

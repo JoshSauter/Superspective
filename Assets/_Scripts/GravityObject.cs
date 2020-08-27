@@ -21,9 +21,7 @@ public class GravityObject : MonoBehaviour {
     }
 
 	public void ReorientGravityAfterPortaling(Portal inPortal) {
-		Vector3 relativeGravity = inPortal.transform.InverseTransformDirection(gravityDirection);
-		relativeGravity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeGravity;
-		gravityDirection = inPortal.otherPortal.transform.TransformDirection(relativeGravity);
+		gravityDirection = inPortal.TransformDirection(gravityDirection);
 	}
 
 	private void FixedUpdate() {

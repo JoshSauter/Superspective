@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using EpitaphUtils;
-using Boo.Lang.Runtime;
 using NaughtyAttributes;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -42,6 +41,7 @@ public enum Level {
 public class LevelManager : Singleton<LevelManager> {
 	public bool DEBUG = false;
 	public DebugLogger debug;
+	[OnValueChanged("LoadDefaultPlayerPosition")]
 	public Level startingScene;
 
 #region PlayerDefaultLocations
@@ -126,7 +126,7 @@ public class LevelManager : Singleton<LevelManager> {
 			returnVector.x = PlayerPrefs.GetFloat(xKey);
 		}
 		else {
-			throw new RuntimeException($"No PlayerPrefs key for {key}");
+			throw new ArgumentException($"No PlayerPrefs key for {key}");
 		}
 
 		// Y
@@ -134,7 +134,7 @@ public class LevelManager : Singleton<LevelManager> {
 			returnVector.y = PlayerPrefs.GetFloat(yKey);
 		}
 		else {
-			throw new RuntimeException($"No PlayerPrefs key for {key}");
+			throw new ArgumentException($"No PlayerPrefs key for {key}");
 		}
 
 		// Z
@@ -142,7 +142,7 @@ public class LevelManager : Singleton<LevelManager> {
 			returnVector.z = PlayerPrefs.GetFloat(zKey);
 		}
 		else {
-			throw new RuntimeException($"No PlayerPrefs key for {key}");
+			throw new ArgumentException($"No PlayerPrefs key for {key}");
 		}
 
 		return returnVector;

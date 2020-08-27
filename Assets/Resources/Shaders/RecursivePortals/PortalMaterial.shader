@@ -1,18 +1,15 @@
 ﻿Shader "Portals/PortalMaterial" {
     Properties {
 		_MainTex("Main Texture", 2D) = "white" {}
+		_DepthNormals("Depth Normals Texture", 2D) = "white" {}
     }
     SubShader {
 		Tags  { 
-			"RenderType" = "Transparent" "Queue" = "Transparent" "PortalTag" = "True"
+			"RenderType" = "PortalMaterial" "Queue" = "Geometry" "PortalTag" = "True"
 		}
 
         Pass {
-			ZWrite Off
-			Stencil {
-				Ref 1
-				Pass replace
-			}
+			ZWrite On
 
 			CGPROGRAM
 				#pragma vertex vert
@@ -37,6 +34,7 @@
 				}
 
 				uniform sampler2D _MainTex;
+				uniform sampler2D _DepthNormals;
 
 				fixed4 frag(v2f i) : SV_Target {
 					float2 uv = i.screenPos.xy / i.screenPos.w;

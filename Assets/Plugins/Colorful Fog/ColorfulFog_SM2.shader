@@ -16,6 +16,7 @@ Shader "Hidden/JG/ColorfulFog"
 	uniform sampler2D_float _CameraDepthTexture;
 	uniform sampler2D _CameraDepthNormalsTexture;
 	uniform sampler2D_float _CustomDepthTexture;
+	uniform sampler2D _PortalMask;
 	int _SkyboxFog;
 	samplerCUBE _Cube;
 	sampler2D _Gradient;
@@ -177,6 +178,16 @@ Shader "Hidden/JG/ColorfulFog"
 			//dpth = Linear01Depth(rawDepth);
 		}
 		//return dpth;
+		float portalMaskSample = tex2D(_PortalMask, i.uv_depth);
+		float portalDepthValue;
+		float3 portalNormalValue;
+		DecodeDepthNormal(portalMaskSample, portalDepthValue, portalNormalValue);
+
+		half sampleIsBehindPortal = rawDepth > portalDepthValue-0.00373 && portalDepthValue < 1;
+		if (sampleIsBehindPortal) {
+			return sceneColor;
+		}
+
 		float4 wsDir = dpth * i.interpolatedRay;
 		float4 wsPos = _CameraWS + wsDir;
 

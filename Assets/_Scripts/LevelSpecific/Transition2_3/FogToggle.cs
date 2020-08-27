@@ -17,14 +17,14 @@ public class FogToggle : MonoBehaviour {
 	private void Start() {
 		fog = Camera.main.GetComponent<GlobalFog>();
 
-		trigger.OnMagicTriggerStayOneTime += ToggleForward;
-		trigger.OnNegativeMagicTriggerStayOneTime += ToggleBackward;
+		trigger.OnMagicTriggerStayOneTime += (ctx) => ToggleForward();
+		trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ToggleBackward();
 	}
 
-	void ToggleForward(Collider c) {
+	void ToggleForward() {
 		fog.enabled = !disableFog;
 	}
-	void ToggleBackward(Collider c) {
+	void ToggleBackward() {
 		fog.enabled = disableFog;
 	}
 }

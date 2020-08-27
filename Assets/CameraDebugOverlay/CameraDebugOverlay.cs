@@ -20,7 +20,7 @@ public class CameraDebugOverlay : MonoBehaviour {
 	}
 	public DebugMode debugMode = DebugMode.off;
 
-	private const int NUM_MODES = 5;
+	private const int NUM_MODES = (int)DebugMode.off + 1;
 	int mode {
 		get {
 			return (int)debugMode;

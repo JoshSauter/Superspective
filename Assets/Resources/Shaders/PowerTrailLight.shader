@@ -11,7 +11,7 @@
     SubShader {
 		Tags { "RenderType"="Opaque" }
 	    CGPROGRAM
-	    #pragma surface surf Standard fullforwardshadows
+	    #pragma surface surf NoLighting fullforwardshadows
 		
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -63,16 +63,13 @@
             return minValue;
 		}
 
-        void surf (Input IN, inout SurfaceOutputStandard o) {
+        void surf (Input IN, inout SurfaceOutput o) {
             // DEBUG
             //float test = worldSdf(IN.worldPos);
             // ENDDEBUG
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
-            // Metallic and smoothness come from slider variables
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
             o.Alpha = c.a;
             // Only turn on emission if worldSDF <= 0
             float emissionEnabled = step(worldSdf(IN.worldPos), 0);
@@ -80,6 +77,10 @@
                 emissionEnabled = 1 - emissionEnabled;     
 			}
 		    o.Emission = _EmissionColor * emissionEnabled;
+        }
+
+        fixed4 LightingNoLighting(SurfaceOutput s, fixed3 lightDir, fixed atten) {
+            return fixed4(s.Albedo, s.Alpha);
         }
         ENDCG
     }

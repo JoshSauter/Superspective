@@ -35,8 +35,8 @@ public class CameraFollow : MonoBehaviour {
 		worldPositionLastFrame = transform.position;
 		TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
 		Portal.OnAnyPortalTeleportSimple += (obj) => { if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame(); };
-		Player.instance.look.OnViewLockBegin += HandleViewLockBegin;
-		Player.instance.look.OnViewUnlockEnd += HandleViewUnlockEnd;
+		Player.instance.look.OnViewLockEnterBegin += HandleViewLockBegin;
+		Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
 	}
 
 	void LateUpdate() {

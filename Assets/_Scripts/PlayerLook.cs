@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using UnityEditor;
 
 public class PlayerLook : Singleton<PlayerLook> {
 	public bool DEBUG = false;
 	DebugLogger debug;
 	UnityEngine.Transform playerTransform;
-    public UnityEngine.Transform cameraTransform;
-	Vector3 cameraInitialLocalPos;
+    public Transform cameraContainerTransform;
+	public Vector3 cameraInitialLocalPos;
 	[Range(0.01f,1)]
 	public float generalSensitivity = 0.3f;
 	[Range(0.01f,1)]
@@ -24,10 +25,10 @@ public class PlayerLook : Singleton<PlayerLook> {
 
 	public ViewLockObject viewLockedObject;
 	public delegate void ViewLockAction();
-	public event ViewLockAction OnViewLockBegin;
-	public event ViewLockAction OnViewLockEnd;
-	public event ViewLockAction OnViewUnlockBegin;
-	public event ViewLockAction OnViewUnlockEnd;
+	public event ViewLockAction OnViewLockEnterBegin;
+	public event ViewLockAction OnViewLockEnterFinish;
+	public event ViewLockAction OnViewLockExitBegin;
+	public event ViewLockAction OnViewLockExitFinish;
 
 	public bool frozen = false;
 
@@ -45,8 +46,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 		debug = new DebugLogger(this, () => DEBUG);
 
         playerTransform = gameObject.transform;
-        cameraTransform = playerTransform.GetChild(0);
-		cameraInitialLocalPos = cameraTransform.localPosition;
+        cameraContainerTransform = playerTransform.GetChild(0);
+		cameraInitialLocalPos = cameraContainerTransform.localPosition;
 
 		//print(cameraTransform.rotation.x + ", " + cameraTransform.rotation.y + ", " + cameraTransform.rotation.z + ", " + cameraTransform.rotation.w);
 		//print(cameraTransform.position.x + ", " + cameraTransform.position.y + ", " + cameraTransform.position.z);
@@ -76,13 +77,21 @@ public class PlayerLook : Singleton<PlayerLook> {
 
 	private void Look(Vector2 lookDirection) {
 		LookHorizontal(lookDirection.x * lookAmountMultiplier * generalSensitivity * sensitivityX * outsideMultiplier);
-		rotationY += lookDirection.y * lookAmountMultiplier * generalSensitivity * sensitivityY * outsideMultiplier;
-		rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
+		float diffY = lookDirection.y * lookAmountMultiplier * generalSensitivity * sensitivityY * outsideMultiplier;
+		// If we've been set to above the yClamp by something else, only allow movement back towards the clamp window
+		if (Mathf.Abs(rotationY) > yClamp) {
+			rotationY = Mathf.Sign(rotationY) * Mathf.Min(Mathf.Abs(rotationY + diffY), Mathf.Abs(rotationY));
+		}
+		else {
+			rotationY += diffY;
+			rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
+		}
+
 		LookVertical(rotationY);
 	}
 
     private void LookVertical(float rotation) {
-        cameraTransform.localEulerAngles = new Vector3(-rotation, cameraTransform.localEulerAngles.y, cameraTransform.localEulerAngles.z);
+        cameraContainerTransform.localEulerAngles = new Vector3(-rotation, cameraContainerTransform.localEulerAngles.y, cameraContainerTransform.localEulerAngles.z);
     }
 
     private void LookHorizontal(float rotation) {
@@ -114,19 +123,20 @@ public class PlayerLook : Singleton<PlayerLook> {
 	}
 
 	bool inLockViewCoroutine = false;
-	Quaternion rotationBeforeViewLock;
+	public Quaternion rotationBeforeViewLock;
 	IEnumerator LockView(ViewLockObject lockObject, ViewLockInfo lockInfo) {
 		debug.Log("Locking view for " + lockObject.gameObject.name);
 		viewLockedObject = lockObject;
 		PlayerMovement.instance.StopMovement();
+		Player.instance.cameraFollow.enabled = false;
+		EpitaphScreen.instance.playerCamera.transform.localPosition = Vector3.zero;
 		Interact.instance.enabled = false;
 		inLockViewCoroutine = true;
-		if (OnViewLockBegin != null) {
-			OnViewLockBegin();
-		}
+		OnViewLockEnterBegin?.Invoke();
+		viewLockedObject.OnViewLockEnterBegin?.Invoke();
 
-		Vector3 startPos = cameraTransform.position;
-		Quaternion startRot = cameraTransform.rotation;
+		Vector3 startPos = cameraContainerTransform.position;
+		Quaternion startRot = cameraContainerTransform.rotation;
 		Vector3 endPos = lockObject.transform.TransformPoint(lockInfo.camPosition);
 		Quaternion endRot = lockObject.transform.rotation * Quaternion.Euler(lockInfo.camRotationEuler);
 		rotationBeforeViewLock = startRot;
@@ -136,14 +146,15 @@ public class PlayerLook : Singleton<PlayerLook> {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / lockObject.viewLockTime;
 
-			cameraTransform.position = Vector3.Lerp(startPos, endPos, t);
-			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
+			cameraContainerTransform.position = Vector3.Lerp(startPos, endPos, t);
+			cameraContainerTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
 
 			yield return null;
 		}
 
-		cameraTransform.position = endPos;
-		cameraTransform.rotation = endRot;
+		Debug.Log($"EndPos: {endPos:F3}");
+		cameraContainerTransform.position = endPos;
+		cameraContainerTransform.rotation = endRot;
 
 		inLockViewCoroutine = false;
 		lockObject.focusIsLocked = true;
@@ -151,9 +162,8 @@ public class PlayerLook : Singleton<PlayerLook> {
 		//Going directly from Locked to Confined does not work
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.lockState = CursorLockMode.Confined;
-		if (OnViewLockEnd != null) {
-			OnViewLockEnd();
-		}
+		OnViewLockEnterFinish?.Invoke();
+		viewLockedObject.OnViewLockEnterFinish?.Invoke();
 		debug.Log("Finished locking view for " + lockObject.gameObject.name);
 	}
 
@@ -162,24 +172,24 @@ public class PlayerLook : Singleton<PlayerLook> {
 		inUnlockViewCoroutine = true;
 		Interact.instance.enabled = false;
 		debug.Log("Unlocking view");
-		if (OnViewUnlockBegin != null) {
-			OnViewUnlockBegin();
-		}
+		OnViewLockExitBegin?.Invoke();
+		viewLockedObject.OnViewLockExitBegin?.Invoke();
 
-		Vector3 startPos = cameraTransform.position;
-		Quaternion startRot = cameraTransform.rotation;
-		Quaternion endRot = rotationBeforeViewLock;
+		Vector3 startPos = cameraContainerTransform.position;
+		Quaternion startRot = cameraContainerTransform.rotation;
 
 		Vector2 reticleStartPos = Reticle.instance.thisTransformPos;
 		Vector2 reticleEndPos = Vector2.one / 2f;
+
+		yield return null;
 
 		float timeElapsed = 0;
 		while (timeElapsed < viewLockedObject.viewUnlockTime) {
 			timeElapsed += Time.deltaTime;
 			float t = timeElapsed / viewLockedObject.viewUnlockTime;
 
-			cameraTransform.position = Vector3.Lerp(startPos, playerTransform.TransformPoint(cameraInitialLocalPos), t);
-			cameraTransform.rotation = Quaternion.Lerp(startRot, endRot, t*t);
+			cameraContainerTransform.position = Vector3.Lerp(startPos, playerTransform.TransformPoint(cameraInitialLocalPos), t);
+			cameraContainerTransform.rotation = Quaternion.Lerp(startRot, rotationBeforeViewLock, t*t);
 
 			Reticle.instance.MoveReticle(Vector2.Lerp(reticleStartPos, reticleEndPos, t));
 
@@ -189,14 +199,16 @@ public class PlayerLook : Singleton<PlayerLook> {
 		Reticle.instance.MoveReticle(reticleEndPos);
 
 		viewLockedObject.hitbox.enabled = true;
+		ViewLockObject temp = viewLockedObject;
 		viewLockedObject = null;
 		inUnlockViewCoroutine = false;
 		PlayerMovement.instance.ResumeMovement();
+		Player.instance.cameraFollow.enabled = true;
 		Interact.instance.enabled = true;
 		Cursor.lockState = CursorLockMode.Locked;
-		if (OnViewUnlockEnd != null) {
-			OnViewUnlockEnd();
-		}
+		OnViewLockExitFinish?.Invoke();
+		temp.OnViewLockExitFinish?.Invoke();
+
 		debug.Log("Finished unlocking view");
 	}
 }

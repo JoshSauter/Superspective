@@ -15,16 +15,19 @@ public struct SerializableNode {
 	public int indexOfParent;
 	public int childCount;
 	public int indexOfFirstChild;
+	public bool zeroDistanceToChildren;
 }
 public class Node {
 	private const float distanceToSpawnNewNodeAt = 0.5f;
 	public Node parent;
 	public List<Node> children = new List<Node>();
 	public Vector3 pos;
+	public bool zeroDistanceToChildren = false;
 
-	public Node(Vector3 pos) {
+	public Node(Vector3 pos, bool zeroDistanceToChildren) {
 		this.children = new List<Node>();
 		this.pos = pos;
+		this.zeroDistanceToChildren = zeroDistanceToChildren;
 	}
 
 	public Node AddNewChild() {
@@ -35,7 +38,7 @@ public class Node {
 		if (NodeSystem.buildAsStaircase) {
 			grandparentToParent = Vector3.zero;
 		}
-		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt);
+		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt, false);
 		newNode.parent = this;
 		this.children.Add(newNode);
 
@@ -61,7 +64,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		// Unity is about to read the serializedNodes field's contents.
 		// The correct data must now be written into that field "just in time".
 		if (serializedNodes == null) serializedNodes = new List<SerializableNode>();
-		if (rootNode == null) rootNode = new Node(Vector3.forward);
+		if (rootNode == null) rootNode = new Node(Vector3.forward, false);
 		serializedNodes.Clear();
 		AddNodeToSerializedNodesRecursively(rootNode, -1);
 		// Now Unity is free to serialize this field, and we should get back the expected 
@@ -75,7 +78,8 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			indexOfParent = parentId,
 			pos = pos,
 			childCount = n.children.Count,
-			indexOfFirstChild = serializedNodes.Count + 1
+			indexOfFirstChild = serializedNodes.Count + 1,
+			zeroDistanceToChildren = n.zeroDistanceToChildren
 		};
 		serializedNodes.Add(serializedNode);
 		if (serializedNode.pos == selectedNode?.pos) {
@@ -93,14 +97,14 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			ReadNodeFromSerializedNodesRecursively(0, out rootNode);
 		}
 		else {
-			rootNode = new Node(Vector3.forward);
+			rootNode = new Node(Vector3.forward, false);
 		}
 	}
 
 	int ReadNodeFromSerializedNodesRecursively(int index, out Node node) {
 		var serializedNode = serializedNodes[index];
 		// Transfer the deserialized data into the internal Node class
-		Node newNode = new Node(serializedNode.pos);
+		Node newNode = new Node(serializedNode.pos, serializedNode.zeroDistanceToChildren);
 
 		// The tree needs to be read in depth-first, since that's how we wrote it out.
 		for (int i = 0; i != serializedNode.childCount; i++) {
@@ -143,7 +147,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}
 		if (rootNode == null) {
 			// Spawn at not-the-origin so it can be selected with the handle
-			rootNode = new Node(Vector3.forward);
+			rootNode = new Node(Vector3.forward, false);
 			allNodes.Add(rootNode);
 			selectedNode = rootNode;
 		}
@@ -199,9 +203,20 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 
 	Color unselectedColor = new Color(.15f, .85f, .25f);
 	Color selectedColor = new Color(.95f, .95f, .15f);
+	Color unselectedZeroDistanceToChildrenColor = new Color(.15f, .25f, .85f);
 	void DrawGizmosRecursively(Node curNode) {
 		if (!showNodes) return;
-		Gizmos.color = (curNode == selectedNode) ? selectedColor : unselectedColor;
+		if (curNode == selectedNode) {
+			Gizmos.color = selectedColor;
+		}
+		else {
+			if (curNode.zeroDistanceToChildren) {
+				Gizmos.color = unselectedZeroDistanceToChildrenColor;
+			}
+			else {
+				Gizmos.color = unselectedColor;
+			}
+		}
 		Gizmos.DrawSphere(transform.TransformPoint(curNode.pos), gizmoSphereSize);
 
 		foreach (Node child in curNode.children) {
@@ -253,7 +268,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 				Node newNode = ns.AddNewChildToSelected();
 				// Make it easy to do staircases:
 				if (buildAsStaircase) {
-					newNode.pos += 0.5f * (temp ? Vector3.right : Vector3.up);
+					newNode.pos += 0.5f * (temp ? Vector3.up : Vector3.left);
 				}
 				temp = !temp;
 			}

@@ -23,7 +23,10 @@ public class InteractableObject : MonoBehaviour {
 
 	public void Awake() {
 		if (thisRendererParent == null) {
-			thisRendererParent = Utils.GetComponentsInChildrenRecursively<Renderer>(transform)[0].gameObject;
+			Renderer[] childRenderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
+			if (childRenderers.Length > 0) {
+				thisRendererParent = childRenderers[0].gameObject;
+			}
 		}
 
 		if (thisRendererParent != null) {

@@ -88,7 +88,8 @@
 	
 			float3 backgroundColor = tex2D(_WaterBackground, uv).rgb;
 			float fogFactor = exp2(-_WaterFogDensity * depthDifference);
-			return lerp(_WaterFogColor, backgroundColor, fogFactor);
+			// The following is a cheap bandaid on water not appearing through portals properly
+			return lerp(_WaterFogColor, backgroundColor, .1/*fogFactor*/);
 		}
 
 		float3 UnpackDerivativeHeight(float4 textureData) {

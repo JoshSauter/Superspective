@@ -173,9 +173,7 @@ public class PickupObject : MonoBehaviour {
 		if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
 			Portal inPortal = throughOutPortalToInPortal ? portalableObject.grabbedThroughPortal : raycastHits.firstRaycast.portalHit.otherPortal;
 
-			Vector3 localTargetPos = inPortal.transform.InverseTransformPoint(targetPos);
-			localTargetPos = Quaternion.Euler(0, 180f, 0) * localTargetPos;
-			targetPos = inPortal.otherPortal.transform.TransformPoint(localTargetPos);
+			targetPos = inPortal.TransformPoint(targetPos);
 		}
 
 		return targetPos;
@@ -216,6 +214,7 @@ public class PickupObject : MonoBehaviour {
 			//transform.parent = originalParent;
 			thisGravity.useGravity = true;
 			//thisRigidbody.isKinematic = false;
+			thisRigidbody.velocity += PlayerMovement.instance.thisRigidbody.velocity;
 			isHeld = false;
 			currentCooldown = pickupDropCooldown;
 

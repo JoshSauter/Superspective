@@ -1,6 +1,6 @@
-﻿Shader "Unlit/Invisible"{
+﻿Shader "Unlit/Invisible" {
     SubShader {
-        Tags { "RenderType"="Transparent" }
+        Tags { "RenderType"="Transparent" "PortalTag"="True" }
         LOD 100
 
         Pass {

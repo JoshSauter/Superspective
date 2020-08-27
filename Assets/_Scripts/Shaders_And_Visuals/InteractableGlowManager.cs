@@ -5,7 +5,8 @@ using UnityEngine.Rendering;
 using EpitaphUtils;
 
 public class InteractableGlowManager : Singleton<InteractableGlowManager> {
-
+	public bool DEBUG = false;
+	DebugLogger debug;
 	private Camera thisCamera;
 	private BladeEdgeDetection edgeDetection;
 	private CommandBuffer commandBuffer;
@@ -40,6 +41,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// On Awake, we cache various values and setup our command buffer to be called Before Image Effects.
 	/// </summary>
 	private void Awake() {
+		debug = new DebugLogger(gameObject, () => DEBUG);
 		prePassMaterial = new Material(Shader.Find("Hidden/GlowCmdShader"));
 		prePassMaterialLarger = new Material(Shader.Find("Hidden/GlowCmdShaderLarger"));
 		prePassMaterialSmaller = new Material(Shader.Find("Hidden/GlowCmdShaderSmaller"));
@@ -61,7 +63,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// Adds all the commands, in order, we want our command buffer to execute.
 	/// Similar to calling sequential rendering methods insde of OnRenderImage().
 	/// </summary>
-	private void RebuildCommandBuffer() {
+	private int RebuildCommandBuffer() {
 		commandBuffer.Clear();
 		commandBuffer.GetTemporaryRT(blurPassRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(blurPassRenderTexID);
@@ -78,7 +80,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		}
 
 		// Prepass
-		commandBuffer.GetTemporaryRT(prePassRenderTexID, EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, QualitySettings.antiAliasing);
+		commandBuffer.GetTemporaryRT(prePassRenderTexID, EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(prePassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
 		foreach (var glowObject in glowableObjects) {
@@ -101,6 +103,8 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		}
 
 		Graphics.ExecuteCommandBuffer(commandBuffer);
+
+		return glowableObjects.Count;
 	}
 
 	/// <summary>
@@ -111,10 +115,10 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// affect thing the glow image.
 	/// </summary>
 	private void OnPreCull() {
-		RebuildCommandBuffer();
+		debug.LogError(RebuildCommandBuffer());
 	}
 
-	private void OnPostRender() {
+	void OnPostRender() {
 		Graphics.ExecuteCommandBuffer(commandBuffer);
 	}
 

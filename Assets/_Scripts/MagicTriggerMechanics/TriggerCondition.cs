@@ -14,7 +14,8 @@ namespace MagicTriggerMechanics {
 		PlayerFacingAwayFromPosition,
 		PlayerMovingDirection,
 		RendererVisible,
-		RendererNotVisible
+		RendererNotVisible,
+		PlayerInDirectionFromPoint
 	}
 
 	[Serializable]
@@ -32,7 +33,7 @@ namespace MagicTriggerMechanics {
 
 		public bool allowTriggeringWhileInsideObject = false;
 
-		public float Evaluate(Transform triggerTransform, Collider player) {
+		public float Evaluate(Transform triggerTransform, GameObject player) {
 			Vector3 realTargetDirection = targetDirection;
 			Transform cameraTransform = EpitaphScreen.instance.playerCamera.transform;
 			switch (triggerCondition) {
@@ -61,23 +62,28 @@ namespace MagicTriggerMechanics {
 				}
 				case TriggerConditionType.PlayerMovingDirection: {
 					realTargetDirection = (useLocalCoordinates) ? triggerTransform.TransformDirection(targetDirection) : targetDirection;
-					PlayerMovement playerMovement = player.gameObject.GetComponent<PlayerMovement>();
+					PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
 					return Vector3.Dot(playerMovement.curVelocity.normalized, realTargetDirection.normalized);
 				}
 				case TriggerConditionType.RendererVisible:
 					return targetRenderer.IsVisibleFrom(EpitaphScreen.instance.playerCamera) ? 1 : -1;
 				case TriggerConditionType.RendererNotVisible:
 					return targetRenderer.IsVisibleFrom(EpitaphScreen.instance.playerCamera) ? -1 : 1;
+				case TriggerConditionType.PlayerInDirectionFromPoint:
+					realTargetDirection = (useLocalCoordinates) ? triggerTransform.TransformDirection(targetDirection) : targetDirection;
+					Vector3 realTargetPosition = (useLocalCoordinates) ? triggerTransform.TransformPoint(targetPosition) : targetPosition;
+					Vector3 playerToPositionDirection = (player.transform.position - realTargetPosition).normalized;
+					return Vector3.Dot(realTargetDirection.normalized, playerToPositionDirection);
 				default:
 					throw new Exception($"TriggerCondition: {triggerCondition} not handled!");
 			}
 		}
 
-		public bool IsTriggered(Transform triggerTransform, Collider player) {
+		public bool IsTriggered(Transform triggerTransform, GameObject player) {
 			return Evaluate(triggerTransform, player) > triggerThreshold;
 		}
 
-		public bool IsReverseTriggered(Transform triggerTransform, Collider player) {
+		public bool IsReverseTriggered(Transform triggerTransform, GameObject player) {
 			return Evaluate(triggerTransform, player) < -triggerThreshold;
 		}
 	}
@@ -118,15 +124,16 @@ namespace MagicTriggerMechanics {
 			GUIContent allowTriggeringInsideObjectLabel = new GUIContent("Allow triggering while inside of target object?");
 			GUIContent useLocalCoordinatesLabel = new GUIContent("Use local coordinates?");
 
-			EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
 
 			switch (currentTriggerCondition) {
 				case TriggerConditionType.PlayerFacingDirection:
+					EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
 					EditorGUILayout.PropertyField(useLocalCoordinates, useLocalCoordinatesLabel);
 					EditorGUILayout.PropertyField(targetDirection, directionLabel);
 					break;
 				case TriggerConditionType.PlayerFacingObject:
 				case TriggerConditionType.PlayerFacingAwayFromObject:
+					EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
 					EditorGUILayout.PropertyField(targetObject, objectLabel);
 					EditorGUILayout.Space();
 
@@ -136,9 +143,11 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerConditionType.PlayerFacingPosition:
 				case TriggerConditionType.PlayerFacingAwayFromPosition:
+					EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
 					EditorGUILayout.PropertyField(targetPosition, positionLabel);
 					break;
 				case TriggerConditionType.PlayerMovingDirection:
+					EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
 					EditorGUILayout.PropertyField(useLocalCoordinates, useLocalCoordinatesLabel);
 					EditorGUILayout.PropertyField(targetDirection, directionLabel);
 					break;
@@ -147,6 +156,12 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerConditionType.RendererNotVisible:
 					EditorGUILayout.PropertyField(targetRenderer, rendererLabel);
+					break;
+				case TriggerConditionType.PlayerInDirectionFromPoint:
+					EditorGUILayout.PropertyField(triggerThreshold, thresholdLabel);
+					EditorGUILayout.PropertyField(useLocalCoordinates, useLocalCoordinatesLabel);
+					EditorGUILayout.PropertyField(targetPosition, positionLabel);
+					EditorGUILayout.PropertyField(targetDirection, directionLabel);
 					break;
 			}
 

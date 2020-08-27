@@ -23,10 +23,11 @@ Material:
     - _ColorChangeWidth: 30
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Color2: {r: 0.13332671, g: 0.13332671, b: 0.13332671, a: 1}
+    - _Color2: {r: 0.13331693, g: 0.13331693, b: 0.13331693, a: 1}
     - _ColorChangeAxis: {r: 0, g: 1, b: 1, a: 1}
     - _ColorChangePoint: {r: 0, g: -268, b: -29, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor2: {r: 0, g: 0, b: 0, a: 0}
     - _NinetyDegreesVector: {r: 1, g: 1, b: 0, a: 1}
     - _ZeroDegreesVector: {r: -1, g: 1, b: 0, a: 1}
+  m_BuildTextureStacks: []

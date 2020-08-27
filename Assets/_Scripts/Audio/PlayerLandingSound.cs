@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PortalMechanics;
+using EpitaphUtils;
 
 public class PlayerLandingSound : MonoBehaviour {
 	public SoundSettings shoeSound;
@@ -17,7 +19,15 @@ public class PlayerLandingSound : MonoBehaviour {
 		playerMovement = GetComponent<PlayerMovement>();
 		startVolume = shoeSound.volume;
 		thumpStartVolume = thumpSound.volume;
+
+		Portal.OnAnyPortalTeleport += HandlePlayerTeleported;
     }
+
+	void HandlePlayerTeleported(Portal inPortal, Collider objTeleported) {
+		if (!objTeleported.gameObject.TaggedAsPlayer()) return;
+
+
+	}
 
     void FixedUpdate() {
         if (wasGrounded && !playerMovement.grounded) {
@@ -27,21 +37,22 @@ public class PlayerLandingSound : MonoBehaviour {
     }
 
 	IEnumerator KeepTrackOfPlayerAirHeight() {
-		float maxHeight = transform.position.y;
+		float verticalOffset = 0f;
+		float maxHeight = verticalOffset;
 		while (!playerMovement.grounded) {
-			float thisHeight = transform.position.y;
-			if (thisHeight > maxHeight) {
-				maxHeight = thisHeight;
+			float diff = Vector3.Dot(playerMovement.ProjectedVerticalVelocity(), -Physics.gravity.normalized) * Time.fixedDeltaTime;
+			verticalOffset += diff;
+			if (verticalOffset > maxHeight) {
+				maxHeight = verticalOffset;
 			}
 
 			yield return new WaitForFixedUpdate();
 		}
-		float playerHeightAtLanding = transform.position.y;
-		float maxDiff = maxHeight - playerHeightAtLanding;
+		float maxDiff = maxHeight - verticalOffset;
 
 		if (maxDiff < 0) yield break;
 
-		float simulatedSpeedOfImpact = Mathf.Sqrt(2 * -Physics.gravity.y * maxDiff);
+		float simulatedSpeedOfImpact = Mathf.Sqrt(2 * Physics.gravity.magnitude * maxDiff);
 
 		// Debug.LogWarning("SimulatedSpeed: " + simulatedSpeedOfImpact);
 		if (simulatedSpeedOfImpact < minSpeed) yield break;

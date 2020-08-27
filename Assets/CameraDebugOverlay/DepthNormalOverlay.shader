@@ -29,7 +29,7 @@ Shader "Custom/DepthNormalOverlay" {
 ENDCG
 
 	SubShader {
-		Tags { "RenderType"="Transparent" }
+		Tags { "RenderType"="Transparent" "Queue" = "Transparent+10" }
 
 		// Depth Render Pass
 		Pass {

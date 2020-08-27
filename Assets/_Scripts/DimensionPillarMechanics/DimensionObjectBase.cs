@@ -253,9 +253,9 @@ public class DimensionObjectBase : MonoBehaviour {
 			case "Standard (Specular setup)":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObjectSpecular"));
 				break;
-			case "TextMeshPro/Distance Field":
-				if (normalMaterial.name.Contains("Signika-Regular SDF Material")) {
-					newMaterial = Resources.Load<Material>("Fonts/Signika-Regular SDF DimensionObject");
+			case "TextMeshPro/Mobile/Distance Field":
+				if (normalMaterial.name.Contains("LiberationSans SDF")) {
+					newMaterial = Resources.Load<Material>("Fonts & Materials/LiberationSans SDF - InGameTextDimensionObject");
 				}
 				else {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);

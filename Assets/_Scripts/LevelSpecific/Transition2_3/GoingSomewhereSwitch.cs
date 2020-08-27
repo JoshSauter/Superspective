@@ -22,7 +22,7 @@ public class GoingSomewhereSwitch : MonoBehaviour {
 		}
 	}
 
-	void TurnObjectsOnOff(Collider teleportEnter, Collider teleportExit, Collider player) {
+	void TurnObjectsOnOff(Collider teleportEnter, Collider teleportExit, GameObject player) {
 		foreach (GameObject enableObject in objectsToEnable) {
 			if (enableObject.name.Contains("GS?") && hasDisplayedGoingSomewhereOnce)
 				continue;

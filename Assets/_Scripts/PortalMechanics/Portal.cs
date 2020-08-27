@@ -9,6 +9,8 @@ using System.Linq;
 
 namespace PortalMechanics {
 	public class Portal : MonoBehaviour {
+		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
+
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
 		public bool DEBUG = false;
 		public string channel = "<Not set>";
@@ -42,9 +44,11 @@ namespace PortalMechanics {
 		public HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
 
 		private RenderTexture internalRenderTextureCopy;
+		private RenderTexture internalDepthNormalsTextureCopy;
 
+		public bool pauseRenderingOnly = false;
 		public bool pauseRenderingAndLogic = false;
-		public bool portalIsEnabled { get { return otherPortal != null && !pauseRenderingAndLogic && gameObject.activeSelf; } }
+		public bool portalIsEnabled => otherPortal != null && !pauseRenderingAndLogic && gameObject.activeSelf;
 
 		#region Events
 		public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
@@ -71,7 +75,7 @@ namespace PortalMechanics {
 #endif
 
 		#region MonoBehaviour Methods
-		private void Awake() {
+		protected virtual void Awake() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
 			if (renderers == null || renderers.Length == 0) {
 				if (compositePortal) {
@@ -83,6 +87,9 @@ namespace PortalMechanics {
 			}
 			foreach (var r in renderers) {
 				r.gameObject.layer = LayerMask.NameToLayer("Portal");
+				if (pauseRenderingAndLogic) {
+					r.material = fallbackMaterial;
+				}
 			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
@@ -132,7 +139,9 @@ namespace PortalMechanics {
 
 		void CreateRenderTexture(int width, int height) {
 			internalRenderTextureCopy = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+			internalDepthNormalsTextureCopy = new RenderTexture(width, height, 24, DepthNormalsTextureFormat);
 			portalMaterial.mainTexture = internalRenderTextureCopy;
+			portalMaterial.SetTexture("_DepthNormals", internalDepthNormalsTextureCopy);
 		}
 
 		private void Start() {
@@ -141,6 +150,10 @@ namespace PortalMechanics {
 
 			CreateRenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
 			EpitaphScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
+
+			if (pauseRenderingOnly || pauseRenderingAndLogic) {
+				DefaultMaterial();
+			}
 		}
 
 		bool test = false;
@@ -159,7 +172,7 @@ namespace PortalMechanics {
 			StartCoroutine(AddPortalCoroutine());
 		}
 
-		private void OnDisable() {
+		protected virtual void OnDisable() {
 			PortalManager.instance.RemovePortal(channel, this);
 		}
 
@@ -202,8 +215,8 @@ namespace PortalMechanics {
 					TeleportObject(portalableObj);
 
 					// Swap state to the other portal
-					otherPortal.objectsInPortal.Add(portalableObj);
 					objectsInPortal.Remove(portalableObj);
+					otherPortal.objectsInPortal.Add(portalableObj);
 					portalableObj.sittingInPortal = otherPortal;
 				}
 			}
@@ -239,6 +252,10 @@ namespace PortalMechanics {
 		}
 
 		public void SetTexture(RenderTexture tex) {
+			if (pauseRenderingOnly || pauseRenderingAndLogic) {
+				debug.LogWarning($"Attempting to set MainTexture for disabled portal: {gameObject.name}");
+				return;
+			}
 			foreach (var r in renderers) {
 				r.material = portalMaterial;
 			}
@@ -246,6 +263,20 @@ namespace PortalMechanics {
 				vp.material = portalMaterial;
 			}
 			Graphics.CopyTexture(tex, internalRenderTextureCopy);
+		}
+
+		public void SetDepthNormalsTexture(RenderTexture tex) {
+			if (pauseRenderingOnly || pauseRenderingAndLogic) {
+				debug.LogWarning($"Attempting to set DepthNormalsTexture for disabled portal: {gameObject.name}");
+				return;
+			}
+			foreach (var r in renderers) {
+				r.material = portalMaterial;
+			}
+			foreach (var vp in volumetricPortals) {
+				vp.material = portalMaterial;
+			}
+			Graphics.CopyTexture(tex, internalDepthNormalsTextureCopy);
 		}
 
 		public void DefaultMaterial() {
@@ -366,29 +397,31 @@ namespace PortalMechanics {
 			objToTransform.position = TransformPoint(objToTransform.position);
 
 			// Rotation
-			Quaternion relativeRot = Quaternion.Inverse(transform.rotation) * objToTransform.rotation;
-			relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
-			objToTransform.rotation = otherPortal.transform.rotation * relativeRot;
+			objToTransform.rotation = TransformRotation(objToTransform.rotation);
 
 			// Velocity?
 			Rigidbody objRigidbody = objToTransform.GetComponent<Rigidbody>();
 			if (transformVelocity && objRigidbody != null) {
-				Vector3 objRelativeVelocity = transform.InverseTransformDirection(objRigidbody.velocity);
-				objRelativeVelocity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * objRelativeVelocity;
-				objRigidbody.velocity = otherPortal.transform.TransformDirection(objRelativeVelocity);
+				objRigidbody.velocity = TransformDirection(objRigidbody.velocity);
 			}
 		}
 
-		public Vector3 TransformPoint(Vector3 point) {
+		public virtual Vector3 TransformPoint(Vector3 point) {
 			Vector3 relativeObjPos = transform.InverseTransformPoint(point);
 			relativeObjPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeObjPos;
 			return otherPortal.transform.TransformPoint(relativeObjPos);
 		}
 
-		public Vector3 TransformDirection(Vector3 direction) {
+		public virtual Vector3 TransformDirection(Vector3 direction) {
 			Vector3 relativeDir = Quaternion.Inverse(transform.rotation) * direction;
 			relativeDir = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeDir;
 			return otherPortal.transform.rotation * relativeDir;
+		}
+
+		public virtual Quaternion TransformRotation(Quaternion rotation) {
+			Quaternion relativeRot = Quaternion.Inverse(transform.rotation) * rotation;
+			relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
+			return otherPortal.transform.rotation * relativeRot;
 		}
 
 		private bool teleportingPlayer = false;
@@ -405,31 +438,24 @@ namespace PortalMechanics {
 			TriggerEventsBeforeTeleport(player.GetComponent<Collider>());
 
 			// Position
-			Vector3 relativePlayerPos = transform.InverseTransformPoint(player.position);
-			relativePlayerPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativePlayerPos;
-			player.position = otherPortal.transform.TransformPoint(relativePlayerPos);
+			player.position = TransformPoint(player.position);
 
 			// Rotation
-			Quaternion relativeRot = Quaternion.Inverse(transform.rotation) * player.rotation;
-			relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
-			player.rotation = otherPortal.transform.rotation * relativeRot;
+			player.rotation = TransformRotation(player.rotation);
 
 			// Velocity
 			Rigidbody playerRigidbody = player.GetComponent<Rigidbody>();
-			Vector3 playerRelativeVelocity = transform.InverseTransformDirection(playerRigidbody.velocity);
-			playerRelativeVelocity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * playerRelativeVelocity;
-			playerRigidbody.velocity = otherPortal.transform.TransformDirection(playerRelativeVelocity);
+			playerRigidbody.velocity = TransformDirection(playerRigidbody.velocity);
 
 			Physics.gravity = Physics.gravity.magnitude * -player.up;
-			//PlayerMovement.instance.enabled = false;
 
 			if (changeCameraEdgeDetection) {
 				SwapEdgeDetectionColors();
 			}
 
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
-			otherPortal.EnableVolumetricPortal();
 			DisableVolumetricPortal();
+			otherPortal.EnableVolumetricPortal();
 			yield return null;
 			teleportingPlayer = false;
 		}
@@ -457,8 +483,12 @@ namespace PortalMechanics {
 			if (anyVolumetricPortalIsDisabled) {
 				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
 				foreach (var vp in volumetricPortals) {
-					vp.material = portalMaterial;
-					vp.enabled = true;
+					if (pauseRenderingAndLogic) continue;
+					else if (pauseRenderingOnly) vp.enabled = true;
+					else {
+						vp.material = portalMaterial;
+						vp.enabled = true;
+					}
 				}
 			}
 		}
@@ -482,7 +512,7 @@ namespace PortalMechanics {
 			max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
 		}
 
-		IEnumerator AddPortalCoroutine() {
+		protected virtual IEnumerator AddPortalCoroutine() {
 			while (!gameObject.scene.isLoaded) {
 				//debug.Log("Waiting for scene " + gameObject.scene + " to be loaded before adding receiver...");
 				yield return null;

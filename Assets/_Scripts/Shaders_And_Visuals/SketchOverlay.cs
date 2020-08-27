@@ -20,6 +20,18 @@ public class SketchOverlay : MonoBehaviour {
 		mat = Resources.Load<Material>("Materials/Overlay/SketchEffectMaterial");
 	}
 
+	float intensityBeforeDisable;
+	void OnDisable() {
+		intensityBeforeDisable = intensity;
+		intensity = 0f;
+	}
+
+	void OnEnable() {
+		if (intensityBeforeDisable > 0) {
+			intensity = intensityBeforeDisable;
+		}
+	}
+
 	IEnumerator Start() {
 		while (enabled) {
 			SetRandomOffsetScale();

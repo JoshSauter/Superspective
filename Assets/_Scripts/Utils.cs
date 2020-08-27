@@ -691,7 +691,43 @@ namespace EpitaphUtils {
 				{ "_FlowOffset", ShaderPropertyType.Range },
 				{ "_WaterFogColor", ShaderPropertyType.Color },
 				{ "_WaterFogDensity", ShaderPropertyType.Range },
-				{ "_RefractionStrength", ShaderPropertyType.Range }
+				{ "_RefractionStrength", ShaderPropertyType.Range },
+				// TextMeshPro properties
+				{ "_FaceColor", ShaderPropertyType.Color },
+				{ "_FaceDilate", ShaderPropertyType.Range },
+				{ "_OutlineColor", ShaderPropertyType.Color },
+				{ "_OutlineWidth", ShaderPropertyType.Range },
+				{ "_OutlineSoftness", ShaderPropertyType.Range },
+				{ "_UnderlayColor", ShaderPropertyType.Color },
+				{ "_UnderlayOffsetX", ShaderPropertyType.Range },
+				{ "_UnderlayOffsetY", ShaderPropertyType.Range },
+				{ "_UnderlayDilate", ShaderPropertyType.Range },
+				{ "_UnderlaySoftness", ShaderPropertyType.Range },
+				{ "_WeightNormal", ShaderPropertyType.Float },
+				{ "_WeightBold", ShaderPropertyType.Float },
+				{ "_ShaderFlags", ShaderPropertyType.Float },
+				{ "_ScaleRatioA", ShaderPropertyType.Float },
+				{ "_ScaleRatioB", ShaderPropertyType.Float },
+				{ "_ScaleRatioC", ShaderPropertyType.Float },
+				{ "_TextureWidth", ShaderPropertyType.Float },
+				{ "_TextureHeight", ShaderPropertyType.Float },
+				{ "_GradientScale", ShaderPropertyType.Float },
+				{ "_ScaleX", ShaderPropertyType.Float },
+				{ "_ScaleY", ShaderPropertyType.Float },
+				{ "_PerspectiveFilter", ShaderPropertyType.Range },
+				{ "_Sharpness", ShaderPropertyType.Range },
+				{ "_VertexOffsetX", ShaderPropertyType.Float },
+				{ "_VertexOffsetY", ShaderPropertyType.Float },
+				{ "_ClipRect", ShaderPropertyType.Vector },
+				{ "_MaskSoftnessX", ShaderPropertyType.Float },
+				{ "_MaskSoftnessY", ShaderPropertyType.Float },
+				{ "_StencilComp", ShaderPropertyType.Float },
+				{ "_Stencil", ShaderPropertyType.Float },
+				{ "_StencilOp", ShaderPropertyType.Float },
+				{ "_StencilWriteMask", ShaderPropertyType.Float },
+				{ "_StencilReadMask", ShaderPropertyType.Float },
+				{ "_CullMode", ShaderPropertyType.Float },
+				{ "_ColorMask", ShaderPropertyType.Float }		
 			};
 
 			public static void CopyMatchingPropertiesFromMaterial(this Material copyInto, Material copyFrom) {
@@ -861,11 +897,13 @@ namespace EpitaphUtils {
 
 				bool raycastResult = false;
 				if (raycastHits.hitInfos.Count > 0 && raycastHits.lastRaycast.portalHit != null) {
-					GameObject outPortalOfLastRaycastHit = raycastHits.lastRaycast.portalHit.otherPortal.gameObject;
-					int tempLayer = outPortalOfLastRaycastHit.layer;
-					outPortalOfLastRaycastHit.layer = LayerMask.NameToLayer("Ignore Raycast");
-					raycastResult = Physics.Raycast(testRay, out thisHitInfo, rayDistance, layermask, QueryTriggerInteraction.Collide);
-					outPortalOfLastRaycastHit.layer = tempLayer;
+					Collider[] outPortalOfLastRaycastHitColliders = raycastHits.lastRaycast.portalHit.otherPortal.colliders;
+					foreach (var c in outPortalOfLastRaycastHitColliders) {
+						int tempLayer = c.gameObject.layer;
+						c.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+						raycastResult = Physics.Raycast(testRay, out thisHitInfo, rayDistance, layermask, QueryTriggerInteraction.Collide);
+						c.gameObject.layer = tempLayer;
+					}
 				}
 				else {
 					raycastResult = Physics.Raycast(testRay, out thisHitInfo, rayDistance, layermask, QueryTriggerInteraction.Collide);
@@ -878,16 +916,21 @@ namespace EpitaphUtils {
 
 					raycastHits.totalDistance = newTotalDistanceTraveled;
 
-					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>() ?? thisHitInfo.collider.gameObject.transform.parent?.GetComponent<Portal>();
+					Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>();
+					if (portalHit == null) {
+						PortalCollider portalCollider = thisHitInfo.collider.gameObject.GetComponent<PortalCollider>();
+						if (portalCollider != null) {
+							portalHit = portalCollider.portal;
+						}
+					}
+					if (portalHit == null && thisHitInfo.collider.gameObject.name.Contains("VolumetricPortal")) {
+						portalHit = thisHitInfo.collider.gameObject.transform.parent?.GetComponent<Portal>();
+					}
 					// Raycast hit a portal, fire a new one on the other side of the portal
 					if (portalHit != null && portalHit.portalIsEnabled) {
-						Vector3 localPositionOfNewStart = portalHit.transform.InverseTransformPoint(thisHitInfo.point);
-						localPositionOfNewStart = Quaternion.Euler(0f, 180f, 0f) * localPositionOfNewStart;
-						Vector3 newStart = portalHit.otherPortal.transform.TransformPoint(localPositionOfNewStart);
+						Vector3 newStart = portalHit.TransformPoint(thisHitInfo.point);
 
-						Vector3 newDirection = portalHit.transform.InverseTransformDirection(direction);
-						newDirection = Quaternion.Euler(0f, 180f, 0f) * newDirection;
-						newDirection = portalHit.otherPortal.transform.TransformDirection(newDirection);
+						Vector3 newDirection = portalHit.TransformDirection(direction);
 
 						raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, portalHit));
 

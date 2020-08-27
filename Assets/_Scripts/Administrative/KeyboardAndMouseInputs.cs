@@ -96,6 +96,7 @@ public static class KeyboardAndMouseInputs {
 	public static KeyboardAndMouseInput Left = new KeyboardAndMouseInput(KeyCode.A);
 	public static KeyboardAndMouseInput Right = new KeyboardAndMouseInput(KeyCode.D);
 	public static KeyboardAndMouseInput Action1 = new KeyboardAndMouseInput(0);
+	public static KeyboardAndMouseInput Action2 = new KeyboardAndMouseInput(1);
 	public static KeyboardAndMouseInput Escape = new KeyboardAndMouseInput(KeyCode.Escape);
 	public static KeyboardAndMouseInput Space = new KeyboardAndMouseInput(KeyCode.Space);
 	public static KeyboardAndMouseInput Shift = new KeyboardAndMouseInput(KeyCode.LeftShift, KeyCode.RightShift);

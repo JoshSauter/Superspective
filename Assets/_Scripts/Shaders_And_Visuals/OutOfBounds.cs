@@ -11,8 +11,8 @@ public class OutOfBounds : MonoBehaviour {
 	Image redBackground;
 	Image blackForeground;
 
-	TMP_Text countdownText;
-	TMP_Text returnToPlayzoneText;
+	TextMeshProUGUI countdownText;
+	TextMeshProUGUI returnToPlayzoneText;
 	float initialTimeLeft = 10;
 	float timeLeft;
 
@@ -23,8 +23,8 @@ public class OutOfBounds : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		timeLeft = initialTimeLeft;
-		countdownText = transform.Find("Countdown").GetComponent<TMP_Text>();
-		returnToPlayzoneText = countdownText.transform.GetComponentsInChildrenOnly<TMP_Text>()[0];
+		countdownText = transform.Find("Countdown").GetComponent<TextMeshProUGUI>();
+		returnToPlayzoneText = countdownText.transform.GetComponentsInChildrenOnly<TextMeshProUGUI>()[0];
 		blackForeground = transform.parent.Find("Black").GetComponent<Image>();
 		redBackground = transform.Find("RedBackground").GetComponent<Image>();
 	}
