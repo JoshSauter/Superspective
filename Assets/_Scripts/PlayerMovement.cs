@@ -137,7 +137,9 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
 			Player.instance.cameraFollow.SetLerpSpeed(15f);
-			OnStaircaseStepUp?.Invoke();
+			if (Vector3.Dot(transform.up, stepFound.stepOffset) > 0) {
+				OnStaircaseStepUp?.Invoke();
+			}
 		}
 		thisRigidbody.useGravity = stepFound == null;
 
@@ -345,8 +347,10 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		Vector3 stepOverbite = Vector3.ProjectOnPlane(-contact.normal.normalized, transform.up).normalized * stepOverbiteMagnitude;
 
 		// Start the raycast position directly above the contact point with the step
-		Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight * 0.99f;
+		Debug.DrawRay(contact.point, transform.up * maxStepHeight * 0.8f, Color.blue, 10);
+		Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight * 0.8f;
 		// Move the raycast inwards towards the stair (we will be raycasting down at the stair)
+		Debug.DrawRay(raycastStartPos, stepOverbite, Color.red, 10);
 		raycastStartPos += stepOverbite;
 		Vector3 direction = -transform.up;
 
@@ -355,9 +359,11 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		if (stepFound) {
 			Vector3 groundPointOrBottomOfPlayer = isGrounded ? ground.point : bottomOfPlayer;
 			float stepHeight = Vector3.Dot(transform.up, stepTest.point - groundPointOrBottomOfPlayer);
+
 			Vector3 stepOffset = stepOverbite + transform.up * (stepHeight + 0.02f);
+			Debug.DrawRay(contact.point, stepOffset, Color.black, 10);
 			step = new StepFound(contact, stepOffset);
-			debug.Log("Step: " + contact + "\n" + stepOffset);
+			debug.Log($"Step: {contact}\n{stepOffset:F3}\nstepHeight:{stepHeight}");
 		}
 
 		return stepFound;
