@@ -2199,6 +2199,41 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!84 &287251704
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  serializedVersion: 3
+  m_Width: 1172
+  m_Height: 538
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthFormat: 2
+  m_ColorFormat: 4
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
 --- !u!1 &293964182
 GameObject:
   m_ObjectHideFlags: 0
@@ -4499,8 +4534,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 160, y: 760.5, z: -350}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 126.5, y: 748.5, z: -359.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1554336841}
@@ -10623,14 +10658,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1554336840}
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 505772567}
   m_Father: {fileID: 623971849}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1554336842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11724,9 +11759,10 @@ GameObject:
   - component: {fileID: 1809741063}
   - component: {fileID: 1809741062}
   - component: {fileID: 1809741076}
+  - component: {fileID: 1809741065}
+  - component: {fileID: 1809741067}
   - component: {fileID: 1809741068}
   - component: {fileID: 1809741070}
-  - component: {fileID: 1809741067}
   - component: {fileID: 1809741075}
   - component: {fileID: 1809741071}
   - component: {fileID: 1809741061}
@@ -11737,7 +11773,6 @@ GameObject:
   - component: {fileID: 1809741057}
   - component: {fileID: 1809741058}
   - component: {fileID: 1809741059}
-  - component: {fileID: 1809741065}
   - component: {fileID: 1809741072}
   m_Layer: 14
   m_Name: Main Camera
@@ -11801,6 +11836,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 1809741064}
+  postProcessEffects:
+  - {fileID: 1809741068}
+  - {fileID: 1809741070}
+  - {fileID: 1809741075}
+  - {fileID: 1809741071}
+  - {fileID: 1809741069}
   dimensionCameras:
   - {fileID: 940225957}
   - {fileID: 1040565902}
@@ -11892,6 +11933,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7e2d16401471fa499e46a143e7565e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   blurIterations: 4
 --- !u!114 &1809741066
 MonoBehaviour:
@@ -11920,6 +11962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Intensity: 3.16
+  test: {fileID: 287251704}
 --- !u!114 &1809741068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12000,14 +12043,14 @@ MonoBehaviour:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
     key1: {r: 0, g: 0, b: 0, a: 1}
-    key2: {r: 1, g: 1, b: 1, a: 0}
+    key2: {r: 1, g: 1, b: 1, a: 0.03137255}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 65535
+    ctime1: 65342
     ctime2: 65342
     ctime3: 0
     ctime4: 0
@@ -12015,8 +12058,8 @@ MonoBehaviour:
     ctime6: 0
     ctime7: 0
     atime0: 0
-    atime1: 46067
-    atime2: 65535
+    atime1: 22552
+    atime2: 50115
     atime3: 65535
     atime4: 0
     atime5: 0
@@ -12024,7 +12067,7 @@ MonoBehaviour:
     atime7: 0
     m_Mode: 0
     m_NumColorKeys: 2
-    m_NumAlphaKeys: 3
+    m_NumAlphaKeys: 4
   edgeColorGradientTexture: {fileID: 0}
   edgeDetectShader: {fileID: 4800000, guid: 233b38d5c7c0ec549b6341830ccac5b7, type: 3}
 --- !u!114 &1809741072
