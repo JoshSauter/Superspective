@@ -5,7 +5,7 @@ using NaughtyAttributes;
 using EpitaphUtils;
 
 public class CubeSpawner : MonoBehaviour {
-	[Label("Fake cube for spawner prefab")]
+	// TODO: Find a replacement for this dimension cube logic below
 	// Spawns a "fake" cube prefab that looks like a normal cube but disappears when in other dimensions
 	// The fake cube is replaced by a real one when it is moved out of the spawner
 	public PickupObject cubePrefab;
@@ -22,11 +22,8 @@ public class CubeSpawner : MonoBehaviour {
 
 	public int baseDimensionForCubes;
 
-	ColorCoded colorCoded;
-
 	IEnumerator Start() {
 		thisCollider = GetComponent<Collider>();
-		colorCoded = GetComponent<ColorCoded>();
 		yield return new WaitForSeconds(0.5f);
 		SpawnNewCube();
     }
@@ -47,7 +44,6 @@ public class CubeSpawner : MonoBehaviour {
 		PickupObject movableObject = other.gameObject.GetComponent<PickupObject>();
 		if (movableObject == objectBeingSuspended) {
 			if (movableObject.isHeld) {
-				movableObject = movableObject.GetComponent<FakeCubeForSpawner>().SpawnRealCube(colorCoded);
 				objectGrabbedFromSpawner = movableObject;
 				objectGrabbedFromSpawner.OnPickupSimple -= DestroyCubeAlreadyGrabbedFromSpawner;
 				SpawnNewCube();
@@ -61,10 +57,7 @@ public class CubeSpawner : MonoBehaviour {
 		const float randomizeOffset = 1.0f;
 		PickupObject newCube = Instantiate(cubePrefab, thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset), new Quaternion());
 		newCube.transform.SetParent(transform, true);
-
-		if (colorCoded != null) {
-			newCube.gameObject.PasteComponent(colorCoded);
-		}
+		newCube.GetComponent<GravityObject>().useGravity = false;
 
 		//newCube.Drop();
 		Physics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>(), true);

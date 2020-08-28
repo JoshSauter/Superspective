@@ -21,7 +21,7 @@ public class InteractableObject : MonoBehaviour {
 	public GameObject thisRendererParent;
 	public bool recursiveChildRenderers = true;
 
-	public void Awake() {
+	public void Start() {
 		if (thisRendererParent == null) {
 			Renderer[] childRenderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
 			if (childRenderers.Length > 0) {

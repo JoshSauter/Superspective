@@ -71,6 +71,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 		// Blur 0-th iteration
 		foreach (var glowObject in glowableObjects) {
+			if (glowObject.renderers == null) continue;
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
 			for (int j = 0; j < glowObject.renderers.Count; j++) {
@@ -84,6 +85,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		commandBuffer.SetRenderTarget(prePassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
 		foreach (var glowObject in glowableObjects) {
+			if (glowObject.renderers == null) continue;
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
 			for (int j = 0; j < glowObject.renderers.Count; j++) {

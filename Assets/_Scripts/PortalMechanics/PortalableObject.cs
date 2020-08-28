@@ -8,6 +8,7 @@ using NaughtyAttributes;
 
 namespace PortalMechanics {
 	public class PortalableObject : MonoBehaviour {
+		public bool DEBUG = false;
 		public Portal sittingInPortal;
 		public Portal hoveredThroughPortal;
 		public Portal grabbedThroughPortal;
@@ -178,14 +179,22 @@ namespace PortalMechanics {
 		}
 
 		void SetMaterials(bool usePortalCopyMaterials) {
-			for (int i = 0; i < renderers.Length; i++) {
-				Renderer r = renderers[i];
+			SetMaterialsForRenderers(renderers, usePortalCopyMaterials);
+			if (usePortalCopyMaterials) {
+				SetMaterialsForRenderers(fakeCopyInstance.renderers, usePortalCopyMaterials);
+			}
+		}
 
-				r.materials = usePortalCopyMaterials ? portalCopyMaterials[r] : originalMaterials[r];
+		void SetMaterialsForRenderers(Renderer[] renderersToChangeMaterialsOf, bool usePortalCopyMaterials) {
+			for (int i = 0; i < renderers.Length; i++) {
+				Renderer rendererToUseAsKey = renderers[i];
+				Renderer rendererToModify = renderersToChangeMaterialsOf[i];
+
+				rendererToModify.materials = usePortalCopyMaterials ? portalCopyMaterials[rendererToUseAsKey] : originalMaterials[rendererToUseAsKey];
 				if (usePortalCopyMaterials) {
 
-					for (int j = 0; j < r.materials.Length; j++) {
-						r.materials[j].CopyMatchingPropertiesFromMaterial(originalMaterials[r][j]);
+					for (int j = 0; j < rendererToModify.materials.Length; j++) {
+						rendererToModify.materials[j].CopyMatchingPropertiesFromMaterial(originalMaterials[rendererToUseAsKey][j]);
 					}
 				}
 			}
@@ -205,19 +214,6 @@ namespace PortalMechanics {
 					Debug.LogWarning("No matching portalCopyShader for shader " + material.shader.name);
 					return null;
 			}
-		}
-
-		private void TransformCopy(Portal inPortal) {
-			Transform obj = fakeCopyInstance.transform;
-			// Position
-			Vector3 relativeObjPos = inPortal.transform.InverseTransformPoint(transform.position);
-			relativeObjPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeObjPos;
-			obj.position = inPortal.otherPortal.transform.TransformPoint(relativeObjPos);
-
-			// Rotation
-			Quaternion relativeRot = Quaternion.Inverse(inPortal.transform.rotation) * transform.rotation;
-			relativeRot = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeRot;
-			obj.rotation = inPortal.otherPortal.transform.rotation * relativeRot;
 		}
 	}
 }

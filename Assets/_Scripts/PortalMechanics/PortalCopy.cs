@@ -13,7 +13,7 @@ public class PortalCopy : MonoBehaviour {
     InteractableGlow maybeOriginalGlow;
     InteractableGlow glow;
 
-    private bool _copyEnabled = true;
+    private bool _copyEnabled = false;
     public bool copyEnabled {
         get { return _copyEnabled; }
         set {
@@ -27,7 +27,7 @@ public class PortalCopy : MonoBehaviour {
         }
     }
 
-    Renderer[] renderers;
+    public Renderer[] renderers;
     Collider[] colliders;
 
     public delegate void PortalCopyAction();
