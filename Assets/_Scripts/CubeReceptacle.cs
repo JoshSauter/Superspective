@@ -12,6 +12,8 @@ public class CubeReceptacle : MonoBehaviour {
 	float translateTime = 0.5f;
 	float afterReleaseCooldown = 1f;
 
+	ColorCoded colorCoded;
+
 	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 	public delegate void CubeReceptacleActionSimple();
 
@@ -94,6 +96,7 @@ public class CubeReceptacle : MonoBehaviour {
 
     void Start() {
 		AddTriggerZone();
+		colorCoded = GetComponent<ColorCoded>();
     }
 
 	void AddTriggerZone() {
@@ -110,6 +113,9 @@ public class CubeReceptacle : MonoBehaviour {
 
 	private void OnTriggerStay(Collider other) {
 		PickupObject cube = other.gameObject.GetComponent<PickupObject>();
+		if (colorCoded != null && !colorCoded.AcceptedColor(cube.GetComponent<ColorCoded>())) {
+			return;
+		}
 		if (cube != null && cubeInReceptacle == null) {
 			Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
 			cube.Drop();

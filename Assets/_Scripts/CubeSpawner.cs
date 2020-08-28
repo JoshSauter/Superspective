@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using EpitaphUtils;
 
 public class CubeSpawner : MonoBehaviour {
 	[Label("Fake cube for spawner prefab")]
@@ -21,8 +22,11 @@ public class CubeSpawner : MonoBehaviour {
 
 	public int baseDimensionForCubes;
 
+	ColorCoded colorCoded;
+
 	IEnumerator Start() {
 		thisCollider = GetComponent<Collider>();
+		colorCoded = GetComponent<ColorCoded>();
 		yield return new WaitForSeconds(0.5f);
 		SpawnNewCube();
     }
@@ -43,7 +47,7 @@ public class CubeSpawner : MonoBehaviour {
 		PickupObject movableObject = other.gameObject.GetComponent<PickupObject>();
 		if (movableObject == objectBeingSuspended) {
 			if (movableObject.isHeld) {
-				movableObject = movableObject.GetComponent<FakeCubeForSpawner>().SpawnRealCube();
+				movableObject = movableObject.GetComponent<FakeCubeForSpawner>().SpawnRealCube(colorCoded);
 				objectGrabbedFromSpawner = movableObject;
 				objectGrabbedFromSpawner.OnPickupSimple -= DestroyCubeAlreadyGrabbedFromSpawner;
 				SpawnNewCube();
@@ -57,6 +61,10 @@ public class CubeSpawner : MonoBehaviour {
 		const float randomizeOffset = 1.0f;
 		PickupObject newCube = Instantiate(cubePrefab, thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset), new Quaternion());
 		newCube.transform.SetParent(transform, true);
+
+		if (colorCoded != null) {
+			newCube.gameObject.PasteComponent(colorCoded);
+		}
 
 		//newCube.Drop();
 		Physics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>(), true);

@@ -36,7 +36,7 @@ public class FakeCubeForSpawner : MonoBehaviour {
 		}
 	}
 
-	public PickupObject SpawnRealCube() {
+	public PickupObject SpawnRealCube(ColorCoded colorCoded) {
 		GetComponent<Collider>().enabled = false;
 		PickupObject newCube = Instantiate(realCubePrefab, transform.position, transform.rotation);
 		newCube.transform.SetParent(thisSpawner.transform, true);
@@ -48,6 +48,10 @@ public class FakeCubeForSpawner : MonoBehaviour {
 		thisSpawner.objectBeingSuspended = newCube;
 		thisSpawner.rigidbodyOfObjectBeingSuspended = newCube.thisRigidbody;
 		newCube.thisRigidbody.useGravity = false;
+
+		if (colorCoded != null) {
+			newCube.gameObject.PasteComponent(colorCoded);
+		}
 
 		DimensionObjectBase cubeDimensionObj = newCube.GetComponent<DimensionObjectBase>();
 		if (cubeDimensionObj != null) {
