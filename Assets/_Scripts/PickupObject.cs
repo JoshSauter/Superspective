@@ -4,6 +4,7 @@ using UnityEngine;
 using EpitaphUtils;
 using EpitaphUtils.PortalUtils;
 using PortalMechanics;
+using NaughtyAttributes;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PickupObject : MonoBehaviour {
@@ -15,6 +16,7 @@ public class PickupObject : MonoBehaviour {
 		Pickup();
 	}
 
+	public bool isReplaceable = true;
 	private bool _interactable = true;
 	public bool interactable {
 		get { return _interactable; }
@@ -50,6 +52,18 @@ public class PickupObject : MonoBehaviour {
 	public static PickupObjectAction OnAnyDrop;
 
 	Vector3 playerPosLastFrame;
+	public SoundSettings pickupSound, dropSound;
+
+	[Button("Test PickupSound")]
+	void PlayPickupSound() {
+		pickupSound.gameObjectAttachedTo = gameObject;
+		SoundManager.instance.Play("PickupObject", pickupSound, true);
+	}
+	[Button("Test DropSound")]
+	void PlayDropSound() {
+		dropSound.gameObjectAttachedTo = gameObject;
+		SoundManager.instance.Play("DropObject", dropSound, true);
+	}
 
 	void Awake() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
@@ -66,6 +80,8 @@ public class PickupObject : MonoBehaviour {
 		if (interactableGlow == null) {
 			interactableGlow = gameObject.AddComponent<InteractableGlow>();
 		}
+
+		pickupSound.gameObjectAttachedTo = dropSound.gameObjectAttachedTo = gameObject;
 	}
 
 	void Start() {
@@ -115,7 +131,7 @@ public class PickupObject : MonoBehaviour {
 			if (portalableObject != null && portalableObject.grabbedThroughPortal != null) {
 				playerPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerPositionalDiff);
 			}
-			debug.Log("Positional diff: " + playerPositionalDiff.ToString("F3"));
+			debug.Log($"Positional diff: {playerPositionalDiff:F3}");
 			thisRigidbody.MovePosition(transform.position + playerPositionalDiff);
 
 			Vector3 diff = targetPos - thisRigidbody.position;
@@ -140,7 +156,7 @@ public class PickupObject : MonoBehaviour {
 		int tempLayer = gameObject.layer;
 		gameObject.layer = ignoreRaycastLayer;
 
-		raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
+		raycastHits = PortalUtils.RaycastThroughPortals(playerCam.position, playerCam.forward, holdDistance, layerMask);
 		Vector3 targetPos = raycastHits.finalPosition;
 		gameObject.layer = tempLayer;
 
@@ -160,7 +176,7 @@ public class PickupObject : MonoBehaviour {
 			portalableObject.fakeCopyInstance.gameObject.layer = ignoreRaycastLayer;
 		}
 
-		raycastHits = PortalUtils.RaycastThroughPortals(player.position, playerCam.forward, holdDistance, layerMask);
+		raycastHits = PortalUtils.RaycastThroughPortals(playerCam.position, playerCam.forward, holdDistance, layerMask);
 		Vector3 targetPos = raycastHits.finalPosition;
 
 		gameObject.layer = tempLayer;
@@ -197,6 +213,8 @@ public class PickupObject : MonoBehaviour {
 			isHeld = true;
 			currentCooldown = pickupDropCooldown;
 
+			SoundManager.instance.Play("PickupObject", pickupSound, true);
+
 			OnPickupSimple?.Invoke();
 			OnPickup?.Invoke(this);
 			OnAnyPickupSimple?.Invoke();
@@ -218,10 +236,14 @@ public class PickupObject : MonoBehaviour {
 			isHeld = false;
 			currentCooldown = pickupDropCooldown;
 
+			SoundManager.instance.Play("DropObject", dropSound, true);
+
 			OnDropSimple?.Invoke();
 			OnDrop?.Invoke(this);
 			OnAnyDropSimple?.Invoke();
 			OnAnyDrop?.Invoke(this);
 		}
 	}
+
+
 }

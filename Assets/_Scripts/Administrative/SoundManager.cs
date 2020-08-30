@@ -38,13 +38,15 @@ public class SoundSettings {
 	public float minDistance = 1f;
 	public float maxDistance = 500f;
 }
+[ExecuteInEditMode]
 public class SoundManager : Singleton<SoundManager> {
 	public bool DEBUG = false;
 	DebugLogger debug;
 	Dictionary<string, AudioSource> knownAudioSources;
 
-	private void Awake() {
+	private void OnEnable() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
+		knownAudioSources = new Dictionary<string, AudioSource>();
 	}
 
 	//public AudioSource GetAvailableAudioSource() {
@@ -55,11 +57,11 @@ public class SoundManager : Singleton<SoundManager> {
 	//		return gameObject.AddComponent<AudioSource>();
 	//	}
 	//}
-	private void Start() {
-		knownAudioSources = new Dictionary<string, AudioSource>();
-	}
 
 	public void Play(string soundName, SoundSettings soundSettings, bool forcePlay = false) {
+		if (knownAudioSources == null) {
+			knownAudioSources = new Dictionary<string, AudioSource>();
+		}
 		AudioSource audioSource;
 		if (knownAudioSources.ContainsKey(soundName)) {
 			audioSource = knownAudioSources[soundName];
@@ -85,7 +87,10 @@ public class SoundManager : Singleton<SoundManager> {
 					Debug.LogError("No gameobject set for EffectOnGameObject: " + soundSettings);
 					return null;
 				}
-				AudioSource newAudioSource = soundSettings.gameObjectAttachedTo.AddComponent<AudioSource>();
+				AudioSource newAudioSource = soundSettings.gameObjectAttachedTo.GetComponent<AudioSource>();
+				if (newAudioSource == null) {
+					newAudioSource = soundSettings.gameObjectAttachedTo.AddComponent<AudioSource>();
+				}
 				FillAudioSourceFromSettings(ref newAudioSource, soundSettings);
 				return newAudioSource;
 			}

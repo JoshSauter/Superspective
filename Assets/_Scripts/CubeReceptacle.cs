@@ -122,6 +122,7 @@ public class CubeReceptacle : MonoBehaviour {
 			cube.interactable = false;
 			cubeRigidbody.isKinematic = true;
 			cubeInReceptacle = cube;
+			cubeInReceptacle.isReplaceable = false;
 			cubeInReceptacle.OnPickupSimple += OnPickupFromReceptacle;
 
 			StartCoroutine(SnapCubeToPosition());
@@ -159,6 +160,7 @@ public class CubeReceptacle : MonoBehaviour {
 		PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
 		cubeInReceptacle = null;
 		cube.interactable = true;
+		cube.isReplaceable = true;
 		triggerZone.enabled = false;
 		Invoke("RestoreTriggerZoneAfterCooldown", afterReleaseCooldown);
 		OnCubeReleaseEnd?.Invoke(this, cubeThatWasInReceptacle);

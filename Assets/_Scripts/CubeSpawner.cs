@@ -38,6 +38,10 @@ public class CubeSpawner : MonoBehaviour {
 				rigidbodyOfObjectBeingSuspended.AddTorque(10*Vector3.up, ForceMode.Force);
 			}
 		}
+
+		if (objectGrabbedFromSpawner != null) {
+			objectBeingSuspended.gameObject.SetActive(objectGrabbedFromSpawner.isReplaceable);
+		}
     }
 
 	private void OnTriggerExit(Collider other) {
