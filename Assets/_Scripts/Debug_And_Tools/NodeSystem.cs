@@ -268,7 +268,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 				Node newNode = ns.AddNewChildToSelected();
 				// Make it easy to do staircases:
 				if (buildAsStaircase) {
-					newNode.pos += 0.5f * (temp ? Vector3.up : Vector3.left);
+					newNode.pos += 0.5f * (temp ? Vector3.left : Vector3.up);
 				}
 				temp = !temp;
 			}
