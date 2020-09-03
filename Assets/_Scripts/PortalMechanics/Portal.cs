@@ -77,6 +77,9 @@ namespace PortalMechanics {
 		#region MonoBehaviour Methods
 		protected virtual void Awake() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
+			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
+			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
+			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
 			if (renderers == null || renderers.Length == 0) {
 				if (compositePortal) {
 					renderers = GetComponentsInChildren<Renderer>();
@@ -111,10 +114,6 @@ namespace PortalMechanics {
 				}
 			}
 
-			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
-			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
-			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
-
 			volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
 			volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetComponent<Renderer>()).ToArray();
 			for (int i = 0; i < volumetricPortals.Length; i++) {
@@ -138,7 +137,7 @@ namespace PortalMechanics {
 		}
 
 		void CreateRenderTexture(int width, int height) {
-			internalRenderTextureCopy = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+			internalRenderTextureCopy = new RenderTexture(width, height, 24, RenderTextureFormat.DefaultHDR);
 			internalDepthNormalsTextureCopy = new RenderTexture(width, height, 24, DepthNormalsTextureFormat);
 			portalMaterial.mainTexture = internalRenderTextureCopy;
 			portalMaterial.SetTexture("_DepthNormals", internalDepthNormalsTextureCopy);
