@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Audio;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,12 +26,24 @@ public class ViewLockObject : MonoBehaviour {
 	public ViewLockEvent OnViewLockExitBegin;
 	public ViewLockEvent OnViewLockExitFinish;
 
+	SoundEffect enterViewLockSfx;
+
 	void Awake() {
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
 		}
 		interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+
+		InitAudio();
+	}
+
+	void InitAudio() {
+		if (enterViewLockSfx == null) {
+			enterViewLockSfx = gameObject.AddComponent<SoundEffectOnGameObject>();
+			enterViewLockSfx.pitch = 0.5f;
+			enterViewLockSfx.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/ViewLockObject");
+		}
 	}
 
     void Start() {
@@ -43,6 +56,7 @@ public class ViewLockObject : MonoBehaviour {
 	public void OnLeftMouseButtonDown() {
 		if (PlayerLook.instance.viewLockedObject == null) {
 			hitbox.enabled = false;
+			enterViewLockSfx.Play(true);
 			PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
 			PlayerMovement.instance.thisRigidbody.isKinematic = true;
 		}

@@ -5,6 +5,7 @@ using EpitaphUtils;
 using EpitaphUtils.PortalUtils;
 using PortalMechanics;
 using NaughtyAttributes;
+using Audio;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PickupObject : MonoBehaviour {
@@ -52,18 +53,8 @@ public class PickupObject : MonoBehaviour {
 	public static PickupObjectAction OnAnyDrop;
 
 	Vector3 playerPosLastFrame;
-	public SoundSettings pickupSound, dropSound;
-
-	[Button("Test PickupSound")]
-	void PlayPickupSound() {
-		pickupSound.gameObjectAttachedTo = gameObject;
-		SoundManager.instance.Play("PickupObject", pickupSound, true);
-	}
-	[Button("Test DropSound")]
-	void PlayDropSound() {
-		dropSound.gameObjectAttachedTo = gameObject;
-		SoundManager.instance.Play("DropObject", dropSound, true);
-	}
+	public SoundEffect pickupSound;
+	public SoundEffect dropSound;
 
 	void Awake() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
@@ -80,8 +71,6 @@ public class PickupObject : MonoBehaviour {
 		if (interactableGlow == null) {
 			interactableGlow = gameObject.AddComponent<InteractableGlow>();
 		}
-
-		pickupSound.gameObjectAttachedTo = dropSound.gameObjectAttachedTo = gameObject;
 	}
 
 	void Start() {
@@ -213,7 +202,9 @@ public class PickupObject : MonoBehaviour {
 			isHeld = true;
 			currentCooldown = pickupDropCooldown;
 
-			SoundManager.instance.Play("PickupObject", pickupSound, true);
+			// Pitch goes 1 -> 1.25 -> 1.5 -> 1
+			pickupSound.pitch = ((pickupSound.pitch - .75f) % .75f) + 1f;
+			pickupSound.Play(true);
 
 			OnPickupSimple?.Invoke();
 			OnPickup?.Invoke(this);
@@ -236,7 +227,7 @@ public class PickupObject : MonoBehaviour {
 			isHeld = false;
 			currentCooldown = pickupDropCooldown;
 
-			SoundManager.instance.Play("DropObject", dropSound, true);
+			dropSound.Play(true);
 
 			OnDropSimple?.Invoke();
 			OnDrop?.Invoke(this);
@@ -244,6 +235,4 @@ public class PickupObject : MonoBehaviour {
 			OnAnyDrop?.Invoke(this);
 		}
 	}
-
-
 }

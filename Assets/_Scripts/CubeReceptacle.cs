@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Audio;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ public class CubeReceptacle : MonoBehaviour {
 	float afterReleaseCooldown = 1f;
 
 	ColorCoded colorCoded;
+
+	public SoundEffect cubeEnterSfx, cubeReleaseSfx;
 
 	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 	public delegate void CubeReceptacleActionSimple();
@@ -113,7 +116,7 @@ public class CubeReceptacle : MonoBehaviour {
 
 	private void OnTriggerStay(Collider other) {
 		PickupObject cube = other.gameObject.GetComponent<PickupObject>();
-		if (colorCoded != null && !colorCoded.AcceptedColor(cube.GetComponent<ColorCoded>())) {
+		if (colorCoded != null && !colorCoded.AcceptedColor(other.gameObject.GetComponent<ColorCoded>())) {
 			return;
 		}
 		if (cube != null && cubeInReceptacle == null) {
@@ -137,6 +140,8 @@ public class CubeReceptacle : MonoBehaviour {
 	IEnumerator ReleaseCubeFromReceptacle(PickupObject cube) {
 		OnCubeReleaseStart?.Invoke(this, cubeInReceptacle);
 		OnCubeReleaseStartSimple?.Invoke();
+
+		cubeReleaseSfx.PlayOneShot();
 
 		cube.interactable = false;
 
@@ -175,11 +180,15 @@ public class CubeReceptacle : MonoBehaviour {
 		OnCubeHoldStart?.Invoke(this, cubeInReceptacle);
 		OnCubeHoldStartSimple?.Invoke();
 
+
 		Quaternion startRot = cubeInReceptacle.transform.rotation;
 		Quaternion endRot = ClosestRotation(startRot);
 
 		Vector3 startRotPos = cubeInReceptacle.transform.position;
 		Vector3 endRotPos = transform.TransformPoint(0, transform.InverseTransformPoint(startRotPos).y, 0);
+
+		cubeEnterSfx.audioSource.volume = 0.75f;
+		cubeEnterSfx.PlayOneShot();
 
 		float timeElapsed = 0;
 		while (cubeInReceptacle != null && timeElapsed < rotateTime) {
@@ -194,6 +203,7 @@ public class CubeReceptacle : MonoBehaviour {
 
 		Vector3 startPos = cubeInReceptacle.transform.position;
 		Vector3 endPos = transform.TransformPoint(0, 0.5f, 0);
+
 
 		timeElapsed = 0;
 		while (cubeInReceptacle != null && timeElapsed < translateTime) {

@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Linq;
 using System;
 using NaughtyAttributes;
+using Audio;
 
 namespace PowerTrailMechanics {
 	public class NodeTrailInfo {
@@ -26,6 +27,7 @@ namespace PowerTrailMechanics {
 		}
 
 		public Renderer[] renderers;
+		Collider[] colliders;
 		Material[] materials;
 		public NodeSystem powerNodes;
 		public List<NodeTrailInfo> trailInfo = new List<NodeTrailInfo>();
@@ -57,6 +59,8 @@ namespace PowerTrailMechanics {
 		[HideIf(EConditionOperator.Or, "useDurationInsteadOfSpeed", "useSameSpeedsForPowerOnOff")]
 		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
+
+		public SoundEffectAtLocation sound;
 
 		#region events
 		public delegate void PowerTrailAction();
@@ -100,11 +104,16 @@ namespace PowerTrailMechanics {
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
+			StartCoroutine(InitSound());
+			gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
 		}
 
 		void Start() {
 			if (renderers == null || renderers.Length == 0) {
 				renderers = GetComponents<Renderer>();
+			}
+			if (colliders == null || colliders.Length == 0) {
+				colliders = renderers.Select(r => r.GetComponent<Collider>()).Where(c => c != null).ToArray();
 			}
 			materials = renderers.Select(r => r.material).ToArray();
 			debug = new DebugLogger(this, () => DEBUG);
@@ -117,7 +126,7 @@ namespace PowerTrailMechanics {
 			}
 
 			PopulateStaticGPUInfo();
-
+			StartCoroutine(UpdateAudio());
 			SetStartState();
 		}
 
@@ -232,6 +241,7 @@ namespace PowerTrailMechanics {
 		void UpdateState(float prevDistance, float nextDistance) {
 			if (powerIsOn) {
 				if (prevDistance == 0 && nextDistance > 0) {
+					sound.Play();
 					state = PowerTrailState.partiallyPowered;
 				}
 				else if (prevDistance < maxDistance && nextDistance == maxDistance) {
@@ -243,6 +253,7 @@ namespace PowerTrailMechanics {
 					state = PowerTrailState.partiallyPowered;
 				}
 				else if (prevDistance > 0 && nextDistance == 0) {
+					sound.Stop();
 					state = PowerTrailState.depowered;
 				}
 			}
@@ -258,8 +269,88 @@ namespace PowerTrailMechanics {
 			}
 			else return distance;
 		}
+#region Audio
+		IEnumerator InitSound() {
+			if (sound == null) {
+				sound = gameObject.AddComponent<SoundEffectAtLocation>();
+				sound.location = transform.position;
+				yield return new WaitUntil(() => sound.audioSource != null);
+				sound.audioSource.loop = true;
+				sound.audioSource.playOnAwake = false;
+				sound.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/Electrical/ElectricalHum2Looping");
+				sound.audioSource.spatialBlend = 1f;
+				sound.audioSource.dopplerLevel = 0.125f;
+				sound.audioSource.pitch = 0.5f;
+			}
+		}
+		IEnumerator UpdateAudio() {
+			float minVolume = 0.15f;
+			float maxVolume = 1f;
+			WaitForSeconds shortWait = new WaitForSeconds(.025f);
+			WaitForSeconds longWait = new WaitForSeconds(.5f);
+			while (true) {
+				float maxSoundDistance = 30f;
+				if (state == PowerTrailState.depowered || sound.audioSource == null) {
+					//Debug.Log($"{gameObject.name} is off.");
+					yield return longWait;
+					continue;
+				}
 
-		#region EditorGizmos
+				Vector3 closestPoint = Vector3.zero;
+				float minDistance = maxSoundDistance + 1f;
+				// If the player is within maxSoundDistance from any collider of this PowerTrail
+				if (Physics.OverlapSphere(Player.instance.transform.position, maxSoundDistance, 1 << gameObject.layer).Where(c => colliders.Contains(c)).Any()) {
+					//Debug.Log($"PLAYER CLOSE TO {gameObject.name}");
+					for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
+						if (interpolationValues[i] == 0) continue;
+
+						int startIndex = startNodeIndex[i];
+						int endIndex = endNodeIndex[i];
+						Vector3 startPoint = nodePositions[startIndex];
+						Vector3 endPoint = nodePositions[endIndex];
+						if (interpolationValues[i] < 1) {
+							endPoint = Vector3.Lerp(startPoint, endPoint, interpolationValues[i]);
+						}
+
+						Vector3 nearestPointOnLine = FindNearestPointOnLine(startPoint, endPoint, EpitaphScreen.instance.playerCamera.transform.position);
+						float distanceToNearestPointOnLine = (EpitaphScreen.instance.playerCamera.transform.position - nearestPointOnLine).magnitude;
+
+						if (distanceToNearestPointOnLine < minDistance) {
+							minDistance = distanceToNearestPointOnLine;
+							closestPoint = nearestPointOnLine;
+						} 
+					}
+				}
+
+				if (minDistance < maxSoundDistance) {
+					//debug.Log($"PLAYER IS {minDistance} FROM {gameObject.name}");
+					sound.location = closestPoint;
+					sound.audioSource.volume = maxVolume * (distance / maxDistance);
+					sound.pitch = 0.5f * (distance / maxDistance);
+					//sound.audioSource.volume = Mathf.Lerp(minVolume, maxVolume, Mathf.InverseLerp(0f, maxSoundDistance, minDistance));
+				}
+				else {
+					sound.audioSource.volume = 0f;
+				}
+
+				yield return shortWait;
+			}
+		}
+
+		private Vector3 FindNearestPointOnLine(Vector3 start, Vector3 end, Vector3 point) {
+			//Get heading
+			Vector3 heading = (end - start);
+			float magnitudeMax = heading.magnitude;
+			heading.Normalize();
+
+			//Do projection from the point but clamp it
+			Vector3 lhs = point - start;
+			float dotP = Vector3.Dot(lhs, heading);
+			dotP = Mathf.Clamp(dotP, 0f, magnitudeMax);
+			return start + heading * dotP;
+		}
+#endregion
+#region EditorGizmos
 		bool editorGizmosEnabled = false;
 		public static float gizmoSphereSize = 0.15f;
 		private void OnDrawGizmos() {

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using PortalMechanics;
 using EpitaphUtils;
+using Audio;
 
 public class PlayerLandingSound : MonoBehaviour {
-	public SoundSettings shoeSound;
-	public SoundSettings thumpSound;
+	public SoundEffect shoeSound;
+	public SoundEffect thumpSound;
 	PlayerMovement playerMovement;
 	bool wasGrounded = true;
 	float startVolume;
@@ -17,8 +18,8 @@ public class PlayerLandingSound : MonoBehaviour {
 
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
-		startVolume = shoeSound.volume;
-		thumpStartVolume = thumpSound.volume;
+		startVolume = shoeSound.audioSource.volume;
+		thumpStartVolume = thumpSound.audioSource.volume;
 
 		Portal.OnAnyPortalTeleport += HandlePlayerTeleported;
     }
@@ -58,15 +59,15 @@ public class PlayerLandingSound : MonoBehaviour {
 		if (simulatedSpeedOfImpact < minSpeed) yield break;
 
 		float volume = startVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
-		shoeSound.volume = volume;
+		shoeSound.audioSource.volume = volume;
 
 		//SoundManager.instance.Play("PlayerLandingShoes", shoeSound);
 
 		if (simulatedSpeedOfImpact < 2 * minSpeed) yield break;
 
 		float thumpVolume = thumpStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(2 * minSpeed, 2 * maxSpeed, simulatedSpeedOfImpact));
-		thumpSound.volume = thumpVolume;
+		thumpSound.audioSource.volume = thumpVolume;
 
-		SoundManager.instance.Play("PlayerLandingThump", thumpSound);
+		thumpSound.Play();
 	}
 }

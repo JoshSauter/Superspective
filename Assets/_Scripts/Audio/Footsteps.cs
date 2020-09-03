@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Audio;
 
 public class Footsteps : MonoBehaviour {
-	public SoundSettings sound;
+	public SoundEffect sound;
 	Headbob bob;
 	PlayerMovement playerMovement;
 	float defaultVolume;
@@ -20,7 +21,7 @@ public class Footsteps : MonoBehaviour {
 		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
 
 		bob = GetComponent<Headbob>();
-		defaultVolume = sound.volume;
+		defaultVolume = sound.audioSource.volume;
 
 		if (bob == null) {
 			Debug.LogWarning("Footsteps requires headbob info");
@@ -34,7 +35,7 @@ public class Footsteps : MonoBehaviour {
 
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
-		sound.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
+		sound.audioSource.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
 		if (playerMovement.grounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
 			float thisFrameOffset = thisFrameBobAmount - curBobAmountUnamplified;
@@ -56,13 +57,13 @@ public class Footsteps : MonoBehaviour {
 	}
 
 	void PlayFootstepAtVolume(bool shouldForcePlay, float tempVolume) {
-		float tmp = sound.volume;
-		sound.volume = tempVolume;
+		float tmp = sound.audioSource.volume;
+		sound.audioSource.volume = tempVolume;
 		PlayFootstep(shouldForcePlay);
-		sound.volume = tmp;
+		sound.audioSource.volume = tmp;
 	}
 
 	void PlayFootstep(bool shouldForcePlay) {
-		SoundManager.instance.Play("footstep", sound, shouldForcePlay);
+		sound.Play(shouldForcePlay);
 	}
 }

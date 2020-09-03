@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using Audio;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : Singleton<PlayerMovement> {
@@ -60,7 +61,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	public float isGroundedSpherecastDistance = 0.5f;
 	#endregion
 
-	public SoundSettings jumpSound;
+	public SoundEffect jumpSound;
 
 	#region events
 	public delegate void PlayerMovementAction();
@@ -264,7 +265,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	/// </summary>
 	IEnumerator Jump() {
 		OnJump?.Invoke();
-		SoundManager.instance.Play("PlayerJumpShoes", jumpSound);
+		jumpSound.Play();
 
 		jumpIsOnCooldown = true;
 		underMinJumpTime = true;

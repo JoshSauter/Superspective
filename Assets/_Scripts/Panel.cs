@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Audio;
 
 public class Panel : MonoBehaviour {
 	EpitaphRenderer thisRenderer;
@@ -10,6 +11,14 @@ public class Panel : MonoBehaviour {
 	public float colorLerpTime = 1.75f;
 
 	public bool activated = false;
+
+	// Sound settings
+	bool soundActivated = false;
+	float minPitch = 0.5f;
+	float maxPitch = 1f;
+	float minVolume = 0.25f;
+	float maxVolume = 1f;
+	public SoundEffect electricalHumSound;
 
 #region events
 	public delegate void PanelAction();
@@ -37,6 +46,44 @@ public class Panel : MonoBehaviour {
 		gemColor = gemButtonRenderer.GetMainColor();
 		gemButton.OnButtonPressFinish += PanelActivate;
 		gemButton.OnButtonDepressBegin += PanelDeactivate;
+
+		gemButton.OnButtonPressBegin += (ctx) => TurnOnSounds();
+		gemButton.OnButtonDepressBegin += (ctx) => TurnOffSounds();
+
+		electricalHumSound.audioSource.pitch = minPitch;
+		electricalHumSound.audioSource.volume = minVolume;
+	}
+
+	private void Update() {
+		UpdateSound();
+	}
+
+	void TurnOnSounds() {
+		soundActivated = true;
+	}
+
+	void TurnOffSounds() {
+		soundActivated = false;
+	}
+
+	void UpdateSound() {
+		if (soundActivated && electricalHumSound.audioSource.volume < maxVolume) {
+			float soundLerpSpeedOn = 1f;
+			float newPitch = Mathf.Clamp(electricalHumSound.audioSource.pitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
+			float newVolume = Mathf.Clamp(electricalHumSound.audioSource.volume + Time.deltaTime * soundLerpSpeedOn, minVolume, maxVolume);
+
+			electricalHumSound.audioSource.pitch = newPitch;
+			electricalHumSound.audioSource.volume = newVolume;
+		}
+
+		if (!soundActivated && electricalHumSound.audioSource.volume > minVolume) {
+			float soundLerpSpeedOff = .333f;
+			float newPitch = Mathf.Clamp(electricalHumSound.audioSource.pitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
+			float newVolume = Mathf.Clamp(electricalHumSound.audioSource.volume - Time.deltaTime * soundLerpSpeedOff, minVolume, maxVolume);
+
+			electricalHumSound.audioSource.pitch = newPitch;
+			electricalHumSound.audioSource.volume = newVolume;
+		}
 	}
 
 	virtual protected void PanelActivate(Button b) {
