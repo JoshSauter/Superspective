@@ -106,15 +106,18 @@ namespace PortalMechanics {
 			portalCamera.cullingMask &= ~hideFromPortalCamera;
 			portalCamera.backgroundColor = Color.white;
 
-			portalCamera.gameObject.AddComponent<VirtualPortalCamera>().DEBUG = DEBUG;
+			VirtualPortalCamera virtualPortalCam = portalCamera.gameObject.AddComponent<VirtualPortalCamera>();
+			virtualPortalCam.DEBUG = DEBUG;
 
 			// Copy post-process effects from player's camera
 			// Order of components here matters; it affects the rendering order of the postprocess effects
 			//portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
-			portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ColorfulFog>());                                             // Copy Fog
+			ColorfulFog fog = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ColorfulFog>());                            // Copy Fog
 			BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 			//edgeDetection.enabled = false;
 			//edgeDetection.checkPortalDepth = false;
+			virtualPortalCam.postProcessEffects.Add(fog);
+			virtualPortalCam.postProcessEffects.Add(edgeDetection);
 
 			portalCamera.gameObject.name = "VirtualPortalCamera";
 		}
