@@ -31,7 +31,10 @@ public class InteractableObject : MonoBehaviour {
 
 		if (thisRendererParent != null) {
 			// gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
-			InteractableGlow glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
+			InteractableGlow glow = thisRendererParent.gameObject.GetComponent<InteractableGlow>();
+			if (glow == null) {
+				glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
+			}
 			glow.recursiveChildRenderers = recursiveChildRenderers;
 			glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
 			glow.overrideGlowColor = overrideGlowColor;
