@@ -10,13 +10,13 @@ Shader "Hidden/JG/ColorfulFog"
 		CGINCLUDE
 
 	#include "UnityCG.cginc"
+	#include "../../Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
 	#pragma target 2.0
 	uniform sampler2D _MainTex;
 	uniform int _UseCustomDepth;
 	uniform sampler2D_float _CameraDepthTexture;
-	uniform sampler2D _CameraDepthNormalsTexture;
+	//uniform sampler2D _CameraDepthNormalsTexture; // Defined in PortalSurfaceHelpers.cginc already
 	uniform sampler2D_float _CustomDepthTexture;
-	uniform sampler2D _PortalMask;
 	int _SkyboxFog;
 	samplerCUBE _Cube;
 	sampler2D _Gradient;

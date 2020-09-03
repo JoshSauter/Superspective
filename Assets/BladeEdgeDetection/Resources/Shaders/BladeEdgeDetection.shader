@@ -71,7 +71,7 @@
 
 #ifdef CHECK_PORTAL_DEPTH
 			// If enabled, will check if all samples are within a portal. If so, don't draw an edge here
-			sampler2D _PortalMask;
+			#include "../../../Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
 #endif
 
 			// Source texture information, screen before edge detection is applied
@@ -80,7 +80,9 @@
 			half4 _MainTex_ST;
 
 			// Depth + Normal texture information, gathered from Unity's built-in global shader variables
+#ifndef CHECK_PORTAL_DEPTH // PortalSurfaceHelpers.cginc brings in _CameraDepthNormalsTexture
 			sampler2D _CameraDepthNormalsTexture;
+#endif
 			half4 _CameraDepthNormalsTexture_ST;
 
 			struct UVPositions {
@@ -306,15 +308,9 @@
 				float depthSamples[NUM_SAMPLES];
 				float3 normalSamples[NUM_SAMPLES];
 				float obliqueness[NUM_SAMPLES];
-#ifdef CHECK_PORTAL_DEPTH
-				half4 portalSamples[NUM_SAMPLES];
-				float portalDepthSamples[NUM_SAMPLES];
-#endif
+
 				for (int i = 0; i < NUM_SAMPLES; i++) {
 					samples[i] = tex2D(_CameraDepthNormalsTexture, uvPositions.UVs[i]);
-#ifdef CHECK_PORTAL_DEPTH
-					portalSamples[i] = tex2D(_PortalMask, uvPositions.UVs[i]);
-#endif
 				}
 
 				float minDepthValue = 1;
@@ -330,17 +326,13 @@
 
 					minDepthValue = min(minDepthValue, depthValue);
 					avgObliqueness += obliqueness[s];
-#ifdef CHECK_PORTAL_DEPTH
-					DecodeDepthNormal(portalSamples[s], depthValue, normalValue);
-					portalDepthSamples[s] = depthValue;
-#endif
 				}
 				avgObliqueness /= NUM_SAMPLES;
 
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
 #ifdef CHECK_PORTAL_DEPTH
-				half allSamplesBehindPortal = depthSamples[0] > portalDepthSamples[0]-0.00373 && portalDepthSamples[0] < 1;
+				half allSamplesBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
 #endif
 				float maxDepthRatio = 0;
 				float maxNormalDiff = 0;
@@ -356,7 +348,7 @@
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
 
 #ifdef CHECK_PORTAL_DEPTH
-					allSamplesBehindPortal *= depthSamples[x] > portalDepthSamples[x]-0.00373 && portalDepthSamples[x] < 1;
+					allSamplesBehindPortal *= SampleBehindPortal(uvPositions.UVs[x]);
 #endif
 
 					/////////////////////////
