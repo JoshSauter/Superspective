@@ -49,7 +49,7 @@ namespace PortalMechanics {
 
 			public static RecursiveTextures CreateTextures() {
 				RecursiveTextures recursiveTextures = new RecursiveTextures {
-					mainTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.ARGB32),
+					mainTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.DefaultHDR),
 					depthNormalsTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat)
 				};
 				return recursiveTextures;
@@ -280,6 +280,7 @@ namespace PortalMechanics {
 
 			foreach (var finishedPortalTexture in finishedPortalTextures) {
 				finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value.mainTexture);
+				finishedPortalTexture.Key.SetDepthNormalsTexture(finishedPortalTexture.Value.depthNormalsTexture);
 			}
 
 			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
@@ -303,10 +304,7 @@ namespace PortalMechanics {
 			EDColors edgeColors = new EDColors(portalCameraEdgeDetection);
 
 			// Key == Visible Portal, Value == visible portal screen bounds
-			Dictionary<Portal, Rect[]> visiblePortals = new Dictionary<Portal, Rect[]>();
-			if (portal.renderRecursivePortals) {
-				visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
-			}
+			Dictionary<Portal, Rect[]> visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
 
 			debug.Log("Depth (Index): " + depth + " (" + index + ")\nPortal: " + portal.name + "\nNumVisible: " + visiblePortals.Count + "\nPortalCamPos: " + portalCamera.transform.position + "\nTree: " + tree + "\nScreenBounds: " + string.Join(", ", portalScreenBounds));
 
@@ -351,20 +349,27 @@ namespace PortalMechanics {
 
 			portalCamera.targetTexture = renderStepTextures[index].depthNormalsTexture;
 			// TODO: Don't find the shader every time
-			portalCamera.GetComponent<BloomOptimized>().enabled = false;
+			//bool bloomWasEnabled = portalCamera.GetComponent<BloomOptimized>().enabled;
+			bool fogWasEnabled = portalCamera.GetComponent<ColorfulFog>().enabled;
+			bool edgesWereEnabled = portalCamera.GetComponent<BladeEdgeDetection>().enabled;
+			//portalCamera.GetComponent<BloomOptimized>().enabled = false;
 			portalCamera.GetComponent<ColorfulFog>().enabled = false;
 			portalCamera.GetComponent<BladeEdgeDetection>().enabled = false;
 			portalCamera.RenderWithShader(Shader.Find("Custom/CustomDepthNormalsTexture"), "RenderType");
 			portal.SetDepthNormalsTexture(renderStepTextures[index].depthNormalsTexture);
 
 			debug.Log("Rendering: " + index + " to " + portal.name + "'s RenderTexture, depth: " + depth);
-			portalCamera.GetComponent<BloomOptimized>().enabled = true;
-			portalCamera.GetComponent<ColorfulFog>().enabled = true;
-			portalCamera.GetComponent<BladeEdgeDetection>().enabled = true;
+			//portalCamera.GetComponent<BloomOptimized>().enabled = bloomWasEnabled;
+			portalCamera.GetComponent<ColorfulFog>().enabled = fogWasEnabled;
+			portalCamera.GetComponent<BladeEdgeDetection>().enabled = edgesWereEnabled;
 			portalCamera.targetTexture = renderStepTextures[index].mainTexture;
 
+			Matrix4x4 originalProjMatrix = EpitaphScreen.instance.portalMaskCamera.projectionMatrix;
+			EpitaphScreen.instance.portalMaskCamera.projectionMatrix = portalCamera.projectionMatrix;
 			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+			EpitaphScreen.instance.portalMaskCamera.projectionMatrix = originalProjMatrix;
 			Shader.SetGlobalTexture("_PortalMask", MaskBufferRenderTextures.instance.portalMaskTexture);
+
 			portalCamera.Render();
 
 			portal.SetTexture(renderStepTextures[index].mainTexture);
