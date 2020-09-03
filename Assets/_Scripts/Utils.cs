@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using PortalMechanics;
 
 namespace EpitaphUtils {
@@ -40,7 +41,9 @@ namespace EpitaphUtils {
 			BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default;
 			PropertyInfo[] pinfos = type.GetProperties(flags);
 			foreach (var pinfo in pinfos) {
-				if (pinfo.CanWrite) {
+				object[] attributes = pinfo.GetCustomAttributes(false);
+				bool isObsolete = attributes.OfType<ObsoleteAttribute>().Any();
+				if (pinfo.CanWrite && !isObsolete) {
 					try {
 						pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
 					}
