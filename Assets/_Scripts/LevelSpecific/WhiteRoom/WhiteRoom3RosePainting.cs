@@ -50,7 +50,7 @@ public class WhiteRoom3RosePainting : MonoBehaviour {
         PlayerLook.instance.rotationY = targetLookY;
         PlayerLook.instance.rotationBeforeViewLock = Quaternion.Euler(targetCameraRotation);
         Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;
-        Invoke("EnableTrigger", 0.1f);
+        Invoke(nameof(EnableTrigger), 0.1f);
 	}
 
     void EnableTrigger() {

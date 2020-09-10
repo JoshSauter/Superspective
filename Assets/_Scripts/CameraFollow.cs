@@ -10,8 +10,9 @@ public class CameraFollow : MonoBehaviour {
 	bool shouldFollow = true;
 	[SerializeField]
 	[ReadOnly]
-	float currentLerpSpeed = 4500f;				// Can be set by external scripts to slow the camera's lerp speed for a short time
-	float desiredLerpSpeed = 4500f;				// currentLerpSpeed will approach this value after not being changed for a while
+	float currentLerpSpeed = 450f;				// Can be set by external scripts to slow the camera's lerp speed for a short time
+	[ReadOnly]
+	public float desiredLerpSpeed = 450f;		// currentLerpSpeed will approach this value after not being changed for a while
 	public Vector3 relativeStartPosition;
 	public Vector3 relativePositionLastFrame;	// Used in restoring position of camera after jump-cut movement of player
 	public Vector3 worldPositionLastFrame;

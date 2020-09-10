@@ -2972,7 +2972,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  startingScene: 12
+  startingScene: 21
   defaultPlayerPosition: 1
   activeSceneName: 
 --- !u!1 &394815695
@@ -4504,7 +4504,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.5, z: 32.5}
+  m_LocalPosition: {x: 163, y: -438.5, z: 988.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1554336841}
@@ -6243,17 +6243,9 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_IsSelectable: 1
-  m_SelectedFaces: 00000000
-  m_SelectedEdges:
-  - a: 0
-    b: 1
-  - a: 2
-    b: 0
-  - a: 1
-    b: 3
-  - a: 3
-    b: 2
-  m_SelectedVertices: 00000000010000000200000003000000
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!33 &938704841
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -7265,7 +7257,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: The Fork
+  m_text: A Fork In The Road
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}
@@ -11323,7 +11315,7 @@ GameObject:
   - component: {fileID: 1593681516}
   - component: {fileID: 1593681515}
   m_Layer: 5
-  m_Name: TheFork (Fork)
+  m_Name: AForkInTheRoad (Fork)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12163,8 +12155,8 @@ GameObject:
   - component: {fileID: 1809741065}
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741068}
-  - component: {fileID: 1809741070}
   - component: {fileID: 1809741075}
+  - component: {fileID: 1809741070}
   - component: {fileID: 1809741071}
   - component: {fileID: 1809741061}
   - component: {fileID: 1809741069}
@@ -14724,7 +14716,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh350750
+  m_Name: pb_Mesh9220096
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

@@ -15,6 +15,7 @@ namespace PortalMechanics {
 		public bool DEBUG = false;
 		public string channel = "<Not set>";
 
+		public bool changeActiveSceneOnTeleport = false;
 		public bool changeCameraEdgeDetection;
 		[ShowIf("changeCameraEdgeDetection")]
 		public BladeEdgeDetection.EdgeColorMode edgeColorMode;
@@ -220,7 +221,7 @@ namespace PortalMechanics {
 				}
 			}
 			else {
-				playerCameraFollow.SetLerpSpeed(4500f);
+				playerCameraFollow.SetLerpSpeed(playerCameraFollow.desiredLerpSpeed);
 				if (!teleportingPlayer) {
 					StartCoroutine(TeleportPlayer(other.transform));
 				}
@@ -452,6 +453,10 @@ namespace PortalMechanics {
 				SwapEdgeDetectionColors();
 			}
 
+			if (changeActiveSceneOnTeleport) {
+				LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
+			}
+
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
 			DisableVolumetricPortal();
 			otherPortal.EnableVolumetricPortal();
@@ -523,25 +528,81 @@ namespace PortalMechanics {
 		private void SwapEdgeDetectionColors() {
 			BladeEdgeDetection playerED = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
-   			BladeEdgeDetection.EdgeColorMode tempEdgeColorMode = playerED.edgeColorMode;
-			Color tempColor = playerED.edgeColor;
-			Gradient tempColorGradient = playerED.edgeColorGradient;
-			Texture2D tempColorGradientTexture = playerED.edgeColorGradientTexture;
+			EDColors tempEDColors = new EDColors {
+				edgeColorMode = playerED.edgeColorMode,
+				edgeColor = playerED.edgeColor,
+				edgeColorGradient = playerED.edgeColorGradient,
+				edgeColorGradientTexture = playerED.edgeColorGradientTexture
+			};
 
-			CopyEdgeColors(dest: playerED, edgeColorMode, edgeColor, edgeColorGradient, edgeColorGradientTexture);
+			CopyEdgeColors(from: this, to: playerED);
 
 			otherPortal.changeCameraEdgeDetection = true;
-			otherPortal.edgeColorMode = tempEdgeColorMode;
-			otherPortal.edgeColor = tempColor;
-			otherPortal.edgeColorGradient = tempColorGradient;
-			otherPortal.edgeColorGradientTexture = tempColorGradientTexture;
+			CopyEdgeColors(from: tempEDColors, to: otherPortal);
 		}
 
-		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
-			dest.edgeColorMode = edgeColorMode;
-			dest.edgeColor = edgeColor;
-			dest.edgeColorGradient = edgeColorGradient;
-			dest.edgeColorGradientTexture = edgeColorGradientTexture;
+		// Don't talk to me about this shit:
+		public static void CopyEdgeColors(BladeEdgeDetection from, BladeEdgeDetection to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(BladeEdgeDetection from, Portal to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(BladeEdgeDetection from, ref EDColors to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(Portal from, BladeEdgeDetection to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(Portal from, Portal to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(Portal from, ref EDColors to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(EDColors from, BladeEdgeDetection to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(EDColors from, Portal to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+
+		public static void CopyEdgeColors(EDColors from, ref EDColors to) {
+			to.edgeColorMode = from.edgeColorMode;
+			to.edgeColor = from.edgeColor;
+			to.edgeColorGradient = from.edgeColorGradient;
+			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
 		}
 		#endregion
 	}

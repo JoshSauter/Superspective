@@ -227,6 +227,60 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	}
 
 #if UNITY_EDITOR
+	[MenuItem("Custom/Power Trails/Mirror Across X")]
+	public static void MirrorAcrossX() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem s = selected.GetComponent<NodeSystem>();
+			if (s != null) {
+				for (int i = 0; i < s.serializedNodes.Count; i++) {
+					SerializableNode thisNode = s.serializedNodes[i];
+					thisNode.pos.x *= -1;
+					s.serializedNodes[i] = thisNode;
+				}
+
+				for (int i = 0; i < s.allNodes.Count; i++) {
+					s.allNodes[i].pos.x *= -1f;
+				}
+			}
+		}
+	}
+
+	[MenuItem("Custom/Power Trails/Mirror Across Y")]
+	public static void MirrorAcrossY() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem s = selected.GetComponent<NodeSystem>();
+			if (s != null) {
+				for (int i = 0; i < s.serializedNodes.Count; i++) {
+					SerializableNode thisNode = s.serializedNodes[i];
+					thisNode.pos.y *= -1;
+					s.serializedNodes[i] = thisNode;
+				}
+
+				for (int i = 0; i < s.allNodes.Count; i++) {
+					s.allNodes[i].pos.y *= -1f;
+				}
+			}
+		}
+	}
+
+	[MenuItem("Custom/Power Trails/Mirror Across Z")]
+	public static void MirrorAcrossZ() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem s = selected.GetComponent<NodeSystem>();
+			if (s != null) {
+				for (int i = 0; i < s.serializedNodes.Count; i++) {
+					SerializableNode thisNode = s.serializedNodes[i];
+					thisNode.pos.z *= -1f;
+					s.serializedNodes[i] = thisNode;
+				}
+
+				for (int i = 0; i < s.allNodes.Count; i++) {
+					s.allNodes[i].pos.z *= -1f;
+				}
+			}
+		}
+	}
+
 	[MenuItem("Custom/Power Trails/Reset Transform")]
 	public static void ResetTransform() {
 		foreach (var selected in Selection.gameObjects) {

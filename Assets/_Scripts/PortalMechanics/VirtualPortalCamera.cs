@@ -9,6 +9,36 @@ using UnityStandardAssets.ImageEffects;
 using UnityEngine.Assertions;
 
 namespace PortalMechanics {
+	// Container for memoizing edge detection color state
+	public struct EDColors {
+		public BladeEdgeDetection.EdgeColorMode edgeColorMode;
+		public Color edgeColor;
+		public Gradient edgeColorGradient;
+		public Texture2D edgeColorGradientTexture;
+
+		public EDColors(BladeEdgeDetection edgeDetection) {
+			this.edgeColorMode = edgeDetection.edgeColorMode;
+			this.edgeColor = edgeDetection.edgeColor;
+
+			this.edgeColorGradient = new Gradient();
+			this.edgeColorGradient.alphaKeys = edgeDetection.edgeColorGradient.alphaKeys;
+			this.edgeColorGradient.colorKeys = edgeDetection.edgeColorGradient.colorKeys;
+			this.edgeColorGradient.mode = edgeDetection.edgeColorGradient.mode;
+
+			this.edgeColorGradientTexture = edgeDetection.edgeColorGradientTexture;
+		}
+
+		public EDColors(BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
+			this.edgeColorMode = edgeColorMode;
+			this.edgeColor = edgeColor;
+			this.edgeColorGradient = new Gradient();
+			this.edgeColorGradient.alphaKeys = edgeColorGradient.alphaKeys;
+			this.edgeColorGradient.colorKeys = edgeColorGradient.colorKeys;
+			this.edgeColorGradient.mode = edgeColorGradient.mode;
+			this.edgeColorGradientTexture = edgeColorGradientTexture;
+		}
+	}
+
 	public class VirtualPortalCamera : Singleton<VirtualPortalCamera> {
 
 		[Serializable]
@@ -56,12 +86,13 @@ namespace PortalMechanics {
 
 		int renderSteps;
 		public List<RecursiveTextures> renderStepTextures;
-		public RenderTexture recursiveDepthNormalsTexture;
 
 		[ShowIf("DEBUG")]
 		public List<Portal> portalOrder = new List<Portal>();
 		[ShowIf("DEBUG")]
 		public List<RecursiveTextures> finishedTex = new List<RecursiveTextures>();
+		[ShowIf("DEBUG")]
+		public List<RenderTexture> portalMaskTextures = new List<RenderTexture>();
 
 		private Shader depthNormalsReplacementShader;
 		private Shader portalMaskReplacementShader;
@@ -70,36 +101,6 @@ namespace PortalMechanics {
 		private const string portalMaskTextureName = "_PortalMask";
 
 		private static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
-
-		// Container for memoizing edge detection color state
-		public struct EDColors {
-			public BladeEdgeDetection.EdgeColorMode edgeColorMode;
-			public Color edgeColor;
-			public Gradient edgeColorGradient;
-			public Texture2D edgeColorGradientTexture;
-
-			public EDColors(BladeEdgeDetection edgeDetection) {
-				this.edgeColorMode = edgeDetection.edgeColorMode;
-				this.edgeColor = edgeDetection.edgeColor;
-
-				this.edgeColorGradient = new Gradient();
-				this.edgeColorGradient.alphaKeys = edgeDetection.edgeColorGradient.alphaKeys;
-				this.edgeColorGradient.colorKeys = edgeDetection.edgeColorGradient.colorKeys;
-				this.edgeColorGradient.mode = edgeDetection.edgeColorGradient.mode;
-
-				this.edgeColorGradientTexture = edgeDetection.edgeColorGradientTexture;
-			}
-
-			public EDColors(BladeEdgeDetection.EdgeColorMode edgeColorMode, Color edgeColor, Gradient edgeColorGradient, Texture2D edgeColorGradientTexture) {
-				this.edgeColorMode = edgeColorMode;
-				this.edgeColor = edgeColor;
-				this.edgeColorGradient = new Gradient();
-				this.edgeColorGradient.alphaKeys = edgeColorGradient.alphaKeys;
-				this.edgeColorGradient.colorKeys = edgeColorGradient.colorKeys;
-				this.edgeColorGradient.mode = edgeColorGradient.mode;
-				this.edgeColorGradientTexture = edgeColorGradientTexture;
-			}
-		}
 
 		void Start() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
@@ -116,13 +117,16 @@ namespace PortalMechanics {
 			EpitaphScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
 
 			renderStepTextures = new List<RecursiveTextures>();
-			recursiveDepthNormalsTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat);
+			portalMaskTextures = new List<RenderTexture>();
 		}
 
 		void ClearRenderTextures() {
 			renderStepTextures.ForEach(rt => rt.Release());
 			renderStepTextures.Clear();
-			recursiveDepthNormalsTexture.Release();
+			if (DEBUG) {
+				portalMaskTextures.ForEach(rt => rt.Release());
+				portalMaskTextures.Clear();
+			}
 		}
 
 		/// <summary>
@@ -138,7 +142,9 @@ namespace PortalMechanics {
 				camProjectionMatrix = mainCamera.projectionMatrix,
 				edgeColors = new EDColors(mainCameraEdgeDetection)
 			};
-			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(transform, false);
+			Camera maskCam = EpitaphScreen.instance.portalMaskCamera;
+			Matrix4x4 maskCamOriginalProjMatrix = maskCam.projectionMatrix;
+			maskCam.transform.SetParent(transform, false);
 			SetCameraSettings(portalCamera, camSettings);
 
 			if (DEBUG) {
@@ -175,7 +181,8 @@ namespace PortalMechanics {
 				finishedPortalTexture.Key.SetDepthNormalsTexture(finishedPortalTexture.Value.depthNormalsTexture);
 			}
 
-			EpitaphScreen.instance.portalMaskCamera.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
+			maskCam.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
+			maskCam.projectionMatrix = mainCamera.projectionMatrix;
 			RenderPortalMaskTexture(false);
 
 			debug.LogError($"End of frame: renderSteps: {renderSteps}");
@@ -199,7 +206,7 @@ namespace PortalMechanics {
 			// Key == Visible Portal, Value == visible portal screen bounds
 			Dictionary<Portal, Rect[]> visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
 
-			debug.Log($"Depth (Index): {depth} ({index})\nPortal:{portal.name}\nNumVisible:{visiblePortals.Count}\nPortalCamPos:{portalCamera.transform.position}\nTree:{tree}\nScreenBounds:{string.Join(", ", portalScreenBounds)}");
+			debug.Log($"Index (Depth): {index} ({depth})\nPortal:{portal.name}\nNumVisible:{visiblePortals.Count}\nPortalCamPos:{portalCamera.transform.position}\nTree:{tree}\nScreenBounds:{string.Join(", ", portalScreenBounds)}");
 
 			Dictionary<Portal, RecursiveTextures> visiblePortalTextures = new Dictionary<Portal, RecursiveTextures>();
 			foreach (var visiblePortalTuple in visiblePortals) {
@@ -242,6 +249,13 @@ namespace PortalMechanics {
 
 			RenderDepthNormalsToPortal(portal, index);
 			RenderPortalMaskTexture(true);
+			if (DEBUG) {
+				while (portalMaskTextures.Count <= index) {
+					portalMaskTextures.Add(new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, EpitaphScreen.instance.portalMaskCamera.targetTexture.format));
+				}
+				
+				Graphics.CopyTexture(EpitaphScreen.instance.portalMaskCamera.targetTexture, portalMaskTextures[index]); 
+			}
 
 			debug.Log($"Rendering: {index} to {portal.name}'s RenderTexture, depth: {depth}");
 			portalCamera.targetTexture = renderStepTextures[index].mainTexture;
@@ -271,13 +285,16 @@ namespace PortalMechanics {
 		/// Renders the portalMaskCamera with the portalMaskReplacementShader, then sets the result as _PortalMask global texture
 		/// </summary>
 		private void RenderPortalMaskTexture(bool usePortalCamProjMatrix) {
-			Matrix4x4 originalProjMatrix = EpitaphScreen.instance.portalMaskCamera.projectionMatrix;
+			Camera maskCam = EpitaphScreen.instance.portalMaskCamera;
+			Matrix4x4 originalProjMatrix = maskCam.projectionMatrix;
 			if (usePortalCamProjMatrix) {
-				EpitaphScreen.instance.portalMaskCamera.projectionMatrix = portalCamera.projectionMatrix;
+				maskCam.projectionMatrix = portalCamera.projectionMatrix;
 			}
-			EpitaphScreen.instance.portalMaskCamera.RenderWithShader(portalMaskReplacementShader, portalMaskReplacementTag);
+
+			maskCam.RenderWithShader(portalMaskReplacementShader, portalMaskReplacementTag);
+
 			if (usePortalCamProjMatrix) {
-				EpitaphScreen.instance.portalMaskCamera.projectionMatrix = originalProjMatrix;
+				maskCam.projectionMatrix = originalProjMatrix;
 			}
 			Shader.SetGlobalTexture(portalMaskTextureName, MaskBufferRenderTextures.instance.portalMaskTexture);
 		}

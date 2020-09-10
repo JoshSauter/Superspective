@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PowerTrailMechanics;
+using NaughtyAttributes;
 
 public class ColorChangeOnPower : MonoBehaviour {
 	public enum ActivationTiming {
@@ -23,6 +24,19 @@ public class ColorChangeOnPower : MonoBehaviour {
 	public float timeToChangeColor = 0.25f;
 	public PowerTrail powerTrailToReactTo;
 	public EpitaphRenderer[] renderers;
+
+
+	[Button("Swap powered/depowered colors")]
+	void SwapPoweredDepoweredColors() {
+		Color tempColor = depoweredColor;
+		Color tempEmission = depoweredEmission;
+
+		depoweredColor = poweredColor;
+		depoweredEmission = poweredEmission;
+
+		poweredColor = tempColor;
+		poweredEmission = tempEmission;
+	}
 
 	// Use this for initialization
 	void Start() {

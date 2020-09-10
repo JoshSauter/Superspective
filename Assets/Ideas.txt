@@ -4,3 +4,6 @@ Mechanics:
  - Portals
  - PickupCubes which can travel through Portals and around Pillars
  - Can stand on PickupCubes in other dimension
+
+ Story:
+  - Analogue for predetermination and lack of free will, perhaps at the end giving the player a choice that leads to one of two endings

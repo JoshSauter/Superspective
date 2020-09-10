@@ -4,9 +4,22 @@ using UnityEngine;
 
 namespace MagicTriggerMechanics {
     public class GlobalMagicTrigger : MagicTrigger {
+		public bool sceneMustBeActive = true;
+		private Level thisScene = Level.managerScene;
+
+		bool IsActive() {
+			bool isActive = enabled;
+			if (sceneMustBeActive) {
+				if (thisScene == Level.managerScene) {
+					thisScene = LevelManager.instance.GetLevel(gameObject.scene.name);
+				}
+				isActive = isActive && thisScene == LevelManager.instance.activeScene;
+			}
+			return isActive;
+		}
 
         void Update() {
-            if (!enabled) return;
+            if (!IsActive()) return;
 			GameObject player = Player.instance.gameObject;
 			if (DEBUG) {
 				PrintDebugInfo(player);

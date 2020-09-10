@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using NaughtyAttributes;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +14,18 @@ public class ButtonColorChange : MonoBehaviour {
 
 	public Button buttonToReactTo;
 	EpitaphRenderer r;
+
+	[Button("Swap powered/depowered colors")]
+	void SwapPoweredDepoweredColors() {
+		Color tempColor = startColor;
+		Color tempEmission = startEmission;
+
+		startColor = pressColor;
+		startEmission = pressEmission;
+
+		pressColor = tempColor;
+		pressEmission = tempEmission;
+	}
 
 	// Use this for initialization
 	void Start () {

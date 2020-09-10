@@ -162,6 +162,10 @@ public class PlayerLook : Singleton<PlayerLook> {
 		//Going directly from Locked to Confined does not work
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.lockState = CursorLockMode.Confined;
+
+		// Debug line to look at differences for teleport pictures
+		//yield return new WaitForSeconds(3f);
+
 		OnViewLockEnterFinish?.Invoke();
 		viewLockedObject.OnViewLockEnterFinish?.Invoke();
 		debug.Log("Finished locking view for " + lockObject.gameObject.name);

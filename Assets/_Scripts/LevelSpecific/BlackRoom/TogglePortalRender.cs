@@ -10,7 +10,7 @@ public class TogglePortalRender : MonoBehaviour {
 	Portal portal;
 
     IEnumerator Start() {
-        while (portal == null) {
+        while (portal == null || portal.otherPortal == null) {
 			portal = GetComponent<Portal>();
 			yield return null;
 		}

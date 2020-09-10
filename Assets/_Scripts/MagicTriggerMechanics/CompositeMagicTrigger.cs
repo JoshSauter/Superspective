@@ -6,9 +6,9 @@ using UnityEngine;
 namespace MagicTriggerMechanics {
     public class CompositeMagicTrigger : MagicTrigger {
         public CompositeMagicTriggerPiece[] triggerColliders;
-        public bool hasTriggeredEnterThisFrame = false;
-        public bool hasTriggeredExitThisFrame = false;
-        public bool hasTriggeredStayThisFrame = false;
+        public HashSet<Collider> hasTriggeredEnterThisFrameForCollider = new HashSet<Collider>();
+        public HashSet<Collider> hasTriggeredExitThisFrameForCollider = new HashSet<Collider>();
+        public HashSet<Collider> hasTriggeredStayThisFrameForCollider = new HashSet<Collider>();
 
         protected override void Awake() {
             base.Awake();
@@ -21,30 +21,30 @@ namespace MagicTriggerMechanics {
         }
 
         public void OnAnyTriggerEnter(Collider other) {
-            if (hasTriggeredEnterThisFrame) return;
-            hasTriggeredEnterThisFrame = true;
+            if (hasTriggeredEnterThisFrameForCollider.Contains(other)) return;
+            hasTriggeredEnterThisFrameForCollider.Add(other);
 
             OnTriggerEnter(other);
         }
 
         public void OnAnyTriggerExit(Collider other) {
-            if (hasTriggeredExitThisFrame) return;
-            hasTriggeredExitThisFrame = true;
+            if (hasTriggeredExitThisFrameForCollider.Contains(other)) return;
+            hasTriggeredExitThisFrameForCollider.Add(other);
 
             OnTriggerExit(other);
         }
 
         public void OnAnyTriggerStay(Collider other) {
-            if (hasTriggeredStayThisFrame) return;
-            hasTriggeredStayThisFrame = true;
+            if (hasTriggeredStayThisFrameForCollider.Contains(other)) return;
+            hasTriggeredStayThisFrameForCollider.Add(other);
 
             OnTriggerStay(other);
         }
 
         private void LateUpdate() {
-            hasTriggeredEnterThisFrame = false;
-            hasTriggeredExitThisFrame = false;
-            hasTriggeredStayThisFrame = false;
+            hasTriggeredEnterThisFrameForCollider.Clear();
+            hasTriggeredExitThisFrameForCollider.Clear();
+            hasTriggeredStayThisFrameForCollider.Clear();
         }
     }
 }

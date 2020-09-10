@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Button : MonoBehaviour {
-	protected InteractableObject interactableObject;
+	public InteractableObject interactableObject;
 #region events
 	public delegate void ButtonAction(Button button);
 	public event ButtonAction OnButtonPressBegin;

@@ -76,7 +76,6 @@ namespace Audio {
 			if (!_audioSourcePlayingAtLocation.isPlaying || shouldForcePlay) {
 				UpdateAudioSourceSettings();
 				_audioSourcePlayingAtLocation.pitch = GetPitch();
-				Debug.Log($"Playing {_audioSourcePlayingAtLocation.clip.name}");
 				PlaySound();
 			}
 		}

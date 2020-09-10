@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using NaughtyAttributes;
+using PowerTrailMechanics;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -14,7 +15,8 @@ namespace MagicTriggerMechanics {
 		ToggleScripts,              // Enables scripts when triggered forward, disables when triggered negatively
 		ToggleGameObjects,          // Enables GameObjects when triggered forward, disables when triggered negatively
 		ChangeLevel,
-		ChangeActivePillar
+		ChangeActivePillar,
+		PowerOrDepowerPowerTrail
 	}
 
 	[Flags]
@@ -47,6 +49,8 @@ namespace MagicTriggerMechanics {
 		public string forwardPillarName;
 		public Level backwardPillarLevel;
 		public string backwardPillarName;
+		public PowerTrail powerTrail;
+		public bool setPowerIsOn = true;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -81,6 +85,9 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.ChangeActivePillar:
 					TriggerPillarChangeForward();
 					return;
+				case TriggerActionType.PowerOrDepowerPowerTrail:
+					powerTrail.powerIsOn = setPowerIsOn;
+					return;
 				default:
 					return;
 			}
@@ -114,6 +121,10 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.DisableSelfGameObject:
 				case TriggerActionType.EnableDisableScripts:
 				case TriggerActionType.EnableDisableGameObjects:
+					return;
+				case TriggerActionType.PowerOrDepowerPowerTrail:
+					powerTrail.powerIsOn = !setPowerIsOn;
+					return;
 				default:
 					return;
 			}
@@ -184,6 +195,9 @@ namespace MagicTriggerMechanics {
 			SerializedProperty backwardPillarLevel = property.FindPropertyRelative("backwardPillarLevel");
 			SerializedProperty backwardPillarName = property.FindPropertyRelative("backwardPillarName");
 
+			SerializedProperty powerTrail = property.FindPropertyRelative("powerTrail");
+			SerializedProperty setPowerIsOn = property.FindPropertyRelative("setPowerIsOn");
+
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
@@ -196,6 +210,8 @@ namespace MagicTriggerMechanics {
 			GUIContent backwardPillarLabel = new GUIContent("Backward Pillar:");
 			GUIContent levelOfPillarLabel = new GUIContent("Level of Pillar:");
 			GUIContent nameOfPillarLabel = new GUIContent("Name of Pillar:");
+			GUIContent powerTrailLabel = new GUIContent("Power trail:");
+			GUIContent setPowerIsOnLabel = new GUIContent("Power On/Off:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -247,6 +263,10 @@ namespace MagicTriggerMechanics {
 						EditorGUILayout.PropertyField(backwardPillarLevel, levelOfPillarLabel);
 						EditorGUILayout.PropertyField(backwardPillarName, nameOfPillarLabel);
 					}
+					break;
+				case TriggerActionType.PowerOrDepowerPowerTrail:
+					EditorGUILayout.PropertyField(powerTrail, powerTrailLabel);
+					EditorGUILayout.PropertyField(setPowerIsOn, setPowerIsOnLabel);
 					break;
 				default:
 					break;

@@ -277,7 +277,7 @@ namespace PowerTrailMechanics {
 				yield return new WaitUntil(() => sound.audioSource != null);
 				sound.audioSource.loop = true;
 				sound.audioSource.playOnAwake = false;
-				sound.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/Electrical/ElectricalHum2Looping");
+				sound.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/Machines/ElectricalHum2Looping");
 				sound.audioSource.spatialBlend = 1f;
 				sound.audioSource.dopplerLevel = 0.125f;
 				sound.audioSource.pitch = 0.5f;
