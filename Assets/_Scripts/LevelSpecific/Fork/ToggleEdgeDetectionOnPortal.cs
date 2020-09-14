@@ -4,37 +4,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ToggleEdgeDetectionOnPortal : MonoBehaviour {
-    public Portal inPortal;
-    public Portal outPortal;
-    public MagicTrigger trigger;
+namespace LevelSpecific.Fork {
+	public class ToggleEdgeDetectionOnPortal : MonoBehaviour {
+		public Portal inPortal;
+		public Portal outPortal;
+		public MagicTrigger trigger;
 
-    EDColors inPortalEdgeColors;
-    EDColors outPortalEdgeColors;
+		EDColors inPortalEdgeColors;
+		EDColors outPortalEdgeColors;
 
-    void Start() {
-		inPortalEdgeColors = new EDColors {
-			edgeColorMode = inPortal.edgeColorMode,
-			edgeColor = inPortal.edgeColor,
-			edgeColorGradient = inPortal.edgeColorGradient,
-			edgeColorGradientTexture = inPortal.edgeColorGradientTexture
-		};
-		outPortalEdgeColors = new EDColors {
-			edgeColorMode = outPortal.edgeColorMode,
-			edgeColor = outPortal.edgeColor,
-			edgeColorGradient = outPortal.edgeColorGradient,
-			edgeColorGradientTexture = outPortal.edgeColorGradientTexture
-		};
+		void Start() {
+			inPortalEdgeColors = new EDColors {
+				edgeColorMode = inPortal.edgeColorMode,
+				edgeColor = inPortal.edgeColor,
+				edgeColorGradient = inPortal.edgeColorGradient,
+				edgeColorGradientTexture = inPortal.edgeColorGradientTexture
+			};
+			outPortalEdgeColors = new EDColors {
+				edgeColorMode = outPortal.edgeColorMode,
+				edgeColor = outPortal.edgeColor,
+				edgeColorGradient = outPortal.edgeColorGradient,
+				edgeColorGradientTexture = outPortal.edgeColorGradientTexture
+			};
 
-		trigger.OnMagicTriggerStayOneTime += (ctx) => ResetInPortalEdgeDetection();
-		trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ResetOutPortalEdgeDetection();
-    }
+			trigger.OnMagicTriggerStayOneTime += (ctx) => ResetInPortalEdgeDetection();
+			trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ResetOutPortalEdgeDetection();
+		}
 
-    void ResetInPortalEdgeDetection() {
-		Portal.CopyEdgeColors(from: inPortalEdgeColors, inPortal);
-	}
+		void ResetInPortalEdgeDetection() {
+			Portal.CopyEdgeColors(from: inPortalEdgeColors, inPortal);
+		}
 
-    void ResetOutPortalEdgeDetection() {
-		Portal.CopyEdgeColors(from: outPortalEdgeColors, outPortal);
+		void ResetOutPortalEdgeDetection() {
+			Portal.CopyEdgeColors(from: outPortalEdgeColors, outPortal);
+		}
 	}
 }

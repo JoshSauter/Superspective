@@ -34,12 +34,15 @@ public class PortalCopy : MonoBehaviour {
     public PortalCopyAction OnPortalCopyEnabled;
     public PortalCopyAction OnPortalCopyDisabled;
 
-    IEnumerator Start() {
+	private void Awake() {
+        renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
+        colliders = transform.GetComponentsInChildrenRecursively<Collider>();
+    }
+
+	IEnumerator Start() {
         debug = new DebugLogger(gameObject, () => DEBUG);
 
         originalPortalableObj = original.GetComponent<PortalableObject>();
-        renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
-        colliders = transform.GetComponentsInChildrenRecursively<Collider>();
 
         // Disallow collisions between a portal object and its copy
         foreach (var c1 in colliders) {
@@ -81,16 +84,18 @@ public class PortalCopy : MonoBehaviour {
         }
 
         copyEnabled = enabled;
+        if (copyEnabled) {
+            TransformCopy();
+        }
     }
 
-    void Update() {
+    void LateUpdate() {
         if (originalPortalableObj.copyShouldBeEnabled != copyEnabled) {
             SetPortalCopyEnabled(originalPortalableObj.copyShouldBeEnabled);
         }
 
         if (copyEnabled) {
             TransformCopy();
-            UpdateMaterials();
             if (maybeOriginalGlow != null && glow != null) {
                 glow.enabled = maybeOriginalGlow.enabled;
                 glow.glowAmount = maybeOriginalGlow.glowAmount;
@@ -98,7 +103,7 @@ public class PortalCopy : MonoBehaviour {
         }
     }
 
-    void UpdateMaterials() {
+	void UpdateMaterials() {
         Portal portal = originalPortalableObj.portalInteractingWith.otherPortal;
 
         foreach (var r in renderers) {
@@ -114,6 +119,7 @@ public class PortalCopy : MonoBehaviour {
         debug.Log("Portal: " + relevantPortal + "\nBefore position: " + transform.position);
         TransformCopy(relevantPortal);
         debug.Log("After position: " + transform.position);
+        UpdateMaterials();
     }
 
     private void TransformCopy(Portal inPortal) {

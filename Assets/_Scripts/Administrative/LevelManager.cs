@@ -37,7 +37,8 @@ public enum Level {
 	forkWhiteRoomBlackHallway,
 	forkWhiteRoom3,
 	transitionWhiteRoom_Fork,
-	forkOctagon
+	forkOctagon,
+	forkBlackRoom2
 }
 
 public class LevelManager : Singleton<LevelManager> {
@@ -222,6 +223,7 @@ public class LevelManager : Singleton<LevelManager> {
 	private const string forkWhiteRoomBlackHallway = "_WhiteRoom_BlackHallway";
 	private const string forkWhiteRoom3 = "_Fork_WhiteRoom3";
 	private const string forkBlackRoom = "_Fork_BlackRoom";
+	private const string forkBlackRoom2 = "_Fork_BlackRoom2";
     private const string invisFloor = "_InvisFloor";
 
 	// Transition Scenes
@@ -345,6 +347,7 @@ public class LevelManager : Singleton<LevelManager> {
 		enumToSceneName.Add(Level.portalTestScene, portalTestScene);
 		enumToSceneName.Add(Level.transitionWhiteRoom_Fork, transitionWhiteRoom_Fork);
 		enumToSceneName.Add(Level.forkOctagon, forkOctagon);
+		enumToSceneName.Add(Level.forkBlackRoom2, forkBlackRoom2);
 
 		foreach (var kv in enumToSceneName) {
 			sceneNameToEnum[kv.Value] = kv.Key;
@@ -365,13 +368,14 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
-		worldGraph.Add(fork, new List<string>() { forkWhiteRoom, forkBlackRoom, forkOctagon });
+		worldGraph.Add(fork, new List<string>() { transitionWhiteRoom_Fork, forkWhiteRoom, /*forkBlackRoom, */forkOctagon });
 		worldGraph.Add(forkOctagon, new List<string>() { transitionWhiteRoom_Fork, fork });
 		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection, forkWhiteRoom2 });
 		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom, forkWhiteRoomBlackHallway });
 		worldGraph.Add(forkWhiteRoomBlackHallway, new List<string>() { forkWhiteRoom2, transitionWhiteRoom_Fork });
 		worldGraph.Add(forkWhiteRoom3, new List<string>() { transitionWhiteRoom_Fork });
 		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
+		worldGraph.Add(forkBlackRoom2, new List<string>() { });
         worldGraph.Add(invisFloor, new List<string>());
 
 		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, tutorialRoom });

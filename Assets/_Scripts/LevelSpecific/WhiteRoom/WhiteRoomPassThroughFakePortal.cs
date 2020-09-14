@@ -4,31 +4,33 @@ using UnityEngine;
 using EpitaphUtils;
 using MagicTriggerMechanics;
 
-public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
-	public MagicTrigger restoreFakePortalTrigger;
+namespace LevelSpecific.WhiteRoom {
+	public class WhiteRoomPassThroughFakePortal : MonoBehaviour {
+		public MagicTrigger restoreFakePortalTrigger;
 
-	public DimensionObjectBase ceilingDropDown;
-	public PillarDimensionObject ceilingDropDownAfterPassingThrough;
-	MagicTrigger trigger;
+		public DimensionObjectBase ceilingDropDown;
+		public PillarDimensionObject ceilingDropDownAfterPassingThrough;
+		MagicTrigger trigger;
 
-    void Start() {
-		trigger = GetComponent<MagicTrigger>();
-		trigger.OnMagicTriggerStayOneTime += OnMagicTriggerStayOneTime;
-		trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
-    }
-
-	private void OnMagicTriggerStayOneTime(GameObject other) {
-		if (other.TaggedAsPlayer()) {
-			ceilingDropDownAfterPassingThrough.Start();
-			ceilingDropDownAfterPassingThrough.OverrideStartingMaterials(ceilingDropDown.startingMaterials);
-			ceilingDropDownAfterPassingThrough.SwitchVisibilityState(ceilingDropDownAfterPassingThrough.visibilityState, true);
+		void Start() {
+			trigger = GetComponent<MagicTrigger>();
+			trigger.OnMagicTriggerStayOneTime += OnMagicTriggerStayOneTime;
+			trigger.OnNegativeMagicTriggerStayOneTime += OnNegativeMagicTriggerStayOneTime;
 		}
-	}
 
-	private void OnNegativeMagicTriggerStayOneTime(GameObject other) {
-		if (other.TaggedAsPlayer()) {
-			restoreFakePortalTrigger.gameObject.SetActive(true);
-			gameObject.SetActive(false);
+		private void OnMagicTriggerStayOneTime(GameObject other) {
+			if (other.TaggedAsPlayer()) {
+				ceilingDropDownAfterPassingThrough.Start();
+				ceilingDropDownAfterPassingThrough.OverrideStartingMaterials(ceilingDropDown.startingMaterials);
+				ceilingDropDownAfterPassingThrough.SwitchVisibilityState(ceilingDropDownAfterPassingThrough.visibilityState, true);
+			}
+		}
+
+		private void OnNegativeMagicTriggerStayOneTime(GameObject other) {
+			if (other.TaggedAsPlayer()) {
+				restoreFakePortalTrigger.gameObject.SetActive(true);
+				gameObject.SetActive(false);
+			}
 		}
 	}
 }

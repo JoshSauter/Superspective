@@ -9,9 +9,55 @@ using NaughtyAttributes;
 namespace PortalMechanics {
 	public class PortalableObject : MonoBehaviour {
 		public bool DEBUG = false;
-		public Portal sittingInPortal;
-		public Portal hoveredThroughPortal;
-		public Portal grabbedThroughPortal;
+
+		private Portal _sittingInPortal;
+		private Portal _hoveredThroughPortal;
+		private Portal _grabbedThroughPortal;
+		public Portal sittingInPortal {
+			get {
+				return _sittingInPortal;
+			}
+			set {
+				_sittingInPortal = value;
+				if (copyShouldBeEnabled && portalInteractingWith != null) {
+					if (fakeCopyInstance == null) {
+						CreateFakeCopyInstance();
+					}
+					SetMaterials(true);
+					UpdateMaterialProperties(portalInteractingWith);
+				}
+			}
+		}
+		public Portal hoveredThroughPortal {
+			get {
+				return _hoveredThroughPortal;
+			}
+			set {
+				_hoveredThroughPortal = value;
+				if (copyShouldBeEnabled && portalInteractingWith != null) {
+					if (fakeCopyInstance == null) {
+						CreateFakeCopyInstance();
+					}
+					SetMaterials(true);
+					UpdateMaterialProperties(portalInteractingWith);
+				}
+			}
+		}
+		public Portal grabbedThroughPortal {
+			get {
+				return _grabbedThroughPortal;
+			}
+			set {
+				_grabbedThroughPortal = value;
+				if (copyShouldBeEnabled && portalInteractingWith != null) {
+					if (fakeCopyInstance == null) {
+						CreateFakeCopyInstance();
+					}
+					SetMaterials(true);
+					UpdateMaterialProperties(portalInteractingWith);
+				}
+			}
+		}
 
 		InteractableObject interact;
 		PickupObject pickupObject;
@@ -81,23 +127,13 @@ namespace PortalMechanics {
 
 			RecalculateHoveredThroughPortal();
 
-			if (copyShouldBeEnabled) {
-				if (fakeCopyInstance == null) {
-					fakeCopyInstance = Instantiate(fakeCopyPrefab);
-					fakeCopyInstance.original = gameObject;
-					fakeCopyInstance.originalPortalableObj = this;
-					fakeCopyInstance.transform.localScale = transform.localScale;
-
-					fakeCopyInstance.OnPortalCopyEnabled += () => SetMaterials(true);
-					fakeCopyInstance.OnPortalCopyDisabled += () => SetMaterials(false);
-				}
-				//fakeCopyInstance.GetComponent<InteractableGlow>().CurrentColor = GetComponent<InteractableGlow>().CurrentColor;
+			if (copyShouldBeEnabled && fakeCopyInstance == null) {
+				CreateFakeCopyInstance();
 			}
 
 			if (copyShouldBeEnabled) {
 				UpdateMaterialProperties(portalInteractingWith);
 			}
-
 			if (sittingInPortal != null) {
 				foreach (var r in renderers) {
 					r.enabled = sittingInPortal.portalIsEnabled;
@@ -111,6 +147,18 @@ namespace PortalMechanics {
 
 			if (!thisFrameRaycastHits.raycastHitAnyPortal && grabbedThroughPortal != null) {
 				//pickupObject.Drop();
+			}
+		}
+
+		void CreateFakeCopyInstance() {
+			if (copyShouldBeEnabled && fakeCopyInstance == null) {
+				fakeCopyInstance = Instantiate(fakeCopyPrefab);
+				fakeCopyInstance.original = gameObject;
+				fakeCopyInstance.originalPortalableObj = this;
+				fakeCopyInstance.transform.localScale = transform.localScale;
+
+				fakeCopyInstance.OnPortalCopyEnabled += () => SetMaterials(true);
+				fakeCopyInstance.OnPortalCopyDisabled += () => SetMaterials(false);
 			}
 		}
 
@@ -172,7 +220,7 @@ namespace PortalMechanics {
 		void UpdateMaterialProperties(Portal inPortal) {
 			foreach (var r in renderers) {
 				foreach (var m in r.materials) {
-					m.SetVector("_PortalPos", inPortal.transform.position - inPortal.transform.forward * 0.00001f);
+					m.SetVector("_PortalPos", inPortal.transform.position + inPortal.transform.forward * 0.00001f);
 					m.SetVector("_PortalNormal", inPortal.transform.forward);
 				}
 			}
@@ -181,6 +229,7 @@ namespace PortalMechanics {
 		void SetMaterials(bool usePortalCopyMaterials) {
 			SetMaterialsForRenderers(renderers, usePortalCopyMaterials);
 			if (usePortalCopyMaterials) {
+				UpdateMaterialProperties(portalInteractingWith);
 				SetMaterialsForRenderers(fakeCopyInstance.renderers, usePortalCopyMaterials);
 			}
 		}

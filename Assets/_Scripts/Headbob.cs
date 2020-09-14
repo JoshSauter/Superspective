@@ -5,7 +5,6 @@ using UnityEngine;
 public class Headbob : MonoBehaviour {
 	public AnimationCurve viewBobCurve;
 	PlayerMovement playerMovement;
-	CameraFollow cameraFollow;
 
 	Camera playerCam;
 	// This value is read from CameraFollow to apply the camera transform offset in one place
@@ -24,17 +23,16 @@ public class Headbob : MonoBehaviour {
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
 		playerCam = EpitaphScreen.instance.playerCamera;
-		cameraFollow = playerCam.GetComponent<CameraFollow>();
     }
 
-    void Update() {
+    void FixedUpdate() {
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
 		if (playerMovement.grounded && playerSpeed > 0.2f) {
 			curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
 			curAmplitude = headbobAmount * Mathf.Lerp(minAmplitude, maxAmplitude, Mathf.InverseLerp(0, 20f, playerSpeed));
 
-			t += Time.deltaTime / curPeriod;
+			t += Time.fixedDeltaTime / curPeriod;
 			t = Mathf.Repeat(t, 1f);
 
 			float thisFrameBobAmount = viewBobCurve.Evaluate(t) * curAmplitude;
@@ -42,7 +40,7 @@ public class Headbob : MonoBehaviour {
 		}
 		else {
 			t = 0;
-			float nextBobAmount = Mathf.Lerp(curBobAmount, 0f, 4f * Time.deltaTime);
+			float nextBobAmount = Mathf.Lerp(curBobAmount, 0f, 4f * Time.fixedDeltaTime);
 
 			curBobAmount = nextBobAmount;
 		}

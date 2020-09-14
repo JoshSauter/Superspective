@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WhiteRoomFakePortalRendering : MonoBehaviour {
-	public PillarDimensionObject fakePortalSides;
-	MeshRenderer thisRenderer;
+namespace LevelSpecific.WhiteRoom {
+	public class WhiteRoomFakePortalRendering : MonoBehaviour {
+		public PillarDimensionObject fakePortalSides;
+		MeshRenderer thisRenderer;
 
-    void Start() {
-		thisRenderer = GetComponent<MeshRenderer>();
-		fakePortalSides.OnStateChange += OnVisibilityStateChange;
-    }
+		void Start() {
+			thisRenderer = GetComponent<MeshRenderer>();
+			fakePortalSides.OnStateChange += OnVisibilityStateChange;
+		}
 
-	void OnVisibilityStateChange(VisibilityState unused) {
-		bool allVisible = fakePortalSides.visibilityState == VisibilityState.visible;
-		thisRenderer.enabled = allVisible;
+		void OnVisibilityStateChange(VisibilityState unused) {
+			bool allVisible = fakePortalSides.visibilityState == VisibilityState.visible;
+			thisRenderer.enabled = allVisible;
+		}
 	}
 }

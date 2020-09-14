@@ -4,29 +4,31 @@ using UnityEngine;
 using PortalMechanics;
 using MagicTriggerMechanics;
 
-public class TogglePortalRender : MonoBehaviour {
-	public DoorOpenClose enableDoor;
-	public MagicTrigger disableTrigger;
-	Portal portal;
+namespace LevelSpecific.BlackRoom {
+	public class TogglePortalRender : MonoBehaviour {
+		public DoorOpenClose enableDoor;
+		public MagicTrigger disableTrigger;
+		Portal portal;
 
-    IEnumerator Start() {
-        while (portal == null || portal.otherPortal == null) {
-			portal = GetComponent<Portal>();
-			yield return null;
+		IEnumerator Start() {
+			while (portal == null || portal.otherPortal == null) {
+				portal = GetComponent<Portal>();
+				yield return null;
+			}
+
+			PausePortalRendering();
+			enableDoor.OnDoorOpenStart += ctx => ResumePortalRendering();
+			disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
 		}
 
-		PausePortalRendering();
-		enableDoor.OnDoorOpenStart += ctx => ResumePortalRendering();
-		disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
-    }
+		void ResumePortalRendering() {
+			portal.pauseRenderingAndLogic = false;
+			portal.otherPortal.pauseRenderingAndLogic = false;
+		}
 
-	void ResumePortalRendering() {
-		portal.pauseRenderingAndLogic = false;
-		portal.otherPortal.pauseRenderingAndLogic = false;
-	}
-
-	void PausePortalRendering() {
-		portal.pauseRenderingAndLogic = true;
-		portal.otherPortal.pauseRenderingAndLogic = true;
+		void PausePortalRendering() {
+			portal.pauseRenderingAndLogic = true;
+			portal.otherPortal.pauseRenderingAndLogic = true;
+		}
 	}
 }

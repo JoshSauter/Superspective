@@ -10,9 +10,8 @@
 		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 		LOD 100
 
-		//ZWrite Off
 		Cull Back
-		Blend DstColor SrcColor
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass {
 			CGPROGRAM
@@ -63,8 +62,7 @@
 			ENDCG
 		}
 		// Pass to render object as a shadow caster
-		Pass
-		{
+		Pass {
 			Name "ShadowCaster"
 			Tags { "LightMode" = "ShadowCaster" }
 

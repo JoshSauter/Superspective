@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WhiteRoom {
+namespace LevelSpecific.WhiteRoom {
     public class WhiteRoomBlackWhiteFade : MonoBehaviour {
         StaircaseRotate staircaseRotate;
         public float fadeAngle = 45;

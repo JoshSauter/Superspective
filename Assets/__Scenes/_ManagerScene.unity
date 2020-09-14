@@ -12213,6 +12213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentLerpSpeed: 45
+  desiredLerpSpeed: 30
   relativeStartPosition: {x: 0, y: 0, z: 0}
   relativePositionLastFrame: {x: 0, y: 0, z: 0}
   worldPositionLastFrame: {x: 0, y: 0, z: 0}
@@ -12434,7 +12435,7 @@ MonoBehaviour:
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
   edgeColorGradient:
     serializedVersion: 2
-    key0: {r: 0, g: 0, b: 0, a: 1}
+    key0: {r: 1, g: 1, b: 1, a: 1}
     key1: {r: 0, g: 0, b: 0, a: 1}
     key2: {r: 1, g: 1, b: 1, a: 0.03137255}
     key3: {r: 0, g: 0, b: 0, a: 0}

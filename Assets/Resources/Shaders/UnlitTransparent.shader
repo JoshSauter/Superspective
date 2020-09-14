@@ -13,7 +13,7 @@
 
 		//ZWrite Off
 		Cull Back
-		Blend DstColor SrcColor
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{

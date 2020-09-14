@@ -52,7 +52,7 @@ public class PickupObject : MonoBehaviour {
 	public static PickupObjectAction OnAnyPickup;
 	public static PickupObjectAction OnAnyDrop;
 
-	Vector3 playerPosLastFrame;
+	Vector3 playerCamPosLastFrame;
 	public SoundEffect pickupSound;
 	public SoundEffect dropSound;
 
@@ -85,7 +85,7 @@ public class PickupObject : MonoBehaviour {
 		}
 
 		portalableObject = GetComponent<PortalableObject>();
-		playerPosLastFrame = Player.instance.transform.position;
+		playerCamPosLastFrame = Player.instance.transform.position;
 
 		Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
 		TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
@@ -103,7 +103,7 @@ public class PickupObject : MonoBehaviour {
 
 	void UpdatePlayerPositionLastFrameAfterPortal(Portal inPortal, Collider objPortaled) {
 		if (objPortaled.gameObject == Player.instance.gameObject) {
-			playerPosLastFrame = inPortal.TransformPoint(playerPosLastFrame);
+			playerCamPosLastFrame = inPortal.TransformPoint(playerCamPosLastFrame);
 		}
 	}
 
@@ -113,15 +113,17 @@ public class PickupObject : MonoBehaviour {
 
 	void FixedUpdate() {
 		if (isHeld) {
-			RaycastHits raycastHits;
-			Vector3 targetPos = (portalableObject == null) ? TargetHoldPosition(out raycastHits) : TargetHoldPositionThroughPortal(out raycastHits);
-
-			Vector3 playerPositionalDiff = Player.instance.transform.position - playerPosLastFrame;
+			Vector3 playerCamPositionalDiff = Player.instance.cameraFollow.transform.position - playerCamPosLastFrame;
 			if (portalableObject != null && portalableObject.grabbedThroughPortal != null) {
-				playerPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerPositionalDiff);
+				playerCamPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerCamPositionalDiff);
 			}
-			debug.Log($"Positional diff: {playerPositionalDiff:F3}");
-			thisRigidbody.MovePosition(transform.position + playerPositionalDiff);
+			//debug.Log($"Positional diff: {playerCamPositionalDiff:F3}");
+			thisRigidbody.MovePosition(transform.position + playerCamPositionalDiff);
+			if (portalableObject.copyIsEnabled) {
+				portalableObject.fakeCopyInstance.TransformCopy();
+			}
+
+			Vector3 targetPos = (portalableObject == null) ? TargetHoldPosition(out RaycastHits raycastHits) : TargetHoldPositionThroughPortal(out raycastHits);
 
 			Vector3 diff = targetPos - thisRigidbody.position;
 			Vector3 newVelocity = Vector3.Lerp(thisRigidbody.velocity, followSpeed * diff, followLerpSpeed * Time.fixedDeltaTime);
@@ -130,12 +132,12 @@ public class PickupObject : MonoBehaviour {
 				newVelocity = Vector3.ProjectOnPlane(newVelocity, raycastHits.lastRaycast.ray.direction);
 			}
 
-			Vector3 velBefore = thisRigidbody.velocity;
+			//Vector3 velBefore = thisRigidbody.velocity;
 			thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
 			//debug.Log("Before: " + velBefore.ToString("F3") + "\nAfter: " + thisRigidbody.velocity.ToString("F3"));
 		}
 
-		playerPosLastFrame = Player.instance.transform.position;
+		playerCamPosLastFrame = playerCam.transform.position;
 	}
 
 	Vector3 TargetHoldPosition(out RaycastHits raycastHits) {

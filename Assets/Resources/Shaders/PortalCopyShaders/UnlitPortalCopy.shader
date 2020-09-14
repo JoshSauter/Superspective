@@ -49,7 +49,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target {
 				float clipTest = -dot(i.worldPos - _PortalPos, _PortalNormal);
-				if (clipTest == 0) clipTest = -1;
+				if (clipTest == 0) clipTest = 1;
 				clip(clipTest);
 
 				// sample the texture

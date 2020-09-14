@@ -56,7 +56,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	private int framesWaitedAfterLeavingGround = 0;
 	private const int framesToWaitAfterLeavingGround = 3;
 	ContactPoint ground;
-	// Dot(face normal, Vector3.up) must be greater than this value to be considered "ground"
+	// Dot(face normal, transform.up) must be greater than this value to be considered "ground"
 	public float isGroundThreshold = 0.6f;
 	public float isGroundedSpherecastDistance = 0.5f;
 	#endregion
@@ -137,7 +137,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		StepFound stepFound = DetectStep(desiredVelocity, ground, grounded);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
-			Player.instance.cameraFollow.SetLerpSpeed(15f);
+			Player.instance.cameraFollow.SetLerpSpeed(Player.instance.cameraFollow.desiredLerpSpeed);
 			if (Vector3.Dot(transform.up, stepFound.stepOffset) > 0) {
 				OnStaircaseStepUp?.Invoke();
 			}

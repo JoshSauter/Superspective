@@ -4,27 +4,29 @@ using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 using MagicTriggerMechanics;
 
-public class FogToggle : MonoBehaviour {
-	public bool disableFog = true;
-	
-	public GlobalFog fog;
-	private MagicTrigger trigger;
+namespace LevelSpecific.Transition2_3 {
+	public class FogToggle : MonoBehaviour {
+		public bool disableFog = true;
 
-	private void Awake() {
-		trigger = GetComponent<MagicTrigger>();
-	}
+		public GlobalFog fog;
+		private MagicTrigger trigger;
 
-	private void Start() {
-		fog = Camera.main.GetComponent<GlobalFog>();
+		private void Awake() {
+			trigger = GetComponent<MagicTrigger>();
+		}
 
-		trigger.OnMagicTriggerStayOneTime += (ctx) => ToggleForward();
-		trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ToggleBackward();
-	}
+		private void Start() {
+			fog = Camera.main.GetComponent<GlobalFog>();
 
-	void ToggleForward() {
-		fog.enabled = !disableFog;
-	}
-	void ToggleBackward() {
-		fog.enabled = disableFog;
+			trigger.OnMagicTriggerStayOneTime += (ctx) => ToggleForward();
+			trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ToggleBackward();
+		}
+
+		void ToggleForward() {
+			fog.enabled = !disableFog;
+		}
+		void ToggleBackward() {
+			fog.enabled = disableFog;
+		}
 	}
 }
