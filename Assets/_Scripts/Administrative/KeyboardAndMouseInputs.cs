@@ -91,13 +91,45 @@ public class KeyboardAndMouseInput {
 }
 
 public static class KeyboardAndMouseInputs {
-	public static KeyboardAndMouseInput Up = new KeyboardAndMouseInput(KeyCode.W);
-	public static KeyboardAndMouseInput Down = new KeyboardAndMouseInput(KeyCode.S);
-	public static KeyboardAndMouseInput Left = new KeyboardAndMouseInput(KeyCode.A);
-	public static KeyboardAndMouseInput Right = new KeyboardAndMouseInput(KeyCode.D);
+	public enum KeyboardLayoutPreset {
+		QWERTY,
+		AZERTY
+	}
+
+	private static KeyboardAndMouseInput QWERTYUp = new KeyboardAndMouseInput(KeyCode.W);
+	private static KeyboardAndMouseInput QWERTYDown = new KeyboardAndMouseInput(KeyCode.S);
+	private static KeyboardAndMouseInput QWERTYLeft = new KeyboardAndMouseInput(KeyCode.A);
+	private static KeyboardAndMouseInput QWERTYRight = new KeyboardAndMouseInput(KeyCode.D);
+
+	private static KeyboardAndMouseInput AZERTYUp = new KeyboardAndMouseInput(KeyCode.Z);
+	private static KeyboardAndMouseInput AZERTYDown = new KeyboardAndMouseInput(KeyCode.S);
+	private static KeyboardAndMouseInput AZERTYLeft = new KeyboardAndMouseInput(KeyCode.Q);
+	private static KeyboardAndMouseInput AZERTYRight = new KeyboardAndMouseInput(KeyCode.D);
+
 	public static KeyboardAndMouseInput Action1 = new KeyboardAndMouseInput(0);
 	public static KeyboardAndMouseInput Action2 = new KeyboardAndMouseInput(1);
+	public static KeyboardAndMouseInput Up = QWERTYUp;
+	public static KeyboardAndMouseInput Down = QWERTYDown;
+	public static KeyboardAndMouseInput Left = QWERTYLeft;
+	public static KeyboardAndMouseInput Right = QWERTYRight;
 	public static KeyboardAndMouseInput Escape = new KeyboardAndMouseInput(KeyCode.Escape);
 	public static KeyboardAndMouseInput Space = new KeyboardAndMouseInput(KeyCode.Space);
 	public static KeyboardAndMouseInput Shift = new KeyboardAndMouseInput(KeyCode.LeftShift, KeyCode.RightShift);
+
+	public static void UseKeyboardLayoutPreset(KeyboardLayoutPreset preset) {
+		switch (preset) {
+			case KeyboardLayoutPreset.AZERTY:
+				Up = AZERTYUp;
+				Down = AZERTYDown;
+				Left = AZERTYLeft;
+				Right = AZERTYRight;
+				break;
+			case KeyboardLayoutPreset.QWERTY:
+				Up = QWERTYUp;
+				Down = QWERTYDown;
+				Left = QWERTYLeft;
+				Right = QWERTYRight;
+				break;
+		}
+	}
 }

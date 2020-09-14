@@ -21,4 +21,12 @@ public class GameManager : MonoBehaviour {
         Application.Quit();
 #endif
     }
+
+    public void UseQWERTYLayout() {
+        KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.QWERTY);
+	}
+
+    public void UseAZERTYLayout() {
+        KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.AZERTY);
+    }
 }
