@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using EpitaphUtils;
 using NaughtyAttributes;
+using Saving;
+using System.Collections;
+using static Saving.SaveManagerForScene;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -41,7 +44,7 @@ public enum Level {
 	forkBlackRoom2
 }
 
-public class LevelManager : Singleton<LevelManager> {
+public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public bool DEBUG = false;
 	public DebugLogger debug;
 	[OnValueChanged("LoadDefaultPlayerPosition")]
@@ -200,12 +203,24 @@ public class LevelManager : Singleton<LevelManager> {
 	Dictionary<string, List<string>> worldGraph;
 	public string activeSceneName;
 	public Level activeScene => GetLevel(activeSceneName);
-	List<string> loadedSceneNames;
+	public List<string> loadedSceneNames;
 	List<string> currentlyLoadingSceneNames;
 	List<string> currentlyUnloadingSceneNames;
+	public bool isCurrentlyLoadingScenes => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
+
+	public delegate void ActiveSceneChange();
+	public event ActiveSceneChange OnActiveSceneChange;
+	public delegate void ActiveSceneWillChange(string nextSceneName);
+	public event ActiveSceneWillChange BeforeActiveSceneChange;
+
+	public delegate void SceneLoadUnload(string sceneName);
+	public event SceneLoadUnload BeforeSceneUnload;
+	public event SceneLoadUnload BeforeSceneLoad;
+	public event SceneLoadUnload AfterSceneUnload;
+	public event SceneLoadUnload AfterSceneLoad;
 
 #region level names
-	private const string managerScene = "_ManagerScene";
+	public const string managerScene = "_ManagerScene";
 	private const string testScene = "_TestScene";
 	private const string portalTestScene = "PortalTestScene";
 
@@ -272,7 +287,7 @@ public class LevelManager : Singleton<LevelManager> {
 	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="levelName">Name of the scene to become active</param>
-	public void SwitchActiveScene(string levelName) {
+	public async void SwitchActiveScene(string levelName, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true) {
 		if (!worldGraph.ContainsKey(levelName)) {
 			debug.LogError("No level name found in world graph with name " + levelName);
 			return;
@@ -283,16 +298,26 @@ public class LevelManager : Singleton<LevelManager> {
 			return;
 		}
 
+		BeforeActiveSceneChange?.Invoke(levelName);
+
 		activeSceneName = levelName;
 
-		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[activeSceneName]);
+		if (playBanner) {
+			LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[activeSceneName]);
+		}
 
 		// First unload any scene no longer needed
-		DeactivateUnrelatedScenes(levelName);
+		DeactivateUnrelatedScenes(levelName, saveDeactivatedScenesToDisk);
+
+		List<string> scenesToBeLoadedFromDisk = new List<string>();
 
 		// Then load the level if it's not already loaded
 		if (!(loadedSceneNames.Contains(levelName) || currentlyLoadingSceneNames.Contains(levelName))) {
 			currentlyLoadingSceneNames.Add(levelName);
+
+			BeforeSceneLoad?.Invoke(levelName);
+
+			scenesToBeLoadedFromDisk.Add(levelName);
 			SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
 		}
 		else {
@@ -305,7 +330,29 @@ public class LevelManager : Singleton<LevelManager> {
 		foreach (string connectedSceneName in worldGraph[levelName]) {
 			if (!(loadedSceneNames.Contains(connectedSceneName) || currentlyLoadingSceneNames.Contains(connectedSceneName))) {
 				currentlyLoadingSceneNames.Add(connectedSceneName);
+
+				BeforeSceneLoad?.Invoke(connectedSceneName);
+
+				scenesToBeLoadedFromDisk.Add(connectedSceneName);
 				SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
+			}
+		}
+
+		Debug.Log("Waiting for scenes to be loaded...");
+		await TaskEx.WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
+		Debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
+
+		if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
+			DynamicObjectManager.LoadOrCreateDynamicObjects(SaveManager.temp);
+
+			foreach (string loadedScene in loadedSceneNames) {
+				SaveManager.GetSaveManagerForScene(loadedScene).InitializeSaveableObjectsDict();
+			}
+
+			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(sceneToBeLoaded);
+				SaveFileForScene saveFileForScene = saveManagerForScene.GetSaveFromDisk(SaveManager.temp);
+				saveManagerForScene?.LoadSceneFromSaveFile(saveFileForScene);
 			}
 		}
 	}
@@ -368,7 +415,7 @@ public class LevelManager : Singleton<LevelManager> {
 		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
 		worldGraph.Add(level4, new List<string>() { transition3_4 });
 		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
-		worldGraph.Add(fork, new List<string>() { transitionWhiteRoom_Fork, forkWhiteRoom, /*forkBlackRoom, */forkOctagon });
+		worldGraph.Add(fork, new List<string>() { transitionWhiteRoom_Fork, forkWhiteRoom, forkBlackRoom, forkOctagon });
 		worldGraph.Add(forkOctagon, new List<string>() { transitionWhiteRoom_Fork, fork });
 		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection, forkWhiteRoom2 });
 		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom, forkWhiteRoomBlackHallway });
@@ -392,14 +439,25 @@ public class LevelManager : Singleton<LevelManager> {
 	/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph.
 	/// </summary>
 	/// <param name="selectedScene"></param>
-	private void DeactivateUnrelatedScenes(string selectedScene) {
+	private void DeactivateUnrelatedScenes(string selectedScene, bool saveDeactivatingScenesToDisk) {
 		List<string> scenesToDeactivate = new List<string>();
 		foreach (string currentlyActiveScene in loadedSceneNames) {
 			if (currentlyActiveScene != selectedScene && !worldGraph[selectedScene].Contains(currentlyActiveScene)) {
 				scenesToDeactivate.Add(currentlyActiveScene);
 			}
 		}
+
+		if (saveDeactivatingScenesToDisk && scenesToDeactivate.Count > 0) {
+			DynamicObjectManager.SaveDynamicObjects(SaveManager.temp);
+		}
 		foreach (string sceneToDeactivate in scenesToDeactivate) {
+			BeforeSceneUnload?.Invoke(sceneToDeactivate);
+
+			if (saveDeactivatingScenesToDisk) {
+				SaveManagerForScene saveForScene = SaveManager.GetSaveManagerForScene(sceneToDeactivate);
+				saveForScene?.SaveScene(SaveManager.temp);
+			}
+
 			SceneManager.UnloadSceneAsync(sceneToDeactivate);
 			loadedSceneNames.Remove(sceneToDeactivate);
 			currentlyUnloadingSceneNames.Add(sceneToDeactivate);
@@ -415,7 +473,10 @@ public class LevelManager : Singleton<LevelManager> {
 	private void FinishLoadingScene(Scene loadedScene) {
 		if (loadedScene.name == activeSceneName) {
 			SceneManager.SetActiveScene(loadedScene);
+			OnActiveSceneChange?.Invoke();
 		}
+
+		AfterSceneLoad?.Invoke(loadedScene.name);
 
 		if (currentlyLoadingSceneNames.Contains(loadedScene.name)) {
 			currentlyLoadingSceneNames.Remove(loadedScene.name);
@@ -434,6 +495,8 @@ public class LevelManager : Singleton<LevelManager> {
 		if (unloadedScene.name == activeSceneName) {
 			debug.LogError("Just unloaded the active scene!");
 		}
+
+		AfterSceneUnload?.Invoke(unloadedScene.name);
 
 		if (currentlyUnloadingSceneNames.Contains(unloadedScene.name)) {
 			currentlyUnloadingSceneNames.Remove(unloadedScene.name);
@@ -455,4 +518,32 @@ public class LevelManager : Singleton<LevelManager> {
 		}
 	}
 #endif
+
+	#region Saving
+	// There's only one LevelManager so we don't need a UniqueId here
+	public string ID => "LevelManager";
+
+	[Serializable]
+	class LevelManagerSave {
+		string activeScene;
+
+		public LevelManagerSave(LevelManager levelManager) {
+			this.activeScene = levelManager.activeSceneName;
+		}
+
+		public void LoadSave(LevelManager levelManager) {
+			levelManager.SwitchActiveScene(activeScene, false, false, false);
+		}
+	}
+
+	public object GetSaveObject() {
+		return new LevelManagerSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		LevelManagerSave save = savedObject as LevelManagerSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

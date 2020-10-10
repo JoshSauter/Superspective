@@ -15,7 +15,6 @@ namespace LevelSpecific.Fork {
             powerTrail.OnDepowerBegin += Disable;
 
             yield return new WaitUntil(() => portal.otherPortal != null);
-            Disable();
         }
 
         void Enable() {

@@ -60,6 +60,20 @@ public class DimensionObjectBase : MonoBehaviour {
 		SwitchVisibilityState(startingVisibilityState, true);
 	}
 
+	private void OnEnable() {
+		LevelManager.instance.OnActiveSceneChange += OnActiveSceneChange;
+	}
+
+	private void OnDisable() {
+		LevelManager.instance.OnActiveSceneChange -= OnActiveSceneChange;
+	}
+
+	void OnActiveSceneChange() {
+		if (gameObject.IsInActiveScene()) {
+			SwitchVisibilityState(startingVisibilityState, true);
+		}
+	}
+
 	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
 		startingMaterials = newStartingMaterials;
 	}
@@ -81,7 +95,7 @@ public class DimensionObjectBase : MonoBehaviour {
 	}
 
 	public virtual IEnumerator SwitchVisibilityStateCoroutine(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		if (!ignoreTransitionRules && !IsValidNextState(nextState)) yield break;
+		if ((!ignoreTransitionRules && !IsValidNextState(nextState)) || !gameObject.IsInActiveScene()) yield break;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
 

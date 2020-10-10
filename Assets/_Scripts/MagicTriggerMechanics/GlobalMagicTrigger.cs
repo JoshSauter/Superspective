@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MagicTriggerMechanics {
+	[RequireComponent(typeof(UniqueId))]
     public class GlobalMagicTrigger : MagicTrigger {
 		public bool sceneMustBeActive = true;
 		private Level thisScene = Level.managerScene;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TempMenu : MonoBehaviour {
+	public bool menuIsOpen => tempMenu.activeInHierarchy;
 	public GameObject tempMenu;
 	public Slider generalSensitivitySlider;
 	public Slider xSensitivitySlider;
@@ -27,18 +28,33 @@ public class TempMenu : MonoBehaviour {
 		});
     }
 
+	public void OpenMenu() {
+		tempMenu.SetActive(true);
+		// Assumes Time.timeScale is always 1 when we're not paused
+		Time.timeScale = 0;
+		Cursor.visible = true;
+		cachedLockMode = Cursor.lockState;
+		Cursor.lockState = CursorLockMode.Confined;
+	}
+
+	public void CloseMenu(bool restoreTimeScale = true) {
+		tempMenu.SetActive(false);
+		// Assumes Time.timeScale is always 1 when we're not paused
+		if (restoreTimeScale) {
+			Time.timeScale = 1;
+		}
+		Cursor.visible = false;
+		Cursor.lockState = cachedLockMode;
+	}
+
 	private void Update() {
 		if (PlayerButtonInput.instance.EscapePressed) {
 			bool becomeActive = !tempMenu.activeSelf;
-			tempMenu.SetActive(becomeActive);
-			PlayerLook.instance.frozen = becomeActive;
-			Cursor.visible = becomeActive;
 			if (becomeActive) {
-				cachedLockMode = Cursor.lockState;
-				Cursor.lockState = CursorLockMode.Confined;
+				OpenMenu();
 			}
 			else {
-				Cursor.lockState = cachedLockMode;
+				CloseMenu();
 			}
 		}
 	}

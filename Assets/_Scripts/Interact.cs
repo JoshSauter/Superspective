@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using EpitaphUtils;
 using EpitaphUtils.PortalUtils;
+using Saving;
+using System;
 
 public class Interact : Singleton<Interact> {
 	public bool DEBUG = false;
@@ -16,7 +18,7 @@ public class Interact : Singleton<Interact> {
 	Color reticleSelectColor = new Color(0.15f,1,0.15f,0.9f);
 	Color reticleOutsideUnselectColor;
 	Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
-	public float interactionDistance = 5f;
+	public const float interactionDistance = 5f;
 	Camera cam;
 
 	public InteractableObject objectHovered;

@@ -106,6 +106,9 @@ GameObject:
   - component: {fileID: -7177761913788684456}
   - component: {fileID: 6942496317342184652}
   - component: {fileID: 645222201582585819}
+  - component: {fileID: -3920780762748762780}
+  - component: {fileID: -4566693041940432657}
+  - component: {fileID: 1450287491848823106}
   m_Layer: 0
   m_Name: PickUpCubeRed
   m_TagString: Untagged
@@ -221,8 +224,6 @@ MonoBehaviour:
   DEBUG: 0
   isReplaceable: 1
   isHeld: 0
-  pickupDropCooldown: 0.1
-  holdDistance: 3
   thisGravity: {fileID: 0}
   thisRigidbody: {fileID: 0}
   pickupSound: {fileID: 6942496317342184652}
@@ -240,9 +241,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  sittingInPortal: {fileID: 0}
-  hoveredThroughPortal: {fileID: 0}
-  grabbedThroughPortal: {fileID: 0}
   colliders: []
   fakeCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
@@ -640,3 +638,41 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &-3920780762748762780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
+--- !u!114 &-4566693041940432657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0df67999d9d464d4f8e71de6f2d0f243, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1450287491848823106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 2

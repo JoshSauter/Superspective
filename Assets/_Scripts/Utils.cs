@@ -35,6 +35,7 @@ namespace EpitaphUtils {
 	}
 	
 	public static class Utils {
+
 		public static T GetCopyOf<T>(this Component comp, T other) where T : Component {
 			Type type = comp.GetType();
 			if (type != other.GetType()) return null; // type mis-match
@@ -55,6 +56,14 @@ namespace EpitaphUtils {
 				finfo.SetValue(comp, finfo.GetValue(other));
 			}
 			return comp as T;
+		}
+
+		public static bool IsInActiveScene(this Component c) {
+			return c.gameObject.scene.name == LevelManager.instance.activeSceneName;
+		}
+
+		public static bool IsInActiveScene(this GameObject o) {
+			return o.scene.name == LevelManager.instance.activeSceneName;
 		}
 
 		public static bool TaggedAsPlayer(this Component c) {

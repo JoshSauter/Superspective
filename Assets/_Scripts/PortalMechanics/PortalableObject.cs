@@ -5,9 +5,23 @@ using EpitaphUtils.ShaderUtils;
 using EpitaphUtils.PortalUtils;
 using System.Linq;
 using NaughtyAttributes;
+using Saving;
+using System;
+using SerializableClasses;
 
 namespace PortalMechanics {
-	public class PortalableObject : MonoBehaviour {
+	[RequireComponent(typeof(UniqueId))]
+	public class PortalableObject : MonoBehaviour, SaveableObject {
+		UniqueId _id;
+		UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
+
 		public bool DEBUG = false;
 
 		private Portal _sittingInPortal;
@@ -84,9 +98,9 @@ namespace PortalMechanics {
 			}
 		}
 		[ShowNativeProperty]
-		public bool copyShouldBeEnabled { get { return sittingInPortal != null || hoveredThroughPortal != null || grabbedThroughPortal != null; } }
+		public bool copyShouldBeEnabled => sittingInPortal != null || hoveredThroughPortal != null || grabbedThroughPortal != null;
 		[ShowNativeProperty]
-		public bool copyIsEnabled { get { return fakeCopyInstance != null && fakeCopyInstance.copyEnabled; } }
+		public bool copyIsEnabled => fakeCopyInstance != null && fakeCopyInstance.copyEnabled;
 		Dictionary<Renderer, Material[]> originalMaterials;
 		Dictionary<Renderer, Material[]> portalCopyMaterials;
 
@@ -264,5 +278,55 @@ namespace PortalMechanics {
 					return null;
 			}
 		}
+
+
+		#region Saving
+		// All components on PickupCubes share the same uniqueId so we need to qualify with component name
+		public string ID => $"PortalableObject_{id.uniqueId}";
+
+		[Serializable]
+		class PortalableObjectSave {
+			SerializableReference<Portal> sittingInPortal;
+			SerializableReference<Portal> hoveredThroughPortal;
+			SerializableReference<Portal> grabbedThroughPortal;
+
+			public PortalableObjectSave(PortalableObject obj) {
+				sittingInPortal = null;
+				hoveredThroughPortal = null;
+				grabbedThroughPortal = null;
+				if (obj.sittingInPortal != null) {
+					this.sittingInPortal = obj.sittingInPortal;
+				}
+				if (obj.hoveredThroughPortal != null) {
+					this.hoveredThroughPortal = obj.hoveredThroughPortal;
+				}
+				if (obj.grabbedThroughPortal != null) {
+					this.grabbedThroughPortal = obj.grabbedThroughPortal;
+				}
+			}
+
+			public void LoadSave(PortalableObject obj) {
+				if (this.sittingInPortal != null) {
+					obj.sittingInPortal = this.sittingInPortal;
+				}
+				if (this.hoveredThroughPortal != null) {
+					obj.hoveredThroughPortal = this.hoveredThroughPortal;
+				}
+				if (this.grabbedThroughPortal != null) {
+					obj.grabbedThroughPortal = this.grabbedThroughPortal;
+				}
+			}
+		}
+
+		public object GetSaveObject() {
+			return new PortalableObjectSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			PortalableObjectSave save = savedObject as PortalableObjectSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

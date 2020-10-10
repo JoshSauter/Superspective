@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 using Audio;
+using Saving;
+using System;
+using SerializableClasses;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : Singleton<PlayerMovement> {
+public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	public bool DEBUG = false;
 	public bool autoRun = false;
 	DebugLogger debug;
@@ -14,33 +17,33 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	public Vector3 curVelocity {
 		get { return thisRigidbody.velocity; }
 	}
-	float accelerationLerpSpeed = 15f;
-	float airspeedControlFactor = 0.4f;
-	float decelerationLerpSpeed = 12f;
-	float backwardsSpeed = 1f;
-	private float _walkSpeed = 9f;
+	const float accelerationLerpSpeed = 15f;
+	const float airspeedControlFactor = 0.4f;
+	const float decelerationLerpSpeed = 12f;
+	const float backwardsSpeed = 1f;
+	private const float _walkSpeed = 9f;
 	public float walkSpeed { get { return _walkSpeed * scale; } }
-	private float _runSpeed = 14f;
+	private const float _runSpeed = 14f;
 	public float runSpeed { get { return _runSpeed * scale; } }
-	private float desiredMovespeedLerpSpeed = 10;
+	private const float desiredMovespeedLerpSpeed = 10;
 
-	private float _jumpForce = 936;
+	private const float _jumpForce = 936;
 	public float jumpForce { get { return _jumpForce * scale; } }
-	public float windResistanceMultiplier = 0.4f;
+	public const float windResistanceMultiplier = 0.4f;
 
-	bool jumpIsOnCooldown = false;				// Prevents player from jumping again while true
-	float jumpCooldown = 0.2f;					// Time after landing before jumping is available again
-	bool underMinJumpTime = false;				// Used to delay otherwise immediate checks for isGrounded right after jumping
-	float minJumpTime = 0.5f;					// as long as underMinJumpTime
+	bool jumpIsOnCooldown = false;					// Prevents player from jumping again while true
+	const float jumpCooldown = 0.2f;				// Time after landing before jumping is available again
+	bool underMinJumpTime = false;					// Used to delay otherwise immediate checks for isGrounded right after jumping
+	const float minJumpTime = 0.5f;					// as long as underMinJumpTime
 	float movespeed;
 	public Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
 
 	// Staircase handling characteristics
-	float _maxStepHeight = 0.6f;
+	const float _maxStepHeight = 0.6f;
 	float maxStepHeight { get { return _maxStepHeight * scale; } }
 	// How far do we move into the step before raycasting down?
-	float _stepOverbiteMagnitude = 0.15f;
+	const float _stepOverbiteMagnitude = 0.15f;
 	float stepOverbiteMagnitude { get { return _stepOverbiteMagnitude * scale; } }
 
 	CapsuleCollider thisCollider;
@@ -57,8 +60,8 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	private const int framesToWaitAfterLeavingGround = 3;
 	ContactPoint ground;
 	// Dot(face normal, transform.up) must be greater than this value to be considered "ground"
-	public float isGroundThreshold = 0.6f;
-	public float isGroundedSpherecastDistance = 0.5f;
+	public const float isGroundThreshold = 0.6f;
+	public const float isGroundedSpherecastDistance = 0.5f;
 	#endregion
 
 	public SoundEffect jumpSound;
@@ -73,14 +76,14 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	private void Awake() {
 		input = PlayerButtonInput.instance;
 		debug = new DebugLogger(this, () => DEBUG);
+		thisRigidbody = GetComponent<Rigidbody>();
+		thisCollider = GetComponent<CapsuleCollider>();
+		thisRenderer = GetComponentInChildren<MeshRenderer>();
 	}
 
 	// Use this for initialization
 	void Start() {
 		movespeed = walkSpeed;
-		thisRigidbody = GetComponent<Rigidbody>();
-		thisCollider = GetComponent<CapsuleCollider>();
-		thisRenderer = GetComponentInChildren<MeshRenderer>();
 	}
 
 	private void Update() {
@@ -137,7 +140,7 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 		StepFound stepFound = DetectStep(desiredVelocity, ground, grounded);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
-			Player.instance.cameraFollow.SetLerpSpeed(Player.instance.cameraFollow.desiredLerpSpeed);
+			Player.instance.cameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
 			if (Vector3.Dot(transform.up, stepFound.stepOffset) > 0) {
 				OnStaircaseStepUp?.Invoke();
 			}
@@ -429,4 +432,72 @@ public class PlayerMovement : Singleton<PlayerMovement> {
 	public void ResumeMovement() {
 		stopped = false;
 	}
+
+	#region Saving
+	// There's only one player so we don't need a UniqueId here
+	public string ID => "PlayerMovement";
+
+	[Serializable]
+	class PlayerMovementSave {
+		bool DEBUG;
+		bool autoRun;
+
+		bool jumpIsOnCooldown;
+		bool underMinJumpTime;
+		float movespeed;
+
+		SerializableVector3 thisRigidbodyVelocity;
+		bool thisRigidbodyKinematic;
+		bool thisRigidbodyUseGravity;
+		float thisRigidbodyMass;
+
+		bool stopped;
+		bool grounded;
+		int framesWaitedAfterLeavingGround = 0;
+
+		public PlayerMovementSave(PlayerMovement playerMovement) {
+			this.DEBUG = playerMovement.DEBUG;
+			this.autoRun = playerMovement.autoRun;
+			this.jumpIsOnCooldown = playerMovement.jumpIsOnCooldown;
+			this.underMinJumpTime = playerMovement.underMinJumpTime;
+			this.movespeed = playerMovement.movespeed;
+
+			this.thisRigidbodyVelocity = playerMovement.thisRigidbody.velocity;
+			this.thisRigidbodyKinematic = playerMovement.thisRigidbody.isKinematic;
+			this.thisRigidbodyUseGravity = playerMovement.thisRigidbody.useGravity;
+			this.thisRigidbodyMass = playerMovement.thisRigidbody.mass;
+
+			this.stopped = playerMovement.stopped;
+			this.grounded = playerMovement.grounded;
+			this.framesWaitedAfterLeavingGround = playerMovement.framesWaitedAfterLeavingGround;
+		}
+
+		public void LoadSave(PlayerMovement playerMovement) {
+			playerMovement.DEBUG = this.DEBUG;
+			playerMovement.autoRun = this.autoRun;
+			playerMovement.jumpIsOnCooldown = this.jumpIsOnCooldown;
+			playerMovement.underMinJumpTime = this.underMinJumpTime;
+			playerMovement.movespeed = this.movespeed;
+
+			playerMovement.thisRigidbody.velocity = this.thisRigidbodyVelocity;
+			playerMovement.thisRigidbody.isKinematic = this.thisRigidbodyKinematic;
+			playerMovement.thisRigidbody.useGravity = this.thisRigidbodyUseGravity;
+			playerMovement.thisRigidbody.mass = this.thisRigidbodyMass;
+
+			playerMovement.stopped = this.stopped;
+			playerMovement.grounded = this.grounded;
+			playerMovement.framesWaitedAfterLeavingGround = this.framesWaitedAfterLeavingGround;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new PlayerMovementSave(this); ;
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		PlayerMovementSave save = savedObject as PlayerMovementSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

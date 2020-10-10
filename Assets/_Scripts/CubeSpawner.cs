@@ -3,8 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 using EpitaphUtils;
+using Saving;
+using System;
+using SerializableClasses;
+using Random = UnityEngine.Random;
+using UnityEngine.SceneManagement;
 
-public class CubeSpawner : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class CubeSpawner : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
 	// TODO: Find a replacement for this dimension cube logic below
 	// Spawns a "fake" cube prefab that looks like a normal cube but disappears when in other dimensions
 	// The fake cube is replaced by a real one when it is moved out of the spawner
@@ -25,7 +40,9 @@ public class CubeSpawner : MonoBehaviour {
 	IEnumerator Start() {
 		thisCollider = GetComponent<Collider>();
 		yield return new WaitForSeconds(0.5f);
-		SpawnNewCube();
+		if (objectBeingSuspended == null) {
+			SpawnNewCube();
+		}
     }
 
     void FixedUpdate() {
@@ -60,7 +77,7 @@ public class CubeSpawner : MonoBehaviour {
 	void SpawnNewCube() {
 		const float randomizeOffset = 1.0f;
 		PickupObject newCube = Instantiate(cubePrefab, thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset), new Quaternion());
-		newCube.transform.SetParent(transform, true);
+		SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 		newCube.GetComponent<GravityObject>().useGravity = false;
 
 		//newCube.Drop();
@@ -127,4 +144,48 @@ public class CubeSpawner : MonoBehaviour {
 		cube.transform.localScale = endSize;
 		Destroy(cube.gameObject);
 	}
+
+	#region Saving
+	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
+	public string ID => $"CubeSpawner_{id.uniqueId}";
+
+	[Serializable]
+	class CubeSpawnerSave {
+		SerializableAnimationCurve cubeGrowCurve;
+		SerializableAnimationCurve cubeShrinkCurve;
+		SerializableReference<PickupObject> objectBeingSuspended;
+		SerializableReference<PickupObject> objectGrabbedFromSpawner;
+
+		int baseDimensionForCubes;
+
+		public CubeSpawnerSave(CubeSpawner spawner) {
+			this.cubeGrowCurve = spawner.cubeGrowCurve;
+			this.cubeShrinkCurve = spawner.cubeShrinkCurve;
+			this.objectBeingSuspended = spawner.objectBeingSuspended;
+			this.objectGrabbedFromSpawner = spawner.objectGrabbedFromSpawner;
+			this.baseDimensionForCubes = spawner.baseDimensionForCubes;
+		}
+
+		public void LoadSave(CubeSpawner spawner) {
+			spawner.cubeGrowCurve = this.cubeGrowCurve;
+			spawner.cubeShrinkCurve = this.cubeShrinkCurve;
+			spawner.objectBeingSuspended = this.objectBeingSuspended;
+			spawner.objectGrabbedFromSpawner = this.objectGrabbedFromSpawner;
+			if (spawner.objectBeingSuspended != null) {
+				spawner.rigidbodyOfObjectBeingSuspended = spawner.objectBeingSuspended.GetComponent<Rigidbody>();
+			}
+			spawner.baseDimensionForCubes = this.baseDimensionForCubes;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new CubeSpawnerSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		CubeSpawnerSave save = savedObject as CubeSpawnerSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

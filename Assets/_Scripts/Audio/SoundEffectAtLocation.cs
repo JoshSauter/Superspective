@@ -68,7 +68,7 @@ namespace Audio {
 			StartCoroutine(PlaySound(_audioSourcePlayingAtLocation));
 		}
 
-		public override void Play(bool shouldForcePlay = false) {
+		public override void Play(bool shouldForcePlay = false, float playAt = 0.0f) {
 			if (_audioSourcePlayingAtLocation == null) {
 				_audioSourcePlayingAtLocation = SimplePool.instance.Spawn(locationGameObjectPrefab, location, new Quaternion());
 			}
@@ -76,6 +76,11 @@ namespace Audio {
 			if (!_audioSourcePlayingAtLocation.isPlaying || shouldForcePlay) {
 				UpdateAudioSourceSettings();
 				_audioSourcePlayingAtLocation.pitch = GetPitch();
+
+				if (audioSource.clip != null) {
+					float time = playAt * audioSource.clip.length;
+					audioSource.time = time;
+				}
 				PlaySound();
 			}
 		}

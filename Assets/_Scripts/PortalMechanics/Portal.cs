@@ -6,9 +6,21 @@ using EpitaphUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
+using Saving;
 
 namespace PortalMechanics {
-	public class Portal : MonoBehaviour {
+	[RequireComponent(typeof(UniqueId))]
+	public class Portal : MonoBehaviour, SaveableObject {
+		UniqueId _id;
+		public UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
+
 		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
@@ -38,6 +50,7 @@ namespace PortalMechanics {
 		public Collider[] colliders;
 		private Transform playerCamera;
 		private CameraFollow playerCameraFollow;
+		private bool teleportingPlayer = false;
 
 		[HorizontalLine]
 
@@ -221,7 +234,7 @@ namespace PortalMechanics {
 				}
 			}
 			else {
-				playerCameraFollow.SetLerpSpeed(playerCameraFollow.desiredLerpSpeed);
+				playerCameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
 				if (!teleportingPlayer) {
 					StartCoroutine(TeleportPlayer(other.transform));
 				}
@@ -424,7 +437,6 @@ namespace PortalMechanics {
 			return otherPortal.transform.rotation * relativeRot;
 		}
 
-		private bool teleportingPlayer = false;
 		/// <summary>
 		/// Frame 1: Teleport player and disable this portal's volumetric portal while enabling the otherPortal's volumetric portal
 		/// Frame 2: Do nothing (but ensure that this is not called twice)
@@ -603,6 +615,66 @@ namespace PortalMechanics {
 			to.edgeColor = from.edgeColor;
 			to.edgeColorGradient = from.edgeColorGradient;
 			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+		}
+		#endregion
+
+		#region Saving
+		[System.Serializable]
+		class PortalSave {
+			bool DEBUG;
+			string channel;
+			bool changeActiveSceneOnTeleport;
+			bool changeCameraEdgeDetection;
+			int edgeColorMode;
+			SerializableClasses.SerializableColor edgeColor;
+			SerializableClasses.SerializableGradient edgeColorGradient;
+			bool renderRecursivePortals;
+			bool compositePortal;
+			bool teleportingPlayer = false;
+
+			bool pauseRenderingOnly = false;
+			bool pauseRenderingAndLogic = false;
+
+			public PortalSave(Portal portal) {
+				this.DEBUG = portal.DEBUG;
+				this.channel = portal.channel;
+				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
+				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;
+				this.edgeColorMode = (int)portal.edgeColorMode;
+				this.edgeColor = portal.edgeColor;
+				this.edgeColorGradient = portal.edgeColorGradient;
+				this.renderRecursivePortals = portal.renderRecursivePortals;
+				this.compositePortal = portal.compositePortal;
+				this.teleportingPlayer = portal.teleportingPlayer;
+				this.pauseRenderingOnly = portal.pauseRenderingOnly;
+				this.pauseRenderingAndLogic = portal.pauseRenderingAndLogic;
+			}
+
+			public void LoadSave(Portal portal) {
+				portal.DEBUG = this.DEBUG;
+				portal.channel = this.channel;
+				portal.changeActiveSceneOnTeleport = this.changeActiveSceneOnTeleport;
+				portal.changeCameraEdgeDetection = this.changeCameraEdgeDetection;
+				portal.edgeColorMode = (BladeEdgeDetection.EdgeColorMode)this.edgeColorMode;
+				portal.edgeColor = this.edgeColor;
+				portal.edgeColorGradient = this.edgeColorGradient;
+				portal.renderRecursivePortals = this.renderRecursivePortals;
+				portal.compositePortal = this.compositePortal;
+				portal.teleportingPlayer = this.teleportingPlayer;
+				portal.pauseRenderingOnly = this.pauseRenderingOnly;
+				portal.pauseRenderingAndLogic = this.pauseRenderingAndLogic;
+			}
+		}
+
+		public string ID => $"Portal_{id.uniqueId}";
+		public object GetSaveObject() {
+			return new PortalSave(this); ;
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			PortalSave save = savedObject as PortalSave;
+
+			save.LoadSave(this);
 		}
 		#endregion
 	}

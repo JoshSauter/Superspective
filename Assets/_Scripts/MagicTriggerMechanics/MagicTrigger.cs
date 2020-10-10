@@ -3,12 +3,26 @@ using UnityEngine;
 using EpitaphUtils;
 using System.Linq;
 using NaughtyAttributes;
+using Saving;
+using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace MagicTriggerMechanics {
-	public class MagicTrigger : MonoBehaviour {
+	[RequireComponent(typeof(UniqueId))]
+	public class MagicTrigger : MonoBehaviour, SaveableObject {
+		// TODO: Should NEVER add uniqueId dynamically at runtime, EXCEPT for DynamicObjects. Remove all instances of the following pattern
+		// and replace with just the GetComponent part, with some editor tool to automatically add UniqueIds to any SaveableObject that's lacking one AND needs one
+		UniqueId _id;
+		public UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
 		public bool DEBUG;
 		public DebugLogger debug;
 
@@ -37,6 +51,7 @@ namespace MagicTriggerMechanics {
 
 		protected virtual void Awake() {
 			debug = new DebugLogger(this, () => DEBUG);
+			gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 		}
 
 		private void OnDisable() {
@@ -146,5 +161,104 @@ namespace MagicTriggerMechanics {
 			}
 			debug.Log(debugString);
 		}
+
+		#region Saving
+		// There's only one player so we don't need a UniqueId here
+		public string ID {
+			get {
+				string uniqueId = $"MagicTrigger_{id.uniqueId}";
+				if (uniqueId == "MagicTrigger_") {
+					Debug.Log(gameObject.name + " in " + gameObject.scene.name);
+				}
+				return uniqueId;
+			}
+		}
+		//public string ID => $"MagicTrigger_{id.uniqueId}";
+
+		[Serializable]
+		class MagicTriggerSave {
+			List<List<bool>> gameObjectsToEnableState = new List<List<bool>>();
+			List<List<bool>> gameObjectsToDisableState = new List<List<bool>>();
+			List<List<bool>> scriptsToEnableState = new List<List<bool>>();
+			List<List<bool>> scriptsToDisableState = new List<List<bool>>();
+			bool hasTriggeredOnStay;
+			bool hasNegativeTriggeredOnStay;
+
+			public MagicTriggerSave(MagicTrigger magicTrigger) {
+				foreach (var action in magicTrigger.actionsToTrigger) {
+					List<bool> objectsToEnableState = new List<bool>();
+					List<bool> objectsToDisableState = new List<bool>();
+					List<bool> scriptsToEnableState = new List<bool>();
+					List<bool> scriptsToDisableState = new List<bool>();
+					if (action.objectsToEnable != null) {
+						foreach (var objToEnable in action.objectsToEnable) {
+							objectsToEnableState.Add(objToEnable.activeSelf);
+						}
+					}
+					if (action.objectsToDisable != null) {
+						foreach (var objToDisable in action.objectsToDisable) {
+							objectsToDisableState.Add(objToDisable.activeSelf);
+						}
+					}
+					if (action.scriptsToEnable != null) {
+						foreach (var scriptToEnable in action.scriptsToEnable) {
+							scriptsToEnableState.Add(scriptToEnable.enabled);
+						}
+					}
+					if (action.scriptsToDisable != null) {
+						foreach (var scriptToDisable in action.scriptsToDisable) {
+							scriptsToDisableState.Add(scriptToDisable.enabled);
+						}
+					}
+					this.gameObjectsToEnableState.Add(objectsToEnableState);
+					this.gameObjectsToDisableState.Add(objectsToDisableState);
+					this.scriptsToEnableState.Add(scriptsToEnableState);
+					this.scriptsToDisableState.Add(scriptsToDisableState);
+				}
+				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
+				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
+			}
+
+			public void LoadSave(MagicTrigger magicTrigger) {
+				for (int i = 0; i < magicTrigger.actionsToTrigger.Count; i++) {
+					TriggerAction action = magicTrigger.actionsToTrigger[i];
+
+					if (action.objectsToEnable != null) {
+						for (int j = 0; j < action.objectsToEnable.Length; j++) {
+							action.objectsToEnable[j].SetActive(this.gameObjectsToEnableState[i][j]);
+						}
+					}
+					if (action.objectsToDisable != null) {
+						for (int j = 0; j < action.objectsToDisable.Length; j++) {
+							action.objectsToDisable[j].SetActive(this.gameObjectsToDisableState[i][j]);
+						}
+					}
+					if (action.scriptsToEnable != null) {
+						for (int j = 0; j < action.scriptsToEnable.Length; j++) {
+							action.scriptsToEnable[j].enabled = this.scriptsToEnableState[i][j];
+						}
+					}
+					if (action.scriptsToDisable != null) {
+						for (int j = 0; j < action.scriptsToDisable.Length; j++) {
+							action.scriptsToDisable[j].enabled = this.scriptsToDisableState[i][j];
+						}
+					}
+				}
+
+				magicTrigger.hasTriggeredOnStay = this.hasTriggeredOnStay;
+				magicTrigger.hasNegativeTriggeredOnStay = this.hasNegativeTriggeredOnStay;
+			}
+		}
+
+		public object GetSaveObject() {
+			return new MagicTriggerSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			MagicTriggerSave save = savedObject as MagicTriggerSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

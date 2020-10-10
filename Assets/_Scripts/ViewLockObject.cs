@@ -11,12 +11,37 @@ public struct ViewLockInfo {
 
 [RequireComponent(typeof(Collider))]
 public class ViewLockObject : MonoBehaviour {
+	PlayerLook.State _state;
+	PlayerLook.State state {
+		get { return _state; }
+		set {
+			if (state == value) return;
+
+			_state = value;
+			switch (value) {
+				case PlayerLook.State.ViewLocking:
+					OnViewLockEnterBegin?.Invoke();
+					break;
+				case PlayerLook.State.ViewLocked:
+					OnViewLockEnterFinish?.Invoke();
+					break;
+				case PlayerLook.State.ViewUnlocking:
+					OnViewLockExitBegin?.Invoke();
+					break;
+				case PlayerLook.State.ViewUnlocked:
+					OnViewLockExitFinish?.Invoke();
+
+					hitbox.enabled = true;
+					break;
+			}
+		}
+	}
+	bool isLockedOnThisObject => state != PlayerLook.State.ViewUnlocked;
 	InteractableObject interactableObject;
 	public ViewLockInfo[] viewLockOptions;
 	public float viewLockTime = 0.75f;
 	public float viewUnlockTime = 0.25f;
 
-	public bool focusIsLocked = false;
 	public Collider hitbox;
 	Transform playerCamera;
 
@@ -53,21 +78,19 @@ public class ViewLockObject : MonoBehaviour {
 		playerCamera = EpitaphScreen.instance.playerCamera.transform;
     }
 
-	public void OnLeftMouseButtonDown() {
-		if (PlayerLook.instance.viewLockedObject == null) {
-			hitbox.enabled = false;
-			enterViewLockSfx.Play(true);
-			PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
-			PlayerMovement.instance.thisRigidbody.isKinematic = true;
+	private void Update() {
+		if (isLockedOnThisObject) {
+			state = PlayerLook.instance.state;
 		}
 	}
 
-	void Update() {
-		if (focusIsLocked && PlayerButtonInput.instance.LeftStickHeld) {
-			focusIsLocked = false;
-			PlayerLook.instance.UnlockView();
-			PlayerMovement.instance.thisRigidbody.isKinematic = false;
-		} 
+	public void OnLeftMouseButtonDown() {
+		if (PlayerLook.instance.state == PlayerLook.State.ViewUnlocked) {
+			hitbox.enabled = false;
+			enterViewLockSfx.Play(true);
+			PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
+			state = PlayerLook.State.ViewLocking;
+		}
 	}
 
 	private ViewLockInfo ClosestViewLock(Vector3 pos, Quaternion rot) {

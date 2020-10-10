@@ -22,7 +22,7 @@ namespace Audio {
 		public abstract AudioSource audioSource { get; }
 
 		[Button("Play Sound")]
-		public abstract void Play(bool shouldForcePlay = false);
+		public abstract void Play(bool shouldForcePlay = false, float playAt = 0.0f);
 
 		public abstract void PlayOneShot();
 

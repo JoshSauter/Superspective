@@ -6,9 +6,24 @@ using EpitaphUtils.PortalUtils;
 using PortalMechanics;
 using NaughtyAttributes;
 using Audio;
+using Saving;
+using System;
+using SerializableClasses;
+using UnityEngine.SceneManagement;
+using static Saving.DynamicObjectManager;
 
+[RequireComponent(typeof(UniqueId))]
 [RequireComponent(typeof(Rigidbody))]
-public class PickupObject : MonoBehaviour {
+public class PickupObject : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
 	public bool DEBUG = false;
 	DebugLogger debug;
 	InteractableObject interactableObject;
@@ -27,13 +42,13 @@ public class PickupObject : MonoBehaviour {
 		}
 	}
 	public bool isHeld = false;
-	public float pickupDropCooldown = 0.1f;
+	public const float pickupDropCooldown = 0.1f;
 	float currentCooldown = 0;
 	bool onCooldown { get { return currentCooldown > 0; } }
-	public float holdDistance = 3;
-	float minDistanceFromPlayer = 0.25f;
-	float followSpeed = 15;
-	float followLerpSpeed = 15;
+	public const float holdDistance = 3;
+	const float minDistanceFromPlayer = 0.25f;
+	const float followSpeed = 15;
+	const float followLerpSpeed = 15;
 	Transform player;
 	Transform playerCam;
 	public GravityObject thisGravity;
@@ -94,6 +109,11 @@ public class PickupObject : MonoBehaviour {
 	private void Update() {
 		if (currentCooldown > 0) {
 			currentCooldown -= Time.deltaTime;
+		}
+
+		// Don't allow clicks in the menu to propagate to picking up/dropping the cube
+		if (MainCanvas.instance.tempMenu.menuIsOpen) {
+			currentCooldown = pickupDropCooldown;
 		}
 
 		if (isHeld) {
@@ -197,7 +217,6 @@ public class PickupObject : MonoBehaviour {
 			if (transform.parent != null) {
 				transform.SetParent(null);
 			}
-			DontDestroyOnLoad(gameObject);
 
 			thisGravity.useGravity = false;
 			thisRigidbody.isKinematic = false;
@@ -237,4 +256,73 @@ public class PickupObject : MonoBehaviour {
 			OnAnyDrop?.Invoke(this);
 		}
 	}
+
+	#region Saving
+	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
+	public string ID => $"PickupObject_{id.uniqueId}";
+
+	[Serializable]
+	class PickupObjectSave {
+		SerializableVector3 position;
+		SerializableQuaternion rotation;
+		SerializableVector3 localScale;
+
+		SerializableVector3 velocity;
+		SerializableVector3 angularVelocity;
+		float mass;
+
+		bool isReplaceable;
+		bool interactable;
+		bool isHeld;
+		float currentCooldown;
+
+		SerializableVector3 playerCamPosLastFrame;
+
+		public PickupObjectSave(PickupObject obj) {
+			this.position = obj.transform.position;
+			this.rotation = obj.transform.rotation;
+			this.localScale = obj.transform.localScale;
+
+			if (obj.thisRigidbody != null) {
+				this.velocity = obj.thisRigidbody.velocity;
+				this.angularVelocity = obj.thisRigidbody.angularVelocity;
+				this.mass = obj.thisRigidbody.mass;
+			}
+
+			this.isReplaceable = obj.isReplaceable;
+			this.interactable = obj.interactable;
+			this.isHeld = obj.isHeld;
+			this.currentCooldown = obj.currentCooldown;
+		}
+
+		public void LoadSave(PickupObject obj) {
+			obj.Awake();
+
+			obj.transform.position = this.position;
+			obj.transform.rotation = this.rotation;
+			obj.transform.localScale = this.localScale;
+
+			if (obj.thisRigidbody != null) {
+				obj.thisRigidbody.velocity = this.velocity;
+				obj.thisRigidbody.angularVelocity = this.angularVelocity;
+				obj.thisRigidbody.mass = this.mass;
+			}
+
+			obj.isReplaceable = this.isReplaceable;
+			obj.interactable = this.interactable;
+			obj.isHeld = this.isHeld;
+			obj.currentCooldown = this.currentCooldown;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new PickupObjectSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		PickupObjectSave save = savedObject as PickupObjectSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

@@ -4,14 +4,17 @@ using UnityEngine;
 using EpitaphUtils;
 using PortalMechanics;
 using NaughtyAttributes;
+using Saving;
+using System;
+using SerializableClasses;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
-public class CameraFollow : MonoBehaviour {
+public class CameraFollow : MonoBehaviour, SaveableObject {
 	bool shouldFollow = true;
 	[SerializeField]
 	[ReadOnly]
 	float currentLerpSpeed = 450f;				// Can be set by external scripts to slow the camera's lerp speed for a short time
-	public float desiredLerpSpeed = 30f;		// currentLerpSpeed will approach this value after not being changed for a while
+	public const float desiredLerpSpeed = 30f;	// currentLerpSpeed will approach this value after not being changed for a while
 	public Vector3 relativeStartPosition;
 	public Vector3 relativePositionLastFrame;	// Used in restoring position of camera after jump-cut movement of player
 	public Vector3 worldPositionLastFrame;
@@ -31,11 +34,13 @@ public class CameraFollow : MonoBehaviour {
 		timeSinceCurrentLerpSpeedWasModified = 0f;
 	}
 
-	private void Start() {
+	private void Awake() {
 		headbob = Player.instance.GetComponent<Headbob>();
-
 		relativeStartPosition = transform.localPosition;
 		worldPositionLastFrame = transform.position;
+	}
+
+	private void Start() {
 		TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
 		Portal.OnAnyPortalTeleportSimple += (obj) => { if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame(); };
 		Player.instance.look.OnViewLockEnterBegin += HandleViewLockBegin;
@@ -87,4 +92,48 @@ public class CameraFollow : MonoBehaviour {
 		shouldFollow = true;
 		RecalculateWorldPositionLastFrame();
 	}
+
+	#region Saving
+	// There's only one player so we don't need a UniqueId here
+	public string ID => "CameraFollow";
+
+	[Serializable]
+	class CameraFollowSave {
+		bool shouldFollow;
+		float currentLerpSpeed;
+		SerializableVector3 relativeStartPosition;
+		SerializableVector3 relativePositionLastFrame;
+		SerializableVector3 worldPositionLastFrame;
+
+		float timeSinceCurrentLerpSpeedWasModified;
+
+		public CameraFollowSave(CameraFollow cam) {
+			this.shouldFollow = cam.shouldFollow;
+			this.currentLerpSpeed = cam.currentLerpSpeed;
+			this.relativeStartPosition = cam.relativeStartPosition;
+			this.relativePositionLastFrame = cam.relativePositionLastFrame;
+			this.worldPositionLastFrame = cam.worldPositionLastFrame;
+			this.timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
+		}
+
+		public void LoadSave(CameraFollow cam) {
+			cam.shouldFollow = this.shouldFollow;
+			cam.currentLerpSpeed = this.currentLerpSpeed;
+			cam.relativeStartPosition = this.relativeStartPosition;
+			cam.relativePositionLastFrame = this.relativePositionLastFrame;
+			cam.worldPositionLastFrame = this.worldPositionLastFrame;
+			cam.timeSinceCurrentLerpSpeedWasModified = this.timeSinceCurrentLerpSpeedWasModified;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new CameraFollowSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		CameraFollowSave save = savedObject as CameraFollowSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

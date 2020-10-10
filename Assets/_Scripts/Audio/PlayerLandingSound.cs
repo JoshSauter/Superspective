@@ -16,6 +16,10 @@ public class PlayerLandingSound : MonoBehaviour {
 	public float minSpeed = 6f;
 	public float maxSpeed = 40f;
 
+	float verticalOffset = 0f;
+	float maxHeight;
+	bool keepTrackOfPlayerAirHeight = false;
+
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
 		startVolume = shoeSound.audioSource.volume;
@@ -26,48 +30,51 @@ public class PlayerLandingSound : MonoBehaviour {
 
 	void HandlePlayerTeleported(Portal inPortal, Collider objTeleported) {
 		if (!objTeleported.gameObject.TaggedAsPlayer()) return;
-
-
 	}
 
     void FixedUpdate() {
         if (wasGrounded && !playerMovement.grounded) {
-			StartCoroutine(KeepTrackOfPlayerAirHeight());
+			keepTrackOfPlayerAirHeight = true;
+
+			verticalOffset = 0f;
+			maxHeight = verticalOffset;
 		}
 		wasGrounded = playerMovement.grounded;
-    }
 
-	IEnumerator KeepTrackOfPlayerAirHeight() {
-		float verticalOffset = 0f;
-		float maxHeight = verticalOffset;
-		while (!playerMovement.grounded) {
-			float diff = Vector3.Dot(playerMovement.ProjectedVerticalVelocity(), -Physics.gravity.normalized) * Time.fixedDeltaTime;
-			verticalOffset += diff;
-			if (verticalOffset > maxHeight) {
-				maxHeight = verticalOffset;
+		if (keepTrackOfPlayerAirHeight) {
+			if (!playerMovement.grounded) {
+				float diff = Vector3.Dot(playerMovement.ProjectedVerticalVelocity(), -Physics.gravity.normalized) * Time.fixedDeltaTime;
+				verticalOffset += diff;
+				if (verticalOffset > maxHeight) {
+					maxHeight = verticalOffset;
+				}
 			}
+			else {
+				float maxDiff = maxHeight - verticalOffset;
 
-			yield return new WaitForFixedUpdate();
+				if (maxDiff < 0)
+					return;
+
+				float simulatedSpeedOfImpact = Mathf.Sqrt(2 * Physics.gravity.magnitude * maxDiff);
+
+				// Debug.LogWarning("SimulatedSpeed: " + simulatedSpeedOfImpact);
+				if (simulatedSpeedOfImpact >= minSpeed) {
+					float volume = startVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
+					shoeSound.audioSource.volume = volume;
+
+
+					if (simulatedSpeedOfImpact >= 2 * minSpeed) {
+						float thumpVolume = thumpStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(2 * minSpeed, 2 * maxSpeed, simulatedSpeedOfImpact));
+						thumpSound.audioSource.volume = thumpVolume;
+
+						thumpSound.Play();
+					}
+
+				}
+
+				keepTrackOfPlayerAirHeight = false;
+			}
 		}
-		float maxDiff = maxHeight - verticalOffset;
 
-		if (maxDiff < 0) yield break;
-
-		float simulatedSpeedOfImpact = Mathf.Sqrt(2 * Physics.gravity.magnitude * maxDiff);
-
-		// Debug.LogWarning("SimulatedSpeed: " + simulatedSpeedOfImpact);
-		if (simulatedSpeedOfImpact < minSpeed) yield break;
-
-		float volume = startVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
-		shoeSound.audioSource.volume = volume;
-
-		//SoundManager.instance.Play("PlayerLandingShoes", shoeSound);
-
-		if (simulatedSpeedOfImpact < 2 * minSpeed) yield break;
-
-		float thumpVolume = thumpStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(2 * minSpeed, 2 * maxSpeed, simulatedSpeedOfImpact));
-		thumpSound.audioSource.volume = thumpVolume;
-
-		thumpSound.Play();
-	}
+    }
 }

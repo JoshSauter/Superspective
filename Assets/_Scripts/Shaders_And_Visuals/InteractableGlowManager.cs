@@ -13,7 +13,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 	private HashSet<InteractableGlow> glowableObjects = new HashSet<InteractableGlow>();
 
-	public int blurIterations = 4;
+	public const int blurIterations = 4;
 
 	private Material prePassMaterial;
 	private Material prePassMaterialLarger;
@@ -26,8 +26,6 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	private int tempRenderTexID;
 	private int blurSizeID;
 	private int glowColorID;
-
-	private int glowLayer;
 
 	public void Add(InteractableGlow glowObj) {
 		glowableObjects.Add(glowObj);
@@ -152,6 +150,6 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	}
 
 	private Color ColorOfGradient(Gradient gradient) {
-		return gradient.Evaluate(Interact.instance.interactionDistance / thisCamera.farClipPlane);
+		return gradient.Evaluate(Interact.interactionDistance / thisCamera.farClipPlane);
 	}
 }

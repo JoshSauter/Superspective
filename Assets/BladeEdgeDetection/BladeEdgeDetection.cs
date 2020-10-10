@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using Saving;
+using SerializableClasses;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
-public class BladeEdgeDetection : MonoBehaviour {
+public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	public enum EdgeColorMode {
 		simpleColor,
 		gradient,
@@ -196,4 +198,67 @@ public class BladeEdgeDetection : MonoBehaviour {
 		depthSensitivity = Mathf.Max(0.0f, depthSensitivity);
 		normalSensitivity = Mathf.Max(0.0f, normalSensitivity);
 	}
+
+	#region Saving
+
+	public string ID => $"{gameObject.name}_BladeEdgeDetection";
+
+	[Serializable]
+	class BladeEdgeDetectionSave {
+		bool debugMode;
+		bool doubleSidedEdges;
+		bool checkPortalDepth;
+		float depthSensitivity;
+		float normalSensitivity;
+		int sampleDistance;
+
+		int weightedEdgeMode;
+		float depthWeightEffect;
+		float normalWeightEffect;
+
+		int edgeColorMode;
+		SerializableColor edgeColor;
+		SerializableGradient edgeColorGradient;
+
+		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) {
+			this.debugMode = edgeDetection.debugMode;
+			this.doubleSidedEdges = edgeDetection.doubleSidedEdges;
+			this.checkPortalDepth = edgeDetection.checkPortalDepth;
+			this.depthSensitivity = edgeDetection.depthSensitivity;
+			this.normalSensitivity = edgeDetection.normalSensitivity;
+			this.sampleDistance = edgeDetection.sampleDistance;
+			this.weightedEdgeMode = (int)edgeDetection.weightedEdgeMode;
+			this.depthWeightEffect = edgeDetection.depthWeightEffect;
+			this.normalWeightEffect = edgeDetection.normalWeightEffect;
+			this.edgeColorMode = (int)edgeDetection.edgeColorMode;
+			this.edgeColor = edgeDetection.edgeColor;
+			this.edgeColorGradient = edgeDetection.edgeColorGradient;
+		}
+
+		public void LoadSave(BladeEdgeDetection edgeDetection) {
+			edgeDetection.debugMode = this.debugMode;
+			edgeDetection.doubleSidedEdges = this.doubleSidedEdges;
+			edgeDetection.checkPortalDepth = this.checkPortalDepth;
+			edgeDetection.depthSensitivity = this.depthSensitivity;
+			edgeDetection.normalSensitivity = this.normalSensitivity;
+			edgeDetection.sampleDistance = this.sampleDistance;
+			edgeDetection.weightedEdgeMode = (WeightedEdgeMode)this.weightedEdgeMode;
+			edgeDetection.depthWeightEffect = this.depthWeightEffect;
+			edgeDetection.normalWeightEffect = this.normalWeightEffect;
+			edgeDetection.edgeColorMode = (EdgeColorMode)this.edgeColorMode;
+			edgeDetection.edgeColor = this.edgeColor;
+			edgeDetection.edgeColorGradient = this.edgeColorGradient;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new BladeEdgeDetectionSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		BladeEdgeDetectionSave save = savedObject as BladeEdgeDetectionSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

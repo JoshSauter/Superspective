@@ -12,6 +12,7 @@ public class ColorChangeOnPower : MonoBehaviour {
 		OnDepowerFinish
 	}
 	public ActivationTiming timing = ActivationTiming.OnPowerFinish;
+	bool reverseColors => timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;
 	public bool useMaterialAsStartColor = true;
 	public Color depoweredColor;
 	[ColorUsage(true, true)]
@@ -21,6 +22,8 @@ public class ColorChangeOnPower : MonoBehaviour {
 	public Color poweredEmission;
 
 	public AnimationCurve colorChangeAnimationCurve;
+	float timeElapsedSinceStateChange = 0f;
+	bool powered = false;
 	public float timeToChangeColor = 0.25f;
 	public PowerTrail powerTrailToReactTo;
 	public EpitaphRenderer[] renderers;
@@ -88,48 +91,37 @@ public class ColorChangeOnPower : MonoBehaviour {
 		}
 	}
 
+	private void Update() {
+		if (timeElapsedSinceStateChange < timeToChangeColor) {
+			timeElapsedSinceStateChange += Time.deltaTime;
+		}
+
+		float t = timeElapsedSinceStateChange / timeToChangeColor;
+		Color startColor = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredColor : poweredColor;
+		Color startEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredEmission : poweredEmission;
+		Color endColor = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredColor : depoweredColor;
+		Color endEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredEmission : depoweredEmission;
+		if (t > 1) {
+			timeElapsedSinceStateChange = timeToChangeColor;
+			SetColor(endColor, endEmission);
+		}
+		else if (t < 1) {
+			float animationTime = colorChangeAnimationCurve.Evaluate(t);
+			SetColor(Color.Lerp(startColor, endColor, animationTime), Color.Lerp(startEmission, endEmission, animationTime));
+		}
+	}
+
+	void SetColor(Color color, Color emission) {
+		foreach (var r in renderers) {
+			r.SetMainColor(color);
+			r.SetColor("_EmissionColor", emission);
+		}
+	}
+
 	void PowerOn() {
-		StartCoroutine(PowerOnCoroutine());
+		timeElapsedSinceStateChange = 0f;
 	}
 	void PowerOff() {
-		StartCoroutine(PowerOffCoroutine());
-	}
-
-	IEnumerator PowerOnCoroutine() {
-		float timeElapsed = 0;
-		while (timeElapsed < timeToChangeColor) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / timeToChangeColor;
-
-			foreach (var r in renderers) {
-				r.SetMainColor(Color.Lerp(depoweredColor, poweredColor, colorChangeAnimationCurve.Evaluate(t)));
-				r.SetColor("_EmissionColor", Color.Lerp(depoweredEmission, poweredEmission, colorChangeAnimationCurve.Evaluate(t)));
-			}
-
-			yield return null;
-		}
-
-		foreach (var r in renderers) {
-			r.SetMainColor(poweredColor);
-		}
-	}
-
-	IEnumerator PowerOffCoroutine() {
-		float timeElapsed = 0;
-		while (timeElapsed < timeToChangeColor) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / timeToChangeColor;
-
-			foreach (var r in renderers) {
-				r.SetMainColor(Color.Lerp(poweredColor, depoweredColor, colorChangeAnimationCurve.Evaluate(t)));
-				r.SetColor("_EmissionColor", Color.Lerp(poweredEmission, depoweredEmission, colorChangeAnimationCurve.Evaluate(t)));
-			}
-
-			yield return null;
-		}
-
-		foreach (var r in renderers) {
-			r.SetMainColor(depoweredColor);
-		}
+		timeElapsedSinceStateChange = 0f;
 	}
 }

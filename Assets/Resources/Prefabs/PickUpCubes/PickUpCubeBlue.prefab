@@ -106,6 +106,9 @@ GameObject:
   - component: {fileID: -6263695277763646836}
   - component: {fileID: -1742086606967583017}
   - component: {fileID: -2554360683110162642}
+  - component: {fileID: 2418330533845386585}
+  - component: {fileID: -1064410124917517280}
+  - component: {fileID: -6322143024176058436}
   m_Layer: 0
   m_Name: PickUpCubeBlue
   m_TagString: Untagged
@@ -221,8 +224,6 @@ MonoBehaviour:
   DEBUG: 0
   isReplaceable: 1
   isHeld: 0
-  pickupDropCooldown: 0.1
-  holdDistance: 3
   thisGravity: {fileID: 0}
   thisRigidbody: {fileID: 0}
   pickupSound: {fileID: -1742086606967583017}
@@ -240,9 +241,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  sittingInPortal: {fileID: 0}
-  hoveredThroughPortal: {fileID: 0}
-  grabbedThroughPortal: {fileID: 0}
   colliders: []
   fakeCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
@@ -640,3 +638,41 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2418330533845386585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
+--- !u!114 &-1064410124917517280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0df67999d9d464d4f8e71de6f2d0f243, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6322143024176058436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 4

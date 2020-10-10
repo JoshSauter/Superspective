@@ -12,12 +12,19 @@ namespace PictureTeleportMechanics {
 		[ReadOnly]
         public GlobalMagicTrigger disableFrameTrigger;
 
-        void Awake() {
+		private void OnValidate() {
+			if (disableFrameTrigger == null) {
+				disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
+			}
+			if (disableFrameTrigger == null) {
+				disableFrameTrigger = AddGlobalEnableTrigger();
+				disableFrameTrigger.enabled = true;
+			}
+		}
+
+		void Awake() {
 			frameRenderer = GetComponent<Renderer>();
 			frameCollider = GetComponent<Collider>();
-
-			disableFrameTrigger = AddGlobalEnableTrigger();
-			disableFrameTrigger.enabled = true;
 		}
 
 		public void TurnOnFrame() {

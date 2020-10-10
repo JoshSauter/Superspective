@@ -4,9 +4,11 @@ using UnityEngine;
 using EpitaphUtils;
 using System.Net.Mime;
 using System.Linq;
-using System;
+using System.IO;
 using NaughtyAttributes;
 using Audio;
+using Saving;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PowerTrailMechanics {
 	public class NodeTrailInfo {
@@ -16,7 +18,8 @@ namespace PowerTrailMechanics {
 		public float endDistance;
 	}
 
-	public class PowerTrail : MonoBehaviour {
+	[RequireComponent(typeof(UniqueId))]
+	public class PowerTrail : MonoBehaviour, SaveableObject {
 		public bool DEBUG = false;
 		public DebugLogger debug;
 
@@ -106,6 +109,9 @@ namespace PowerTrailMechanics {
 			}
 			StartCoroutine(InitSound());
 			gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+
+			// Saving
+			ID = GetComponent<UniqueId>().uniqueId;
 		}
 
 		void Start() {
@@ -348,6 +354,74 @@ namespace PowerTrailMechanics {
 			float dotP = Vector3.Dot(lhs, heading);
 			dotP = Mathf.Clamp(dotP, 0f, magnitudeMax);
 			return start + heading * dotP;
+		}
+#endregion
+#region Saving
+		[System.Serializable]
+		class PowerTrailSave {
+			public bool DEBUG;
+			public bool reverseVisibility;
+			public bool useDurationInsteadOfSpeed;
+			public bool useSeparateSpeedsForPowerOnOff;
+			public float targetDuration;
+			public float targetDurationPowerOff;
+			public float speed;
+			public float speedPowerOff;
+			public float powerTrailRadius;
+			public float distance;
+			public float maxDistance;
+			public bool powerIsOn;
+			public int state;
+
+			public PowerTrailSave(PowerTrail powerTrail) {
+				this.DEBUG = powerTrail.DEBUG;
+				this.reverseVisibility = powerTrail.reverseVisibility;
+				this.useDurationInsteadOfSpeed = powerTrail.useDurationInsteadOfSpeed;
+				this.useSeparateSpeedsForPowerOnOff = powerTrail.useSeparateSpeedsForPowerOnOff;
+				this.targetDuration = powerTrail.targetDuration;
+				this.targetDurationPowerOff = powerTrail.targetDurationPowerOff;
+				this.speed = powerTrail.speed;
+				this.speedPowerOff = powerTrail.speedPowerOff;
+				this.powerTrailRadius = powerTrail.powerTrailRadius;
+				this.distance = powerTrail.distance;
+				this.maxDistance = powerTrail.maxDistance;
+				this.powerIsOn = powerTrail.powerIsOn;
+				this.state = (int)powerTrail._state;
+			}
+
+			public void LoadSave(PowerTrail powerTrail) {
+				powerTrail.DEBUG = this.DEBUG;
+				powerTrail.reverseVisibility = this.reverseVisibility;
+				powerTrail.useDurationInsteadOfSpeed = this.useDurationInsteadOfSpeed;
+				powerTrail.useSeparateSpeedsForPowerOnOff = this.useSeparateSpeedsForPowerOnOff;
+				powerTrail.targetDuration = this.targetDuration;
+				powerTrail.targetDurationPowerOff = this.targetDurationPowerOff;
+				powerTrail.speed = this.speed;
+				powerTrail.speedPowerOff = this.speedPowerOff;
+				powerTrail.powerTrailRadius = this.powerTrailRadius;
+				powerTrail.distance = this.distance;
+				powerTrail.maxDistance = this.maxDistance;
+				// If we're at min or max distance, bring us in ever so slightly so that it re-finishes the animation
+				if (powerTrail.distance == powerTrail.maxDistance) {
+					powerTrail.distance -= 0.00001f;
+				}
+				else if (powerTrail.distance == 0) {
+					powerTrail.distance += 0.00001f;
+				}
+				powerTrail.powerIsOn = this.powerIsOn;
+				powerTrail._state = (PowerTrailState)this.state;
+			}
+		}
+
+		public string ID { get; private set; }
+		public object GetSaveObject() {
+			return new PowerTrailSave(this); ;
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			PowerTrailSave save = savedObject as PowerTrailSave;
+
+			save.LoadSave(this);
 		}
 #endregion
 #region EditorGizmos

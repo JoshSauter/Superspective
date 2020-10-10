@@ -40,9 +40,18 @@ namespace Audio {
 			}
 		}
 
-		public override void Play(bool shouldForcePlay = false) {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="shouldForcePlay"></param>
+		/// <param name="playAt">Offset from 0-1 to play the audio at</param>
+		public override void Play(bool shouldForcePlay = false, float playAt = 0.0f) {
 			audioSource.pitch = GetPitch();
 			if (!audioSource.isPlaying || shouldForcePlay) {
+				if (audioSource.clip != null) {
+					float time = playAt * audioSource.clip.length;
+					audioSource.time = time;
+				}
 				audioSource.Play();
 			}
 		}

@@ -1,12 +1,14 @@
-﻿using System.Collections;
+﻿using Saving;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
-public class NoClipMode : MonoBehaviour {
-	UnityEngine.Transform playerCamera;
+public class NoClipMode : MonoBehaviour, SaveableObject {
+	Transform playerCamera;
 	PlayerMovement playerMovement;
 	Rigidbody playerRigidbody;
 	Collider playerCollider;
@@ -50,4 +52,33 @@ public class NoClipMode : MonoBehaviour {
 		playerRigidbody.isKinematic = noClipOn;
 		playerCollider.isTrigger = noClipOn;
 	}
+
+	#region Saving
+	// There's only one player so we don't need a UniqueId here
+	public string ID => "NoClipMode";
+
+	[Serializable]
+	class NoClipSave {
+		bool noClipOn;
+
+		public NoClipSave(NoClipMode noClip) {
+			this.noClipOn = noClip.noClipOn;
+		}
+
+		public void LoadSave(NoClipMode noClip) {
+			noClip.noClipOn = !this.noClipOn;
+			noClip.ToggleNoClip();
+		}
+	}
+
+	public object GetSaveObject() {
+		return new NoClipSave(this); ;
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		NoClipSave save = savedObject as NoClipSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }
