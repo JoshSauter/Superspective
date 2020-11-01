@@ -107,7 +107,6 @@ GameObject:
   - component: {fileID: 6942496317342184652}
   - component: {fileID: 645222201582585819}
   - component: {fileID: -3920780762748762780}
-  - component: {fileID: -4566693041940432657}
   - component: {fileID: 1450287491848823106}
   m_Layer: 0
   m_Name: PickUpCubeRed
@@ -651,18 +650,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &-4566693041940432657
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7702703061741439296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0df67999d9d464d4f8e71de6f2d0f243, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1450287491848823106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,3 +663,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Type: 2
+  isGlobal: 1

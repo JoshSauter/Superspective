@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class JunkPillar : MonoBehaviour {
+	public Transform[] corners;
+
 	public int minNumberOfPieces;
 	public int maxNumberOfPieces;
 
@@ -15,18 +17,17 @@ public class JunkPillar : MonoBehaviour {
 	public float radius = 5f;
 	public float pillarHeight = 12;
 
-    void Start() {
-		SpawnPillar(new Vector3(radius, 0, radius));
-		SpawnPillar(new Vector3(radius, 0, -radius));
-		SpawnPillar(new Vector3(-radius, 0, radius));
-		SpawnPillar(new Vector3(-radius, 0, -radius));
+    void OnValidate() {
+		if (corners == null) {
+			corners = new Transform[4];
+			corners[0] = SpawnPillar(new Vector3(radius, 0, radius));
+			corners[1] = SpawnPillar(new Vector3(radius, 0, -radius));
+			corners[2] = SpawnPillar(new Vector3(-radius, 0, radius));
+			corners[3] = SpawnPillar(new Vector3(-radius, 0, -radius));
+		}
 	}
 
-    void Update() {
-        
-    }
-
-	void SpawnPillar(Vector3 origin) {
+	Transform SpawnPillar(Vector3 origin) {
 		Transform root = new GameObject("PillarRoot").transform;
 		root.SetParent(transform);
 		root.localPosition = origin;
@@ -44,6 +45,8 @@ public class JunkPillar : MonoBehaviour {
 			horizontalOffset.y = 0;
 			SpawnPiece(root, height, horizontalOffset, scale);
 		}
+
+		return root;
 	}
 
 	void SpawnPiece(Transform root, float height, Vector3 horizontalOffset, Vector3 scale) {

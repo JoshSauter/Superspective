@@ -17,11 +17,17 @@ namespace Saving {
         public Dictionary<string, SaveableObject> saveableObjects = new Dictionary<string, SaveableObject>();
 
         public void InitializeSaveableObjectsDict() {
+            //var x = Resources.FindObjectsOfTypeAll<MonoBehaviour>();
+            //var y = x.Where(s => IsObjectInThisScene(s));
+            //var z = y.OfType<SaveableObject>().ToList();
+            //var w = z.Where(s => !(s is DynamicObject) && s.ID != null && s.ID != "").ToList();
+            //var r = w.Select(s => s.ID).ToList();
             saveableObjects = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
                 .Where(s => IsObjectInThisScene(s))
                 .OfType<SaveableObject>()
                 // Dynamic objects are loaded separately
                 .Where(s => !(s is DynamicObject) && s.ID != null && s.ID != "")
+                .Where(s => !s.SkipSave)
                 .ToDictionary(s => s.ID);
 		}
 

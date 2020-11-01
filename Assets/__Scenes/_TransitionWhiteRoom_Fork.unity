@@ -20850,6 +20850,7 @@ GameObject:
   m_Component:
   - component: {fileID: 409882521}
   - component: {fileID: 409882522}
+  - component: {fileID: 409882523}
   m_Layer: 0
   m_Name: RedSymbol
   m_TagString: Untagged
@@ -20928,6 +20929,19 @@ MonoBehaviour:
   - {fileID: 529979855}
   - {fileID: 1417131702}
   - {fileID: 856278322}
+--- !u!114 &409882523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409882520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 561e35de-f9a7-4dcd-b11a-5a6c6a5ebb46
 --- !u!43 &415395980
 Mesh:
   m_ObjectHideFlags: 0
@@ -39137,6 +39151,7 @@ GameObject:
   m_Component:
   - component: {fileID: 735534359}
   - component: {fileID: 735534360}
+  - component: {fileID: 735534361}
   m_Layer: 0
   m_Name: GreenSymbol
   m_TagString: Untagged
@@ -39213,6 +39228,19 @@ MonoBehaviour:
   - {fileID: 399774390}
   - {fileID: 1185118953}
   - {fileID: 968733598}
+--- !u!114 &735534361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735534358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 73952f1c-db8d-4200-8c07-b40617bd1e0f
 --- !u!1 &745338476
 GameObject:
   m_ObjectHideFlags: 0
@@ -39227,6 +39255,8 @@ GameObject:
   - component: {fileID: 745338479}
   - component: {fileID: 745338478}
   - component: {fileID: 745338482}
+  - component: {fileID: 745338484}
+  - component: {fileID: 745338483}
   m_Layer: 0
   m_Name: 12PointStarBigPictureFrame
   m_TagString: Untagged
@@ -39871,7 +39901,62 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   frameRenderer: {fileID: 0}
   frameCollider: {fileID: 0}
-  disableFrameTrigger: {fileID: 0}
+  disableFrameTrigger: {fileID: 745338483}
+--- !u!114 &745338483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745338476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24dba1f0c1231d4cb0b55c7a5298ceb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  triggerConditions:
+  - triggerCondition: 7
+    useLocalCoordinates: 0
+    triggerThreshold: 0.01
+    targetDirection: {x: 0, y: 0, z: 0}
+    targetObject: {fileID: 0}
+    targetRenderer: {fileID: 745338480}
+    targetPosition: {x: 0, y: 0, z: 0}
+    allowTriggeringWhileInsideObject: 0
+  actionsToTrigger:
+  - actionTiming: 4
+    action: 0
+    objectsToEnable: []
+    objectsToDisable: []
+    scriptsToEnable: []
+    scriptsToDisable: []
+    levelForward: 0
+    levelBackward: 0
+    forwardSameScenePillar: 1
+    backwardSameScenePillar: 1
+    forwardPillar: {fileID: 0}
+    backwardPillar: {fileID: 0}
+    forwardPillarLevel: 0
+    forwardPillarName: 
+    backwardPillarLevel: 0
+    backwardPillarName: 
+    powerTrail: {fileID: 0}
+    setPowerIsOn: 1
+  sceneMustBeActive: 1
+--- !u!114 &745338484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745338476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 1d509478-aef7-4130-80b4-26f135bb4c01
 --- !u!43 &752586852
 Mesh:
   m_ObjectHideFlags: 0
@@ -78106,6 +78191,7 @@ GameObject:
   - component: {fileID: 1474959026}
   - component: {fileID: 1474959025}
   - component: {fileID: 1474959024}
+  - component: {fileID: 1474959028}
   m_Layer: 0
   m_Name: ViewLock
   m_TagString: Untagged
@@ -78199,6 +78285,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 3, z: 3}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1474959028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1474959022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 9fe10883-5c47-48d4-908a-011ae8941e8e
 --- !u!43 &1476871618
 Mesh:
   m_ObjectHideFlags: 0
@@ -91050,6 +91149,7 @@ GameObject:
   - component: {fileID: 1769913372}
   - component: {fileID: 1769913369}
   - component: {fileID: 1769913370}
+  - component: {fileID: 1769913371}
   m_Layer: 0
   m_Name: ViewLock
   m_TagString: Untagged
@@ -91112,6 +91212,19 @@ MonoBehaviour:
   targetCameraRotation: {x: -90, y: 0, z: 0}
   targetLookY: 90
   ssaoMultiplier: 0.75
+--- !u!114 &1769913371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769913367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 1f04ba1f-9b46-41f2-a0bf-fc4aa7b73903
 --- !u!114 &1769913372
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96316,6 +96429,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1877717618}
   - component: {fileID: 1877717619}
+  - component: {fileID: 1877717620}
   m_Layer: 0
   m_Name: BlueSymbol
   m_TagString: Untagged
@@ -96394,6 +96508,19 @@ MonoBehaviour:
   - {fileID: 1492677981}
   - {fileID: 937265785}
   - {fileID: 2055999627}
+--- !u!114 &1877717620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877717617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 5c61ef2f-7211-4627-8cd5-12f52f911cb8
 --- !u!1 &1880761657
 GameObject:
   m_ObjectHideFlags: 0
@@ -98758,6 +98885,7 @@ GameObject:
   - component: {fileID: 1890489069}
   - component: {fileID: 1890489068}
   - component: {fileID: 1890489067}
+  - component: {fileID: 1890489072}
   m_Layer: 2
   m_Name: TriggerToDisablePictureBlocker
   m_TagString: Untagged
@@ -99128,6 +99256,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1890489065}
   m_Mesh: {fileID: 1495758690}
+--- !u!114 &1890489072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890489065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 9ff4e33f-2f5f-4d7b-871b-bf33e72679f8
 --- !u!43 &1894130148
 Mesh:
   m_ObjectHideFlags: 0

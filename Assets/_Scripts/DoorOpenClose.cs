@@ -2,23 +2,64 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using Saving;
+using System;
+using SerializableClasses;
+using System.Linq;
 
-public class DoorOpenClose : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class DoorOpenClose : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
 	public bool DEBUG = false;
 	public AnimationCurve doorOpenCurve;
 	public AnimationCurve doorCloseCurve;
 
-	UnityEngine.Transform[] doorPieces;
-	Vector3[] originalScales;
+	Transform[] doorPieces;
 
 	public enum DoorState {
-		closed,
-		opening,
-		open,
-		closing
+		Closed,
+		Opening,
+		Open,
+		Closing
 	}
-	public DoorState state = DoorState.closed;
+	private DoorState _state = DoorState.Closed;
+	public DoorState state {
+		get { return _state; }
+		set {
+			if (_state == value) {
+				return;
+			}
+			switch (value) {
+				case DoorState.Closed:
+					OnDoorCloseEnd?.Invoke();
+					break;
+				case DoorState.Opening:
+					OnDoorOpenStart?.Invoke();
+					break;
+				case DoorState.Open:
+					OnDoorOpenEnd?.Invoke();
+					break;
+				case DoorState.Closing:
+					OnDoorCloseStart?.Invoke();
+					break;
+			}
+			timeSinceStateChange = 0f;
+			_state = value;
+		}
+	}
+	float timeSinceStateChange = 0f;
 	bool queueDoorClose = false;
+
+	Vector3 closedScale;
+	Vector3 openedScale;
 
 	// Has to be re-asserted every physics timestep, else will close the door
 	bool playerWasInTriggerZoneLastFrame = false;
@@ -28,160 +69,127 @@ public class DoorOpenClose : MonoBehaviour {
 	public float timeForEachDoorPieceToOpen = 2f;
 	public float timeForEachDoorPieceToClose = 0.5f;
 
-	public float targetLocalXScale = 0;
+	const float targetLocalXScale = 0;
 
 #region events
-	public delegate void DoorAction(DoorOpenClose door);
+	public delegate void DoorAction();
 	public event DoorAction OnDoorOpenStart;
 	public event DoorAction OnDoorCloseStart;
 	public event DoorAction OnDoorOpenEnd;
 	public event DoorAction OnDoorCloseEnd;
-#endregion
+	#endregion
 
-	// Use this for initialization
-	void Start() {
-		doorPieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();
-		originalScales = new Vector3[doorPieces.Length];
-		for (int i = 0; i < doorPieces.Length; i++) {
-			originalScales[i] = doorPieces[i].localScale;
-		}
+	private void Awake() {
+		doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
+		closedScale = doorPieces[0].localScale;
+		openedScale = new Vector3(targetLocalXScale, closedScale.y, closedScale.z);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (!DEBUG) return;
 
-		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && state != DoorState.opening && state != DoorState.closing) {
+		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && state != DoorState.Opening && state != DoorState.Closing) {
 			ResetDoorPieceScales();
 		}
 
-		else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O) && state != DoorState.opening && state != DoorState.closing) {
-			StartCoroutine(DoorCloseCoroutine());
+		else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O) && state != DoorState.Opening && state != DoorState.Closing) {
+			state = DoorState.Closing;
 		}
 
-		else if (Input.GetKeyDown(KeyCode.O) && state != DoorState.opening && state != DoorState.closing) {
-			StartCoroutine(DoorOpenCoroutine());
+		else if (Input.GetKeyDown(KeyCode.O) && state != DoorState.Opening && state != DoorState.Closing) {
+			state = DoorState.Opening;
 		}
 	}
 
 	private void FixedUpdate() {
-		if ((state == DoorState.open || state == DoorState.opening) && playerWasInTriggerZoneLastFrame && !playerInTriggerZoneThisFrame) {
+		if ((state == DoorState.Open || state == DoorState.Opening) && playerWasInTriggerZoneLastFrame && !playerInTriggerZoneThisFrame) {
 			queueDoorClose = true;
 		}
 
-		if (queueDoorClose && state == DoorState.open) {
+		if (queueDoorClose && state == DoorState.Open) {
 			CloseDoor();
 		}
+
+		UpdateDoor();
 
 		// Need to re-assert this every physics timestep, reset state
 		playerWasInTriggerZoneLastFrame = playerInTriggerZoneThisFrame;
 		playerInTriggerZoneThisFrame = false;
 	}
 
+	void UpdateDoor() {
+		timeSinceStateChange += Time.fixedDeltaTime;
+		switch (state) {
+			case DoorState.Closed:
+				break;
+			case DoorState.Opening: {
+					float totalTime = timeBetweenEachDoorPiece * (doorPieces.Length - 1) + timeForEachDoorPieceToOpen;
+					if (timeSinceStateChange < totalTime) {
+						for (int i = doorPieces.Length - 1; i >= 0; i--) {
+							float timeIndex = doorPieces.Length - i - 1;
+							float startTime = timeIndex * timeBetweenEachDoorPiece;
+							float endTime = startTime + timeForEachDoorPieceToOpen;
+							float t = Mathf.InverseLerp(startTime, endTime, timeSinceStateChange);
+
+							doorPieces[i].localScale = Vector3.LerpUnclamped(closedScale, openedScale, doorOpenCurve.Evaluate(t));
+						}
+					}
+					else {
+						foreach (var piece in doorPieces) {
+							piece.localScale = openedScale;
+						}
+						state = DoorState.Open;
+					}
+					break;
+				}
+			case DoorState.Open:
+				break;
+			case DoorState.Closing: {
+					float totalTime = timeBetweenEachDoorPiece * (doorPieces.Length - 1) + timeForEachDoorPieceToClose;
+					if (timeSinceStateChange < totalTime) {
+						for (int i = doorPieces.Length - 1; i >= 0; i--) {
+							float timeIndex = doorPieces.Length - i - 1;
+							float startTime = timeIndex * timeBetweenEachDoorPiece;
+							float endTime = startTime + timeForEachDoorPieceToClose;
+							float t = Mathf.InverseLerp(startTime, endTime, timeSinceStateChange);
+
+							doorPieces[i].localScale = Vector3.LerpUnclamped(openedScale, closedScale, doorCloseCurve.Evaluate(t));
+						}
+					}
+					else {
+						for (int i = 0; i < doorPieces.Length; i++) {
+							doorPieces[i].localScale = closedScale;
+						}
+						state = DoorState.Closed;
+					}
+					break;
+				}
+		}
+	}
+
 	void ResetDoorPieceScales() {
 		for (int i = 0; i < doorPieces.Length; i++) {
-			doorPieces[i].localScale = originalScales[i];
+			doorPieces[i].localScale = closedScale;
 		}
 	}
 
 	public void OpenDoor() {
-		if (state == DoorState.closed) {
-			StartCoroutine(DoorOpenCoroutine());
+		if (state == DoorState.Closed) {
+			state = DoorState.Opening;
 		}
 	}
 
 	public void CloseDoor() {
-		if (state == DoorState.open) {
+		if (state == DoorState.Open) {
 			queueDoorClose = false;
-			StartCoroutine(DoorCloseCoroutine());
+			state = DoorState.Closing;
 		}
-	}
-
-	IEnumerator DoorOpenCoroutine() {
-		state = DoorState.opening;
-		if (OnDoorOpenStart != null) {
-			OnDoorOpenStart(this);
-		}
-
-		int i = 0;
-		while (i < doorPieces.Length) {
-
-			StartCoroutine(DoorPieceOpen(doorPieces[doorPieces.Length - i - 1]));
-			i++;
-
-			yield return new WaitForSeconds(timeBetweenEachDoorPiece);
-		}
-
-		// Allow time for the last door piece to open before marking the coroutine complete
-		yield return new WaitForSeconds(timeForEachDoorPieceToOpen);
-		state = DoorState.open;
-
-		if (OnDoorOpenEnd != null) {
-			OnDoorOpenEnd(this);
-		}
-	}
-
-	IEnumerator DoorPieceOpen(UnityEngine.Transform piece) {
-		Vector3 startScale = piece.localScale;
-		Vector3 endScale = new Vector3(targetLocalXScale, startScale.y, startScale.z);
-
-		float timeElapsed = 0;
-		while (timeElapsed < timeForEachDoorPieceToOpen) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / timeForEachDoorPieceToOpen;
-
-			piece.localScale = Vector3.LerpUnclamped(startScale, endScale, doorOpenCurve.Evaluate(t));
-
-			yield return null;
-		}
-
-		piece.localScale = endScale;
-	}
-
-	IEnumerator DoorCloseCoroutine() {
-		state = DoorState.closing;
-		if (OnDoorCloseStart != null) {
-			OnDoorCloseStart(this);
-		}
-
-		int i = 0;
-		while (i < doorPieces.Length) {
-
-			StartCoroutine(DoorPieceClose(doorPieces.Length - i - 1));
-			i++;
-
-			yield return new WaitForSeconds(timeBetweenEachDoorPiece);
-		}
-
-		// Allow time for the last door piece to open before marking the coroutine complete
-		yield return new WaitForSeconds(timeForEachDoorPieceToClose);
-		state = DoorState.closed;
-
-		if (OnDoorCloseEnd != null) {
-			OnDoorCloseEnd(this);
-		}
-	}
-
-	IEnumerator DoorPieceClose(int pieceIndex) {
-		Vector3 startScale = doorPieces[pieceIndex].localScale;
-		Vector3 endScale = originalScales[pieceIndex];
-
-		float timeElapsed = 0;
-		while (timeElapsed < timeForEachDoorPieceToClose) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / timeForEachDoorPieceToClose;
-
-			doorPieces[pieceIndex].localScale = Vector3.LerpUnclamped(startScale, endScale, doorCloseCurve.Evaluate(t));
-			
-			yield return null;
-		}
-
-		doorPieces[pieceIndex].localScale = endScale;
 	}
 
 	private void OnTriggerStay(Collider other) {
 		if (other.TaggedAsPlayer()) {
-			if (state == DoorState.closed) {
+			if (state == DoorState.Closed) {
 				OpenDoor();
 			}
 			playerInTriggerZoneThisFrame = true;
@@ -190,9 +198,86 @@ public class DoorOpenClose : MonoBehaviour {
 
 	private void OnTriggerExit(Collider other) {
 		if (other.TaggedAsPlayer()) {
-			if (state == DoorState.open) {
-				CloseDoor();
-			}
+			queueDoorClose = true;
 		}
 	}
+
+	#region Saving
+	public bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+
+	public string ID => $"DoorOpenClose_{id.uniqueId}";
+
+	[Serializable]
+	class DoorOpenCloseSave {
+		SerializableAnimationCurve doorOpenCurve;
+		SerializableAnimationCurve doorCloseCurve;
+
+		SerializableVector3[] doorPieceScales;
+		DoorState state;
+		float timeSinceStateChange;
+		bool queueDoorClose;
+
+		SerializableVector3 closedScale;
+		SerializableVector3 openedScale;
+
+		bool playerWasInTriggerZoneLastFrame;
+		bool playerInTriggerZoneThisFrame;
+
+		public float timeBetweenEachDoorPiece;
+		public float timeForEachDoorPieceToOpen;
+		public float timeForEachDoorPieceToClose;
+
+		public DoorOpenCloseSave(DoorOpenClose door) {
+			this.doorOpenCurve = door.doorOpenCurve;
+			this.doorCloseCurve = door.doorCloseCurve;
+
+			this.doorPieceScales = door.doorPieces.Select<Transform, SerializableVector3>(d => d.localScale).ToArray();
+			this.state = door.state;
+			this.timeSinceStateChange = door.timeSinceStateChange;
+			this.queueDoorClose = door.queueDoorClose;
+
+			this.closedScale = door.closedScale;
+			this.openedScale = door.openedScale;
+
+			this.playerWasInTriggerZoneLastFrame = door.playerWasInTriggerZoneLastFrame;
+			this.playerInTriggerZoneThisFrame = door.playerInTriggerZoneThisFrame;
+
+			this.timeBetweenEachDoorPiece = door.timeBetweenEachDoorPiece;
+			this.timeForEachDoorPieceToOpen = door.timeForEachDoorPieceToOpen;
+			this.timeForEachDoorPieceToClose = door.timeForEachDoorPieceToClose;
+		}
+
+		public void LoadSave(DoorOpenClose door) {
+			door.doorOpenCurve = this.doorOpenCurve;
+			door.doorCloseCurve = this.doorCloseCurve;
+
+			for (int i = 0; i < this.doorPieceScales.Length; i++) {
+				door.doorPieces[i].localScale = this.doorPieceScales[i];
+			}
+			door._state = this.state;
+			door.timeSinceStateChange = this.timeSinceStateChange;
+			door.queueDoorClose = this.queueDoorClose;
+
+			door.closedScale = this.closedScale;
+			door.openedScale = this.openedScale;
+
+			door.playerWasInTriggerZoneLastFrame = this.playerWasInTriggerZoneLastFrame;
+			door.playerInTriggerZoneThisFrame = this.playerInTriggerZoneThisFrame;
+
+			door.timeBetweenEachDoorPiece = this.timeBetweenEachDoorPiece;
+			door.timeForEachDoorPieceToOpen = this.timeForEachDoorPieceToOpen;
+			door.timeForEachDoorPieceToClose = this.timeForEachDoorPieceToClose;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new DoorOpenCloseSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		DoorOpenCloseSave save = savedObject as DoorOpenCloseSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

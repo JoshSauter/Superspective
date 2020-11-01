@@ -3,9 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 using NaughtyAttributes;
+using Saving;
+using System;
 
+[RequireComponent(typeof(UniqueId))]
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
-public class DimensionPillar : MonoBehaviour {
+public class DimensionPillar : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	public UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	public static Dictionary<string, DimensionPillar> pillars = new Dictionary<string, DimensionPillar>();
 
 	private static DimensionPillar _activePillar;
@@ -26,6 +39,7 @@ public class DimensionPillar : MonoBehaviour {
 	public bool DEBUG = false;
 	DebugLogger debug;
 	public bool setAsActiveOnStart = false;
+	bool initialized = false;
 
 	public string pillarKey;
 	[SerializeField]
@@ -34,8 +48,6 @@ public class DimensionPillar : MonoBehaviour {
 	[Range(1, 123)]
 	public int maxDimension;
 	public int curDimension;
-
-	Camera playerCamera;
 
 	public bool overrideDimensionShiftAngle = false;
 	public Angle dimensionShiftAngle;
@@ -52,9 +64,13 @@ public class DimensionPillar : MonoBehaviour {
 	public event PlayerMoveAroundPillarEvent OnPlayerMoveAroundPillar;
 #endregion
 
+	void Awake() {
+		debug = new DebugLogger(this, () => DEBUG);
+		InitializeDimensionWall();
+	}
+
 	void Start() {
 		Initialize();
-		InitializeDimensionWall();
 		InitializeDictEntry();
 
 		if (setAsActiveOnStart) {
@@ -75,19 +91,19 @@ public class DimensionPillar : MonoBehaviour {
     }
 
 	private void Initialize() {
-		debug = new DebugLogger(this, () => DEBUG);
+		if (initialized) return;
 
-		playerCamera = EpitaphScreen.instance.playerCamera;
 		if (!overrideDimensionShiftAngle) {
 			dimensionShiftAngle = DimensionShiftAngle() + Angle.Degrees(0.01f);
 		}
 		cameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
+		initialized = true;
 	}
 
-	private void UpdateRelativeCameraAngle() {
+	private void UpdateRelativeCameraAngle(bool forceUpdate = false) {
 		Angle newCameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
 		Angle angleDiff = newCameraAngleRelativeToPillar.WrappedAngleDiff(cameraAngleRelativeToPillar);
-		if (angleDiff.degrees == 0) return;
+		if (angleDiff.degrees == 0 && !forceUpdate) return;
 
 		bool clockwise = angleDiff.radians >= 0;
 
@@ -129,7 +145,7 @@ public class DimensionPillar : MonoBehaviour {
 	}
 
 	Angle DimensionShiftAngle() {
-		Vector3 pillarToCamera = playerCamera.transform.position - transform.position;
+		Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
 		return polar.angle;
 	}
@@ -146,7 +162,7 @@ public class DimensionPillar : MonoBehaviour {
 	}
 
 	public Angle PillarAngleOfPlayerCamera() {
-		return PillarAngleOfPoint(playerCamera.transform.position);
+		return PillarAngleOfPoint(EpitaphScreen.instance.playerCamera.transform.position);
 	}
 
 	// Wrap-around logic for incrementing dimension values
@@ -174,4 +190,69 @@ public class DimensionPillar : MonoBehaviour {
 				"\nThis pillar is active? " + (activePillar == this), activePillar.gameObject);
 		}
 	}
+
+	#region Saving
+	public bool SkipSave { get; set; }
+
+	public string ID {
+		get {
+			if (id == null || id.uniqueId == null) {
+				throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
+			}
+			return $"DimensionPillar_{id.uniqueId}";
+		}
+	}
+	//public string ID => $"DimensionPillar_{id.uniqueId}";
+
+	[Serializable]
+	class DimensionPillarSave {
+		bool setAsActiveOnStart;
+
+		bool initialized;
+		int maxDimension;
+		int curDimension;
+
+		bool overrideDimensionShiftAngle;
+		Angle dimensionShiftAngle;
+		Angle cameraAngleRelativeToPillar;
+
+		public DimensionPillarSave(DimensionPillar dimensionPillar) {
+			this.setAsActiveOnStart = DimensionPillar.activePillar == dimensionPillar;
+			this.initialized = dimensionPillar.initialized;
+			this.maxDimension = dimensionPillar.maxDimension;
+			this.curDimension = dimensionPillar.curDimension;
+			this.overrideDimensionShiftAngle = dimensionPillar.overrideDimensionShiftAngle;
+			this.dimensionShiftAngle = dimensionPillar.dimensionShiftAngle;
+			this.cameraAngleRelativeToPillar = dimensionPillar.cameraAngleRelativeToPillar;
+		}
+
+		public void LoadSave(DimensionPillar dimensionPillar) {
+			dimensionPillar.initialized = this.initialized;
+			dimensionPillar.maxDimension = this.maxDimension;
+			if (dimensionPillar.curDimension != this.curDimension) {
+				dimensionPillar.curDimension = this.curDimension;
+				dimensionPillar.OnDimensionChange?.Invoke(dimensionPillar.curDimension, this.curDimension);
+			}
+			dimensionPillar.curDimension = this.curDimension;
+			dimensionPillar.overrideDimensionShiftAngle = this.overrideDimensionShiftAngle;
+			dimensionPillar.dimensionShiftAngle = this.dimensionShiftAngle;
+			dimensionPillar.cameraAngleRelativeToPillar = this.cameraAngleRelativeToPillar - Angle.Degrees(0.001f);
+
+			if (setAsActiveOnStart) {
+				DimensionPillar.activePillar = dimensionPillar;
+				dimensionPillar.UpdateRelativeCameraAngle(true);
+			}
+		}
+	}
+
+	public object GetSaveObject() {
+		return new DimensionPillarSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		DimensionPillarSave save = savedObject as DimensionPillarSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

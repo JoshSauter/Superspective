@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using PowerTrailMechanics;
+using Saving;
+using System;
 
 namespace LevelSpecific.BlackRoom {
 	[RequireComponent(typeof(Button))]
-	public class ProjectorPowerButton : MonoBehaviour {
-		public PowerTrailMechanics.PowerTrail powerTrail;
-		public bool lightTurnedOn = false;
+	public class ProjectorPowerButton : MonoBehaviour, SaveableObject {
+		public PowerTrail powerTrail;
+		public bool projectorTurnedOn = false;
 		public LightProjector projector;
 		Button b;
 
@@ -19,8 +21,10 @@ namespace LevelSpecific.BlackRoom {
 			powerTrail.OnPowerFinish += TurnOnProjector;
 			powerTrail.OnDepowerBegin += TurnOffProjector;
 
-			if (lightTurnedOn) {
-				b.PressButton();
+			projectorTurnedOn = powerTrail.powerIsOn && powerTrail.maxDistance - powerTrail.distance < 0.01f;
+
+			if (projectorTurnedOn) {
+				TurnOnProjector();
 			}
 		}
 
@@ -33,16 +37,47 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void TurnOnProjector() {
-			foreach (UnityEngine.Transform child in projector.transform) {
+			foreach (Transform child in projector.transform) {
 				child.gameObject.SetActive(true);
 			}
-			lightTurnedOn = true;
+			projectorTurnedOn = true;
 		}
 		void TurnOffProjector() {
-			foreach (UnityEngine.Transform child in projector.transform) {
+			foreach (Transform child in projector.transform) {
 				child.gameObject.SetActive(false);
 			}
-			lightTurnedOn = false;
+			projectorTurnedOn = false;
 		}
+
+		#region Saving
+		public bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+
+		public string ID => $"{gameObject.name}";
+
+		[Serializable]
+		class ProjectorPowerButtonSave {
+			bool projectorTurnedOn;
+
+			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) {
+				this.projectorTurnedOn = projectorPowerButton.projectorTurnedOn;
+			}
+
+			public void LoadSave(ProjectorPowerButton projectorPowerButton) {
+				if (this.projectorTurnedOn) {
+					projectorPowerButton.TurnOnProjector();
+				}
+			}
+		}
+
+		public object GetSaveObject() {
+			return new ProjectorPowerButtonSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			ProjectorPowerButtonSave save = savedObject as ProjectorPowerButtonSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

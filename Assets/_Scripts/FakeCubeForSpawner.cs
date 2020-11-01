@@ -2,23 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using Saving;
+using System;
+using SerializableClasses;
 
-public class FakeCubeForSpawner : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class FakeCubeForSpawner : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	public PickupObject realCubePrefab;
 	PickupObject thisCube;
-	CubeSpawner thisSpawner;
+	public CubeSpawner thisSpawner;
 
 	private void Awake() {
 		thisCube = GetComponent<PickupObject>();
 	}
 
 	void Start() {
-		thisSpawner = GetComponentInParent<CubeSpawner>();
-
 		CreateAndCopyDimensionObjectFromSpawner();
 	}
 
 	void CreateAndCopyDimensionObjectFromSpawner() {
+		if (thisSpawner == null) {
+			Debug.LogError($"No cube spawner set for {gameObject.name}", gameObject);
+			return;
+		}
 		PillarDimensionObject spawnerDimensionObj = Utils.FindDimensionObjectRecursively(thisSpawner.transform);
 		if (spawnerDimensionObj != null) {
 			PillarDimensionObject thisDimensionObj = gameObject.AddComponent<PillarDimensionObject>();
@@ -65,4 +81,33 @@ public class FakeCubeForSpawner : MonoBehaviour {
 		Destroy(gameObject);
 		return newCube;
 	}
+
+	#region Saving
+	public bool SkipSave { get; set; }
+	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
+	public string ID => $"FakeCubeForSpawner_{id.uniqueId}";
+
+	[Serializable]
+	class FakeCubeForSpawnerSave {
+		SerializableReference<CubeSpawner> thisSpawner;
+
+		public FakeCubeForSpawnerSave(FakeCubeForSpawner obj) {
+			this.thisSpawner = obj.thisSpawner;
+		}
+
+		public void LoadSave(FakeCubeForSpawner obj) {
+			obj.thisSpawner = this.thisSpawner;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new FakeCubeForSpawnerSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		FakeCubeForSpawnerSave save = savedObject as FakeCubeForSpawnerSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

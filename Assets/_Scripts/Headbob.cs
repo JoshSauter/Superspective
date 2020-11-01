@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Saving;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Headbob : MonoBehaviour {
+public class Headbob : MonoBehaviour, SaveableObject {
 	public AnimationCurve viewBobCurve;
 	PlayerMovement playerMovement;
 	// This value is read from CameraFollow to apply the camera transform offset in one place
@@ -46,6 +47,7 @@ public class Headbob : MonoBehaviour {
 
 	#region Saving
 	// There's only one player so we don't need a UniqueId here
+	public bool SkipSave { get; set; }
 	public string ID => "Headbob";
 
 	[Serializable]

@@ -10,8 +10,8 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	Collider kinematicCollider;
 	SphereCollider thisTrigger;
 
-	float triggerZoneSize = 1.5f;
-	float minTriggerRadius = 1;
+	const float triggerZoneSize = 1.5f;
+	const float minTriggerRadius = 1;
 
 	HashSet<Collider> collidersBeingIgnored = new HashSet<Collider>();
 

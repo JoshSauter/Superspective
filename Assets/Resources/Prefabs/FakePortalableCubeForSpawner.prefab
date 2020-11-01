@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 181776413839145545}
   - component: {fileID: 8697380111667528222}
   - component: {fileID: 4616170053735054869}
+  - component: {fileID: -7209649710396932607}
+  - component: {fileID: -5695913647078972543}
   m_Layer: 0
   m_Name: FakePortalableCubeForSpawner
   m_TagString: Untagged
@@ -132,11 +134,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  isReplaceable: 1
   isHeld: 0
-  pickupDropCooldown: 0.1
-  holdDistance: 3
   thisGravity: {fileID: 0}
   thisRigidbody: {fileID: 0}
+  pickupSound: {fileID: 0}
+  dropSound: {fileID: 0}
 --- !u!114 &9090055543411700026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4007,6 +4010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   realCubePrefab: {fileID: 7982744811521786668, guid: db7f895775b7a4e46a3f6de9c8e9743a,
     type: 3}
+  thisSpawner: {fileID: 0}
 --- !u!114 &8697380111667528222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4035,6 +4039,32 @@ MonoBehaviour:
   useGravity: 0
   gravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
+--- !u!114 &-7209649710396932607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6219911249331447795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGlobal: 0
+--- !u!114 &-5695913647078972543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6219911249331447795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
 --- !u!1 &6948069022256006685
 GameObject:
   m_ObjectHideFlags: 0

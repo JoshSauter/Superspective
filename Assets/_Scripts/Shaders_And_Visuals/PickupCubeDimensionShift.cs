@@ -9,7 +9,7 @@ public class PickupCubeDimensionShift : MonoBehaviour {
 	public PillarDimensionObject pickupCubeDimensionObject, invertColorsDimensionObject;
 	public EpitaphRenderer cubeOutlineRenderer, invertColorsRenderer, raymarchRenderer;
 
-	UnityEngine.Transform[] cubeTransforms;
+	Transform[] cubeTransforms;
 
 	public BoxCollider thisCollider;
 

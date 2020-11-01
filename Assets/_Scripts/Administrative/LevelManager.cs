@@ -49,6 +49,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public DebugLogger debug;
 	[OnValueChanged("LoadDefaultPlayerPosition")]
 	public Level startingScene;
+	bool initialized = false;
 
 #region PlayerDefaultLocations
 	private const string positionKeyPrefix = "playerStartingPositions";
@@ -167,7 +168,11 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 	[Button("Load default player position")]
 	private void LoadDefaultPlayerPosition() {
-		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
+		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition
+#if !UNITY_EDITOR
+			|| true
+#endif
+		) return;
 
 		string sceneName = GetSceneName();
 		string positionKey = $"{positionKeyPrefix}.{sceneName}";
@@ -252,7 +257,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 #endregion
 
-	public void Start() {
+	public void Awake() {
 		hasLoadedDefaultPlayerPosition = false;
         debug = new DebugLogger(this, () => DEBUG);
 
@@ -268,32 +273,39 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		PopulateAlreadyLoadedScenes();
 #endif
 
+		activeSceneName = enumToSceneName[startingScene];
+	}
+
+	void Start() {
 		SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
 		SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
 		SceneManager.sceneUnloaded += FinishUnloadingScene;
 
-		SwitchActiveScene(startingScene);
+		if (!initialized) {
+			SwitchActiveScene(startingScene, true, false, false, false);
+			initialized = true;
+		}
 	}
 
 	/// <summary>
 	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="level">Enum value of the scene to become active</param>
-	public void SwitchActiveScene(Level level) {
-		SwitchActiveScene(enumToSceneName[level]);
+	public void SwitchActiveScene(Level level, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true, bool checkActiveSceneName = true) {
+		SwitchActiveScene(enumToSceneName[level], playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
 	}
 
 	/// <summary>
 	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="levelName">Name of the scene to become active</param>
-	public async void SwitchActiveScene(string levelName, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true) {
+	public async void SwitchActiveScene(string levelName, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true, bool checkActiveSceneName = true) {
 		if (!worldGraph.ContainsKey(levelName)) {
 			debug.LogError("No level name found in world graph with name " + levelName);
 			return;
 		}
 
-		if (activeSceneName == levelName) {
+		if (checkActiveSceneName && activeSceneName == levelName) {
 			debug.LogWarning("Level " + levelName + " already the active scene.");
 			return;
 		}
@@ -338,12 +350,14 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			}
 		}
 
-		Debug.Log("Waiting for scenes to be loaded...");
+		debug.Log("Waiting for scenes to be loaded...");
 		await TaskEx.WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
-		Debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
+		debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
 
 		if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
-			DynamicObjectManager.LoadOrCreateDynamicObjects(SaveManager.temp);
+			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				DynamicObjectManager.LoadDynamicObjectsForScene(sceneToBeLoaded);
+			}
 
 			foreach (string loadedScene in loadedSceneNames) {
 				SaveManager.GetSaveManagerForScene(loadedScene).InitializeSaveableObjectsDict();
@@ -447,13 +461,11 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			}
 		}
 
-		if (saveDeactivatingScenesToDisk && scenesToDeactivate.Count > 0) {
-			DynamicObjectManager.SaveDynamicObjects(SaveManager.temp);
-		}
 		foreach (string sceneToDeactivate in scenesToDeactivate) {
 			BeforeSceneUnload?.Invoke(sceneToDeactivate);
 
 			if (saveDeactivatingScenesToDisk) {
+				DynamicObjectManager.SaveDynamicObjectsForScene(sceneToDeactivate);
 				SaveManagerForScene saveForScene = SaveManager.GetSaveManagerForScene(sceneToDeactivate);
 				saveForScene?.SaveScene(SaveManager.temp);
 			}
@@ -471,6 +483,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// </summary>
 	/// <param name="loadedScene">Scene that finished loading</param>
 	private void FinishLoadingScene(Scene loadedScene) {
+		if (loadedScene.name == managerScene) {
+			return;
+		}
+
 		if (loadedScene.name == activeSceneName) {
 			SceneManager.SetActiveScene(loadedScene);
 			OnActiveSceneChange?.Invoke();
@@ -519,20 +535,24 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	}
 #endif
 
-	#region Saving
+#region Saving
+	public bool SkipSave { get; set; }
 	// There's only one LevelManager so we don't need a UniqueId here
 	public string ID => "LevelManager";
 
 	[Serializable]
 	class LevelManagerSave {
+		bool initialized;
 		string activeScene;
 
 		public LevelManagerSave(LevelManager levelManager) {
+			this.initialized = levelManager.initialized;
 			this.activeScene = levelManager.activeSceneName;
 		}
 
 		public void LoadSave(LevelManager levelManager) {
-			levelManager.SwitchActiveScene(activeScene, false, false, false);
+			levelManager.initialized = this.initialized;
+			levelManager.SwitchActiveScene(activeScene, false, false, false, false);
 		}
 	}
 
@@ -545,5 +565,5 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 		save.LoadSave(this);
 	}
-	#endregion
+#endregion
 }

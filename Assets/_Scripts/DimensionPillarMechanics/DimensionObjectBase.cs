@@ -4,6 +4,8 @@ using UnityEngine;
 using EpitaphUtils;
 using EpitaphUtils.ShaderUtils;
 using System.Linq;
+using Saving;
+using System;
 
 public enum VisibilityState {
 	invisible,
@@ -12,11 +14,23 @@ public enum VisibilityState {
 	partiallyInvisible,
 };
 
-public class DimensionObjectBase : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class DimensionObjectBase : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	public UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	protected DebugLogger debug;
 
+	protected bool initialized = false;
 	[Range(0, 1)]
 	public int channel;
 	[Range(0, 7)]
@@ -45,7 +59,7 @@ public class DimensionObjectBase : MonoBehaviour {
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
-	public virtual void Start() {
+	private void Awake() {
 		debug = new DebugLogger(this, () => DEBUG);
 
 		renderers = GetAllEpitaphRenderers().ToArray();
@@ -55,9 +69,15 @@ public class DimensionObjectBase : MonoBehaviour {
 		}
 		startingMaterials = GetAllStartingMaterials(renderers);
 		startingLayers = GetAllStartingLayers(renderers);
+	}
+
+	public virtual void Start() {
 		SetChannelValuesInMaterials();
 
-		SwitchVisibilityState(startingVisibilityState, true);
+		if (!initialized) {
+			SwitchVisibilityState(startingVisibilityState, true);
+			initialized = true;
+		}
 	}
 
 	private void OnEnable() {
@@ -91,7 +111,9 @@ public class DimensionObjectBase : MonoBehaviour {
 	#region stateChange
 
 	public virtual void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		StartCoroutine(SwitchVisibilityStateCoroutine(nextState, ignoreTransitionRules));
+		if (gameObject.activeInHierarchy) {
+			StartCoroutine(SwitchVisibilityStateCoroutine(nextState, ignoreTransitionRules));
+		}
 	}
 
 	public virtual IEnumerator SwitchVisibilityStateCoroutine(VisibilityState nextState, bool ignoreTransitionRules = false) {
@@ -121,7 +143,6 @@ public class DimensionObjectBase : MonoBehaviour {
 		if (!ignoreMaterialChanges) {
 			foreach (var r in renderers) {
 				SetMaterials(r);
-
 			}
 			if (setDimension >= 0) {
 				SetDimensionValuesInMaterials(setDimension);
@@ -294,8 +315,72 @@ public class DimensionObjectBase : MonoBehaviour {
 		if (newMaterial != null && normalMaterial != null) {
 			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
 		}
-		// ?? means: return (newMaterial != null) ? newMaterial : normalMaterial;
-		return newMaterial ?? normalMaterial;
+		return (newMaterial != null) ? newMaterial : normalMaterial;
+	}
+	#endregion
+
+	#region Saving
+	public bool SkipSave { get; set; }
+	// There's only one player so we don't need a UniqueId here
+	public virtual string ID => $"DimensionObjectBase_{id.uniqueId}";
+	//public virtual string ID {
+	//	get {
+	//		if (id == null || id.uniqueId == null) {
+	//			throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
+	//		}
+	//		return $"DimensionObjectBase_{id.uniqueId}";
+	//	}
+	//}
+
+	[Serializable]
+	class DimensionObjectBaseSave {
+		bool treatChildrenAsOneObjectRecursively;
+
+		bool initialized;
+		int channel;
+		int baseDimension;
+		bool reverseVisibilityStates;
+		bool ignoreMaterialChanges;
+		int curDimensionSetInMaterial;
+
+		int startingVisibilityState;
+		int visibilityState;
+
+		public DimensionObjectBaseSave(DimensionObjectBase dimensionObj) {
+			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
+			this.initialized = dimensionObj.initialized;
+			this.channel = dimensionObj.channel;
+			this.baseDimension = dimensionObj.baseDimension;
+			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
+			this.ignoreMaterialChanges = dimensionObj.ignoreMaterialChanges;
+			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
+			this.startingVisibilityState = (int)dimensionObj.startingVisibilityState;
+			this.visibilityState = (int)dimensionObj.visibilityState;
+		}
+
+		public void LoadSave(DimensionObjectBase dimensionObj) {
+			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
+			dimensionObj.initialized = this.initialized;
+			dimensionObj.channel = this.channel;
+			dimensionObj.baseDimension = this.baseDimension;
+			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
+			dimensionObj.ignoreMaterialChanges = this.ignoreMaterialChanges;
+			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;
+			dimensionObj.startingVisibilityState = (VisibilityState)this.startingVisibilityState;
+			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;
+
+			dimensionObj.SwitchVisibilityState(dimensionObj.visibilityState, true);
+		}
+	}
+
+	public virtual object GetSaveObject() {
+		return new DimensionObjectBaseSave(this);
+	}
+
+	public virtual void LoadFromSavedObject(object savedObject) {
+		DimensionObjectBaseSave save = savedObject as DimensionObjectBaseSave;
+
+		save.LoadSave(this);
 	}
 	#endregion
 }

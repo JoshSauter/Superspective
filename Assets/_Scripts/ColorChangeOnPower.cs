@@ -3,8 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using PowerTrailMechanics;
 using NaughtyAttributes;
+using Saving;
+using System;
+using SerializableClasses;
+using MagicTriggerMechanics;
+using System.Linq;
 
-public class ColorChangeOnPower : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	public UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	public enum ActivationTiming {
 		OnPowerBegin,
 		OnPowerFinish,
@@ -23,11 +39,9 @@ public class ColorChangeOnPower : MonoBehaviour {
 
 	public AnimationCurve colorChangeAnimationCurve;
 	float timeElapsedSinceStateChange = 0f;
-	bool powered = false;
 	public float timeToChangeColor = 0.25f;
 	public PowerTrail powerTrailToReactTo;
 	public EpitaphRenderer[] renderers;
-
 
 	[Button("Swap powered/depowered colors")]
 	void SwapPoweredDepoweredColors() {
@@ -42,7 +56,7 @@ public class ColorChangeOnPower : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Start() {
+	void Awake() {
 		if (powerTrailToReactTo == null) {
 			powerTrailToReactTo = GetComponent<PowerTrail>();
 		}
@@ -124,4 +138,67 @@ public class ColorChangeOnPower : MonoBehaviour {
 	void PowerOff() {
 		timeElapsedSinceStateChange = 0f;
 	}
+
+	#region Saving
+	public bool SkipSave { get; set; }
+	// There's only one player so we don't need a UniqueId here
+	public string ID => $"{poweredColor:F3}_{id.uniqueId}";
+
+	[Serializable]
+	class ColorChangeOnPowerSave {
+		int timing;
+		bool useMaterialAsStartColor;
+		SerializableColor depoweredColor;
+		SerializableColor depoweredEmission;
+		SerializableColor poweredColor;
+		SerializableColor poweredEmission;
+
+		SerializableAnimationCurve colorChangeAnimationCurve;
+		float timeElapsedSinceStateChange;
+
+		SerializableColor currentColor;
+		SerializableColor currentEmission;
+
+		public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) {
+			this.timing = (int)colorChange.timing;
+			this.useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
+			this.depoweredColor = colorChange.depoweredColor;
+			this.depoweredEmission = colorChange.depoweredEmission;
+			this.poweredColor = colorChange.poweredColor;
+			this.poweredEmission = colorChange.poweredEmission;
+			this.colorChangeAnimationCurve = colorChange.colorChangeAnimationCurve;
+			this.timeElapsedSinceStateChange = colorChange.timeElapsedSinceStateChange;
+
+			if (colorChange.renderers != null && colorChange.renderers.Length > 0) {
+				this.currentColor = colorChange.renderers[0].GetMainColor();
+				this.currentEmission = colorChange.renderers[0].GetColor("_EmissionColor");
+			}
+		}
+
+		public void LoadSave(ColorChangeOnPower colorChange) {
+			colorChange.timing = (ActivationTiming)this.timing;
+			colorChange.useMaterialAsStartColor = this.useMaterialAsStartColor;
+			colorChange.depoweredColor = this.depoweredColor;
+			colorChange.depoweredEmission = this.depoweredEmission;
+			colorChange.poweredColor = this.poweredColor;
+			colorChange.poweredEmission = this.poweredEmission;
+			colorChange.colorChangeAnimationCurve = this.colorChangeAnimationCurve;
+			colorChange.timeElapsedSinceStateChange = this.timeElapsedSinceStateChange;
+
+			if (this.currentColor != null && this.currentEmission != null) {
+				colorChange.SetColor(this.currentColor, this.currentEmission);
+			}
+		}
+	}
+
+	public object GetSaveObject() {
+		return new ColorChangeOnPowerSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		ColorChangeOnPowerSave save = savedObject as ColorChangeOnPowerSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

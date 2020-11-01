@@ -13,7 +13,7 @@ public class TeleportEnter : MonoBehaviour {
 	public Collider teleportEnter;
     public Collider teleportExit;
 	public Vector3 teleportOffset = Vector3.zero;
-	public UnityEngine.Transform[] otherObjectsToTeleport;
+	public Transform[] otherObjectsToTeleport;
 
 #region events
 	public delegate void TeleportAction(Collider teleportEnter, Collider teleportExit, GameObject player);
@@ -36,7 +36,7 @@ public class TeleportEnter : MonoBehaviour {
 		teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
 
-		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new UnityEngine.Transform[0];
+		if (otherObjectsToTeleport == null) otherObjectsToTeleport = new Transform[0];
 	}
 
 	private void OnEnable() {
@@ -61,7 +61,7 @@ public class TeleportEnter : MonoBehaviour {
 		Quaternion rotationTransformation = teleportExit.transform.rotation * Quaternion.Inverse(teleportEnter.transform.rotation);
 		debug.Log("Displacement: " + teleportDisplacement + "\nDisplacementToCenter: " + displacementToCenter + "\nRotationTransformation: " + rotationTransformation.eulerAngles);
 
-		foreach (UnityEngine.Transform otherObject in otherObjectsToTeleport) {
+		foreach (Transform otherObject in otherObjectsToTeleport) {
 			otherObject.transform.position += displacementToCenter;
 			otherObject.transform.rotation = rotationTransformation * otherObject.transform.rotation;
 			otherObject.transform.position += teleportDisplacement;
@@ -104,33 +104,17 @@ public class TeleportEnter : MonoBehaviour {
 	}
 
 	void TriggerEventsBeforeTeleport(GameObject player) {
-		if (BeforeTeleport != null) {
-			BeforeTeleport(teleportEnter, teleportExit, player);
-		}
-		if (BeforeAnyTeleport != null) {
-			BeforeAnyTeleport(teleportEnter, teleportExit, player);
-		}
-		if (BeforeTeleportSimple != null) {
-			BeforeTeleportSimple();
-		}
-		if (BeforeAnyTeleportSimple != null) {
-			BeforeAnyTeleportSimple();
-		}
+		BeforeTeleport?.Invoke(teleportEnter, teleportExit, player);
+		BeforeAnyTeleport?.Invoke(teleportEnter, teleportExit, player);
+		BeforeTeleportSimple?.Invoke();
+		BeforeAnyTeleportSimple?.Invoke();
 	}
 
 	void TriggerEventsAfterTeleport(GameObject player) {
-		if (OnTeleport != null) {
-			OnTeleport(teleportEnter, teleportExit, player);
-		}
-		if (OnAnyTeleport != null) {
-			OnAnyTeleport(teleportEnter, teleportExit, player);
-		}
-		if (OnTeleportSimple != null) {
-			OnTeleportSimple();
-		}
-		if (OnAnyTeleportSimple != null) {
-			OnAnyTeleportSimple();
-		}
+		OnTeleport?.Invoke(teleportEnter, teleportExit, player);
+		OnAnyTeleport?.Invoke(teleportEnter, teleportExit, player);
+		OnTeleportSimple?.Invoke();
+		OnAnyTeleportSimple?.Invoke();
 	}
 
 }

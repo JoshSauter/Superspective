@@ -7,14 +7,6 @@
 
         void LoadFromSavedObject(object savedObject);
 
-		bool HasValidId() {
-            try {
-                string s = ID;
-                return true;
-            }
-            catch {
-                return false;
-			}
-		}
+        bool SkipSave { get; set; }
 	}
 }

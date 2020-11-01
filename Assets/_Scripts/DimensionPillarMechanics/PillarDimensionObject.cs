@@ -4,6 +4,8 @@ using UnityEngine;
 using EpitaphUtils;
 using EpitaphUtils.ShaderUtils;
 using System.Linq;
+using System;
+using SerializableClasses;
 
 public class PillarDimensionObject : DimensionObjectBase {
 	public bool continuouslyUpdateOnOffAngles = false;
@@ -36,9 +38,9 @@ public class PillarDimensionObject : DimensionObjectBase {
 	public bool overrideOnOffAngles = false;
 	public Angle onAngle;
 	public Angle offAngle;
-	private Angle centralAngle;	// Used for continuous on/off angle updating for knowing when the object changes quadrants
+	private Angle centralAngle; // Used for continuous on/off angle updating for knowing when the object changes quadrants
 
-	public override void Start() {
+	private void Awake() {
 		debug = new DebugLogger(this, () => DEBUG);
 
 		objectStartDimension = baseDimension;
@@ -46,9 +48,12 @@ public class PillarDimensionObject : DimensionObjectBase {
 		renderers = GetAllEpitaphRenderers().ToArray();
 		startingMaterials = GetAllStartingMaterials(renderers);
 		startingLayers = GetAllStartingLayers(renderers);
+	}
 
+	public override void Start() {
 		FindRelevantPillars();
-		SwitchVisibilityState(visibilityState, true);
+
+		SwitchVisibilityState(startingVisibilityState, true);
 
 		if (DimensionPillar.activePillar != null) {
 			HandleActivePillarChanged(null);
@@ -381,6 +386,99 @@ public class PillarDimensionObject : DimensionObjectBase {
 
 		//debug.Log(nextState);
 		return nextState;
+	}
+	#endregion
+
+	#region Saving
+	public override string ID => $"PillarDimensionObject_{id.uniqueId}";
+
+	[Serializable]
+	class PillarDimensionObjectSave {
+		bool treatChildrenAsOneObjectRecursively;
+
+		int channel;
+		int baseDimension;
+		bool reverseVisibilityStates;
+		bool ignoreMaterialChanges;
+		int curDimensionSetInMaterial;
+
+		int visibilityState;
+
+		bool continuouslyUpdateOnOffAngles;
+
+		int objectStartDimension;
+		int objectEndDimension;
+		int findPillarsTechnique;
+
+		List<SerializableReference<DimensionPillar>> whitelist = new List<SerializableReference<DimensionPillar>>();
+		List<SerializableReference<DimensionPillar>> blacklist = new List<SerializableReference<DimensionPillar>>();
+		float pillarSearchRadius;
+		SerializableVector3 pillarSearchBoxSize;
+
+		bool overrideOnOffAngles;
+		Angle onAngle;
+		Angle offAngle;
+		Angle centralAngle;
+
+		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj) {
+			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
+			this.channel = dimensionObj.channel;
+			this.baseDimension = dimensionObj.baseDimension;
+			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
+			this.ignoreMaterialChanges = dimensionObj.ignoreMaterialChanges;
+			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
+			this.visibilityState = (int)dimensionObj.visibilityState;
+			this.continuouslyUpdateOnOffAngles = dimensionObj.continuouslyUpdateOnOffAngles;
+			this.objectStartDimension = dimensionObj.objectStartDimension;
+			this.objectEndDimension = dimensionObj.objectEndDimension;
+			this.findPillarsTechnique = (int)dimensionObj.findPillarsTechnique;
+			this.whitelist = dimensionObj.whitelist.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToList();
+			this.blacklist = dimensionObj.blacklist.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToList();
+			this.pillarSearchRadius = dimensionObj.pillarSearchRadius;
+			this.pillarSearchBoxSize = dimensionObj.pillarSearchBoxSize;
+			this.overrideOnOffAngles = dimensionObj.overrideOnOffAngles;
+			this.onAngle = dimensionObj.onAngle;
+			this.offAngle = dimensionObj.offAngle;
+			this.centralAngle = dimensionObj.centralAngle;
+		}
+
+		public void LoadSave(PillarDimensionObject dimensionObj) {
+			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
+			dimensionObj.channel = this.channel;
+			dimensionObj.baseDimension = this.baseDimension;
+			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
+			dimensionObj.ignoreMaterialChanges = this.ignoreMaterialChanges;
+			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;
+			dimensionObj.startingVisibilityState = (VisibilityState)this.visibilityState;
+			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;
+
+			dimensionObj.continuouslyUpdateOnOffAngles = this.continuouslyUpdateOnOffAngles;
+			dimensionObj.objectStartDimension = this.objectStartDimension;
+			dimensionObj.objectEndDimension = this.objectEndDimension;
+			dimensionObj.findPillarsTechnique = (FindPillarsTechnique)this.findPillarsTechnique;
+			dimensionObj.whitelist = this.whitelist.Select(p => p.Reference).ToList();
+			dimensionObj.blacklist = this.blacklist.Select(p => p.Reference).ToList();
+			dimensionObj.pillarSearchRadius = this.pillarSearchRadius;
+			dimensionObj.pillarSearchBoxSize = this.pillarSearchBoxSize;
+			dimensionObj.overrideOnOffAngles = this.overrideOnOffAngles;
+			dimensionObj.onAngle = this.onAngle;
+			dimensionObj.offAngle = this.offAngle;
+			dimensionObj.centralAngle = this.centralAngle;
+
+			if (dimensionObj.gameObject.activeInHierarchy) {
+				dimensionObj.SwitchVisibilityState(dimensionObj.visibilityState, true);
+			}
+		}
+	}
+
+	public override object GetSaveObject() {
+		return new PillarDimensionObjectSave(this);
+	}
+
+	public override void LoadFromSavedObject(object savedObject) {
+		PillarDimensionObjectSave save = savedObject as PillarDimensionObjectSave;
+
+		save.LoadSave(this);
 	}
 	#endregion
 }

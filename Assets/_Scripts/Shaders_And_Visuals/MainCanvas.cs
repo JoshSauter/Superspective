@@ -6,12 +6,19 @@ using UnityEngine.UI;
 public class MainCanvas : Singleton<MainCanvas> {
 	public TempMenu tempMenu;
 	public Image blackOverlay;
-	private bool _blackOverlayEnabled = false;
-	public bool blackOverlayEnabled {
-		get { return _blackOverlayEnabled; }
+	public enum BlackOverlayState {
+		Off,
+		On,
+		FadingOut
+	}
+	private BlackOverlayState _blackOverlayState = BlackOverlayState.Off;
+	public BlackOverlayState blackOverlayState {
+		get { return _blackOverlayState; }
 		set {
-			blackOverlayAlpha = 1f;
-			_blackOverlayEnabled = value;
+			if (value != BlackOverlayState.Off) {
+				blackOverlayAlpha = 1f;
+			}
+			_blackOverlayState = value;
 		}
 	}
 	float blackOverlayFadeSpeed = 4f;
@@ -25,11 +32,15 @@ public class MainCanvas : Singleton<MainCanvas> {
 		}
 	}
 
-	private void Update() {
-		if (!blackOverlayEnabled && blackOverlayAlpha > 0) {
-			float nextAlpha = Mathf.Lerp(blackOverlayAlpha, 0f, blackOverlayFadeSpeed * Time.deltaTime);
+	private void FixedUpdate() {
+		if (blackOverlayState == BlackOverlayState.FadingOut) {
+			float nextAlpha = Mathf.Lerp(blackOverlayAlpha, 0f, blackOverlayFadeSpeed * Time.fixedDeltaTime);
 			if (nextAlpha < 0.001f) nextAlpha = 0f;
 			blackOverlayAlpha = nextAlpha;
+
+			if (blackOverlayAlpha == 0) {
+				blackOverlayState = BlackOverlayState.Off;
+			}
 		}
 	}
 }

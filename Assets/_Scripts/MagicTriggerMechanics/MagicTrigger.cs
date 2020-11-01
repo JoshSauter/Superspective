@@ -12,8 +12,6 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : MonoBehaviour, SaveableObject {
-		// TODO: Should NEVER add uniqueId dynamically at runtime, EXCEPT for DynamicObjects. Remove all instances of the following pattern
-		// and replace with just the GetComponent part, with some editor tool to automatically add UniqueIds to any SaveableObject that's lacking one AND needs one
 		UniqueId _id;
 		public UniqueId id {
 			get {
@@ -163,17 +161,8 @@ namespace MagicTriggerMechanics {
 		}
 
 		#region Saving
-		// There's only one player so we don't need a UniqueId here
-		public string ID {
-			get {
-				string uniqueId = $"MagicTrigger_{id.uniqueId}";
-				if (uniqueId == "MagicTrigger_") {
-					Debug.Log(gameObject.name + " in " + gameObject.scene.name);
-				}
-				return uniqueId;
-			}
-		}
-		//public string ID => $"MagicTrigger_{id.uniqueId}";
+		public bool SkipSave { get; set; }
+		public string ID => $"MagicTrigger_{id.uniqueId}";
 
 		[Serializable]
 		class MagicTriggerSave {

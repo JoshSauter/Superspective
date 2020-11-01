@@ -1,4 +1,6 @@
 ﻿using Audio;
+using Saving;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,8 +11,19 @@ public struct ViewLockInfo {
 	public Vector3 camRotationEuler;
 }
 
+[RequireComponent(typeof(UniqueId))]
 [RequireComponent(typeof(Collider))]
-public class ViewLockObject : MonoBehaviour {
+public class ViewLockObject : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	public UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	PlayerLook.State _state;
 	PlayerLook.State state {
 		get { return _state; }
@@ -54,6 +67,9 @@ public class ViewLockObject : MonoBehaviour {
 	SoundEffect enterViewLockSfx;
 
 	void Awake() {
+		hitbox = GetComponent<Collider>();
+		hitbox.isTrigger = true;
+
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
@@ -66,15 +82,13 @@ public class ViewLockObject : MonoBehaviour {
 	void InitAudio() {
 		if (enterViewLockSfx == null) {
 			enterViewLockSfx = gameObject.AddComponent<SoundEffectOnGameObject>();
+			enterViewLockSfx.SkipSave = true;
 			enterViewLockSfx.pitch = 0.5f;
 			enterViewLockSfx.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/ViewLockObject");
 		}
 	}
 
     void Start() {
-		hitbox = GetComponent<Collider>();
-		hitbox.isTrigger = true;
-
 		playerCamera = EpitaphScreen.instance.playerCamera.transform;
     }
 
@@ -115,4 +129,36 @@ public class ViewLockObject : MonoBehaviour {
 
 		return viewLockOptions[indexOfWinner];
 	}
+
+	#region Saving
+	public bool SkipSave { get { return hitbox == null; } set { } }
+
+	public string ID => $"ViewLockObject_{id.uniqueId}";
+
+	[Serializable]
+	class ViewLockObjectSave {
+		int state;
+		bool colliderEnabled;
+
+		public ViewLockObjectSave(ViewLockObject viewLockObject) {
+			this.state = (int)viewLockObject.state;
+			this.colliderEnabled = viewLockObject.hitbox.enabled;
+		}
+
+		public void LoadSave(ViewLockObject viewLockObject) {
+			viewLockObject.state = (PlayerLook.State)this.state;
+			viewLockObject.hitbox.enabled = this.colliderEnabled;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new ViewLockObjectSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		ViewLockObjectSave save = savedObject as ViewLockObjectSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

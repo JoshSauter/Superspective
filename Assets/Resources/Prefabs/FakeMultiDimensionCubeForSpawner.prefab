@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 8697380111667528222}
   - component: {fileID: 4616170053735054869}
   - component: {fileID: 2464818933562291503}
+  - component: {fileID: 8410754666259562607}
   m_Layer: 0
   m_Name: FakeMultiDimensionCubeForSpawner
   m_TagString: Untagged
@@ -4009,6 +4010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   realCubePrefab: {fileID: 1754106264064273301, guid: 080b4de68633fa74caed8ddad090ac94,
     type: 3}
+  thisSpawner: {fileID: 0}
 --- !u!114 &8697380111667528222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4050,6 +4052,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
+--- !u!114 &8410754666259562607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6219911249331447795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabPath: 
+  isGlobal: 0
 --- !u!1 &6948069022256006685
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using EpitaphUtils;
+using Saving;
+using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzle : MonoBehaviour {
-		public UnityEngine.Transform smallPuzzleParent;
+	public class ColorPuzzle : MonoBehaviour, SaveableObject {
+		public Transform smallPuzzleParent;
 		public bool solved = false;
 		public bool isActive = false;
 		ColorPuzzleNode[] solutionNodes;
 		LightBlocker[] lightBlockers;
-		UnityEngine.Transform smallPuzzle;
+		Transform smallPuzzle;
 
 		Vector3 activePos;
 		Vector3 inactivePos;
@@ -22,7 +24,7 @@ namespace LevelSpecific.BlackRoom {
 		void Start() {
 			solutionNodes = GetComponentsInChildren<ColorPuzzleNode>();
 			lightBlockers = GetComponentsInChildren<LightBlocker>();
-			smallPuzzle = CreateBigPuzzlePieces().transform;
+			smallPuzzle = CreateSmallPuzzlePieces().transform;
 			ColorPuzzleNode.OnSolutionNodeStateChange += HandleSolutionNodeStateChange;
 
 			activePos = transform.localPosition;
@@ -45,18 +47,18 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		GameObject CreateBigPuzzlePieces() {
-			GameObject bigPuzzle = Instantiate(this, smallPuzzleParent, false).gameObject;
-			DestroyImmediate(bigPuzzle.GetComponent<ColorPuzzle>());
+		GameObject CreateSmallPuzzlePieces() {
+			GameObject smallPuzzle = Instantiate(this, smallPuzzleParent, false).gameObject;
+			DestroyImmediate(smallPuzzle.GetComponent<ColorPuzzle>());
 
-			foreach (UnityEngine.Transform t in bigPuzzle.transform) {
+			foreach (Transform t in smallPuzzle.transform) {
 				ColorPuzzleNode node = t.GetComponent<ColorPuzzleNode>();
 				LightBlocker lightBlocker = t.GetComponent<LightBlocker>();
 				if (node != null) DestroyImmediate(node);
 				if (lightBlocker != null) DestroyImmediate(lightBlocker);
 			}
 
-			return bigPuzzle;
+			return smallPuzzle;
 		}
 
 		public void SetActive(bool active) {
@@ -72,6 +74,34 @@ namespace LevelSpecific.BlackRoom {
 				lb.gameObject.SetActive(active);
 			}
 			isActive = active;
+		}
+
+		public bool SkipSave { get; set; }
+		public string ID => $"BlackRoom_ColorPuzzle{transform.GetSiblingIndex()}";
+
+		[Serializable]
+		public class ColorPuzzleSave {
+			bool solved;
+			bool isActive;
+			public ColorPuzzleSave(ColorPuzzle colorPuzzle) {
+				this.solved = colorPuzzle.solved;
+				this.isActive = colorPuzzle.isActive;
+			}
+
+			public void LoadSave(ColorPuzzle colorPuzzle) {
+				colorPuzzle.solved = this.solved;
+				colorPuzzle.isActive = this.isActive;
+			}
+		}
+
+		public object GetSaveObject() {
+			return new ColorPuzzleSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			ColorPuzzleSave save = savedObject as ColorPuzzleSave;
+
+			save.LoadSave(this);
 		}
 	}
 }

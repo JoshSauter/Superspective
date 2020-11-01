@@ -200,7 +200,7 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-
+	public bool SkipSave { get; set; }
 	public string ID => $"{gameObject.name}_BladeEdgeDetection";
 
 	[Serializable]

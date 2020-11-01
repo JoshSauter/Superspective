@@ -147,8 +147,6 @@ public class PuzzlePanel : MonoBehaviour {
 		b.depressDistance = 0;
 		b.depressAfterPress = false;
 		b.timeBetweenPressEndDepressStart = 0;
-		b.deadTimeAfterButtonPress = 0.125f;
-		b.deadTimeAfterButtonDepress = 0.125f;
 
 		ButtonColorChange c = b.gameObject.AddComponent<ButtonColorChange>();
 		c.pressColor = new Color(58f / 255f, 58f / 255f, 58f / 255f, 1);

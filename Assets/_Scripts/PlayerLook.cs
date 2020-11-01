@@ -75,14 +75,6 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 		playerTransform = gameObject.transform;
 		cameraContainerTransform = playerTransform.GetChild(0);
 		cameraInitialLocalPos = cameraContainerTransform.localPosition;
-	}
-
-	// Use this for initialization
-	void Start () {
-		debug = new DebugLogger(this, () => DEBUG);
-
-		//print(cameraTransform.rotation.x + ", " + cameraTransform.rotation.y + ", " + cameraTransform.rotation.z + ", " + cameraTransform.rotation.w);
-		//print(cameraTransform.position.x + ", " + cameraTransform.position.y + ", " + cameraTransform.position.z);
 
 		if (!Application.isEditor
 #if UNITY_EDITOR
@@ -92,6 +84,14 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.visible = false;
 		}
+	}
+
+	// Use this for initialization
+	void Start () {
+		debug = new DebugLogger(this, () => DEBUG);
+
+		//print(cameraTransform.rotation.x + ", " + cameraTransform.rotation.y + ", " + cameraTransform.rotation.z + ", " + cameraTransform.rotation.w);
+		//print(cameraTransform.position.x + ", " + cameraTransform.position.y + ", " + cameraTransform.position.z);
 	}
 
 	void Update() {
@@ -162,6 +162,9 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			}
 			else {
 				Reticle.instance.MoveReticle(reticleEndPos);
+
+				cameraContainerTransform.position = playerTransform.TransformPoint(cameraInitialLocalPos);
+				cameraContainerTransform.rotation = rotationBeforeViewLock;
 
 				PlayerMovement.instance.ResumeMovement();
 				Player.instance.cameraFollow.enabled = true;
@@ -274,6 +277,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 
 
 	#region Saving
+	public bool SkipSave { get; set; }
 	// There's only one PlayerLook so we don't need a UniqueId here
 	public string ID => "PlayerLook";
 
@@ -293,6 +297,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 		SerializableVector2 reticleStartPos;
 		SerializableVector2 reticleEndPos;
 		float viewLockTime;
+		float viewUnlockTime;
 
 		float generalSensitivity;
 		float sensitivityX;
@@ -300,6 +305,9 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 		float rotationY;
 		float yClamp;
 		float outsideMultiplier;
+
+		int lockState;
+		bool cursorVisible;
 
 		public PlayerLookSave(PlayerLook playerLook) {
 			this.cameraLocalPosition = playerLook.cameraContainerTransform.localPosition;
@@ -315,6 +323,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			this.reticleStartPos = playerLook.reticleStartPos;
 			this.reticleEndPos = playerLook.reticleEndPos;
 			this.viewLockTime = playerLook.viewLockTime;
+			this.viewUnlockTime = playerLook.viewUnlockTime;
 
 			this.generalSensitivity = playerLook.generalSensitivity;
 			this.sensitivityX = playerLook.sensitivityX;
@@ -322,6 +331,9 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			this.rotationY = playerLook.rotationY;
 			this.yClamp = playerLook.yClamp;
 			this.outsideMultiplier = playerLook.outsideMultiplier;
+
+			this.lockState = (int)Cursor.lockState;
+			this.cursorVisible = Cursor.visible;
 		}
 
 		public void LoadSave(PlayerLook playerLook) {
@@ -338,6 +350,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			playerLook.reticleStartPos = this.reticleStartPos;
 			playerLook.reticleEndPos = this.reticleEndPos;
 			playerLook.viewLockTime = this.viewLockTime;
+			playerLook.viewUnlockTime = this.viewUnlockTime;
 
 			playerLook.generalSensitivity = this.generalSensitivity;
 			playerLook.sensitivityX = this.sensitivityX;
@@ -345,6 +358,9 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 			playerLook.rotationY = this.rotationY;
 			playerLook.yClamp = this.yClamp;
 			playerLook.outsideMultiplier = this.outsideMultiplier;
+
+			Cursor.lockState = (CursorLockMode)this.lockState;
+			Cursor.visible = this.cursorVisible;
 		}
 	}
 

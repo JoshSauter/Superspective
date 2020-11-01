@@ -3,10 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 using NaughtyAttributes;
+using Saving;
+using System;
+using SerializableClasses;
 
 namespace PictureTeleportMechanics {
+    [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
-    public class PictureTeleport : MonoBehaviour {
+    public class PictureTeleport : MonoBehaviour, SaveableObject {
+        UniqueId _id;
+        UniqueId id {
+            get {
+                if (_id == null) {
+                    _id = GetComponent<UniqueId>();
+                }
+                return _id;
+            }
+        }
+
         public static Dictionary<string, BigFrame> bigFrames = new Dictionary<string, BigFrame>();
 
         public static string BigFrameKey(string scene, string name) {
@@ -31,26 +45,31 @@ namespace PictureTeleportMechanics {
         // Change the SSAO to blend the teleport
         ScreenSpaceAmbientOcclusion ssao;
         private float startSsaoIntensity;
-        public float ssaoMultiplier = .75f;
+        const float ssaoMultiplier = .75f;
+        public float ssaoBlendTimeRemaining = 0f;
 
-        void Start() {
+        void Awake() {
             ssao = EpitaphScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
             startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject = GetComponent<ViewLockObject>();
-            viewLockObject.OnViewLockEnterBegin += () => StartCoroutine(SSAOBlend());
+        }
+
+        void Start() {
+            viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;
         }
 
-        IEnumerator SSAOBlend() {
-            float timeElapsed = 0f;
-            while (timeElapsed < viewLockObject.viewLockTime) {
-                timeElapsed += Time.deltaTime;
-                float t = timeElapsed / viewLockObject.viewLockTime;
-
-                ssao.m_OcclusionIntensity = Mathf.Lerp(startSsaoIntensity, startSsaoIntensity * ssaoMultiplier, t);
-
-                yield return null;
+        void Update() {
+            if (ssaoBlendTimeRemaining > 0f) {
+                UpdateSSAOBlend();
             }
+		}
+
+        void UpdateSSAOBlend() {
+            ssaoBlendTimeRemaining -= Time.deltaTime;
+            float t = (viewLockObject.viewLockTime - ssaoBlendTimeRemaining) / viewLockObject.viewLockTime;
+
+            ssao.m_OcclusionIntensity = Mathf.Lerp(startSsaoIntensity, startSsaoIntensity * ssaoMultiplier, Mathf.Clamp01(t));
         }
 
         void TeleportPlayer() {
@@ -73,5 +92,55 @@ namespace PictureTeleportMechanics {
             PlayerLook.instance.rotationBeforeViewLock = camContainer.rotation;
             Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;
         }
+
+        #region Saving
+        public bool SkipSave { get; set; }
+
+        public string ID => $"PictureTeleport_{id.uniqueId}";
+
+        [Serializable]
+        class PictureTeleportSave {
+            SerializableVector3 targetPosition;
+            SerializableVector3 targetRotation;
+            SerializableVector3 targetCameraPosition;
+            SerializableVector3 targetCameraRotation;
+            float targetLookY;
+            float startSsaoIntensity;
+            float curSsaoIntensity;
+            float ssaoBlendTimeRemaining;
+
+            public PictureTeleportSave(PictureTeleport script) {
+                this.targetPosition = script.targetPosition;
+                this.targetRotation = script.targetRotation;
+                this.targetCameraPosition = script.targetCameraPosition;
+                this.targetCameraRotation = script.targetCameraRotation;
+                this.targetLookY = script.targetLookY;
+                this.startSsaoIntensity = script.startSsaoIntensity;
+                this.curSsaoIntensity = script.ssao.m_OcclusionIntensity;
+                this.ssaoBlendTimeRemaining = script.ssaoBlendTimeRemaining;
+            }
+
+            public void LoadSave(PictureTeleport script) {
+                script.targetPosition = this.targetPosition;
+                script.targetRotation = this.targetRotation;
+                script.targetCameraPosition = this.targetCameraPosition;
+                script.targetCameraRotation = this.targetCameraRotation;
+                script.targetLookY = this.targetLookY;
+                script.startSsaoIntensity = this.startSsaoIntensity;
+                script.ssao.m_OcclusionIntensity = this.curSsaoIntensity;
+                script.ssaoBlendTimeRemaining = this.ssaoBlendTimeRemaining;
+            }
+        }
+
+        public object GetSaveObject() {
+            return new PictureTeleportSave(this);
+        }
+
+        public void LoadFromSavedObject(object savedObject) {
+            PictureTeleportSave save = savedObject as PictureTeleportSave;
+
+            save.LoadSave(this);
+        }
+        #endregion
     }
 }

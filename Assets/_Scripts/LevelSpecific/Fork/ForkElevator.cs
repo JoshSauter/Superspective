@@ -245,6 +245,7 @@ namespace LevelSpecific.Fork {
 			}
 		}
 
+		public bool SkipSave { get; set; }
 		public string ID { get; private set; }
 		public object GetSaveObject() {
 			ForkElevatorSave save = new ForkElevatorSave(this);

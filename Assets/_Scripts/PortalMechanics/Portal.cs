@@ -81,6 +81,17 @@ namespace PortalMechanics {
 		private DebugLogger debug;
 
 #if UNITY_EDITOR
+		void OnDrawGizmosSelected() {
+			Portal[] otherPortals = FindObjectsOfType<Portal>().Where(p => p != this && p.channel == channel).ToArray();
+			Portal otherPortal = (otherPortals.Length > 0) ? otherPortals[0] : null;
+			if (otherPortal != null) {
+				Color prevGizmosColor = Gizmos.color;
+				Gizmos.color = Color.blue;
+				Gizmos.DrawLine(transform.position, otherPortal.transform.position);
+				Gizmos.color = prevGizmosColor;
+			}
+		}
+
 		[MenuItem("CONTEXT/Portal/Select other side of portal")]
 		public static void SelectOtherSideOfPortal(MenuCommand command) {
 			Portal thisPortal = (Portal)command.context;
@@ -666,6 +677,7 @@ namespace PortalMechanics {
 			}
 		}
 
+		public bool SkipSave { get; set; }
 		public string ID => $"Portal_{id.uniqueId}";
 		public object GetSaveObject() {
 			return new PortalSave(this); ;

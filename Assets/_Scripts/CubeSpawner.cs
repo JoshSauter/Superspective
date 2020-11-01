@@ -56,7 +56,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 			}
 		}
 
-		if (objectGrabbedFromSpawner != null) {
+		if (objectGrabbedFromSpawner != null && objectBeingSuspended != null) {
 			objectBeingSuspended.gameObject.SetActive(objectGrabbedFromSpawner.isReplaceable);
 		}
     }
@@ -87,6 +87,11 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 		rigidbodyOfObjectBeingSuspended.useGravity = false;
 
 		objectBeingSuspended.OnPickupSimple += DestroyCubeAlreadyGrabbedFromSpawner;
+
+		FakeCubeForSpawner fakeCube = newCube.GetComponent<FakeCubeForSpawner>();
+		if (fakeCube != null) {
+			fakeCube.thisSpawner = this;
+		}
 
 		StartCoroutine(GrowCube(newCube));
 	}
@@ -146,6 +151,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
+	public bool SkipSave { get; set; }
 	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
 	public string ID => $"CubeSpawner_{id.uniqueId}";
 

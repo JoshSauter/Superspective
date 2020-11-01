@@ -258,6 +258,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
+	public bool SkipSave { get; set; }
 	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
 	public string ID => $"PickupObject_{id.uniqueId}";
 

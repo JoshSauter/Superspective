@@ -105,7 +105,6 @@ GameObject:
   - component: {fileID: -3066150796430305416}
   - component: {fileID: -5157101015855089325}
   - component: {fileID: -1455407386897224382}
-  - component: {fileID: -741885502008359020}
   - component: {fileID: 4397215519273683910}
   m_Layer: 0
   m_Name: PickUpCube
@@ -618,18 +617,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &-741885502008359020
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7702703061741439296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0df67999d9d464d4f8e71de6f2d0f243, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &4397215519273683910
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -643,3 +630,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Type: 1
+  isGlobal: 1

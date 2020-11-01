@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 114537068168057644}
   - component: {fileID: 114903975693810574}
   - component: {fileID: 114217820196104496}
+  - component: {fileID: 2124954088125841995}
   m_Layer: 12
   m_Name: Cone
   m_TagString: Untagged
@@ -431,6 +432,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeSinceStateChange: 0
+  interactableObject: {fileID: 0}
   buttonPressCurve:
     serializedVersion: 2
     m_Curve:
@@ -482,11 +485,21 @@ MonoBehaviour:
   timeToPressButton: 1.5
   timeToDepressButton: 0.5
   depressDistance: 1.5
-  buttonPressed: 0
   depressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  deadTimeAfterButtonPress: 0
-  deadTimeAfterButtonDepress: 0
+--- !u!114 &2124954088125841995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424253712433124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
 --- !u!1 &1914097367790136
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,6 +517,7 @@ GameObject:
   - component: {fileID: 114120149231171404}
   - component: {fileID: 2374120363153894372}
   - component: {fileID: 4290670063850682555}
+  - component: {fileID: 2018410501740558988}
   m_Layer: 12
   m_Name: Panel
   m_TagString: Untagged
@@ -1997,3 +2011,16 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2018410501740558988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1914097367790136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 

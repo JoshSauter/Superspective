@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Saving;
+using System;
 
 namespace LevelSpecific.BlackRoom {
-    public class ToggleBlackRoomEnabled : MonoBehaviour {
+    public class ToggleBlackRoomEnabled : MonoBehaviour, SaveableObject {
         public GameObject blackRoomRoot;
         DoorOpenClose door;
 
         void Start() {
             door = GetComponent<DoorOpenClose>();
-            door.OnDoorOpenStart += (door) => EnableBlackRoom();
-            door.OnDoorCloseEnd += (door) => DisableBlackRoomIfInMainHallway();
+            door.OnDoorOpenStart += () => EnableBlackRoom();
+            door.OnDoorCloseEnd += () => DisableBlackRoomIfInMainHallway();
         }
 
         void EnableBlackRoom() {
@@ -23,5 +25,34 @@ namespace LevelSpecific.BlackRoom {
                 blackRoomRoot.SetActive(false);
             }
         }
-    }
+
+		#region Saving
+		public bool SkipSave { get; set; }
+
+		public string ID => "ToggleBlackRoomEnabled";
+
+		[Serializable]
+		class ToggleBlackRoomEnabledSave {
+			bool blackRoomEnabled;
+
+			public ToggleBlackRoomEnabledSave(ToggleBlackRoomEnabled toggle) {
+				this.blackRoomEnabled = toggle.blackRoomRoot.activeSelf;
+			}
+
+			public void LoadSave(ToggleBlackRoomEnabled toggle) {
+				toggle.blackRoomRoot.SetActive(this.blackRoomEnabled);
+			}
+		}
+
+		public object GetSaveObject() {
+			return new ToggleBlackRoomEnabledSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			ToggleBlackRoomEnabledSave save = savedObject as ToggleBlackRoomEnabledSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
+	}
 }

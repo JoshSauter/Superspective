@@ -1,5 +1,7 @@
 ﻿using PortalMechanics;
 using PowerTrailMechanics;
+using Saving;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,13 +20,15 @@ namespace LevelSpecific.WhiteRoom {
 
             powerTrail.OnPowerFinish += () => HandlePowerTrail(true);
             powerTrail.OnDepowerBegin += () => HandlePowerTrail(false);
+
+            HandlePowerTrail(powerTrail.fullyPowered);
         }
 
-        void HandlePowerTrail(bool powered) {
-            SetEdgeColors(powered);
+        void HandlePowerTrail(bool poweredNow) {
+            SetEdgeColors(poweredNow);
 
             foreach (var teleporter in blackHallwayLoopTeleporters) {
-                teleporter.gameObject.SetActive(!powered);
+                teleporter.gameObject.SetActive(!poweredNow);
             }
         }
 

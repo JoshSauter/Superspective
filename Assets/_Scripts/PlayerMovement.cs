@@ -27,14 +27,23 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	public float runSpeed { get { return _runSpeed * scale; } }
 	private const float desiredMovespeedLerpSpeed = 10;
 
+	// Jump Settings
+	public enum JumpState {
+		JumpReady,
+		Jumping,
+		JumpOnCooldown
+	}
+	JumpState jumpState = JumpState.JumpReady;
+	float timeSpentJumping = 0.0f;
 	private const float _jumpForce = 936;
 	public float jumpForce { get { return _jumpForce * scale; } }
 	public const float windResistanceMultiplier = 0.4f;
 
-	bool jumpIsOnCooldown = false;					// Prevents player from jumping again while true
+	float jumpCooldownRemaining = 0.0f;				// Prevents player from jumping again while > 0
 	const float jumpCooldown = 0.2f;				// Time after landing before jumping is available again
 	bool underMinJumpTime = false;					// Used to delay otherwise immediate checks for isGrounded right after jumping
 	const float minJumpTime = 0.5f;					// as long as underMinJumpTime
+
 	float movespeed;
 	public Rigidbody thisRigidbody;
 	private PlayerButtonInput input;
@@ -105,14 +114,11 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		grounded = IsGrounded(ref ground);
 		bool standingOnHeldObject = grounded && IsStandingOnHeldObject(ground);
 
+		UpdateJumping(standingOnHeldObject);
+
 		Vector3 desiredVelocity = thisRigidbody.velocity;
 		if (grounded) {
 			desiredVelocity = CalculateGroundMovement(ground);
-
-			// Handle jumping
-			if (input.SpaceHeld && !jumpIsOnCooldown && !standingOnHeldObject) {
-				StartCoroutine(Jump());
-			}
 		}
 		else {
 			desiredVelocity = CalculateAirMovement();
@@ -266,26 +272,45 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	/// Removes any current y-direction movement on the player, applies a one time impulse force to the player upwards,
 	/// then waits jumpCooldown seconds to be ready again.
 	/// </summary>
-	IEnumerator Jump() {
+	void Jump() {
 		OnJump?.Invoke();
 		jumpSound.Play();
 
-		jumpIsOnCooldown = true;
+		timeSpentJumping = 0.0f;
 		underMinJumpTime = true;
 		grounded = false;
 		
 		Vector3 jumpVector = -Physics.gravity.normalized * jumpForce;
 		thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
-		Coroutine p = StartCoroutine(PrintMaxHeight(transform.position));
-		yield return new WaitForSeconds(minJumpTime);
-		underMinJumpTime = false;
-		yield return new WaitUntil(() => grounded);
-		OnJumpLanding?.Invoke();
-		yield return new WaitForSeconds(jumpCooldown);
+		StartCoroutine(PrintMaxHeight(transform.position));
 
-		if (p != null)
-			StopCoroutine(p);
-		jumpIsOnCooldown = false;
+		jumpState = JumpState.Jumping;
+	}
+
+	void UpdateJumping(bool standingOnHeldObject) {
+		switch (jumpState) {
+			case JumpState.JumpReady:
+				if (input.SpaceHeld && !standingOnHeldObject) {
+					Jump();
+				}
+				return;
+			case JumpState.Jumping:
+				timeSpentJumping += Time.fixedDeltaTime;
+				underMinJumpTime = timeSpentJumping < minJumpTime;
+				if (underMinJumpTime) return;
+				else if (grounded) {
+					jumpCooldownRemaining = jumpCooldown;
+					OnJumpLanding?.Invoke();
+					jumpState = JumpState.JumpOnCooldown;
+				}
+				return;
+			case JumpState.JumpOnCooldown:
+				jumpCooldownRemaining = Mathf.Max(jumpCooldownRemaining - Time.fixedDeltaTime, 0.0f);
+				if (jumpCooldownRemaining == 0.0f) {
+					jumpState = JumpState.JumpReady;
+				}
+				return;
+		}
 	}
 
 	public Vector3 ProjectedHorizontalVelocity() {
@@ -434,6 +459,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	}
 
 	#region Saving
+	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
 	public string ID => "PlayerMovement";
 
@@ -442,10 +468,14 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		bool DEBUG;
 		bool autoRun;
 
-		bool jumpIsOnCooldown;
+		int jumpState;
+		float timeSpentJumping;
+
+		float jumpCooldownRemaining;
 		bool underMinJumpTime;
 		float movespeed;
 
+		SerializableVector3 playerGravityDirection;
 		SerializableVector3 thisRigidbodyVelocity;
 		bool thisRigidbodyKinematic;
 		bool thisRigidbodyUseGravity;
@@ -458,10 +488,14 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		public PlayerMovementSave(PlayerMovement playerMovement) {
 			this.DEBUG = playerMovement.DEBUG;
 			this.autoRun = playerMovement.autoRun;
-			this.jumpIsOnCooldown = playerMovement.jumpIsOnCooldown;
+			this.jumpState = (int)playerMovement.jumpState;
+			this.timeSpentJumping = playerMovement.timeSpentJumping;
+
+			this.jumpCooldownRemaining = playerMovement.jumpCooldownRemaining;
 			this.underMinJumpTime = playerMovement.underMinJumpTime;
 			this.movespeed = playerMovement.movespeed;
 
+			this.playerGravityDirection = Physics.gravity.normalized;
 			this.thisRigidbodyVelocity = playerMovement.thisRigidbody.velocity;
 			this.thisRigidbodyKinematic = playerMovement.thisRigidbody.isKinematic;
 			this.thisRigidbodyUseGravity = playerMovement.thisRigidbody.useGravity;
@@ -475,10 +509,15 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		public void LoadSave(PlayerMovement playerMovement) {
 			playerMovement.DEBUG = this.DEBUG;
 			playerMovement.autoRun = this.autoRun;
-			playerMovement.jumpIsOnCooldown = this.jumpIsOnCooldown;
+			playerMovement.jumpState = (JumpState)this.jumpState;
+			playerMovement.timeSpentJumping = this.timeSpentJumping;
+
+			playerMovement.jumpCooldownRemaining = this.jumpCooldownRemaining;
 			playerMovement.underMinJumpTime = this.underMinJumpTime;
 			playerMovement.movespeed = this.movespeed;
 
+			// Don't know a better place to restore gravity direction
+			Physics.gravity = Physics.gravity.magnitude * (Vector3)this.playerGravityDirection;
 			playerMovement.thisRigidbody.velocity = this.thisRigidbodyVelocity;
 			playerMovement.thisRigidbody.isKinematic = this.thisRigidbodyKinematic;
 			playerMovement.thisRigidbody.useGravity = this.thisRigidbodyUseGravity;

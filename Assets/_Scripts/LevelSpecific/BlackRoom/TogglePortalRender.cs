@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using PortalMechanics;
 using MagicTriggerMechanics;
+using Saving;
+using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class TogglePortalRender : MonoBehaviour {
+	public class TogglePortalRender : MonoBehaviour, SaveableObject {
+		bool initialized = false;
 		public DoorOpenClose enableDoor;
 		public MagicTrigger disableTrigger;
 		Portal portal;
@@ -16,8 +19,11 @@ namespace LevelSpecific.BlackRoom {
 				yield return null;
 			}
 
-			PausePortalRendering();
-			enableDoor.OnDoorOpenStart += ctx => ResumePortalRendering();
+			if (!initialized) {
+				initialized = true;
+				PausePortalRendering();
+			}
+			enableDoor.OnDoorOpenStart += () => ResumePortalRendering();
 			disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
 		}
 
@@ -30,5 +36,34 @@ namespace LevelSpecific.BlackRoom {
 			portal.pauseRenderingAndLogic = true;
 			portal.otherPortal.pauseRenderingAndLogic = true;
 		}
+
+		#region Saving
+		public bool SkipSave { get; set; }
+
+		public string ID => "TogglePortalRender";
+
+		[Serializable]
+		class TogglePortalRenderSave {
+			bool initialized;
+
+			public TogglePortalRenderSave(TogglePortalRender toggle) {
+				this.initialized = toggle.initialized;
+			}
+
+			public void LoadSave(TogglePortalRender toggle) {
+				toggle.initialized = this.initialized;
+			}
+		}
+
+		public object GetSaveObject() {
+			return new TogglePortalRenderSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			TogglePortalRenderSave save = savedObject as TogglePortalRenderSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

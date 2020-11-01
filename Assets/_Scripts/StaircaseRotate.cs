@@ -8,7 +8,7 @@ public class StaircaseRotate : MonoBehaviour {
 	public bool DEBUG;
 
 	// Solves a problem where the t value never hit 0 or 1 (because bottom of player was marginally too high to be exactly floor level)
-	float startEndGap = 0.25f;
+	readonly float startEndGap = 0.25f;
 	[ShowNativeProperty]
 	public Vector3 currentGravity => Physics.gravity;
 	public Vector3 pivotPoint { get { return transform.parent.position; } }

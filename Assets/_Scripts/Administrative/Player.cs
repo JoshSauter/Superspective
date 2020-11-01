@@ -32,6 +32,7 @@ public class Player : Singleton<Player>, SaveableObject {
 	}
 
 	#region Saving
+	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
 	public string ID => "Player";
 

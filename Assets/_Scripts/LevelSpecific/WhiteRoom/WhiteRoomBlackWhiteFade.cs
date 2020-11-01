@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LevelSpecific.WhiteRoom {
     public class WhiteRoomBlackWhiteFade : MonoBehaviour {
         StaircaseRotate staircaseRotate;
-        public float fadeAngle = 45;
+        public const float fadeAngle = 45;
 
         IEnumerator Start() {
             yield return null;

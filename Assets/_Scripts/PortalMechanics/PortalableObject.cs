@@ -281,6 +281,7 @@ namespace PortalMechanics {
 
 
 		#region Saving
+		public bool SkipSave { get; set; }
 		// All components on PickupCubes share the same uniqueId so we need to qualify with component name
 		public string ID => $"PortalableObject_{id.uniqueId}";
 

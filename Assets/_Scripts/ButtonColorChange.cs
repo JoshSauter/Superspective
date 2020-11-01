@@ -52,44 +52,40 @@ public class ButtonColorChange : MonoBehaviour {
 			r.SetColor("_EmissionColor", startEmission);
 		}
 
-		buttonToReactTo.OnButtonPressBegin += ButtonPressBegin;
-		buttonToReactTo.OnButtonDepressBegin += ButtonDepressBegin;
+		buttonToReactTo.OnButtonPressFinish += ButtonPressFinish;
+		buttonToReactTo.OnButtonDepressFinish += ButtonDepressFinish;
 	}
 
-	void ButtonPressBegin(Button b) {
-		StartCoroutine(ButtonPress(b));
-	}
-	void ButtonDepressBegin(Button b) {
-		StartCoroutine(ButtonDepress(b));
+	private void Update() {
+		UpdateColor();
 	}
 
-	IEnumerator ButtonPress(Button b) {
-		float timeElapsed = 0;
-		while (timeElapsed < b.timeToPressButton) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / b.timeToPressButton;
+	void UpdateColor() {
+		float t;
+		switch (buttonToReactTo.state) {
+			case Button.State.ButtonPressing:
+				t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToPressButton;
 
-			r.SetMainColor(Color.Lerp(startColor, pressColor, b.buttonPressCurve.Evaluate(t)));
-			r.SetColor("_EmissionColor", Color.Lerp(startEmission, pressEmission, b.buttonPressCurve.Evaluate(t)));
+				r.SetMainColor(Color.Lerp(startColor, pressColor, buttonToReactTo.buttonPressCurve.Evaluate(t)));
+				r.SetColor("_EmissionColor", Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t)));
+				break;
+			case Button.State.ButtonDepressing:
+				t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToDepressButton;
 
-			yield return null;
+				r.SetMainColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonDepressCurve.Evaluate(t)));
+				r.SetColor("_EmissionColor", Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonDepressCurve.Evaluate(t)));
+				break;
+			default:
+				break;
 		}
+	}
 
+	void ButtonPressFinish(Button b) {
 		r.SetMainColor(pressColor);
+		r.SetColor("_EmissionColor", pressEmission);
 	}
-
-	IEnumerator ButtonDepress(Button b) {
-		float timeElapsed = 0;
-		while (timeElapsed < b.timeToPressButton) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / b.timeToPressButton;
-
-			r.SetMainColor(Color.Lerp(pressColor, startColor, b.buttonDepressCurve.Evaluate(t)));
-			r.SetColor("_EmissionColor", Color.Lerp(pressEmission, startEmission, b.buttonDepressCurve.Evaluate(t)));
-
-			yield return null;
-		}
-
+	void ButtonDepressFinish(Button b) {
 		r.SetMainColor(startColor);
+		r.SetColor("_EmissionColor", startEmission);
 	}
 }

@@ -19,7 +19,7 @@ namespace LevelSpecific.BlackRoom {
 		public ButtonHold projectorRotateAxisUpButton;
 
 		// How many rotations of the valve does it take to rotate the light around the circumference once?
-		private float valveToLightRotationRatio = 8;
+		const float valveToLightRotationRatio = 8;
 
 		// Use this for initialization
 		void Start() {
@@ -33,11 +33,6 @@ namespace LevelSpecific.BlackRoom {
 
 			projectorRotateAxisDownButton.OnButtonHeld += ctx => RotateProjectorDownOnAxis();
 			projectorRotateAxisUpButton.OnButtonHeld += ctx => RotateProjectorUpOnAxis();
-		}
-
-		// Update is called once per frame
-		void Update() {
-
 		}
 
 		void IncreaseFrustumSize() {

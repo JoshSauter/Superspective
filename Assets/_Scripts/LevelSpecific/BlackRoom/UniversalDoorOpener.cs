@@ -18,11 +18,11 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		void OpenThisDoor(DoorOpenClose doorOpened) {
+		void OpenThisDoor() {
 			thisDoor.OpenDoor();
 		}
 
-		void CloseThisDoor(DoorOpenClose doorClosed) {
+		void CloseThisDoor() {
 			thisDoor.CloseDoor();
 		}
 	}

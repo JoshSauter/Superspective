@@ -16,7 +16,7 @@ public class ChangeColorsOnPillarActive : MonoBehaviour {
 	GlassGlow optionalGlass;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		thisPillar = GetComponent<DimensionPillar>();
 		thisRenderer = GetComponent<EpitaphRenderer>();
 		optionalGlass = GetComponentInChildren<GlassGlow>();

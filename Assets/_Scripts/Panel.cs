@@ -2,22 +2,75 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Audio;
+using Saving;
+using System;
+using SerializableClasses;
 
-public class Panel : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class Panel : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+	public enum State {
+		Deactivated,
+		Activating,
+		Activated,
+		Deactivating
+	}
+	private State _state;
+	public State state {
+		get { return _state; }
+		set {
+			if (_state == value) {
+				return;
+			}
+			timeSinceStateChange = 0f;
+			switch (value) {
+				case State.Deactivated:
+					OnPanelDeactivateFinish?.Invoke();
+					break;
+				case State.Activating:
+					OnPanelActivateBegin?.Invoke();
+					startColor = thisRenderer.GetMainColor();
+					endColor = gemColor;
+					break;
+				case State.Activated:
+					OnPanelActivateFinish?.Invoke();
+					break;
+				case State.Deactivating:
+					OnPanelDeactivateBegin?.Invoke();
+					startColor = gemColor;
+					endColor = thisRenderer.GetMainColor();
+					break;
+				default:
+					break;
+			}
+
+			_state = value;
+		}
+	}
+	float timeSinceStateChange = 0f;
 	EpitaphRenderer thisRenderer;
 	public Color gemColor;
 	public Button gemButton;
 
-	public float colorLerpTime = 1.75f;
+	Color startColor, endColor;
+	public float colorLerpTime = .75f;
 
-	public bool activated = false;
+	public bool activated => state == State.Activated || state == State.Activating;
 
 	// Sound settings
 	bool soundActivated = false;
-	float minPitch = 0.5f;
-	float maxPitch = 1f;
-	float minVolume = 0.25f;
-	float maxVolume = 1f;
+	readonly float minPitch = 0.5f;
+	readonly float maxPitch = 1f;
+	readonly float minVolume = 0.25f;
+	readonly float maxVolume = 1f;
 	public SoundEffect electricalHumSound;
 
 #region events
@@ -28,8 +81,7 @@ public class Panel : MonoBehaviour {
 	public event PanelAction OnPanelDeactivateFinish;
 #endregion
 
-	// Use this for initialization
-	virtual protected void Start () {
+	virtual protected void Awake() {
 		// Set up references
 		thisRenderer = gameObject.GetComponent<EpitaphRenderer>();
 		if (thisRenderer == null) {
@@ -37,15 +89,17 @@ public class Panel : MonoBehaviour {
 		}
 
 		gemButton = GetComponentInChildren<Button>();
-		gemButton.deadTimeAfterButtonPress = colorLerpTime;
-		gemButton.deadTimeAfterButtonDepress = 0.25f;
-        EpitaphRenderer gemButtonRenderer = gemButton.GetComponent<EpitaphRenderer>();
-        if (gemButtonRenderer == null) {
-            gemButtonRenderer = gemButton.gameObject.AddComponent<EpitaphRenderer>();
-        }
+		EpitaphRenderer gemButtonRenderer = gemButton.GetComponent<EpitaphRenderer>();
+		if (gemButtonRenderer == null) {
+			gemButtonRenderer = gemButton.gameObject.AddComponent<EpitaphRenderer>();
+		}
 		gemColor = gemButtonRenderer.GetMainColor();
-		gemButton.OnButtonPressFinish += PanelActivate;
-		gemButton.OnButtonDepressBegin += PanelDeactivate;
+	}
+
+	// Use this for initialization
+	virtual protected void Start () {
+		gemButton.OnButtonPressFinish += (ctx) => PanelActivate();
+		gemButton.OnButtonDepressBegin += (ctx) => PanelDeactivate();
 
 		gemButton.OnButtonPressBegin += (ctx) => TurnOnSounds();
 		gemButton.OnButtonDepressBegin += (ctx) => TurnOffSounds();
@@ -55,7 +109,40 @@ public class Panel : MonoBehaviour {
 	}
 
 	private void Update() {
+		UpdatePanel();
 		UpdateSound();
+	}
+
+	void UpdatePanel() {
+		timeSinceStateChange += Time.deltaTime;
+		float t = timeSinceStateChange / colorLerpTime;
+		Color curColor = Color.Lerp(startColor, endColor, t);
+		switch (state) {
+			case State.Deactivated:
+				break;
+			case State.Activating:
+				if (timeSinceStateChange < colorLerpTime) {
+					thisRenderer.SetMainColor(curColor);
+				}
+				else {
+					thisRenderer.SetMainColor(endColor);
+					state = State.Activated;
+				}
+				break;
+			case State.Activated:
+				break;
+			case State.Deactivating:
+				if (timeSinceStateChange < colorLerpTime) {
+					thisRenderer.SetMainColor(curColor);
+				}
+				else {
+					thisRenderer.SetMainColor(endColor);
+					state = State.Deactivated;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 
 	void TurnOnSounds() {
@@ -86,33 +173,62 @@ public class Panel : MonoBehaviour {
 		}
 	}
 
-	virtual protected void PanelActivate(Button b) {
-		activated = true;
-		StartCoroutine(PanelColorLerp(thisRenderer.GetMainColor(), gemColor));
-	}
-
-	virtual protected void PanelDeactivate(Button b) {
-		activated = false;
-		StartCoroutine(PanelColorLerp(gemColor, thisRenderer.GetMainColor()));
-	}
-	
-	IEnumerator PanelColorLerp(Color startColor, Color endColor) {
-		if (activated && OnPanelActivateBegin != null) OnPanelActivateBegin();
-		else if (!activated && OnPanelDeactivateBegin != null) OnPanelDeactivateBegin();
-		
-		float timeElapsed = 0;
-		while (timeElapsed < colorLerpTime) {
-			timeElapsed += Time.deltaTime;
-			float t = timeElapsed / colorLerpTime;
-
-			Color curColor = Color.Lerp(startColor, endColor, t);
-			thisRenderer.SetMainColor(curColor);
-
-			yield return null;
+	virtual protected void PanelActivate() {
+		if (state == State.Deactivated) {
+			state = State.Activating;
 		}
-		thisRenderer.SetMainColor(endColor);
-
-		if (activated && OnPanelActivateFinish != null) OnPanelActivateFinish();
-		else if (!activated && OnPanelDeactivateFinish != null) OnPanelDeactivateFinish();
 	}
+
+	virtual protected void PanelDeactivate() {
+		if (state == State.Activated) {
+			state = State.Deactivating;
+		}
+	}
+
+	#region Saving
+	public bool SkipSave { get; set; }
+	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
+	public string ID => $"Panel_{id.uniqueId}";
+
+	[Serializable]
+	class PanelSave {
+		State state;
+		float timeSinceStateChange;
+		SerializableColor gemColor;
+		SerializableColor startColor;
+		SerializableColor endColor;
+		float colorLerpTime;
+		bool soundActivated;
+
+		public PanelSave(Panel script) {
+			this.state = script.state;
+			this.timeSinceStateChange = script.timeSinceStateChange;
+			this.gemColor = script.gemColor;
+			this.startColor = script.startColor;
+			this.endColor = script.endColor;
+			this.colorLerpTime = script.colorLerpTime;
+			this.soundActivated = script.soundActivated;
+		}
+
+		public void LoadSave(Panel script) {
+			script.state = this.state;
+			script.timeSinceStateChange = this.timeSinceStateChange;
+			script.gemColor = this.gemColor;
+			script.startColor = this.startColor;
+			script.endColor = this.endColor;
+			script.colorLerpTime = this.colorLerpTime;
+			script.soundActivated = this.soundActivated;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new PanelSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		PanelSave save = savedObject as PanelSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

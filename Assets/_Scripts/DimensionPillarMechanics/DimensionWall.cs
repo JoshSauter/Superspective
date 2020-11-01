@@ -21,7 +21,7 @@ public class DimensionWall : MonoBehaviour {
 	readonly float dimensionWallWidth = 0.01f;
 	LayerMask roomBoundsMask;
 
-	void Start() {
+	void Awake() {
 		pillar = GetComponentInParent<DimensionPillar>();
 		pillarRenderer = pillar.GetComponent<Renderer>();
 		thisRenderer = GetComponent<Renderer>();

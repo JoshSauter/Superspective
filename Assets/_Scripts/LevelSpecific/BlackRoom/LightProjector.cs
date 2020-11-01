@@ -3,40 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using EpitaphUtils;
+using Saving;
+using System;
+using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
-	public class LightProjector : MonoBehaviour {
+	public class LightProjector : MonoBehaviour, SaveableObject {
 		public bool DEBUG = false;
-		float minSize = .5f;
-		float maxSize = 2.5f;
+		const float minSize = .5f;
+		const float maxSize = 2.5f;
 		float currentSize = 1;
-		float frustumSizeChangeSpeed = 200;
+		const float frustumSizeChangeSpeed = 200;
 
 		Animator sideToSideAnim;
 		public float curSideToSideAnimTime = 0.5f;
 		float desiredSideToSideAnimTime = 0.5f;
-		float sideToSideAnimLerpSpeed = 10f;
-		float rotationSpeed = .4f;
+		const float sideToSideAnimLerpSpeed = 10f;
+		const float rotationSpeed = .4f;
 
 		Quaternion desiredCircumferenceRotation;
 		Quaternion curCircumferenceRotation {
 			get { return transform.parent.parent.localRotation; }
 			set { transform.parent.parent.localRotation = value; }
 		}
-		float circumferenceRotationLerpSpeed = 2.5f;
-		float circumferenceRotationSpeed = 4;
+		const float circumferenceRotationLerpSpeed = 2.5f;
 
 		Animator upAndDownAnim;
 		public float curUpAndDownAnimTime = 0.15f;
 		float desiredUpAndDownAnimTime = 0.15f;
-		float upAndDownAnimLerpSpeed = 10f;
-		float verticalMovespeed = .15f;
+		const float upAndDownAnimLerpSpeed = 10f;
+		const float verticalMovespeed = .15f;
 
-		private void Start() {
+		private void Awake() {
 			upAndDownAnim = GetComponent<Animator>();
 			sideToSideAnim = transform.parent.GetComponent<Animator>();
 			desiredUpAndDownAnimTime = curUpAndDownAnimTime;
 			desiredCircumferenceRotation = curCircumferenceRotation;
+		}
+
+		void Start() {
+			if (upAndDownAnim != null) {
+				upAndDownAnim.Play("ProjectorUpDown", 0, curUpAndDownAnimTime);
+			}
+			if (sideToSideAnim != null) {
+				sideToSideAnim.Play("ProjectorSideToSide", 1, curSideToSideAnimTime);
+			}
 		}
 
 		// Update is called once per frame
@@ -130,5 +141,63 @@ namespace LevelSpecific.BlackRoom {
 				desiredUpAndDownAnimTime = Mathf.Clamp01(desiredUpAndDownAnimTime + amount);
 			}
 		}
+
+		#region Saving
+		public bool SkipSave { get; set; }
+
+		public string ID => $"{gameObject.name}";
+
+		[Serializable]
+		class LightProjectorSave {
+			float currentSize;
+
+			float curSideToSideAnimTime;
+			float desiredSideToSideAnimTime;
+
+			SerializableQuaternion desiredCircumferenceRotation;
+			SerializableQuaternion curCircumferenceRotation;
+
+			float curUpAndDownAnimTime;
+			float desiredUpAndDownAnimTime;
+
+			public LightProjectorSave(LightProjector lightProjector) {
+				this.currentSize = lightProjector.currentSize;
+
+				this.curSideToSideAnimTime = lightProjector.curSideToSideAnimTime;
+				this.desiredSideToSideAnimTime = lightProjector.desiredSideToSideAnimTime;
+
+				this.desiredCircumferenceRotation = lightProjector.desiredCircumferenceRotation;
+				this.curCircumferenceRotation = lightProjector.curCircumferenceRotation;
+
+				this.curUpAndDownAnimTime = lightProjector.curUpAndDownAnimTime;
+				this.desiredUpAndDownAnimTime = lightProjector.desiredUpAndDownAnimTime;
+			}
+
+			public void LoadSave(LightProjector lightProjector) {
+				lightProjector.currentSize = this.currentSize;
+
+				lightProjector.curSideToSideAnimTime = this.curSideToSideAnimTime;
+				lightProjector.desiredSideToSideAnimTime = this.desiredSideToSideAnimTime;
+				
+				lightProjector.desiredCircumferenceRotation = this.desiredCircumferenceRotation;
+				lightProjector.curCircumferenceRotation = this.curCircumferenceRotation;
+				
+				lightProjector.curUpAndDownAnimTime = this.curUpAndDownAnimTime;
+				lightProjector.desiredUpAndDownAnimTime = this.desiredUpAndDownAnimTime;
+
+				lightProjector.ChangeFrustumSize(1);
+			}
+		}
+
+		public object GetSaveObject() {
+			return new LightProjectorSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			LightProjectorSave save = savedObject as LightProjectorSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

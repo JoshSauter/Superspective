@@ -1,11 +1,24 @@
 ﻿using MagicTriggerMechanics;
 using NaughtyAttributes;
+using Saving;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace PictureTeleportMechanics {
-    public class BigFrame : MonoBehaviour {
+	[RequireComponent(typeof(UniqueId))]
+    public class BigFrame : MonoBehaviour, SaveableObject {
+		UniqueId _id;
+		UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
+
 		public Renderer frameRenderer;
 		public Collider frameCollider;
 
@@ -68,5 +81,38 @@ namespace PictureTeleportMechanics {
 
 			return trigger;
 		}
-    }
+
+		#region Saving
+		public bool SkipSave { get; set; }
+
+		public string ID => $"BigFrame_{id.uniqueId}";
+
+		[Serializable]
+		class BigFrameSave {
+			bool frameEnabled;
+			bool disableFrameTriggerEnabled;
+
+			public BigFrameSave(BigFrame bigFrame) {
+				this.frameEnabled = bigFrame.frameRenderer.enabled;
+				this.disableFrameTriggerEnabled = bigFrame.disableFrameTrigger.enabled;
+			}
+
+			public void LoadSave(BigFrame bigFrame) {
+				bigFrame.frameRenderer.enabled = this.frameEnabled;
+				bigFrame.frameCollider.enabled = this.frameEnabled;
+				bigFrame.disableFrameTrigger.enabled = this.disableFrameTriggerEnabled;
+			}
+		}
+
+		public object GetSaveObject() {
+			return new BigFrameSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			BigFrameSave save = savedObject as BigFrameSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
+	}
 }

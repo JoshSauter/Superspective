@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LevelSpecific.Level3 {
 	public class LaserReceiver : MonoBehaviour {
 		public static int numReceiversActivated = 0;
-		public SideRoomPanel laserActivation;
+		//public SideRoomPanel laserActivation;
 
 		Renderer thisRenderer;
 
@@ -20,7 +20,7 @@ namespace LevelSpecific.Level3 {
 		void Start() {
 			thisRenderer = GetComponent<Renderer>();
 
-			laserActivation.OnLaserActivateFinish += StartColorChange;
+			//laserActivation.OnLaserActivateFinish += StartColorChange;
 		}
 
 		void StartColorChange() {
@@ -31,7 +31,7 @@ namespace LevelSpecific.Level3 {
 			MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 			thisRenderer.GetPropertyBlock(propBlock);
 			Color startColor = propBlock.GetColor("_Color");
-			Color targetColor = laserActivation.gemColor;
+			Color targetColor = Color.magenta;//laserActivation.gemColor;
 
 			float timeElapsed = 0;
 			while (timeElapsed < colorLerpTime) {

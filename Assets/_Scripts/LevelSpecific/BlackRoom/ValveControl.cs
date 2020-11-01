@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using Saving;
+using System;
+using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
-	public class ValveControl : MonoBehaviour {
+	public class ValveControl : MonoBehaviour, SaveableObject {
+		const float lookSpeedMultiplier = 0.5f;
 		InteractableObject interactableObject;
 		PlayerLook playerLook;
-		float lookSpeedMultiplier = 0.5f;
 		bool isActive = false;
 		Angle prevAngle;
 
@@ -61,5 +64,40 @@ namespace LevelSpecific.BlackRoom {
 			Vector3 localMouseLocation = transform.InverseTransformPoint(mouseLocation);
 			return PolarCoordinate.CartesianToPolar(localMouseLocation).angle;
 		}
+
+		#region Saving
+		public bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+
+		public string ID => $"{transform.parent.name}_ValveControl";
+
+		[Serializable]
+		class ValveControlSave {
+			SerializableQuaternion rotation;
+			bool isActive;
+			Angle prevAngle;
+
+			public ValveControlSave(ValveControl toggle) {
+				this.rotation = toggle.transform.rotation;
+				this.isActive = toggle.isActive;
+				this.prevAngle = toggle.prevAngle;
+			}
+
+			public void LoadSave(ValveControl toggle) {
+				toggle.transform.rotation = this.rotation;
+				toggle.isActive = this.isActive;
+				toggle.prevAngle = this.prevAngle;
+			}
+		}
+
+		public object GetSaveObject() {
+			return new ValveControlSave(this);
+		}
+
+		public void LoadFromSavedObject(object savedObject) {
+			ValveControlSave save = savedObject as ValveControlSave;
+
+			save.LoadSave(this);
+		}
+		#endregion
 	}
 }

@@ -81,6 +81,7 @@ namespace PowerTrailMechanics {
 		public float distance = 0f;
 		public float maxDistance = 0f;
 		public bool powerIsOn = false;
+		public bool fullyPowered => distance >= maxDistance;
 		[SerializeField]
 		private PowerTrailState _state = PowerTrailState.depowered;
 		public PowerTrailState state {
@@ -279,6 +280,7 @@ namespace PowerTrailMechanics {
 		IEnumerator InitSound() {
 			if (sound == null) {
 				sound = gameObject.AddComponent<SoundEffectAtLocation>();
+				sound.SkipSave = true;
 				sound.location = transform.position;
 				yield return new WaitUntil(() => sound.audioSource != null);
 				sound.audioSource.loop = true;
@@ -413,6 +415,7 @@ namespace PowerTrailMechanics {
 			}
 		}
 
+		public bool SkipSave { get; set; }
 		public string ID { get; private set; }
 		public object GetSaveObject() {
 			return new PowerTrailSave(this); ;

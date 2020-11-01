@@ -2,11 +2,15 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Saving.DynamicObjectManager;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Saving {
     // Dynamic objects are objects that may be created or destroyed at runtime
     // They must provide what type of object they are so they can be instantiated from a prefab if it does not exist
 	// They are loaded before SaveableObjects so that the instance exists for other Component loads
+	[ExecuteInEditMode]
     public class DynamicObject : MonoBehaviour, SaveableObject {
 		UniqueId _id;
 		public UniqueId id {
@@ -20,10 +24,37 @@ namespace Saving {
 				return _id;
 			}
 		}
-		public DynamicObjectType Type;
+		public string prefabPath;
 
-		public string ID => $"{Type:g}_{id.uniqueId}";
+		public bool SkipSave { get; set; }
+		public string ID => id.uniqueId;
 		public bool isGlobal = true;
+
+		PickupObject pickup;
+
+		void OnValidate() {
+			if ((gameObject.scene == null || gameObject.scene.name == null || gameObject.scene.name == "") && (prefabPath == null || prefabPath == "")) {
+#if UNITY_EDITOR
+				prefabPath = AssetDatabase.GetAssetPath(this)
+					// Strip prefix and suffix to get the Resources-relative path
+					.Replace("Assets/Resources/", "")
+					.Replace(".prefab", "");
+#endif
+			}
+		}
+
+		void Awake() {
+			if (prefabPath == "") {
+				Debug.LogError($"{gameObject.name}: No prefab for this DynamicObject", gameObject);
+			}
+			pickup = GetComponent<PickupObject>();
+		}
+
+		void Update() {
+			if (pickup != null && pickup.isHeld) {
+				SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByName(LevelManager.instance.activeSceneName));
+			}
+		}
 
 		// GlobalObjects are moved between scenes as they hit objects from various scenes
 		private void OnCollisionEnter(Collision collision) {
@@ -35,18 +66,20 @@ namespace Saving {
 
 		[Serializable]
 		public class DynamicObjectSave {
-			public int Type;
+			public string prefabPath;
 			public bool isGlobal;
 			public string scene;
+			public bool active;
 
 			public DynamicObjectSave(DynamicObject obj) {
-				this.Type = (int)obj.Type;
+				this.prefabPath = obj.prefabPath;
 				this.isGlobal = obj.isGlobal;
 				this.scene = obj.gameObject.scene.name;
+				this.active = obj.gameObject.activeSelf;
 			}
 
 			public void LoadSave(DynamicObject obj) {
-				obj.Type = (DynamicObjectType)this.Type;
+				obj.prefabPath = this.prefabPath;
 				obj.isGlobal = this.isGlobal;
 				if (scene != null && scene != "") {
 					if (obj.transform.parent != null) {
@@ -54,6 +87,7 @@ namespace Saving {
 					}
 					SceneManager.MoveGameObjectToScene(obj.gameObject, SceneManager.GetSceneByName(scene));
 				}
+				obj.gameObject.SetActive(this.active);
 			}
 		}
 

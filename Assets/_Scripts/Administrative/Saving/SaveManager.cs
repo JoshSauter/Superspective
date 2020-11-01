@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using static Saving.SaveManagerForScene;
 using System.Reflection;
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
 using UnityEditor;
 #endif
 
@@ -55,7 +56,7 @@ namespace Saving {
                 GetSaveManagerForScene(sceneName);
 			}
 
-            DynamicObjectManager.SaveDynamicObjects(saveName);
+            DynamicObjectManager.SaveAllDynamicObjectsToDisk(saveName);
 
             foreach (var saveForScene in activeScenes.Values) {
                 saveForScene.SaveScene(saveName);
@@ -65,10 +66,11 @@ namespace Saving {
         public async static void Load(string saveName) {
             CopyDirectory(SavePath(saveName), SavePath(temp));
 
-            MainCanvas.instance.blackOverlayEnabled = true;
+            MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
             Time.timeScale = 0f;
 
-            // Step 1: Load or create dynamic objects for every scene to repair broken references
+            DynamicObjectManager.DeleteAllExistingDynamicObjects();
+
             SaveManagerForScene saveManagerForManagerScene = GetSaveManagerForScene(LevelManager.managerScene);
             SaveFileForScene saveFileForManagerScene = saveManagerForManagerScene.GetSaveFromDisk(saveName);
             saveManagerForManagerScene.LoadSceneFromSaveFile(saveFileForManagerScene);
@@ -77,7 +79,7 @@ namespace Saving {
             await TaskEx.WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
             Debug.Log("All scenes loaded into memory, loading save...");
 
-            DynamicObjectManager.LoadOrCreateDynamicObjects(saveName);
+            DynamicObjectManager.LoadDynamicObjectsFromDisk(saveName);
 
             Dictionary<SaveManagerForScene, SaveFileForScene> savesForScenes = LevelManager.instance.loadedSceneNames
                 .Select(activeScene => GetSaveManagerForScene(activeScene))
@@ -103,7 +105,7 @@ namespace Saving {
             // Play the level change banner and remove the black overlay
             LevelChangeBanner.instance.PlayBanner(LevelManager.instance.activeScene);
             Time.timeScale = 1f;
-            MainCanvas.instance.blackOverlayEnabled = false;
+            MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
         }
 
         public static void DeleteSave(string saveName) {
@@ -143,6 +145,7 @@ namespace Saving {
                 // Do this check again so we don't double-add for multiple scripts on same GO
                 if (script.GetComponent<UniqueId>() == null) {
                     script.gameObject.AddComponent<UniqueId>();
+                    EditorSceneManager.MarkSceneDirty(script.gameObject.scene);
                     count++;
 				}
 			}

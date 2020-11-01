@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
 using NaughtyAttributes;
+using Saving;
 
 public class InteractableObject : MonoBehaviour {
 	public bool interactable = true;
