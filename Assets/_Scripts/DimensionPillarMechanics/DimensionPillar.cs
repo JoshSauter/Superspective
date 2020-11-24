@@ -36,6 +36,8 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 	}
 
+	public Vector3 axis => transform.up;
+
 	public bool DEBUG = false;
 	DebugLogger debug;
 	public bool setAsActiveOnStart = false;
@@ -50,6 +52,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	public int curDimension;
 
 	public bool overrideDimensionShiftAngle = false;
+	public Vector3 dimensionShiftVector => transform.forward;
 	public Angle dimensionShiftAngle;
 	public Angle cameraAngleRelativeToPillar;
 
@@ -145,8 +148,9 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	}
 
 	Angle DimensionShiftAngle() {
-		Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
-		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
+		//Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
+		//PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
+		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(dimensionShiftVector);
 		return polar.angle;
 	}
 

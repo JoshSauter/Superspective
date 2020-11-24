@@ -50,10 +50,8 @@ public class PillarDimensionObject : DimensionObjectBase {
 		startingLayers = GetAllStartingLayers(renderers);
 	}
 
-	public override void Start() {
+	public override IEnumerator Start() {
 		FindRelevantPillars();
-
-		SwitchVisibilityState(startingVisibilityState, true);
 
 		if (DimensionPillar.activePillar != null) {
 			HandleActivePillarChanged(null);
@@ -62,6 +60,10 @@ public class PillarDimensionObject : DimensionObjectBase {
 		if (GetComponent<Rigidbody>() != null && GetComponent<IgnoreCollisionsWithOtherDimensions>() == null) {
 			gameObject.AddComponent<IgnoreCollisionsWithOtherDimensions>();
 		}
+
+		StartCoroutine(base.Start());
+
+		yield break;
 	}
 
 	void OnEnable() {
@@ -327,16 +329,16 @@ public class PillarDimensionObject : DimensionObjectBase {
 			objectEndDimension = baseDimension;
 		}
 		else if (objectIsSplitWithinThisDimension) {
-			objectStartDimension = (baseDimension == 0) ? maxDimension : baseDimension - 1;
+			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
 			objectEndDimension = baseDimension;
 		}
 		else if (objectExistsWholelyInSecondHalf) {
-			objectStartDimension = (baseDimension == 0) ? maxDimension : baseDimension - 1;
-			objectEndDimension = (baseDimension == 0) ? maxDimension : baseDimension - 1;
+			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
+			objectEndDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
 		}
 		else if (objectIsSplitIntoNextDimension) {
-			objectStartDimension = (baseDimension == 0) ? maxDimension : baseDimension - 1;
-			objectEndDimension = (baseDimension == 0) ? maxDimension : baseDimension - 1;
+			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
+			objectEndDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
 		}
 
 		int objectStartDimensionPlusOne = (objectStartDimension == maxDimension) ? 0 : objectStartDimension + 1;

@@ -66,6 +66,15 @@ namespace EpitaphUtils {
 			return o.scene.name == LevelManager.instance.activeSceneName;
 		}
 
+		public static bool IsInLoadedScene(this Component c) {
+			return LevelManager.instance.loadedSceneNames.Contains(c.gameObject.scene.name);
+		}
+
+		public static bool IsInLoadedScene(this GameObject o) {
+			return LevelManager.instance.loadedSceneNames.Contains(o.scene.name);
+
+		}
+
 		public static bool TaggedAsPlayer(this Component c) {
 			return c.CompareTag("Player");
 		}

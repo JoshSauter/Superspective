@@ -71,10 +71,11 @@ public class DimensionObjectBase : MonoBehaviour, SaveableObject {
 		startingLayers = GetAllStartingLayers(renderers);
 	}
 
-	public virtual void Start() {
+	public virtual IEnumerator Start() {
 		SetChannelValuesInMaterials();
 
 		if (!initialized) {
+			yield return new WaitUntil(() => gameObject.IsInLoadedScene());
 			SwitchVisibilityState(startingVisibilityState, true);
 			initialized = true;
 		}
@@ -117,7 +118,7 @@ public class DimensionObjectBase : MonoBehaviour, SaveableObject {
 	}
 
 	public virtual IEnumerator SwitchVisibilityStateCoroutine(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		if ((!ignoreTransitionRules && !IsValidNextState(nextState)) || !gameObject.IsInActiveScene()) yield break;
+		if (!(ignoreTransitionRules || IsValidNextState(nextState))) yield break;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
 
