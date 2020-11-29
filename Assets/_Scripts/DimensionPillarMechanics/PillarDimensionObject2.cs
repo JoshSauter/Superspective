@@ -19,24 +19,32 @@ public class PillarDimensionObject2 : DimensionObjectBase {
 	bool spansMultipleDimensions = false;
 	Plane leftParallel;//, leftPerpindicular;
 	Plane rightParallel;//, rightPerpindicular;
-	public bool showCorners = false;
 
 	// These are only used for debug purposes and are calcuated when the leftParallel and rightParallel planes are
+	public bool showCorners = false;
 	float minAngle, maxAngle;
 	Vector3 minAngleVector, maxAngleVector;
 
+	public bool useColliderBoundsInsteadOfRendererBounds = false;
+	Collider[] colliders;
+
 	public override IEnumerator Start() {
 		renderers = GetAllEpitaphRenderers().ToArray();
+		// TODO: Find colliders recursively if necessary
+		colliders = new Collider[] { GetComponent<Collider>() };
 
 		if (pillar == null) yield break;
 		DeterminePlanes();
-		yield break;
+
+		playerQuadrant = DetermineQuadrant(Player.instance.transform.position);
+		dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+		SwitchVisibilityState(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension), true);
 	}
 
 	private void FixedUpdate() {
 		if (pillar == null) return;
 		if (DEBUG) {
-			debug.Log($"Min: {minAngle}°, direction: {minAngleVector.normalized:F2}\nMax: {maxAngle}°, direction: {maxAngleVector.normalized}\nSpans multiple dimensions: {spansMultipleDimensions}");
+			debug.Log($"Min: {minAngle}°, direction: {minAngleVector.normalized:F2}\nMax: {maxAngle}°, direction: {maxAngleVector.normalized:F2}\nSpans multiple dimensions: {spansMultipleDimensions}");
 			Debug.DrawRay(pillar.transform.position, minAngleVector, Color.cyan);
 			Debug.DrawRay(pillar.transform.position, maxAngleVector, Color.blue);
 		}
@@ -45,8 +53,18 @@ public class PillarDimensionObject2 : DimensionObjectBase {
 		dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
 		int playerDimension = pillar.curDimension;
 
-		debug.Log(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, playerDimension));
-		SwitchVisibilityState(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, playerDimension), true);
+		//debug.Log(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, playerDimension));
+		SwitchVisibilityState(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, playerDimension));
+
+		if (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible) {
+			SetDimensionValuesInMaterials(pillar.curDimension);
+		}
+	}
+
+	public override void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
+		if (nextState != visibilityState || ignoreTransitionRules) {
+			base.SwitchVisibilityState(nextState, ignoreTransitionRules);
+		}
 	}
 
 	VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
@@ -61,45 +79,35 @@ public class PillarDimensionObject2 : DimensionObjectBase {
 			}
 		}
 
-		int startDimension = baseDimension;
-		int endDimension = baseDimension;
-		if (spansMultipleDimensions) {
-			endDimension = pillar.NextDimension(endDimension);
-		}
-
-		debug.Log($"Start: {startDimension}\nEnd: {endDimension}\nCompare to dimension: {dimension}");
-
 		switch (playerQuadrant) {
 			case Quadrant.Opposite:
-				if (dimension == startDimension) {
+				if (dimension == baseDimension) {
 					return VisibilityState.partiallyVisible;
 				}
-				else if (dimension == endDimension) {
+				else if (dimension == pillar.NextDimension(baseDimension)) {
 					return VisibilityState.partiallyInvisible;
 				}
 				else {
 					return VisibilityState.invisible;
 				}
 			case Quadrant.Left:
-				if (dimension == endDimension) {
-					return VisibilityState.visible;
-				}
-				else {
-					return VisibilityState.invisible;
-				}
 			case Quadrant.SameSide:
-				if (dimension == endDimension) {
-					return VisibilityState.visible;
-				}
-				else {
-					return VisibilityState.invisible;
-				}
 			case Quadrant.Right:
-				if (dimension == endDimension) {
-					return VisibilityState.visible;
+				if ((int)dimensionShiftQuadrant < (int)playerQuadrant) {
+					if (dimension == pillar.NextDimension(baseDimension)) {
+						return VisibilityState.visible;
+					}
+					else {
+						return VisibilityState.invisible;
+					}
 				}
 				else {
-					return VisibilityState.invisible;
+					if (dimension == baseDimension) {
+						return VisibilityState.visible;
+					}
+					else {
+						return VisibilityState.invisible;
+					}
 				}
 			default:
 				throw new System.Exception($"Unhandled case: {this.playerQuadrant}");
@@ -129,26 +137,35 @@ public class PillarDimensionObject2 : DimensionObjectBase {
 		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillarPos, pillar.axis);
 		Vector3 projectedVerticalPillarOffset = pillarPos - projectedPillarCenter;
 
-		List<Bounds> allRendererBounds = new List<Bounds>();
+		List<Bounds> allBounds = new List<Bounds>();
 		Vector3 positionAvg = Vector3.zero;
-		foreach (var r in renderers) {
-			Bounds b = r.GetRendererBounds();
-			allRendererBounds.Add(b);
-			positionAvg += Vector3.ProjectOnPlane(b.center, pillar.axis);
+		if (!useColliderBoundsInsteadOfRendererBounds) {
+			foreach (var r in renderers) {
+				Bounds b = r.GetRendererBounds();
+				allBounds.Add(b);
+				positionAvg += Vector3.ProjectOnPlane(b.center, pillar.axis);
+			}
 		}
-		positionAvg /= allRendererBounds.Count;
+		else {
+			foreach (var c in colliders) {
+				Bounds b = c.bounds;
+				allBounds.Add(b);
+				positionAvg += Vector3.ProjectOnPlane(b.center, pillar.axis);
+			}
+		}
+		positionAvg /= allBounds.Count;
 		positionAvg += projectedVerticalPillarOffset;
 
 		Debug.DrawRay(pillarPos, positionAvg - pillarPos, Color.magenta);
 
-		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg) > 0;
+		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg - pillar.transform.position) < 0;
 		Vector3 dimensionShiftVector = flipDimensionShiftAngle ? Quaternion.AngleAxis(180, pillar.axis) * pillar.dimensionShiftVector : pillar.dimensionShiftVector;
 
 		minAngle = float.MaxValue;
 		maxAngle = float.MinValue;
 		minAngleVector = Vector3.zero;
 		maxAngleVector = Vector3.zero;
-		foreach (var b in allRendererBounds) {
+		foreach (var b in allBounds) {
 			Vector3[] corners = new Vector3[] {
 				new Vector3(b.min.x, b.min.y, b.min.z),
 				new Vector3(b.min.x, b.min.y, b.max.z),

@@ -90,7 +90,7 @@ public class PillarDimensionObject : DimensionObjectBase {
 		}
 	}
 
-	protected override bool IsRelevantDimension(int dimension) {
+	protected bool IsRelevantDimension(int dimension) {
 		HashSet<int> acceptableDimensions = new HashSet<int>() { objectStartDimension, objectEndDimension };
 		if (DimensionPillar.activePillar != null && reverseVisibilityStates && visibilityState == VisibilityState.partiallyInvisible) {
 			acceptableDimensions.Add(DimensionPillar.activePillar.NextDimension(objectStartDimension));

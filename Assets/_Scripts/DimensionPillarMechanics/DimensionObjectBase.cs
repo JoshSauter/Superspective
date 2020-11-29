@@ -204,16 +204,12 @@ public class DimensionObjectBase : MonoBehaviour, SaveableObject {
 
 	protected void SetDimensionValuesInMaterials(int newDimensionValue) {
 		bool isDimensionShader = (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible);
-		if (curDimensionSetInMaterial != newDimensionValue && isDimensionShader && IsRelevantDimension(newDimensionValue)) {
+		if (curDimensionSetInMaterial != newDimensionValue && isDimensionShader) {
 			foreach (var r in renderers) {
 				r.SetInt("_Dimension", newDimensionValue);
 			}
 			curDimensionSetInMaterial = newDimensionValue;
 		}
-	}
-
-	protected virtual bool IsRelevantDimension(int dimension) {
-		return dimension == baseDimension || (reverseVisibilityStates && visibilityState == VisibilityState.partiallyInvisible && dimension == baseDimension+1);
 	}
 
 	protected void SetChannelValuesInMaterials() {
