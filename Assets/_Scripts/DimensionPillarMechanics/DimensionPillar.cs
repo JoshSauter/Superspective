@@ -30,9 +30,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			if (value != null) {
 				value.Initialize();
 			}
-			if (OnActivePillarChanged != null) {
-				OnActivePillarChanged(prevActive);
-			}
+			OnActivePillarChanged?.Invoke(prevActive);
 		}
 	}
 
@@ -56,9 +54,17 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	public Angle dimensionShiftAngle;
 	public Angle cameraAngleRelativeToPillar;
 
+	public enum DimensionSwitch {
+		Up,
+		Down
+	}
+
 #region events
 	public delegate void DimensionChangeEvent(int prevDimension, int curDimension);
 	public event DimensionChangeEvent OnDimensionChange;
+
+	public delegate void DimensionChangeWithDirectionEvent(int prevDimension, int curDimension, DimensionSwitch direction);
+	public event DimensionChangeWithDirectionEvent OnDimensionChangeWithDirection;
 
 	public delegate void ActivePillarChangedEvent(DimensionPillar previousActivePillar);
 	public static event ActivePillarChangedEvent OnActivePillarChanged;
@@ -129,9 +135,8 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			int prevDimension = curDimension;
 			curDimension = NextDimension(curDimension);
 
-			if (OnDimensionChange != null) {
-				OnDimensionChange(prevDimension, curDimension);
-			}
+			OnDimensionChange?.Invoke(prevDimension, curDimension);
+			OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Up);
 
 			debug.Log("Shift to dimension " + curDimension);
 		}
@@ -139,9 +144,8 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			int prevDimension = curDimension;
 			curDimension = PrevDimension(curDimension);
 
-			if (OnDimensionChange != null) {
-				OnDimensionChange(prevDimension, curDimension);
-			}
+			OnDimensionChange?.Invoke(prevDimension, curDimension);
+			OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Down);
 
 			debug.Log("Shift to dimension " + curDimension);
 		}

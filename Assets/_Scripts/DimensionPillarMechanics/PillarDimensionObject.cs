@@ -7,7 +7,7 @@ using System.Linq;
 using System;
 using SerializableClasses;
 
-public class PillarDimensionObject : DimensionObjectBase {
+public class PillarDimensionObject : DimensionObject {
 	public bool continuouslyUpdateOnOffAngles = false;
 
 	public int objectStartDimension;
@@ -25,7 +25,7 @@ public class PillarDimensionObject : DimensionObjectBase {
 		anyPillar
 	}
 	public FindPillarsTechnique findPillarsTechnique;
-	private List<DimensionPillar> pillarsFound = new List<DimensionPillar>();
+	public List<DimensionPillar> pillarsFound = new List<DimensionPillar>();
 	// Whitelist/blacklist pillars
 	public List<DimensionPillar> whitelist = new List<DimensionPillar>();
 	public List<DimensionPillar> blacklist = new List<DimensionPillar>();

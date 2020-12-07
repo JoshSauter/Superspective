@@ -8,7 +8,7 @@ MonoImporter:
       type: 3}
   - debugWallPrefab: {fileID: 2122955047296409985, guid: f7403fc48925e1344a985840b0d1ba41,
       type: 3}
-  executionOrder: 0
+  executionOrder: -1
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

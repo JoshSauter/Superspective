@@ -13,7 +13,6 @@ using UnityEngine.SceneManagement;
 using static Saving.DynamicObjectManager;
 
 [RequireComponent(typeof(UniqueId))]
-[RequireComponent(typeof(Rigidbody))]
 public class PickupObject : MonoBehaviour, SaveableObject {
 	UniqueId _id;
 	UniqueId id {
@@ -54,7 +53,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 	public GravityObject thisGravity;
 	public Rigidbody thisRigidbody;
 
-	PortalableObject portalableObject;
+	public PortalableObject portalableObject;
 
 	public delegate void PickupObjectSimpleAction();
 	public delegate void PickupObjectAction(PickupObject obj);
@@ -73,18 +72,26 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 
 	void Awake() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
-		thisRigidbody = GetComponent<Rigidbody>();
-		thisGravity = GetComponent<GravityObject>();
+		if (thisRigidbody == null) {
+			thisRigidbody = GetComponent<Rigidbody>();
+		}
+		if (thisGravity == null) {
+			thisGravity = GetComponent<GravityObject>();
+		}
 
-		interactableObject = GetComponent<InteractableObject>();
+		interactableObject = thisRigidbody.GetComponent<InteractableObject>();
 		if (interactableObject == null) {
-			interactableObject = gameObject.AddComponent<InteractableObject>();
+			interactableObject = thisRigidbody.gameObject.AddComponent<InteractableObject>();
 		}
 		interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 
-		interactableGlow = GetComponent<InteractableGlow>();
+		interactableGlow = interactableObject.GetComponent<InteractableGlow>();
 		if (interactableGlow == null) {
-			interactableGlow = gameObject.AddComponent<InteractableGlow>();
+			interactableGlow = interactableObject.gameObject.AddComponent<InteractableGlow>();
+		}
+
+		if (portalableObject == null) {
+			portalableObject = GetComponent<PortalableObject>();
 		}
 	}
 
@@ -99,7 +106,6 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 			thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 		}
 
-		portalableObject = GetComponent<PortalableObject>();
 		playerCamPosLastFrame = Player.instance.transform.position;
 
 		Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
@@ -139,7 +145,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 			}
 			//debug.Log($"Positional diff: {playerCamPositionalDiff:F3}");
 			thisRigidbody.MovePosition(transform.position + playerCamPositionalDiff);
-			if (portalableObject.copyIsEnabled) {
+			if (portalableObject != null && portalableObject.copyIsEnabled) {
 				portalableObject.fakeCopyInstance.TransformCopy();
 			}
 

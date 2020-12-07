@@ -60,6 +60,9 @@ namespace Saving {
 		private void OnCollisionEnter(Collision collision) {
 			if (isGlobal) {
 				Scene sceneOfContact = collision.collider.gameObject.scene;
+				if (transform.parent != null) {
+					transform.parent = null;
+				}
 				SceneManager.MoveGameObjectToScene(gameObject, sceneOfContact);
 			}
 		}

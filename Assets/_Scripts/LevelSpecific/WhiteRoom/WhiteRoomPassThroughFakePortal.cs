@@ -10,7 +10,7 @@ namespace LevelSpecific.WhiteRoom {
 	public class WhiteRoomPassThroughFakePortal : MonoBehaviour, SaveableObject {
 		public MagicTrigger restoreFakePortalTrigger;
 
-		public DimensionObjectBase ceilingDropDown;
+		public DimensionObject ceilingDropDown;
 		public PillarDimensionObject ceilingDropDownAfterPassingThrough;
 		MagicTrigger trigger;
 

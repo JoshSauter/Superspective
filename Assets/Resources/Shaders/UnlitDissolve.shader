@@ -70,7 +70,7 @@
 				}
 				else {
 					col = _Color;
-					if (test < _BurnSize && _DissolveValue < 1) {
+					if (test < _BurnSize && _DissolveValue < 1 && _DissolveValue > 0) {
 						col += tex2D(_BurnRamp, float2(test * (1 / _BurnSize), 0)) * _BurnColor * _EmissionAmount;
 					}
 				}

@@ -631,22 +631,35 @@ namespace EpitaphUtils {
 	public class DebugLogger {
 		public Func<bool> enabled;
         private UnityEngine.Object context;
+		bool idSet = false;
+		string id = "";
         
         public DebugLogger(UnityEngine.Object context, Func<bool> enabled) {
             this.enabled = enabled;
             this.context = context;
+
+			if (context is GameObject) {
+				Saving.SaveableObject saveableContext = (context as GameObject).GetComponent<Saving.SaveableObject>();
+				if (saveableContext != null) {
+					try {
+						id = saveableContext.ID;
+						idSet = true;
+					}
+					catch { }
+				}
+			}
         }
 
         public void Log(object message) {
-            if (enabled.Invoke()) Debug.Log(message, context);
+            if (enabled.Invoke()) Debug.Log($"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}", context);
         }
 
         public void LogWarning(object message) {
-            if (enabled.Invoke()) Debug.LogWarning(message, context);
+            if (enabled.Invoke()) Debug.LogWarning($"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}", context);
         }
 
         public void LogError(object message) {
-            if (enabled.Invoke()) Debug.LogError(message, context);
+            if (enabled.Invoke()) Debug.LogError($"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}", context);
         }
     }
 
