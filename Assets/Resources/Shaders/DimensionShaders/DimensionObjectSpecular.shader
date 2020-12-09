@@ -4,7 +4,6 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 {
 	Properties
 	{
-		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 		_Color("Color", Color) = (1,1,1,1)
@@ -95,12 +94,11 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
 			
-			int _Dimension;
 			int _Channel;
 			int _Inverse;
 
 			half4 fragBaseNew(VertexOutputForwardBase i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Dimension, _Channel, _Inverse);
+				ClipDimensionObject(i.pos, _Channel, _Inverse);
 				return fragBase(i);
 			}
 
@@ -140,12 +138,11 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
 			
-			int _Dimension;
 			int _Channel;
 			int _Inverse;
 
 			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Dimension, _Channel, _Inverse);
+				ClipDimensionObject(i.pos, _Channel, _Inverse);
 				return fragAdd(i);
 			}
 

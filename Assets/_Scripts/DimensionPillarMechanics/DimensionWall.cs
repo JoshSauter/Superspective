@@ -25,13 +25,10 @@ public class DimensionWall : MonoBehaviour {
 		pillar = GetComponentInParent<DimensionPillar>();
 		pillarRenderer = pillar.GetComponent<Renderer>();
 		thisRenderer = GetComponent<Renderer>();
-		pillar.OnDimensionChange += HandleDimensionChange;
 
 		roomBoundsMask = 1 << LayerMask.NameToLayer("WallOnly") | 1 << LayerMask.NameToLayer("RoomBounds");
 
 		InitializeWallTransform();
-
-		HandleDimensionChange(0, pillar.curDimension);
     }
 
 	private void InitializeWallTransform() {
@@ -82,9 +79,5 @@ public class DimensionWall : MonoBehaviour {
 			transform.localScale = new Vector3(originalSize.x, originalSize.y, EpitaphScreen.instance.playerCamera.farClipPlane);
 			//print("Nothing hit"); Debug.DrawRay(checkForWalls.origin, checkForWalls.direction * mainCamera.farClipPlane, Color.blue, 10f);
 		}
-	}
-
-	private void HandleDimensionChange(int prevDimension, int nextDimension) {
-		GetComponent<Renderer>().material.SetInt("_Dimension", nextDimension);
 	}
 }

@@ -1,9 +1,5 @@
 ﻿Shader "Custom/DimensionShaders/DimensionWall"
 {
-    Properties
-    {
-        _Dimension ("Dimension", Int) = 1
-    }
     SubShader
     {
         Tags { "Queue"="Background-1000" }
@@ -21,8 +17,6 @@
             #include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
 
-			int _Dimension;
-
 			struct appdata {
 				float4 vertex : POSITION;
 			};
@@ -39,7 +33,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				return DimensionValueToColor(_Dimension);
+				return fixed4(1,0,0,1);
 			}
             ENDCG
         }

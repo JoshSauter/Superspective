@@ -5,7 +5,6 @@
 Shader "Custom/CustomDepthNormalsTexture" {
 Properties {
     _MainTex ("", 2D) = "white" {}
-	_Dimension("Dimension", Int) = 0
 }
 
 CGINCLUDE
@@ -55,7 +54,6 @@ fixed4 _BurnColor;
 float _BurnSize;
 float _DissolveValue;
 
-int _Dimension;
 int _Channel;
 int _Inverse;
 
@@ -83,7 +81,7 @@ v2f vert( appdata_full v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy, _Dimension, _Channel, _Inverse);
+	ClipDimensionObject(i.pos.xy, _Channel, _Inverse);
 
     half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 	if (_Color.a == 0) clip(-test);
@@ -305,7 +303,6 @@ CGPROGRAM
 #include "UnityCG.cginc"
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
-int _Dimension;
 int _Channel;
 int _Inverse;
 
@@ -331,7 +328,7 @@ v2f vert( appdata_base v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy, _Dimension, _Channel, _Inverse);
+	ClipDimensionObject(i.pos.xy, _Channel, _Inverse);
 
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }

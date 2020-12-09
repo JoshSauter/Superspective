@@ -163,8 +163,8 @@ public class MultiDimensionCube : MonoBehaviour {
 	}
 
 	void Materialize() {
-		corporealCubeDimensionObj.SetBaseDimension(DimensionPillar.activePillar.curDimension);
-		invertedCubeDimensionObj.SetBaseDimension(DimensionPillar.activePillar.curDimension);
+		corporealCubeDimensionObj.baseDimension = DimensionPillar.activePillar.curDimension;
+		invertedCubeDimensionObj.baseDimension = DimensionPillar.activePillar.curDimension;
 		ResetMaterialsOtherDimensions();
 		state = State.Materializing;
 	}

@@ -69,10 +69,10 @@ public class FakeCubeForSpawner : MonoBehaviour, SaveableObject {
 			newCube.gameObject.PasteComponent(colorCoded);
 		}
 
-		DimensionObject cubeDimensionObj = newCube.GetComponent<DimensionObject>();
+		PillarDimensionObject cubeDimensionObj = newCube.GetComponent<PillarDimensionObject>();
 		if (cubeDimensionObj != null) {
 			cubeDimensionObj.baseDimension = thisSpawner.baseDimensionForCubes;
-			foreach (var dimensionObj in Utils.GetComponentsInChildrenRecursively<DimensionObject>(newCube.transform)) {
+			foreach (var dimensionObj in Utils.GetComponentsInChildrenRecursively<PillarDimensionObject>(newCube.transform)) {
 				dimensionObj.baseDimension = thisSpawner.baseDimensionForCubes;
 			}
 		}

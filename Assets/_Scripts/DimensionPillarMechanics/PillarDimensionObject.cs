@@ -35,10 +35,15 @@ public class PillarDimensionObject : DimensionObject {
 	///////////////////
 	// On/Off Angles //
 	///////////////////
+	[Range(0, 7)]
+	public int baseDimension = 1;
 	public bool overrideOnOffAngles = false;
 	public Angle onAngle;
 	public Angle offAngle;
 	private Angle centralAngle; // Used for continuous on/off angle updating for knowing when the object changes quadrants
+
+	public delegate void DimensionObjectAction();
+	public event DimensionObjectAction OnBaseDimensionChange;
 
 	private void Awake() {
 		debug = new DebugLogger(this, () => DEBUG);
@@ -66,6 +71,13 @@ public class PillarDimensionObject : DimensionObject {
 		yield break;
 	}
 
+	public virtual void SetBaseDimension(int newBaseDimension) {
+		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
+			OnBaseDimensionChange();
+		}
+		baseDimension = newBaseDimension;
+	}
+
 	void OnEnable() {
 		DimensionPillar.OnActivePillarChanged += HandleActivePillarChanged;
 		StartCoroutine(WaitOneFrameToSetup());
@@ -85,18 +97,6 @@ public class PillarDimensionObject : DimensionObject {
 
 	protected virtual void HandlePillarDimensionChange(int prevDimension, int curDimension) {
 		DetermineState(curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar, true);
-		if (IsRelevantDimension(curDimension)) {
-			SetDimensionValuesInMaterials(curDimension);
-		}
-	}
-
-	protected bool IsRelevantDimension(int dimension) {
-		HashSet<int> acceptableDimensions = new HashSet<int>() { objectStartDimension, objectEndDimension };
-		if (DimensionPillar.activePillar != null && reverseVisibilityStates && visibilityState == VisibilityState.partiallyInvisible) {
-			acceptableDimensions.Add(DimensionPillar.activePillar.NextDimension(objectStartDimension));
-			acceptableDimensions.Add(DimensionPillar.activePillar.NextDimension(objectEndDimension));
-		}
-		return acceptableDimensions.Contains(dimension);
 	}
 
 	protected virtual void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
@@ -106,7 +106,6 @@ public class PillarDimensionObject : DimensionObject {
 			// If in one fixedUpdate frame we move through both onAngle and offAngle, ignore the state change rules
 			bool ignoreVisibilityStateChangeRules = IgnoreVisibilityStateChangeRules(DimensionPillar.activePillar.cameraAngleRelativeToPillar, angle);
 			SwitchVisibilityState(nextState, ignoreVisibilityStateChangeRules);
-			SetDimensionValuesInMaterials(dimension);
 		}
 	}
 
@@ -162,7 +161,6 @@ public class PillarDimensionObject : DimensionObject {
 
 			if (nextState != visibilityState) {
 				SwitchVisibilityState(nextState);
-				SetDimensionValuesInMaterials(DimensionPillar.activePillar.curDimension);
 			}
 		}
 	}

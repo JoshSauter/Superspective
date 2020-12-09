@@ -685,7 +685,6 @@ namespace EpitaphUtils {
 			private static readonly Dictionary<string, ShaderPropertyType> knownShaderProperties = new Dictionary<string, ShaderPropertyType> {
 				{ "_Color", ShaderPropertyType.Color },
 				{ "_EmissionColor", ShaderPropertyType.Color },
-				{ "_Dimension", ShaderPropertyType.Float },
 				{ "_MainTex", ShaderPropertyType.Texture },
 				{ "_Cutoff", ShaderPropertyType.Range },
 				{ "_Glossiness", ShaderPropertyType.Range },

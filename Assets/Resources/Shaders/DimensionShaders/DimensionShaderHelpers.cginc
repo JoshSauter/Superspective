@@ -3,6 +3,7 @@ float _ResolutionY;
 sampler2D _DimensionMask0;
 sampler2D _DimensionMask1;
 
+/// OBSOLETE v ///
 inline sampler2D DimensionMaskForChannel(int channel) {
 	if (channel == 0) {
 		return _DimensionMask0;
@@ -26,42 +27,33 @@ fixed4 DimensionValueToColor(int dimensionValue) {
 int ColorToDimensionValue(fixed4 color) {
 	return round((color.r * 100) + (color.g * 20) + (color.b * 4.0) - 1);
 }
+/// OBSOLETE ^ ///
 
-fixed4 ClipDimensionObject(float2 vertex, int dimension, int channel, int invert) {
+float ClipDimensionObject(float2 vertex, int channel, int invert) {
 	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
-	fixed4 dimensionTest = fixed4(0,0,0,0);
+	float dimensionTest = 0;
 	if (channel == 0) {
-		dimensionTest = tex2D(_DimensionMask0, viewportVertex);
+		dimensionTest = tex2D(_DimensionMask0, viewportVertex).r;
 	}
 	else /*if (channel == 1)*/ {
-		dimensionTest = tex2D(_DimensionMask1, viewportVertex);
+		dimensionTest = tex2D(_DimensionMask1, viewportVertex).r;
 	}
 
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	if (invert == 0) {
-		clip(-(dimensionValue != dimension));
-	}
-	else {
-		clip(-(dimensionValue != -1));
-	}
+	clip(-(((1 - dimensionTest)*invert + dimensionTest*(1 - invert)) == 0));
+
 	return dimensionTest;
 }
 
-fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, int dimension, int channel, int invert) {
-	fixed4 dimensionTest = fixed4(0,0,0,0);
+fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, int channel, int invert) {
+	float dimensionTest = 0;
 	if (channel == 0) {
-		dimensionTest = tex2D(_DimensionMask0, screenPos);
+		dimensionTest = tex2D(_DimensionMask0, screenPos).r;
 	}
 	else /*if (channel == 1)*/ {
-		dimensionTest = tex2D(_DimensionMask1, screenPos);
+		dimensionTest = tex2D(_DimensionMask1, screenPos).r;
 	}
 
-	int dimensionValue = ColorToDimensionValue(dimensionTest);
-	if (invert == 0) {
-		clip(-(dimensionValue != dimension));
-	}
-	else {
-		clip(-(dimensionValue != -1));
-	}
+	clip(-(((1 - dimensionTest)*invert + dimensionTest*(1 - invert)) == 0));
+
 	return dimensionTest;
 }

@@ -16,7 +16,7 @@ public class EpitaphRenderer : MonoBehaviour {
 	}
 	public bool printLookupValue = false;
 	public PropBlockType lookupType = PropBlockType.Int;
-	public string lookupString = "_Dimension";
+	public string lookupString = "Look up anything";
 	public const string mainColor = "_Color";
 
 	private Renderer lazy_r;

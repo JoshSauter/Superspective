@@ -6,7 +6,6 @@
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
-		_Dimension("Dimension", Int) = 0
 		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
@@ -33,7 +32,6 @@
 			
 			float4 _Color;
 			
-			int _Dimension;
 			int _Channel;
 			int _Inverse;
 
@@ -59,7 +57,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Dimension, _Channel, _Inverse);
+				ClipDimensionObject(i.vertex, _Channel, _Inverse);
 
 				return _Color;
 			}

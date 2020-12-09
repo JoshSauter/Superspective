@@ -33,8 +33,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	protected bool initialized = false;
 	[Range(0, 1)]
 	public int channel;
-	[Range(0, 7)]
-	public int baseDimension = 1;
 	public bool reverseVisibilityStates = false;
 	public bool ignoreMaterialChanges = false;
 	protected int curDimensionSetInMaterial;
@@ -53,8 +51,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	};
 
 	#region events
-	public delegate void DimensionObjectAction();
-	public event DimensionObjectAction OnBaseDimensionChange;
 	public delegate void DimensionObjectStateChangeAction(VisibilityState visibilityState);
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
@@ -99,12 +95,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		startingMaterials = newStartingMaterials;
 	}
 
-	public virtual void SetBaseDimension(int newBaseDimension) {
-		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
-			OnBaseDimensionChange();
-		}
-		baseDimension = newBaseDimension;
-	}
+
 
 	////////////////////////
 	// State Change Logic //
@@ -129,14 +120,12 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 				break;
 			case VisibilityState.partiallyVisible:
 				visibilityState = VisibilityState.partiallyVisible;
-				setDimension = (DimensionPillar.activePillar != null) ? DimensionPillar.activePillar.curDimension : baseDimension;
 				break;
 			case VisibilityState.visible:
 				visibilityState = VisibilityState.visible;
 				break;
 			case VisibilityState.partiallyInvisible:
 				visibilityState = VisibilityState.partiallyInvisible;
-				setDimension = (DimensionPillar.activePillar != null) ? DimensionPillar.activePillar.curDimension : baseDimension;
 				if (reverseVisibilityStates) setDimension = DimensionPillar.activePillar?.NextDimension(setDimension) ?? setDimension;
 				break;
 		}
@@ -144,9 +133,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		if (!ignoreMaterialChanges) {
 			foreach (var r in renderers) {
 				SetMaterials(r);
-			}
-			if (setDimension >= 0) {
-				SetDimensionValuesInMaterials(setDimension);
 			}
 			SetChannelValuesInMaterials();
 		}
@@ -200,16 +186,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 		renderer.SetMaterials(newMaterials);
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
-	}
-
-	protected void SetDimensionValuesInMaterials(int newDimensionValue) {
-		bool isDimensionShader = (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible);
-		if (curDimensionSetInMaterial != newDimensionValue && isDimensionShader) {
-			foreach (var r in renderers) {
-				r.SetInt("_Dimension", newDimensionValue);
-			}
-			curDimensionSetInMaterial = newDimensionValue;
-		}
 	}
 
 	protected void SetChannelValuesInMaterials() {
@@ -335,7 +311,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 		bool initialized;
 		int channel;
-		int baseDimension;
 		bool reverseVisibilityStates;
 		bool ignoreMaterialChanges;
 		int curDimensionSetInMaterial;
@@ -347,7 +322,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
 			this.initialized = dimensionObj.initialized;
 			this.channel = dimensionObj.channel;
-			this.baseDimension = dimensionObj.baseDimension;
 			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
 			this.ignoreMaterialChanges = dimensionObj.ignoreMaterialChanges;
 			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
@@ -359,7 +333,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
 			dimensionObj.initialized = this.initialized;
 			dimensionObj.channel = this.channel;
-			dimensionObj.baseDimension = this.baseDimension;
 			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
 			dimensionObj.ignoreMaterialChanges = this.ignoreMaterialChanges;
 			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;

@@ -9,6 +9,18 @@ using EpitaphUtils;
 // If this object goes across the 180° + dimensionShiftAngle (when the player is standing in the direction of pillar's transform.forward from pillar),
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 public class PillarDimensionObject2 : DimensionObject {
+	[SerializeField]
+	[Range(0,7)]
+	private int _baseDimension = 0;
+	public int baseDimension {
+		get { return _baseDimension; }
+		set {
+			if (value != baseDimension) {
+				OnBaseDimensionChange?.Invoke();
+			}
+			baseDimension = value;
+		}
+	}
 	public enum Quadrant {
 		Opposite,
 		Left,
@@ -30,14 +42,15 @@ public class PillarDimensionObject2 : DimensionObject {
 	public bool useColliderBoundsInsteadOfRendererBounds = false;
 	public bool thisObjectMoves = false;
 	public Rigidbody thisRigidbody;
-	Collider[] colliders;
+	public Collider[] colliders;
 
-	public enum SwitchedDimensions {
-		Neither,
-		Up,
-		Down
-	}
-	SwitchedDimensions switchedDimensions = SwitchedDimensions.Neither;
+	Vector3 camPos => EpitaphScreen.instance.playerCamera.transform.position;
+	Vector3 pillarPos => pillar.transform.position;
+
+	private Angle.Quadrant quadrantRelativeToDimensionShiftAngle;
+
+	public delegate void DimensionObjectAction();
+	public event DimensionObjectAction OnBaseDimensionChange;
 
 	private void OnValidate() {
 		if (thisObjectMoves) {
@@ -51,9 +64,9 @@ public class PillarDimensionObject2 : DimensionObject {
 			}
 		}
 
-		foreach (var p in pillars) {
-			p.OnDimensionChangeWithDirection += HandleDimensionChangeWithDirection;
-		}
+		DimensionPillar.OnActivePillarChanged += (p) => {
+			if (pillar != null) quadrantRelativeToDimensionShiftAngle = DetermineQuadrantRelativeToDimensionShift(transform.position);
+		};
 	}
 
 	void HandleDimensionChangeWithDirection(int prev, int next, DimensionPillar.DimensionSwitch direction) {
@@ -69,9 +82,11 @@ public class PillarDimensionObject2 : DimensionObject {
 		pillarsSet = new HashSet<DimensionPillar>(pillars);
 		renderers = GetAllEpitaphRenderers().ToArray();
 
-		colliders = new Collider[] { GetComponent<Collider>() };
-		if (treatChildrenAsOneObjectRecursively) {
-			colliders = GetCollidersRecursively().ToArray();
+		if (colliders == null || colliders.Length == 0) {
+			colliders = new Collider[] { GetComponent<Collider>() };
+			if (treatChildrenAsOneObjectRecursively) {
+				colliders = GetCollidersRecursively().ToArray();
+			}
 		}
 
 		foreach (var p in pillars) {
@@ -80,8 +95,8 @@ public class PillarDimensionObject2 : DimensionObject {
 
 		if (pillar == null) yield break;
 
-		playerQuadrant = DetermineQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
-		dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+		playerQuadrant = DetermineQuadrant(camPos);
+		dimensionShiftQuadrant = DetermineQuadrant(pillarPos + pillar.dimensionShiftVector);
 		UpdateState();
 	}
 
@@ -107,33 +122,32 @@ public class PillarDimensionObject2 : DimensionObject {
 	private void FixedUpdate() {
 		if (pillar == null) return;
 		if (DEBUG) {
-			Debug.DrawRay(pillar.transform.position, minAngleVector, Color.cyan);
-			Debug.DrawRay(pillar.transform.position, maxAngleVector, Color.blue);
+			Debug.DrawRay(pillarPos, minAngleVector, Color.cyan);
+			Debug.DrawRay(pillarPos, maxAngleVector, Color.blue);
 		}
 
 		bool thisObjectMoving = thisObjectMoves && !thisRigidbody.IsSleeping();
 		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.Opposite (moving objects only)
-		bool dimensionShiftWasNotInOppositeQuadrant = dimensionShiftQuadrant != Quadrant.Opposite;
+		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(pillarPos + pillar.dimensionShiftVector);
 		if (thisObjectMoving) {
 			DeterminePlanes(pillar);
+			Angle.Quadrant nextQuadrantRelativeToDimensionShiftAngle = DetermineQuadrantRelativeToDimensionShift(transform.position);
+			if (dimensionShiftQuadrant == Quadrant.Opposite && nextDimensionShiftQuadrant == Quadrant.Right) {
+				baseDimension = pillar.NextDimension(baseDimension);
+				Debug.Log("Up?");
+			}
+			else if (dimensionShiftQuadrant == Quadrant.Right && nextDimensionShiftQuadrant == Quadrant.Opposite) {
+				baseDimension = pillar.PrevDimension(baseDimension);
+				Debug.Log("Down?");
+			}
+
+			quadrantRelativeToDimensionShiftAngle = nextQuadrantRelativeToDimensionShiftAngle;
 		}
 
-		playerQuadrant = DetermineQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
-		dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
-
+		playerQuadrant = DetermineQuadrant(camPos);
+		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
 
 		UpdateState();
-	}
-
-	private SwitchedDimensions ThisObjectSwitchedDimensions() {
-		if (dimensionShiftQuadrant == Quadrant.Opposite) {
-			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.dimensionShiftVector.normalized, pillar.axis);
-			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
-			return dimensionShiftPlane.GetSide(transform.position) ? SwitchedDimensions.Up : SwitchedDimensions.Down;
-		}
-		else {
-			return SwitchedDimensions.Neither;
-		}
 	}
 
 	private void UpdateState() {
@@ -142,17 +156,13 @@ public class PillarDimensionObject2 : DimensionObject {
 		if (nextState != visibilityState) {
 			SwitchVisibilityState(nextState, true);
 		}
-
-		if (visibilityState == VisibilityState.partiallyVisible || visibilityState == VisibilityState.partiallyInvisible) {
-			SetDimensionValuesInMaterials(pillar.curDimension);
-		}
 	}
 
 	bool HasGoneToNextDimension(DimensionPillar pillar, Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant) {
 		if (playerQuadrant == dimensionShiftQuadrant) {
 			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.dimensionShiftVector.normalized, pillar.axis);
-			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
-			return !dimensionShiftPlane.GetSide(EpitaphScreen.instance.playerCamera.transform.position);
+			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillarPos);
+			return !dimensionShiftPlane.GetSide(camPos);
 		}
 		else {
 			return false;
@@ -160,8 +170,9 @@ public class PillarDimensionObject2 : DimensionObject {
 	}
 
 	VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
-		if (HasGoneToNextDimension(pillar, playerQuadrant, dimensionShiftQuadrant)) {
+		if (!thisObjectMoves && HasGoneToNextDimension(pillar, playerQuadrant, dimensionShiftQuadrant)) {
 			dimension = pillar.PrevDimension(dimension);
+			debug.Log("Woah dude prev dimension");
 		}
 
 		switch (playerQuadrant) {
@@ -217,8 +228,34 @@ public class PillarDimensionObject2 : DimensionObject {
 		}
 	}
 
+	Angle.Quadrant DetermineQuadrantRelativeToDimensionShift(Vector3 position) {
+		Plane dimensionShiftPerpindicular = new Plane(pillar.dimensionShiftVector, pillarPos);
+		Plane dimensionShiftParallel = new Plane(Vector3.Cross(pillar.dimensionShiftVector, pillar.axis), pillarPos);
+
+		bool perpindicularTest = dimensionShiftPerpindicular.GetSide(position);
+		bool parallelTest = dimensionShiftParallel.GetSide(position);
+
+
+		Angle.Quadrant quadrant;
+		if (perpindicularTest && parallelTest) {
+			quadrant = Angle.Quadrant.I;
+		}
+		else if (!perpindicularTest && parallelTest) {
+			quadrant = Angle.Quadrant.II;
+		}
+		else if (!perpindicularTest && !parallelTest) {
+			quadrant = Angle.Quadrant.III;
+		}
+		else /*if (perpindicularTest && !parallelTest)*/ {
+			quadrant = Angle.Quadrant.IV;
+		}
+
+		//debug.Log($"Quadrant: {quadrant}\nPerpindicular Test: {perpindicularTest}\nParallel Test: {parallelTest}");
+
+		return quadrant;
+	}
+
 	void DeterminePlanes(DimensionPillar pillar) {
-		Vector3 pillarPos = pillar.transform.position;
 		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillarPos, pillar.axis);
 		Vector3 projectedVerticalPillarOffset = pillarPos - projectedPillarCenter;
 
@@ -243,7 +280,7 @@ public class PillarDimensionObject2 : DimensionObject {
 
 		Debug.DrawRay(pillarPos, positionAvg - pillarPos, Color.magenta);
 
-		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg - pillar.transform.position) < 0;
+		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg - pillarPos) < 0;
 		Vector3 dimensionShiftVector = flipDimensionShiftAngle ? Quaternion.AngleAxis(180, pillar.axis) * pillar.dimensionShiftVector : pillar.dimensionShiftVector;
 
 		float minAngle = float.MaxValue;
@@ -288,8 +325,8 @@ public class PillarDimensionObject2 : DimensionObject {
 
 	private void OnDrawGizmos() {
 		if (DEBUG && pillar != null) {
-			DrawPlanes(pillar.transform.position, leftParallels[pillar].normal);
-			DrawPlanes(pillar.transform.position, rightParallels[pillar].normal);
+			DrawPlanes(pillarPos, leftParallels[pillar].normal);
+			DrawPlanes(pillarPos, rightParallels[pillar].normal);
 		}
 	}
 
