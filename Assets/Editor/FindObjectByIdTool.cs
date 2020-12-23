@@ -47,7 +47,8 @@ public class FindObjectByIdTool : ScriptableWizard {
 	bool HasValidId(SaveableObject obj) {
 		try {
 			string s = obj.ID;
-			return true;
+
+			return s != null && s != "";
 		}
 		catch {
 			return false;

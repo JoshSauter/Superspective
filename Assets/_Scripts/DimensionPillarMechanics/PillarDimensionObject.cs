@@ -1,483 +1,434 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using EpitaphUtils;
-using EpitaphUtils.ShaderUtils;
 using System.Linq;
+using UnityEngine;
+using NaughtyAttributes;
+using EpitaphUtils;
 using System;
+using Saving;
 using SerializableClasses;
 
-public class PillarDimensionObject : DimensionObject {
-	public bool continuouslyUpdateOnOffAngles = false;
-
-	public int objectStartDimension;
-	public int objectEndDimension;
-
-	////////////////////////////////////
-	// Techniques for finding pillars //
-	////////////////////////////////////
-	public enum FindPillarsTechnique {
-		whitelist,
-		automaticSphere,
-		automaticSphereWithBlacklist,
-		automaticBox,
-		automaticBoxWithBlacklist,
-		anyPillar
-	}
-	public FindPillarsTechnique findPillarsTechnique;
-	public List<DimensionPillar> pillarsFound = new List<DimensionPillar>();
-	// Whitelist/blacklist pillars
-	public List<DimensionPillar> whitelist = new List<DimensionPillar>();
-	public List<DimensionPillar> blacklist = new List<DimensionPillar>();
-	public float pillarSearchRadius = 40;
-	public Vector3 pillarSearchBoxSize = Vector3.one * 80;
-
-	///////////////////
-	// On/Off Angles //
-	///////////////////
+// DimensionObjectBase.baseDimension is the lower dimension that this object exists in
+// If this object goes across the 180° + dimensionShiftAngle (when the player is standing in the direction of pillar's transform.forward from pillar),
+// it will act as a baseDimension+1 object when the pillar is in that dimension.
+[RequireComponent(typeof(UniqueId))]
+public class PillarDimensionObject : DimensionObject, SaveableObject {
+	[SerializeField]
 	[Range(0, 7)]
-	public int baseDimension = 1;
-	public bool overrideOnOffAngles = false;
-	public Angle onAngle;
-	public Angle offAngle;
-	private Angle centralAngle; // Used for continuous on/off angle updating for knowing when the object changes quadrants
+	private int _dimension = 0;
+	public int Dimension {
+		get { return _dimension; }
+		set {
+			if (value != Dimension) {
+				OnBaseDimensionChange?.Invoke();
+			}
+			_dimension = value;
+		}
+	}
+
+	public enum Quadrant {
+		Opposite,
+		Left,
+		SameSide,
+		Right
+	}
+	[ReadOnly]
+	public Quadrant playerQuadrant;
+	[ReadOnly]
+	public Quadrant dimensionShiftQuadrant;
+	[SerializeField]
+	[ReadOnly]
+	float minAngle;
+	[SerializeField]
+	[ReadOnly]
+	float maxAngle;
+
+	// The active pillar that this object is setting its visibility state based off of
+	public DimensionPillar pillar => pillarsSet.Contains(DimensionPillar.activePillar) || pillars.Length == 0 ? DimensionPillar.activePillar : null;
+	public DimensionPillar[] pillars;
+	HashSet<DimensionPillar> pillarsSet = new HashSet<DimensionPillar>();
+	Dictionary<DimensionPillar, Plane> leftParallels = new Dictionary<DimensionPillar, Plane>();
+	Dictionary<DimensionPillar, Plane> rightParallels = new Dictionary<DimensionPillar, Plane>();
+	// Only used for drawing debug planes
+	Dictionary<DimensionPillar, float> maxDistances = new Dictionary<DimensionPillar, float>();
+
+	Vector3 minAngleVector, maxAngleVector;
+
+	public bool thisObjectMoves = false;
+	public Rigidbody thisRigidbody;
+	public Collider colliderBoundsOverride;
+
+	Vector3 camPos => EpitaphScreen.instance.playerCamera.transform.position;
 
 	public delegate void DimensionObjectAction();
 	public event DimensionObjectAction OnBaseDimensionChange;
 
-	private void Awake() {
-		debug = new DebugLogger(this, () => DEBUG);
+	DimensionPillar.ActivePillarChangedEvent activePillarChangedHandler;
 
-		objectStartDimension = baseDimension;
-		objectEndDimension = baseDimension;
-		renderers = GetAllEpitaphRenderers().ToArray();
-		startingMaterials = GetAllStartingMaterials(renderers);
-		startingLayers = GetAllStartingLayers(renderers);
+	protected override void Awake() {
+		base.Awake();
+		if (thisObjectMoves) {
+			if (thisRigidbody == null && GetComponent<Rigidbody>() == null) {
+				DebugLogger tempDebug = new DebugLogger(gameObject, () => true);
+				tempDebug.LogError($"{gameObject.name} moves, but no rigidbody could be found (Consider setting it manually)");
+				thisObjectMoves = false;
+			}
+			else if (thisRigidbody == null) {
+				thisRigidbody = GetComponent<Rigidbody>();
+			}
+		}
 	}
 
 	public override IEnumerator Start() {
-		FindRelevantPillars();
+		pillarsSet = new HashSet<DimensionPillar>(pillars);
+		renderers = GetAllEpitaphRenderers().ToArray();
 
-		if (DimensionPillar.activePillar != null) {
-			HandleActivePillarChanged(null);
+		foreach (var p in pillars) {
+			DeterminePlanes(p);
 		}
 
-		if (GetComponent<Rigidbody>() != null && GetComponent<IgnoreCollisionsWithOtherDimensions>() == null) {
-			gameObject.AddComponent<IgnoreCollisionsWithOtherDimensions>();
-		}
+		activePillarChangedHandler = (prev) => HandleNewPillar();
+		DimensionPillar.OnActivePillarChanged += activePillarChangedHandler;
 
-		StartCoroutine(base.Start());
+		HandleNewPillar();
 
 		yield break;
 	}
 
-	public virtual void SetBaseDimension(int newBaseDimension) {
-		if (newBaseDimension != baseDimension && OnBaseDimensionChange != null) {
-			OnBaseDimensionChange();
-		}
-		baseDimension = newBaseDimension;
-	}
+	void HandleNewPillar() {
+		if (pillar != null) {
+			DeterminePlanes(pillar);
 
-	void OnEnable() {
-		DimensionPillar.OnActivePillarChanged += HandleActivePillarChanged;
-		StartCoroutine(WaitOneFrameToSetup());
-	}
-
-	IEnumerator WaitOneFrameToSetup() {
-		yield return null;
-		HandleActivePillarChanged(DimensionPillar.activePillar);
-	}
-
-	private void OnDisable() {
-		DimensionPillar.OnActivePillarChanged -= HandleActivePillarChanged;
-		if (DimensionPillar.activePillar != null && PillarIsRelevant(DimensionPillar.activePillar)) {
-			TeardownEventListeners(DimensionPillar.activePillar);
+			playerQuadrant = DetermineQuadrant(camPos);
+			dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+			UpdateState(true);
 		}
 	}
 
-	protected virtual void HandlePillarDimensionChange(int prevDimension, int curDimension) {
-		DetermineState(curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar, true);
+	private void OnDestroy() {
+		DimensionPillar.OnActivePillarChanged -= activePillarChangedHandler;
 	}
 
-	protected virtual void HandlePlayerMoveAroundPillar(int dimension, Angle angle) {
-		VisibilityState nextState = DetermineState(dimension, angle);
+	void GetCollidersRecursivelyHelper(Transform parent, ref List<Collider> collidersSoFar) {
+		Collider thisCollider = parent.GetComponent<Collider>();
+		if (thisCollider != null) {
+			collidersSoFar.Add(thisCollider);
+		}
 
-		if (nextState != visibilityState) {
-			// If in one fixedUpdate frame we move through both onAngle and offAngle, ignore the state change rules
-			bool ignoreVisibilityStateChangeRules = IgnoreVisibilityStateChangeRules(DimensionPillar.activePillar.cameraAngleRelativeToPillar, angle);
-			SwitchVisibilityState(nextState, ignoreVisibilityStateChangeRules);
+		if (parent.childCount > 0) {
+			foreach (Transform child in parent) {
+				GetCollidersRecursivelyHelper(child, ref collidersSoFar);
+			}
 		}
 	}
 
-	// Returns true if both onAngle and offAngle were covered between prevAngleOfPlayer and angleOfPlayer
-	private bool IgnoreVisibilityStateChangeRules(Angle prevAngleOfPlayer, Angle angleOfPlayer) {
-		// If in one fixedUpdate frame we move through both onAngle and offAngle, ignore the state change rules
-		Angle startAngleForIngoreRulesTest = Angle.IsClockwise(prevAngleOfPlayer, angleOfPlayer) ? prevAngleOfPlayer : angleOfPlayer;
-		Angle endAngleForIngoreRulesTest = Angle.IsClockwise(prevAngleOfPlayer, angleOfPlayer) ? angleOfPlayer : prevAngleOfPlayer;
-
-		return Angle.IsAngleBetween(onAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest) &&
-			Angle.IsAngleBetween(offAngle, startAngleForIngoreRulesTest, endAngleForIngoreRulesTest);
-	}
-	
 	private void FixedUpdate() {
-		if (continuouslyUpdateOnOffAngles && PillarIsRelevant(DimensionPillar.activePillar)) {
-			HandleThisObjectMoving();
-		}
-	}
-
-	private bool PillarIsRelevant(DimensionPillar pillar) {
-		return (findPillarsTechnique == FindPillarsTechnique.anyPillar && pillar != null) || (pillarsFound.Contains(pillar));
-	}
-
-	// Updates on/off positions for this object, then
-	// Updates baseDimension if this object passed the dimensionShift angle, then
-	// Updates state based on current cameraAngleRelativeToPillar
-	void HandleThisObjectMoving() {
-		Angle prevAvgAngleOfObject = centralAngle;
-		Angle.Quadrant prevQuadrantOfObject = prevAvgAngleOfObject.quadrant;
-		RecalculateOnOffPositions();
-		Angle avgAngleOfObject = centralAngle;
-		Angle.Quadrant quadrantOfObject = avgAngleOfObject.quadrant;
-
-		//debug.Log(prevAvgAngleOfObject + ", " + avgAngleOfObject);// + "\nOn: " + onAngle + ", Off: " + offAngle);
-		if (prevQuadrantOfObject != quadrantOfObject) {
-			debug.Log("Prev Quadrant: " + prevQuadrantOfObject + ", Next Quadrant: " + quadrantOfObject);
+		if (pillar == null) return;
+		if (DEBUG) {
+			Debug.DrawRay(pillar.transform.position, minAngleVector, Color.cyan);
+			Debug.DrawRay(pillar.transform.position, maxAngleVector, Color.blue);
 		}
 
-		bool clockwise = Angle.IsClockwise(prevAvgAngleOfObject, avgAngleOfObject);
-		if (prevAvgAngleOfObject != avgAngleOfObject) {
-			if (clockwise && prevQuadrantOfObject == Angle.Quadrant.IV && quadrantOfObject == Angle.Quadrant.I) {
-				// Bump baseDimension up
-				debug.Log("Bumping baseDimension up");
-				SetBaseDimension((baseDimension + 1) % (DimensionPillar.activePillar.maxDimension + 1));
-			}
-			else if (!clockwise && prevQuadrantOfObject == Angle.Quadrant.I && quadrantOfObject == Angle.Quadrant.IV) {
-				// Bump baseDimension down
-				debug.Log("Bumping baseDimension down");
-				SetBaseDimension((baseDimension == 0) ? DimensionPillar.activePillar.maxDimension : baseDimension - 1);
-			}
+		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
+		if (thisObjectMoving) {
+			DeterminePlanes(pillar);
+		}
 
-			VisibilityState nextState = DetermineState(DimensionPillar.activePillar.curDimension, DimensionPillar.activePillar.cameraAngleRelativeToPillar, forceCalculations: true);
-
-			if (nextState != visibilityState) {
-				SwitchVisibilityState(nextState);
+		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.Opposite (moving objects only)
+		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+		if (thisObjectMoving) {
+			if (dimensionShiftQuadrant == Quadrant.Opposite && nextDimensionShiftQuadrant == Quadrant.Right) {
+				Dimension = pillar.NextDimension(Dimension);
+			}
+			else if (dimensionShiftQuadrant == Quadrant.Right && nextDimensionShiftQuadrant == Quadrant.Opposite) {
+				Dimension = pillar.PrevDimension(Dimension);
 			}
 		}
+
+		playerQuadrant = DetermineQuadrant(camPos);
+		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
+
+		UpdateState();
 	}
 
-	protected virtual void HandleActivePillarChanged(DimensionPillar prevPillar) {
-		if (prevPillar != null && PillarIsRelevant(prevPillar)) {
-			TeardownEventListeners(prevPillar);
-		}
-		FindRelevantPillars();
+	private void UpdateState(bool forceUpdate = false) {
+		VisibilityState nextState = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension);
 
-		if (DimensionPillar.activePillar != null && PillarIsRelevant(DimensionPillar.activePillar)) {
-			RecalculateOnOffPositions();
-			SetupEventListeners(DimensionPillar.activePillar);
-			HandlePillarDimensionChange(-1, DimensionPillar.activePillar.curDimension);
-		}
-	}
-
-	void SetupEventListeners(DimensionPillar pillar) {
-		pillar.OnDimensionChange += HandlePillarDimensionChange;
-		pillar.OnPlayerMoveAroundPillar += HandlePlayerMoveAroundPillar;
-	}
-
-	void TeardownEventListeners(DimensionPillar pillar) {
-		pillar.OnDimensionChange -= HandlePillarDimensionChange;
-		pillar.OnPlayerMoveAroundPillar -= HandlePlayerMoveAroundPillar;
-	}
-
-	////////////////////////////
-	// Administrative & Setup //
-	////////////////////////////
-	#region adminAndSetup
-	void FindRelevantPillars() {
-		pillarsFound.Clear();
-		switch (findPillarsTechnique) {
-			case FindPillarsTechnique.whitelist:
-				foreach (var pillar in whitelist) {
-					pillarsFound.Add(pillar);
-				}
-				break;
-			case FindPillarsTechnique.automaticSphere:
-				SearchForPillarsInSphere(new List<DimensionPillar>());
-				break;
-			case FindPillarsTechnique.automaticSphereWithBlacklist:
-				SearchForPillarsInSphere(blacklist);
-				break;
-			case FindPillarsTechnique.automaticBox:
-				SearchForPillarsInBox(new List<DimensionPillar>());
-				break;
-			case FindPillarsTechnique.automaticBoxWithBlacklist:
-				SearchForPillarsInBox(blacklist);
-				break;
-			case FindPillarsTechnique.anyPillar:
-				break;
-		}
-	}
-	private void SearchForPillarsInSphere(List<DimensionPillar> blacklist) {
-		foreach (var pillarMaybe in Physics.OverlapSphere(transform.position, pillarSearchRadius)) {
-			DimensionPillar pillar = pillarMaybe.GetComponent<DimensionPillar>();
-			if (pillar != null && !blacklist.Contains(pillar)) {
-				pillarsFound.Add(pillar);
-			}
+		if (nextState != visibilityState || forceUpdate) {
+			SwitchVisibilityState(nextState, true);
 		}
 	}
 
-	private void SearchForPillarsInBox(List<DimensionPillar> blacklist) {
-		foreach (var pillarMaybe in Physics.OverlapBox(transform.position, pillarSearchBoxSize / 2f, new Quaternion())) {
-			DimensionPillar pillar = pillarMaybe.GetComponent<DimensionPillar>();
-			if (pillar != null && !blacklist.Contains(pillar)) {
-				pillarsFound.Add(pillar);
-			}
-		}
-	}
-
-	private void RecalculateOnOffPositions() {
-		if (overrideOnOffAngles) return;
-
-		if (renderers.Length == 0) {
-			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
-			enabled = false;
-			return;
-		}
-
-		if (DimensionPillar.activePillar == null) {
-			onAngle = null; offAngle = null;
-			return;
-		}
-
-		List<Bounds> allRendererBounds = new List<Bounds>(); // new Vector3[] { renderers[0].GetRendererBounds().min, renderers[0].GetRendererBounds().max };
-		foreach (var r in renderers) {
-			allRendererBounds.Add(r.GetRendererBounds());
-		}
-		Vector3 min = new Vector3(allRendererBounds.Min(b => b.min.x), 0, allRendererBounds.Min(b => b.min.z));
-		Vector3 max = new Vector3(allRendererBounds.Max(b => b.max.x), 0, allRendererBounds.Max(b => b.max.z));
-		Vector3[] corners = new Vector3[] {
-			new Vector3(min.x, min.y, min.z),
-			new Vector3(min.x, min.y, max.z),
-			new Vector3(max.x, min.y, min.z),
-			new Vector3(max.x, min.y, max.z),
-		};
-
-		Vector3 centerOfObject = (min + max) / 2f;
-		centralAngle = DimensionPillar.activePillar.PillarAngleOfPoint(centerOfObject);
-		onAngle = Angle.Radians(centralAngle.radians - .001f);
-		offAngle = Angle.Radians(centralAngle.radians);
-		foreach (var corner in corners) {
-			Angle cornerAngle = DimensionPillar.activePillar.PillarAngleOfPoint(corner);
-			if (!Angle.IsAngleBetween(cornerAngle, onAngle, offAngle)) {
-				Angle replaceOn = Angle.AngleBetween(cornerAngle, offAngle);
-				Angle replaceOff = Angle.AngleBetween(cornerAngle, onAngle);
-				if (replaceOn.radians > replaceOff.radians) {
-					onAngle = cornerAngle;
-				}
-				else {
-					offAngle = cornerAngle;
-				}
-			}
-		}
-		onAngle.Reverse();
-		offAngle.Reverse();
-	}
-	#endregion
-
-	////////////////////////
-	// State Change Logic //
-	////////////////////////
-	#region stateChange
-	VisibilityState DetermineState(int dimension, Angle angle, bool forceCalculations = false) {
-		Angle prevAngleOfPlayer = DimensionPillar.activePillar.cameraAngleRelativeToPillar.normalized;
-		Angle angleOfPlayer = angle.normalized;
-		if (prevAngleOfPlayer == angleOfPlayer && !forceCalculations) return visibilityState;
-
-		Angle angleOppositeToPlayer = (angleOfPlayer + Angle.D180).normalized;
-
-		bool playerIsOnFirstHalf = angleOfPlayer < Angle.D180;
-
-		bool leftSideOfObjectAppearsLeftOfPillar = Angle.IsAngleBetween(onAngle, angleOppositeToPlayer, angleOfPlayer);
-		bool rightSideOfObjectAppearsLeftOfPillar = Angle.IsAngleBetween(offAngle, angleOppositeToPlayer, angleOfPlayer);
-
-		bool objectIsVisuallySplitByPillar = leftSideOfObjectAppearsLeftOfPillar && !rightSideOfObjectAppearsLeftOfPillar;
-
-		// These are relative to the dimension shift angle of the pillar itself
-		bool onAngleExistsInFirstHalf = onAngle < Angle.D180;
-		bool offAngleExistsInFirstHalf = offAngle < Angle.D180;
-
-		// object fully < 180 degrees
-		bool objectExistsWholelyInFirstHalf = onAngleExistsInFirstHalf && offAngleExistsInFirstHalf;
-		// object starts > 180 degrees and ends < 180 degrees
-		bool objectIsSplitWithinThisDimension = !onAngleExistsInFirstHalf && offAngleExistsInFirstHalf;
-		// object fully > 180 degrees
-		bool objectExistsWholelyInSecondHalf = !onAngleExistsInFirstHalf && !offAngleExistsInFirstHalf;
-		// object starts < 180 degrees and ends > 180 degrees (into next dimension)
-		bool objectIsSplitIntoNextDimension = onAngleExistsInFirstHalf && !offAngleExistsInFirstHalf;
-
-		//objectStartDimension = baseDimension - (onAngleIsLeftOfPillar || (objectExistsAtStartOfDimension && objectExistsAtEndOfDimension) ? 1 : 0);
-		//objectEndDimension = baseDimension - (!offAngleIsLeftOfPillar || (!objectExistsAtStartOfDimension && objectExistsAtEndOfDimension) ? 0 : 1);
-
-
-
-		int maxDimension = DimensionPillar.activePillar.maxDimension;
-		VisibilityState nextState = visibilityState;
-		// Determine relevant dimensions for this object
-		if (objectExistsWholelyInFirstHalf) {
-			objectStartDimension = baseDimension;
-			objectEndDimension = baseDimension;
-		}
-		else if (objectIsSplitWithinThisDimension) {
-			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
-			objectEndDimension = baseDimension;
-		}
-		else if (objectExistsWholelyInSecondHalf) {
-			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
-			objectEndDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
-		}
-		else if (objectIsSplitIntoNextDimension) {
-			objectStartDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
-			objectEndDimension = DimensionPillar.activePillar.PrevDimension(baseDimension);
-		}
-
-		int objectStartDimensionPlusOne = (objectStartDimension == maxDimension) ? 0 : objectStartDimension + 1;
-		int objectEndDimensionPlusOne = (objectEndDimension == maxDimension) ? 0 : objectEndDimension + 1;
-		//debug.Log("Object name: " + gameObject.name + "\nDimension:\t\t\t\t" + dimension + "\nAngle:\t\t\t\t" + angle +
-		//	"\n\nAngleOfPlayer:\t\t\t" + angleOfPlayer + "\nAngleOppositeToPlayer:\t\t" + angleOppositeToPlayer +
-		//	"\n\nLeftSideOfObjectAppearsLeftOfPillar:\t" + leftSideOfObjectAppearsLeftOfPillar + "\nRightSideOfObjectAppearsLeftOfPillar:\t" + rightSideOfObjectAppearsLeftOfPillar +
-		//	"\n\nObjectIsVisuallySplitByPillar:\t\t" + objectIsVisuallySplitByPillar +
-		//	"\n\nOnAngleExistsInFirstHalf:\t\t" + onAngleExistsInFirstHalf + "\nOffAngleExistsInFirstHalf:\t\t" + offAngleExistsInFirstHalf +
-		//	"\n\nObjectFullyInFirstHalf?:\t\t" + objectExistsWholelyInFirstHalf +
-		//	"\nObjectSplitWithinThisDimension?:\t\t" + objectIsSplitWithinThisDimension +
-		//	"\nObjectFullyInSecondHalf?:\t\t" + objectExistsWholelyInSecondHalf +
-		//	"\nObjectSplitIntoNextDimension?:\t\t" + objectIsSplitIntoNextDimension +
-		//	"\n\nObjectStartDimension:\t\t" + objectStartDimension +
-		//	"\nObjectEndDimension:\t\t\t" + objectEndDimension
-		//);
-
-		if (objectIsVisuallySplitByPillar) {
-			if ((dimension == objectStartDimension && !playerIsOnFirstHalf) || (dimension == objectEndDimension && playerIsOnFirstHalf)) {
-				nextState = VisibilityState.partiallyVisible;
-			}
-			else if ((dimension == objectStartDimensionPlusOne && !playerIsOnFirstHalf) || (dimension == objectEndDimensionPlusOne && playerIsOnFirstHalf)) {
-				nextState = VisibilityState.partiallyInvisible;
-			}
-			else {
-				nextState = VisibilityState.invisible;
-			}
+	bool HasGoneToNextDimension(DimensionPillar pillar, Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant) {
+		if (playerQuadrant == dimensionShiftQuadrant) {
+			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.dimensionShiftVector.normalized, pillar.axis);
+			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
+			//debug.Log($"GetSide: {dimensionShiftPlane.GetSide(camPos)}\nPillar.curDimension: {pillar.curDimension}");
+			return !dimensionShiftPlane.GetSide(camPos);
 		}
 		else {
-			if (objectIsSplitWithinThisDimension) {
-				if (dimension == objectEndDimension && (angleOfPlayer > offAngle && angleOfPlayer < onAngle)) {
-					nextState = VisibilityState.visible;
-				}
-				else {
-					nextState = VisibilityState.invisible;
-				}
-			}
-			else {
-				if ((dimension == objectEndDimension && angleOfPlayer > offAngle) || (dimension == objectStartDimensionPlusOne && angleOfPlayer < onAngle)) {
-					nextState = VisibilityState.visible;
-				}
-				else {
-					nextState = VisibilityState.invisible;
-				}
+			return false;
+		}
+	}
+
+	// Iterates through the dimension pillar's possible dimensions and checks what the visibility state would be
+	// if this the player were in that dimension. This is not very performant but there's probably a smarter way to do this.
+	// This is identical to the method below it except that it holds the object's dimension constant and tries different values of pillar.curDimension
+	public int GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
+		if (pillar == null) {
+			return -1;
+		}
+
+		// Don't need to check all the dimensions if we already are in the right one
+		if (desiredVisibility(visibilityState)) {
+			return pillar.curDimension;
+		}
+
+		// Try each dimension, test what the visibility state would be there
+		for (int i = 0; i <= pillar.maxDimension; i++) {
+			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, i))) {
+				return i;
 			}
 		}
 
-		//debug.Log(nextState);
-		return nextState;
+		// No suitable dimension was found
+		return -1;
 	}
-	#endregion
+
+	// Iterates through the dimension pillar's possible dimensions and checks what the visibility state would be
+	// if this object were in that dimension. This is not very performant but there's probably a smarter way to do this.
+	public int GetDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
+		int tempDimension = _dimension;
+
+		// Don't need to check all the dimensions if we already are in the right one
+		if (desiredVisibility(visibilityState)) {
+			return Dimension;
+		}
+
+		// Try each dimension, test what the visibility state would be there
+		for (int i = 0; i <= pillar.maxDimension; i++) {
+			_dimension = i;
+			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension))) {
+				_dimension = tempDimension;
+				return i;
+			}
+		}
+		_dimension = tempDimension;
+
+		// No suitable dimension was found
+		return -1;
+	}
+
+	public VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
+		if (HasGoneToNextDimension(pillar, playerQuadrant, dimensionShiftQuadrant)) {
+			dimension = pillar.PrevDimension(dimension);
+		}
+
+		switch (playerQuadrant) {
+			case Quadrant.Opposite:
+				if (dimension == this.Dimension) {
+					return VisibilityState.partiallyVisible;
+				}
+				else if (dimension == pillar.NextDimension(this.Dimension)) {
+					return VisibilityState.partiallyInvisible;
+				}
+				else {
+					return VisibilityState.invisible;
+				}
+			case Quadrant.Left:
+			case Quadrant.SameSide:
+			case Quadrant.Right:
+				if ((int)dimensionShiftQuadrant < (int)playerQuadrant) {
+					if (dimension == pillar.NextDimension(this.Dimension)) {
+						return VisibilityState.visible;
+					}
+					else {
+						return VisibilityState.invisible;
+					}
+				}
+				else {
+					if (dimension == this.Dimension) {
+						return VisibilityState.visible;
+					}
+					else {
+						return VisibilityState.invisible;
+					}
+				}
+			default:
+				throw new Exception($"Unhandled case: {this.playerQuadrant}");
+		}
+	}
+
+	Quadrant DetermineQuadrant(Vector3 position) {
+		bool leftPlaneTest = leftParallels[pillar].GetSide(position);
+		bool rightPlaneTest = rightParallels[pillar].GetSide(position);
+
+		if (leftPlaneTest && rightPlaneTest) {
+			return Quadrant.Left;
+		}
+		else if (leftPlaneTest && !rightPlaneTest) {
+			return Quadrant.Opposite;
+		}
+		else if (!leftPlaneTest && rightPlaneTest) {
+			return Quadrant.SameSide;
+		}
+		else { // if (!leftPlaneTest && !rightPlaneTest) {
+			return Quadrant.Right;
+		}
+	}
+
+	void DeterminePlanes(DimensionPillar pillar) {
+		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillar.transform.position, pillar.axis);
+		Vector3 projectedVerticalPillarOffset = pillar.transform.position - projectedPillarCenter;
+
+		List<Vector3> allCorners = renderers.SelectMany(r => CornersOfRenderer(r)).ToList();
+		Vector3 positionAvg = renderers.Aggregate(Vector3.zero, (acc, r) => acc + Vector3.ProjectOnPlane(r.GetRendererBounds().center, pillar.axis));
+		positionAvg /= renderers.Length;
+		positionAvg += projectedVerticalPillarOffset;
+
+		Debug.DrawRay(pillar.transform.position, positionAvg - pillar.transform.position, Color.magenta);
+
+		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg - pillar.transform.position) < 0;
+		Vector3 dimensionShiftVector = flipDimensionShiftAngle ? Quaternion.AngleAxis(180, pillar.axis) * pillar.dimensionShiftVector : pillar.dimensionShiftVector;
+
+		float maxDistance = 0f;
+
+		minAngle = float.MaxValue;
+		maxAngle = float.MinValue;
+		minAngleVector = Vector3.zero;
+		maxAngleVector = Vector3.zero;
+		foreach (Vector3 corner in allCorners) {
+			Vector3 projectedCorner = Vector3.ProjectOnPlane(corner, pillar.axis) + projectedVerticalPillarOffset;
+			float signedAngle = Vector3.SignedAngle(dimensionShiftVector, projectedCorner - pillar.transform.position, pillar.axis);
+			if (signedAngle < minAngle) {
+				minAngle = signedAngle;
+				minAngleVector = (projectedCorner - pillar.transform.position);
+			}
+			else if (signedAngle > maxAngle) {
+				maxAngle = signedAngle;
+				maxAngleVector = (projectedCorner - pillar.transform.position);
+			}
+
+			float distance = (projectedCorner - pillar.transform.position).magnitude;
+			if (distance > maxDistance) {
+				maxDistance = distance;
+			}
+
+			if (DEBUG) {
+				Debug.DrawRay(pillar.transform.position, projectedCorner - pillar.transform.position, Color.green);
+			}
+		}
+
+		Vector3 minAngleNormalVector = Vector3.Cross(minAngleVector.normalized, pillar.axis);
+		Vector3 maxAngleNormalVector = Vector3.Cross(maxAngleVector.normalized, pillar.axis);
+		leftParallels[pillar] = new Plane(minAngleNormalVector, pillar.transform.position);
+		rightParallels[pillar] = new Plane(maxAngleNormalVector, pillar.transform.position);
+
+		maxDistances[pillar] = maxDistance;
+
+		// Don't spam the console with a moving object updating this info every frame
+		if (DEBUG && !thisObjectMoves) {
+			debug.Log($"Min: {minAngle}°, direction: {minAngleVector.normalized:F2}\nMax: {maxAngle}°, direction: {maxAngleVector.normalized:F2}");
+		}
+	}
+
+	Vector3[] CornersOfRenderer(EpitaphRenderer renderer) {
+		// Use Collider as bounds if override specified
+		if (colliderBoundsOverride != null) {
+			Bounds bounds = colliderBoundsOverride.bounds;
+			return new Vector3[] {
+				new Vector3(bounds.min.x, bounds.min.y, bounds.min.z),
+				new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+				new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+				new Vector3(bounds.min.x, bounds.max.y, bounds.max.z),
+				new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+				new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+				new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+				new Vector3(bounds.max.x, bounds.max.y, bounds.max.z)
+			};
+		}
+
+		MeshFilter meshFilter = renderer.GetComponent<MeshFilter>();
+		if (renderer.r is MeshRenderer && meshFilter != null) {
+			Bounds localBounds = meshFilter.sharedMesh.bounds;
+			return new Vector3[] {
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.min.x, localBounds.min.y, localBounds.min.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.min.x, localBounds.min.y, localBounds.max.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.min.x, localBounds.max.y, localBounds.min.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.min.x, localBounds.max.y, localBounds.max.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.max.x, localBounds.min.y, localBounds.min.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.max.x, localBounds.min.y, localBounds.max.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.max.x, localBounds.max.y, localBounds.min.z)),
+				meshFilter.transform.TransformPoint(new Vector3(localBounds.max.x, localBounds.max.y, localBounds.max.z))
+			};
+		}
+		else {
+			Bounds bounds = renderer.GetRendererBounds();
+			return new Vector3[] {
+				new Vector3(bounds.min.x, bounds.min.y, bounds.min.z),
+				new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+				new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+				new Vector3(bounds.min.x, bounds.max.y, bounds.max.z),
+				new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+				new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+				new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+				new Vector3(bounds.max.x, bounds.max.y, bounds.max.z)
+			};
+		}
+	}
+
+	private void OnDrawGizmosSelected() {
+		if (DEBUG && pillar != null) {
+			DrawPlanes(pillar.transform.position, leftParallels[pillar].normal, pillar.dimensionWall.pillarHeight, 2f*maxDistances[pillar]);
+			DrawPlanes(pillar.transform.position, rightParallels[pillar].normal, pillar.dimensionWall.pillarHeight, 2f*maxDistances[pillar]);
+		}
+	}
+
+	void DrawPlanes(Vector3 point, Vector3 normal, float height = 16f, float width = 100f) {
+		Quaternion rotation = Quaternion.LookRotation(normal);
+		Matrix4x4 trs = Matrix4x4.TRS(point, rotation, Vector3.one);
+		Gizmos.matrix = trs;
+		Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
+		float depth = 0.0001f;
+		Gizmos.DrawCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+		Gizmos.color = Color.blue;
+		Gizmos.DrawWireCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+		Gizmos.matrix = Matrix4x4.identity;
+		Gizmos.color = Color.white;
+	}
 
 	#region Saving
 	public override string ID => $"PillarDimensionObject_{id.uniqueId}";
 
 	[Serializable]
 	class PillarDimensionObjectSave {
-		bool treatChildrenAsOneObjectRecursively;
+		public object dimensionObjectSave;
 
-		int channel;
-		int baseDimension;
-		bool reverseVisibilityStates;
-		bool ignoreMaterialChanges;
-		int curDimensionSetInMaterial;
+		SerializableReference<DimensionPillar>[] pillars;
+		int dimension;
 
-		int visibilityState;
+		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj, object dimensionObjBaseSave) {
+			this.dimensionObjectSave = dimensionObjBaseSave;
 
-		bool continuouslyUpdateOnOffAngles;
-
-		int objectStartDimension;
-		int objectEndDimension;
-		int findPillarsTechnique;
-
-		List<SerializableReference<DimensionPillar>> whitelist = new List<SerializableReference<DimensionPillar>>();
-		List<SerializableReference<DimensionPillar>> blacklist = new List<SerializableReference<DimensionPillar>>();
-		float pillarSearchRadius;
-		SerializableVector3 pillarSearchBoxSize;
-
-		bool overrideOnOffAngles;
-		Angle onAngle;
-		Angle offAngle;
-		Angle centralAngle;
-
-		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj) {
-			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
-			this.channel = dimensionObj.channel;
-			this.baseDimension = dimensionObj.baseDimension;
-			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
-			this.ignoreMaterialChanges = dimensionObj.ignoreMaterialChanges;
-			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
-			this.visibilityState = (int)dimensionObj.visibilityState;
-			this.continuouslyUpdateOnOffAngles = dimensionObj.continuouslyUpdateOnOffAngles;
-			this.objectStartDimension = dimensionObj.objectStartDimension;
-			this.objectEndDimension = dimensionObj.objectEndDimension;
-			this.findPillarsTechnique = (int)dimensionObj.findPillarsTechnique;
-			this.whitelist = dimensionObj.whitelist.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToList();
-			this.blacklist = dimensionObj.blacklist.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToList();
-			this.pillarSearchRadius = dimensionObj.pillarSearchRadius;
-			this.pillarSearchBoxSize = dimensionObj.pillarSearchBoxSize;
-			this.overrideOnOffAngles = dimensionObj.overrideOnOffAngles;
-			this.onAngle = dimensionObj.onAngle;
-			this.offAngle = dimensionObj.offAngle;
-			this.centralAngle = dimensionObj.centralAngle;
+			this.pillars = dimensionObj.pillars.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToArray();
+			this.dimension = dimensionObj.Dimension;
 		}
 
 		public void LoadSave(PillarDimensionObject dimensionObj) {
-			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
-			dimensionObj.channel = this.channel;
-			dimensionObj.baseDimension = this.baseDimension;
-			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
-			dimensionObj.ignoreMaterialChanges = this.ignoreMaterialChanges;
-			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;
-			dimensionObj.startingVisibilityState = (VisibilityState)this.visibilityState;
-			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;
+			dimensionObj.pillars = this.pillars.Select<SerializableReference<DimensionPillar>, DimensionPillar>(p => p).ToArray();
 
-			dimensionObj.continuouslyUpdateOnOffAngles = this.continuouslyUpdateOnOffAngles;
-			dimensionObj.objectStartDimension = this.objectStartDimension;
-			dimensionObj.objectEndDimension = this.objectEndDimension;
-			dimensionObj.findPillarsTechnique = (FindPillarsTechnique)this.findPillarsTechnique;
-			dimensionObj.whitelist = this.whitelist.Select(p => p.Reference).ToList();
-			dimensionObj.blacklist = this.blacklist.Select(p => p.Reference).ToList();
-			dimensionObj.pillarSearchRadius = this.pillarSearchRadius;
-			dimensionObj.pillarSearchBoxSize = this.pillarSearchBoxSize;
-			dimensionObj.overrideOnOffAngles = this.overrideOnOffAngles;
-			dimensionObj.onAngle = this.onAngle;
-			dimensionObj.offAngle = this.offAngle;
-			dimensionObj.centralAngle = this.centralAngle;
-
-			if (dimensionObj.gameObject.activeInHierarchy) {
-				dimensionObj.SwitchVisibilityState(dimensionObj.visibilityState, true);
-			}
+			dimensionObj.Dimension = this.dimension;
 		}
 	}
 
 	public override object GetSaveObject() {
-		return new PillarDimensionObjectSave(this);
+		return new PillarDimensionObjectSave(this, base.GetSaveObject());
 	}
 
 	public override void LoadFromSavedObject(object savedObject) {
 		PillarDimensionObjectSave save = savedObject as PillarDimensionObjectSave;
 
+		base.LoadFromSavedObject(save.dimensionObjectSave);
 		save.LoadSave(this);
 	}
 	#endregion

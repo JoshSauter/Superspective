@@ -162,7 +162,15 @@ namespace MagicTriggerMechanics {
 
 		#region Saving
 		public bool SkipSave { get; set; }
-		public string ID => $"MagicTrigger_{id.uniqueId}";
+		public string ID {
+			get {
+				if (id == null || id.uniqueId == null) {
+					throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
+				}
+				return $"MagicTrigger_{id.uniqueId}";
+			}
+		}
+		//public string ID => $"MagicTrigger_{id.uniqueId}";
 
 		[Serializable]
 		class MagicTriggerSave {

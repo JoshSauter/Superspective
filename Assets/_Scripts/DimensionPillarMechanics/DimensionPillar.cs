@@ -34,7 +34,34 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 	}
 
+	public Vector3 dimensionShiftVector => transform.forward;
 	public Vector3 axis => transform.up;
+	public Plane dimensionShiftParallelPlane {
+		get {
+			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(dimensionShiftVector.normalized, axis);
+			return new Plane(dimensionShiftPlaneNormalVector, transform.position);
+		}
+	}
+	public Plane dimensionShiftPerpindicularPlane {
+		get {
+			return new Plane(dimensionShiftVector.normalized, transform.position);
+		}
+	}
+	[SerializeField]
+	private Angle.Quadrant _playerQuadrant;
+	public Angle.Quadrant playerQuadrant {
+		get { return _playerQuadrant; }
+		set {
+			if (playerQuadrant == Angle.Quadrant.I && value == Angle.Quadrant.IV) {
+				ShiftDimensionUp();
+			}
+			else if (playerQuadrant == Angle.Quadrant.IV && value == Angle.Quadrant.I) {
+				ShiftDimensionDown();
+			}
+
+			_playerQuadrant = value;
+		}
+	}
 
 	public bool DEBUG = false;
 	DebugLogger debug;
@@ -44,13 +71,14 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	public string pillarKey;
 	[SerializeField]
 	GameObject dimensionWallPrefab;
+	public DimensionWall dimensionWall;
 
 	[Range(1, 123)]
 	public int maxDimension;
 	public int curDimension;
 
+	// TO REMOVE:
 	public bool overrideDimensionShiftAngle = false;
-	public Vector3 dimensionShiftVector => transform.forward;
 	public Angle dimensionShiftAngle;
 	public Angle cameraAngleRelativeToPillar;
 
@@ -96,7 +124,8 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	void FixedUpdate() {
 		if (activePillar != this) return;
 
-		UpdateRelativeCameraAngle();
+		playerQuadrant = GetQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
+		//UpdateRelativeCameraAngle();
     }
 
 	private void Initialize() {
@@ -107,6 +136,26 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 		cameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
 		initialized = true;
+	}
+
+	Angle.Quadrant GetQuadrant(Vector3 position) {
+		bool parallelPlaneTest = dimensionShiftParallelPlane.GetSide(position);
+		bool perpindicularPlaneTest = dimensionShiftPerpindicularPlane.GetSide(position);
+
+		//debug.Log($"ParallelTest: {parallelPlaneTest}\nPerpindicularTest: {perpindicularPlaneTest}");
+
+		if (parallelPlaneTest && perpindicularPlaneTest) {
+			return Angle.Quadrant.I;
+		}
+		else if (parallelPlaneTest && !perpindicularPlaneTest) {
+			return Angle.Quadrant.II;
+		}
+		else if (!parallelPlaneTest && !perpindicularPlaneTest) {
+			return Angle.Quadrant.III;
+		}
+		else /*if (!parallelPlaneTest && perpindicularPlaneTest)*/ {
+			return Angle.Quadrant.IV;
+		}
 	}
 
 	private void UpdateRelativeCameraAngle(bool forceUpdate = false) {
@@ -124,30 +173,38 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			debug.Log("Prev: " + cameraAngleRelativeToPillar + "\nNew: " + newCameraAngleRelativeToPillar);
 		}
 
-
 		cameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;
+	}
+
+	void ShiftDimensionUp() {
+		int prevDimension = curDimension;
+		curDimension = NextDimension(curDimension);
+
+		OnDimensionChange?.Invoke(prevDimension, curDimension);
+		OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Up);
+
+		debug.Log("Shift to dimension " + curDimension);
+	}
+
+	void ShiftDimensionDown() {
+		int prevDimension = curDimension;
+		curDimension = PrevDimension(curDimension);
+
+		OnDimensionChange?.Invoke(prevDimension, curDimension);
+		OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Down);
+
+		debug.Log("Shift to dimension " + curDimension);
 	}
 
 	void UpdateDimensionShifting(Angle prevAngle, Angle newAngle, bool clockwise) {
 		bool shiftDimensionUp = clockwise && Angle.IsAngleBetween((curDimension+1) * Angle.D360, prevAngle, newAngle);
 		bool shiftDimensionDown = !clockwise && Angle.IsAngleBetween(curDimension * Angle.D360, newAngle, prevAngle);
+
 		if (shiftDimensionUp) {
-			int prevDimension = curDimension;
-			curDimension = NextDimension(curDimension);
-
-			OnDimensionChange?.Invoke(prevDimension, curDimension);
-			OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Up);
-
-			debug.Log("Shift to dimension " + curDimension);
+			ShiftDimensionUp();
 		}
 		if (shiftDimensionDown) {
-			int prevDimension = curDimension;
-			curDimension = PrevDimension(curDimension);
-
-			OnDimensionChange?.Invoke(prevDimension, curDimension);
-			OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Down);
-
-			debug.Log("Shift to dimension " + curDimension);
+			ShiftDimensionDown();
 		}
 	}
 
@@ -186,6 +243,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	private void InitializeDimensionWall() {
 		GameObject dimensionWallGO = Instantiate(dimensionWallPrefab, transform);
 		dimensionWallGO.name = "Dimension Wall";
+		dimensionWall = dimensionWallGO.GetComponent<DimensionWall>();
 	}
 
 	[ContextMenu("Print active pillar details")]

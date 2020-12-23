@@ -27,7 +27,7 @@ public class Headbob : MonoBehaviour, SaveableObject {
     void FixedUpdate() {
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
-		if (playerMovement.grounded && playerSpeed > 0.2f) {
+		if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f) {
 			curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
 			curAmplitude = headbobAmount * Mathf.Lerp(minAmplitude, maxAmplitude, Mathf.InverseLerp(0, 20f, playerSpeed));
 

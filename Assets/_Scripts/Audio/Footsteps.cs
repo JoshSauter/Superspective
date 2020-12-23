@@ -36,7 +36,7 @@ public class Footsteps : MonoBehaviour {
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
 		sound.audioSource.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
-		if (playerMovement.grounded && playerSpeed > 0.2f) {
+		if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
 			float thisFrameOffset = thisFrameBobAmount - curBobAmountUnamplified;
 			curBobAmountUnamplified = thisFrameBobAmount;

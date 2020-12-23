@@ -86,24 +86,24 @@ namespace EpitaphUtils {
 			return go.AddComponent<T>().GetCopyOf(toAdd) as T;
 		}
 
-		public static T[] GetComponentsInChildrenRecursively<T>(this UnityEngine.Transform parent) where T : Component {
+		public static T[] GetComponentsInChildrenRecursively<T>(this Transform parent) where T : Component {
 			List<T> components = new List<T>();
 			GetComponentsInChildrenRecursivelyHelper(parent, ref components);
 			return components.ToArray();
 		}
 
-		private static void GetComponentsInChildrenRecursivelyHelper<T>(UnityEngine.Transform parent, ref List<T> componentsSoFar) where T : Component {
+		private static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar) where T : Component {
 			T maybeComponent = parent.GetComponent<T>();
 			if (maybeComponent != default(T)) {
 				componentsSoFar.Add(maybeComponent);
 			}
 
-			foreach (UnityEngine.Transform child in parent) {
+			foreach (Transform child in parent) {
 				GetComponentsInChildrenRecursivelyHelper(child, ref componentsSoFar);
 			}
 		}
 
-		public static T[] GetComponentsInChildrenOnly<T>(this UnityEngine.Transform parent) where T : Component {
+		public static T[] GetComponentsInChildrenOnly<T>(this Transform parent) where T : Component {
 			T[] all = parent.GetComponentsInChildren<T>();
 			T[] children = new T[parent.childCount];
 			int index = 0;
@@ -117,7 +117,7 @@ namespace EpitaphUtils {
 			return children;
 		}
 
-		public static T GetComponentInChildrenOnly<T>(this UnityEngine.Transform parent) where T : Component {
+		public static T GetComponentInChildrenOnly<T>(this Transform parent) where T : Component {
 			T[] all = parent.GetComponentsInChildren<T>();
 			foreach (T each in all) {
 				if (each.transform != parent) {
@@ -128,9 +128,9 @@ namespace EpitaphUtils {
 		}
 
 		// Recursively search up the transform tree through parents to find a DimensionObject
-		public static PillarDimensionObject FindDimensionObjectRecursively(UnityEngine.Transform go) {
+		public static PillarDimensionObject FindDimensionObjectRecursively(Transform go) {
 			PillarDimensionObject dimensionObj = go.GetComponent<PillarDimensionObject>();
-			UnityEngine.Transform parent = go.parent;
+			Transform parent = go.parent;
 			if (dimensionObj != null) {
 				return dimensionObj;
 			}
@@ -140,8 +140,8 @@ namespace EpitaphUtils {
 			else return null;
 		}
 
-		public static UnityEngine.Transform[] GetChildren(this UnityEngine.Transform parent) {
-			return parent.GetComponentsInChildrenOnly<UnityEngine.Transform>();
+		public static Transform[] GetChildren(this Transform parent) {
+			return parent.GetComponentsInChildrenOnly<Transform>();
 		}
 
 		public static bool IsVisibleFrom(this Renderer r, Camera camera) {
@@ -159,7 +159,7 @@ namespace EpitaphUtils {
 		public static void SetLayerRecursively(GameObject obj, int layer) {
 			obj.layer = layer;
 
-			foreach (UnityEngine.Transform child in obj.transform) {
+			foreach (Transform child in obj.transform) {
 				SetLayerRecursively(child.gameObject, layer);
 			}
 		}

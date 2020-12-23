@@ -55,7 +55,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
-	private void Awake() {
+	protected virtual void Awake() {
 		debug = new DebugLogger(this, () => DEBUG);
 
 		renderers = GetAllEpitaphRenderers().ToArray();
@@ -113,7 +113,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
 
-		int setDimension = -1;
 		switch (nextState) {
 			case VisibilityState.invisible:
 				visibilityState = VisibilityState.invisible;
@@ -126,7 +125,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 				break;
 			case VisibilityState.partiallyInvisible:
 				visibilityState = VisibilityState.partiallyInvisible;
-				if (reverseVisibilityStates) setDimension = DimensionPillar.activePillar?.NextDimension(setDimension) ?? setDimension;
 				break;
 		}
 
@@ -258,6 +256,9 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolve"));
 				break;
+			case "Custom/UnlitDissolveTransparent":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolveTransparent"));
+				break;
 			case "Standard (Specular setup)":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObjectSpecular"));
 				break;
@@ -295,7 +296,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	#region Saving
 	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
-	public virtual string ID => $"DimensionObjectBase_{id.uniqueId}";
+	public virtual string ID => $"DimensionObject_{id.uniqueId}";
 	//public virtual string ID {
 	//	get {
 	//		if (id == null || id.uniqueId == null) {
@@ -306,7 +307,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	//}
 
 	[Serializable]
-	class DimensionObjectBaseSave {
+	class DimensionObjectSave {
 		bool treatChildrenAsOneObjectRecursively;
 
 		bool initialized;
@@ -318,7 +319,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		int startingVisibilityState;
 		int visibilityState;
 
-		public DimensionObjectBaseSave(DimensionObject dimensionObj) {
+		public DimensionObjectSave(DimensionObject dimensionObj) {
 			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
 			this.initialized = dimensionObj.initialized;
 			this.channel = dimensionObj.channel;
@@ -344,11 +345,11 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	}
 
 	public virtual object GetSaveObject() {
-		return new DimensionObjectBaseSave(this);
+		return new DimensionObjectSave(this);
 	}
 
 	public virtual void LoadFromSavedObject(object savedObject) {
-		DimensionObjectBaseSave save = savedObject as DimensionObjectBaseSave;
+		DimensionObjectSave save = savedObject as DimensionObjectSave;
 
 		save.LoadSave(this);
 	}

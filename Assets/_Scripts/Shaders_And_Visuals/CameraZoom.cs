@@ -33,7 +33,7 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
 	private void Update() {
         zoomed = input.Action2Held && playerLook.state == PlayerLook.State.ViewUnlocked;
 
-        mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, zoomed ? zoomFOV : defaultFOV, Time.deltaTime * zoomLerpSpeed);
+        mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, zoomed ? zoomFOV : defaultFOV, Time.deltaTime * zoomLerpSpeed * (zoomed ? 1f : 2f));
         foreach (var cam in otherCameras) {
             cam.fieldOfView = mainCamera.fieldOfView;
 		}

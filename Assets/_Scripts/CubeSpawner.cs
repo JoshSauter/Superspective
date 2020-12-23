@@ -20,9 +20,44 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 			return _id;
 		}
 	}
-	// TODO: Find a replacement for this dimension cube logic below
-	// Spawns a "fake" cube prefab that looks like a normal cube but disappears when in other dimensions
-	// The fake cube is replaced by a real one when it is moved out of the spawner
+
+	public enum GrowCubeState {
+		Idle,
+		Growing,
+		Grown
+	}
+	GrowCubeState _growCubeState;
+	public GrowCubeState growCubeState {
+		get { return _growCubeState; }
+		set {
+			if (value != _growCubeState) {
+				timeSinceGrowCubeStateChanged = 0f;
+				_growCubeState = value;
+			}
+		}
+	}
+	float timeSinceGrowCubeStateChanged = 0f;
+	const float growTime = 0.75f;
+	Vector3 growEndSize;
+
+	public enum ShrinkCubeState {
+		Idle,
+		Shrinking
+	}
+	ShrinkCubeState _shrinkCubeState;
+	public ShrinkCubeState shrinkCubeState {
+		get { return _shrinkCubeState; }
+		set {
+			if (value != _shrinkCubeState) {
+				timeSinceShrinkCubeStateChanged = 0f;
+				_shrinkCubeState = value;
+			}
+		}
+	}
+	float timeSinceShrinkCubeStateChanged = 0f;
+	const float shrinkTime = 0.4f;
+	Vector3 shrinkStartSize;
+
 	public PickupObject cubePrefab;
 	public AnimationCurve cubeGrowCurve;
 	public AnimationCurve cubeShrinkCurve;
@@ -32,6 +67,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 	[ReadOnly]
 	public PickupObject objectBeingSuspended;
 	PickupObject objectGrabbedFromSpawner = null;
+	PickupObject objectShrinking;
 	[ReadOnly]
 	public Rigidbody rigidbodyOfObjectBeingSuspended;
 
@@ -45,6 +81,19 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 		}
     }
 
+	void Update() {
+		if (objectBeingSuspended == null && (objectGrabbedFromSpawner == null || objectGrabbedFromSpawner.isReplaceable)) {
+			SpawnNewCube();
+		}
+
+		if (objectGrabbedFromSpawner != null && objectBeingSuspended != null) {
+			objectBeingSuspended.gameObject.SetActive(objectGrabbedFromSpawner.isReplaceable);
+		}
+
+		UpdateGrowCube(objectBeingSuspended);
+		UpdateShrinkAndDestroyCube(objectShrinking);
+	}
+
     void FixedUpdate() {
 		if (objectBeingSuspended != null) {
 			rigidbodyOfObjectBeingSuspended.useGravity = false;
@@ -54,10 +103,6 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 				rigidbodyOfObjectBeingSuspended.AddForce(750 * (center - objPos), ForceMode.Force);
 				rigidbodyOfObjectBeingSuspended.AddTorque(10*Vector3.up, ForceMode.Force);
 			}
-		}
-
-		if (objectGrabbedFromSpawner != null && objectBeingSuspended != null) {
-			objectBeingSuspended.gameObject.SetActive(objectGrabbedFromSpawner.isReplaceable);
 		}
     }
 
@@ -77,77 +122,81 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 	void SpawnNewCube() {
 		const float randomizeOffset = 1.0f;
 		PickupObject newCube = Instantiate(cubePrefab, thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset), new Quaternion());
+		objectBeingSuspended = newCube;
 		SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 		newCube.GetComponent<GravityObject>().useGravity = false;
 
-		//newCube.Drop();
 		Physics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>(), true);
-		objectBeingSuspended = newCube;
 		rigidbodyOfObjectBeingSuspended = newCube.thisRigidbody;
 		rigidbodyOfObjectBeingSuspended.useGravity = false;
 
+		// TODO: Make this happen when the cube is pulled out rather than when it is clicked on
 		objectBeingSuspended.OnPickupSimple += DestroyCubeAlreadyGrabbedFromSpawner;
 
-		FakeCubeForSpawner fakeCube = newCube.GetComponent<FakeCubeForSpawner>();
-		if (fakeCube != null) {
-			fakeCube.thisSpawner = this;
-		}
-
-		StartCoroutine(GrowCube(newCube));
+		growEndSize = newCube.transform.localScale;
+		growCubeState = GrowCubeState.Growing;
 	}
 
 	public void DestroyCubeAlreadyGrabbedFromSpawner() {
-		if (objectGrabbedFromSpawner != null) {
-			StartCoroutine(ShrinkAndDestroyCube(objectGrabbedFromSpawner));
+		if (objectGrabbedFromSpawner != null && objectGrabbedFromSpawner.isReplaceable) {
+			objectShrinking = objectGrabbedFromSpawner;
 			objectGrabbedFromSpawner = null;
+
+			shrinkStartSize = objectShrinking.transform.localScale;
+			shrinkCubeState = ShrinkCubeState.Shrinking;
 		}
 	}
 
-	IEnumerator GrowCube(PickupObject cube) {
-		// Don't allow growing cubes to be picked up (don't want to break some logic and end up with a mis-sized cube)
-		cube.interactable = false;
-		const float growTime = 0.75f;
-		float timeElapsed = 0;
+	void UpdateGrowCube(PickupObject cube) {
+		switch (growCubeState) {
+			case GrowCubeState.Idle:
+			case GrowCubeState.Grown:
+				break;
+			case GrowCubeState.Growing:
+				// Don't allow growing cubes to be picked up (don't want to break some logic and end up with a mis-sized cube)
+				cube.interactable = false;
+				if (timeSinceGrowCubeStateChanged == 0) {
+					cube.transform.localScale = Vector3.zero;
+				}
+				if (timeSinceGrowCubeStateChanged < growTime) {
+					timeSinceGrowCubeStateChanged += Time.deltaTime;
+					float t = Mathf.Clamp01(timeSinceGrowCubeStateChanged / growTime);
 
-		Vector3 endSize = cube.transform.localScale;
-		cube.transform.localScale = Vector3.zero;
-
-		while (timeElapsed < growTime) {
-			timeElapsed += Time.deltaTime;
-			float t = Mathf.Clamp01(timeElapsed / growTime);
-
-			cube.transform.localScale = endSize * cubeGrowCurve.Evaluate(t);
-
-			yield return null;
+					cube.transform.localScale = growEndSize * cubeGrowCurve.Evaluate(t);
+				}
+				else {
+					cube.transform.localScale = growEndSize;
+					cube.interactable = true;
+					growCubeState = GrowCubeState.Grown;
+				}
+				break;
+			default:
+				break;
 		}
 
-		cube.transform.localScale = endSize;
-		cube.interactable = true;
 	}
 
-	IEnumerator ShrinkAndDestroyCube(PickupObject cube) {
-		// Don't allow shrinking cubes to be picked up
-		cube.interactable = false;
-		// Trick to get the cube to not interact with the player anymore but still collide with ground
-		cube.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
-		cube.thisRigidbody.useGravity = false;
-		const float shrinkTime = 0.4f;
-		float timeElapsed = 0;
+	void UpdateShrinkAndDestroyCube(PickupObject cube) {
+		if (shrinkCubeState == ShrinkCubeState.Shrinking) {
+			// Don't allow shrinking cubes to be picked up
+			cube.interactable = false;
+			// Trick to get the cube to not interact with the player anymore but still collide with ground
+			cube.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+			cube.thisRigidbody.useGravity = false;
 
-		Vector3 startSize = cube.transform.localScale;
-		Vector3 endSize = Vector3.zero;
+			if (timeSinceShrinkCubeStateChanged < shrinkTime) {
+				timeSinceShrinkCubeStateChanged += Time.deltaTime;
+				float t = Mathf.Clamp01(timeSinceShrinkCubeStateChanged / shrinkTime);
 
-		while (timeElapsed < shrinkTime) {
-			timeElapsed += Time.deltaTime;
-			float t = Mathf.Clamp01(timeElapsed / shrinkTime);
-
-			cube.transform.localScale = Vector3.LerpUnclamped(startSize, endSize, cubeShrinkCurve.Evaluate(t));
-
-			yield return null;
+				cube.transform.localScale = Vector3.LerpUnclamped(shrinkStartSize, Vector3.zero, cubeShrinkCurve.Evaluate(t));
+			}
+			else {
+				cube.transform.localScale = Vector3.zero;
+				Destroy(cube.gameObject);
+				objectShrinking = null;
+				shrinkCubeState = ShrinkCubeState.Idle;
+			}
 		}
-
-		cube.transform.localScale = endSize;
-		Destroy(cube.gameObject);
 	}
 
 	#region Saving

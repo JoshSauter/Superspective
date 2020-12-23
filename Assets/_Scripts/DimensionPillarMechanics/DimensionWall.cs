@@ -11,7 +11,7 @@ public class DimensionWall : MonoBehaviour {
 	Vector3 topOfPillar { get { return pillarRenderer.bounds.center + Vector3.up * pillarRenderer.bounds.size.y / 2f; } }
 	Vector3 bottomOfPillar { get { return pillarRenderer.bounds.center - Vector3.up * pillarRenderer.bounds.size.y / 2f; } }
 
-	float pillarHeight {
+	public float pillarHeight {
 		get {
 			return topOfPillar.y - bottomOfPillar.y;
 		}

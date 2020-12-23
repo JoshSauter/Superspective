@@ -2,8 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
+using Saving;
+using System;
 
-public class MultiDimensionCube : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class MultiDimensionCube : MonoBehaviour, SaveableObject {
+	UniqueId _id;
+	public UniqueId id {
+		get {
+			if (_id == null) {
+				_id = GetComponent<UniqueId>();
+			}
+			return _id;
+		}
+	}
+
 	public enum State {
 		Materialized,
 		Materializing
@@ -31,77 +44,74 @@ public class MultiDimensionCube : MonoBehaviour {
 			_state = value;
 		}
 	}
-	// TODO: Continue implementing to get rid of Coroutine
 	float timeSinceStateChange = 0f;
 	InteractableObject interactableObject;
 	public PickupObject pickupCube;
-	public PillarDimensionObject2 corporealCubeDimensionObj, invertedCubeDimensionObj;
-	public EpitaphRenderer cubeFrameRenderer, corporealGlassRenderer, invertedCubeRenderer, raymarchRenderer;
+	PillarDimensionObject corporealCubeDimensionObj, invertedCubeDimensionObj;
+	EpitaphRenderer cubeFrameRenderer, corporealGlassRenderer, invertedCubeRenderer, raymarchRenderer;
 
 	Transform[] cubeTransforms;
 
 	public BoxCollider thisCollider;
 
-	BoxCollider kinematicCollider;
-	Rigidbody kinematicRigidbody;
-
+	public BoxCollider kinematicCollider;
 	BoxCollider detectWhenPlayerIsNearCollider;
 
 	const string defaultLayerName = "Default";
 	const string propName = "_DissolveValue";
-	float outlineFadeInTime = .5f;
-	float invertColorsDelay = 0.4f;
-	float invertColorsFadeOutTime = .5f;
+	const float outlineFadeInTime = .5f;
+	const float invertColorsDelay = 0.4f;
+	const float invertColorsFadeOutTime = .5f;
 
-	public void OnLeftMouseButtonDown() {
-		if (!pickupCube.isHeld && corporealCubeDimensionObj.visibilityState != VisibilityState.visible) {
+	public void OnPickup() {
+		if (corporealCubeDimensionObj.visibilityState != VisibilityState.visible) {
 			Materialize();
 		}
-	}
-
-	void SetupKinematicCollider() {
-		GameObject kinematicGameObject = new GameObject("KinematicCollider");
-		kinematicGameObject.transform.SetParent(transform);
-		kinematicGameObject.transform.localScale = Vector3.one;
-		kinematicGameObject.layer = LayerMask.NameToLayer("CollideWithPlayerOnly");
-
-		kinematicRigidbody = kinematicGameObject.AddComponent<Rigidbody>();
-		kinematicRigidbody.isKinematic = true;
-
-		kinematicCollider = kinematicGameObject.AddComponent<BoxCollider>();
-		kinematicCollider.size = thisCollider.size * 1.01f;
-		kinematicCollider.enabled = !thisCollider.enabled;
-	}
-
-	void SetupDetectPlayerIsNearCollider() {
-		GameObject triggerGameObject = new GameObject("DetectPlayerIsNearCollider");
-		triggerGameObject.transform.SetParent(transform);
-		triggerGameObject.transform.localScale = Vector3.one;
-		triggerGameObject.transform.localPosition = Vector3.zero;
-		triggerGameObject.transform.localRotation = new Quaternion();
-		triggerGameObject.layer = LayerMask.NameToLayer("CollideWithPlayerOnly");
-
-		detectWhenPlayerIsNearCollider = triggerGameObject.AddComponent<BoxCollider>();
-		detectWhenPlayerIsNearCollider.size = thisCollider.size * 1.02f;
-		detectWhenPlayerIsNearCollider.isTrigger = true;
-
-		triggerGameObject.AddComponent<FreezeRigidbodyWhenPlayerIsNear>().pickupCubeDimensionShift = this;
 	}
 
 	void Awake() {
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
-			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+		}
+
+		Transform corporealCube = transform.Find("CorporealCube");
+		Transform invertedCube = transform.Find("InvertedCube");
+		pickupCube = GetComponent<PickupObject>();
+
+		corporealCubeDimensionObj = corporealCube.GetComponent<PillarDimensionObject>();
+		invertedCubeDimensionObj = invertedCube.GetComponent<PillarDimensionObject>();
+
+		cubeFrameRenderer = corporealCube.GetComponent<EpitaphRenderer>();
+		corporealGlassRenderer = corporealCube.Find("Glass").GetComponent<EpitaphRenderer>();
+		invertedCubeRenderer = invertedCube.GetComponent<EpitaphRenderer>();
+		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<EpitaphRenderer>();
+
+		thisCollider = GetComponent<BoxCollider>();
+		kinematicCollider = invertedCube.Find("KinematicCollider").GetComponent<BoxCollider>();
+		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
+
+		DynamicObjectManager.OnDynamicObjectCreated += SetUniqueIdsUponCreation;
+	}
+
+	void OnDestroy() {
+		DynamicObjectManager.OnDynamicObjectCreated -= SetUniqueIdsUponCreation;
+	}
+
+	void SetUniqueIdsUponCreation(string id) {
+		if (id == this.id.uniqueId) {
+			corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
+			invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
 		}
 	}
 
 	void Start() {
-		cubeTransforms = corporealCubeDimensionObj.transform.GetComponentsInChildrenRecursively<Transform>();
-		thisCollider = GetComponent<BoxCollider>();
+		pickupCube.OnPickupSimple += OnPickup;
 
-		SetupKinematicCollider();
-		SetupDetectPlayerIsNearCollider();
+		cubeTransforms = corporealCubeDimensionObj.transform.GetComponentsInChildrenRecursively<Transform>();
+
+		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
+		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
 
 		corporealCubeDimensionObj.OnStateChange += HandleStateChange;
 	}
@@ -111,6 +121,8 @@ public class MultiDimensionCube : MonoBehaviour {
 		kinematicCollider.transform.position = transform.position;
 		kinematicCollider.transform.rotation = transform.rotation;
 		kinematicCollider.size = thisCollider.size * 1.01f;
+
+		kinematicCollider.enabled = detectWhenPlayerIsNearCollider.enabled = corporealCubeDimensionObj.visibilityState == VisibilityState.invisible;
 	}
 
     void Update() {
@@ -145,6 +157,7 @@ public class MultiDimensionCube : MonoBehaviour {
 					}
 				}
 				else {
+					invertedCubeDimensionObj.Dimension = corporealCubeDimensionObj.Dimension;
 					state = State.Materialized;
 				}
 				break;
@@ -154,17 +167,47 @@ public class MultiDimensionCube : MonoBehaviour {
 	}
 
 	void HandleStateChange(VisibilityState newState) {
-		if (newState == VisibilityState.visible) {
-			ResetMaterialsThisDimension();
-		}
-		else if (newState == VisibilityState.invisible) {
-			ResetMaterialsOtherDimensions();
+		if (state != State.Materializing) {
+			switch (newState) {
+				case VisibilityState.invisible:
+					// Corporeal cube should be invisible, inverted cube visible
+					SetDissolveValuesForVisibility(corporealCubeVisible: false, invertedCubeVisible: true);
+
+					// Don't allow the players to hold inverted cubes
+					pickupCube.Drop();
+					break;
+				case VisibilityState.partiallyVisible:
+				case VisibilityState.partiallyInvisible:
+					// Both should be visible, visibility now controlled by dimension shaders
+					SetDissolveValuesForVisibility(corporealCubeVisible: true, invertedCubeVisible: true);
+					break;
+				case VisibilityState.visible:
+					// Corporeal cube should be visible, inverted cube invisible
+					SetDissolveValuesForVisibility(corporealCubeVisible: true, invertedCubeVisible: false);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 
+	void SetDissolveValuesForVisibility(bool corporealCubeVisible, bool invertedCubeVisible) {
+		cubeFrameRenderer.SetFloat(propName, corporealCubeVisible ? 0 : 1);
+		corporealGlassRenderer.SetFloat(propName, corporealCubeVisible ? 0 : 1);
+		invertedCubeRenderer.SetFloat(propName, invertedCubeVisible ? 0 : 1);
+		raymarchRenderer.SetFloat(propName, invertedCubeVisible ? 0 : 1);
+	}
+
 	void Materialize() {
-		corporealCubeDimensionObj.baseDimension = DimensionPillar.activePillar.curDimension;
-		invertedCubeDimensionObj.baseDimension = DimensionPillar.activePillar.curDimension;
+		VisibilityState desiredState = (VisibilityState)(((int)corporealCubeDimensionObj.visibilityState + 2) % 4);
+		int desiredDimension = corporealCubeDimensionObj.GetDimensionWhereThisObjectWouldBeInVisibilityState(v => v == desiredState);
+		if (desiredDimension == -1) {
+			Debug.LogError($"Could not find a dimension where {corporealCubeDimensionObj.visibilityState} becomes {desiredState}");
+		}
+		else {
+			corporealCubeDimensionObj.Dimension = desiredDimension;
+		}
+
 		ResetMaterialsOtherDimensions();
 		state = State.Materializing;
 	}
@@ -199,4 +242,35 @@ public class MultiDimensionCube : MonoBehaviour {
 		invertedCubeRenderer.SetFloat(propName, 0);
 		raymarchRenderer.SetFloat(propName, 0);
 	}
+
+	#region Saving
+	public bool SkipSave { get; set; }
+	public string ID => $"MultiDimensionCube_{id.uniqueId}";
+
+	[Serializable]
+	class MultiDimensionCubeSave {
+		int state;
+		float timeSinceStateChange;
+
+		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) {
+			this.state = (int)multiDimensionCube.state;
+			this.timeSinceStateChange = multiDimensionCube.timeSinceStateChange;
+		}
+
+		public void LoadSave(MultiDimensionCube multiDimensionCube) {
+			multiDimensionCube._state = (State)this.state;
+			multiDimensionCube.timeSinceStateChange = this.timeSinceStateChange;
+		}
+	}
+
+	public object GetSaveObject() {
+		return new MultiDimensionCubeSave(this);
+	}
+
+	public void LoadFromSavedObject(object savedObject) {
+		MultiDimensionCubeSave save = savedObject as MultiDimensionCubeSave;
+
+		save.LoadSave(this);
+	}
+	#endregion
 }

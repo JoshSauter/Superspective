@@ -17,7 +17,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     public bool isPlayingBanner;
 
     float fadeTime = 2.5f;
-    float displayTime = 2f;
+    float displayTime = 4f;
 
     void Awake() {
         bannerGroup = GetComponent<CanvasGroup>();

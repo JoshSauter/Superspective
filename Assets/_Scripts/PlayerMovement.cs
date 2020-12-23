@@ -6,6 +6,7 @@ using Audio;
 using Saving;
 using System;
 using SerializableClasses;
+using NaughtyAttributes;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
@@ -64,10 +65,25 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	public Vector3 bottomOfPlayer { get { return transform.position - transform.up * 2.5f; } }
 
 	#region IsGrounded characteristics
-	public bool grounded = false;
-	private int framesWaitedAfterLeavingGround = 0;
+	public struct GroundedState {
+		public bool isGrounded {
+			get { return ground != null; }
+			// Only allow setting isGrounded to false (clear the state)
+			set {
+				if (!value) {
+					contact = default(ContactPoint);
+					framesWaitedAfterLeavingGround = 0;
+				}
+			}
+		}
+		public Collider ground => contact.otherCollider;
+		public bool standingOnHeldObject => instance.IsStandingOnHeldObject(contact);
+
+		public ContactPoint contact;
+		public float framesWaitedAfterLeavingGround;
+	}
+	public GroundedState grounded = default;
 	private const int framesToWaitAfterLeavingGround = 3;
-	ContactPoint ground;
 	// Dot(face normal, transform.up) must be greater than this value to be considered "ground"
 	public const float isGroundThreshold = 0.6f;
 	public const float isGroundedSpherecastDistance = 0.5f;
@@ -81,6 +97,15 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	public PlayerMovementAction OnJumpLanding;
 	public PlayerMovementAction OnStaircaseStepUp;
 	#endregion
+
+	// Inspector-only:
+	[ShowNativeProperty]
+	bool isGrounded => grounded.isGrounded;
+	[ShowNativeProperty]
+	bool standingOnHeldObject => grounded.standingOnHeldObject;
+	[ShowNativeProperty]
+	string ground => grounded.ground?.gameObject.name ?? "";
+	
 
 	private void Awake() {
 		input = PlayerButtonInput.instance;
@@ -109,23 +134,22 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	}
 
 	void FixedUpdate() {
-		if (stopped) return;
+		UpdateGroundedState();
 
-		grounded = IsGrounded(ref ground);
-		bool standingOnHeldObject = grounded && IsStandingOnHeldObject(ground);
+		if (stopped || grounded.standingOnHeldObject) return;
 
-		UpdateJumping(standingOnHeldObject);
+		UpdateJumping();
 
 		Vector3 desiredVelocity = thisRigidbody.velocity;
-		if (grounded) {
-			desiredVelocity = CalculateGroundMovement(ground);
+		if (grounded.isGrounded) {
+			desiredVelocity = CalculateGroundMovement(grounded.contact);
 		}
 		else {
 			desiredVelocity = CalculateAirMovement();
 		}
 
 		// Prevent player from floating around on cubes they're holding...
-		if (standingOnHeldObject) {
+		if (grounded.standingOnHeldObject) {
 			desiredVelocity += 4*Physics.gravity * Time.fixedDeltaTime;
 		}
 
@@ -136,14 +160,14 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 			desiredVelocity.z *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
 		}
 
-		if (!input.LeftStickHeld && !input.SpaceHeld && ground.otherCollider != null && ground.otherCollider.CompareTag("Staircase")) {
+		if (!input.LeftStickHeld && !input.SpaceHeld && grounded.ground != null && grounded.ground.CompareTag("Staircase")) {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
 		}
 		else {
 			thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 		}
 
-		StepFound stepFound = DetectStep(desiredVelocity, ground, grounded);
+		StepFound stepFound = DetectStep(desiredVelocity, grounded.contact, grounded.isGrounded);
 		if (stepFound != null) {
 			transform.Translate(stepFound.stepOffset, Space.World);
 			Player.instance.cameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
@@ -157,7 +181,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 
 		// Apply wind resistance
 		Vector3 projectedVertVelocity = ProjectedVerticalVelocity();
-		if (!grounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0) {
+		if (!grounded.isGrounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0) {
 			thisRigidbody.AddForce(transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * windResistanceMultiplier);
 		}
 
@@ -258,7 +282,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	IEnumerator PrintMaxHeight(Vector3 startPosition) {
 		float maxHeight = 0;
 		yield return new WaitForSeconds(minJumpTime/2f);
-		while (!grounded) {
+		while (!grounded.isGrounded) {
 			float height = Vector3.Dot(transform.up, transform.position - startPosition);
 			if (height > maxHeight) {
 				maxHeight = height;
@@ -278,7 +302,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 
 		timeSpentJumping = 0.0f;
 		underMinJumpTime = true;
-		grounded = false;
+		grounded.isGrounded = false;
 		
 		Vector3 jumpVector = -Physics.gravity.normalized * jumpForce;
 		thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
@@ -287,10 +311,10 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		jumpState = JumpState.Jumping;
 	}
 
-	void UpdateJumping(bool standingOnHeldObject) {
+	void UpdateJumping() {
 		switch (jumpState) {
 			case JumpState.JumpReady:
-				if (input.SpaceHeld && !standingOnHeldObject) {
+				if (input.SpaceHeld && grounded.isGrounded && !grounded.standingOnHeldObject) {
 					Jump();
 				}
 				return;
@@ -298,7 +322,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 				timeSpentJumping += Time.fixedDeltaTime;
 				underMinJumpTime = timeSpentJumping < minJumpTime;
 				if (underMinJumpTime) return;
-				else if (grounded) {
+				else if (grounded.isGrounded) {
 					jumpCooldownRemaining = jumpCooldown;
 					OnJumpLanding?.Invoke();
 					jumpState = JumpState.JumpOnCooldown;
@@ -398,14 +422,14 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		return stepFound;
 	}
 
-	public bool IsGrounded(ref ContactPoint ground) {
-		ContactPoint groundNow = default(ContactPoint);
+	public void UpdateGroundedState() {
+		ContactPoint groundContactPoint = default(ContactPoint);
 		float maxGroundTest = isGroundThreshold;    // Amount upwards-facing the most ground-like object is
 		foreach (ContactPoint contact in allContactThisFrame) {
 
 			float groundTest = Vector3.Dot(contact.normal, transform.up);
 			if (groundTest > maxGroundTest) {
-				groundNow = contact;
+				groundContactPoint = contact;
 				maxGroundTest = groundTest;
 			}
 		}
@@ -413,26 +437,23 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		// Was a ground object found?
 		bool isGroundedNow = (maxGroundTest > isGroundThreshold) && !underMinJumpTime;
 		if (isGroundedNow) {
-			framesWaitedAfterLeavingGround = 0;
-			ground = groundNow;
-			return true;
+			grounded.framesWaitedAfterLeavingGround = 0;
+			grounded.contact = groundContactPoint;
 		}
 		// If we were grounded last FixedUpdate and not grounded now
-		else if (grounded) {
+		else if (grounded.isGrounded) {
 			// Wait a few fixed updates before saying that the player is ungrounded
-			if (framesWaitedAfterLeavingGround >= framesToWaitAfterLeavingGround) {
-				ground = default(ContactPoint);
-				framesWaitedAfterLeavingGround = 0;
-				return false;
+			if (grounded.framesWaitedAfterLeavingGround >= framesToWaitAfterLeavingGround) {
+				grounded.contact = default(ContactPoint);
+				grounded.framesWaitedAfterLeavingGround = 0;
 			}
 			else {
-				framesWaitedAfterLeavingGround++;
-				return true;
+				grounded.framesWaitedAfterLeavingGround++;
 			}
 		}
+		// Not grounded anytime recently
 		else {
-			ground = default(ContactPoint);
-			return false;
+			grounded.contact = default(ContactPoint);
 		}
 	}
 
@@ -446,6 +467,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		}
 		bool cube1IsHeld = maybeCube1 != null && maybeCube1.isHeld;
 		bool cube2IsHeld = maybeCube2 != null && maybeCube2.isHeld;
+		//debug.Log($"Grounded: {grounded.isGrounded}\nCube1IsHeld: {cube1IsHeld}\nCube2IsHeld: {cube2IsHeld}");
 		return (cube1IsHeld || cube2IsHeld);
 	}
 
@@ -482,8 +504,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 		float thisRigidbodyMass;
 
 		bool stopped;
-		bool grounded;
-		int framesWaitedAfterLeavingGround = 0;
 
 		public PlayerMovementSave(PlayerMovement playerMovement) {
 			this.DEBUG = playerMovement.DEBUG;
@@ -502,8 +522,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 			this.thisRigidbodyMass = playerMovement.thisRigidbody.mass;
 
 			this.stopped = playerMovement.stopped;
-			this.grounded = playerMovement.grounded;
-			this.framesWaitedAfterLeavingGround = playerMovement.framesWaitedAfterLeavingGround;
 		}
 
 		public void LoadSave(PlayerMovement playerMovement) {
@@ -524,8 +542,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 			playerMovement.thisRigidbody.mass = this.thisRigidbodyMass;
 
 			playerMovement.stopped = this.stopped;
-			playerMovement.grounded = this.grounded;
-			playerMovement.framesWaitedAfterLeavingGround = this.framesWaitedAfterLeavingGround;
 		}
 	}
 

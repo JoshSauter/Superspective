@@ -4,10 +4,9 @@ using UnityEngine;
 using EpitaphUtils;
 
 public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
-	PillarDimensionObject thisDimensionObject;
+	public PillarDimensionObject corporealDimensionObject;
 	Collider thisCollider;
-	Collider invertColorsCollider;
-	Collider kinematicCollider;
+	public Collider kinematicCollider;
 	SphereCollider thisTrigger;
 
 	const float triggerZoneSize = 1.5f;
@@ -16,17 +15,30 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	HashSet<Collider> collidersBeingIgnored = new HashSet<Collider>();
 
     void Start() {
-		thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
 		thisCollider = GetComponent<Collider>();
-		invertColorsCollider = transform.Find("InvertColors")?.GetComponent<Collider>();
-		kinematicCollider = invertColorsCollider?.transform.Find("KinematicCollider").GetComponent<Collider>();
-
-		if (thisDimensionObject != null) {
-			thisDimensionObject.OnBaseDimensionChange += HandleBaseDimensionChange;
-		}
 
 		CreateTriggerZone();
     }
+
+	void IgnoreCollision(Collider collider) {
+		if (!collidersBeingIgnored.Contains(collider)) {
+			//Debug.Log($"{gameObject.name} ignoring collision with {collider.gameObject.name}");
+			Physics.IgnoreCollision(thisCollider, collider, true);
+			if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, collider, true);
+
+			collidersBeingIgnored.Add(collider);
+		}
+	}
+
+	void RestoreCollision(Collider collider) {
+		if (collidersBeingIgnored.Contains(collider)) {
+			//Debug.Log($"{gameObject.name} restoring collision with {collider.gameObject.name}");
+			Physics.IgnoreCollision(thisCollider, collider, false);
+			if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, collider, false);
+
+			collidersBeingIgnored.Remove(collider);
+		}
+	}
 
 	void CreateTriggerZone() {
 		GameObject triggerGO = new GameObject("IgnoreCollisionsTriggerZone");
@@ -38,25 +50,31 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	}
 
 	private void OnTriggerStay(Collider other) {
-		if (thisDimensionObject == null) return;
+		if (corporealDimensionObject == null) return;
 		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
-		if (otherDimensionObj != null && otherDimensionObj.baseDimension != thisDimensionObject.baseDimension) {
-			if (!collidersBeingIgnored.Contains(other)) {
-				collidersBeingIgnored.Add(other);
-				Physics.IgnoreCollision(thisCollider, other, true);
-				if (invertColorsCollider != null) Physics.IgnoreCollision(invertColorsCollider, other, true);
-				if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, other, true);
+		if (otherDimensionObj != null) {
+			int testDimension = corporealDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible || v == VisibilityState.partiallyVisible);
+			if (testDimension == -1) {
+				return;
+			}
+
+			VisibilityState test1 = corporealDimensionObject.DetermineVisibilityState(corporealDimensionObject.playerQuadrant, corporealDimensionObject.dimensionShiftQuadrant, testDimension);
+			VisibilityState test2 = otherDimensionObj.DetermineVisibilityState(otherDimensionObj.playerQuadrant, otherDimensionObj.dimensionShiftQuadrant, testDimension);
+
+			bool areOpposites = Mathf.Abs((int)test2 - (int)test1) == 2;
+
+			//Debug.Log($"Corporeal test: {test1}\nOther test: {test2}");
+			if (Mathf.Abs((int)test2 - (int)test1) == 2) {
+				IgnoreCollision(other);
+			}
+			else {
+				RestoreCollision(other);
 			}
 		}
 	}
 
-	void HandleBaseDimensionChange() {
-		foreach (var collider in collidersBeingIgnored) {
-			Physics.IgnoreCollision(thisCollider, collider, false);
-			if (invertColorsCollider != null) Physics.IgnoreCollision(invertColorsCollider, collider, false);
-			if (kinematicCollider != null) Physics.IgnoreCollision(kinematicCollider, collider, false);
-		}
-		collidersBeingIgnored.Clear();
+	private void OnTriggerExit(Collider other) {
+		RestoreCollision(other);
 	}
 
 	void FixedUpdate() {

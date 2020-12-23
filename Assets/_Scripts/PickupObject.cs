@@ -106,7 +106,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 			thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 		}
 
-		playerCamPosLastFrame = Player.instance.transform.position;
+		playerCamPosLastFrame = playerCam.transform.position;
 
 		Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
 		TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;

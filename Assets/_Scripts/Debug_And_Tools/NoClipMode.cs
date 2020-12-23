@@ -15,8 +15,9 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
 	PlayerButtonInput input;
 
 	public bool noClipOn = false;
-	public float moveSpeed = 15;
-	public float sprintSpeed = 75;
+	public float slowMoveSpeed = 15f;
+	public float moveSpeed = 45;
+	public float sprintSpeed = 125;
 	public float middleMouseVerticalSpeed = 10;
 
     void Start() {
@@ -36,7 +37,7 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
 			Vector2 moveInput = input.LeftStick;
 
 			Vector3 moveDirection = playerCamera.forward * moveInput.y + playerCamera.right * moveInput.x;
-			float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
+			float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : Input.GetKey(KeyCode.LeftControl) ? slowMoveSpeed : moveSpeed;
 
 			float middleMouseScroll = Input.mouseScrollDelta.y;
 			Vector3 verticalScroll = middleMouseScroll * transform.up * middleMouseVerticalSpeed;

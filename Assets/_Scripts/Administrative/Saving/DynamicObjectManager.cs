@@ -15,6 +15,9 @@ namespace Saving {
 		public static Dictionary<string, Dictionary<string, DynamicObjectSave>> dynamicObjectsInInactiveScenes = new Dictionary<string, Dictionary<string, DynamicObjectSave>>();
 		public static Dictionary<string, string> allDynamicObjectsSceneById = new Dictionary<string, string>();
 
+		public delegate void DynamicObjectCreated(string id);
+		public static event DynamicObjectCreated OnDynamicObjectCreated;
+
 		private static string SavePath(string saveFileName) {
 			return $"{Application.persistentDataPath}/Saves/{saveFileName}";
 		}
@@ -69,7 +72,7 @@ namespace Saving {
 
 		private static void InitializeDynamicObjectsDict() {
 			var allDynamicObjects = Resources.FindObjectsOfTypeAll<DynamicObject>()
-				.Where(d => d.ID != null && d.ID != "" && !d.SkipSave);
+				.Where(d => d.ID != null && d.ID != "" && !d.SkipSave && d.gameObject.scene.name != null);
 			dynamicObjectsInActiveScenes = allDynamicObjects
 				.GroupBy(d => d.gameObject.scene.name)
 				.ToDictionary(d => d.Key, d => d.ToList())
@@ -161,6 +164,7 @@ namespace Saving {
 					DynamicObject newDynamicObject = CreateInstanceFromSavedInfo(savedObject);
 					newDynamicObject.id.uniqueId = id;
 					savedObject.LoadSave(newDynamicObject);
+					OnDynamicObjectCreated?.Invoke(id);
 					loadedSceneInfo.Add(id, newDynamicObject);
 				}
 

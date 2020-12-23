@@ -33,16 +33,16 @@ public class PlayerLandingSound : MonoBehaviour {
 	}
 
     void FixedUpdate() {
-        if (wasGrounded && !playerMovement.grounded) {
+        if (wasGrounded && !playerMovement.grounded.isGrounded) {
 			keepTrackOfPlayerAirHeight = true;
 
 			verticalOffset = 0f;
 			maxHeight = verticalOffset;
 		}
-		wasGrounded = playerMovement.grounded;
+		wasGrounded = playerMovement.grounded.isGrounded;
 
 		if (keepTrackOfPlayerAirHeight) {
-			if (!playerMovement.grounded) {
+			if (!playerMovement.grounded.isGrounded) {
 				float diff = Vector3.Dot(playerMovement.ProjectedVerticalVelocity(), -Physics.gravity.normalized) * Time.fixedDeltaTime;
 				verticalOffset += diff;
 				if (verticalOffset > maxHeight) {

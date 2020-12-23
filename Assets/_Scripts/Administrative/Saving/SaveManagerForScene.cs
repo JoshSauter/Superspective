@@ -1,4 +1,5 @@
 ﻿using EpitaphUtils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +36,7 @@ namespace Saving {
             return obj != null && obj.gameObject != null && obj.gameObject.scene != null && obj.gameObject.scene == gameObject.scene;
         }
 
-        [System.Serializable]
+        [Serializable]
         public class SaveFileForScene {
             public string saveFileName;
             public string sceneName;
@@ -49,7 +50,12 @@ namespace Saving {
                 this.sceneName = sceneName;
                 serializedSaveObjects = new Dictionary<string, object>();
                 foreach (var id in objs.Keys) {
-                    serializedSaveObjects.Add(id, objs[id].GetSaveObject());
+                    try {
+                        serializedSaveObjects.Add(id, objs[id].GetSaveObject());
+                    }
+                    catch (Exception e) {
+                        Debug.LogError($"Could not get serialized save object for: {id}, {objs[id]}. Details:\n{e.ToString()}");
+					}
 				}
 			}
 
@@ -106,7 +112,7 @@ namespace Saving {
             if (currentSaveFile != null) {
                 foreach (var id in currentSaveFile.serializedSaveObjects.Keys) {
                     if (!saveableObjects.ContainsKey(id)) {
-                        Debug.LogError($"{id} not found in scene {sceneName}");
+                        Debug.LogWarning($"{id} not found in scene {sceneName}");
                         continue;
 					}
                     SaveableObject saveableObject = saveableObjects[id];

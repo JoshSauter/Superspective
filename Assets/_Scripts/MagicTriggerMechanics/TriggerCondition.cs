@@ -170,11 +170,6 @@ namespace MagicTriggerMechanics {
 			EditorGUILayout.Space();
 		}
 
-		// This is weird code smell but without it there is empty space at the start of a List of these
-		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-			return 0f;
-		}
-
 		private void AddSeparator() {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}

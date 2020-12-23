@@ -17,12 +17,14 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         // Don't generate an ID for objects without scenes (prefabs)
         bool notInitialized = uniqueId == null || uniqueId == "";
         if (notInitialized && HasScene) {
+            //Debug.LogWarning($"{gameObject.name} in {gameObject.scene.name} has an uninitialized id. Creating one now.");
             Guid guid = Guid.NewGuid();
             uniqueId = guid.ToString();
 		}
         bool idAlreadyTaken = uniqueId != null && uniqueId != "" && !IsUnique(uniqueId);
         // If we are playing and the id is non-null & already taken, destroy this instance
         if (Application.isPlaying && idAlreadyTaken) {
+            Debug.LogWarning($"ID {uniqueId} already taken, {gameObject.name} in {gameObject.scene.name} self-destructing.");
             Destroy(gameObject);
             return;
         }

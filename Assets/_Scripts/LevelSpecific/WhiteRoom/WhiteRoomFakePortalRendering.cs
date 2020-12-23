@@ -1,12 +1,13 @@
 ﻿using Saving;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace LevelSpecific.WhiteRoom {
 	public class WhiteRoomFakePortalRendering : MonoBehaviour, SaveableObject {
 		public PillarDimensionObject fakePortalSides;
+        [SerializeField]
+        [ReadOnly]
 		MeshRenderer thisRenderer;
 
         void OnValidate() {
