@@ -48,7 +48,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 	[Range(0.01f,1)]
 	public float sensitivityY = 0.5f;
     public float rotationY = 0F;
-	private float yClamp = 85;
+	public float yClamp = 85;
 
 	private const int lookAmountMultiplier = 14;
 

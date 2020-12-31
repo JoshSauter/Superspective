@@ -18,7 +18,8 @@ public class Interact : Singleton<Interact> {
 	Color reticleSelectColor = new Color(0.15f,1,0.15f,0.9f);
 	Color reticleOutsideUnselectColor;
 	Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
-	public const float interactionDistance = 5f;
+	public const float defaultInteractionDistance = 6.5f;
+	public float interactionDistance = defaultInteractionDistance;
 	Camera cam;
 
 	public InteractableObject objectHovered;

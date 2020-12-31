@@ -116,8 +116,13 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	}
 
 	// Use this for initialization
-	void Start() {
+	IEnumerator Start() {
 		movespeed = walkSpeed;
+
+		thisRigidbody.isKinematic = true;
+		yield return new WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
+		yield return new WaitForSeconds(1f);
+		thisRigidbody.isKinematic = false;
 	}
 
 	private void Update() {
@@ -175,7 +180,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 				OnStaircaseStepUp?.Invoke();
 			}
 		}
-		thisRigidbody.useGravity = stepFound == null;
+		thisRigidbody.useGravity = !grounded.isGrounded;
 
 		thisRigidbody.velocity = desiredVelocity;
 

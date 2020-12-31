@@ -160,6 +160,9 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	}
 
 	bool HasGoneToNextDimension(DimensionPillar pillar, Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant) {
+		if (pillar == null) {
+			return false;
+		}
 		if (playerQuadrant == dimensionShiftQuadrant) {
 			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.dimensionShiftVector.normalized, pillar.axis);
 			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
@@ -220,6 +223,9 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	}
 
 	public VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
+		if (pillar == null) {
+			return visibilityState;
+		}
 		if (HasGoneToNextDimension(pillar, playerQuadrant, dimensionShiftQuadrant)) {
 			dimension = pillar.PrevDimension(dimension);
 		}

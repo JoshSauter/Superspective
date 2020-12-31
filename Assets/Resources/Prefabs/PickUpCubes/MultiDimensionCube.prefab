@@ -180,6 +180,7 @@ MonoBehaviour:
   DEBUG: 0
   isReplaceable: 1
   isHeld: 0
+  shouldFollow: 1
   thisGravity: {fileID: 0}
   thisRigidbody: {fileID: 1544007497055716628}
   portalableObject: {fileID: 0}
@@ -758,9 +759,12 @@ MonoBehaviour:
   _dimension: 0
   playerQuadrant: 0
   dimensionShiftQuadrant: 0
+  minAngle: 0
+  maxAngle: 0
   pillars: []
   thisObjectMoves: 1
   thisRigidbody: {fileID: 1544007497055716628}
+  colliderBoundsOverride: {fileID: 0}
 --- !u!114 &3596818825556985124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4821,9 +4825,12 @@ MonoBehaviour:
   _dimension: 0
   playerQuadrant: 0
   dimensionShiftQuadrant: 0
+  minAngle: 0
+  maxAngle: 0
   pillars: []
   thisObjectMoves: 1
   thisRigidbody: {fileID: 1544007497055716628}
+  colliderBoundsOverride: {fileID: 0}
 --- !u!114 &4478531533605895390
 MonoBehaviour:
   m_ObjectHideFlags: 0

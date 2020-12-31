@@ -6,13 +6,7 @@ using NaughtyAttributes;
 namespace LevelSpecific.WhiteRoom {
 	public class WhiteRoomFakePortalRendering : MonoBehaviour, SaveableObject {
 		public PillarDimensionObject fakePortalSides;
-        [SerializeField]
-        [ReadOnly]
-		MeshRenderer thisRenderer;
-
-        void OnValidate() {
-            thisRenderer = GetComponent<MeshRenderer>();
-        }
+		public MeshRenderer thisRenderer;
 
 		void Start() {
 			fakePortalSides.OnStateChange += OnVisibilityStateChange;

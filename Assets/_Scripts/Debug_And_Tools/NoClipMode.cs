@@ -29,7 +29,7 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
     }
 
     void Update() {
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.G)) {
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G)) {
 			ToggleNoClip();
 		}
 

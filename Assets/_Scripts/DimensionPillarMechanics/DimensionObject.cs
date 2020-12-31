@@ -77,20 +77,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	private void OnEnable() {
-		LevelManager.instance.OnActiveSceneChange += OnActiveSceneChange;
-	}
-
-	private void OnDisable() {
-		LevelManager.instance.OnActiveSceneChange -= OnActiveSceneChange;
-	}
-
-	void OnActiveSceneChange() {
-		if (gameObject.IsInActiveScene()) {
-			SwitchVisibilityState(startingVisibilityState, true);
-		}
-	}
-
 	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
 		startingMaterials = newStartingMaterials;
 	}
@@ -281,6 +267,9 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			case "Custom/Water":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionWater"));
 				break;
+			case "Custom/PowerTrailLight":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPowerTrail"));
+				break;
 			default:
 				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
@@ -295,7 +284,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 	#region Saving
 	public bool SkipSave { get; set; }
-	// There's only one player so we don't need a UniqueId here
 	public virtual string ID => $"DimensionObject_{id.uniqueId}";
 	//public virtual string ID {
 	//	get {

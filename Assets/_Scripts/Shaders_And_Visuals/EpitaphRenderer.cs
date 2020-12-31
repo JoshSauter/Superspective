@@ -8,7 +8,8 @@ public class EpitaphRenderer : MonoBehaviour {
 	public enum PropBlockType {
 		Color,
 		Float,
-		Int
+		Int,
+		FloatArray
 	}
 	[Button("Print Property Block Value")]
 	void PrintLookupValueCallback() {
@@ -124,6 +125,9 @@ public class EpitaphRenderer : MonoBehaviour {
 				break;
 			case PropBlockType.Int:
 				Debug.Log(key + ": " + propBlock.GetInt(key));
+				break;
+			case PropBlockType.FloatArray:
+				Debug.Log(key + ": " + string.Join(", ", propBlock.GetFloatArray(key)));
 				break;
 		}
 	}

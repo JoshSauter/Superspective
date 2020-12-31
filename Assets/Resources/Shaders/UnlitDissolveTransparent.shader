@@ -20,6 +20,7 @@
 		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 		LOD 100
 		Cull Back
+		//Blend SrcAlpha OneMinusSrcAlpha
 		Blend DstColor SrcColor
 
 		Pass

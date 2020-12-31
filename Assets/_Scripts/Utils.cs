@@ -628,6 +628,194 @@ namespace EpitaphUtils {
 		public static Angle D360 = new Angle(Mathf.PI * 2);
 	}
 
+	public static class Base9FontConversions {
+		public static Dictionary<int, char> ValueToBase9Char = new Dictionary<int, char>() {
+			{ 0, '0' },
+			{ 1, '1' },
+			{ 2, '2' },
+			{ 3, '3' },
+			{ 4, '4' },
+			{ 5, '5' },
+			{ 6, '6' },
+			{ 7, '7' },
+			{ 8, '8' },
+			{ 9, '9' },
+			{ 10, '!' },
+			{ 11, '@' },
+			{ 12, '#' },
+			{ 13, '$' },
+			{ 14, '%' },
+			{ 15, '^' },
+			{ 16, '&' },
+			{ 17, '*' },
+			{ 18, '(' },
+			{ 19, ')' },
+			{ 20, 'a' },
+			{ 21, 'b' },
+			{ 22, 'c' },
+			{ 23, 'd' },
+			{ 24, 'e' },
+			{ 25, 'f' },
+			{ 26, 'g' },
+			{ 27, 'h' },
+			{ 28, 'i' },
+			{ 29, 'j' },
+			{ 30, 'k' },
+			{ 31, 'l' },
+			{ 32, 'm' },
+			{ 33, 'n' },
+			{ 34, 'o' },
+			{ 35, 'p' },
+			{ 36, 'q' },
+			{ 37, 'r' },
+			{ 38, 's' },
+			{ 39, 't' },
+			{ 40, 'u' },
+			{ 41, 'v' },
+			{ 42, 'w' },
+			{ 43, 'x' },
+			{ 44, 'y' },
+			{ 45, 'z' },
+			{ 46, 'A' },
+			{ 47, 'B' },
+			{ 48, 'C' },
+			{ 49, 'D' },
+			{ 50, 'E' },
+			{ 51, 'F' },
+			{ 52, 'G' },
+			{ 53, 'H' },
+			{ 54, 'I' },
+			{ 55, 'J' },
+			{ 56, 'K' },
+			{ 57, 'L' },
+			{ 58, 'M' },
+			{ 59, 'N' },
+			{ 60, 'O' },
+			{ 61, 'P' },
+			{ 62, 'Q' },
+			{ 63, 'R' },
+			{ 64, 'S' },
+			{ 65, 'T' },
+			{ 66, 'U' },
+			{ 67, 'V' },
+			{ 68, 'W' },
+			{ 69, 'X' },
+			{ 70, 'Y' },
+			{ 71, 'Z' },
+			{ 72, '[' },
+			{ 73, '\\' },
+			{ 74, ']' },
+			{ 75, '{' },
+			{ 76, '|' },
+			{ 77, '}' },
+			{ 78, ',' },
+			{ 79, '.' },
+			{ 80, '/' }
+		};
+		public static Dictionary<char, int> Base9CharToValue = ValueToBase9Char.ToDictionary(kv => kv.Value, kv => kv.Key);
+	}
+
+	public static class RightAngleRotations {
+		private static Quaternion[] rightAngleRotations = new Quaternion[] {
+			Quaternion.Euler(0,0,0),
+			Quaternion.Euler(0,0,90),
+			Quaternion.Euler(0,0,180),
+			Quaternion.Euler(0,0,270),
+			Quaternion.Euler(0,90,0),
+			Quaternion.Euler(0,90,90),
+			Quaternion.Euler(0,90,180),
+			Quaternion.Euler(0,90,270),
+			Quaternion.Euler(0,180,0),
+			Quaternion.Euler(0,180,90),
+			Quaternion.Euler(0,180,180),
+			Quaternion.Euler(0,180,270),
+			Quaternion.Euler(0,270,0),
+			Quaternion.Euler(0,270,90),
+			Quaternion.Euler(0,270,180),
+			Quaternion.Euler(0,270,270),
+			Quaternion.Euler(90,0,0),
+			Quaternion.Euler(90,0,90),
+			Quaternion.Euler(90,0,180),
+			Quaternion.Euler(90,0,270),
+			Quaternion.Euler(90,90,0),
+			Quaternion.Euler(90,90,90),
+			Quaternion.Euler(90,90,180),
+			Quaternion.Euler(90,90,270),
+			Quaternion.Euler(90,180,0),
+			Quaternion.Euler(90,180,90),
+			Quaternion.Euler(90,180,180),
+			Quaternion.Euler(90,180,270),
+			Quaternion.Euler(90,270,0),
+			Quaternion.Euler(90,270,90),
+			Quaternion.Euler(90,270,180),
+			Quaternion.Euler(90,270,270),
+			Quaternion.Euler(180,0,0),
+			Quaternion.Euler(180,0,90),
+			Quaternion.Euler(180,0,180),
+			Quaternion.Euler(180,0,270),
+			Quaternion.Euler(180,90,0),
+			Quaternion.Euler(180,90,90),
+			Quaternion.Euler(180,90,180),
+			Quaternion.Euler(180,90,270),
+			Quaternion.Euler(180,180,0),
+			Quaternion.Euler(180,180,90),
+			Quaternion.Euler(180,180,180),
+			Quaternion.Euler(180,180,270),
+			Quaternion.Euler(180,270,0),
+			Quaternion.Euler(180,270,90),
+			Quaternion.Euler(180,270,180),
+			Quaternion.Euler(180,270,270),
+			Quaternion.Euler(270,0,0),
+			Quaternion.Euler(270,0,90),
+			Quaternion.Euler(270,0,180),
+			Quaternion.Euler(270,0,270),
+			Quaternion.Euler(270,90,0),
+			Quaternion.Euler(270,90,90),
+			Quaternion.Euler(270,90,180),
+			Quaternion.Euler(270,90,270),
+			Quaternion.Euler(270,180,0),
+			Quaternion.Euler(270,180,90),
+			Quaternion.Euler(270,180,180),
+			Quaternion.Euler(270,180,270),
+			Quaternion.Euler(270,270,0),
+			Quaternion.Euler(270,270,90),
+			Quaternion.Euler(270,270,180),
+			Quaternion.Euler(270,270,270),
+		};
+
+		// Returns a 90 degree rotation relative to the given Transform rather than global axis
+		public static Quaternion GetNearestRelativeToTransform(Quaternion comparedTo, Transform relativeTo) {
+			float minAngle = float.MaxValue;
+			Quaternion returnRotation = Quaternion.identity;
+
+			foreach (var q in rightAngleRotations) {
+				Quaternion localRotation = relativeTo.rotation * q;
+				float angleBetween = Quaternion.Angle(localRotation, comparedTo);
+				if (angleBetween < minAngle) {
+					minAngle = angleBetween;
+					returnRotation = localRotation;
+				}
+			}
+
+			return returnRotation;
+		}
+
+		public static Quaternion GetNearest(Quaternion comparedTo) {
+			float minAngle = float.MaxValue;
+			Quaternion returnRotation = Quaternion.identity;
+
+			foreach (var q in rightAngleRotations) {
+				float angleBetween = Quaternion.Angle(q, comparedTo);
+				if (angleBetween < minAngle) {
+					minAngle = angleBetween;
+					returnRotation = q;
+				}
+			}
+
+			return returnRotation;
+		}
+	}
+
 	public class DebugLogger {
 		public Func<bool> enabled;
         private UnityEngine.Object context;

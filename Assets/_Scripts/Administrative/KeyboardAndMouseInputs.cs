@@ -108,6 +108,7 @@ public static class KeyboardAndMouseInputs {
 
 	public static KeyboardAndMouseInput Action1 = new KeyboardAndMouseInput(0);
 	public static KeyboardAndMouseInput Action2 = new KeyboardAndMouseInput(1);
+	public static KeyboardAndMouseInput Action3 = new KeyboardAndMouseInput(2);
 	public static KeyboardAndMouseInput Up = QWERTYUp;
 	public static KeyboardAndMouseInput Down = QWERTYDown;
 	public static KeyboardAndMouseInput Left = QWERTYLeft;

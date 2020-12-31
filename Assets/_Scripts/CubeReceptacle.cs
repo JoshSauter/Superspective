@@ -1,4 +1,5 @@
 ﻿using Audio;
+using EpitaphUtils;
 using Saving;
 using SerializableClasses;
 using System;
@@ -63,7 +64,9 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 	Vector3 startPos;
 	Vector3 endPos;
 
+	public bool makesCubeIrreplaceable = true;
 	public float receptacleSize = 1f;
+	public float receptableDepth = 0.5f;
 
 	BoxCollider triggerZone;
 	PickupObject cubeInReceptacle;
@@ -89,73 +92,6 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 	public event CubeReceptacleActionSimple OnCubeHoldEndSimple;
 	public event CubeReceptacleActionSimple OnCubeReleaseStartSimple;
 	public event CubeReceptacleActionSimple OnCubeReleaseEndSimple;
-
-	private static Quaternion[] acceptableRotations = new Quaternion[] {
-		Quaternion.Euler(0,0,0),
-		Quaternion.Euler(0,0,90),
-		Quaternion.Euler(0,0,180),
-		Quaternion.Euler(0,0,270),
-		Quaternion.Euler(0,90,0),
-		Quaternion.Euler(0,90,90),
-		Quaternion.Euler(0,90,180),
-		Quaternion.Euler(0,90,270),
-		Quaternion.Euler(0,180,0),
-		Quaternion.Euler(0,180,90),
-		Quaternion.Euler(0,180,180),
-		Quaternion.Euler(0,180,270),
-		Quaternion.Euler(0,270,0),
-		Quaternion.Euler(0,270,90),
-		Quaternion.Euler(0,270,180),
-		Quaternion.Euler(0,270,270),
-		Quaternion.Euler(90,0,0),
-		Quaternion.Euler(90,0,90),
-		Quaternion.Euler(90,0,180),
-		Quaternion.Euler(90,0,270),
-		Quaternion.Euler(90,90,0),
-		Quaternion.Euler(90,90,90),
-		Quaternion.Euler(90,90,180),
-		Quaternion.Euler(90,90,270),
-		Quaternion.Euler(90,180,0),
-		Quaternion.Euler(90,180,90),
-		Quaternion.Euler(90,180,180),
-		Quaternion.Euler(90,180,270),
-		Quaternion.Euler(90,270,0),
-		Quaternion.Euler(90,270,90),
-		Quaternion.Euler(90,270,180),
-		Quaternion.Euler(90,270,270),
-		Quaternion.Euler(180,0,0),
-		Quaternion.Euler(180,0,90),
-		Quaternion.Euler(180,0,180),
-		Quaternion.Euler(180,0,270),
-		Quaternion.Euler(180,90,0),
-		Quaternion.Euler(180,90,90),
-		Quaternion.Euler(180,90,180),
-		Quaternion.Euler(180,90,270),
-		Quaternion.Euler(180,180,0),
-		Quaternion.Euler(180,180,90),
-		Quaternion.Euler(180,180,180),
-		Quaternion.Euler(180,180,270),
-		Quaternion.Euler(180,270,0),
-		Quaternion.Euler(180,270,90),
-		Quaternion.Euler(180,270,180),
-		Quaternion.Euler(180,270,270),
-		Quaternion.Euler(270,0,0),
-		Quaternion.Euler(270,0,90),
-		Quaternion.Euler(270,0,180),
-		Quaternion.Euler(270,0,270),
-		Quaternion.Euler(270,90,0),
-		Quaternion.Euler(270,90,90),
-		Quaternion.Euler(270,90,180),
-		Quaternion.Euler(270,90,270),
-		Quaternion.Euler(270,180,0),
-		Quaternion.Euler(270,180,90),
-		Quaternion.Euler(270,180,180),
-		Quaternion.Euler(270,180,270),
-		Quaternion.Euler(270,270,0),
-		Quaternion.Euler(270,270,90),
-		Quaternion.Euler(270,270,180),
-		Quaternion.Euler(270,270,270),
-	};
 
     void Start() {
 		AddTriggerZone();
@@ -203,8 +139,11 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 					cubeInReceptacle.transform.rotation = Quaternion.Lerp(startRot, endRot, t);
 				}
 				else {
+					cubeInReceptacle.transform.position = endPos;
+					cubeInReceptacle.transform.rotation = endRot;
+
 					startPos = cubeInReceptacle.transform.position;
-					endPos = transform.TransformPoint(0, 0.5f, 0);
+					endPos = transform.TransformPoint(0, 1-receptableDepth, 0);
 
 					state = State.CubeEnterTranslate;
 				}
@@ -220,6 +159,8 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 					cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
 				}
 				else {
+					cubeInReceptacle.transform.position = endPos;
+
 					cubeInReceptacle.interactable = true;
 					state = State.CubeInReceptacle;
 				}
@@ -233,6 +174,7 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 				}
 				else {
 					PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
+					cubeThatWasInReceptacle.shouldFollow = true;
 					cubeThatWasInReceptacle.interactable = true;
 					cubeThatWasInReceptacle.isReplaceable = true;
 					triggerZone.enabled = false;
@@ -260,17 +202,21 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 		cube.interactable = false;
 		cubeRigidbody.isKinematic = true;
 		cubeInReceptacle = cube;
-		cubeInReceptacle.isReplaceable = false;
+		if (makesCubeIrreplaceable) {
+			cubeInReceptacle.isReplaceable = false;
+		}
 		cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
 
 		startRot = cubeInReceptacle.transform.rotation;
-		endRot = ClosestRotation(startRot);
+		endRot = RightAngleRotations.GetNearestRelativeToTransform(startRot, transform);
 
 		startPos = cubeInReceptacle.transform.position;
 		endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
 
-		cubeEnterSfx.audioSource.volume = 0.75f;
-		cubeEnterSfx.PlayOneShot();
+		if (cubeEnterSfx != null) {
+			cubeEnterSfx.audioSource.volume = 0.75f;
+			cubeEnterSfx.PlayOneShot();
+		}
 
 		state = State.CubeEnterRotate;
 	}
@@ -283,8 +229,9 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 	void ReleaseCubeFromReceptacle() {
 		state = State.CubeExiting;
 
-		cubeReleaseSfx.PlayOneShot();
+		cubeReleaseSfx?.PlayOneShot();
 
+		cubeInReceptacle.shouldFollow = false;
 		cubeInReceptacle.interactable = false;
 
 		startPos = cubeInReceptacle.transform.position;
@@ -294,21 +241,6 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 
 	void RestoreTriggerZoneAfterCooldown() {
 		triggerZone.enabled = true;
-	}
-
-	Quaternion ClosestRotation(Quaternion comparedTo) {
-		float minAngle = float.MaxValue;
-		Quaternion returnRotation = Quaternion.identity;
-
-		foreach (var q in acceptableRotations) {
-			float angleBetween = Quaternion.Angle(q, comparedTo);
-			if (angleBetween < minAngle) {
-				minAngle = angleBetween;
-				returnRotation = q;
-			}
-		}
-
-		return returnRotation;
 	}
 
 	#region Saving

@@ -126,6 +126,11 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 		SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 		newCube.GetComponent<GravityObject>().useGravity = false;
 
+		PillarDimensionObject[] dimensionObjs = Utils.GetComponentsInChildrenRecursively<PillarDimensionObject>(newCube.transform);
+		foreach (var newCubeDimensionObj in dimensionObjs) {
+			newCubeDimensionObj.Dimension = baseDimensionForCubes;
+		}
+
 		Physics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>(), true);
 		rigidbodyOfObjectBeingSuspended = newCube.thisRigidbody;
 		rigidbodyOfObjectBeingSuspended.useGravity = false;

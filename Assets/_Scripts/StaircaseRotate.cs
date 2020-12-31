@@ -97,6 +97,7 @@ public class StaircaseRotate : MonoBehaviour {
 
 			PlayerLook playerLook = PlayerLook.instance;
 			playerLook.rotationY -= angleBetween * Vector3.Dot(playerMovement.transform.forward, playerMovement.ProjectedHorizontalVelocity().normalized);
+			playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
 		}
 		else if (gravityObj != null) {
 			float objT = GetLerpPositionOfPoint(other.transform.position);
@@ -122,6 +123,7 @@ public class StaircaseRotate : MonoBehaviour {
 
 			PlayerLook playerLook = PlayerLook.instance;
 			playerLook.rotationY -= angleBetween * Vector3.Dot(playerMovement.transform.forward, playerMovement.ProjectedHorizontalVelocity().normalized);
+			playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
 		}
 		else if (gravityObj != null) {
 			gravityObj.gravityDirection = exitGravity;

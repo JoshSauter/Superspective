@@ -9,8 +9,6 @@ using Audio;
 using Saving;
 using System;
 using SerializableClasses;
-using UnityEngine.SceneManagement;
-using static Saving.DynamicObjectManager;
 
 [RequireComponent(typeof(UniqueId))]
 public class PickupObject : MonoBehaviour, SaveableObject {
@@ -41,6 +39,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 		}
 	}
 	public bool isHeld = false;
+	public bool shouldFollow = true;
 	public const float pickupDropCooldown = 0.1f;
 	float currentCooldown = 0;
 	bool onCooldown { get { return currentCooldown > 0; } }
@@ -69,6 +68,8 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 	Vector3 playerCamPosLastFrame;
 	public SoundEffect pickupSound;
 	public SoundEffect dropSound;
+
+	float rotateToRightAngleTime = 0.35f;
 
 	void Awake() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
@@ -124,6 +125,10 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 
 		if (isHeld) {
 			interactableGlow.TurnOnGlow();
+
+			if (PlayerButtonInput.instance.Action3Pressed) {
+				StartCoroutine(RotateToRightAngle(RightAngleRotations.GetNearest(transform.rotation)));
+			}
 		}
 	}
 
@@ -137,8 +142,27 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 		// TODO:
 	}
 
+	IEnumerator RotateToRightAngle(Quaternion destinationRotation) {
+		thisRigidbody.angularVelocity = Vector3.zero;
+
+		float timeElapsed = 0f;
+
+		Quaternion startRot = transform.rotation;
+
+		while (timeElapsed < rotateToRightAngleTime) {
+			timeElapsed += Time.deltaTime;
+			float t = timeElapsed / rotateToRightAngleTime;
+
+			transform.rotation = Quaternion.Lerp(startRot, destinationRotation, t);
+
+			yield return null;
+		}
+
+		transform.rotation = destinationRotation;
+	}
+
 	void FixedUpdate() {
-		if (isHeld) {
+		if (isHeld && shouldFollow) {
 			Vector3 playerCamPositionalDiff = Player.instance.cameraFollow.transform.position - playerCamPosLastFrame;
 			if (portalableObject != null && portalableObject.grabbedThroughPortal != null) {
 				playerCamPositionalDiff = portalableObject.grabbedThroughPortal.TransformDirection(playerCamPositionalDiff);

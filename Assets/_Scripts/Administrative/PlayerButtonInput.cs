@@ -30,6 +30,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonPressEvent OnLeftPress;
 	public event ButtonPressEvent OnAction1Press;
 	public event ButtonPressEvent OnAction2Press;
+	public event ButtonPressEvent OnAction3Press;
 	public event ButtonPressEvent OnEscapePress;
 	public event ButtonPressEvent OnSpacePress;
 	public event ButtonPressEvent OnShiftPress;
@@ -40,6 +41,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonReleaseEvent OnLeftRelease;
 	public event ButtonReleaseEvent OnAction1Release;
 	public event ButtonReleaseEvent OnAction2Release;
+	public event ButtonReleaseEvent OnAction3Release;
 	public event ButtonReleaseEvent OnEscapeRelease;
 	public event ButtonReleaseEvent OnSpaceRelease;
 	public event ButtonReleaseEvent OnShiftRelease;
@@ -50,6 +52,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonHeldEvent OnLeftHeld;
 	public event ButtonHeldEvent OnAction1Held;
 	public event ButtonHeldEvent OnAction2Held;
+	public event ButtonHeldEvent OnAction3Held;
 	public event ButtonHeldEvent OnEscapeHeld;
 	public event ButtonHeldEvent OnSpaceHeld;
 	public event ButtonHeldEvent OnShiftHeld;
@@ -65,6 +68,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	private bool inLeftHoldCoroutine = false;
 	private bool inAction1HoldCoroutine = false;
 	private bool inAction2HoldCoroutine = false;
+	private bool inAction3HoldCoroutine = false;
 	private bool inEscapeHoldCoroutine = false;
 	private bool inSpaceHoldCoroutine = false;
 	private bool inShiftHoldCoroutine = false;
@@ -147,6 +151,17 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 			OnAction2Release();
 		}
 
+		// Action3 button (also maps to mouse middle-click)
+		if (Action3Pressed && OnAction3Press != null) {
+			OnAction3Press();
+			if (!inAction3HoldCoroutine) {
+				StartCoroutine(Action3HoldCoroutine());
+			}
+		}
+		else if (Action3Released && OnAction3Release != null) {
+			OnAction3Release();
+		}
+
 		// Escape button
 		if (EscapePressed && OnEscapePress != null) {
 			OnEscapePress();
@@ -193,6 +208,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool Action1Pressed => KeyboardAndMouseInputs.Action1.Pressed;
 
 	public bool Action2Pressed => KeyboardAndMouseInputs.Action2.Pressed;
+
+	public bool Action3Pressed => KeyboardAndMouseInputs.Action3.Pressed;
 	
 	public bool EscapePressed => KeyboardAndMouseInputs.Escape.Pressed;
 	
@@ -214,6 +231,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 	public bool Action2Released => KeyboardAndMouseInputs.Action2.Released;
 
+	public bool Action3Released => KeyboardAndMouseInputs.Action3.Released;
+
 	public bool EscapeReleased => KeyboardAndMouseInputs.Escape.Released;
 	
 	public bool SpaceReleased => KeyboardAndMouseInputs.Space.Released;
@@ -233,6 +252,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool Action1Held => KeyboardAndMouseInputs.Action1.Held;
 	
 	public bool Action2Held => KeyboardAndMouseInputs.Action2.Held;
+
+	public bool Action3Held => KeyboardAndMouseInputs.Action3.Held;
 	
 	public bool EscapeHeld => KeyboardAndMouseInputs.Escape.Held;
 	
@@ -405,6 +426,21 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		}
 
 		inAction2HoldCoroutine = false;
+	}
+	IEnumerator Action3HoldCoroutine() {
+		inAction3HoldCoroutine = true;
+
+		float timeHeld = 0;
+		while (Action3Held) {
+			if (OnAction3Held != null) {
+				OnAction3Held(timeHeld);
+			}
+
+			timeHeld += Time.deltaTime;
+			yield return null;
+		}
+
+		inAction3HoldCoroutine = false;
 	}
 	IEnumerator EscapeHoldCoroutine() {
 		inEscapeHoldCoroutine = true;
