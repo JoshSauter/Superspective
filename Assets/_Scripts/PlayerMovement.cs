@@ -89,8 +89,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	public const float isGroundedSpherecastDistance = 0.5f;
 	#endregion
 
-	public SoundEffect jumpSound;
-
 	#region events
 	public delegate void PlayerMovementAction();
 	public PlayerMovementAction OnJump;
@@ -303,7 +301,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 	/// </summary>
 	void Jump() {
 		OnJump?.Invoke();
-		jumpSound.Play();
+		AudioManager.instance.PlayOnGameObject(AudioName.PlayerJump, ID, gameObject);
 
 		timeSpentJumping = 0.0f;
 		underMinJumpTime = true;

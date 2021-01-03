@@ -78,8 +78,6 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 
 	ColorCoded colorCoded;
 
-	public SoundEffect cubeEnterSfx, cubeReleaseSfx;
-
 	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 	public delegate void CubeReceptacleActionSimple();
 
@@ -213,10 +211,7 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 		startPos = cubeInReceptacle.transform.position;
 		endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
 
-		if (cubeEnterSfx != null) {
-			cubeEnterSfx.audioSource.volume = 0.75f;
-			cubeEnterSfx.PlayOneShot();
-		}
+		AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
 
 		state = State.CubeEnterRotate;
 	}
@@ -229,7 +224,7 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 	void ReleaseCubeFromReceptacle() {
 		state = State.CubeExiting;
 
-		cubeReleaseSfx?.PlayOneShot();
+		AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
 
 		cubeInReceptacle.shouldFollow = false;
 		cubeInReceptacle.interactable = false;

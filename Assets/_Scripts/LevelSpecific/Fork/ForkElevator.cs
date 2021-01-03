@@ -49,8 +49,6 @@ namespace LevelSpecific.Fork {
 
 		bool playerStandingInElevator = false;
 
-		public SoundEffect openSfx, closeSfx, movingSfx;
-
 		void Start() {
 			raisedHeight = transform.parent.position.y;
 			loweredHeight = raisedHeight - height;
@@ -93,7 +91,7 @@ namespace LevelSpecific.Fork {
 		void UpdateDoorClosingAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				invisibleElevatorWall.SetActive(true);
-				closeSfx.Play(true);
+				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, ID, gameObject, true);
 				CameraShake.instance.Shake(timeToLockDoors, 0.25f, 0f);
 			}
 
@@ -115,7 +113,7 @@ namespace LevelSpecific.Fork {
 				// Transition state to ElevatorMoving after waiting .1 additional seconds
 				if (timeElapsedSinceStateChange >= totalAnimationTime + 0.1f) {
 					CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
-					movingSfx.Play(true);
+					AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, gameObject, true);
 
 					state = State.ElevatorMoving;
 				}
@@ -124,7 +122,7 @@ namespace LevelSpecific.Fork {
 
 		void UpdateDoorOpeningAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
-				openSfx.Play(true);
+				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, ID, gameObject, true);
 				CameraShake.instance.Shake(timeToUnlockDoors, 0.25f, 0f);
 			}
 
@@ -229,17 +227,17 @@ namespace LevelSpecific.Fork {
 					case State.ElevatorMoving:
 						t = Mathf.InverseLerp(elevator.loweredHeight, elevator.raisedHeight, elevator.transform.parent.position.y);
 						if (elevator.goingDown) t = 1 - t;
-						elevator.movingSfx.Play(false, t);
+						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
 						break;
 					case State.DoorsOpening:
 						float totalAnimationTime = timeToUnlockDoors + (elevator.lockBars.Length / 2) * unlockBarDelayTime;
 						t = elevator.timeElapsedSinceStateChange / totalAnimationTime;
-						elevator.openSfx.Play(false, t);
+						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
 						break;
 					case State.DoorsClosing:
 						totalAnimationTime = timeToLockDoors + (elevator.lockBars.Length / 2) * lockBarDelayTime;
 						t = elevator.timeElapsedSinceStateChange / totalAnimationTime;
-						elevator.closeSfx.Play(false, t);
+						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
 						break;
 				}
 			}

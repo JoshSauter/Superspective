@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Audio;
+using static Audio.AudioManager;
 
 public class Footsteps : MonoBehaviour {
-	public SoundEffect sound;
+	AudioJob audioJob;
 	Headbob bob;
 	PlayerMovement playerMovement;
 	float defaultVolume;
@@ -16,12 +17,16 @@ public class Footsteps : MonoBehaviour {
 	// Alternates between true and false so we only play a sound every other step
 	bool shouldForceStepSound = true;
 
+	// Used for creating and retrieving audio jobs
+	string id = "Footsteps";
+
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
 		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
 
 		bob = GetComponent<Headbob>();
-		defaultVolume = sound.audioSource.volume;
+		audioJob = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id);
+		defaultVolume = audioJob.audio.volume;
 
 		if (bob == null) {
 			Debug.LogWarning("Footsteps requires headbob info");
@@ -35,7 +40,7 @@ public class Footsteps : MonoBehaviour {
 
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
-		sound.audioSource.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
+		audioJob.audio.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
 		if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
 			float thisFrameOffset = thisFrameBobAmount - curBobAmountUnamplified;
@@ -50,20 +55,20 @@ public class Footsteps : MonoBehaviour {
 		else {
 			if (playerWasHeadingDownLastFrame) {
 				PlayFootstep(shouldForcePlay);
-				timeSinceLastHit = 0f;
 			}
 			playerWasHeadingDownLastFrame = false;
 		}
 	}
 
 	void PlayFootstepAtVolume(bool shouldForcePlay, float tempVolume) {
-		float tmp = sound.audioSource.volume;
-		sound.audioSource.volume = tempVolume;
+		float tmp = audioJob.audio.volume;
+		audioJob.audio.volume = tempVolume;
 		PlayFootstep(shouldForcePlay);
-		sound.audioSource.volume = tmp;
+		audioJob.audio.volume = tmp;
 	}
 
 	void PlayFootstep(bool shouldForcePlay) {
-		sound.Play(shouldForcePlay);
+		timeSinceLastHit = 0f;
+		AudioManager.instance.Play(AudioName.PlayerFootstep, id, shouldForcePlay);
 	}
 }

@@ -4,13 +4,17 @@ using UnityEngine;
 using PortalMechanics;
 using EpitaphUtils;
 using Audio;
+using static Audio.AudioManager;
 
 public class PlayerLandingSound : MonoBehaviour {
-	public SoundEffect shoeSound;
-	public SoundEffect thumpSound;
+	//public SoundEffectOld shoeSound;
+	//public SoundEffectOld thumpSound;
+	AudioJob ruffleSound;
+	AudioJob thumpSound;
+
 	PlayerMovement playerMovement;
 	bool wasGrounded = true;
-	float startVolume;
+	float ruffleStartVolume;
 	float thumpStartVolume;
 	public float volumeDelta = 0.3f;
 	public float minSpeed = 6f;
@@ -20,10 +24,16 @@ public class PlayerLandingSound : MonoBehaviour {
 	float maxHeight;
 	bool keepTrackOfPlayerAirHeight = false;
 
+	string id = "PlayerLandingSound";
+
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
-		startVolume = shoeSound.audioSource.volume;
-		thumpStartVolume = thumpSound.audioSource.volume;
+		
+		ruffleSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, id);
+		thumpSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, id);
+
+		ruffleStartVolume = ruffleSound.audio.volume;
+		thumpStartVolume = thumpSound.audio.volume;
 
 		Portal.OnAnyPortalTeleport += HandlePlayerTeleported;
     }
@@ -59,15 +69,15 @@ public class PlayerLandingSound : MonoBehaviour {
 
 				// Debug.LogWarning("SimulatedSpeed: " + simulatedSpeedOfImpact);
 				if (simulatedSpeedOfImpact >= minSpeed) {
-					float volume = startVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
-					shoeSound.audioSource.volume = volume;
-
+					float volume = ruffleStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(minSpeed, maxSpeed, simulatedSpeedOfImpact));
+					ruffleSound.audio.volume = volume;
+					//AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingRuffle, id, gameObject);
 
 					if (simulatedSpeedOfImpact >= 2 * minSpeed) {
 						float thumpVolume = thumpStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(2 * minSpeed, 2 * maxSpeed, simulatedSpeedOfImpact));
-						thumpSound.audioSource.volume = thumpVolume;
+						thumpSound.audio.volume = thumpVolume;
 
-						thumpSound.Play();
+						AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingThump, id, gameObject);
 					}
 
 				}

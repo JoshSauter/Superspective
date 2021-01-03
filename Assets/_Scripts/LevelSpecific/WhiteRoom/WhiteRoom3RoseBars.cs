@@ -15,8 +15,6 @@ namespace LevelSpecific.WhiteRoom {
         public GameObject invisibleWall;
         public GameObject[] bars;
 
-        public SoundEffect barsSfx;
-
         bool barsWereUpLastFrame = true;
         public bool barsAreUp = true;
 
@@ -30,7 +28,7 @@ namespace LevelSpecific.WhiteRoom {
 
         private void Update() {
             if (!barsAreUp && barsWereUpLastFrame) {
-                barsSfx.Play();
+                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, gameObject);
             }
 
             invisibleWall.SetActive(barsAreUp);

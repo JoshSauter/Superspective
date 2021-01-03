@@ -14,7 +14,7 @@ namespace LevelSpecific.WhiteRoom {
         public Transform[] bars;
         public GameObject invisibleWall;
 
-        public SoundEffect barsOpenSfx;
+        public GameObject barRoot;
 
         public int numSolved = 0;
         bool wasSolvedLastFrame = false;
@@ -29,7 +29,7 @@ namespace LevelSpecific.WhiteRoom {
 
         void Update() {
             if (solved && !wasSolvedLastFrame) {
-                barsOpenSfx.Play();
+                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, barRoot);
             }
 
             invisibleWall.SetActive(!solved);

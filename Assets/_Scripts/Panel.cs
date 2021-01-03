@@ -5,6 +5,7 @@ using Audio;
 using Saving;
 using System;
 using SerializableClasses;
+using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
 public class Panel : MonoBehaviour, SaveableObject {
@@ -71,7 +72,7 @@ public class Panel : MonoBehaviour, SaveableObject {
 	readonly float maxPitch = 1f;
 	readonly float minVolume = 0.25f;
 	readonly float maxVolume = 1f;
-	public SoundEffect electricalHumSound;
+	//public SoundEffectOld electricalHumSound;
 
 #region events
 	public delegate void PanelAction();
@@ -101,16 +102,14 @@ public class Panel : MonoBehaviour, SaveableObject {
 		gemButton.OnButtonPressFinish += (ctx) => PanelActivate();
 		gemButton.OnButtonDepressBegin += (ctx) => PanelDeactivate();
 
-		gemButton.OnButtonPressBegin += (ctx) => TurnOnSounds();
-		gemButton.OnButtonDepressBegin += (ctx) => TurnOffSounds();
+		gemButton.OnButtonPressBegin += (ctx) => soundActivated = true;
+		gemButton.OnButtonDepressBegin += (ctx) => soundActivated = false;
 
-		electricalHumSound.audioSource.pitch = minPitch;
-		electricalHumSound.audioSource.volume = minVolume;
+		AudioManager.instance.PlayWithUpdate(AudioName.PanelHum, ID, UpdateSound);
 	}
 
 	private void Update() {
 		UpdatePanel();
-		UpdateSound();
 	}
 
 	void UpdatePanel() {
@@ -145,31 +144,30 @@ public class Panel : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	void TurnOnSounds() {
-		soundActivated = true;
-	}
-
-	void TurnOffSounds() {
-		soundActivated = false;
-	}
-
-	void UpdateSound() {
-		if (soundActivated && electricalHumSound.audioSource.volume < maxVolume) {
-			float soundLerpSpeedOn = 1f;
-			float newPitch = Mathf.Clamp(electricalHumSound.audioSource.pitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
-			float newVolume = Mathf.Clamp(electricalHumSound.audioSource.volume + Time.deltaTime * soundLerpSpeedOn, minVolume, maxVolume);
-
-			electricalHumSound.audioSource.pitch = newPitch;
-			electricalHumSound.audioSource.volume = newVolume;
+	void UpdateSound(AudioJob audioJob) {
+		if (this == null || gameObject == null) {
+			audioJob.removeSound = true;
+			return;
 		}
 
-		if (!soundActivated && electricalHumSound.audioSource.volume > minVolume) {
-			float soundLerpSpeedOff = .333f;
-			float newPitch = Mathf.Clamp(electricalHumSound.audioSource.pitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
-			float newVolume = Mathf.Clamp(electricalHumSound.audioSource.volume - Time.deltaTime * soundLerpSpeedOff, minVolume, maxVolume);
+		audioJob.audio.transform.position = transform.position;
 
-			electricalHumSound.audioSource.pitch = newPitch;
-			electricalHumSound.audioSource.volume = newVolume;
+		if (soundActivated && audioJob.audio.volume < maxVolume) {
+			float soundLerpSpeedOn = 1f;
+			float newPitch = Mathf.Clamp(audioJob.audio.pitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
+			float newVolume = Mathf.Clamp(audioJob.audio.volume + Time.deltaTime * soundLerpSpeedOn, minVolume, maxVolume);
+
+			audioJob.audio.pitch = newPitch;
+			audioJob.audio.volume = newVolume;
+		}
+
+		if (!soundActivated && audioJob.audio.volume > minVolume) {
+			float soundLerpSpeedOff = .333f;
+			float newPitch = Mathf.Clamp(audioJob.audio.pitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
+			float newVolume = Mathf.Clamp(audioJob.audio.volume - Time.deltaTime * soundLerpSpeedOff, minVolume, maxVolume);
+
+			audioJob.audio.pitch = newPitch;
+			audioJob.audio.volume = newVolume;
 		}
 	}
 

@@ -9,6 +9,7 @@ using Audio;
 using Saving;
 using System;
 using SerializableClasses;
+using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
 public class PickupObject : MonoBehaviour, SaveableObject {
@@ -66,8 +67,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 	public static PickupObjectAction OnAnyDrop;
 
 	Vector3 playerCamPosLastFrame;
-	public SoundEffect pickupSound;
-	public SoundEffect dropSound;
+	AudioJob pickupSound;
 
 	float rotateToRightAngleTime = 0.35f;
 
@@ -111,6 +111,8 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 
 		Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
 		TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
+
+		pickupSound = AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
 	}
 
 	private void Update() {
@@ -254,8 +256,8 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 			currentCooldown = pickupDropCooldown;
 
 			// Pitch goes 1 -> 1.25 -> 1.5 -> 1
-			pickupSound.pitch = ((pickupSound.pitch - .75f) % .75f) + 1f;
-			pickupSound.Play(true);
+			pickupSound.audio.pitch = ((pickupSound.audio.pitch - .75f) % .75f) + 1f;
+			AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, gameObject, true);
 
 			OnPickupSimple?.Invoke();
 			OnPickup?.Invoke(this);
@@ -278,7 +280,7 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 			isHeld = false;
 			currentCooldown = pickupDropCooldown;
 
-			dropSound.Play(true);
+			AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, gameObject, true);
 
 			OnDropSimple?.Invoke();
 			OnDrop?.Invoke(this);

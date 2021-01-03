@@ -49,12 +49,12 @@ namespace PictureTeleportMechanics {
         public float ssaoBlendTimeRemaining = 0f;
 
         void Awake() {
-            ssao = EpitaphScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
-            startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject = GetComponent<ViewLockObject>();
         }
 
         void Start() {
+            ssao = EpitaphScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
+            startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;
         }

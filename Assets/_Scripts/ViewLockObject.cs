@@ -64,8 +64,6 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
 	public ViewLockEvent OnViewLockExitBegin;
 	public ViewLockEvent OnViewLockExitFinish;
 
-	SoundEffect enterViewLockSfx;
-
 	void Awake() {
 		hitbox = GetComponent<Collider>();
 		hitbox.isTrigger = true;
@@ -75,17 +73,6 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
 		}
 		interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
-
-		InitAudio();
-	}
-
-	void InitAudio() {
-		if (enterViewLockSfx == null) {
-			enterViewLockSfx = gameObject.AddComponent<SoundEffectOnGameObject>();
-			enterViewLockSfx.SkipSave = true;
-			enterViewLockSfx.pitch = 0.5f;
-			enterViewLockSfx.audioSource.clip = Resources.Load<AudioClip>("Audio/Sounds/Objects/ViewLockObject");
-		}
 	}
 
     void Start() {
@@ -101,7 +88,7 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
 	public void OnLeftMouseButtonDown() {
 		if (PlayerLook.instance.state == PlayerLook.State.ViewUnlocked) {
 			hitbox.enabled = false;
-			enterViewLockSfx.Play(true);
+			AudioManager.instance.PlayOnGameObject(AudioName.ViewLockObject, ID, gameObject, true);
 			PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
 			state = PlayerLook.State.ViewLocking;
 		}

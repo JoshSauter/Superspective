@@ -5,11 +5,20 @@ using UnityEngine;
 namespace Audio {
 	[RequireComponent(typeof(Rigidbody))]
     public class CubeImpactSound : MonoBehaviour {
-        public SoundEffect cubeImpactSounds;
+		UniqueId _id;
+		UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
 
 		float minSpeed = 5f;
 		float maxSpeed = 25f;
 
+		float curVolume = 0f;
 		float minVolume = .15f;
 		float maxVolume = 4.5f;
 
@@ -24,14 +33,18 @@ namespace Audio {
 			float impactSpeed = Mathf.Clamp(collision.relativeVelocity.magnitude, 0f, maxSpeed);
 			float impactLerpSpeed = Mathf.InverseLerp(minSpeed, maxSpeed, impactSpeed);
 			//Debug.Log(impactSpeed);
-			float volume = Mathf.Lerp(minVolume, maxVolume, impactLerpSpeed);
-			float prevVolume = cubeImpactSounds.audioSource.volume;
-			cubeImpactSounds.audioSource.volume = volume;
-			cubeImpactSounds.pitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
+			float nextVolume = Mathf.Lerp(minVolume, maxVolume, impactLerpSpeed);
 
-			bool shouldPlay = timeSinceLastSound > cooldown || volume > prevVolume;
-			cubeImpactSounds.Play(shouldPlay);
+			bool shouldPlay = timeSinceLastSound > cooldown || nextVolume > curVolume;
+
+			void AudioSettingsOverride(AudioSource audio) {
+				audio.volume = nextVolume;
+				audio.pitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
+			}
+
+			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, gameObject, shouldPlay, AudioSettingsOverride);
 			timeSinceLastSound = 0f;
+			curVolume = nextVolume;
 		}
 
 		private void Update() {
