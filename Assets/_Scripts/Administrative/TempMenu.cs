@@ -11,7 +11,7 @@ public class TempMenu : MonoBehaviour {
 	public Slider ySensitivitySlider;
 	public Slider headbobSlider;
 
-	private CursorLockMode cachedLockMode;
+	CursorLockMode cachedLockMode;
 
     void Start() {
 		generalSensitivitySlider.onValueChanged.AddListener(delegate {
@@ -47,7 +47,7 @@ public class TempMenu : MonoBehaviour {
 		Cursor.lockState = cachedLockMode;
 	}
 
-	private void Update() {
+	void Update() {
 		if (PlayerButtonInput.instance.EscapePressed) {
 			bool becomeActive = !tempMenu.activeSelf;
 			if (becomeActive) {

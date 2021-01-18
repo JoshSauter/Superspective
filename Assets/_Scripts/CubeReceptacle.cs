@@ -1,296 +1,325 @@
-﻿using Audio;
+﻿using System;
+using Audio;
 using EpitaphUtils;
 using Saving;
 using SerializableClasses;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
 public class CubeReceptacle : MonoBehaviour, SaveableObject {
-	UniqueId _id;
-	UniqueId id {
-		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
-			}
-			return _id;
-		}
-	}
-	public enum State {
-		Empty,
-		CubeEnterRotate,
-		CubeEnterTranslate,
-		CubeInReceptacle,
-		CubeExiting
-	}
-	private State _state = State.Empty;
-	public State state {
-		get { return _state; }
-		set {
-			if (_state == value) {
-				return;
-			}
-			timeSinceStateChange = 0f;
-			switch (value) {
-				case State.CubeEnterRotate:
-					OnCubeHoldStart?.Invoke(this, cubeInReceptacle);
-					OnCubeHoldStartSimple?.Invoke();
-					break;
-				case State.CubeInReceptacle:
-					OnCubeHoldEnd?.Invoke(this, cubeInReceptacle);
-					OnCubeHoldEndSimple?.Invoke();
-					break;
-				case State.CubeExiting:
-					OnCubeReleaseStart?.Invoke(this, cubeInReceptacle);
-					OnCubeReleaseStartSimple?.Invoke();
-					break;
-				case State.Empty:
-					OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
-					OnCubeReleaseEndSimple?.Invoke();
-					break;
-				default:
-					break;
-			}
-			_state = value;
-		}
-	}
-	public float timeSinceStateChange;
+    public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 
-	Quaternion startRot;
-	Quaternion endRot;
+    public delegate void CubeReceptacleActionSimple();
 
-	Vector3 startPos;
-	Vector3 endPos;
-
-	public bool makesCubeIrreplaceable = true;
-	public float receptacleSize = 1f;
-	public float receptableDepth = 0.5f;
-
-	BoxCollider triggerZone;
-	PickupObject cubeInReceptacle;
-
-	const float rotateTime = 0.25f;
-	const float translateTime = 0.5f;
-	const float afterReleaseCooldown = 1f;
-	const float timeToRelease = .25f;
-
-	ColorCoded colorCoded;
-
-	public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
-	public delegate void CubeReceptacleActionSimple();
-
-	public event CubeReceptacleAction OnCubeHoldStart;
-	public event CubeReceptacleAction OnCubeHoldEnd;
-	public event CubeReceptacleAction OnCubeReleaseStart;
-	public event CubeReceptacleAction OnCubeReleaseEnd;
-
-	public event CubeReceptacleActionSimple OnCubeHoldStartSimple;
-	public event CubeReceptacleActionSimple OnCubeHoldEndSimple;
-	public event CubeReceptacleActionSimple OnCubeReleaseStartSimple;
-	public event CubeReceptacleActionSimple OnCubeReleaseEndSimple;
-
-    void Start() {
-		AddTriggerZone();
-		colorCoded = GetComponent<ColorCoded>();
+    public enum State {
+        Empty,
+        CubeEnterRotate,
+        CubeEnterTranslate,
+        CubeInReceptacle,
+        CubeExiting
     }
 
-	void AddTriggerZone() {
-		//GameObject triggerZoneGO = new GameObject("TriggerZone");
-		//triggerZoneGO.transform.SetParent(transform, false);
-		//triggerZoneGO.layer = LayerMask.NameToLayer("Ignore Raycast");
-		//triggerZone = triggerZoneGO.AddComponent<BoxCollider>();
-		triggerZone = gameObject.AddComponent<BoxCollider>();
-		gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+    const float rotateTime = 0.25f;
+    const float translateTime = 0.5f;
+    const float afterReleaseCooldown = 1f;
+    const float timeToRelease = .25f;
+    public float timeSinceStateChange;
 
-		triggerZone.size = new Vector3(receptacleSize * 0.25f, receptacleSize * 1.5f, receptacleSize * 0.25f);
-		triggerZone.isTrigger = true;
-	}
+    public bool makesCubeIrreplaceable = true;
+    public float receptacleSize = 1f;
+    public float receptableDepth = 0.5f;
+    public PickupObject cubeInReceptacle;
+    UniqueId _id;
+    State _state = State.Empty;
 
-	private void FixedUpdate() {
-		UpdateCubeReceptacle();
-	}
+    ColorCoded colorCoded;
+    Vector3 endPos;
+    Quaternion endRot;
 
-	void UpdateCubeReceptacle() {
-		timeSinceStateChange += Time.fixedDeltaTime;
-		switch (state) {
-			case State.Empty:
-				if (timeSinceStateChange > afterReleaseCooldown) {
-					RestoreTriggerZoneAfterCooldown();
-				}
-				break;
-			case State.CubeInReceptacle:
-				if (cubeInReceptacle == null) {
-					state = State.Empty;
-				}
-				break;
-			case State.CubeEnterRotate:
-				if (cubeInReceptacle == null) {
-					state = State.Empty;
-					break;
-				}
-				if (timeSinceStateChange < rotateTime) {
-					float t = timeSinceStateChange / rotateTime;
+    Vector3 startPos;
 
-					cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
-					cubeInReceptacle.transform.rotation = Quaternion.Lerp(startRot, endRot, t);
-				}
-				else {
-					cubeInReceptacle.transform.position = endPos;
-					cubeInReceptacle.transform.rotation = endRot;
+    Quaternion startRot;
 
-					startPos = cubeInReceptacle.transform.position;
-					endPos = transform.TransformPoint(0, 1-receptableDepth, 0);
+    BoxCollider triggerZone;
 
-					state = State.CubeEnterTranslate;
-				}
-				break;
-			case State.CubeEnterTranslate:
-				if (cubeInReceptacle == null) {
-					state = State.Empty;
-					break;
-				}
-				if (timeSinceStateChange < translateTime) {
-					float t = timeSinceStateChange / translateTime;
+    UniqueId id {
+        get {
+            if (_id == null) _id = GetComponent<UniqueId>();
+            return _id;
+        }
+    }
 
-					cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
-				}
-				else {
-					cubeInReceptacle.transform.position = endPos;
+    public State state {
+        get => _state;
+        set {
+            if (_state == value) return;
+            timeSinceStateChange = 0f;
+            switch (value) {
+                case State.CubeEnterRotate:
+                    OnCubeHoldStart?.Invoke(this, cubeInReceptacle);
+                    OnCubeHoldStartSimple?.Invoke();
+                    break;
+                case State.CubeInReceptacle:
+                    OnCubeHoldEnd?.Invoke(this, cubeInReceptacle);
+                    OnCubeHoldEndSimple?.Invoke();
+                    break;
+                case State.CubeExiting:
+                    OnCubeReleaseStart?.Invoke(this, cubeInReceptacle);
+                    OnCubeReleaseStartSimple?.Invoke();
+                    break;
+                case State.Empty:
+                    OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
+                    OnCubeReleaseEndSimple?.Invoke();
+                    break;
+            }
 
-					cubeInReceptacle.interactable = true;
-					state = State.CubeInReceptacle;
-				}
-				break;
-			case State.CubeExiting:
-				if (timeSinceStateChange < timeToRelease) {
-					float t = timeSinceStateChange / timeToRelease;
+            _state = value;
+        }
+    }
 
-					cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
-					cubeInReceptacle.transform.rotation = startRot;
-				}
-				else {
-					PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
-					cubeThatWasInReceptacle.shouldFollow = true;
-					cubeThatWasInReceptacle.interactable = true;
-					cubeThatWasInReceptacle.isReplaceable = true;
-					triggerZone.enabled = false;
+    public bool isCubeInReceptacle => cubeInReceptacle != null;
 
-					state = State.Empty;
-					cubeInReceptacle = null;
-				}
-				break;
-		}
-	}
+    void Start() {
+        AddTriggerZone();
+        colorCoded = GetComponent<ColorCoded>();
+    }
 
-	private void OnTriggerStay(Collider other) {
-		PickupObject cube = other.gameObject.GetComponent<PickupObject>();
-		if (colorCoded != null && !colorCoded.AcceptedColor(other.gameObject.GetComponent<ColorCoded>())) {
-			return;
-		}
-		if (cube != null && cubeInReceptacle == null) {
-			StartCubeEnter(cube);
-		}
-	}
+    void FixedUpdate() {
+        UpdateCubeReceptacle();
+    }
 
-	void StartCubeEnter(PickupObject cube) {
-		Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
-		cube.Drop();
-		cube.interactable = false;
-		cubeRigidbody.isKinematic = true;
-		cubeInReceptacle = cube;
-		if (makesCubeIrreplaceable) {
-			cubeInReceptacle.isReplaceable = false;
-		}
-		cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
+    void OnTriggerStay(Collider other) {
+        PickupObject cube = other.gameObject.GetComponent<PickupObject>();
+        if (colorCoded != null && !colorCoded.AcceptedColor(other.gameObject.GetComponent<ColorCoded>())) return;
+        if (cube != null && cubeInReceptacle == null) StartCubeEnter(cube);
+    }
 
-		startRot = cubeInReceptacle.transform.rotation;
-		endRot = RightAngleRotations.GetNearestRelativeToTransform(startRot, transform);
+    public event CubeReceptacleAction OnCubeHoldStart;
+    public event CubeReceptacleAction OnCubeHoldEnd;
+    public event CubeReceptacleAction OnCubeReleaseStart;
+    public event CubeReceptacleAction OnCubeReleaseEnd;
 
-		startPos = cubeInReceptacle.transform.position;
-		endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
+    public event CubeReceptacleActionSimple OnCubeHoldStartSimple;
+    public event CubeReceptacleActionSimple OnCubeHoldEndSimple;
+    public event CubeReceptacleActionSimple OnCubeReleaseStartSimple;
+    public event CubeReceptacleActionSimple OnCubeReleaseEndSimple;
 
-		AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
+    void AddTriggerZone() {
+        //GameObject triggerZoneGO = new GameObject("TriggerZone");
+        //triggerZoneGO.transform.SetParent(transform, false);
+        //triggerZoneGO.layer = LayerMask.NameToLayer("Ignore Raycast");
+        //triggerZone = triggerZoneGO.AddComponent<BoxCollider>();
+        triggerZone = gameObject.AddComponent<BoxCollider>();
+        gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
-		state = State.CubeEnterRotate;
-	}
+        triggerZone.size = new Vector3(receptacleSize * 0.25f, receptacleSize * 1.5f, receptacleSize * 0.25f);
+        triggerZone.isTrigger = true;
+    }
 
-	void ReleaseFromReceptacle() {
-		cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
-		ReleaseCubeFromReceptacle();
-	}
+    void UpdateCubeReceptacle() {
+        timeSinceStateChange += Time.fixedDeltaTime;
+        switch (state) {
+            case State.Empty:
+                if (timeSinceStateChange > afterReleaseCooldown) RestoreTriggerZoneAfterCooldown();
+                break;
+            case State.CubeInReceptacle:
+                if (cubeInReceptacle == null) {
+                    // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
+                    state = State.CubeExiting;
+                    state = State.Empty;
+                }
 
-	void ReleaseCubeFromReceptacle() {
-		state = State.CubeExiting;
+                break;
+            case State.CubeEnterRotate:
+                if (cubeInReceptacle == null) {
+                    // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
+                    state = State.CubeExiting;
+                    state = State.Empty;
+                    break;
+                }
 
-		AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+                if (timeSinceStateChange < rotateTime) {
+                    float t = timeSinceStateChange / rotateTime;
 
-		cubeInReceptacle.shouldFollow = false;
-		cubeInReceptacle.interactable = false;
+                    cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
+                    cubeInReceptacle.transform.rotation = Quaternion.Lerp(startRot, endRot, t);
+                }
+                else {
+                    cubeInReceptacle.transform.position = endPos;
+                    cubeInReceptacle.transform.rotation = endRot;
 
-		startPos = cubeInReceptacle.transform.position;
-		endPos = transform.TransformPoint(0, 1.5f, 0);
-		startRot = cubeInReceptacle.transform.rotation;
-	}
+                    startPos = cubeInReceptacle.transform.position;
+                    endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
 
-	void RestoreTriggerZoneAfterCooldown() {
-		triggerZone.enabled = true;
-	}
+                    state = State.CubeEnterTranslate;
+                }
 
-	#region Saving
-	public bool SkipSave { get; set; }
-	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
-	public string ID => $"CubeReceptacle_{id.uniqueId}";
+                break;
+            case State.CubeEnterTranslate:
+                if (cubeInReceptacle == null) {
+                    // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
+                    state = State.CubeExiting;
+                    state = State.Empty;
+                    break;
+                }
 
-	[Serializable]
-	class CubeReceptacleSave {
-		State state;
-		float timeSinceStateChange;
+                if (timeSinceStateChange < translateTime) {
+                    float t = timeSinceStateChange / translateTime;
 
-		SerializableQuaternion startRot;
-		SerializableQuaternion endRot;
+                    cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
+                }
+                else {
+                    cubeInReceptacle.transform.position = endPos;
 
-		SerializableVector3 startPos;
-		SerializableVector3 endPos;
+                    cubeInReceptacle.interactable = true;
+                    state = State.CubeInReceptacle;
+                }
 
-		SerializableReference<PickupObject> cubeInReceptacle;
+                break;
+            case State.CubeExiting:
+                if (cubeInReceptacle == null) {
+                    state = State.Empty;
+                    break;
+                }
 
-		public CubeReceptacleSave(CubeReceptacle receptacle) {
-			this.state = receptacle.state;
-			this.timeSinceStateChange = receptacle.timeSinceStateChange;
+                if (timeSinceStateChange < timeToRelease) {
+                    float t = timeSinceStateChange / timeToRelease;
 
-			this.startRot = receptacle.startRot;
-			this.endRot = receptacle.endRot;
+                    cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
+                    cubeInReceptacle.transform.rotation = startRot;
+                }
+                else {
+                    PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
+                    cubeThatWasInReceptacle.shouldFollow = true;
+                    cubeThatWasInReceptacle.interactable = true;
+                    cubeThatWasInReceptacle.isReplaceable = true;
+                    triggerZone.enabled = false;
 
-			this.startPos = receptacle.startPos;
-			this.endPos = receptacle.endPos;
+                    state = State.Empty;
+                    cubeInReceptacle = null;
+                }
 
-			this.cubeInReceptacle = receptacle.cubeInReceptacle;
-		}
+                break;
+        }
+    }
 
-		public void LoadSave(CubeReceptacle receptacle) {
-			receptacle.state = this.state;
-			receptacle.timeSinceStateChange = this.timeSinceStateChange;
+    void StartCubeEnter(PickupObject cube) {
+        Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
+        cube.Drop();
+        cube.interactable = false;
+        cubeRigidbody.isKinematic = true;
+        cubeInReceptacle = cube;
+        if (makesCubeIrreplaceable) cubeInReceptacle.isReplaceable = false;
+        cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
 
-			receptacle.startRot = this.startRot;
-			receptacle.endRot = this.endRot;
+        startRot = cubeInReceptacle.transform.rotation;
+        endRot = RightAngleRotations.GetNearestRelativeToTransform(startRot, transform);
 
-			receptacle.startPos = this.startPos;
-			receptacle.endPos = this.endPos;
+        startPos = cubeInReceptacle.transform.position;
+        endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
 
-			receptacle.cubeInReceptacle = this.cubeInReceptacle;
-		}
-	}
+        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
 
-	public object GetSaveObject() {
-		return new CubeReceptacleSave(this);
-	}
+        state = State.CubeEnterRotate;
+    }
 
-	public void LoadFromSavedObject(object savedObject) {
-		CubeReceptacleSave save = savedObject as CubeReceptacleSave;
+    public void ReleaseCubeFromReceptacleInstantly() {
+        if (cubeInReceptacle == null) return;
+        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
+        state = State.CubeExiting;
 
-		save.LoadSave(this);
-	}
-	#endregion
+        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+
+        startPos = cubeInReceptacle.transform.position;
+        endPos = transform.TransformPoint(0, 1.5f, 0);
+        startRot = cubeInReceptacle.transform.rotation;
+
+        PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
+        cubeThatWasInReceptacle.shouldFollow = true;
+        cubeThatWasInReceptacle.interactable = true;
+        cubeThatWasInReceptacle.isReplaceable = true;
+        triggerZone.enabled = false;
+
+        state = State.Empty;
+        cubeThatWasInReceptacle.thisRigidbody.isKinematic = false;
+        cubeInReceptacle = null;
+    }
+
+    void ReleaseFromReceptacle() {
+        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
+        ReleaseCubeFromReceptacle();
+    }
+
+    void ReleaseCubeFromReceptacle() {
+        state = State.CubeExiting;
+
+        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+
+        cubeInReceptacle.shouldFollow = false;
+        cubeInReceptacle.interactable = false;
+
+        startPos = cubeInReceptacle.transform.position;
+        endPos = transform.TransformPoint(0, 1.5f, 0);
+        startRot = cubeInReceptacle.transform.rotation;
+    }
+
+    void RestoreTriggerZoneAfterCooldown() {
+        triggerZone.enabled = true;
+    }
+
+#region Saving
+    public bool SkipSave { get; set; }
+
+    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
+    public string ID => $"CubeReceptacle_{id.uniqueId}";
+
+    [Serializable]
+    class CubeReceptacleSave {
+        SerializableReference<PickupObject> cubeInReceptacle;
+        SerializableVector3 endPos;
+        SerializableQuaternion endRot;
+
+        SerializableVector3 startPos;
+
+        SerializableQuaternion startRot;
+        State state;
+        float timeSinceStateChange;
+
+        public CubeReceptacleSave(CubeReceptacle receptacle) {
+            state = receptacle.state;
+            timeSinceStateChange = receptacle.timeSinceStateChange;
+
+            startRot = receptacle.startRot;
+            endRot = receptacle.endRot;
+
+            startPos = receptacle.startPos;
+            endPos = receptacle.endPos;
+
+            cubeInReceptacle = receptacle.cubeInReceptacle;
+        }
+
+        public void LoadSave(CubeReceptacle receptacle) {
+            receptacle.state = state;
+            receptacle.timeSinceStateChange = timeSinceStateChange;
+
+            receptacle.startRot = startRot;
+            receptacle.endRot = endRot;
+
+            receptacle.startPos = startPos;
+            receptacle.endPos = endPos;
+
+            receptacle.cubeInReceptacle = cubeInReceptacle;
+        }
+    }
+
+    public object GetSaveObject() {
+        return new CubeReceptacleSave(this);
+    }
+
+    public void LoadFromSavedObject(object savedObject) {
+        CubeReceptacleSave save = savedObject as CubeReceptacleSave;
+
+        save.LoadSave(this);
+    }
+#endregion
 }

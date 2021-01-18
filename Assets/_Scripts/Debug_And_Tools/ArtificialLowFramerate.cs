@@ -5,11 +5,12 @@ using UnityEngine;
 public class ArtificialLowFramerate : MonoBehaviour {
 	[Header("Toggle with Shift+F5")]
 	public float targetFramerate = 60;
-	private int numOperations = 0;
-	private long sum = long.MinValue;
-	private int maxOperationsDelta = 20000;
 
-	private bool limitFramerate = false;
+	int numOperations = 0;
+	long sum = long.MinValue;
+	int maxOperationsDelta = 20000;
+
+	bool limitFramerate = false;
 
     void Update() {
 		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F5)) {

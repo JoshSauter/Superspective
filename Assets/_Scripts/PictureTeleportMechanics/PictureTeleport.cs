@@ -44,7 +44,7 @@ namespace PictureTeleportMechanics {
 
         // Change the SSAO to blend the teleport
         ScreenSpaceAmbientOcclusion ssao;
-        private float startSsaoIntensity;
+        float startSsaoIntensity;
         const float ssaoMultiplier = .75f;
         public float ssaoBlendTimeRemaining = 0f;
 

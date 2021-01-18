@@ -17,7 +17,7 @@ public class SerializeProperty : PropertyAttribute {
 #if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(SerializeProperty))]
 public class SerializePropertyAttributeDrawer : PropertyDrawer {
-	private PropertyInfo propertyFieldInfo = null;
+	PropertyInfo propertyFieldInfo = null;
 
 	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 		UnityEngine.Object target = property.serializedObject.targetObject;
@@ -52,7 +52,7 @@ public class SerializePropertyAttributeDrawer : PropertyDrawer {
 		}
 	}
 
-	private object DrawProperty(Rect position, SerializedPropertyType propertyType, Type type, object value, GUIContent label) {
+	object DrawProperty(Rect position, SerializedPropertyType propertyType, Type type, object value, GUIContent label) {
 		switch (propertyType) {
 			case SerializedPropertyType.Integer:
 				return EditorGUI.IntField(position, label, (int)value);

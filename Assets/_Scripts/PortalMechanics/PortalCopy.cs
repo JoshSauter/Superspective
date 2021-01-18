@@ -13,7 +13,7 @@ public class PortalCopy : MonoBehaviour {
     InteractableGlow maybeOriginalGlow;
     InteractableGlow glow;
 
-    private bool _copyEnabled = false;
+    bool _copyEnabled = false;
     public bool copyEnabled {
         get { return _copyEnabled; }
         set {
@@ -34,7 +34,7 @@ public class PortalCopy : MonoBehaviour {
     public PortalCopyAction OnPortalCopyEnabled;
     public PortalCopyAction OnPortalCopyDisabled;
 
-	private void Awake() {
+    void Awake() {
         renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
         colliders = transform.GetComponentsInChildrenRecursively<Collider>();
     }
@@ -122,7 +122,7 @@ public class PortalCopy : MonoBehaviour {
         UpdateMaterials();
     }
 
-    private void TransformCopy(Portal inPortal) {
+    void TransformCopy(Portal inPortal) {
         // Position
         transform.position = inPortal.TransformPoint(original.transform.position);
 

@@ -59,19 +59,19 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 #endregion
 
 #region Coroutine bools
-	private bool inLeftStickHeldCoroutine = false;
-	private bool inRightStickHeldCoroutine = false;
+	bool inLeftStickHeldCoroutine = false;
+	bool inRightStickHeldCoroutine = false;
 
-	private bool inUpHoldCoroutine = false;
-	private bool inDownHoldCoroutine = false;
-	private bool inRightHoldCoroutine = false;
-	private bool inLeftHoldCoroutine = false;
-	private bool inAction1HoldCoroutine = false;
-	private bool inAction2HoldCoroutine = false;
-	private bool inAction3HoldCoroutine = false;
-	private bool inEscapeHoldCoroutine = false;
-	private bool inSpaceHoldCoroutine = false;
-	private bool inShiftHoldCoroutine = false;
+	bool inUpHoldCoroutine = false;
+	bool inDownHoldCoroutine = false;
+	bool inRightHoldCoroutine = false;
+	bool inLeftHoldCoroutine = false;
+	bool inAction1HoldCoroutine = false;
+	bool inAction2HoldCoroutine = false;
+	bool inAction3HoldCoroutine = false;
+	bool inEscapeHoldCoroutine = false;
+	bool inSpaceHoldCoroutine = false;
+	bool inShiftHoldCoroutine = false;
 #endregion
 	
 	public void Update() {

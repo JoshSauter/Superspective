@@ -41,7 +41,7 @@ namespace MagicTriggerMechanics {
             OnTriggerStay(other);
         }
 
-        private void LateUpdate() {
+        void LateUpdate() {
             hasTriggeredEnterThisFrameForCollider.Clear();
             hasTriggeredExitThisFrameForCollider.Clear();
             hasTriggeredStayThisFrameForCollider.Clear();

@@ -27,7 +27,7 @@ public class InteractableGlow : MonoBehaviour {
 		private set;
 	}
 	// Target glow amount must be set every frame or it turns off
-	private float targetGlowAmount;
+	float targetGlowAmount;
 
 	void Start() {
 		playerCamGlowController = InteractableGlowManager.instance;
@@ -69,7 +69,7 @@ public class InteractableGlow : MonoBehaviour {
 	/// <summary>
 	/// Update color, disable self if we reach our target color.
 	/// </summary>
-	private void Update() {
+	void Update() {
 		float diff = targetGlowAmount - glowAmount;
 		float glowAmountDelta = Time.deltaTime * glowSpeed;
 		glowAmount += glowAmountDelta * Mathf.Sign(diff);
@@ -83,7 +83,7 @@ public class InteractableGlow : MonoBehaviour {
 		}
 	}
 
-	private void LateUpdate() {
+	void LateUpdate() {
 		targetGlowAmount = 0f;
 	}
 }

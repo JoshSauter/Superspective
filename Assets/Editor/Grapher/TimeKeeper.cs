@@ -5,10 +5,10 @@ namespace NWH
 {
     public static class TimeKeeper
     {
-        private static float time = 0;
+        static float time = 0;
 
         public static double systemTime;
-        private static double prevSystemTime;
+        static double prevSystemTime;
         public static float systemDeltaTime;
 
         public static float Time

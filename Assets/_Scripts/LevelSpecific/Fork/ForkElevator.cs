@@ -18,7 +18,7 @@ namespace LevelSpecific.Fork {
 		}
 
 		[SerializeField][ReadOnly]
-		private State _state = State.Idle;
+		State _state = State.Idle;
 		public State state {
 			get { return _state; }
 			set {
@@ -60,7 +60,7 @@ namespace LevelSpecific.Fork {
 			ID = GetComponent<UniqueId>().uniqueId;
 		}
 
-		private void FixedUpdate() {
+		void FixedUpdate() {
 			elevatorButton.interactableObject.interactable = playerStandingInElevator && state == State.Idle;
 
 			switch (state) {
@@ -174,11 +174,11 @@ namespace LevelSpecific.Fork {
 			}
 		}
 
-		private void OnTriggerEnter(Collider other) {
+		void OnTriggerEnter(Collider other) {
 			playerStandingInElevator = true;
 		}
 
-		private void OnTriggerExit(Collider other) {
+		void OnTriggerExit(Collider other) {
 			playerStandingInElevator = false;
 		}
 

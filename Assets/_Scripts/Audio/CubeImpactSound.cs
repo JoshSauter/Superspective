@@ -29,7 +29,7 @@ namespace Audio {
 		float timeSinceLastSound = 0f;
 		float cooldown = 0.05f;
 
-		private void OnCollisionEnter(Collision collision) {
+		void OnCollisionEnter(Collision collision) {
 			float impactSpeed = Mathf.Clamp(collision.relativeVelocity.magnitude, 0f, maxSpeed);
 			float impactLerpSpeed = Mathf.InverseLerp(minSpeed, maxSpeed, impactSpeed);
 			//Debug.Log(impactSpeed);
@@ -47,7 +47,7 @@ namespace Audio {
 			curVolume = nextVolume;
 		}
 
-		private void Update() {
+		void Update() {
 			timeSinceLastSound += Time.deltaTime;
 		}
 	}

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
@@ -10,15 +9,15 @@ using SerializableClasses;
 [RequireComponent(typeof(Camera))]
 public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	public enum EdgeColorMode {
-		simpleColor,
-		gradient,
-		colorRampTexture
+		SimpleColor,
+		Gradient,
+		ColorRampTexture
 	}
 	public enum WeightedEdgeMode {
-		unweighted,
-		weightedByDepth,
-		weightedByNormals,
-		weightedByDepthAndNormals
+		Unweighted,
+		WeightedByDepth,
+		WeightedByNormals,
+		WeightedByDepthAndNormals
 	}
 	// In debug mode, red indicates a depth-detected edge, green indicates a normal-detected edge, and yellow indicates that both checks detected an edge
 	public bool debugMode = false;
@@ -30,12 +29,12 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	public int sampleDistance = 1;
 
 	// Weighted edges options
-	public WeightedEdgeMode weightedEdgeMode = WeightedEdgeMode.unweighted;
+	public WeightedEdgeMode weightedEdgeMode = WeightedEdgeMode.Unweighted;
 	public float depthWeightEffect = 0f;
 	public float normalWeightEffect = 0f;
 
 	// Edge color options
-	public EdgeColorMode edgeColorMode = EdgeColorMode.simpleColor;
+	public EdgeColorMode edgeColorMode = EdgeColorMode.SimpleColor;
 	public Color edgeColor = Color.black;
 	public Gradient edgeColorGradient;
 	public Texture2D edgeColorGradientTexture;
@@ -45,33 +44,51 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	Material shaderMaterial;
 	Camera thisCamera;
 
-	private const float DEPTH_SENSITIVITY_MULTIPLIER = 40;	// Keeps depth-sensitivity values close to normal-sensitivity values in the inspector
-	private const int GRADIENT_ARRAY_SIZE = 10;
+	const float DepthSensitivityMultiplier = 40;	// Keeps depth-sensitivity values close to normal-sensitivity values in the inspector
+	const int GradientArraySize = 10;
 
 	// Allocate once to save GC every frame
-	private float[] floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
-	private Color[] colorGradientBuffer = new Color[GRADIENT_ARRAY_SIZE];
+	readonly float[] floatGradientBuffer = new float[GradientArraySize];
+	readonly Color[] colorGradientBuffer = new Color[GradientArraySize];
 
 	[NonSerialized]
 	Vector3[] frustumCorners;
 	[NonSerialized]
 	Vector4[] frustumCornersOrdered;
 
-	private void OnEnable () {
+	static readonly int DepthSensitivityID = Shader.PropertyToID("_DepthSensitivity");
+	static readonly int NormalSensitivityID = Shader.PropertyToID("_NormalSensitivity");
+	static readonly int SampleDistanceID = Shader.PropertyToID("_SampleDistance");
+	static readonly int ColorModeID = Shader.PropertyToID("_ColorMode");
+	static readonly int EdgeColorID = Shader.PropertyToID("_EdgeColor");
+	static readonly int DebugModeID = Shader.PropertyToID("_DebugMode");
+	static readonly int GradientTextureID = Shader.PropertyToID("_GradientTexture");
+	static readonly int WeightedEdgeModeID = Shader.PropertyToID("_WeightedEdgeMode");
+	static readonly int DepthWeightEffectID = Shader.PropertyToID("_DepthWeightEffect");
+	static readonly int NormalWeightEffectID = Shader.PropertyToID("_NormalWeightEffect");
+	
+	static readonly int GradientKeyTimesID = Shader.PropertyToID("_GradientKeyTimes");
+	static readonly int EdgeColorGradientID = Shader.PropertyToID("_EdgeColorGradient");
+	static readonly int GradientAlphaKeyTimesID = Shader.PropertyToID("_GradientAlphaKeyTimes");
+	static readonly int AlphaGradientID = Shader.PropertyToID("_AlphaGradient");
+	static readonly int GradientModeID = Shader.PropertyToID("_GradientMode");
+	static readonly int FrustumCorners = Shader.PropertyToID("_FrustumCorners");
+
+	void OnEnable () {
 		SetDepthNormalTextureFlag();
 		frustumCorners = new Vector3[4];
 		frustumCornersOrdered = new Vector4[4];
 	}
 	
 	[ImageEffectOpaque]
-	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (shaderMaterial == null && !CreateMaterial()) {
 			Debug.LogError("Failed to create shader material!");
 			Graphics.Blit(source, destination);
 			this.enabled = false;
 		}
 
-		shaderMaterial.SetFloat("_DebugMode", debugMode ? 1 : 0);
+		shaderMaterial.SetFloat(DebugModeID, debugMode ? 1 : 0);
 
 		if (doubleSidedEdges) {
 			shaderMaterial.EnableKeyword("DOUBLE_SIDED_EDGES");
@@ -86,26 +103,26 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 			shaderMaterial.DisableKeyword("CHECK_PORTAL_DEPTH");
 		}
 		// Note: Depth sensitivity originally calibrated for camera with a far plane of 400, this normalizes it for other cameras
-		shaderMaterial.SetFloat("_DepthSensitivity", depthSensitivity * DEPTH_SENSITIVITY_MULTIPLIER * (thisCamera.farClipPlane/400));
-		shaderMaterial.SetFloat("_NormalSensitivity", normalSensitivity);
-		shaderMaterial.SetInt("_SampleDistance", sampleDistance);
+		shaderMaterial.SetFloat(DepthSensitivityID, depthSensitivity * DepthSensitivityMultiplier * (thisCamera.farClipPlane/400));
+		shaderMaterial.SetFloat(NormalSensitivityID, normalSensitivity);
+		shaderMaterial.SetInt(SampleDistanceID, sampleDistance);
 
-		shaderMaterial.SetInt("_ColorMode", (int)edgeColorMode);	
+		shaderMaterial.SetInt(ColorModeID, (int)edgeColorMode);	
 		switch (edgeColorMode) {
-			case EdgeColorMode.simpleColor:
-				shaderMaterial.SetColor("_EdgeColor", edgeColor);
+			case EdgeColorMode.SimpleColor:
+				shaderMaterial.SetColor(EdgeColorID, edgeColor);
 				break;
-			case EdgeColorMode.gradient:
+			case EdgeColorMode.Gradient:
 				SetEdgeColorGradient();
 				break;
-			case EdgeColorMode.colorRampTexture:
-				shaderMaterial.SetTexture("_GradientTexture", edgeColorGradientTexture);
+			case EdgeColorMode.ColorRampTexture:
+				shaderMaterial.SetTexture(GradientTextureID, edgeColorGradientTexture);
 				break;
 		}
 
-		shaderMaterial.SetInt("_WeightedEdgeMode", (int)weightedEdgeMode);
-		shaderMaterial.SetFloat("_DepthWeightEffect", depthWeightEffect);
-		shaderMaterial.SetFloat("_NormalWeightEffect", normalWeightEffect);
+		shaderMaterial.SetInt(WeightedEdgeModeID, (int)weightedEdgeMode);
+		shaderMaterial.SetFloat(DepthWeightEffectID, depthWeightEffect);
+		shaderMaterial.SetFloat(NormalWeightEffectID, normalWeightEffect);
 
 		Graphics.Blit(source, destination, shaderMaterial);
 	}
@@ -115,23 +132,23 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	/// Populates _GradientKeyTimes with the times of each colorKey in edgeColorGradient (as well as a 0 as the first key and a series of 1s to fill out the array at the end)
 	/// Populates _EdgeColorGradient with the colors of each colorKey in edgeColorGradient (as well as values for the times filled in as described above)
 	/// </summary>
-	private void SetEdgeColorGradient() {
+	void SetEdgeColorGradient() {
 		Color startColor = edgeColorGradient.Evaluate(0);
 		Color endColor = edgeColorGradient.Evaluate(1);
 		float startAlpha = startColor.a;
 		float endAlpha = endColor.a;
 
-		shaderMaterial.SetFloatArray("_GradientKeyTimes", GetGradientFloatValues(0f, edgeColorGradient.colorKeys.Select(x => x.time), 1f));
-		shaderMaterial.SetColorArray("_EdgeColorGradient", GetGradientColorValues(startColor, edgeColorGradient.colorKeys.Select(x => x.color), endColor));
-		shaderMaterial.SetFloatArray("_GradientAlphaKeyTimes", GetGradientFloatValues(0f, edgeColorGradient.alphaKeys.Select(x => x.time), 1f));
-		shaderMaterial.SetFloatArray("_AlphaGradient", GetGradientFloatValues(startAlpha, edgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
+		shaderMaterial.SetFloatArray(GradientKeyTimesID, GetGradientFloatValues(0f, edgeColorGradient.colorKeys.Select(x => x.time), 1f));
+		shaderMaterial.SetColorArray(EdgeColorGradientID, GetGradientColorValues(startColor, edgeColorGradient.colorKeys.Select(x => x.color), endColor));
+		shaderMaterial.SetFloatArray(GradientAlphaKeyTimesID, GetGradientFloatValues(0f, edgeColorGradient.alphaKeys.Select(x => x.time), 1f));
+		shaderMaterial.SetFloatArray(AlphaGradientID, GetGradientFloatValues(startAlpha, edgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 
-		shaderMaterial.SetInt("_GradientMode", edgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
+		shaderMaterial.SetInt(GradientModeID, edgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
 
 		SetFrustumCornersVector();
 	}
 
-	private void SetFrustumCornersVector() {
+	void SetFrustumCornersVector() {
 		thisCamera.CalculateFrustumCorners(
 			new Rect(0, 0, 1, 1),
 			thisCamera.farClipPlane,
@@ -143,58 +160,60 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 		frustumCornersOrdered[1] = frustumCorners[3];   // Bottom-right
 		frustumCornersOrdered[2] = frustumCorners[1];   // Top-left
 		frustumCornersOrdered[3] = frustumCorners[2];   // Top-right
-		shaderMaterial.SetVectorArray("_FrustumCorners", frustumCornersOrdered);
+		shaderMaterial.SetVectorArray(FrustumCorners, frustumCornersOrdered);
 	}
 
 	// Actually just populates the float buffer with the values provided, then returns a reference to the float buffer
-	private float[] GetGradientFloatValues(float startValue, IEnumerable<float> middleValues, float endValue) {
+	float[] GetGradientFloatValues(float startValue, IEnumerable<float> middleValues, float endValue) {
 		float[] middleValuesArray = middleValues.ToArray();
 		floatGradientBuffer[0] = startValue;
 		for (int i = 1; i < middleValuesArray.Length + 1; i++) {
 			floatGradientBuffer[i] = middleValuesArray[i - 1];
 		}
-		for (int j = middleValuesArray.Length + 1; j < GRADIENT_ARRAY_SIZE; j++) {
+		for (int j = middleValuesArray.Length + 1; j < GradientArraySize; j++) {
 			floatGradientBuffer[j] = endValue;
 		}
 		return floatGradientBuffer;
 	}
 
 	// Actually just populates the color buffer with the values provided, then returns a reference to the color buffer
-	private Color[] GetGradientColorValues(Color startValue, IEnumerable<Color> middleValues, Color endValue) {
+	Color[] GetGradientColorValues(Color startValue, IEnumerable<Color> middleValues, Color endValue) {
 		Color[] middleValuesArray = middleValues.ToArray();
 		colorGradientBuffer[0] = startValue;
 		for (int i = 1; i < middleValuesArray.Length + 1; i++) {
 			colorGradientBuffer[i] = middleValuesArray[i - 1];
 		}
-		for (int j = middleValuesArray.Length + 1; j < GRADIENT_ARRAY_SIZE; j++) {
+		for (int j = middleValuesArray.Length + 1; j < GradientArraySize; j++) {
 			colorGradientBuffer[j] = endValue;
 		}
 		return colorGradientBuffer;
 	}
 
-	private void SetDepthNormalTextureFlag () {
+	void SetDepthNormalTextureFlag () {
 		if (thisCamera == null) thisCamera = GetComponent<Camera>();
 		thisCamera.depthTextureMode = DepthTextureMode.DepthNormals;
 	}
 
-	private bool CreateMaterial() {
+	bool CreateMaterial() {
 		if (!edgeDetectShader.isSupported) {
 			return false;
 		}
-		shaderMaterial = new Material(edgeDetectShader);
-		shaderMaterial.hideFlags = HideFlags.HideAndDontSave;
+
+		shaderMaterial = new Material(edgeDetectShader) {
+			hideFlags = HideFlags.HideAndDontSave
+		};
 
 		return shaderMaterial != null;
 	}
 
-	private void OnDisable() {
+	void OnDisable() {
 		if (shaderMaterial != null) {
 			DestroyImmediate(shaderMaterial);
 			shaderMaterial = null;
 		}
 	}
 
-	private void OnValidate() {
+	void OnValidate() {
 		depthSensitivity = Mathf.Max(0.0f, depthSensitivity);
 		normalSensitivity = Mathf.Max(0.0f, normalSensitivity);
 	}
@@ -258,7 +277,7 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	public void LoadFromSavedObject(object savedObject) {
 		BladeEdgeDetectionSave save = savedObject as BladeEdgeDetectionSave;
 
-		save.LoadSave(this);
+		save?.LoadSave(this);
 	}
 	#endregion
 }

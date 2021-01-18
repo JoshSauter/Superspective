@@ -20,14 +20,15 @@ public class EpitaphRenderer : MonoBehaviour {
 	public string lookupString = "Look up anything";
 	public const string mainColor = "_Color";
 
-	private Renderer lazy_r;
+	Renderer lazy_r;
 	public Renderer r {
 		get {
 			if (lazy_r == null) lazy_r = GetComponent<Renderer>();
 			return lazy_r;
 		}
 	}
-	private MaterialPropertyBlock lazy_propBlock;
+
+	MaterialPropertyBlock lazy_propBlock;
 	MaterialPropertyBlock propBlock {
 		get {
 			if (lazy_propBlock == null) lazy_propBlock = new MaterialPropertyBlock();
@@ -109,6 +110,17 @@ public class EpitaphRenderer : MonoBehaviour {
 	public int GetInt(string propName) {
 		r.GetPropertyBlock(propBlock);
 		return propBlock.GetInt(propName);
+	}
+	
+	public void SetFloatArray(string propName, float[] value) {
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetFloatArray(propName, value);
+		r.SetPropertyBlock(propBlock);
+	}
+	
+	public float[] GetFloatArray(string propName) {
+		r.GetPropertyBlock(propBlock);
+		return propBlock.GetFloatArray(propName);
 	}
 
 	public Bounds GetRendererBounds() {

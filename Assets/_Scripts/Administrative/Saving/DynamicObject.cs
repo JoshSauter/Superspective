@@ -57,7 +57,7 @@ namespace Saving {
 		}
 
 		// GlobalObjects are moved between scenes as they hit objects from various scenes
-		private void OnCollisionEnter(Collision collision) {
+		void OnCollisionEnter(Collision collision) {
 			if (isGlobal) {
 				Scene sceneOfContact = collision.collider.gameObject.scene;
 				if (transform.parent != null) {

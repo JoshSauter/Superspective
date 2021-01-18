@@ -15,7 +15,7 @@ namespace LevelSpecific.WhiteRoom {
         float turnOnSpeed = 4f;
         EpitaphRenderer r;
 
-        private const string emissionColorKey = "_EmissionColor";
+        const string emissionColorKey = "_EmissionColor";
 
         bool powered => powerTrail.distance > turnOnAtDistance;
 

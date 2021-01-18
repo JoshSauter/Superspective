@@ -10,7 +10,7 @@ namespace Audio {
         public AudioName type;
         public AudioSettings audioSettings;
 
-		private void OnValidate() {
+        void OnValidate() {
 			if (audioSettings.audioSource == null) {
                 audioSettings.audioSource = GetComponent<AudioSource>();
                 if (audioSettings.audioSource == null) {

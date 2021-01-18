@@ -9,13 +9,13 @@ namespace LevelSpecific.Transition2_3 {
 		public bool disableFog = true;
 
 		public GlobalFog fog;
-		private MagicTrigger trigger;
+		MagicTrigger trigger;
 
-		private void Awake() {
+		void Awake() {
 			trigger = GetComponent<MagicTrigger>();
 		}
 
-		private void Start() {
+		void Start() {
 			fog = Camera.main.GetComponent<GlobalFog>();
 
 			trigger.OnMagicTriggerStayOneTime += (ctx) => ToggleForward();

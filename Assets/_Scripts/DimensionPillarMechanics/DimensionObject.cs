@@ -28,6 +28,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
+	public bool ignoreChildrenWithDimensionObject = true;
 	protected DebugLogger debug;
 
 	protected bool initialized = false;
@@ -50,7 +51,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		{ VisibilityState.partiallyInvisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } }
 	};
 
-	#region events
+#region events
 	public delegate void DimensionObjectStateChangeAction(VisibilityState visibilityState);
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
@@ -63,6 +64,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
 			enabled = false;
 		}
+		
 		startingMaterials = GetAllStartingMaterials(renderers);
 		startingLayers = GetAllStartingLayers(renderers);
 	}
@@ -81,7 +83,9 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		startingMaterials = newStartingMaterials;
 	}
 
-
+	void OnDisable() {
+		SetChannelValuesInMaterials(false);
+	}
 
 	////////////////////////
 	// State Change Logic //
@@ -126,7 +130,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		OnStateChange?.Invoke(nextState);
 	}
 
-	private bool IsValidNextState(VisibilityState nextState) {
+	bool IsValidNextState(VisibilityState nextState) {
 		return nextStates[visibilityState].Contains(nextState);
 	}
 	#endregion
@@ -136,6 +140,10 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	///////////////////////////
 	#region materials
 	void SetMaterials(EpitaphRenderer renderer) {
+		if (!startingMaterials.ContainsKey(renderer)) {
+			startingMaterials.Add(renderer, renderer.GetMaterials());
+			startingLayers.Add(renderer, renderer.gameObject.layer);
+		}
 		Material[] normalMaterials = startingMaterials[renderer];
 		Material[] newMaterials;
 		bool inverseShader = false;
@@ -172,9 +180,11 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
 	}
 
-	protected void SetChannelValuesInMaterials() {
+	protected void SetChannelValuesInMaterials(bool turnOn = true) {
 		foreach (var r in renderers) {
-			r.SetInt("_Channel", channel);
+			float[] buffer = r.GetFloatArray("_Channels") ?? new float[2];
+			buffer[channel] = turnOn ? 1 : 0;
+			r.SetFloatArray("_Channels", buffer);
 		}
 	}
 
@@ -197,7 +207,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 	void SetEpitaphRenderersRecursively(Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
 		// Children who have DimensionObject scripts are treated on only by their own settings
-		if (parent != transform && parent.GetComponent<DimensionObject>() != null) return;
+		if (parent != transform && !ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
 
 		EpitaphRenderer thisRenderer = parent.GetComponent<EpitaphRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
@@ -233,7 +243,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		return dict;
 	}
 
-	private Material GetDimensionObjectMaterial(Material normalMaterial) {
+	Material GetDimensionObjectMaterial(Material normalMaterial) {
 		Material newMaterial = null;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
@@ -270,6 +280,9 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			case "Custom/PowerTrailLight":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPowerTrail"));
 				break;
+			case "Portals/PortalMaterial":
+                newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
+                break;
 			default:
 				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
@@ -297,6 +310,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	[Serializable]
 	class DimensionObjectSave {
 		bool treatChildrenAsOneObjectRecursively;
+		bool ignoreChildrenWithDimensionObject;
 
 		bool initialized;
 		int channel;
@@ -309,6 +323,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 		public DimensionObjectSave(DimensionObject dimensionObj) {
 			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
+			this.ignoreChildrenWithDimensionObject = dimensionObj.ignoreChildrenWithDimensionObject;
 			this.initialized = dimensionObj.initialized;
 			this.channel = dimensionObj.channel;
 			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
@@ -320,6 +335,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 		public void LoadSave(DimensionObject dimensionObj) {
 			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
+			dimensionObj.ignoreChildrenWithDimensionObject = this.ignoreChildrenWithDimensionObject;
 			dimensionObj.initialized = this.initialized;
 			dimensionObj.channel = this.channel;
 			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;

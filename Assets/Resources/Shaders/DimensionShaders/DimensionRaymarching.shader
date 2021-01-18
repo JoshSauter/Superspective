@@ -6,7 +6,6 @@ Shader "Custom/DimensionShaders/DimensionRaymarching"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
     }
     SubShader
@@ -22,7 +21,7 @@ Shader "Custom/DimensionShaders/DimensionRaymarching"
             #include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
 			
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 
             struct v2f
@@ -143,7 +142,7 @@ Shader "Custom/DimensionShaders/DimensionRaymarching"
             }
 
             fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.clipPos, _Channel, _Inverse);
+				ClipDimensionObject(i.clipPos, _Channels, _Inverse);
 
                 float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
                 float depth = 100;

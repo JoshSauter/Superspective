@@ -29,7 +29,7 @@ public class OutOfBounds : MonoBehaviour {
 		redBackground = transform.Find("RedBackground").GetComponent<Image>();
 	}
 
-	private void OnEnable() {
+	void OnEnable() {
 		countdownCoroutine = Countdown();
 		animateBackgroundCoroutine = AnimateBackground();
 		quickFadeToBlackCoroutine = QuickFadeToBlack();
@@ -38,7 +38,7 @@ public class OutOfBounds : MonoBehaviour {
 		StartCoroutines();
 	}
 
-	private void OnDisable() {
+	void OnDisable() {
 		StopCoroutines();
 		ResetState();
 	}

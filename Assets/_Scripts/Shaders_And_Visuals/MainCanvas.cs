@@ -11,7 +11,8 @@ public class MainCanvas : Singleton<MainCanvas> {
 		On,
 		FadingOut
 	}
-	private BlackOverlayState _blackOverlayState = BlackOverlayState.Off;
+
+	BlackOverlayState _blackOverlayState = BlackOverlayState.Off;
 	public BlackOverlayState blackOverlayState {
 		get { return _blackOverlayState; }
 		set {
@@ -32,7 +33,7 @@ public class MainCanvas : Singleton<MainCanvas> {
 		}
 	}
 
-	private void FixedUpdate() {
+	void FixedUpdate() {
 		if (blackOverlayState == BlackOverlayState.FadingOut) {
 			float nextAlpha = Mathf.Lerp(blackOverlayAlpha, 0f, blackOverlayFadeSpeed * Time.fixedDeltaTime);
 			if (nextAlpha < 0.001f) nextAlpha = 0f;

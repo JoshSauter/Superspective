@@ -32,7 +32,7 @@ public class CameraShake : Singleton<CameraShake>, SaveableObject {
 	const float returnToCenterLerpSpeed = 2f;
 	public Vector2 totalOffsetApplied = Vector2.zero;
 
-	private void Update() {
+	void Update() {
 		if (Time.timeScale == 0) return;
 
 #if UNITY_EDITOR

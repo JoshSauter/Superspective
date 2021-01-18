@@ -23,7 +23,7 @@ namespace LevelSpecific.WhiteRoom {
         [ColorUsage(true, true)]
         public Color obeliskLightEmissionColorStart, obeliskLightEmissionColorEnd;
         public Material whiteToBlack, blackToWhite;
-        private Color white, black;
+        Color white, black;
         public CubeReceptacle receptacleToRespawnIn;
 
         ///////////////////////////////
@@ -36,7 +36,7 @@ namespace LevelSpecific.WhiteRoom {
             Respawning
         }
 
-        private State _state = State.Calm;
+        State _state = State.Calm;
         public State state {
             get { return _state; }
             set { timeSinceLastStateChange = 0f; _state = value; }
@@ -74,9 +74,9 @@ namespace LevelSpecific.WhiteRoom {
         float cameraShakeIntensityOnCubeRespawn = 2f;
         float respawnEndDelay = 0.75f;
 
-        private const string emissionProp = "_EmissionColor";
-        private const string colorProp = "_Color";
-        private const string colorProp2 = "_Color2";
+        const string emissionProp = "_EmissionColor";
+        const string colorProp = "_Color";
+        const string colorProp2 = "_Color2";
 
         void Start() {
             startReceptacle.OnCubeHoldStartSimple += StartCalm;
@@ -91,18 +91,18 @@ namespace LevelSpecific.WhiteRoom {
             StartCalm();
         }
 
-        private void OnDisable() {
+        void OnDisable() {
             ResetWhiteBlackFadeMaterials();
         }
 
-        private void ResetWhiteBlackFadeMaterials() {
+        void ResetWhiteBlackFadeMaterials() {
             whiteToBlack.SetColor(colorProp, white);
             whiteToBlack.SetColor(colorProp2, black);
             blackToWhite.SetColor(colorProp, black);
             blackToWhite.SetColor(colorProp2, white);
         }
 
-        private void StartCalm() {
+        void StartCalm() {
             state = State.Calm;
             CalmParticleSystem(outerParticles);
             CalmParticleSystem(innerParticles);
@@ -116,7 +116,7 @@ namespace LevelSpecific.WhiteRoom {
             innerHexRotate.enabled = true;
         }
 
-        private void StartTracking(CubeReceptacle receptacle, PickupObject cube) {
+        void StartTracking(CubeReceptacle receptacle, PickupObject cube) {
             cubeFollowing = cube;
             state = State.Tracking;
 
@@ -127,7 +127,7 @@ namespace LevelSpecific.WhiteRoom {
             CalmParticleSystem(laserToCube);
         }
 
-        private void StartEnrage() {
+        void StartEnrage() {
             state = State.Enraged;
 
             CameraShake.instance.Shake(enrageDuration, enrageCameraShakeMultiplier, enrageCameraShake);
@@ -138,7 +138,7 @@ namespace LevelSpecific.WhiteRoom {
             EnrageParticleSystem(innerParticles);
         }
 
-        private void StartRespawning() {
+        void StartRespawning() {
             state = State.Respawning;
 
             // Respawn depends on no external systems so it's straightforward to use a coroutine here
@@ -207,7 +207,7 @@ namespace LevelSpecific.WhiteRoom {
             StartCalm();
         }
 
-        private void CalmParticleSystem(ParticleSystem particles) {
+        void CalmParticleSystem(ParticleSystem particles) {
             ParticleSystem.MainModule particlesMain = particles.main;
             particlesMain.startColor = new ParticleSystem.MinMaxGradient(calmColor1, calmColor2);
             particlesMain.prewarm = false;
@@ -216,7 +216,7 @@ namespace LevelSpecific.WhiteRoom {
             particles.Play();
         }
 
-        private void EnrageParticleSystem(ParticleSystem particles) {
+        void EnrageParticleSystem(ParticleSystem particles) {
             ParticleSystem.MainModule particlesMain = particles.main;
             particlesMain.startColor = new ParticleSystem.MinMaxGradient(enragedGradient1, enragedGradient2);
             particlesMain.prewarm = true;

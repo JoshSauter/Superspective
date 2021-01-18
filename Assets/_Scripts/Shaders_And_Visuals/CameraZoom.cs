@@ -11,7 +11,7 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
     public float currentFOV => mainCamera.fieldOfView;
     public bool zoomed = false;
 
-    private const float zoomLerpSpeed = 4f;
+    const float zoomLerpSpeed = 4f;
     PlayerLook playerLook;
     Camera mainCamera;
     public List<Camera> otherCameras = new List<Camera>();
@@ -30,7 +30,7 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
         otherCameras.Add(VirtualPortalCamera.instance.portalCamera);
     }
 
-	private void Update() {
+    void Update() {
         zoomed = input.Action2Held && playerLook.state == PlayerLook.State.ViewUnlocked;
 
         mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, zoomed ? zoomFOV : defaultFOV, Time.deltaTime * zoomLerpSpeed * (zoomed ? 1f : 2f));

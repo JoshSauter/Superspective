@@ -66,14 +66,14 @@ namespace LevelSpecific.Axis {
 			distanceTravelled += distance;
 		}
 
-		private void OnTriggerEnter(Collider other) {
+		void OnTriggerEnter(Collider other) {
 			pipeInContact = other.gameObject.GetComponent<AxisPipe>();
 			if (pipeInContact != null) {
 				pipeInContact.state = state = AxisPipeState.rotating;
 			}
 		}
 
-		private void OnTriggerExit(Collider other) {
+		void OnTriggerExit(Collider other) {
 			if (pipeInContact != null) {
 				pipeInContact.state = state = AxisPipeState.rotatingAndMoving;
 			}

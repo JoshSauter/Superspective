@@ -5,24 +5,26 @@ using EpitaphUtils;
 using NaughtyAttributes;
 using Saving;
 using System;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
 public class DimensionPillar : MonoBehaviour, SaveableObject {
-	UniqueId _id;
-	public UniqueId id {
+	UniqueId id;
+
+	UniqueId uniqueId {
 		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
+			if (id == null) {
+				id = GetComponent<UniqueId>();
 			}
-			return _id;
+			return id;
 		}
 	}
 
 	public static Dictionary<string, DimensionPillar> pillars = new Dictionary<string, DimensionPillar>();
 
-	private static DimensionPillar _activePillar;
-	public static DimensionPillar activePillar {
+	static DimensionPillar _activePillar;
+	public static DimensionPillar ActivePillar {
 		get { return _activePillar; }
 		set {
 			DimensionPillar prevActive = _activePillar;
@@ -34,28 +36,28 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	public Vector3 dimensionShiftVector => transform.forward;
-	public Vector3 axis => transform.up;
-	public Plane dimensionShiftParallelPlane {
+	public Vector3 DimensionShiftVector => transform.forward;
+	public Vector3 Axis => transform.up;
+	public Plane DimensionShiftParallelPlane {
 		get {
-			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(dimensionShiftVector.normalized, axis);
+			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(DimensionShiftVector.normalized, Axis);
 			return new Plane(dimensionShiftPlaneNormalVector, transform.position);
 		}
 	}
-	public Plane dimensionShiftPerpindicularPlane {
+	public Plane DimensionShiftPerpendicularPlane {
 		get {
-			return new Plane(dimensionShiftVector.normalized, transform.position);
+			return new Plane(DimensionShiftVector.normalized, transform.position);
 		}
 	}
 	[SerializeField]
-	private Angle.Quadrant _playerQuadrant;
-	public Angle.Quadrant playerQuadrant {
+	Angle.Quadrant _playerQuadrant;
+	public Angle.Quadrant PlayerQuadrant {
 		get { return _playerQuadrant; }
 		set {
-			if (playerQuadrant == Angle.Quadrant.I && value == Angle.Quadrant.IV) {
+			if (PlayerQuadrant == Angle.Quadrant.I && value == Angle.Quadrant.IV) {
 				ShiftDimensionUp();
 			}
-			else if (playerQuadrant == Angle.Quadrant.IV && value == Angle.Quadrant.I) {
+			else if (PlayerQuadrant == Angle.Quadrant.IV && value == Angle.Quadrant.I) {
 				ShiftDimensionDown();
 			}
 
@@ -63,7 +65,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	public bool DEBUG = false;
+	public bool debugMode = false;
 	DebugLogger debug;
 	public bool setAsActiveOnStart = false;
 	bool initialized = false;
@@ -82,6 +84,9 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	public Angle dimensionShiftAngle;
 	public Angle cameraAngleRelativeToPillar;
 
+	public int heightOverride = -1;
+	public bool HeightOverridden => heightOverride != -1;
+	
 	public enum DimensionSwitch {
 		Up,
 		Down
@@ -102,7 +107,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 #endregion
 
 	void Awake() {
-		debug = new DebugLogger(this, () => DEBUG);
+		debug = new DebugLogger(this, () => debugMode);
 		InitializeDimensionWall();
 	}
 
@@ -111,7 +116,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		InitializeDictEntry();
 
 		if (setAsActiveOnStart) {
-			activePillar = this;
+			ActivePillar = this;
 		}
 	}
 	void InitializeDictEntry() {
@@ -122,13 +127,13 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	}
 
 	void FixedUpdate() {
-		if (activePillar != this) return;
+		if (ActivePillar != this) return;
 
-		playerQuadrant = GetQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
+		PlayerQuadrant = GetQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
 		//UpdateRelativeCameraAngle();
     }
 
-	private void Initialize() {
+	void Initialize() {
 		if (initialized) return;
 
 		if (!overrideDimensionShiftAngle) {
@@ -139,26 +144,26 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	}
 
 	Angle.Quadrant GetQuadrant(Vector3 position) {
-		bool parallelPlaneTest = dimensionShiftParallelPlane.GetSide(position);
-		bool perpindicularPlaneTest = dimensionShiftPerpindicularPlane.GetSide(position);
+		bool parallelPlaneTest = DimensionShiftParallelPlane.GetSide(position);
+		bool perpendicularPlaneTest = DimensionShiftPerpendicularPlane.GetSide(position);
 
 		//debug.Log($"ParallelTest: {parallelPlaneTest}\nPerpindicularTest: {perpindicularPlaneTest}");
 
-		if (parallelPlaneTest && perpindicularPlaneTest) {
+		if (parallelPlaneTest && perpendicularPlaneTest) {
 			return Angle.Quadrant.I;
 		}
-		else if (parallelPlaneTest && !perpindicularPlaneTest) {
+		else if (parallelPlaneTest && !perpendicularPlaneTest) {
 			return Angle.Quadrant.II;
 		}
-		else if (!parallelPlaneTest && !perpindicularPlaneTest) {
+		else if (!parallelPlaneTest && !perpendicularPlaneTest) {
 			return Angle.Quadrant.III;
 		}
-		else /*if (!parallelPlaneTest && perpindicularPlaneTest)*/ {
+		else /*if (!parallelPlaneTest && perpendicularPlaneTest)*/ {
 			return Angle.Quadrant.IV;
 		}
 	}
 
-	private void UpdateRelativeCameraAngle(bool forceUpdate = false) {
+	void UpdateRelativeCameraAngle(bool forceUpdate = false) {
 		Angle newCameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
 		Angle angleDiff = newCameraAngleRelativeToPillar.WrappedAngleDiff(cameraAngleRelativeToPillar);
 		if (angleDiff.degrees == 0 && !forceUpdate) return;
@@ -211,7 +216,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	Angle DimensionShiftAngle() {
 		//Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
 		//PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
-		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(dimensionShiftVector);
+		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(DimensionShiftVector);
 		return polar.angle;
 	}
 
@@ -240,7 +245,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		return fromDimension > 0 ? fromDimension - 1 : maxDimension;
 	}
 
-	private void InitializeDimensionWall() {
+	void InitializeDimensionWall() {
 		GameObject dimensionWallGO = Instantiate(dimensionWallPrefab, transform);
 		dimensionWallGO.name = "Dimension Wall";
 		dimensionWall = dimensionWallGO.GetComponent<DimensionWall>();
@@ -248,12 +253,12 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 
 	[ContextMenu("Print active pillar details")]
 	void PrintActivePillarName() {
-		if (DimensionPillar.activePillar == null) {
+		if (DimensionPillar.ActivePillar == null) {
 			Debug.Log("Active pillar is null");
 		}
 		else {
-			Debug.Log("Active pillar is: " + activePillar.gameObject.name + " in Scene: " + activePillar.gameObject.scene.name +
-				"\nThis pillar is active? " + (activePillar == this), activePillar.gameObject);
+			Debug.Log("Active pillar is: " + ActivePillar.gameObject.name + " in Scene: " + ActivePillar.gameObject.scene.name +
+				"\nThis pillar is active? " + (ActivePillar == this), ActivePillar.gameObject);
 		}
 	}
 
@@ -262,10 +267,10 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 
 	public string ID {
 		get {
-			if (id == null || id.uniqueId == null) {
+			if (uniqueId == null || uniqueId.uniqueId == null) {
 				throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
 			}
-			return $"DimensionPillar_{id.uniqueId}";
+			return $"DimensionPillar_{uniqueId.uniqueId}";
 		}
 	}
 	//public string ID => $"DimensionPillar_{id.uniqueId}";
@@ -283,7 +288,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		Angle cameraAngleRelativeToPillar;
 
 		public DimensionPillarSave(DimensionPillar dimensionPillar) {
-			this.setAsActiveOnStart = DimensionPillar.activePillar == dimensionPillar;
+			this.setAsActiveOnStart = DimensionPillar.ActivePillar == dimensionPillar;
 			this.initialized = dimensionPillar.initialized;
 			this.maxDimension = dimensionPillar.maxDimension;
 			this.curDimension = dimensionPillar.curDimension;
@@ -305,7 +310,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			dimensionPillar.cameraAngleRelativeToPillar = this.cameraAngleRelativeToPillar - Angle.Degrees(0.001f);
 
 			if (setAsActiveOnStart) {
-				DimensionPillar.activePillar = dimensionPillar;
+				DimensionPillar.ActivePillar = dimensionPillar;
 				dimensionPillar.UpdateRelativeCameraAngle(true);
 			}
 		}

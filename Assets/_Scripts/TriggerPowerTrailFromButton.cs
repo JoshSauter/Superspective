@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PowerTrailMechanics {
     public class TriggerPowerTrailFromButton : MonoBehaviour {
@@ -9,18 +7,17 @@ namespace PowerTrailMechanics {
             powerOnOnly,
             powerOffOnly
         }
+
         public Button button;
         public PowerControl whatToControl;
         PowerTrail thisPowerTrail;
 
         void Start() {
             thisPowerTrail = GetComponent<PowerTrail>();
-            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOnOnly) {
-                button.OnButtonPressBegin += (Button b) => thisPowerTrail.powerIsOn = true;
-            }
-            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOffOnly) {
-                button.OnButtonDepressFinish += (Button b) => thisPowerTrail.powerIsOn = false;
-            }
+            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOnOnly)
+                button.OnButtonPressBegin += b => thisPowerTrail.powerIsOn = true;
+            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOffOnly)
+                button.OnButtonDepressFinish += b => thisPowerTrail.powerIsOn = false;
         }
     }
 }

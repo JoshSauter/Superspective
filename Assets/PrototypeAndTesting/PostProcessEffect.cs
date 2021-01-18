@@ -12,7 +12,7 @@ public class PostProcessEffect : MonoBehaviour {
 		mat = new Material(Shader.Find("SMO/Complete/Painting"));
 	}
 
-	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		mat.SetInt("_KernelSize", ks);
 		Graphics.Blit(source, destination, mat);
 	}

@@ -18,11 +18,11 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		EpitaphScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
 	}
 
-	private void OnDisable() {
+	void OnDisable() {
 		ReleaseAllTextures();
 	}
 
-	private void HandleScreenResolutionChanged(int newWidth, int newHeight) {
+	void HandleScreenResolutionChanged(int newWidth, int newHeight) {
 		ReleaseAllTextures();
 		CreateAllRenderTextures(newWidth, newHeight);
 	}

@@ -50,7 +50,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// Cache's the player's PlayerLook component if the player collides with this object.
 	/// </summary>
 	/// <param name="other">Object inside the trigger zone</param>
-	private void OnTriggerEnter(Collider other) {
+	void OnTriggerEnter(Collider other) {
 		if (playerLook == null && other.TaggedAsPlayer()) {
 			playerLook = other.transform.GetComponent<PlayerLook>();
 		}
@@ -60,7 +60,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// Uncache's the player's PlayerLook component if the player leaves the trigger zone.
 	/// </summary>
 	/// <param name="other">Object that has just left the trigger zone</param>
-	private void OnTriggerExit(Collider other) {
+	void OnTriggerExit(Collider other) {
 		if (playerLook != null && other.TaggedAsPlayer()) {
 			playerLook = null;
 		}
@@ -72,7 +72,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	/// will make the platform rise or fall (lerping up or down to speed).
 	/// </summary>
 	/// <param name="normalizedYLook">The player's current, normalized, rotationY</param>
-	private void HandlePlayerLook(float normalizedYLook) {
+	void HandlePlayerLook(float normalizedYLook) {
 		curLook = Mathf.Lerp(curLook, normalizedYLook, curLookLerpSpeed);
 
 		MovePanel(curLook);
@@ -81,14 +81,14 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 		MovePlatform(curLook);
 	}
 
-	private void MovePanel(float curLook) {
+	void MovePanel(float curLook) {
 		float t = Mathf.InverseLerp(-panelDeadZone, panelDeadZone, curLook);
 		Vector3 curPanelPos = lookPanel.localPosition;
 		curPanelPos.y = Mathf.Lerp(minPanelYPosition, maxPanelYPosition, t);
 		lookPanel.localPosition = curPanelPos;
 	}
 
-	private void MoveNotch(float curLook) {
+	void MoveNotch(float curLook) {
 		if (curLook > deadZone || curLook < -deadZone) {
 			notch.localPosition = notchStartPos + new Vector3(0, Mathf.Sign(curLook) * maxNotchOffset, 0);
 
@@ -102,7 +102,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 		}
 	}
 
-	private void ColorNotch(float curLook) {
+	void ColorNotch(float curLook) {
 		if (curLook > deadZone) {
 			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, notchGreen, "_EmissionColor");
 		}
@@ -114,7 +114,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 		}
 	}
 
-	private void MovePlatform(float curLook) {
+	void MovePlatform(float curLook) {
 		if (Mathf.Abs(curLook) < deadZone) {
 			panelRigidbody.velocity = Vector3.Lerp(panelRigidbody.velocity, Vector3.zero, platformDecelerationLerpRate);
 			return;

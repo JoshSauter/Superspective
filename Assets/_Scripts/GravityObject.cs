@@ -1,83 +1,77 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 using PortalMechanics;
 using Saving;
-using System;
 using SerializableClasses;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(UniqueId))]
 public class GravityObject : MonoBehaviour, SaveableObject {
-	UniqueId _id;
-	UniqueId id {
-		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
-			}
-			return _id;
-		}
-	}
-	public Rigidbody thisRigidbody;
-	public bool useGravity = true;
-	public Vector3 gravityDirection = Physics.gravity.normalized;
-	public float gravityMagnitude = Physics.gravity.magnitude;
+    public Rigidbody thisRigidbody;
+    public bool useGravity = true;
+    public Vector3 gravityDirection = Physics.gravity.normalized;
+    public float gravityMagnitude = Physics.gravity.magnitude;
+    UniqueId _id;
 
-	void Awake() {
-		thisRigidbody = GetComponent<Rigidbody>();
-	}
-
-    void Start() {
-		thisRigidbody.useGravity = false;
-
-		PortalableObject portalableObject = GetComponent<PortalableObject>();
-		if (portalableObject != null) {
-			portalableObject.OnObjectTeleported += ReorientGravityAfterPortaling;
-		}
+    UniqueId id {
+        get {
+            if (_id == null) _id = GetComponent<UniqueId>();
+            return _id;
+        }
     }
 
-	public void ReorientGravityAfterPortaling(Portal inPortal) {
-		gravityDirection = inPortal.TransformDirection(gravityDirection);
-	}
+    void Awake() {
+        thisRigidbody = GetComponent<Rigidbody>();
+    }
 
-	private void FixedUpdate() {
-		if (useGravity) {
-			thisRigidbody.AddForce(gravityDirection * gravityMagnitude, ForceMode.Acceleration);
-		}
-	}
+    void Start() {
+        thisRigidbody.useGravity = false;
 
-	#region Saving
-	public bool SkipSave { get; set; }
-	// All components on PickupCubes share the same uniqueId so we need to qualify with component name
-	public string ID => $"GravityObject_{id.uniqueId}";
+        PortalableObject portalableObject = GetComponent<PortalableObject>();
+        if (portalableObject != null) portalableObject.OnObjectTeleported += ReorientGravityAfterPortaling;
+    }
 
-	[Serializable]
-	class GravityObjectSave {
-		bool useGravity;
-		SerializableVector3 gravityDirection;
-		float gravityMagnitude;
+    void FixedUpdate() {
+        if (useGravity) thisRigidbody.AddForce(gravityDirection * gravityMagnitude, ForceMode.Acceleration);
+    }
 
-		public GravityObjectSave(GravityObject obj) {
-			this.useGravity = obj.useGravity;
-			this.gravityDirection = obj.gravityDirection;
-			this.gravityMagnitude = obj.gravityMagnitude;
-		}
+    public void ReorientGravityAfterPortaling(Portal inPortal) {
+        gravityDirection = inPortal.TransformDirection(gravityDirection);
+    }
 
-		public void LoadSave(GravityObject obj) {
-			obj.useGravity = this.useGravity;
-			obj.gravityDirection = this.gravityDirection;
-			obj.gravityMagnitude = this.gravityMagnitude;
-		}
-	}
+#region Saving
+    public bool SkipSave { get; set; }
 
-	public object GetSaveObject() {
-		return new GravityObjectSave(this);
-	}
+    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
+    public string ID => $"GravityObject_{id.uniqueId}";
 
-	public void LoadFromSavedObject(object savedObject) {
-		GravityObjectSave save = savedObject as GravityObjectSave;
+    [Serializable]
+    class GravityObjectSave {
+        SerializableVector3 gravityDirection;
+        float gravityMagnitude;
+        bool useGravity;
 
-		save.LoadSave(this);
-	}
-	#endregion
+        public GravityObjectSave(GravityObject obj) {
+            useGravity = obj.useGravity;
+            gravityDirection = obj.gravityDirection;
+            gravityMagnitude = obj.gravityMagnitude;
+        }
+
+        public void LoadSave(GravityObject obj) {
+            obj.useGravity = useGravity;
+            obj.gravityDirection = gravityDirection;
+            obj.gravityMagnitude = gravityMagnitude;
+        }
+    }
+
+    public object GetSaveObject() {
+        return new GravityObjectSave(this);
+    }
+
+    public void LoadFromSavedObject(object savedObject) {
+        GravityObjectSave save = savedObject as GravityObjectSave;
+
+        save.LoadSave(this);
+    }
+#endregion
 }

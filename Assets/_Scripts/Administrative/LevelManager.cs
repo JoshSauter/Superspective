@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 using EpitaphUtils;
 using NaughtyAttributes;
 using Saving;
-using System.Collections;
+using UnityEngine.Serialization;
 using static Saving.SaveManagerForScene;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,79 +15,74 @@ using UnityEditor;
 
 // When adding a new Level to this enum, make sure you also add it under level names region,
 // PopulateSceneNames function, PopulateWorldGraph function, and add the scene to Build Settings as well
-// ALSO NOTE: You MUST append any new additions to the END of the enum, else it fucks with serializataion
+// ALSO NOTE: You MUST append any new additions to the END of the enum, else it fucks with serialization
 [Serializable]
 public enum Level {
-	managerScene,
-	testScene,
-	emptyRoom,
-	hexPillarRoom,
-	library,
-	level3,
-	level4,
-	tutorialHallway,
-	tutorialRoom,
-	transition2_3,
-	transition3_4,
-	axis,
-	fork,
-	forkWhiteRoom,
-	forkBlackRoom,
-    invisFloor,
-	metaEdgeDetection,
-	portalTestScene,
-	forkWhiteRoom2,
-	forkWhiteRoomBlackHallway,
-	forkWhiteRoom3,
-	transitionWhiteRoom_Fork,
-	forkOctagon,
-	forkBlackRoom2
+	ManagerScene,
+	TestScene,
+	EmptyRoom,
+	HexPillarRoom,
+	Library,
+	Level3,
+	Level4,
+	TutorialHallway,
+	TutorialRoom,
+	Transition23,
+	Transition34,
+	Axis,
+	Fork,
+	ForkWhiteRoom,
+	ForkBlackRoom,
+    InvisFloor,
+	MetaEdgeDetection,
+	PortalTestScene,
+	ForkWhiteRoom2,
+	ForkWhiteRoomBlackHallway,
+	ForkWhiteRoom3,
+	TransitionWhiteRoomFork,
+	ForkOctagon,
+	ForkBlackRoom2
 }
 
 public class LevelManager : Singleton<LevelManager>, SaveableObject {
-	public bool DEBUG = false;
-	public DebugLogger debug;
+	public bool debugMode = false;
+	DebugLogger debug;
 	[OnValueChanged("LoadDefaultPlayerPosition")]
 	public Level startingScene;
 	bool initialized = false;
 
 #region PlayerDefaultLocations
-	private const string positionKeyPrefix = "playerStartingPositions";
-	private const string rotationKeyPrefix = "playerStartingRotations";
+	const string PositionKeyPrefix = "playerStartingPositions";
+	const string RotationKeyPrefix = "playerStartingRotations";
 	public bool defaultPlayerPosition = false;
-	private bool hasLoadedDefaultPlayerPosition = false;
+	bool hasLoadedDefaultPlayerPosition = false;
 
 #if UNITY_EDITOR
 	[ShowNativeProperty]
-	public Vector3 startingPositionForScene {
+	public Vector3 StartingPositionForScene {
 		get {
 			string sceneName = GetSceneName();
-			string key = $"{positionKeyPrefix}.{sceneName}";
-			if (HasVector3(key)) {
-				return GetVector3(key);
-			}
-			else {
-				return Vector3.zero;
-			}
+			string key = $"{PositionKeyPrefix}.{sceneName}";
+			return HasVector3(key) ? GetVector3(key) : Vector3.zero;
 		}
 	}
 
 	[Button("Set default player position")]
-	private void SetDefaultPlayerPositionForScene() {
+	void SetDefaultPlayerPositionForScene() {
 		string sceneName = GetSceneName();
-		SetVector3($"{positionKeyPrefix}.{sceneName}", Player.instance.transform.position);
-		SetVector3($"{rotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
+		SetVector3($"{PositionKeyPrefix}.{sceneName}", Player.instance.transform.position);
+		SetVector3($"{RotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
 
-		if (DEBUG) {
+		if (debugMode) {
 			Debug.Log($"Starting position for player set to {Player.instance.transform.position} for scene {sceneName}");
 		}
 	}
 
 	[Button("Remove default player position for this scene")]
-	private void UnsetDefaultPlayerPositionForScene() {
+	void UnsetDefaultPlayerPositionForScene() {
 		string sceneName = GetSceneName();
-		string positionKey = $"{positionKeyPrefix}.{sceneName}";
-		string rotationKey = $"{rotationKeyPrefix}.{sceneName}";
+		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
+		string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
 
 		if (HasVector3(positionKey)) {
 			RemoveVector3(positionKey);
@@ -98,7 +93,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	}
 #endif
 
-	private bool HasVector3(string key) {
+	bool HasVector3(string key) {
 		string xKey = $"{key}.x";
 		string yKey = $"{key}.y";
 		string zKey = $"{key}.z";
@@ -106,7 +101,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		return (PlayerPrefs.HasKey(xKey) && PlayerPrefs.HasKey(yKey) && PlayerPrefs.HasKey(zKey));
 	}
 
-	private void RemoveVector3(string key) {
+	void RemoveVector3(string key) {
 		string xKey = $"{key}.x";
 		string yKey = $"{key}.y";
 		string zKey = $"{key}.z";
@@ -116,13 +111,13 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		PlayerPrefs.DeleteKey(zKey);
 	}
 
-	private void SetVector3(string key, Vector3 value) {
+	void SetVector3(string key, Vector3 value) {
 		PlayerPrefs.SetFloat($"{key}.x", value.x);
 		PlayerPrefs.SetFloat($"{key}.y", value.y);
 		PlayerPrefs.SetFloat($"{key}.z", value.z);
 	}
 
-	private Vector3 GetVector3(string key) {
+	Vector3 GetVector3(string key) {
 		Vector3 returnVector = Vector3.zero;
 		string xKey = $"{key}.x";
 		string yKey = $"{key}.y";
@@ -155,7 +150,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		return returnVector;
 	}
 
-	private string GetSceneName() {
+	string GetSceneName() {
 		string sceneName = activeSceneName;
 		if (!Application.isPlaying) {
 			if (enumToSceneName == null) {
@@ -167,7 +162,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	}
 
 	[Button("Load default player position")]
-	private void LoadDefaultPlayerPosition() {
+	void LoadDefaultPlayerPosition() {
 		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition
 #if !UNITY_EDITOR
 			|| true
@@ -175,8 +170,8 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		) return;
 
 		string sceneName = GetSceneName();
-		string positionKey = $"{positionKeyPrefix}.{sceneName}";
-		string rotationKey = $"{rotationKeyPrefix}.{sceneName}";
+		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
+		string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
 
 		if (HasVector3(positionKey) && HasVector3(rotationKey)) {
 			Vector3 pos = GetVector3(positionKey);
@@ -185,7 +180,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			Player.instance.transform.position = pos;
 			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
 		}
-		if (DEBUG) {
+		if (debugMode) {
 			if (!HasVector3(positionKey)) {
 				Debug.LogError($"No position key found for {positionKey}");
 			}
@@ -207,11 +202,11 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	Dictionary<string, Level> sceneNameToEnum;
 	Dictionary<string, List<string>> worldGraph;
 	public string activeSceneName;
-	public Level activeScene => GetLevel(activeSceneName);
+	public Level ActiveScene => GetLevel(activeSceneName);
 	public List<string> loadedSceneNames;
 	List<string> currentlyLoadingSceneNames;
 	List<string> currentlyUnloadingSceneNames;
-	public bool isCurrentlyLoadingScenes => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
+	public bool IsCurrentlyLoadingScenes => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
 
 	public delegate void ActiveSceneChange();
 	public event ActiveSceneChange OnActiveSceneChange;
@@ -225,41 +220,41 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public event SceneLoadUnload AfterSceneLoad;
 
 #region level names
-	public const string managerScene = "_ManagerScene";
-	private const string testScene = "_TestScene";
-	private const string portalTestScene = "PortalTestScene";
+	public const string ManagerScene = "_ManagerScene";
+	const string TestScene = "_TestScene";
+	const string PortalTestScene = "PortalTestScene";
 
 	// Main Scenes
-	private const string emptyRoom = "_EmptyRoom";
-	private const string hexPillarRoom = "_HexPillarRoom";
-	private const string library = "_Library";
-	private const string level3 = "_Level3";
-	private const string level4 = "_Level4";
-	private const string axis = "_Axis";
-	private const string fork = "_Fork";
-	private const string forkOctagon = "_ForkOctagon";
-	private const string forkWhiteRoom = "_Fork_WhiteRoom";
-	private const string forkWhiteRoom2 = "_Fork_WhiteRoom2";
-	private const string forkWhiteRoomBlackHallway = "_WhiteRoom_BlackHallway";
-	private const string forkWhiteRoom3 = "_Fork_WhiteRoom3";
-	private const string forkBlackRoom = "_Fork_BlackRoom";
-	private const string forkBlackRoom2 = "_Fork_BlackRoom2";
-    private const string invisFloor = "_InvisFloor";
+	const string EmptyRoom = "_EmptyRoom";
+	const string HexPillarRoom = "_HexPillarRoom";
+	const string Library = "_Library";
+	const string Level3 = "_Level3";
+	const string Level4 = "_Level4";
+	const string Axis = "_Axis";
+	const string Fork = "_Fork";
+	const string ForkOctagon = "_ForkOctagon";
+	const string ForkWhiteRoom = "_Fork_WhiteRoom";
+	const string ForkWhiteRoom2 = "_Fork_WhiteRoom2";
+	const string ForkWhiteRoomBlackHallway = "_WhiteRoom_BlackHallway";
+	const string ForkWhiteRoom3 = "_Fork_WhiteRoom3";
+	const string ForkBlackRoom = "_Fork_BlackRoom";
+	const string ForkBlackRoom2 = "_Fork_BlackRoom2";
+	const string InvisFloor = "_InvisFloor";
 
 	// Transition Scenes
-	private const string tutorialHallway = "_TutorialHallway";
-	private const string tutorialRoom = "_TutorialRoom";
-	private const string transition2_3 = "_Transition2_3";
-	private const string transition3_4 = "_Transition3_4";
-	private const string transitionWhiteRoom_Fork = "_TransitionWhiteRoom_Fork";
+	const string TutorialHallway = "_TutorialHallway";
+	const string TutorialRoom = "_TutorialRoom";
+	const string Transition23 = "_Transition2_3";
+	const string Transition34 = "_Transition3_4";
+	const string TransitionWhiteRoomFork = "_TransitionWhiteRoom_Fork";
 
-	private const string metaEdgeDetection = "_Meta_EdgeDetection";
+	const string MetaEdgeDetection = "_Meta_EdgeDetection";
 
 #endregion
 
 	public void Awake() {
 		hasLoadedDefaultPlayerPosition = false;
-        debug = new DebugLogger(this, () => DEBUG);
+        debug = new DebugLogger(this, () => debugMode);
 
 		loadedSceneNames = new List<string>();
 		currentlyLoadingSceneNames = new List<string>();
@@ -291,6 +286,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="level">Enum value of the scene to become active</param>
+	/// <param name="playBanner">Whether or not to play the LevelBanner. Defaults to true.</param>
+	/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
+	/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
+	/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
 	public void SwitchActiveScene(Level level, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true, bool checkActiveSceneName = true) {
 		SwitchActiveScene(enumToSceneName[level], playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
 	}
@@ -299,6 +298,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 	/// </summary>
 	/// <param name="levelName">Name of the scene to become active</param>
+	/// <param name="playBanner">Whether or not to play the LevelBanner. Defaults to true.</param>
+	/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
+	/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
+	/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
 	public async void SwitchActiveScene(string levelName, bool playBanner = true, bool saveDeactivatedScenesToDisk = true, bool loadActivatedScenesFromDisk = true, bool checkActiveSceneName = true) {
 		if (!worldGraph.ContainsKey(levelName)) {
 			debug.LogError("No level name found in world graph with name " + levelName);
@@ -351,7 +354,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		}
 
 		debug.Log("Waiting for scenes to be loaded...");
-		await TaskEx.WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
+		await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
 		debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
 
 		if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
@@ -379,36 +382,36 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		return sceneNameToEnum[sceneName];
 	}
 
-	private void PopulateSceneNames() {
+	void PopulateSceneNames() {
 		enumToSceneName = new Dictionary<Level, string>();
 		sceneNameToEnum = new Dictionary<string, Level>();
 
 #if UNITY_EDITOR || TEST_BUILD
-		enumToSceneName.Add(Level.testScene, testScene);
+		enumToSceneName.Add(Level.TestScene, TestScene);
 #endif
-		enumToSceneName.Add(Level.managerScene, managerScene);
-		enumToSceneName.Add(Level.emptyRoom, emptyRoom);
-		enumToSceneName.Add(Level.hexPillarRoom, hexPillarRoom);
-		enumToSceneName.Add(Level.library, library);
-		enumToSceneName.Add(Level.level3, level3);
-		enumToSceneName.Add(Level.level4, level4);
-		enumToSceneName.Add(Level.axis, axis);
-		enumToSceneName.Add(Level.fork, fork);
-		enumToSceneName.Add(Level.forkWhiteRoom, forkWhiteRoom);
-		enumToSceneName.Add(Level.forkWhiteRoom2, forkWhiteRoom2);
-		enumToSceneName.Add(Level.forkWhiteRoomBlackHallway, forkWhiteRoomBlackHallway);
-		enumToSceneName.Add(Level.forkWhiteRoom3, forkWhiteRoom3);
-		enumToSceneName.Add(Level.forkBlackRoom, forkBlackRoom);
-		enumToSceneName.Add(Level.tutorialHallway, tutorialHallway);
-		enumToSceneName.Add(Level.tutorialRoom, tutorialRoom);
-		enumToSceneName.Add(Level.transition2_3, transition2_3);
-		enumToSceneName.Add(Level.transition3_4, transition3_4);
-        enumToSceneName.Add(Level.invisFloor, invisFloor);
-		enumToSceneName.Add(Level.metaEdgeDetection, metaEdgeDetection);
-		enumToSceneName.Add(Level.portalTestScene, portalTestScene);
-		enumToSceneName.Add(Level.transitionWhiteRoom_Fork, transitionWhiteRoom_Fork);
-		enumToSceneName.Add(Level.forkOctagon, forkOctagon);
-		enumToSceneName.Add(Level.forkBlackRoom2, forkBlackRoom2);
+		enumToSceneName.Add(Level.ManagerScene, ManagerScene);
+		enumToSceneName.Add(Level.EmptyRoom, EmptyRoom);
+		enumToSceneName.Add(Level.HexPillarRoom, HexPillarRoom);
+		enumToSceneName.Add(Level.Library, Library);
+		enumToSceneName.Add(Level.Level3, Level3);
+		enumToSceneName.Add(Level.Level4, Level4);
+		enumToSceneName.Add(Level.Axis, Axis);
+		enumToSceneName.Add(Level.Fork, Fork);
+		enumToSceneName.Add(Level.ForkWhiteRoom, ForkWhiteRoom);
+		enumToSceneName.Add(Level.ForkWhiteRoom2, ForkWhiteRoom2);
+		enumToSceneName.Add(Level.ForkWhiteRoomBlackHallway, ForkWhiteRoomBlackHallway);
+		enumToSceneName.Add(Level.ForkWhiteRoom3, ForkWhiteRoom3);
+		enumToSceneName.Add(Level.ForkBlackRoom, ForkBlackRoom);
+		enumToSceneName.Add(Level.TutorialHallway, TutorialHallway);
+		enumToSceneName.Add(Level.TutorialRoom, TutorialRoom);
+		enumToSceneName.Add(Level.Transition23, Transition23);
+		enumToSceneName.Add(Level.Transition34, Transition34);
+        enumToSceneName.Add(Level.InvisFloor, InvisFloor);
+		enumToSceneName.Add(Level.MetaEdgeDetection, MetaEdgeDetection);
+		enumToSceneName.Add(Level.PortalTestScene, PortalTestScene);
+		enumToSceneName.Add(Level.TransitionWhiteRoomFork, TransitionWhiteRoomFork);
+		enumToSceneName.Add(Level.ForkOctagon, ForkOctagon);
+		enumToSceneName.Add(Level.ForkBlackRoom2, ForkBlackRoom2);
 
 		foreach (var kv in enumToSceneName) {
 			sceneNameToEnum[kv.Value] = kv.Key;
@@ -418,42 +421,42 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// <summary>
 	/// Defines the world graph which determines which scenes are adjacent to one another.
 	/// </summary>
-	private void PopulateWorldGraph() {
+	void PopulateWorldGraph() {
 #if UNITY_EDITOR || TEST_BUILD
-		worldGraph.Add(testScene, new List<string>());
+		worldGraph.Add(TestScene, new List<string>());
 #endif
 
-		worldGraph.Add(emptyRoom, new List<string>() { tutorialHallway });
-		worldGraph.Add(hexPillarRoom, new List<string>() { tutorialHallway, library });
-		worldGraph.Add(library, new List<string>() { hexPillarRoom, tutorialHallway });
-		worldGraph.Add(level3, new List<string>() { transition2_3, transition3_4 });
-		worldGraph.Add(level4, new List<string>() { transition3_4 });
-		worldGraph.Add(axis, new List<string>() { tutorialHallway, tutorialRoom });
-		worldGraph.Add(fork, new List<string>() { transitionWhiteRoom_Fork, forkWhiteRoom, forkBlackRoom, forkOctagon });
-		worldGraph.Add(forkOctagon, new List<string>() { transitionWhiteRoom_Fork, fork });
-		worldGraph.Add(forkWhiteRoom, new List<string>() { fork, metaEdgeDetection, forkWhiteRoom2 });
-		worldGraph.Add(forkWhiteRoom2, new List<string>() { forkWhiteRoom, forkWhiteRoomBlackHallway });
-		worldGraph.Add(forkWhiteRoomBlackHallway, new List<string>() { forkWhiteRoom2, transitionWhiteRoom_Fork });
-		worldGraph.Add(forkWhiteRoom3, new List<string>() { transitionWhiteRoom_Fork });
-		worldGraph.Add(forkBlackRoom, new List<string>() { fork });
-		worldGraph.Add(forkBlackRoom2, new List<string>() { });
-        worldGraph.Add(invisFloor, new List<string>());
+		worldGraph.Add(EmptyRoom, new List<string>() { TutorialHallway });
+		worldGraph.Add(HexPillarRoom, new List<string>() { TutorialHallway, Library });
+		worldGraph.Add(Library, new List<string>() { HexPillarRoom, TutorialHallway });
+		worldGraph.Add(Level3, new List<string>() { Transition23, Transition34 });
+		worldGraph.Add(Level4, new List<string>() { Transition34 });
+		worldGraph.Add(Axis, new List<string>() { TutorialHallway, TutorialRoom });
+		worldGraph.Add(Fork, new List<string>() { TransitionWhiteRoomFork, ForkWhiteRoom, ForkBlackRoom, ForkOctagon });
+		worldGraph.Add(ForkOctagon, new List<string>() { TransitionWhiteRoomFork, Fork });
+		worldGraph.Add(ForkWhiteRoom, new List<string>() { Fork, MetaEdgeDetection, TransitionWhiteRoomFork });
+		worldGraph.Add(ForkWhiteRoom2, new List<string>() { ForkWhiteRoom3, ForkWhiteRoomBlackHallway });
+		worldGraph.Add(ForkWhiteRoomBlackHallway, new List<string>() { ForkWhiteRoom2 });
+		worldGraph.Add(ForkWhiteRoom3, new List<string>() { ForkWhiteRoom2 });
+		worldGraph.Add(ForkBlackRoom, new List<string>() { Fork });
+		worldGraph.Add(ForkBlackRoom2, new List<string>() { });
+        worldGraph.Add(InvisFloor, new List<string>());
 
-		worldGraph.Add(tutorialHallway, new List<string>() { emptyRoom, tutorialRoom });
-		worldGraph.Add(tutorialRoom, new List<string>() { tutorialHallway, axis });
-		worldGraph.Add(transition2_3, new List<string>() { hexPillarRoom, level3 });
-		worldGraph.Add(transition3_4, new List<string>() { level3, level4 });
-		worldGraph.Add(transitionWhiteRoom_Fork, new List<string>() { forkWhiteRoomBlackHallway, forkWhiteRoom3, forkOctagon });
+		worldGraph.Add(TutorialHallway, new List<string>() { EmptyRoom, TutorialRoom });
+		worldGraph.Add(TutorialRoom, new List<string>() { TutorialHallway, Axis });
+		worldGraph.Add(Transition23, new List<string>() { HexPillarRoom, Level3 });
+		worldGraph.Add(Transition34, new List<string>() { Level3, Level4 });
+		worldGraph.Add(TransitionWhiteRoomFork, new List<string>() { ForkWhiteRoom, ForkWhiteRoom3, ForkOctagon });
 
-		worldGraph.Add(metaEdgeDetection, new List<string>() { forkWhiteRoom });
-		worldGraph.Add(portalTestScene, new List<string>() { });
+		worldGraph.Add(MetaEdgeDetection, new List<string>() { ForkWhiteRoom });
+		worldGraph.Add(PortalTestScene, new List<string>() { });
 	}
 
 	/// <summary>
 	/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph.
 	/// </summary>
 	/// <param name="selectedScene"></param>
-	private void DeactivateUnrelatedScenes(string selectedScene, bool saveDeactivatingScenesToDisk) {
+	void DeactivateUnrelatedScenes(string selectedScene, bool saveDeactivatingScenesToDisk) {
 		List<string> scenesToDeactivate = new List<string>();
 		foreach (string currentlyActiveScene in loadedSceneNames) {
 			if (currentlyActiveScene != selectedScene && !worldGraph[selectedScene].Contains(currentlyActiveScene)) {
@@ -482,8 +485,8 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// Removes scene name from currentlyLoadingSceneNames and adds it to loadedSceneNames.
 	/// </summary>
 	/// <param name="loadedScene">Scene that finished loading</param>
-	private void FinishLoadingScene(Scene loadedScene) {
-		if (loadedScene.name == managerScene) {
+	void FinishLoadingScene(Scene loadedScene) {
+		if (loadedScene.name == ManagerScene) {
 			return;
 		}
 
@@ -507,7 +510,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// Removes the scene from currentlyUnloadingSceneNames.
 	/// </summary>
 	/// <param name="unloadedScene">Scene that finished unloading</param>
-	private void FinishUnloadingScene(Scene unloadedScene) {
+	void FinishUnloadingScene(Scene unloadedScene) {
 		if (unloadedScene.name == activeSceneName) {
 			debug.LogError("Just unloaded the active scene!");
 		}
@@ -525,10 +528,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	/// Any already loaded levels are added to the loadedSceneNames list.
 	/// Manager scene is left out of scene management.
 	/// </summary>
-	private void PopulateAlreadyLoadedScenes() {
+	void PopulateAlreadyLoadedScenes() {
 		foreach (var scene in EditorBuildSettings.scenes) {
 			Scene alreadyLoadedScene = SceneManager.GetSceneByPath(scene.path);
-			if (alreadyLoadedScene.IsValid() && alreadyLoadedScene.name != managerScene) {
+			if (alreadyLoadedScene.IsValid() && alreadyLoadedScene.name != ManagerScene) {
 				loadedSceneNames.Add(alreadyLoadedScene.name);
 			}
 		}
@@ -563,7 +566,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public void LoadFromSavedObject(object savedObject) {
 		LevelManagerSave save = savedObject as LevelManagerSave;
 
-		save.LoadSave(this);
+		save?.LoadSave(this);
 	}
 #endregion
 }

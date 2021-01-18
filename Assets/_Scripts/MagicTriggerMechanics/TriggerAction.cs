@@ -130,7 +130,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		private void TriggerPillarChangeForward() {
+		void TriggerPillarChangeForward() {
 			if (forwardPillar == null && !forwardSameScenePillar) {
 				string pillarKey = PillarKey(forwardPillarLevel, forwardPillarName);
 				if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
@@ -138,10 +138,10 @@ namespace MagicTriggerMechanics {
 				}
 			}
 
-			DimensionPillar.activePillar = forwardPillar;
+			DimensionPillar.ActivePillar = forwardPillar;
 		}
 
-		private void TriggerPillarChangeBackward() {
+		void TriggerPillarChangeBackward() {
 			if (backwardPillar == null && !backwardSameScenePillar) {
 				string pillarKey = PillarKey(backwardPillarLevel, backwardPillarName);
 				if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
@@ -149,14 +149,14 @@ namespace MagicTriggerMechanics {
 				}
 			}
 
-			DimensionPillar.activePillar = backwardPillar;
+			DimensionPillar.ActivePillar = backwardPillar;
 		}
 
-		private string PillarKey(Level level, string name) {
+		string PillarKey(Level level, string name) {
 			return LevelManager.instance.GetSceneName(level) + " " + name;
 		}
 
-		private bool HasTiming(ActionTiming timing) {
+		bool HasTiming(ActionTiming timing) {
 			return (int)timing > 0;
 		}
 	}
@@ -277,7 +277,7 @@ namespace MagicTriggerMechanics {
 			EditorGUILayout.Space();
 		}
 
-		private void AddSeparator() {
+		void AddSeparator() {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}
 	}

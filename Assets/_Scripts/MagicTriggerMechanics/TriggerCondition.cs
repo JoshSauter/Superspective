@@ -170,7 +170,7 @@ namespace MagicTriggerMechanics {
 			EditorGUILayout.Space();
 		}
 
-		private void AddSeparator() {
+		void AddSeparator() {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}
 	}

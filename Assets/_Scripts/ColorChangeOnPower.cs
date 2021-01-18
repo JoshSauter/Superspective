@@ -1,204 +1,200 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using PowerTrailMechanics;
+﻿using System;
 using NaughtyAttributes;
+using PowerTrailMechanics;
 using Saving;
-using System;
 using SerializableClasses;
-using MagicTriggerMechanics;
-using System.Linq;
+using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
 public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
-	UniqueId _id;
-	public UniqueId id {
-		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
-			}
-			return _id;
-		}
-	}
+    public enum ActivationTiming {
+        OnPowerBegin,
+        OnPowerFinish,
+        OnDepowerBegin,
+        OnDepowerFinish
+    }
 
-	public enum ActivationTiming {
-		OnPowerBegin,
-		OnPowerFinish,
-		OnDepowerBegin,
-		OnDepowerFinish
-	}
-	public ActivationTiming timing = ActivationTiming.OnPowerFinish;
-	bool reverseColors => timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;
-	public bool useMaterialAsStartColor = true;
-	public Color depoweredColor;
-	[ColorUsage(true, true)]
-	public Color depoweredEmission;
-	public Color poweredColor;
-	[ColorUsage(true, true)]
-	public Color poweredEmission;
+    public ActivationTiming timing = ActivationTiming.OnPowerFinish;
+    public bool useMaterialAsStartColor = true;
+    public Color depoweredColor;
 
-	public AnimationCurve colorChangeAnimationCurve;
-	float timeElapsedSinceStateChange = 0f;
-	public float timeToChangeColor = 0.25f;
-	public PowerTrail powerTrailToReactTo;
-	public EpitaphRenderer[] renderers;
+    [ColorUsage(true, true)]
+    public Color depoweredEmission;
 
-	[Button("Swap powered/depowered colors")]
-	void SwapPoweredDepoweredColors() {
-		Color tempColor = depoweredColor;
-		Color tempEmission = depoweredEmission;
+    public Color poweredColor;
 
-		depoweredColor = poweredColor;
-		depoweredEmission = poweredEmission;
+    [ColorUsage(true, true)]
+    public Color poweredEmission;
 
-		poweredColor = tempColor;
-		poweredEmission = tempEmission;
-	}
+    public AnimationCurve colorChangeAnimationCurve;
+    public float timeToChangeColor = 0.25f;
+    public PowerTrail powerTrailToReactTo;
+    public EpitaphRenderer[] renderers;
+    UniqueId _id;
+    float timeElapsedSinceStateChange;
 
-	// Use this for initialization
-	void Awake() {
-		if (powerTrailToReactTo == null) {
-			powerTrailToReactTo = GetComponent<PowerTrail>();
-		}
-		if (powerTrailToReactTo == null) {
-			Debug.LogWarning("No Power Trail to react to, disabling color change script", gameObject);
-			enabled = false;
-			return;
-		}
+    public UniqueId id {
+        get {
+            if (_id == null) _id = GetComponent<UniqueId>();
+            return _id;
+        }
+    }
 
-		if (renderers == null || renderers.Length == 0) {
-			renderers = GetComponents<EpitaphRenderer>();
-		}
-		if (renderers == null || renderers.Length == 0) {
-			renderers = new EpitaphRenderer[1];
-			renderers[0] = gameObject.AddComponent<EpitaphRenderer>();
-		}
+    bool reverseColors =>
+        timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;
 
-		foreach (var r in renderers) {
-			if (useMaterialAsStartColor) {
-				depoweredColor = r.GetMainColor();
-				depoweredEmission = r.GetColor("_EmissionColor");
-			}
-			else {
-				r.SetMainColor(depoweredColor);
-				r.SetColor("_EmissionColor", depoweredEmission);
-			}
-		}
+    // Use this for initialization
+    void Awake() {
+        if (powerTrailToReactTo == null) powerTrailToReactTo = GetComponent<PowerTrail>();
+        if (powerTrailToReactTo == null) {
+            Debug.LogWarning("No Power Trail to react to, disabling color change script", gameObject);
+            enabled = false;
+            return;
+        }
 
-		switch (timing) {
-			case ActivationTiming.OnPowerBegin:
-				powerTrailToReactTo.OnPowerBegin += PowerOn;
-				powerTrailToReactTo.OnDepowerFinish += PowerOff;
-				break;
-			case ActivationTiming.OnPowerFinish:
-				powerTrailToReactTo.OnPowerFinish += PowerOn;
-				powerTrailToReactTo.OnDepowerBegin += PowerOff;
-				break;
-			case ActivationTiming.OnDepowerBegin:
-				powerTrailToReactTo.OnDepowerBegin += PowerOn;
-				powerTrailToReactTo.OnPowerFinish += PowerOff;
-				break;
-			case ActivationTiming.OnDepowerFinish:
-				powerTrailToReactTo.OnDepowerFinish += PowerOn;
-				powerTrailToReactTo.OnPowerBegin += PowerOff;
-				break;
-		}
-	}
+        if (renderers == null || renderers.Length == 0) renderers = GetComponents<EpitaphRenderer>();
+        if (renderers == null || renderers.Length == 0) {
+            renderers = new EpitaphRenderer[1];
+            renderers[0] = gameObject.AddComponent<EpitaphRenderer>();
+        }
 
-	private void Update() {
-		if (timeElapsedSinceStateChange < timeToChangeColor) {
-			timeElapsedSinceStateChange += Time.deltaTime;
-		}
+        foreach (EpitaphRenderer r in renderers) {
+            if (useMaterialAsStartColor) {
+                depoweredColor = r.GetMainColor();
+                depoweredEmission = r.GetColor("_EmissionColor");
+            }
+            else {
+                r.SetMainColor(depoweredColor);
+                r.SetColor("_EmissionColor", depoweredEmission);
+            }
+        }
 
-		float t = timeElapsedSinceStateChange / timeToChangeColor;
-		Color startColor = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredColor : poweredColor;
-		Color startEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredEmission : poweredEmission;
-		Color endColor = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredColor : depoweredColor;
-		Color endEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredEmission : depoweredEmission;
-		if (t > 1) {
-			timeElapsedSinceStateChange = timeToChangeColor;
-			SetColor(endColor, endEmission);
-		}
-		else if (t < 1) {
-			float animationTime = colorChangeAnimationCurve.Evaluate(t);
-			SetColor(Color.Lerp(startColor, endColor, animationTime), Color.Lerp(startEmission, endEmission, animationTime));
-		}
-	}
+        switch (timing) {
+            case ActivationTiming.OnPowerBegin:
+                powerTrailToReactTo.OnPowerBegin += PowerOn;
+                powerTrailToReactTo.OnDepowerFinish += PowerOff;
+                break;
+            case ActivationTiming.OnPowerFinish:
+                powerTrailToReactTo.OnPowerFinish += PowerOn;
+                powerTrailToReactTo.OnDepowerBegin += PowerOff;
+                break;
+            case ActivationTiming.OnDepowerBegin:
+                powerTrailToReactTo.OnDepowerBegin += PowerOn;
+                powerTrailToReactTo.OnPowerFinish += PowerOff;
+                break;
+            case ActivationTiming.OnDepowerFinish:
+                powerTrailToReactTo.OnDepowerFinish += PowerOn;
+                powerTrailToReactTo.OnPowerBegin += PowerOff;
+                break;
+        }
+    }
 
-	void SetColor(Color color, Color emission) {
-		foreach (var r in renderers) {
-			r.SetMainColor(color);
-			r.SetColor("_EmissionColor", emission);
-		}
-	}
+    void Update() {
+        if (timeElapsedSinceStateChange < timeToChangeColor) timeElapsedSinceStateChange += Time.deltaTime;
 
-	void PowerOn() {
-		timeElapsedSinceStateChange = 0f;
-	}
-	void PowerOff() {
-		timeElapsedSinceStateChange = 0f;
-	}
+        float t = timeElapsedSinceStateChange / timeToChangeColor;
+        Color startColor = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredColor : poweredColor;
+        Color startEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredEmission : poweredEmission;
+        Color endColor = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredColor : depoweredColor;
+        Color endEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredEmission : depoweredEmission;
+        if (t > 1) {
+            timeElapsedSinceStateChange = timeToChangeColor;
+            SetColor(endColor, endEmission);
+        }
+        else if (t < 1) {
+            float animationTime = colorChangeAnimationCurve.Evaluate(t);
+            SetColor(
+                Color.Lerp(startColor, endColor, animationTime),
+                Color.Lerp(startEmission, endEmission, animationTime)
+            );
+        }
+    }
 
-	#region Saving
-	public bool SkipSave { get; set; }
-	// There's only one player so we don't need a UniqueId here
-	public string ID => $"{poweredColor:F3}_{id.uniqueId}";
+    [Button("Swap powered/depowered colors")]
+    void SwapPoweredDepoweredColors() {
+        Color tempColor = depoweredColor;
+        Color tempEmission = depoweredEmission;
 
-	[Serializable]
-	class ColorChangeOnPowerSave {
-		int timing;
-		bool useMaterialAsStartColor;
-		SerializableColor depoweredColor;
-		SerializableColor depoweredEmission;
-		SerializableColor poweredColor;
-		SerializableColor poweredEmission;
+        depoweredColor = poweredColor;
+        depoweredEmission = poweredEmission;
 
-		SerializableAnimationCurve colorChangeAnimationCurve;
-		float timeElapsedSinceStateChange;
+        poweredColor = tempColor;
+        poweredEmission = tempEmission;
+    }
 
-		SerializableColor currentColor;
-		SerializableColor currentEmission;
+    void SetColor(Color color, Color emission) {
+        foreach (EpitaphRenderer r in renderers) {
+            r.SetMainColor(color);
+            r.SetColor("_EmissionColor", emission);
+        }
+    }
 
-		public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) {
-			this.timing = (int)colorChange.timing;
-			this.useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
-			this.depoweredColor = colorChange.depoweredColor;
-			this.depoweredEmission = colorChange.depoweredEmission;
-			this.poweredColor = colorChange.poweredColor;
-			this.poweredEmission = colorChange.poweredEmission;
-			this.colorChangeAnimationCurve = colorChange.colorChangeAnimationCurve;
-			this.timeElapsedSinceStateChange = colorChange.timeElapsedSinceStateChange;
+    void PowerOn() {
+        timeElapsedSinceStateChange = 0f;
+    }
 
-			if (colorChange.renderers != null && colorChange.renderers.Length > 0) {
-				this.currentColor = colorChange.renderers[0].GetMainColor();
-				this.currentEmission = colorChange.renderers[0].GetColor("_EmissionColor");
-			}
-		}
+    void PowerOff() {
+        timeElapsedSinceStateChange = 0f;
+    }
 
-		public void LoadSave(ColorChangeOnPower colorChange) {
-			colorChange.timing = (ActivationTiming)this.timing;
-			colorChange.useMaterialAsStartColor = this.useMaterialAsStartColor;
-			colorChange.depoweredColor = this.depoweredColor;
-			colorChange.depoweredEmission = this.depoweredEmission;
-			colorChange.poweredColor = this.poweredColor;
-			colorChange.poweredEmission = this.poweredEmission;
-			colorChange.colorChangeAnimationCurve = this.colorChangeAnimationCurve;
-			colorChange.timeElapsedSinceStateChange = this.timeElapsedSinceStateChange;
+#region Saving
+    public bool SkipSave { get; set; }
 
-			if (this.currentColor != null && this.currentEmission != null) {
-				colorChange.SetColor(this.currentColor, this.currentEmission);
-			}
-		}
-	}
+    // There's only one player so we don't need a UniqueId here
+    public string ID => $"{poweredColor:F3}_{id.uniqueId}";
 
-	public object GetSaveObject() {
-		return new ColorChangeOnPowerSave(this);
-	}
+    [Serializable]
+    class ColorChangeOnPowerSave {
+        SerializableAnimationCurve colorChangeAnimationCurve;
 
-	public void LoadFromSavedObject(object savedObject) {
-		ColorChangeOnPowerSave save = savedObject as ColorChangeOnPowerSave;
+        SerializableColor currentColor;
+        SerializableColor currentEmission;
+        SerializableColor depoweredColor;
+        SerializableColor depoweredEmission;
+        SerializableColor poweredColor;
+        SerializableColor poweredEmission;
+        float timeElapsedSinceStateChange;
+        int timing;
+        bool useMaterialAsStartColor;
 
-		save.LoadSave(this);
-	}
-	#endregion
+        public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) {
+            timing = (int) colorChange.timing;
+            useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
+            depoweredColor = colorChange.depoweredColor;
+            depoweredEmission = colorChange.depoweredEmission;
+            poweredColor = colorChange.poweredColor;
+            poweredEmission = colorChange.poweredEmission;
+            colorChangeAnimationCurve = colorChange.colorChangeAnimationCurve;
+            timeElapsedSinceStateChange = colorChange.timeElapsedSinceStateChange;
+
+            if (colorChange.renderers != null && colorChange.renderers.Length > 0) {
+                currentColor = colorChange.renderers[0].GetMainColor();
+                currentEmission = colorChange.renderers[0].GetColor("_EmissionColor");
+            }
+        }
+
+        public void LoadSave(ColorChangeOnPower colorChange) {
+            colorChange.timing = (ActivationTiming) timing;
+            colorChange.useMaterialAsStartColor = useMaterialAsStartColor;
+            colorChange.depoweredColor = depoweredColor;
+            colorChange.depoweredEmission = depoweredEmission;
+            colorChange.poweredColor = poweredColor;
+            colorChange.poweredEmission = poweredEmission;
+            colorChange.colorChangeAnimationCurve = colorChangeAnimationCurve;
+            colorChange.timeElapsedSinceStateChange = timeElapsedSinceStateChange;
+
+            if (currentColor != null && currentEmission != null) colorChange.SetColor(currentColor, currentEmission);
+        }
+    }
+
+    public object GetSaveObject() {
+        return new ColorChangeOnPowerSave(this);
+    }
+
+    public void LoadFromSavedObject(object savedObject) {
+        ColorChangeOnPowerSave save = savedObject as ColorChangeOnPowerSave;
+
+        save.LoadSave(this);
+    }
+#endregion
 }

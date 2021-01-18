@@ -52,7 +52,6 @@ Properties {
 	_CullMode			("Cull Mode", Float) = 0
 	_ColorMask			("Color Mask", Float) = 15
 	
-	_Channel("Channel", Int) = 0
 	_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 }
 
@@ -121,7 +120,7 @@ SubShader {
 			#endif
 		};
 
-		int _Channel;
+		int _Channels[NUM_CHANNELS];
 		int _Inverse;
 
 		pixel_t VertShader(vertex_t input)
@@ -201,7 +200,7 @@ SubShader {
 		// PIXEL SHADER
 		fixed4 PixShader(pixel_t input) : SV_Target
 		{
-			ClipDimensionObject(input.vertex, _Channel, _Inverse);
+			ClipDimensionObject(input.vertex, _Channels, _Inverse);
 			UNITY_SETUP_INSTANCE_ID(input);
 
 			half d = tex2D(_MainTex, input.texcoord0.xy).a * input.param.x;

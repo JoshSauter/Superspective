@@ -12,7 +12,6 @@
         _BurnColor("Burn Color", Color) = (1,1,1,1)
  
         _EmissionAmount("Emission amount", float) = 2.0
-		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader
@@ -43,7 +42,7 @@
 			float _DissolveValue;
 			float _EmissionAmount;
 
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 
 			struct v2f
@@ -63,7 +62,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channel, _Inverse);
+				ClipDimensionObject(i.vertex, _Channels, _Inverse);
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);
@@ -104,7 +103,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 			float _DissolveValue;
 			fixed4 _Color;
@@ -131,7 +130,7 @@
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);
-				ClipDimensionObject(i.pos.xy, _Channel, _Inverse);
+				ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

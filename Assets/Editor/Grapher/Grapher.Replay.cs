@@ -7,8 +7,8 @@ using NWH;
 // Replay
 public partial class Grapher : EditorWindow
 {
-    private static List<string> replayFiles = new List<string>();
-    private static List<Queue<Sample>> replaySampleQueues = new List<Queue<Sample>>();
+    static List<string> replayFiles = new List<string>();
+    static List<Queue<Sample>> replaySampleQueues = new List<Queue<Sample>>();
 
     public static ReplayControls prevControl = ReplayControls.Stop;
     public static ReplayControls replayControl = ReplayControls.Stop;
@@ -17,7 +17,7 @@ public partial class Grapher : EditorWindow
         Play, Pause, Stop, Reverse, Forward, Replay
     }
 
-    private void ReplayInit()
+    void ReplayInit()
     {
         // No replay files, ask user to add some
         if(replayFiles.Count == 0 && channels.Count == 0)
@@ -73,7 +73,7 @@ public partial class Grapher : EditorWindow
         }
     }
 
-    private void UpdateReplay()
+    void UpdateReplay()
     {
         if (prevControl == ReplayControls.Stop && replayControl != ReplayControls.Stop)
         {
@@ -88,7 +88,7 @@ public partial class Grapher : EditorWindow
         prevControl = replayControl;
     }
 
-    private void OpenFiles()
+    void OpenFiles()
     {
         List<string> files = FileHandler.BrowserOpenFiles();
 

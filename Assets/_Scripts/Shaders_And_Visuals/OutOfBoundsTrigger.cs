@@ -6,17 +6,17 @@ using EpitaphUtils;
 public class OutOfBoundsTrigger : MonoBehaviour {
 	GameObject outOfBoundsCanvas;
 
-	private void Start() {
+	void Start() {
 		outOfBoundsCanvas = MainCanvas.instance.transform.Find("OutOfBoundsCanvas").gameObject;
 	}
 
-	private void OnTriggerEnter(Collider other) {
+	void OnTriggerEnter(Collider other) {
 		if (other.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(true);
 		}
 	}
 
-	private void OnTriggerExit(Collider other) {
+	void OnTriggerExit(Collider other) {
 		if (other.TaggedAsPlayer()) {
 			outOfBoundsCanvas.SetActive(false);
 		}

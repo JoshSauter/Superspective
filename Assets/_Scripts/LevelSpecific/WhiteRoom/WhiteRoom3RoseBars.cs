@@ -26,7 +26,7 @@ namespace LevelSpecific.WhiteRoom {
             powerTrail.OnDepowerBegin += () => barsAreUp = true;
         }
 
-        private void Update() {
+        void Update() {
             if (!barsAreUp && barsWereUpLastFrame) {
                 AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, gameObject);
             }

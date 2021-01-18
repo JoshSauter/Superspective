@@ -7,7 +7,7 @@ public class TestOverlay : MonoBehaviour {
 	public Shader shader;
 	Material mat;
 
-	private void OnEnable() {
+	void OnEnable() {
 		if (mat == null && shader != null) {
 			mat = new Material(shader);
 		}

@@ -18,10 +18,11 @@ namespace Saving {
 		public delegate void DynamicObjectCreated(string id);
 		public static event DynamicObjectCreated OnDynamicObjectCreated;
 
-		private static string SavePath(string saveFileName) {
+		static string SavePath(string saveFileName) {
 			return $"{Application.persistentDataPath}/Saves/{saveFileName}";
 		}
-		private const string filename = "DynamicObjects.save";
+
+		const string filename = "DynamicObjects.save";
 
 		public enum DynamicObjectType {
 			NotSet,
@@ -31,14 +32,15 @@ namespace Saving {
 			PickupCubeBlue,
 			MultiDimensionCube
 		}
-		private const string prefabPathPrefix = "Prefabs/";
-		private const string pickupCubePrefabPath = "PickUpCubes/PickUpCube";
-		private const string pickupCubeRedPrefabPath = "PickUpCubes/PickUpCubeRed";
-		private const string pickupCubeGreenPrefabPath = "PickUpCubes/PickUpCubeGreen";
-		private const string pickupCubeBluePrefabPath = "PickUpCubes/PickUpCubeBlue";
-		private const string multiDimensionCubePrefabPath = "PickUpCubes/MultiDimensionCube";
 
-		private static string GetPrefabPathSuffix(DynamicObjectType type) {
+		const string prefabPathPrefix = "Prefabs/";
+		const string pickupCubePrefabPath = "PickUpCubes/PickUpCube";
+		const string pickupCubeRedPrefabPath = "PickUpCubes/PickUpCubeRed";
+		const string pickupCubeGreenPrefabPath = "PickUpCubes/PickUpCubeGreen";
+		const string pickupCubeBluePrefabPath = "PickUpCubes/PickUpCubeBlue";
+		const string multiDimensionCubePrefabPath = "PickUpCubes/MultiDimensionCube";
+
+		static string GetPrefabPathSuffix(DynamicObjectType type) {
 			switch (type) {
 				case DynamicObjectType.PickupCube:
 					return pickupCubePrefabPath;
@@ -70,7 +72,7 @@ namespace Saving {
 			return newObject;
 		}
 
-		private static void InitializeDynamicObjectsDict() {
+		static void InitializeDynamicObjectsDict() {
 			var allDynamicObjects = Resources.FindObjectsOfTypeAll<DynamicObject>()
 				.Where(d => d.ID != null && d.ID != "" && !d.SkipSave && d.gameObject.scene.name != null);
 			dynamicObjectsInActiveScenes = allDynamicObjects
@@ -173,7 +175,7 @@ namespace Saving {
 			}
 		}
 
-		private static DynamicObjectsSaveFile GetDynamicObjectsSaveFile(string saveFileName) {
+		static DynamicObjectsSaveFile GetDynamicObjectsSaveFile(string saveFileName) {
 			string directoryPath = SavePath(saveFileName);
 			string saveFile = $"{directoryPath}/{filename}";
 

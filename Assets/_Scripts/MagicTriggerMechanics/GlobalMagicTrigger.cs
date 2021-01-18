@@ -6,15 +6,15 @@ namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
     public class GlobalMagicTrigger : MagicTrigger {
 		public bool sceneMustBeActive = true;
-		private Level thisScene = Level.managerScene;
+		Level thisScene = Level.ManagerScene;
 
 		bool IsActive() {
 			bool isActive = enabled;
 			if (sceneMustBeActive) {
-				if (thisScene == Level.managerScene) {
+				if (thisScene == Level.ManagerScene) {
 					thisScene = LevelManager.instance.GetLevel(gameObject.scene.name);
 				}
-				isActive = isActive && thisScene == LevelManager.instance.activeScene;
+				isActive = isActive && thisScene == LevelManager.instance.ActiveScene;
 			}
 			return isActive;
 		}
@@ -58,7 +58,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		private void OnValidate() {
+        void OnValidate() {
 			foreach (var action in actionsToTrigger) {
 				if (action.actionTiming.HasFlag(ActionTiming.OnEnter) || action.actionTiming.HasFlag(ActionTiming.OnExit)) {
 					Debug.LogError("OnEnter and OnExit trigger action timings will not work for GlobalMagicTriggers");

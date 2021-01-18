@@ -14,11 +14,11 @@ namespace PortalMechanics {
 		public List<Portal> activePortals = new List<Portal>();
 		Camera portalCamera;
 
-		private void Awake() {
+		void Awake() {
 			debug = new DebugLogger(this, () => DEBUG);
 		}
 
-		private void Start() {
+		void Start() {
 			InitializeVirtualPortalCamera();
 		}
 
@@ -74,7 +74,7 @@ namespace PortalMechanics {
 		}
 
 		#region PortalEnableDisable
-		private void EnablePortalsForChannel(HashSet<Portal> portals) {
+		void EnablePortalsForChannel(HashSet<Portal> portals) {
 			foreach (var portal in portals) {
 				Portal otherPortal = portals.FirstOrDefault(x => x != portal);
 				// If this is a single portal system, just set otherPortal to self
@@ -85,7 +85,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		private void DisablePortalsForChannel(HashSet<Portal> portals) {
+		void DisablePortalsForChannel(HashSet<Portal> portals) {
 			foreach (var portal in portals) {
 				portal.DisablePortal();
 			}
@@ -95,7 +95,7 @@ namespace PortalMechanics {
 		/// <summary>
 		/// Instantiates portalCamera as a copy of the player's Camera with post-processing effects copied, as a child of the PortalManager, and disables the Camera.
 		/// </summary>
-		private void InitializeVirtualPortalCamera() {
+		void InitializeVirtualPortalCamera() {
 			Camera playerCam = EpitaphScreen.instance.playerCamera;
 			portalCamera = new GameObject("VirtualPortalCamera").AddComponent<Camera>();
 			portalCamera.transform.SetParent(transform, false);

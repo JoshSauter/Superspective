@@ -38,7 +38,7 @@ namespace Audio {
 		Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
 		Dictionary<string, Action<AudioJob>> updateAudioJobs = new Dictionary<string, Action<AudioJob>>();
 
-		private void Awake() {
+		void Awake() {
 			foreach (var template in Utils.GetComponentsInChildrenRecursively<AudioTemplate>(transform)) {
 				defaultSettings.Add(template.type, template.audioSettings);
 			}
@@ -46,7 +46,7 @@ namespace Audio {
 			soundsRoot = transform.Find("Sounds");
 		}
 
-		private void Update() {
+		void Update() {
 			// Perform update actions for running audio jobs that have one
 			foreach (var updateJob in updateAudioJobs) {
 				AudioJob job = audioJobs[updateJob.Key];

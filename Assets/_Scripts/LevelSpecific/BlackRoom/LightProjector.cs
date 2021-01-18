@@ -34,7 +34,7 @@ namespace LevelSpecific.BlackRoom {
 		const float upAndDownAnimLerpSpeed = 10f;
 		const float verticalMovespeed = .15f;
 
-		private void Awake() {
+		void Awake() {
 			upAndDownAnim = GetComponent<Animator>();
 			sideToSideAnim = transform.parent.GetComponent<Animator>();
 			desiredUpAndDownAnimTime = curUpAndDownAnimTime;

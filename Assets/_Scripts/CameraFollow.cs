@@ -1,140 +1,147 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 using EpitaphUtils;
-using PortalMechanics;
 using NaughtyAttributes;
+using PortalMechanics;
 using Saving;
-using System;
 using SerializableClasses;
+using UnityEngine;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
 public class CameraFollow : MonoBehaviour, SaveableObject {
-	bool shouldFollow = true;
-	[SerializeField]
-	[ReadOnly]
-	float currentLerpSpeed = 450f;				// Can be set by external scripts to slow the camera's lerp speed for a short time
-	public const float desiredLerpSpeed = 30f;	// currentLerpSpeed will approach this value after not being changed for a while
-	public Vector3 relativeStartPosition;
-	public Vector3 relativePositionLastFrame;	// Used in restoring position of camera after jump-cut movement of player
-	public Vector3 worldPositionLastFrame;
+    public delegate void CameraFollowUpdate(Vector3 offset, Vector3 positionDiffFromLastFrame);
 
-	float timeSinceCurrentLerpSpeedWasModified = 0f;
+    public const float desiredLerpSpeed = 30f; // currentLerpSpeed will approach this value after not being changed for a while
 
-	Headbob headbob;
+    [SerializeField]
+    [ReadOnly]
+    float currentLerpSpeed = 450f; // Can be set by external scripts to slow the camera's lerp speed for a short time
 
-	public delegate void CameraFollowUpdate(Vector3 offset, Vector3 positionDiffFromLastFrame);
-	public event CameraFollowUpdate OnCameraFollowUpdate;
+    public Vector3 relativeStartPosition;
+    public Vector3 relativePositionLastFrame; // Used in restoring position of camera after jump-cut movement of player
+    public Vector3 worldPositionLastFrame;
 
-	// DEBUG:
-	//float maxFollowDistance = 0f;
+    Headbob headbob;
+    bool shouldFollow = true;
 
-	public void SetLerpSpeed(float lerpSpeed) {
-		currentLerpSpeed = lerpSpeed;
-		timeSinceCurrentLerpSpeedWasModified = 0f;
-	}
+    float timeSinceCurrentLerpSpeedWasModified;
 
-	private void Awake() {
-		headbob = Player.instance.GetComponent<Headbob>();
-		relativeStartPosition = transform.localPosition;
-		worldPositionLastFrame = transform.position;
-	}
-
-	private void Start() {
-		TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
-		Portal.OnAnyPortalTeleportSimple += (obj) => { if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame(); };
-		Player.instance.look.OnViewLockEnterBegin += HandleViewLockBegin;
-		Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
-	}
-
-	void FixedUpdate() {
-		if (!shouldFollow) return;
-
-		Vector3 destination = transform.parent.TransformPoint(relativeStartPosition);
-
-		//float distanceBetweenCamAndPlayerBefore = Vector3.Distance(worldPositionLastFrame, destination);
-		Vector3 nextPosition = Vector3.Lerp(worldPositionLastFrame, destination, currentLerpSpeed * Time.fixedDeltaTime);
-		Vector3 offset = nextPosition - transform.position;
-		Vector3 positionDiffFromLastFrame = nextPosition - worldPositionLastFrame;
-		OnCameraFollowUpdate?.Invoke(offset, positionDiffFromLastFrame);
-		transform.position = nextPosition;
-		//float distanceBetweenCamAndPlayer = Vector3.Distance(transform.position, destination);
-
-		//if (distanceBetweenCamAndPlayer > maxFollowDistance) {
-		//	maxFollowDistance = distanceBetweenCamAndPlayer;
-		//	Debug.LogWarning("New max follow distance: " + maxFollowDistance);
-		//}
-
-		Debug.DrawRay(worldPositionLastFrame, transform.position - worldPositionLastFrame, Color.magenta);
-
-		worldPositionLastFrame = transform.position;
-		relativePositionLastFrame = transform.localPosition;
-
-		transform.position -= headbob.curBobAmount * -Player.instance.transform.up;
-
-		if (timeSinceCurrentLerpSpeedWasModified > 0.5f) {
-			currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, desiredLerpSpeed, 0.25f * Time.fixedDeltaTime);
-		}
-
-		timeSinceCurrentLerpSpeedWasModified += Time.fixedDeltaTime;
+    void Awake() {
+        headbob = Player.instance.GetComponent<Headbob>();
+        relativeStartPosition = transform.localPosition;
+        worldPositionLastFrame = transform.position;
     }
 
-	// Restore the relative offset of worldPositionLastFrame after a jump-cut movement of the player
-	public void RecalculateWorldPositionLastFrame() {
-		worldPositionLastFrame = transform.parent.TransformPoint(relativePositionLastFrame);
-	}
+    void Start() {
+        TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
+        Portal.OnAnyPortalTeleportSimple += obj => {
+            if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame();
+        };
+        Player.instance.look.OnViewLockEnterBegin += HandleViewLockBegin;
+        Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
+    }
 
-	void HandleViewLockBegin() {
-		shouldFollow = false;
-	}
+    void FixedUpdate() {
+        if (!shouldFollow) return;
 
-	void HandleViewUnlockEnd() {
-		shouldFollow = true;
-		RecalculateWorldPositionLastFrame();
-	}
+        Vector3 destination = transform.parent.TransformPoint(relativeStartPosition);
 
-	#region Saving
-	public bool SkipSave { get; set; }
-	// There's only one player so we don't need a UniqueId here
-	public string ID => "CameraFollow";
+        //float distanceBetweenCamAndPlayerBefore = Vector3.Distance(worldPositionLastFrame, destination);
+        Vector3 nextPosition = Vector3.Lerp(
+            worldPositionLastFrame,
+            destination,
+            currentLerpSpeed * Time.fixedDeltaTime
+        );
+        Vector3 offset = nextPosition - transform.position;
+        Vector3 positionDiffFromLastFrame = nextPosition - worldPositionLastFrame;
+        OnCameraFollowUpdate?.Invoke(offset, positionDiffFromLastFrame);
+        transform.position = nextPosition;
+        //float distanceBetweenCamAndPlayer = Vector3.Distance(transform.position, destination);
 
-	[Serializable]
-	class CameraFollowSave {
-		bool shouldFollow;
-		float currentLerpSpeed;
-		SerializableVector3 relativeStartPosition;
-		SerializableVector3 relativePositionLastFrame;
-		SerializableVector3 worldPositionLastFrame;
+        //if (distanceBetweenCamAndPlayer > maxFollowDistance) {
+        //	maxFollowDistance = distanceBetweenCamAndPlayer;
+        //	Debug.LogWarning("New max follow distance: " + maxFollowDistance);
+        //}
 
-		float timeSinceCurrentLerpSpeedWasModified;
+        Debug.DrawRay(worldPositionLastFrame, transform.position - worldPositionLastFrame, Color.magenta);
 
-		public CameraFollowSave(CameraFollow cam) {
-			this.shouldFollow = cam.shouldFollow;
-			this.currentLerpSpeed = cam.currentLerpSpeed;
-			this.relativeStartPosition = cam.relativeStartPosition;
-			this.relativePositionLastFrame = cam.relativePositionLastFrame;
-			this.worldPositionLastFrame = cam.worldPositionLastFrame;
-			this.timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
-		}
+        worldPositionLastFrame = transform.position;
+        relativePositionLastFrame = transform.localPosition;
 
-		public void LoadSave(CameraFollow cam) {
-			cam.shouldFollow = this.shouldFollow;
-			cam.currentLerpSpeed = this.currentLerpSpeed;
-			cam.relativeStartPosition = this.relativeStartPosition;
-			cam.relativePositionLastFrame = this.relativePositionLastFrame;
-			cam.worldPositionLastFrame = this.worldPositionLastFrame;
-			cam.timeSinceCurrentLerpSpeedWasModified = this.timeSinceCurrentLerpSpeedWasModified;
-		}
-	}
+        transform.position -= headbob.curBobAmount * -Player.instance.transform.up;
 
-	public object GetSaveObject() {
-		return new CameraFollowSave(this);
-	}
+        if (timeSinceCurrentLerpSpeedWasModified > 0.5f)
+            currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, desiredLerpSpeed, 0.25f * Time.fixedDeltaTime);
 
-	public void LoadFromSavedObject(object savedObject) {
-		CameraFollowSave save = savedObject as CameraFollowSave;
+        timeSinceCurrentLerpSpeedWasModified += Time.fixedDeltaTime;
+    }
 
-		save.LoadSave(this);
-	}
-	#endregion
+    public event CameraFollowUpdate OnCameraFollowUpdate;
+
+    // DEBUG:
+    //float maxFollowDistance = 0f;
+
+    public void SetLerpSpeed(float lerpSpeed) {
+        currentLerpSpeed = lerpSpeed;
+        timeSinceCurrentLerpSpeedWasModified = 0f;
+    }
+
+    // Restore the relative offset of worldPositionLastFrame after a jump-cut movement of the player
+    public void RecalculateWorldPositionLastFrame() {
+        worldPositionLastFrame = transform.parent.TransformPoint(relativePositionLastFrame);
+    }
+
+    void HandleViewLockBegin() {
+        shouldFollow = false;
+    }
+
+    void HandleViewUnlockEnd() {
+        shouldFollow = true;
+        RecalculateWorldPositionLastFrame();
+    }
+
+#region Saving
+    public bool SkipSave { get; set; }
+
+    // There's only one player so we don't need a UniqueId here
+    public string ID => "CameraFollow";
+
+    [Serializable]
+    class CameraFollowSave {
+        float currentLerpSpeed;
+        SerializableVector3 relativePositionLastFrame;
+        SerializableVector3 relativeStartPosition;
+        bool shouldFollow;
+
+        float timeSinceCurrentLerpSpeedWasModified;
+        SerializableVector3 worldPositionLastFrame;
+
+        public CameraFollowSave(CameraFollow cam) {
+            shouldFollow = cam.shouldFollow;
+            currentLerpSpeed = cam.currentLerpSpeed;
+            relativeStartPosition = cam.relativeStartPosition;
+            relativePositionLastFrame = cam.relativePositionLastFrame;
+            worldPositionLastFrame = cam.worldPositionLastFrame;
+            timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
+        }
+
+        public void LoadSave(CameraFollow cam) {
+            cam.shouldFollow = shouldFollow;
+            cam.currentLerpSpeed = currentLerpSpeed;
+            cam.relativeStartPosition = relativeStartPosition;
+            cam.relativePositionLastFrame = relativePositionLastFrame;
+            cam.worldPositionLastFrame = worldPositionLastFrame;
+            cam.timeSinceCurrentLerpSpeedWasModified = timeSinceCurrentLerpSpeedWasModified;
+        }
+    }
+
+    public object GetSaveObject() {
+        return new CameraFollowSave(this);
+    }
+
+    public void LoadFromSavedObject(object savedObject) {
+        CameraFollowSave save = savedObject as CameraFollowSave;
+
+        save.LoadSave(this);
+    }
+#endregion
 }

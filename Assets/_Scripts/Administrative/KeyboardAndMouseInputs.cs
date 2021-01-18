@@ -7,9 +7,9 @@ public class KeyboardAndMouseInput {
 	public bool Pressed { get { return _Pressed(); } }
 	public bool Released { get { return _Released(); } }
 	public bool Held { get { return _Held(); } }
-	private Func<bool> _Pressed;
-	private Func<bool> _Released;
-	private Func<bool> _Held;
+	Func<bool> _Pressed;
+	Func<bool> _Released;
+	Func<bool> _Held;
 	public string primary;
 	public string secondary;
 
@@ -96,15 +96,15 @@ public static class KeyboardAndMouseInputs {
 		AZERTY
 	}
 
-	private static KeyboardAndMouseInput QWERTYUp = new KeyboardAndMouseInput(KeyCode.W);
-	private static KeyboardAndMouseInput QWERTYDown = new KeyboardAndMouseInput(KeyCode.S);
-	private static KeyboardAndMouseInput QWERTYLeft = new KeyboardAndMouseInput(KeyCode.A);
-	private static KeyboardAndMouseInput QWERTYRight = new KeyboardAndMouseInput(KeyCode.D);
+	static KeyboardAndMouseInput QWERTYUp = new KeyboardAndMouseInput(KeyCode.W);
+	static KeyboardAndMouseInput QWERTYDown = new KeyboardAndMouseInput(KeyCode.S);
+	static KeyboardAndMouseInput QWERTYLeft = new KeyboardAndMouseInput(KeyCode.A);
+	static KeyboardAndMouseInput QWERTYRight = new KeyboardAndMouseInput(KeyCode.D);
 
-	private static KeyboardAndMouseInput AZERTYUp = new KeyboardAndMouseInput(KeyCode.Z);
-	private static KeyboardAndMouseInput AZERTYDown = new KeyboardAndMouseInput(KeyCode.S);
-	private static KeyboardAndMouseInput AZERTYLeft = new KeyboardAndMouseInput(KeyCode.Q);
-	private static KeyboardAndMouseInput AZERTYRight = new KeyboardAndMouseInput(KeyCode.D);
+	static KeyboardAndMouseInput AZERTYUp = new KeyboardAndMouseInput(KeyCode.Z);
+	static KeyboardAndMouseInput AZERTYDown = new KeyboardAndMouseInput(KeyCode.S);
+	static KeyboardAndMouseInput AZERTYLeft = new KeyboardAndMouseInput(KeyCode.Q);
+	static KeyboardAndMouseInput AZERTYRight = new KeyboardAndMouseInput(KeyCode.D);
 
 	public static KeyboardAndMouseInput Action1 = new KeyboardAndMouseInput(0);
 	public static KeyboardAndMouseInput Action2 = new KeyboardAndMouseInput(1);

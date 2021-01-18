@@ -18,7 +18,7 @@ public struct SerializableNode {
 	public bool zeroDistanceToChildren;
 }
 public class Node {
-	private const float distanceToSpawnNewNodeAt = 0.5f;
+	const float distanceToSpawnNewNodeAt = 0.5f;
 	public Node parent;
 	public List<Node> children = new List<Node>();
 	public Vector3 pos;
@@ -30,12 +30,12 @@ public class Node {
 		this.zeroDistanceToChildren = zeroDistanceToChildren;
 	}
 
-	public Node AddNewChild() {
+	public Node AddNewChild(bool buildAsStaircase) {
 		Vector3 grandparentToParent = Vector3.forward;
 		if (parent != null) {
 			grandparentToParent = (pos - parent.pos).normalized;
 		}
-		if (NodeSystem.buildAsStaircase) {
+		if (buildAsStaircase) {
 			grandparentToParent = Vector3.zero;
 		}
 		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt, false);
@@ -52,7 +52,8 @@ public class Node {
 [ExecuteInEditMode]
 public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	// Used for special logic around repositioning nodes/placing new nodes
-	public static bool buildAsStaircase = true;
+	public bool buildAsStaircase = true;
+	public Vector3 staircaseDirection1 = Vector3.right, staircaseDirection2 = Vector3.up;
 	public bool showNodes = true;
 	public List<Node> allNodes;
 	[HideInInspector]
@@ -117,7 +118,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		return index;
 	}
 
-	private Node _selectedNode;
+	Node _selectedNode;
 	public Node selectedNode {
 		get {
 			if (_selectedNode == null && rootNode != null) {
@@ -133,7 +134,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	[ShowNativeProperty]
 	public int Count => allNodes.Count;
 
-	private void OnEnable() {
+	void OnEnable() {
 		Initialize();
 	}
 
@@ -156,7 +157,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	public Node AddNewChildToSelected() {
 		Node newNode = null;
 		if (selectedNode != null) {
-			newNode = selectedNode.AddNewChild();
+			newNode = selectedNode.AddNewChild(buildAsStaircase);
 			allNodes.Add(newNode);
 
 			selectedNode = newNode;
@@ -194,8 +195,9 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}
 	}
 
-	private static float gizmoSphereSize = 0.15f;
-	private void OnDrawGizmos() {
+	static float gizmoSphereSize = 0.15f;
+
+	void OnDrawGizmos() {
 		if (rootNode == null) return;
 
 		DrawGizmosRecursively(rootNode);
@@ -321,8 +323,8 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			if (ns != null && ns.selectedNode != null) {
 				Node newNode = ns.AddNewChildToSelected();
 				// Make it easy to do staircases:
-				if (buildAsStaircase) {
-					newNode.pos += 0.5f * (temp ? Vector3.left : Vector3.up);
+				if (ns.buildAsStaircase) {
+					newNode.pos += 0.5f * (temp ? ns.staircaseDirection1 : ns.staircaseDirection2);
 				}
 				temp = !temp;
 			}

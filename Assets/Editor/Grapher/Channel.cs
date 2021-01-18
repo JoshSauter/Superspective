@@ -16,9 +16,9 @@ namespace NWH
         public float tagY;
         public float tagX;
 
-        private float timeScale = 5;
-        private float yMax;
-        private float yMin;
+        float timeScale = 5;
+        float yMax;
+        float yMin;
         public int sampleNo = 0;
         public bool beingManuallyAdjusted = false;
         public float autoScaleResolution = GraphSettings.DefaultVerticalResolution;

@@ -1,14 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using EpitaphUtils;
 using UnityEngine;
-using EpitaphUtils;
 
 public class FreezeRigidbodyWhenPlayerIsNear : MonoBehaviour {
-	public MultiDimensionCube pickupCubeDimensionShift;
+    public MultiDimensionCube multiDimensionCube;
 
-	void OnTriggerEnter(Collider other) {
-		if (other.TaggedAsPlayer() && pickupCubeDimensionShift.thisCollider.enabled) {
-			pickupCubeDimensionShift.pickupCube.thisRigidbody.isKinematic = true;
-		}
-	}
+    void OnTriggerEnter(Collider other) {
+        if (other.TaggedAsPlayer() && multiDimensionCube.thisCollider.enabled)
+            multiDimensionCube.pickupCube.thisRigidbody.isKinematic = true;
+    }
+
+    void OnTriggerExit(Collider other) {
+        if (other.TaggedAsPlayer() && multiDimensionCube.thisCollider.enabled)
+            multiDimensionCube.pickupCube.thisRigidbody.isKinematic = false;
+    }
 }

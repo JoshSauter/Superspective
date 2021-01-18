@@ -17,7 +17,7 @@ public class Player : Singleton<Player>, SaveableObject {
 	public Renderer renderer;
 	public Vector3 playerSize { get { return renderer.bounds.size; } }
 
-	private void Awake() {
+	void Awake() {
 		renderer = GetComponentInChildren<Renderer>();
 		collider = GetComponentInChildren<Collider>();
 		look = GetComponent<PlayerLook>();
@@ -26,7 +26,7 @@ public class Player : Singleton<Player>, SaveableObject {
 		cameraFollow = GetComponentInChildren<CameraFollow>();
 	}
 
-	private void Start() {
+	void Start() {
 		PickupObject.OnAnyPickup += (PickupObject objPickedUp) => heldObject = objPickedUp;
 		PickupObject.OnAnyDrop += (PickupObject objDropped) => { if (objDropped == heldObject) heldObject = null; };
 	}

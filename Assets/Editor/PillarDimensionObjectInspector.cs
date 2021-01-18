@@ -1,107 +1,122 @@
-using EpitaphUtils;
 using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(PillarDimensionObject))]
 [CanEditMultipleObjects]
 public class PillarDimensionObjectInspector : Editor {
-	// DimensionObject properties (base class)
-	SerializedProperty DEBUG;
-	SerializedProperty treatChildrenAsOneObjectRecursively;
-	SerializedProperty visibilityState;
-	SerializedProperty channel;
-	SerializedProperty reverseVisibilityStates;
-	SerializedProperty ignoreMaterialChanges;
+    SerializedProperty channel;
 
-	// PillarDimensionObject properties
-	SerializedProperty dimension;
-	SerializedProperty playerQuadrant;
-	SerializedProperty dimensionShiftQuadrant;
-	SerializedProperty minAngle;
-	SerializedProperty maxAngle;
+    SerializedProperty colliderBoundsOverride;
 
-	SerializedProperty colliderBoundsOverride;
+    // DimensionObject properties (base class)
+    SerializedProperty DEBUG;
 
-	SerializedProperty pillars;
-	SerializedProperty thisObjectMoves;
-	SerializedProperty thisRigidbody;
+    // PillarDimensionObject properties
+    SerializedProperty dimension;
+    SerializedProperty dimensionShiftQuadrant;
+    SerializedProperty ignoreMaterialChanges;
+    SerializedProperty maxAngle;
+    SerializedProperty minAngle;
 
-	protected virtual void OnEnable() {
-		DEBUG = serializedObject.FindProperty("DEBUG");
-		treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
-		visibilityState = serializedObject.FindProperty("visibilityState");
-		channel = serializedObject.FindProperty("channel");
-		reverseVisibilityStates = serializedObject.FindProperty("reverseVisibilityStates");
-		ignoreMaterialChanges = serializedObject.FindProperty("ignoreMaterialChanges");
+    SerializedProperty pillars;
+    SerializedProperty playerQuadrant;
+    SerializedProperty reverseVisibilityStates;
+    SerializedProperty thisObjectMoves;
+    SerializedProperty thisRigidbody;
+    SerializedProperty treatChildrenAsOneObjectRecursively;
+    SerializedProperty ignoreChildrenWithDimensionObject;
+    SerializedProperty visibilityState;
 
-		dimension = serializedObject.FindProperty("_dimension");
-		playerQuadrant = serializedObject.FindProperty("playerQuadrant");
-		dimensionShiftQuadrant = serializedObject.FindProperty("dimensionShiftQuadrant");
-		minAngle = serializedObject.FindProperty("minAngle");
-		maxAngle = serializedObject.FindProperty("maxAngle");
+    protected virtual void OnEnable() {
+        DEBUG = serializedObject.FindProperty("DEBUG");
+        treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
+        ignoreChildrenWithDimensionObject = serializedObject.FindProperty("ignoreChildrenWithDimensionObject");
+        visibilityState = serializedObject.FindProperty("visibilityState");
+        channel = serializedObject.FindProperty("channel");
+        reverseVisibilityStates = serializedObject.FindProperty("reverseVisibilityStates");
+        ignoreMaterialChanges = serializedObject.FindProperty("ignoreMaterialChanges");
 
-		colliderBoundsOverride = serializedObject.FindProperty("colliderBoundsOverride");
+        dimension = serializedObject.FindProperty("_dimension");
+        playerQuadrant = serializedObject.FindProperty("playerQuadrant");
+        dimensionShiftQuadrant = serializedObject.FindProperty("dimensionShiftQuadrant");
+        minAngle = serializedObject.FindProperty("minAngle");
+        maxAngle = serializedObject.FindProperty("maxAngle");
 
-		pillars = serializedObject.FindProperty("pillars");
-		thisObjectMoves = serializedObject.FindProperty("thisObjectMoves");
-		thisRigidbody = serializedObject.FindProperty("thisRigidbody");
-	}
+        colliderBoundsOverride = serializedObject.FindProperty("colliderBoundsOverride");
 
-	public override void OnInspectorGUI() {
-		serializedObject.Update();
+        pillars = serializedObject.FindProperty("pillars");
+        thisObjectMoves = serializedObject.FindProperty("thisObjectMoves");
+        thisRigidbody = serializedObject.FindProperty("thisRigidbody");
+    }
 
-		DEBUG.boolValue = EditorGUILayout.Toggle("Debug?", DEBUG.boolValue);
+    public override void OnInspectorGUI() {
+        serializedObject.Update();
 
-		AddSeparator();
+        DEBUG.boolValue = EditorGUILayout.Toggle("Debug?", DEBUG.boolValue);
 
-		GUILayout.Label("State:", EditorStyles.miniBoldLabel);
+        AddSeparator();
 
-		EditorGUILayout.LabelField("Visibility State:", visibilityState.enumDisplayNames[visibilityState.intValue]);
-		EditorGUILayout.LabelField("Appears as Visibility State:", reverseVisibilityStates.boolValue ? visibilityState.enumDisplayNames[(visibilityState.intValue + 2) % 4] : visibilityState.enumDisplayNames[visibilityState.intValue]);
-		EditorGUILayout.LabelField("Player Quadrant:", playerQuadrant.enumDisplayNames[playerQuadrant.intValue]);
-		EditorGUILayout.LabelField("Dimension Shift Quadrant:", dimensionShiftQuadrant.enumDisplayNames[dimensionShiftQuadrant.intValue]);
-		EditorGUI.BeginDisabledGroup(true);
-		EditorGUILayout.FloatField("Min angle for active pillar: ", minAngle.floatValue);
-		EditorGUILayout.FloatField("Max angle for active pillar: ", maxAngle.floatValue);
-		EditorGUI.EndDisabledGroup();
+        GUILayout.Label("State:", EditorStyles.miniBoldLabel);
 
-		AddSeparator();
+        EditorGUILayout.LabelField("Visibility State:", visibilityState.enumDisplayNames[visibilityState.intValue]);
+        EditorGUILayout.LabelField(
+            "Appears as Visibility State:",
+            reverseVisibilityStates.boolValue
+                ? visibilityState.enumDisplayNames[(visibilityState.intValue + 2) % 4]
+                : visibilityState.enumDisplayNames[visibilityState.intValue]
+        );
+        EditorGUILayout.LabelField("Player Quadrant:", playerQuadrant.enumDisplayNames[playerQuadrant.intValue]);
+        EditorGUILayout.LabelField(
+            "Dimension Shift Quadrant:",
+            dimensionShiftQuadrant.enumDisplayNames[dimensionShiftQuadrant.intValue]
+        );
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUILayout.FloatField("Min angle for active pillar: ", minAngle.floatValue);
+        EditorGUILayout.FloatField("Max angle for active pillar: ", maxAngle.floatValue);
+        EditorGUI.EndDisabledGroup();
 
-		GUILayout.Label("Setup:", EditorStyles.miniBoldLabel);
+        AddSeparator();
 
-		GUIContent pillarsLabel = new GUIContent("Pillars: ");
-		EditorGUILayout.PropertyField(pillars, pillarsLabel);
+        GUILayout.Label("Setup:", EditorStyles.miniBoldLabel);
 
-		GUIContent channelLabel = new GUIContent("Channel: ");
-		EditorGUILayout.PropertyField(channel, channelLabel);
+        GUIContent pillarsLabel = new GUIContent("Pillars: ");
+        EditorGUILayout.PropertyField(pillars, pillarsLabel);
 
-		GUIContent dimensionLabel = new GUIContent("Dimension: ");
-		EditorGUILayout.PropertyField(dimension, dimensionLabel);
+        GUIContent channelLabel = new GUIContent("Channel: ");
+        EditorGUILayout.PropertyField(channel, channelLabel);
 
-		GUIContent treatChildrenAsOneObjectLabel = new GUIContent("Treat children as one object?");
-		EditorGUILayout.PropertyField(treatChildrenAsOneObjectRecursively, treatChildrenAsOneObjectLabel);
+        GUIContent dimensionLabel = new GUIContent("Dimension: ");
+        EditorGUILayout.PropertyField(dimension, dimensionLabel);
 
-		GUIContent reverseVisibilityStatesLabel = new GUIContent("Invert visibility states?");
-		EditorGUILayout.PropertyField(reverseVisibilityStates, reverseVisibilityStatesLabel);
+        GUIContent treatChildrenAsOneObjectLabel = new GUIContent("Treat children as one object?");
+        EditorGUILayout.PropertyField(treatChildrenAsOneObjectRecursively, treatChildrenAsOneObjectLabel);
 
-		GUIContent ignoreMaterialChangesLabel = new GUIContent("Ignore material changes?");
-		EditorGUILayout.PropertyField(ignoreMaterialChanges, ignoreMaterialChangesLabel);
+        if (treatChildrenAsOneObjectRecursively.boolValue) {
+            GUIContent ignoreChildrenWithDimensionObjectLabel = new GUIContent("Ignore children already with DimensionObject?");
+            EditorGUILayout.PropertyField(ignoreChildrenWithDimensionObject, ignoreChildrenWithDimensionObjectLabel);
+        }
 
-		GUIContent thisObjectMovesLabel = new GUIContent("This object moves: ");
-		EditorGUILayout.PropertyField(thisObjectMoves, thisObjectMovesLabel);
+        GUIContent reverseVisibilityStatesLabel = new GUIContent("Invert visibility states?");
+        EditorGUILayout.PropertyField(reverseVisibilityStates, reverseVisibilityStatesLabel);
 
-		if (thisObjectMoves.boolValue) {
-			GUIContent thisRigidbodyLabel = new GUIContent("Rigidbody: ");
-			EditorGUILayout.PropertyField(thisRigidbody, thisRigidbodyLabel);
-		}
+        GUIContent ignoreMaterialChangesLabel = new GUIContent("Ignore material changes?");
+        EditorGUILayout.PropertyField(ignoreMaterialChanges, ignoreMaterialChangesLabel);
 
-		GUIContent useColliderOverrideLabel = new GUIContent("Use collider for bounds: ");
-		EditorGUILayout.PropertyField(colliderBoundsOverride, useColliderOverrideLabel);
+        GUIContent thisObjectMovesLabel = new GUIContent("This object moves: ");
+        EditorGUILayout.PropertyField(thisObjectMoves, thisObjectMovesLabel);
 
-		serializedObject.ApplyModifiedProperties();
-	}
+        if (thisObjectMoves.boolValue) {
+            GUIContent thisRigidbodyLabel = new GUIContent("Rigidbody: ");
+            EditorGUILayout.PropertyField(thisRigidbody, thisRigidbodyLabel);
+        }
 
-	private void AddSeparator() {
-		EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-	}
+        GUIContent useColliderOverrideLabel = new GUIContent("Use collider for bounds: ");
+        EditorGUILayout.PropertyField(colliderBoundsOverride, useColliderOverrideLabel);
+
+        serializedObject.ApplyModifiedProperties();
+    }
+
+    void AddSeparator() {
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+    }
 }

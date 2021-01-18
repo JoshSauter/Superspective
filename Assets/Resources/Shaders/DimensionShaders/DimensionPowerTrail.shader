@@ -8,7 +8,6 @@
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
         //_CapsuleRadius ("Capsule Radius", Range(0,1)) = 0
         
-		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
     }
     SubShader {
@@ -34,7 +33,7 @@
         fixed4 _Color;
 	    fixed4 _EmissionColor;
         
-		int _Channel;
+		int _Channels[NUM_CHANNELS];
 		int _Inverse;
 
         // Power trail info
@@ -73,7 +72,7 @@
 
         void surf (Input IN, inout SurfaceOutput o) {
 			float2 coords = IN.screenPos.xy / IN.screenPos.w;
-			ClipDimensionObjectFromScreenSpaceCoords(coords, _Channel, _Inverse);
+			ClipDimensionObjectFromScreenSpaceCoords(coords, _Channels, _Inverse);
             // DEBUG
             //float test = worldSdf(IN.worldPos);
             // ENDDEBUG

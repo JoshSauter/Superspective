@@ -39,7 +39,7 @@ public class SketchOverlay : MonoBehaviour {
 		}
 	}
 
-	private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		mat.SetFloat("_Intensity", intensity);
 		mat.SetTextureOffset("_SketchTex", offset);
 		mat.SetTextureScale("_SketchTex", scale);
@@ -49,7 +49,7 @@ public class SketchOverlay : MonoBehaviour {
 	/// <summary>
 	/// Sets a random texture offset and scale between subSampleMin and subSampleMax.
 	/// </summary>
-	private void SetRandomOffsetScale() {
+	void SetRandomOffsetScale() {
 		scale = new Vector2(0.4f, 0.4f);
 		Vector2 minOffset = subSampleMin;
 		Vector2 maxOffset = subSampleMax - scale;

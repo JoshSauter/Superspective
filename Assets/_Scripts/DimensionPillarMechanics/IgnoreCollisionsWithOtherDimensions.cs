@@ -49,7 +49,7 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 		SetTriggerZoneSize();
 	}
 
-	private void OnTriggerStay(Collider other) {
+	void OnTriggerStay(Collider other) {
 		if (corporealDimensionObject == null) return;
 		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
 		if (otherDimensionObj != null) {
@@ -73,7 +73,7 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 		}
 	}
 
-	private void OnTriggerExit(Collider other) {
+	void OnTriggerExit(Collider other) {
 		RestoreCollision(other);
 	}
 

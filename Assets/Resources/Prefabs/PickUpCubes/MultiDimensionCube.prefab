@@ -111,7 +111,7 @@ Rigidbody:
   m_GameObject: {fileID: 1544007497055716613}
   serializedVersion: 2
   m_Mass: 36
-  m_Drag: 1
+  m_Drag: 0.5
   m_AngularDrag: 1
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -220,7 +220,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cubeImpactSounds: {fileID: 0}
 --- !u!114 &1544007497055716629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -292,7 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5f38d7aaa274b846a6107539c548392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupCubeDimensionShift: {fileID: 1544007497055716615}
+  multiDimensionCube: {fileID: 1544007497055716615}
 --- !u!1 &4478531533671423337
 GameObject:
   m_ObjectHideFlags: 0

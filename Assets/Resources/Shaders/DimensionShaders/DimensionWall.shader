@@ -15,7 +15,6 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-			#include "DimensionShaderHelpers.cginc"
 
 			struct appdata {
 				float4 vertex : POSITION;

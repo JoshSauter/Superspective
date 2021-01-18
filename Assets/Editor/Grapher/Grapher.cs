@@ -11,25 +11,25 @@ using NWH;
 [ExecuteInEditMode]
 public partial class Grapher : EditorWindow
 {
-    private static int frameCounter = 0;
-    private static bool wasPlayingOrPaused = false;
-    private static string consoleString = "";
+    static int frameCounter = 0;
+    static bool wasPlayingOrPaused = false;
+    static string consoleString = "";
     public static float sharedVerticalResolution = 10;
     public static bool beingManuallyAdjusted = false;
 
     public static string grapherPath = "";
     public static bool validGrapherPath = true;
 
-    private enum MouseState
+    enum MouseState
     {
         Up, Down
     }
 
-    private Vector3 mousePosition;
-    private MouseState mouseState;
-    private bool mouseInside;
+    Vector3 mousePosition;
+    MouseState mouseState;
+    bool mouseInside;
 
-    private static List<Channel> channels = new List<Channel>();
+    static List<Channel> channels = new List<Channel>();
 
     public static Grapher grapherWindow;
 
@@ -177,7 +177,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Convert world position to graph position.
     /// </summary>
-    private Vector2 WToG(Vector2 pos)
+    Vector2 WToG(Vector2 pos)
     {
         Vector2 r = new Vector3();
         r.x = GraphSettings.graphMargins.x + graphRect.width - pos.x;
@@ -189,7 +189,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Convert graph position to world position.
     /// </summary>
-    private Vector2 GToW(Vector2 pos)
+    Vector2 GToW(Vector2 pos)
     {
         Vector2 r = new Vector3();
         r.x = -(pos.x - GraphSettings.graphMargins.x - graphRect.width);
@@ -200,7 +200,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Clamp a point to inside of a rect.
     /// </summary>
-    private Vector2 RectClamp(Rect rect, Vector2 point)
+    Vector2 RectClamp(Rect rect, Vector2 point)
     {
         point.x = Mathf.Clamp(point.x, rect.x, rect.x + rect.width);
         point.y = Mathf.Clamp(point.y, rect.y, rect.y + rect.height);
@@ -210,7 +210,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Reset Grapher.
     /// </summary>
-    private void Reset()
+    void Reset()
     {
         try
         {
@@ -226,7 +226,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Add new channel to graph.
     /// </summary>
-    private static Channel AddChannel()
+    static Channel AddChannel()
     {
         Channel ch;
         channels.Add(ch = new Channel(channels.Count));
@@ -341,7 +341,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Called when Editor Application is stopped.
     /// </summary>
-    private static void OnStopped()
+    static void OnStopped()
     {
         // Generate session filename
         string sessionFilename = "";
@@ -400,7 +400,7 @@ public partial class Grapher : EditorWindow
     // *      HELPERS        *
     // ***********************
 
-    private static float ToFloat(object d)
+    static float ToFloat(object d)
     {
         Type type = d.GetType();
         float x = 0f;
@@ -433,17 +433,17 @@ public partial class Grapher : EditorWindow
         return x;
     }
 
-    private static bool IsNullOrValue<T>(T value)
+    static bool IsNullOrValue<T>(T value)
     {
         return object.Equals(value, default(T));
     }
 
-    private static string GetFilenameTimestamp()
+    static string GetFilenameTimestamp()
     {
         return "_" + DateTime.Now.ToString("ddMMyyyy") + "_" + DateTime.Now.ToString("HHmmss");
     }
 
-    private static int GetRecordingSessionID()
+    static int GetRecordingSessionID()
     {
         string key = "GrapherSessionID";
         if (EditorPrefs.HasKey(key))
@@ -457,7 +457,7 @@ public partial class Grapher : EditorWindow
         }
     }
 
-    private static int IncrementRecordingSessionID()
+    static int IncrementRecordingSessionID()
     {
         string key = "GrapherSessionID";
         if (EditorPrefs.HasKey(key))

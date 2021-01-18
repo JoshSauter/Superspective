@@ -25,7 +25,7 @@ namespace PictureTeleportMechanics {
 		[ReadOnly]
         public GlobalMagicTrigger disableFrameTrigger;
 
-		private void OnValidate() {
+        void OnValidate() {
 			if (disableFrameTrigger == null) {
 				disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
 			}
@@ -51,12 +51,12 @@ namespace PictureTeleportMechanics {
 			frameCollider.enabled = false;
 		}
 
-		private void OnEnable() {
+		void OnEnable() {
 			PictureTeleport.bigFrames[PictureTeleport.BigFrameKey(gameObject.scene.name, gameObject.name)] = this;
 			TurnOffFrame();
 		}
 
-		private void OnDisable() {
+		void OnDisable() {
 			PictureTeleport.bigFrames.Remove(PictureTeleport.BigFrameKey(gameObject.scene.name, gameObject.name));
 		}
 

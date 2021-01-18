@@ -7,24 +7,26 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
 using Saving;
+using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : MonoBehaviour, SaveableObject {
-		UniqueId _id;
-		public UniqueId id {
+		UniqueId id;
+
+		UniqueId UniqueId {
 			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
+				if (id == null) {
+					id = GetComponent<UniqueId>();
 				}
-				return _id;
+				return id;
 			}
 		}
 
 		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
-		public bool DEBUG = false;
+		public bool debugMode = false;
 		public string channel = "<Not set>";
 
 		public bool changeActiveSceneOnTeleport = false;
@@ -42,23 +44,23 @@ namespace PortalMechanics {
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
 
-		private GameObject volumetricPortalPrefab;
-		private Renderer[] volumetricPortals;
-		private Material portalMaterial;
-		private Material fallbackMaterial;
+		GameObject volumetricPortalPrefab;
+		Renderer[] volumetricPortals;
+		Material portalMaterial;
+		Material fallbackMaterial;
 		public Renderer[] renderers;
 		public Collider[] colliders;
-		private Transform playerCamera;
-		private CameraFollow playerCameraFollow;
-		private bool teleportingPlayer = false;
+		Transform playerCamera;
+		CameraFollow playerCameraFollow;
+		bool teleportingPlayer = false;
 
 		[HorizontalLine]
 
 		public Portal otherPortal;
 		public HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
 
-		private RenderTexture internalRenderTextureCopy;
-		private RenderTexture internalDepthNormalsTextureCopy;
+		RenderTexture internalRenderTextureCopy;
+		RenderTexture internalDepthNormalsTextureCopy;
 
 		public bool pauseRenderingOnly = false;
 		public bool pauseRenderingAndLogic = false;
@@ -78,7 +80,7 @@ namespace PortalMechanics {
 		public static event SimplePortalTeleportAction BeforeAnyPortalTeleportSimple;
 		public static event SimplePortalTeleportAction OnAnyPortalTeleportSimple;
 		#endregion
-		private DebugLogger debug;
+		DebugLogger debug;
 
 #if UNITY_EDITOR
 		void OnDrawGizmosSelected() {
@@ -101,7 +103,7 @@ namespace PortalMechanics {
 
 		#region MonoBehaviour Methods
 		protected virtual void Awake() {
-			debug = new DebugLogger(gameObject, () => DEBUG);
+			debug = new DebugLogger(gameObject, () => debugMode);
 			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
 			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
 			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
@@ -117,6 +119,9 @@ namespace PortalMechanics {
 				r.gameObject.layer = LayerMask.NameToLayer("Portal");
 				if (pauseRenderingAndLogic) {
 					r.material = fallbackMaterial;
+				}
+				else {
+					r.material = portalMaterial;
 				}
 			}
 			if (colliders == null || colliders.Length == 0) {
@@ -168,7 +173,7 @@ namespace PortalMechanics {
 			portalMaterial.SetTexture("_DepthNormals", internalDepthNormalsTextureCopy);
 		}
 
-		private void Start() {
+		void Start() {
 			playerCamera = EpitaphScreen.instance.playerCamera.transform;
 			playerCameraFollow = playerCamera.GetComponent<CameraFollow>();
 
@@ -177,6 +182,21 @@ namespace PortalMechanics {
 
 			if (pauseRenderingOnly || pauseRenderingAndLogic) {
 				DefaultMaterial();
+			}
+			else {
+				foreach (var r in renderers) {
+					r.material = portalMaterial;
+				}
+				foreach (var vp in volumetricPortals) {
+					vp.material = portalMaterial;
+				}
+			}
+			
+			// DimensionObject Portals are treated in a special-case way
+			// This is so that the Portal script does not change the shader off of the DimensionPortalMaterial
+			if (GetComponent<DimensionObject>() != null) {
+				portalMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
+				portalMaterial.SetInt("_Inverse", 1);
 			}
 		}
 
@@ -192,7 +212,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		private void OnEnable() {
+		void OnEnable() {
 			StartCoroutine(AddPortalCoroutine());
 		}
 
@@ -397,7 +417,7 @@ namespace PortalMechanics {
 		#endregion
 
 		#region Portal Teleporter
-		private void CreatePortalTeleporter() {
+		void CreatePortalTeleporter() {
 			foreach (var c in colliders) {
 				c.isTrigger = true;
 			}
@@ -503,9 +523,9 @@ namespace PortalMechanics {
 		#endregion
 
 		#region Volumetric Portal
+		bool playerRemainsInPortal = false;
 
-		private bool playerRemainsInPortal = false;
-		private void EnableVolumetricPortal() {
+		void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
 			if (anyVolumetricPortalIsDisabled) {
 				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
@@ -520,7 +540,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		private void DisableVolumetricPortal() {
+		void DisableVolumetricPortal() {
 			bool anyVolumetricPortalIsEnabled = volumetricPortals.Any(vp => vp.enabled);
 			if (anyVolumetricPortalIsEnabled) {
 				debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
@@ -548,7 +568,7 @@ namespace PortalMechanics {
 			PortalManager.instance.AddPortal(channel, this);
 		}
 
-		private void SwapEdgeDetectionColors() {
+		void SwapEdgeDetectionColors() {
 			BladeEdgeDetection playerED = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
 			EDColors tempEDColors = new EDColors {
@@ -647,7 +667,7 @@ namespace PortalMechanics {
 			bool pauseRenderingAndLogic = false;
 
 			public PortalSave(Portal portal) {
-				this.DEBUG = portal.DEBUG;
+				this.DEBUG = portal.debugMode;
 				this.channel = portal.channel;
 				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
 				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;
@@ -662,7 +682,7 @@ namespace PortalMechanics {
 			}
 
 			public void LoadSave(Portal portal) {
-				portal.DEBUG = this.DEBUG;
+				portal.debugMode = this.DEBUG;
 				portal.channel = this.channel;
 				portal.changeActiveSceneOnTeleport = this.changeActiveSceneOnTeleport;
 				portal.changeCameraEdgeDetection = this.changeCameraEdgeDetection;
@@ -678,7 +698,7 @@ namespace PortalMechanics {
 		}
 
 		public bool SkipSave { get; set; }
-		public string ID => $"Portal_{id.uniqueId}";
+		public string ID => $"Portal_{UniqueId.uniqueId}";
 		public object GetSaveObject() {
 			return new PortalSave(this); ;
 		}

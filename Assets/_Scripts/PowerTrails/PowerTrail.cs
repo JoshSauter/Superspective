@@ -53,7 +53,7 @@ namespace PowerTrailMechanics {
 		public bool useDurationInsteadOfSpeed = false;
 		public bool useSeparateSpeedsForPowerOnOff = false;
 		// Just used for NaughtyAttributes
-		private bool useSameSpeedsForPowerOnOff => !useSeparateSpeedsForPowerOnOff;
+		bool useSameSpeedsForPowerOnOff => !useSeparateSpeedsForPowerOnOff;
 		[ShowIf("useDurationInsteadOfSpeed")]
 		public float targetDuration = 3f;
 		[ShowIf(EConditionOperator.And, "useDurationInsteadOfSpeed", "useSeparateSpeedsForPowerOnOff")]
@@ -84,7 +84,7 @@ namespace PowerTrailMechanics {
 		public bool powerIsOn = false;
 		public bool fullyPowered => distance >= maxDistance;
 		[SerializeField]
-		private PowerTrailState _state = PowerTrailState.depowered;
+		PowerTrailState _state = PowerTrailState.depowered;
 		public PowerTrailState state {
 			get { return _state; }
 			set {
@@ -105,7 +105,7 @@ namespace PowerTrailMechanics {
 		}
 		bool isInitialized = false;
 
-		private void Awake() {
+		void Awake() {
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
@@ -407,7 +407,7 @@ namespace PowerTrailMechanics {
 		//	}
 		//}
 
-		private Vector3 FindNearestPointOnLine(Vector3 start, Vector3 end, Vector3 point) {
+		Vector3 FindNearestPointOnLine(Vector3 start, Vector3 end, Vector3 point) {
 			//Get heading
 			Vector3 heading = (end - start);
 			float magnitudeMax = heading.magnitude;
@@ -492,7 +492,8 @@ namespace PowerTrailMechanics {
 #region EditorGizmos
 		bool editorGizmosEnabled = false;
 		public static float gizmoSphereSize = 0.15f;
-		private void OnDrawGizmos() {
+
+		void OnDrawGizmos() {
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}

@@ -6,7 +6,7 @@ public class GlowComposite : MonoBehaviour {
 	public float Intensity = 2;
 
 	public RenderTexture test;
-	private Material _compositeMat;
+	Material _compositeMat;
 
 	void OnEnable() {
 		_compositeMat = new Material(Shader.Find("Hidden/GlowComposite"));

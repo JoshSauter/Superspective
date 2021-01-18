@@ -1,46 +1,41 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using EpitaphUtils;
+﻿using EpitaphUtils;
 using NaughtyAttributes;
-using Saving;
+using UnityEngine;
 
 public class InteractableObject : MonoBehaviour {
-	public bool interactable = true;
-	public bool useLargerPrepassMaterial = false;
-	public bool overrideGlowColor = false;
-	[ShowIf("overrideGlowColor")]
-	public Color glowColor = new Color(.6f, .35f, .25f, 1f);
-	public delegate void InteractAction();
-	public InteractAction OnLeftMouseButtonDown;
-	public InteractAction OnLeftMouseButton;
-	public InteractAction OnLeftMouseButtonUp;
-	public InteractAction OnMouseHoverExit;
-	public InteractAction OnMouseHover;
-	public InteractAction OnMouseHoverEnter;
+    public delegate void InteractAction();
 
-	public GameObject thisRendererParent;
-	public bool recursiveChildRenderers = true;
+    public bool interactable = true;
+    public bool useLargerPrepassMaterial;
+    public bool overrideGlowColor;
 
-	public void Start() {
-		if (thisRendererParent == null) {
-			Renderer[] childRenderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform);
-			if (childRenderers.Length > 0) {
-				thisRendererParent = childRenderers[0].gameObject;
-			}
-		}
+    [ShowIf("overrideGlowColor")]
+    public Color glowColor = new Color(.6f, .35f, .25f, 1f);
 
-		if (thisRendererParent != null) {
-			// gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
-			InteractableGlow glow = thisRendererParent.gameObject.GetComponent<InteractableGlow>();
-			if (glow == null) {
-				glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
-			}
-			glow.recursiveChildRenderers = recursiveChildRenderers;
-			glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
-			glow.overrideGlowColor = overrideGlowColor;
-			glow.glowColor = glowColor;
-			glow.interactableObject = this;
-		}
-	}
+    public GameObject thisRendererParent;
+    public bool recursiveChildRenderers = true;
+    public InteractAction OnLeftMouseButton;
+    public InteractAction OnLeftMouseButtonDown;
+    public InteractAction OnLeftMouseButtonUp;
+    public InteractAction OnMouseHover;
+    public InteractAction OnMouseHoverEnter;
+    public InteractAction OnMouseHoverExit;
+
+    public void Start() {
+        if (thisRendererParent == null) {
+            Renderer[] childRenderers = transform.GetComponentsInChildrenRecursively<Renderer>();
+            if (childRenderers.Length > 0) thisRendererParent = childRenderers[0].gameObject;
+        }
+
+        if (thisRendererParent != null) {
+            // gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
+            InteractableGlow glow = thisRendererParent.gameObject.GetComponent<InteractableGlow>();
+            if (glow == null) glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
+            glow.recursiveChildRenderers = recursiveChildRenderers;
+            glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
+            glow.overrideGlowColor = overrideGlowColor;
+            glow.glowColor = glowColor;
+            glow.interactableObject = this;
+        }
+    }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
 	public class ColorPuzzleNode : MonoBehaviour {
-		private bool _isSolved = false;
+		bool _isSolved = false;
 		public bool isSolved {
 			get { return _isSolved; }
 			set {

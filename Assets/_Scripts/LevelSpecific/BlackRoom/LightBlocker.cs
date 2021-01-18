@@ -36,7 +36,7 @@ namespace LevelSpecific.BlackRoom {
 			puzzle = GetComponentInParent<ColorPuzzle>();
 		}
 
-		private void Update() {
+		void Update() {
 			foreach (var b in blockers) {
 				if (b.blocker != null) {
 					b.blocker.SetActive(puzzle.isActive);

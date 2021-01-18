@@ -74,18 +74,18 @@ public class BladeEdgeDetectionInspector : Editor {
 		LabelWithHelpButton(ref weightedEdgesHelp, "Weighted edges:");
 		weightedEdgeMode.enumValueIndex = (int)(BladeEdgeDetection.WeightedEdgeMode)EditorGUILayout.EnumPopup("Weighted edge mode: ", (BladeEdgeDetection.WeightedEdgeMode)weightedEdgeMode.enumValueIndex);
 		switch ((BladeEdgeDetection.WeightedEdgeMode)weightedEdgeMode.enumValueIndex) {
-			case BladeEdgeDetection.WeightedEdgeMode.unweighted:
+			case BladeEdgeDetection.WeightedEdgeMode.Unweighted:
 				OptionalHelpBox(weightedEdgesHelp, "All edges will have equal strength regardless of depth or normal differences");
 				break;
-			case BladeEdgeDetection.WeightedEdgeMode.weightedByDepth:
+			case BladeEdgeDetection.WeightedEdgeMode.WeightedByDepth:
 				OptionalHelpBox(weightedEdgesHelp, "Depth-detected edges will vary in strength depending on magnitude of depth difference");
 				depthWeightEffect.floatValue = EditorGUILayout.FloatField("Depth weight effect: ", depthWeightEffect.floatValue);
 				break;
-			case BladeEdgeDetection.WeightedEdgeMode.weightedByNormals:
+			case BladeEdgeDetection.WeightedEdgeMode.WeightedByNormals:
 				OptionalHelpBox(weightedEdgesHelp, "Normal-detected edges will vary in strength depending on magnitude of normal difference");
 				normalWeightEffect.floatValue = EditorGUILayout.FloatField("Normal weight effect: ", normalWeightEffect.floatValue);
 				break;
-			case BladeEdgeDetection.WeightedEdgeMode.weightedByDepthAndNormals:
+			case BladeEdgeDetection.WeightedEdgeMode.WeightedByDepthAndNormals:
 				OptionalHelpBox(weightedEdgesHelp, "All edges will vary in strength depending on magnitude of depth & normal differences");
 				depthWeightEffect.floatValue = EditorGUILayout.FloatField("Depth weight effect: ", depthWeightEffect.floatValue);
 				normalWeightEffect.floatValue = EditorGUILayout.FloatField("Normal weight effect: ", normalWeightEffect.floatValue);
@@ -97,16 +97,16 @@ public class BladeEdgeDetectionInspector : Editor {
 		LabelWithHelpButton(ref edgeColorsHelp, "Colors:");
 		edgeColorMode.enumValueIndex = (int)(BladeEdgeDetection.EdgeColorMode)EditorGUILayout.EnumPopup("Edge Color Mode: ", (BladeEdgeDetection.EdgeColorMode)edgeColorMode.enumValueIndex);
 		switch ((BladeEdgeDetection.EdgeColorMode)edgeColorMode.enumValueIndex) {
-			case BladeEdgeDetection.EdgeColorMode.simpleColor:
+			case BladeEdgeDetection.EdgeColorMode.SimpleColor:
 				edgeColor.colorValue = EditorGUILayout.ColorField("Edge color: ", edgeColor.colorValue);
 				OptionalHelpBox(edgeColorsHelp, "All edges will have the same color");
 				break;
-			case BladeEdgeDetection.EdgeColorMode.gradient:
+			case BladeEdgeDetection.EdgeColorMode.Gradient:
 				GUIContent gradientLabel = new GUIContent("Edge gradient: ");
 				EditorGUILayout.PropertyField(edgeColorGradient, gradientLabel);
 				OptionalHelpBox(edgeColorsHelp, "Edges colors will be sampled from the gradient based on distance from the camera");
 				break;
-			case BladeEdgeDetection.EdgeColorMode.colorRampTexture:
+			case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
 				GUIContent colorRampLabel = new GUIContent("Edge gradient texture: ");
 				EditorGUILayout.PropertyField(edgeColorGradientTexture, colorRampLabel);
 				OptionalHelpBox(edgeColorsHelp, "Edge colors will be sampled from the gradient texture (horizontally) based on the distance from the camera");
@@ -117,17 +117,17 @@ public class BladeEdgeDetectionInspector : Editor {
 		serializedObject.ApplyModifiedProperties();
 	}
 
-	private void AddSeparator() {
+	void AddSeparator() {
 		EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 	}
 
-	private void OptionalHelpBox(bool enabled, string text) {
+	void OptionalHelpBox(bool enabled, string text) {
 		if (enabled) {
 			EditorGUILayout.HelpBox(text, MessageType.Info);
 		}
 	}
 
-	private void LabelWithHelpButton(ref bool helpButtonPressed, string label) {
+	void LabelWithHelpButton(ref bool helpButtonPressed, string label) {
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(label, EditorStyles.miniBoldLabel);
 		helpButtonPressed = GUILayout.Toggle(helpButtonPressed, "?", "Button", GUILayout.ExpandWidth(false));

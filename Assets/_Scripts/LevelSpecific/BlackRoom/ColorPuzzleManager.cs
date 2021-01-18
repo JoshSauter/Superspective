@@ -23,7 +23,7 @@ namespace LevelSpecific.BlackRoom {
 		}
 		ColorPuzzle[] puzzles;
 
-		private void Awake() {
+		void Awake() {
 			puzzles = GetComponentsInChildren<ColorPuzzle>();
 		}
 

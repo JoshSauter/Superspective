@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor (typeof( NoiseAndGrain))]
-    class NoiseAndGrainEditor : Editor
+    internal class NoiseAndGrainEditor : Editor
     {
         SerializedObject serObj;
 

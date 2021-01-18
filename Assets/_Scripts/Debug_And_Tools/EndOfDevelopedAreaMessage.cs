@@ -9,7 +9,7 @@ public class EndOfDevelopedAreaMessage : MonoBehaviour {
 	float fadeTime = 2;
 	public TMPro.TextMeshProUGUI text;
 
-	private void OnTriggerEnter(Collider other) {
+	void OnTriggerEnter(Collider other) {
 		if (other.TaggedAsPlayer()) {
 			StartCoroutine(DisplayEndOfDevelopedAreaMessage());
 		}

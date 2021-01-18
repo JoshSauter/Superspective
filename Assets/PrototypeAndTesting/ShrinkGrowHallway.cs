@@ -14,7 +14,7 @@ public class ShrinkGrowHallway : MonoBehaviour {
 		triggerZone.OnTransitionTrigger += SetScale;
     }
 
-	private void Update() {
+    void Update() {
 		Vector3 objPos = objectToTransform.position;
 		Vector3 pivot = Player.instance.movement.bottomOfPlayer;
 

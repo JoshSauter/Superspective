@@ -7,25 +7,25 @@ using EpitaphUtils;
 public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	public bool DEBUG = false;
 	DebugLogger debug;
-	private Camera thisCamera;
-	private BladeEdgeDetection edgeDetection;
-	private CommandBuffer commandBuffer;
+	Camera thisCamera;
+	BladeEdgeDetection edgeDetection;
+	CommandBuffer commandBuffer;
 
-	private HashSet<InteractableGlow> glowableObjects = new HashSet<InteractableGlow>();
+	HashSet<InteractableGlow> glowableObjects = new HashSet<InteractableGlow>();
 
 	public const int blurIterations = 4;
 
-	private Material prePassMaterial;
-	private Material prePassMaterialLarger;
-	private Material prePassMaterialSmaller;
-	private Material blurMaterial;
-	private Vector2 blurTexelSize;
+	Material prePassMaterial;
+	Material prePassMaterialLarger;
+	Material prePassMaterialSmaller;
+	Material blurMaterial;
+	Vector2 blurTexelSize;
 
-	private int prePassRenderTexID;
-	private int blurPassRenderTexID;
-	private int tempRenderTexID;
-	private int blurSizeID;
-	private int glowColorID;
+	int prePassRenderTexID;
+	int blurPassRenderTexID;
+	int tempRenderTexID;
+	int blurSizeID;
+	int glowColorID;
 
 	public void Add(InteractableGlow glowObj) {
 		glowableObjects.Add(glowObj);
@@ -38,7 +38,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// <summary>
 	/// On Awake, we cache various values and setup our command buffer to be called Before Image Effects.
 	/// </summary>
-	private void Awake() {
+	void Awake() {
 		debug = new DebugLogger(gameObject, () => DEBUG);
 		prePassMaterial = new Material(Shader.Find("Hidden/GlowCmdShader"));
 		prePassMaterialLarger = new Material(Shader.Find("Hidden/GlowCmdShaderLarger"));
@@ -61,7 +61,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// Adds all the commands, in order, we want our command buffer to execute.
 	/// Similar to calling sequential rendering methods insde of OnRenderImage().
 	/// </summary>
-	private int RebuildCommandBuffer() {
+	int RebuildCommandBuffer() {
 		commandBuffer.Clear();
 		commandBuffer.GetTemporaryRT(blurPassRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(blurPassRenderTexID);
@@ -114,7 +114,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// Could be further optimized to not include objects which are currently black and not
 	/// affect thing the glow image.
 	/// </summary>
-	private void OnPreCull() {
+	void OnPreCull() {
 		debug.LogError(RebuildCommandBuffer());
 	}
 
@@ -122,21 +122,21 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		Graphics.ExecuteCommandBuffer(commandBuffer);
 	}
 
-	private Color GetColor(InteractableGlow objGlow) {
+	Color GetColor(InteractableGlow objGlow) {
 		Color color = new Color();
 		if (edgeDetection == null || objGlow.overrideGlowColor) {
 			color = objGlow.currentColor;
 		}
 		else {
 			switch (edgeDetection.edgeColorMode) {
-				case BladeEdgeDetection.EdgeColorMode.colorRampTexture:
+				case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
 					color = objGlow.currentColor;
 					break;
-				case BladeEdgeDetection.EdgeColorMode.gradient:
+				case BladeEdgeDetection.EdgeColorMode.Gradient:
 					color = ColorOfGradient(edgeDetection.edgeColorGradient);
 					color.a = objGlow.currentColor.a;
 					break;
-				case BladeEdgeDetection.EdgeColorMode.simpleColor:
+				case BladeEdgeDetection.EdgeColorMode.SimpleColor:
 					color = edgeDetection.edgeColor;
 					color.a = objGlow.currentColor.a;
 					break;
@@ -149,7 +149,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		return color;
 	}
 
-	private Color ColorOfGradient(Gradient gradient) {
+	Color ColorOfGradient(Gradient gradient) {
 		return gradient.Evaluate(Interact.instance.interactionDistance / thisCamera.farClipPlane);
 	}
 }

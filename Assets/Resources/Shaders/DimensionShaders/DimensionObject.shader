@@ -5,7 +5,6 @@
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
-		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader
@@ -42,7 +41,7 @@
 			float4 _Color;
 			float4 _EmissionColor;
 			
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 			
 			v2f vert (appdata v)
@@ -54,7 +53,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channel, _Inverse);
+				ClipDimensionObject(i.vertex, _Channels, _Inverse);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog
@@ -80,7 +79,7 @@
 			#include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
 
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 
 			struct v2f {
@@ -98,7 +97,7 @@
 			}
 
 			float4 frag( v2f i ) : SV_Target {
-				ClipDimensionObject(i.pos.xy, _Channel, _Inverse);
+				ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

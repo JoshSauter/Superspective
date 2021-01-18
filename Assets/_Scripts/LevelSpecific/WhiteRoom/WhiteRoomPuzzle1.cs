@@ -37,7 +37,8 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
         FakePortalPowered,
         WalkedThroughFakePortal
 	}
-    private State _state;
+
+	State _state;
     public State state {
         get { return _state; }
         set {
@@ -64,14 +65,14 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	private void Awake() {
+    void Awake() {
 		fakePortalUnsolvedPos = fakePortal.transform.TransformPoint(Vector3.down * 10);
 		fakePortalSolvedPos = fakePortal.transform.position;
 
 		fakePortal.transform.position = fakePortalUnsolvedPos;
 	}
 
-	private void Start() {
+    void Start() {
 		state = State.Unsolved;
 
 		fakePortalTrigger.OnMagicTriggerStayOneTime += (ctx) => {
@@ -91,7 +92,7 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 		};
 	}
 
-	private void Update() {
+    void Update() {
 		fakePortalTargetPos = powerTrail.state == PowerTrail.PowerTrailState.powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
 		fakePortal.SetActive(!(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f));
 		fakePortal.transform.position = Vector3.Lerp(fakePortal.transform.position, fakePortalTargetPos, Time.deltaTime * fakePortalLerpSpeed);

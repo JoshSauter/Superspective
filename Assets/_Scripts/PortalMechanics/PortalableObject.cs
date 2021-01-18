@@ -24,9 +24,9 @@ namespace PortalMechanics {
 
 		public bool DEBUG = false;
 
-		private Portal _sittingInPortal;
-		private Portal _hoveredThroughPortal;
-		private Portal _grabbedThroughPortal;
+		Portal _sittingInPortal;
+		Portal _hoveredThroughPortal;
+		Portal _grabbedThroughPortal;
 		public Portal sittingInPortal {
 			get {
 				return _sittingInPortal;
@@ -113,7 +113,7 @@ namespace PortalMechanics {
 
 		RaycastHits thisFrameRaycastHits;
 
-		private void Awake() {
+		void Awake() {
 			interact = GetComponent<InteractableObject>();
 			pickupObject = GetComponent<PickupObject>();
 
@@ -131,12 +131,12 @@ namespace PortalMechanics {
 			pickupObject.OnDropSimple += HandleDrop;
 		}
 
-		private void Start() {
+		void Start() {
 			OnObjectTeleported += UpdateGrabbedThroughPortalAfterObjectTeleports;
 			Portal.BeforeAnyPortalTeleport += (Portal inPortal, Collider objBeingTeleported) => UpdateGrabbedThroughPortalAfterPlayerTeleports(inPortal);
 		}
 
-		private void Update() {
+		void Update() {
 			thisFrameRaycastHits = Interact.instance.GetRaycastHits();
 
 			RecalculateHoveredThroughPortal();

@@ -16,7 +16,7 @@ public class TransitionTrigger : MonoBehaviour {
 		bounds = GetComponent<Renderer>().bounds;
     }
 
-	private void OnTriggerEnter(Collider other) {
+    void OnTriggerEnter(Collider other) {
 
 		if (!startPositions.ContainsKey(other)) {
 			Vector3 startPos = transform.InverseTransformPoint(other.transform.position);	// Store start position as local, read out as world
@@ -40,7 +40,7 @@ public class TransitionTrigger : MonoBehaviour {
 		//go2.transform.parent = transform;
 	}
 
-	private void OnTriggerStay(Collider other) {
+    void OnTriggerStay(Collider other) {
 		if (startPositions.ContainsKey(other) && endPositions.ContainsKey(other)) {
 			Vector3 start = transform.TransformPoint(startPositions[other]);
 			Vector3 end = transform.TransformPoint(endPositions[other]);
@@ -51,7 +51,7 @@ public class TransitionTrigger : MonoBehaviour {
 		}
 	}
 
-	private void OnTriggerExit(Collider other) {
+    void OnTriggerExit(Collider other) {
 		if (startPositions.ContainsKey(other) && endPositions.ContainsKey(other)) {
 			if (OnTransitionTrigger != null) {
 				Vector3 start = transform.TransformPoint(startPositions[other]);

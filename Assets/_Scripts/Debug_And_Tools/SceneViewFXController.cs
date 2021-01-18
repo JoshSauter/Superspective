@@ -13,7 +13,7 @@ public class SceneViewFXController : Singleton<SceneViewFXController> {
 	public bool needsToBeRepaused = false;
 	public bool wasMaximized = false;
 
-	private void OnDrawGizmos() {
+	void OnDrawGizmos() {
 		if (needsToBeRepaused) {
 			needsToBeRepaused = false;
 			PauseAndRestoreMaximizeOnPlay();
@@ -24,13 +24,13 @@ public class SceneViewFXController : Singleton<SceneViewFXController> {
 		}
 	}
 
-	private static void RestoreFx() {
+	static void RestoreFx() {
 		if (SceneViewFX.instance != null) {
 			SceneViewFX.instance.enabled = SceneViewFX.instance.cachedEnableState;
 		}
 	}
 
-	private static void RestoreFxFromFullScreenPause() {
+	static void RestoreFxFromFullScreenPause() {
 		if (SceneViewFX.instance != null) {
 			instance.wasMaximized = GameWindow.instance.maximizeOnPlay;
 			GameWindow.instance.maximizeOnPlay = false;
@@ -40,7 +40,7 @@ public class SceneViewFXController : Singleton<SceneViewFXController> {
 		}
 	}
 
-	private static void PauseAndRestoreMaximizeOnPlay() {
+	static void PauseAndRestoreMaximizeOnPlay() {
 		if (SceneViewFX.instance != null) {
 			EditorApplication.isPaused = true;
 			GameWindow.instance.maximizeOnPlay = instance.wasMaximized;

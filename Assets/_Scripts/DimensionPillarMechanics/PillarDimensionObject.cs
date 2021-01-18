@@ -15,7 +15,7 @@ using SerializableClasses;
 public class PillarDimensionObject : DimensionObject, SaveableObject {
 	[SerializeField]
 	[Range(0, 7)]
-	private int _dimension = 0;
+	int _dimension = 0;
 	public int Dimension {
 		get { return _dimension; }
 		set {
@@ -44,7 +44,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	float maxAngle;
 
 	// The active pillar that this object is setting its visibility state based off of
-	public DimensionPillar pillar => pillarsSet.Contains(DimensionPillar.activePillar) || pillars.Length == 0 ? DimensionPillar.activePillar : null;
+	public DimensionPillar pillar => pillarsSet.Contains(DimensionPillar.ActivePillar) || pillars.Length == 0 ? DimensionPillar.ActivePillar : null;
 	public DimensionPillar[] pillars;
 	HashSet<DimensionPillar> pillarsSet = new HashSet<DimensionPillar>();
 	Dictionary<DimensionPillar, Plane> leftParallels = new Dictionary<DimensionPillar, Plane>();
@@ -100,12 +100,12 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 			DeterminePlanes(pillar);
 
 			playerQuadrant = DetermineQuadrant(camPos);
-			dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+			dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.DimensionShiftVector);
 			UpdateState(true);
 		}
 	}
 
-	private void OnDestroy() {
+	void OnDestroy() {
 		DimensionPillar.OnActivePillarChanged -= activePillarChangedHandler;
 	}
 
@@ -122,7 +122,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		}
 	}
 
-	private void FixedUpdate() {
+	void FixedUpdate() {
 		if (pillar == null) return;
 		if (DEBUG) {
 			Debug.DrawRay(pillar.transform.position, minAngleVector, Color.cyan);
@@ -135,7 +135,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		}
 
 		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.Opposite (moving objects only)
-		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.dimensionShiftVector);
+		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.DimensionShiftVector);
 		if (thisObjectMoving) {
 			if (dimensionShiftQuadrant == Quadrant.Opposite && nextDimensionShiftQuadrant == Quadrant.Right) {
 				Dimension = pillar.NextDimension(Dimension);
@@ -151,7 +151,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		UpdateState();
 	}
 
-	private void UpdateState(bool forceUpdate = false) {
+	void UpdateState(bool forceUpdate = false) {
 		VisibilityState nextState = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
@@ -164,7 +164,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 			return false;
 		}
 		if (playerQuadrant == dimensionShiftQuadrant) {
-			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.dimensionShiftVector.normalized, pillar.axis);
+			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.DimensionShiftVector.normalized, pillar.Axis);
 			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
 			//debug.Log($"GetSide: {dimensionShiftPlane.GetSide(camPos)}\nPillar.curDimension: {pillar.curDimension}");
 			return !dimensionShiftPlane.GetSide(camPos);
@@ -284,18 +284,18 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	}
 
 	void DeterminePlanes(DimensionPillar pillar) {
-		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillar.transform.position, pillar.axis);
+		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillar.transform.position, pillar.Axis);
 		Vector3 projectedVerticalPillarOffset = pillar.transform.position - projectedPillarCenter;
 
 		List<Vector3> allCorners = renderers.SelectMany(r => CornersOfRenderer(r)).ToList();
-		Vector3 positionAvg = renderers.Aggregate(Vector3.zero, (acc, r) => acc + Vector3.ProjectOnPlane(r.GetRendererBounds().center, pillar.axis));
+		Vector3 positionAvg = renderers.Aggregate(Vector3.zero, (acc, r) => acc + Vector3.ProjectOnPlane(r.GetRendererBounds().center, pillar.Axis));
 		positionAvg /= renderers.Length;
 		positionAvg += projectedVerticalPillarOffset;
 
 		Debug.DrawRay(pillar.transform.position, positionAvg - pillar.transform.position, Color.magenta);
 
-		bool flipDimensionShiftAngle = Vector3.Dot(pillar.dimensionShiftVector, positionAvg - pillar.transform.position) < 0;
-		Vector3 dimensionShiftVector = flipDimensionShiftAngle ? Quaternion.AngleAxis(180, pillar.axis) * pillar.dimensionShiftVector : pillar.dimensionShiftVector;
+		bool flipDimensionShiftAngle = Vector3.Dot(pillar.DimensionShiftVector, positionAvg - pillar.transform.position) < 0;
+		Vector3 dimensionShiftVector = flipDimensionShiftAngle ? Quaternion.AngleAxis(180, pillar.Axis) * pillar.DimensionShiftVector : pillar.DimensionShiftVector;
 
 		float maxDistance = 0f;
 
@@ -304,8 +304,8 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		minAngleVector = Vector3.zero;
 		maxAngleVector = Vector3.zero;
 		foreach (Vector3 corner in allCorners) {
-			Vector3 projectedCorner = Vector3.ProjectOnPlane(corner, pillar.axis) + projectedVerticalPillarOffset;
-			float signedAngle = Vector3.SignedAngle(dimensionShiftVector, projectedCorner - pillar.transform.position, pillar.axis);
+			Vector3 projectedCorner = Vector3.ProjectOnPlane(corner, pillar.Axis) + projectedVerticalPillarOffset;
+			float signedAngle = Vector3.SignedAngle(dimensionShiftVector, projectedCorner - pillar.transform.position, pillar.Axis);
 			if (signedAngle < minAngle) {
 				minAngle = signedAngle;
 				minAngleVector = (projectedCorner - pillar.transform.position);
@@ -325,8 +325,8 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 			}
 		}
 
-		Vector3 minAngleNormalVector = Vector3.Cross(minAngleVector.normalized, pillar.axis);
-		Vector3 maxAngleNormalVector = Vector3.Cross(maxAngleVector.normalized, pillar.axis);
+		Vector3 minAngleNormalVector = Vector3.Cross(minAngleVector.normalized, pillar.Axis);
+		Vector3 maxAngleNormalVector = Vector3.Cross(maxAngleVector.normalized, pillar.Axis);
 		leftParallels[pillar] = new Plane(minAngleNormalVector, pillar.transform.position);
 		rightParallels[pillar] = new Plane(maxAngleNormalVector, pillar.transform.position);
 
@@ -383,10 +383,10 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		}
 	}
 
-	private void OnDrawGizmosSelected() {
+	void OnDrawGizmosSelected() {
 		if (DEBUG && pillar != null) {
-			DrawPlanes(pillar.transform.position, leftParallels[pillar].normal, pillar.dimensionWall.pillarHeight, 2f*maxDistances[pillar]);
-			DrawPlanes(pillar.transform.position, rightParallels[pillar].normal, pillar.dimensionWall.pillarHeight, 2f*maxDistances[pillar]);
+			DrawPlanes(pillar.transform.position, leftParallels[pillar].normal, pillar.dimensionWall.PillarHeight, 2f*maxDistances[pillar]);
+			DrawPlanes(pillar.transform.position, rightParallels[pillar].normal, pillar.dimensionWall.PillarHeight, 2f*maxDistances[pillar]);
 		}
 	}
 

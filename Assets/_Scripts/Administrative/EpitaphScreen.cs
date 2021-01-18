@@ -46,11 +46,11 @@ public class EpitaphScreen : Singleton<EpitaphScreen> {
 		}
 	}
 
-	private void OnPreRender() {
+	void OnPreRender() {
 		OnPlayerCamPreRender?.Invoke();
 	}
 
-	private IEnumerator OnPostRender() {
+	IEnumerator OnPostRender() {
 		yield return new WaitForEndOfFrame();
 		OnPlayerCamPostRender?.Invoke();
 	}

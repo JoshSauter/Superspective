@@ -7,8 +7,8 @@ public class MenuRoom3D : MonoBehaviour {
 	UnityEngine.Transform[] pieces;
 
 	public AnimationCurve buildAnimationCurve;
-	private float maxPieceSpawnDelay = 0.5f;
-	private float buildTime = 0.5f;
+	float maxPieceSpawnDelay = 0.5f;
+	float buildTime = 0.5f;
 
     IEnumerator Start() {
 		pieces = transform.GetComponentsInChildrenOnly<UnityEngine.Transform>();

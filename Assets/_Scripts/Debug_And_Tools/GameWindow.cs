@@ -7,7 +7,7 @@ using UnityEditor;
 
 public class GameWindow : Singleton<GameWindow> {
 #if UNITY_EDITOR
-	private EditorWindow _gameWindow = null;
+	EditorWindow _gameWindow = null;
 	public EditorWindow gameWindow {
 		get {
 			if (_gameWindow == null) {

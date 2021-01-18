@@ -20,15 +20,15 @@ namespace LevelSpecific.Fork {
             fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);
         }
 
-        private void Update() {
+        void Update() {
             switch (edgeDetection.edgeColorMode) {
-                case BladeEdgeDetection.EdgeColorMode.simpleColor:
+                case BladeEdgeDetection.EdgeColorMode.SimpleColor:
                     edgesAreBlack = edgeDetection.edgeColor.grayscale == 0;
                     break;
-                case BladeEdgeDetection.EdgeColorMode.gradient:
+                case BladeEdgeDetection.EdgeColorMode.Gradient:
                     edgesAreBlack = edgeDetection.edgeColorGradient.Evaluate(0.5f).grayscale == 0;
                     break;
-                case BladeEdgeDetection.EdgeColorMode.colorRampTexture:
+                case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
                     edgesAreBlack = false;
                     break;
             }

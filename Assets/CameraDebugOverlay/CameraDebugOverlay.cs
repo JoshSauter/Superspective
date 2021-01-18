@@ -20,14 +20,14 @@ public class CameraDebugOverlay : MonoBehaviour {
 	}
 	public DebugMode debugMode = DebugMode.off;
 
-	private const int NUM_MODES = (int)DebugMode.off + 1;
+	const int NUM_MODES = (int)DebugMode.off + 1;
 	int mode {
 		get {
 			return (int)debugMode;
 		}
 	}
 
-	private void Awake() {
+	void Awake() {
 		//if (stencilBufferDebugMat == null) {
 		//	stencilBufferDebugMat = new Material(stencilBufferDebugShader);
 		//}
@@ -37,7 +37,7 @@ public class CameraDebugOverlay : MonoBehaviour {
 		GetComponent<Camera>().depthTextureMode = DepthTextureMode.DepthNormals;
 	}
 
-	private void Update() {
+	void Update() {
 		if (Input.GetKeyDown(modeSwitchKey)) {
 			debugMode = (DebugMode)(((int)debugMode + 1) % NUM_MODES);
 		}

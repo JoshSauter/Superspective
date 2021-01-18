@@ -7,18 +7,18 @@ using NWH;
 
 public partial class Grapher : EditorWindow
 {
-    private static Rect graphRect;
-    private Rect borderRect;
-    private Rect toolbarRect;
+    static Rect graphRect;
+    Rect borderRect;
+    Rect toolbarRect;
 
-    private GUIStyle toggleButtonStyle;
+    GUIStyle toggleButtonStyle;
 
-    private static Texture2D showTexture;
-    private static Texture2D autoScaleTexture;
-    private static Texture2D logTexture;
-    private static Texture2D consoleTexture;
+    static Texture2D showTexture;
+    static Texture2D autoScaleTexture;
+    static Texture2D logTexture;
+    static Texture2D consoleTexture;
 
-    private void SetupStyles()
+    void SetupStyles()
     {
         // Get textures
         showTexture = GraphSettings.GetTextureFrom64(GraphSettings.showIcon64);
@@ -42,7 +42,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Draw horizontal and vertical rule lines
     /// </summary>
-    private void DrawRules()
+    void DrawRules()
     {
         // Draw rules
         if (graphRect.Contains(mousePosition))
@@ -70,7 +70,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Draw graph lines / points and tags.
     /// </summary>
-    private void DrawGraph()
+    void DrawGraph()
     {
         bool stopReplay = true;
 
@@ -235,7 +235,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Draw backgrounds and channel side panels
     /// </summary>
-    private void DrawStatic()
+    void DrawStatic()
     {
         Vector2 labelOffset = new Vector2(-4f, -7f);
 
@@ -324,7 +324,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Draw buttons on the bottom of the Grapher window.
     /// </summary>
-    private void DrawBottomControls()
+    void DrawBottomControls()
     {
         GUILayout.BeginArea(toolbarRect);
         GUILayout.BeginHorizontal();
@@ -400,7 +400,7 @@ public partial class Grapher : EditorWindow
         GUILayout.EndArea();
     }
 
-    private void DrawChannelSidebar(int chId)
+    void DrawChannelSidebar(int chId)
     {
         Channel ch = channels[chId];
 
@@ -498,7 +498,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Generates persistent button with toggle functionality.
     /// </summary>
-    private bool DrawToggleButton(bool toggle, string key, Texture2D tex)
+    bool DrawToggleButton(bool toggle, string key, Texture2D tex)
     {
         Color def = GUI.color;
         if (toggle)
@@ -514,7 +514,7 @@ public partial class Grapher : EditorWindow
         return toggle;
     }
 
-    private void DrawHorizontalTag(Vector2 p, string text, Color color)
+    void DrawHorizontalTag(Vector2 p, string text, Color color)
     {
         // Prevent jitter by drawing tags only on repaint (avoid layout)
         if (Event.current.type == EventType.Repaint)
@@ -527,7 +527,7 @@ public partial class Grapher : EditorWindow
         }
     }
 
-    private void DrawHorizontalLabel(Vector2 p, string text, Color color)
+    void DrawHorizontalLabel(Vector2 p, string text, Color color)
     {
         if (Event.current.type == EventType.Repaint)
         {
@@ -539,7 +539,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Returns single color texture.
     /// </summary>
-    private static Texture2D GenerateMonotoneTexture(Vector2 size, Color32 color)
+    static Texture2D GenerateMonotoneTexture(Vector2 size, Color32 color)
     {
         Texture2D tex = new Texture2D(32, 32);
         Color[] px = tex.GetPixels();
@@ -553,7 +553,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Converts large values to more readable format.
     /// </summary>
-    private static string FloatToCompact(float x)
+    static string FloatToCompact(float x)
     {
         string first = " ";
         if(x < 0)
@@ -583,7 +583,7 @@ public partial class Grapher : EditorWindow
         return first + x.ToString("0.000") + appendix;
     }
 
-    private static string OutOfScreenFormat(string s, bool outside)
+    static string OutOfScreenFormat(string s, bool outside)
     {
         if (!outside)
             return s;
@@ -594,7 +594,7 @@ public partial class Grapher : EditorWindow
     /// <summary>
     /// Saves channel color to EditorPrefs.
     /// </summary>
-    private static void SetChannel(Color32 color, string name)
+    static void SetChannel(Color32 color, string name)
     {
         EditorPrefs.SetInt("GrapherCH" + name + "R", color.r);
         EditorPrefs.SetInt("GrapherCH" + name + "G", color.g);
@@ -605,7 +605,7 @@ public partial class Grapher : EditorWindow
     /// Tries to get channel color from EditorPrefs by chanel name. If chanel hasn't been previously
     /// used it generates a random color.
     /// </summary>
-    private static Color32 GetChannelColor(string name)
+    static Color32 GetChannelColor(string name)
     {
         Color32 res = new Color32();
 

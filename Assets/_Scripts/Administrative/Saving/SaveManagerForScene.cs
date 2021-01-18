@@ -13,7 +13,7 @@ namespace Saving {
     public class SaveManagerForScene : MonoBehaviour {
         public bool DEBUG = false;
         public DebugLogger debug;
-        private string sceneName => gameObject.scene.name;
+        string sceneName => gameObject.scene.name;
 
         public Dictionary<string, SaveableObject> saveableObjects = new Dictionary<string, SaveableObject>();
 
@@ -32,7 +32,7 @@ namespace Saving {
                 .ToDictionary(s => s.ID);
 		}
 
-        private bool IsObjectInThisScene(MonoBehaviour obj) {
+        bool IsObjectInThisScene(MonoBehaviour obj) {
             return obj != null && obj.gameObject != null && obj.gameObject.scene != null && obj.gameObject.scene == gameObject.scene;
         }
 
@@ -45,7 +45,7 @@ namespace Saving {
             string savePath => $"{Application.persistentDataPath}/Saves/{saveFileName}";
             string saveFile => $"{savePath}/{sceneName}.save";
 
-            private SaveFileForScene(string saveFileName, string sceneName, Dictionary<string, SaveableObject> objs) {
+            SaveFileForScene(string saveFileName, string sceneName, Dictionary<string, SaveableObject> objs) {
                 this.saveFileName = saveFileName;
                 this.sceneName = sceneName;
                 serializedSaveObjects = new Dictionary<string, object>();
@@ -72,11 +72,11 @@ namespace Saving {
 			}
         }
 
-		private void Awake() {
+        void Awake() {
             debug = new DebugLogger(gameObject, () => DEBUG);
         }
 
-		private void OnDisable() {
+        void OnDisable() {
             SaveManager.RemoveSaveManagerForScene(sceneName);
         }
 

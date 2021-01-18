@@ -71,12 +71,12 @@ namespace Saving {
 
             DynamicObjectManager.DeleteAllExistingDynamicObjects();
 
-            SaveManagerForScene saveManagerForManagerScene = GetSaveManagerForScene(LevelManager.managerScene);
+            SaveManagerForScene saveManagerForManagerScene = GetSaveManagerForScene(LevelManager.ManagerScene);
             SaveFileForScene saveFileForManagerScene = saveManagerForManagerScene.GetSaveFromDisk(saveName);
             saveManagerForManagerScene.LoadSceneFromSaveFile(saveFileForManagerScene);
 
             Debug.Log("Waiting for scenes to be loaded...");
-            await TaskEx.WaitUntil(() => !LevelManager.instance.isCurrentlyLoadingScenes);
+            await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
             Debug.Log("All scenes loaded into memory, loading save...");
 
             DynamicObjectManager.LoadDynamicObjectsFromDisk(saveName);
@@ -103,7 +103,7 @@ namespace Saving {
             }
 
             // Play the level change banner and remove the black overlay
-            LevelChangeBanner.instance.PlayBanner(LevelManager.instance.activeScene);
+            LevelChangeBanner.instance.PlayBanner(LevelManager.instance.ActiveScene);
             Time.timeScale = 1f;
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
         }
@@ -115,7 +115,7 @@ namespace Saving {
             }
         }
 
-        private static void CopyDirectory(string sourcePath, string targetPath) {
+        static void CopyDirectory(string sourcePath, string targetPath) {
             if (Directory.Exists(sourcePath)) {
                 Directory.CreateDirectory(targetPath);
                 string[] files = Directory.GetFiles(sourcePath);

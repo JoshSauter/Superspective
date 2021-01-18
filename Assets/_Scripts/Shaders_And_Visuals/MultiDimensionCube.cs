@@ -21,7 +21,8 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		Materialized,
 		Materializing
 	}
-	private State _state;
+
+	State _state;
 	public State state {
 		get { return _state; }
 		set {
@@ -53,6 +54,7 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 	Transform[] cubeTransforms;
 
 	public BoxCollider thisCollider;
+	PhysicMaterial defaultPhysicsMaterial;
 
 	public BoxCollider kinematicCollider;
 	BoxCollider detectWhenPlayerIsNearCollider;
@@ -88,6 +90,7 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<EpitaphRenderer>();
 
 		thisCollider = GetComponent<BoxCollider>();
+		defaultPhysicsMaterial = thisCollider.material;
 		kinematicCollider = invertedCube.Find("KinematicCollider").GetComponent<BoxCollider>();
 		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
 
@@ -123,13 +126,11 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		kinematicCollider.size = thisCollider.size * 1.01f;
 
 		kinematicCollider.enabled = detectWhenPlayerIsNearCollider.enabled = corporealCubeDimensionObj.visibilityState == VisibilityState.invisible;
+
+		thisCollider.material = corporealCubeDimensionObj.thisRigidbody.isKinematic ? kinematicCollider.material : defaultPhysicsMaterial;
 	}
 
     void Update() {
-        if (Input.GetKeyDown("o")) {
-			Materialize();
-		}
-
 		timeSinceStateChange += Time.deltaTime;
 		switch (state) {
 			case State.Materialized:

@@ -13,7 +13,6 @@
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
 		
-		_Channel("Channel", Int) = 0
 		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
 	}
 	SubShader {
@@ -44,7 +43,7 @@
 			float _EmissionAmount;
 			float4 _EmissionColor;
 			
-			int _Channel;
+			int _Channels[NUM_CHANNELS];
 			int _Inverse;
 
 			struct v2f {
@@ -62,7 +61,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channel, _Inverse);
+				ClipDimensionObject(i.vertex, _Channels, _Inverse);
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);

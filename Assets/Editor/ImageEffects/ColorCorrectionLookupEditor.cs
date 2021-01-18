@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor (typeof(ColorCorrectionLookup))]
-    class ColorCorrectionLookupEditor : Editor
+    internal class ColorCorrectionLookupEditor : Editor
     {
         SerializedObject serObj;
 
@@ -13,7 +13,7 @@ namespace UnityStandardAssets.ImageEffects
             serObj = new SerializedObject (target);
         }
 
-        private Texture2D tempClutTex2D;
+        Texture2D tempClutTex2D;
 
 
         public override void OnInspectorGUI () {

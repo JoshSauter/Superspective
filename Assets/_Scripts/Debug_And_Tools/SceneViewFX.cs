@@ -15,14 +15,15 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	DebugLogger debug;
 
 #if UNITY_EDITOR
-	private SceneView sceneView;
-	private Camera sceneViewCamera;
-	private Camera myCamera;
+	SceneView sceneView;
+	Camera sceneViewCamera;
+
+	Camera myCamera;
 	//[HideInInspector]
 	public bool cachedEnableState;
 
 	[MenuItem("Custom/SceneFxToggle _F1")]
-	private static void ToggleFx() {
+	static void ToggleFx() {
 		DebugPrintState("ToggleFx()");
 		if (instance != null) {
 			instance.enabled = !instance.enabled;
@@ -30,7 +31,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		}
 	}
 
-	private void OnReloadScripts() {
+	void OnReloadScripts() {
 		DebugPrintState("OnReloadScripts()");
 		// Re-enabling the script prevents the Scene view window bug
 		cachedEnableState = instance.enabled;
@@ -43,7 +44,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	[UnityEditor.Callbacks.DidReloadScripts]
-	private static void AfterScriptsReloaded() {
+	static void AfterScriptsReloaded() {
 		DebugPrintState("AfterScriptsReloaded()");
 		if (instance != null && UnityEditorInternal.InternalEditorUtility.isApplicationActive) {
 			instance.enabled = instance.cachedEnableState;
@@ -51,7 +52,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		}
 	}
 
-	private void OnEnable() {
+	void OnEnable() {
 		debug = new DebugLogger(this, () => DEBUG);
 
 		DebugPrintState("OnEnable()");
@@ -68,19 +69,19 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		AssemblyReloadEvents.beforeAssemblyReload += OnReloadScripts;
 	}
 
-	private void OnDisable() {
+	void OnDisable() {
 		DebugPrintState("OnDisable()");
 		ClearCurrentEffects();
 	}
 
-	private Camera GetCamera() {
+	Camera GetCamera() {
 		myCamera = GetComponent<Camera>();
 		sceneView = EditorWindow.GetWindow<SceneView>();
 		return sceneView.camera;
 	}
 
 	// get components from main game camera.
-	private Component[] GetComponents() {
+	Component[] GetComponents() {
 		var result = myCamera.GetComponents<Component>();
 		if (result != null && result.Length > 1) {
 			// exlude these components:
@@ -140,7 +141,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 		}
 	}
 
-	private static void DebugPrintState(string methodName) {
+	static void DebugPrintState(string methodName) {
 		instance?.debug?.Log("SceneViewFX." + methodName + "\nEnabled: " + instance.enabled + "\nCachedEnableState: " + instance.cachedEnableState);
 	}
 

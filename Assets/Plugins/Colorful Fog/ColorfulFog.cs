@@ -37,9 +37,9 @@ public class ColorfulFog : MonoBehaviour
 
     protected Texture2D tmpGradientTexture;
 
-    private Material fogMaterial = null;
+    Material fogMaterial = null;
 
-    private Material GetFogMaterial()
+    Material GetFogMaterial()
     {
         if (fogMaterial == null)
         {
@@ -58,12 +58,12 @@ public class ColorfulFog : MonoBehaviour
         return fogMaterial;
     }
 
-    private Camera cam;
-    private Camera depthCamera;
-    private RenderTexture depthTexture;
-    private Vector2 cachedResolution = new Vector2(Screen.width, Screen.height);
+    Camera cam;
+    Camera depthCamera;
+    RenderTexture depthTexture;
+    Vector2 cachedResolution = new Vector2(Screen.width, Screen.height);
 
-    private bool CheckResources()
+    bool CheckResources()
     {
         if (GetFogMaterial() == null)
         {
@@ -91,7 +91,7 @@ public class ColorfulFog : MonoBehaviour
     }
 
     //Query for resolution changes if we are in custom depth mode.
-    private bool ScreenResolutionChanged()
+    bool ScreenResolutionChanged()
     {
 
         Vector2 currentResolution = new Vector2(Screen.width, Screen.height);
@@ -314,7 +314,8 @@ public class ColorfulFog : MonoBehaviour
         DestroyImmediate(tmpGradientTexture);
         tmpGradientTexture = null;
     }
-    private Texture2D GetGradientTexture(Gradient gradient, int resolution = 10)
+
+    Texture2D GetGradientTexture(Gradient gradient, int resolution = 10)
     {
         Texture2D result = new Texture2D(resolution, 1, TextureFormat.RGB24, false);
         Color[] colors = new Color[resolution];

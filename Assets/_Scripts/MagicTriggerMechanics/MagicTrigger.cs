@@ -52,7 +52,7 @@ namespace MagicTriggerMechanics {
 			gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 		}
 
-		private void OnDisable() {
+		void OnDisable() {
 			hasTriggeredOnStay = false;
 			hasNegativeTriggeredOnStay = false;
 		}

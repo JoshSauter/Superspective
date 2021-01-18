@@ -94,13 +94,13 @@ namespace PortalMechanics {
 		[ShowIf("DEBUG")]
 		public List<RenderTexture> portalMaskTextures = new List<RenderTexture>();
 
-		private Shader depthNormalsReplacementShader;
-		private Shader portalMaskReplacementShader;
-		private const string depthNormalsReplacementTag = "RenderType";
-		private const string portalMaskReplacementTag = "PortalTag";
-		private const string portalMaskTextureName = "_PortalMask";
+		Shader depthNormalsReplacementShader;
+		Shader portalMaskReplacementShader;
+		const string depthNormalsReplacementTag = "RenderType";
+		const string portalMaskReplacementTag = "PortalTag";
+		const string portalMaskTextureName = "_PortalMask";
 
-		private static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
+		static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
 		void Start() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
@@ -273,7 +273,7 @@ namespace PortalMechanics {
 		/// </summary>
 		/// <param name="portal"></param>
 		/// <param name="index"></param>
-		private void RenderDepthNormalsToPortal(Portal portal, int index) {
+		void RenderDepthNormalsToPortal(Portal portal, int index) {
 			portalCamera.targetTexture = renderStepTextures[index].depthNormalsTexture;
 			List<bool> postProcessEffectsWereEnabled = DisablePostProcessEffects();
 			portalCamera.RenderWithShader(depthNormalsReplacementShader, depthNormalsReplacementTag);
@@ -284,7 +284,7 @@ namespace PortalMechanics {
 		/// <summary>
 		/// Renders the portalMaskCamera with the portalMaskReplacementShader, then sets the result as _PortalMask global texture
 		/// </summary>
-		private void RenderPortalMaskTexture(bool usePortalCamProjMatrix) {
+		void RenderPortalMaskTexture(bool usePortalCamProjMatrix) {
 			Camera maskCam = EpitaphScreen.instance.portalMaskCamera;
 			Matrix4x4 originalProjMatrix = maskCam.projectionMatrix;
 			if (usePortalCamProjMatrix) {
@@ -299,7 +299,7 @@ namespace PortalMechanics {
 			Shader.SetGlobalTexture(portalMaskTextureName, MaskBufferRenderTextures.instance.portalMaskTexture);
 		}
 
-		private bool ShouldRenderRecursively(int parentDepth, Portal parentPortal, Portal visiblePortal) {
+		bool ShouldRenderRecursively(int parentDepth, Portal parentPortal, Portal visiblePortal) {
 			bool parentRendersRecursively = true;
 			if (parentPortal != null) {
 				parentRendersRecursively = parentPortal.renderRecursivePortals;
@@ -308,7 +308,7 @@ namespace PortalMechanics {
 			return parentDepth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && parentRendersRecursively && !pausedRendering;
 		}
 
-		private bool IsWithinRenderDistance(Portal portal, Camera camera) {
+		bool IsWithinRenderDistance(Portal portal, Camera camera) {
 			return Vector3.Distance(portal.transform.position, camera.transform.position) < MaxRenderDistance;
 		}
 
@@ -410,7 +410,7 @@ namespace PortalMechanics {
 			CopyEdgeColors(dest, source.edgeColorMode, source.edgeColor, source.edgeColorGradient, source.edgeColorGradientTexture);
 		}
 
-		private void CopyEdgeColors(BladeEdgeDetection dest, EDColors edgeColors) {
+		void CopyEdgeColors(BladeEdgeDetection dest, EDColors edgeColors) {
 			CopyEdgeColors(dest, edgeColors.edgeColorMode, edgeColors.edgeColor, edgeColors.edgeColorGradient, edgeColors.edgeColorGradientTexture);
 		}
 
@@ -425,7 +425,7 @@ namespace PortalMechanics {
 		/// Sets each post process effect to enabled = false;
 		/// </summary>
 		/// <returns>The enabled state for each post process effect before it was disabled</returns>
-		private List<bool> DisablePostProcessEffects() {
+		List<bool> DisablePostProcessEffects() {
 			return postProcessEffects.Select(pp => {
 				bool wasEnabled = pp.enabled;
 				pp.enabled = false;
@@ -437,14 +437,14 @@ namespace PortalMechanics {
 		/// Sets each post process effect's enabled state to what it was before it was disabled
 		/// </summary>
 		/// <param name="wasEnabled"></param>
-		private void ReEnablePostProcessEffects(List<bool> wasEnabled) {
+		void ReEnablePostProcessEffects(List<bool> wasEnabled) {
 			Assert.AreEqual(wasEnabled.Count, postProcessEffects.Count);
 			for (int i = 0; i < postProcessEffects.Count; i++) {
 				postProcessEffects[i].enabled = wasEnabled[i];
 			}
 		}
 
-		private float GetPortalSurfaceArea(Portal p) {
+		float GetPortalSurfaceArea(Portal p) {
 			float area = 0f;
 			foreach (var c in p.colliders) {
 				float product = 1f;

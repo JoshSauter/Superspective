@@ -3,21 +3,14 @@ using UnityEngine;
 
 namespace FLGCoreEditor.Utilities {
     public class FindMissingScriptsRecursivelyAndRemove : EditorWindow {
-        private static int _goCount;
-        private static int _componentsCount;
-        private static int _missingCount;
+        static int _goCount;
+        static int _componentsCount;
+        static int _missingCount;
 
-        private static bool _bHaveRun;
-
-        [MenuItem("My Tools/Find Missing Scripts Recursively And Remove")]
-        public static void ShowWindow() {
-            GetWindow(typeof(FindMissingScriptsRecursivelyAndRemove));
-        }
+        static bool _bHaveRun;
 
         public void OnGUI() {
-            if (GUILayout.Button("Find Missing Scripts in selected GameObjects")) {
-                FindInSelected();
-            }
+            if (GUILayout.Button("Find Missing Scripts in selected GameObjects")) FindInSelected();
 
             if (!_bHaveRun) return;
 
@@ -26,12 +19,17 @@ namespace FLGCoreEditor.Utilities {
             if (_goCount > 0) EditorGUILayout.TextField($"{_missingCount} Deleted");
         }
 
-        private static void FindInSelected() {
-            var go = Selection.gameObjects;
+        [MenuItem("My Tools/Find Missing Scripts Recursively And Remove")]
+        public static void ShowWindow() {
+            GetWindow(typeof(FindMissingScriptsRecursivelyAndRemove));
+        }
+
+        static void FindInSelected() {
+            GameObject[] go = Selection.gameObjects;
             _goCount = 0;
             _componentsCount = 0;
             _missingCount = 0;
-            foreach (var g in go) {
+            foreach (GameObject g in go) {
                 FindInGo(g);
             }
 
@@ -41,7 +39,7 @@ namespace FLGCoreEditor.Utilities {
             AssetDatabase.SaveAssets();
         }
 
-        private static void FindInGo(GameObject g) {
+        static void FindInGo(GameObject g) {
             _goCount++;
 
             _missingCount += GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(g);

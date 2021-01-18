@@ -129,7 +129,7 @@ namespace SerializableClasses {
 	}
 
 	// Used for SerializableGradient
-	static class TwoDArrayExtensions {
+	internal static class TwoDArrayExtensions {
 		public static void ClearTo(this float[,] a, float val) {
 			for (int i = a.GetLowerBound(0); i <= a.GetUpperBound(0); i++) {
 				for (int j = a.GetLowerBound(1); j <= a.GetUpperBound(1); j++) {
