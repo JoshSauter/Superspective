@@ -11,10 +11,14 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+			#include "DimensionShaders/DimensionShaderHelpers.cginc"
 			
 			// Depth + Normal texture information, gathered from Unity's built-in global shader variables
 			sampler2D _CameraDepthNormalsTexture;
 			half4 _CameraDepthNormalsTexture_ST;
+            
+			uniform int _Channels[NUM_CHANNELS];
+			uniform int _Inverse;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -40,6 +44,7 @@
 
 			// Only write the object's depth to the DepthNormalsTexture, leave the normal at whatever value it was
 			fixed4 frag(v2f i) : SV_Target {
+				ClipDimensionObject(i.pos, _Channels, _Inverse);
 				fixed4 sample = tex2D(_CameraDepthNormalsTexture, i.pos);
 				float sampleDepthValue;
 				float3 sampleNormalValue;

@@ -20,8 +20,6 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 	const float fakePortalLerpSpeedUp = 4;
 	const float fakePortalLerpSpeedDown = 10;
 
-	// Hole cover needs to disappear when unsolved and in another dimension
-	public GameObject holeCover;
 	public PillarDimensionObject dimension0;
 
 	// Fake portal plane needs to temporarily disappear if the player walks backwards through it
@@ -29,8 +27,8 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 	public GameObject restoreFakePortalPlaneTrigger;
 
 	// We trade out the ToCathedral DimensionObject for ToCathedral PillarDimensionObject after player walks through fake portal
-	public GameObject toCathedral;
-	public GameObject toCathedralInPillarDimension0;
+	public DimensionObject archToNextRoom;
+	public DimensionObject holeCover;
 
 	public enum State {
         Unsolved,
@@ -50,12 +48,18 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 				case State.Unsolved:
 					fakePortalTargetPos = fakePortalUnsolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedDown;
+					archToNextRoom.SwitchVisibilityState(VisibilityState.invisible, true);
+					holeCover.SwitchVisibilityState(VisibilityState.invisible, true);
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedUp;
+					archToNextRoom.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
+					holeCover.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
 					break;
 				case State.WalkedThroughFakePortal:
+					archToNextRoom.SwitchVisibilityState(VisibilityState.visible, true);
+					holeCover.SwitchVisibilityState(VisibilityState.visible, true);
 					break;
 				default:
 					break;
@@ -72,7 +76,7 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 		fakePortal.transform.position = fakePortalUnsolvedPos;
 	}
 
-    void Start() {
+    IEnumerator Start() {
 		state = State.Unsolved;
 
 		fakePortalTrigger.OnMagicTriggerStayOneTime += (ctx) => {
@@ -90,17 +94,21 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 				restoreFakePortalPlaneTrigger.SetActive(true);
 			}
 		};
+
+		yield return new WaitForSeconds(1f);
+		
+		archToNextRoom.SwitchVisibilityState(VisibilityState.invisible, true);
+		holeCover.SwitchVisibilityState(VisibilityState.invisible, true);
 	}
 
     void Update() {
 		fakePortalTargetPos = powerTrail.state == PowerTrail.PowerTrailState.powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
-		fakePortal.SetActive(!(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f));
+		bool fakePortalActive = !(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f);
+		if (fakePortal.activeSelf != fakePortalActive) {
+			fakePortal.SetActive(fakePortalActive);
+		}
+
 		fakePortal.transform.position = Vector3.Lerp(fakePortal.transform.position, fakePortalTargetPos, Time.deltaTime * fakePortalLerpSpeed);
-
-		holeCover.SetActive(state != State.WalkedThroughFakePortal && dimension0.visibilityState == VisibilityState.visible);
-
-		toCathedral.SetActive(state != State.WalkedThroughFakePortal && dimension0.visibilityState == VisibilityState.visible);
-		toCathedralInPillarDimension0.SetActive(state == State.WalkedThroughFakePortal);
 
 		switch (state) {
 			case State.Unsolved:
@@ -132,9 +140,6 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 		bool fakePortalActive;
 		bool fakePortalPlaneActive;
 		bool restoreFakePortalPlaneTriggerActive;
-		bool holeCoverActive;
-		bool toCathedralActive;
-		bool toCathedralInPillarDimension0Active;
 
 		float fakePortalLerpSpeed;
 
@@ -144,9 +149,6 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 			this.fakePortalActive = script.fakePortal.activeSelf;
 			this.fakePortalPlaneActive = script.fakePortalPlane.activeSelf;
 			this.restoreFakePortalPlaneTriggerActive = script.restoreFakePortalPlaneTrigger.activeSelf;
-			this.holeCoverActive = script.holeCover.activeSelf;
-			this.toCathedralActive = script.toCathedral.activeSelf;
-			this.toCathedralInPillarDimension0Active = script.toCathedralInPillarDimension0.activeSelf;
 			this.fakePortalLerpSpeed = script.fakePortalLerpSpeed;
 		}
 
@@ -156,9 +158,6 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 			script.fakePortal.SetActive(this.fakePortalActive);
 			script.fakePortalPlane.SetActive(this.fakePortalPlaneActive);
 			script.restoreFakePortalPlaneTrigger.SetActive(this.restoreFakePortalPlaneTriggerActive);
-			script.holeCover.SetActive(this.holeCoverActive);
-			script.toCathedral.SetActive(this.toCathedralActive);
-			script.toCathedralInPillarDimension0.SetActive(this.toCathedralInPillarDimension0Active);
 			script.fakePortalLerpSpeed = this.fakePortalLerpSpeed;
 		}
 	}

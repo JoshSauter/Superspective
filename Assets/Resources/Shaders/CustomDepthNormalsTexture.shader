@@ -199,6 +199,49 @@ ENDCG
     }
 }
 SubShader {
+    Tags { "RenderType"="DimensionPortalMaterial" }
+    Pass {
+
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+#include "UnityCG.cginc"
+#include "DimensionShaders/DimensionShaderHelpers.cginc"
+
+uniform sampler2D _DepthNormals;
+uniform int _Channels[NUM_CHANNELS];
+uniform int _Inverse;
+
+struct appdata {
+	float4 vertex : POSITION;
+};
+
+struct v2f {
+	float4 vertex : SV_POSITION;
+	float4 screenPos : TEXCOORD0;
+};
+
+v2f vert(appdata v) {
+	v2f o;
+	o.vertex = UnityObjectToClipPos(v.vertex);
+	o.screenPos = ComputeScreenPos(o.vertex);
+	return o;
+}
+
+fixed4 frag(v2f i) : SV_Target {
+    ClipDimensionObjectFromScreenSpaceCoords(i.screenPos, _Channels, _Inverse);
+	float2 uv = i.screenPos.xy / i.screenPos.w;
+
+	fixed4 col = tex2D(_DepthNormals, uv);
+    if (length(col) == 0) {
+     clip(-1);
+	}
+	return col;
+}
+ENDCG
+    }
+}
+SubShader {
     Tags { "RenderType"="PortalCopy" }
     Pass {
 

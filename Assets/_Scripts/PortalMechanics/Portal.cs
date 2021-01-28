@@ -44,6 +44,9 @@ namespace PortalMechanics {
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
 
+		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
+		public bool doubleSidedPortals = false;
+
 		GameObject volumetricPortalPrefab;
 		Renderer[] volumetricPortals;
 		Material portalMaterial;
@@ -66,7 +69,10 @@ namespace PortalMechanics {
 		public bool pauseRenderingAndLogic = false;
 		public bool portalIsEnabled => otherPortal != null && !pauseRenderingAndLogic && gameObject.activeSelf;
 
-		#region Events
+		[ShowNativeProperty]
+		bool playerRemainsInPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
+
+#region Events
 		public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
 		public delegate void SimplePortalTeleportAction(Collider objectTeleported);
 
@@ -210,6 +216,20 @@ namespace PortalMechanics {
 			else if (!playerIsCloseToPortal) {
 				test = false;
 			}
+
+			// If the player moves to the backside of a double-sided portal, rotate the portals to match
+			if (doubleSidedPortals && portalIsEnabled && !playerRemainsInPortal && !otherPortal.playerRemainsInPortal) {
+				Vector3 portalToPlayer = playerCamera.position - transform.position;
+				Vector3 otherPortalToPlayer = playerCamera.position - otherPortal.transform.position;
+				if (portalToPlayer.magnitude < otherPortalToPlayer.magnitude) {
+					bool playerIsOnOtherSide = Vector3.Dot(-PortalNormal(), portalToPlayer) <
+					                           Vector3.Dot(PortalNormal(), portalToPlayer);
+					if (playerIsOnOtherSide) {
+						transform.Rotate(transform.up, 180);
+						otherPortal.transform.Rotate(otherPortal.transform.up, 180);
+					}
+				}
+			}
 		}
 
 		void OnEnable() {
@@ -250,6 +270,7 @@ namespace PortalMechanics {
 			if (!portalIsEnabled) return;
 
 			Vector3 closestPoint = ClosestPoint(other.transform.position);
+			// TODO: This check doesn't work properly, player will rapidly teleport back and forth if standing in the middle
 			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
 			if (!objectShouldBeTeleported) return;
 
@@ -523,7 +544,6 @@ namespace PortalMechanics {
 		#endregion
 
 		#region Volumetric Portal
-		bool playerRemainsInPortal = false;
 
 		void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);

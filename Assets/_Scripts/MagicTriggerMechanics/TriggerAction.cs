@@ -16,7 +16,8 @@ namespace MagicTriggerMechanics {
 		ToggleGameObjects,          // Enables GameObjects when triggered forward, disables when triggered negatively
 		ChangeLevel,
 		ChangeActivePillar,
-		PowerOrDepowerPowerTrail
+		PowerOrDepowerPowerTrail,
+		ChangeVisibilityState
 	}
 
 	[Flags]
@@ -51,6 +52,8 @@ namespace MagicTriggerMechanics {
 		public string backwardPillarName;
 		public PowerTrail powerTrail;
 		public bool setPowerIsOn = true;
+		public DimensionObject[] dimensionObjects;
+		public VisibilityState visibilityState;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -88,6 +91,11 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					powerTrail.powerIsOn = setPowerIsOn;
 					return;
+				case TriggerActionType.ChangeVisibilityState:
+					foreach (var dimensionObject in dimensionObjects) {
+						dimensionObject.SwitchVisibilityState(visibilityState);
+					}
+					break;
 				default:
 					return;
 			}
@@ -125,6 +133,11 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					powerTrail.powerIsOn = !setPowerIsOn;
 					return;
+				case TriggerActionType.ChangeVisibilityState:
+					foreach (var dimensionObject in dimensionObjects) {
+						dimensionObject.SwitchVisibilityState(dimensionObject.startingVisibilityState);
+					}
+					break;
 				default:
 					return;
 			}
@@ -198,6 +211,9 @@ namespace MagicTriggerMechanics {
 			SerializedProperty powerTrail = property.FindPropertyRelative("powerTrail");
 			SerializedProperty setPowerIsOn = property.FindPropertyRelative("setPowerIsOn");
 
+			SerializedProperty dimensionObjects = property.FindPropertyRelative("dimensionObjects");
+			SerializedProperty visibilityState = property.FindPropertyRelative("visibilityState");
+
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
@@ -212,6 +228,8 @@ namespace MagicTriggerMechanics {
 			GUIContent nameOfPillarLabel = new GUIContent("Name of Pillar:");
 			GUIContent powerTrailLabel = new GUIContent("Power trail:");
 			GUIContent setPowerIsOnLabel = new GUIContent("Power On/Off:");
+			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
+			GUIContent visibilityStatelabel = new GUIContent("Visibility State:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -267,6 +285,10 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					EditorGUILayout.PropertyField(powerTrail, powerTrailLabel);
 					EditorGUILayout.PropertyField(setPowerIsOn, setPowerIsOnLabel);
+					break;
+				case TriggerActionType.ChangeVisibilityState:
+					EditorGUILayout.PropertyField(dimensionObjects, dimensionObjectsLabel);
+					EditorGUILayout.PropertyField(visibilityState, visibilityStatelabel);
 					break;
 				default:
 					break;

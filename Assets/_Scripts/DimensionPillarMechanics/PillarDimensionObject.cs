@@ -67,6 +67,8 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 
 	protected override void Awake() {
 		base.Awake();
+		// PillarDimensionObjects continue to interact with other objects even while in other dimensions
+		disableColliderWhileInvisible = false;
 		if (thisObjectMoves) {
 			if (thisRigidbody == null && GetComponent<Rigidbody>() == null) {
 				DebugLogger tempDebug = new DebugLogger(gameObject, () => true);
@@ -284,6 +286,8 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	}
 
 	void DeterminePlanes(DimensionPillar pillar) {
+		if (pillar == null) return;
+		
 		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillar.transform.position, pillar.Axis);
 		Vector3 projectedVerticalPillarOffset = pillar.transform.position - projectedPillarCenter;
 

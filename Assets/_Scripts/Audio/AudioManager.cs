@@ -39,7 +39,7 @@ namespace Audio {
 		Dictionary<string, Action<AudioJob>> updateAudioJobs = new Dictionary<string, Action<AudioJob>>();
 
 		void Awake() {
-			foreach (var template in Utils.GetComponentsInChildrenRecursively<AudioTemplate>(transform)) {
+			foreach (var template in transform.GetComponentsInChildrenRecursively<AudioTemplate>()) {
 				defaultSettings.Add(template.type, template.audioSettings);
 			}
 

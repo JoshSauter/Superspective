@@ -36,6 +36,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	public int channel;
 	public bool reverseVisibilityStates = false;
 	public bool ignoreMaterialChanges = false;
+	public bool disableColliderWhileInvisible = true;
 	protected int curDimensionSetInMaterial;
 
 	public EpitaphRenderer[] renderers;
@@ -85,6 +86,10 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 	void OnDisable() {
 		SetChannelValuesInMaterials(false);
+	}
+
+	void OnEnable() {
+		SetChannelValuesInMaterials();
 	}
 
 	////////////////////////
@@ -149,10 +154,10 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		bool inverseShader = false;
 		if (!reverseVisibilityStates) {
 			if (visibilityState == VisibilityState.partiallyVisible) {
-				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
 			}
 			else if (visibilityState == VisibilityState.partiallyInvisible) {
-				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
 				inverseShader = true;
 			}
 			else {
@@ -172,15 +177,32 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			}
 		}
 
-		bool invisibleLayer = visibilityState == VisibilityState.invisible;
-		if (reverseVisibilityStates) invisibleLayer = visibilityState == VisibilityState.visible;
-		renderer.gameObject.layer = invisibleLayer ? LayerMask.NameToLayer("Invisible") : startingLayers[renderer];
+		switch (visibilityState) {
+			case VisibilityState.invisible:
+				renderer.gameObject.layer = reverseVisibilityStates ? startingLayers[renderer] : LayerMask.NameToLayer("Invisible");
+				break;
+			case VisibilityState.partiallyVisible:
+				renderer.gameObject.layer = reverseVisibilityStates ? startingLayers[renderer] : LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+				break;
+			case VisibilityState.visible:
+				renderer.gameObject.layer = reverseVisibilityStates ? LayerMask.NameToLayer("Invisible") : startingLayers[renderer];
+				break;
+			case VisibilityState.partiallyInvisible:
+				renderer.gameObject.layer = reverseVisibilityStates ? LayerMask.NameToLayer("VisibleButNoPlayerCollision") : startingLayers[renderer];
+				break;
+		}
+		
+		// Disable colliders while invisible
+		if (disableColliderWhileInvisible && renderer.TryGetComponent(out Collider c)) {
+			c.enabled = (!reverseVisibilityStates && visibilityState != VisibilityState.invisible) ||
+			            (reverseVisibilityStates && visibilityState != VisibilityState.visible);
+		}
 
 		renderer.SetMaterials(newMaterials);
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
 	}
 
-	protected void SetChannelValuesInMaterials(bool turnOn = true) {
+	void SetChannelValuesInMaterials(bool turnOn = true) {
 		foreach (var r in renderers) {
 			float[] buffer = r.GetFloatArray("_Channels") ?? new float[2];
 			buffer[channel] = turnOn ? 1 : 0;
@@ -207,7 +229,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 	void SetEpitaphRenderersRecursively(Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
 		// Children who have DimensionObject scripts are treated on only by their own settings
-		if (parent != transform && !ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
+		if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
 
 		EpitaphRenderer thisRenderer = parent.GetComponent<EpitaphRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
@@ -225,22 +247,12 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	protected Dictionary<EpitaphRenderer, Material[]> GetAllStartingMaterials(EpitaphRenderer[] renderers) {
-		Dictionary<EpitaphRenderer, Material[]> dict = new Dictionary<EpitaphRenderer, Material[]>();
-		foreach (var r in renderers) {
-			dict.Add(r, r.GetMaterials());
-		}
-
-		return dict;
+	Dictionary<EpitaphRenderer, Material[]> GetAllStartingMaterials(EpitaphRenderer[] renderers) {
+		return renderers.ToDictionary(r => r, r => r.GetMaterials());
 	}
 
-	protected Dictionary<EpitaphRenderer, int> GetAllStartingLayers(EpitaphRenderer[] renderers) {
-		Dictionary<EpitaphRenderer, int> dict = new Dictionary<EpitaphRenderer, int>();
-		foreach (var r in renderers) {
-			dict.Add(r, r.gameObject.layer);
-		}
-
-		return dict;
+	Dictionary<EpitaphRenderer, int> GetAllStartingLayers(EpitaphRenderer[] renderers) {
+		return renderers.ToDictionary(r => r, r => r.gameObject.layer);
 	}
 
 	Material GetDimensionObjectMaterial(Material normalMaterial) {
@@ -283,6 +295,9 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			case "Portals/PortalMaterial":
                 newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
                 break;
+			case "Custom/UnlitNoDepth":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitNoDepth"));
+				break;
 			default:
 				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
 				break;
@@ -311,6 +326,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	class DimensionObjectSave {
 		bool treatChildrenAsOneObjectRecursively;
 		bool ignoreChildrenWithDimensionObject;
+		bool disableColliderWhileInvisible;
 
 		bool initialized;
 		int channel;
@@ -324,6 +340,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		public DimensionObjectSave(DimensionObject dimensionObj) {
 			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
 			this.ignoreChildrenWithDimensionObject = dimensionObj.ignoreChildrenWithDimensionObject;
+			this.disableColliderWhileInvisible = dimensionObj.disableColliderWhileInvisible;
 			this.initialized = dimensionObj.initialized;
 			this.channel = dimensionObj.channel;
 			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
@@ -336,6 +353,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		public void LoadSave(DimensionObject dimensionObj) {
 			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
 			dimensionObj.ignoreChildrenWithDimensionObject = this.ignoreChildrenWithDimensionObject;
+			dimensionObj.disableColliderWhileInvisible = this.disableColliderWhileInvisible;
 			dimensionObj.initialized = this.initialized;
 			dimensionObj.channel = this.channel;
 			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;

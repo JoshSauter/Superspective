@@ -11,7 +11,7 @@ public class Footsteps : MonoBehaviour {
 	float defaultVolume;
 	float curBobAmountUnamplified = 0;
 	bool playerWasHeadingDownLastFrame = false;
-	float minTimeBetweenHits = 0.25f;
+	float minTimeBetweenHits = 0.175f;
 	float timeSinceLastHit = 0f;
 
 	// Alternates between true and false so we only play a sound every other step

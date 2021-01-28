@@ -7,6 +7,7 @@ using Saving;
 using System;
 using SerializableClasses;
 
+// TODO: Change this to work with local position offset from bigFrame position instead of just a world position
 namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
