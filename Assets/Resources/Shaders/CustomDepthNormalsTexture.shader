@@ -25,7 +25,7 @@ v2f vert(appdata_base v) {
 	v2f o;
 	o.pos = UnityObjectToClipPos(v.vertex);
 	o.nz.xyz = float3(0,0,0);
-	o.nz.w = .999;
+	o.nz.w = .99999;
 	return o;
 }
 fixed4 frag(v2f i) : SV_Target {

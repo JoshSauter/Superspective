@@ -27,7 +27,8 @@ public class WhiteRoomPuzzle1 : MonoBehaviour, SaveableObject {
 	public GameObject restoreFakePortalPlaneTrigger;
 
 	// We trade out the ToCathedral DimensionObject for ToCathedral PillarDimensionObject after player walks through fake portal
-	public DimensionObject archToNextRoom;
+	public SerializableReference<DimensionObject> archToNextRoomReference;
+	DimensionObject archToNextRoom => archToNextRoomReference.Reference;
 	public DimensionObject holeCover;
 
 	public enum State {

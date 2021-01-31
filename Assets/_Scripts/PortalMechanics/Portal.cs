@@ -200,7 +200,7 @@ namespace PortalMechanics {
 			
 			// DimensionObject Portals are treated in a special-case way
 			// This is so that the Portal script does not change the shader off of the DimensionPortalMaterial
-			if (GetComponent<DimensionObject>() != null) {
+			if (TryGetComponent(out DimensionObject d) && !(d is PillarDimensionObject)) {
 				portalMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
 				portalMaterial.SetInt("_Inverse", 1);
 			}

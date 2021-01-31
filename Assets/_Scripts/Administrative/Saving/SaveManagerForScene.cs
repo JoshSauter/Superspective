@@ -74,6 +74,7 @@ namespace Saving {
 
         void Awake() {
             debug = new DebugLogger(gameObject, () => DEBUG);
+            InitializeSaveableObjectsDict();
         }
 
         void OnDisable() {

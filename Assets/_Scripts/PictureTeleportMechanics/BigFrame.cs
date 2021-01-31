@@ -33,6 +33,8 @@ namespace PictureTeleportMechanics {
 				disableFrameTrigger = AddGlobalEnableTrigger();
 				disableFrameTrigger.enabled = true;
 			}
+
+			disableFrameTrigger.OnMagicTriggerStayOneTime += (ctx) => TurnOffFrame();
 		}
 
 		void Awake() {
@@ -76,8 +78,6 @@ namespace PictureTeleportMechanics {
 				action = TriggerActionType.DisableSelfScript
 			};
 			trigger.actionsToTrigger.Add(disableSelfScriptAciton);
-
-			trigger.OnMagicTriggerStayOneTime += (ctx) => TurnOffFrame();
 
 			return trigger;
 		}

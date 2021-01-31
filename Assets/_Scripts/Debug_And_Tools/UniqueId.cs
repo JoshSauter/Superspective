@@ -10,6 +10,11 @@ using UnityEditor;
 
 [ExecuteInEditMode]
 public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
+    [ContextMenu("Copy ID to clipboard")]
+    void DoSomething() {
+        GUIUtility.systemCopyBuffer = uniqueId;
+    }
+    
     [ReadOnly]
     public string uniqueId;
 

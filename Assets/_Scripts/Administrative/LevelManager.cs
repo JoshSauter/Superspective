@@ -41,7 +41,8 @@ public enum Level {
 	ForkWhiteRoom3,
 	TransitionWhiteRoomFork,
 	ForkOctagon,
-	ForkBlackRoom2
+	ForkBlackRoom2,
+	WhiteRoom1BackRoom
 }
 
 public class LevelManager : Singleton<LevelManager>, SaveableObject {
@@ -240,6 +241,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	const string ForkBlackRoom = "_Fork_BlackRoom";
 	const string ForkBlackRoom2 = "_Fork_BlackRoom2";
 	const string InvisFloor = "_InvisFloor";
+	const string WhiteRoom1BackRoom = "_WhiteRoom1_BackRoom";
 
 	// Transition Scenes
 	const string TutorialHallway = "_TutorialHallway";
@@ -412,6 +414,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		enumToSceneName.Add(Level.TransitionWhiteRoomFork, TransitionWhiteRoomFork);
 		enumToSceneName.Add(Level.ForkOctagon, ForkOctagon);
 		enumToSceneName.Add(Level.ForkBlackRoom2, ForkBlackRoom2);
+		enumToSceneName.Add(Level.WhiteRoom1BackRoom, WhiteRoom1BackRoom);
 
 		foreach (var kv in enumToSceneName) {
 			sceneNameToEnum[kv.Value] = kv.Key;
@@ -434,9 +437,9 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		worldGraph.Add(Axis, new List<string>() { TutorialHallway, TutorialRoom });
 		worldGraph.Add(Fork, new List<string>() { TransitionWhiteRoomFork, ForkWhiteRoom, ForkBlackRoom, ForkOctagon });
 		worldGraph.Add(ForkOctagon, new List<string>() { TransitionWhiteRoomFork, Fork });
-		worldGraph.Add(ForkWhiteRoom, new List<string>() { Fork, MetaEdgeDetection, TransitionWhiteRoomFork });
+		worldGraph.Add(ForkWhiteRoom, new List<string>() { Fork, MetaEdgeDetection, WhiteRoom1BackRoom });
 		worldGraph.Add(ForkWhiteRoom2, new List<string>() { ForkWhiteRoom3, ForkWhiteRoomBlackHallway });
-		worldGraph.Add(ForkWhiteRoomBlackHallway, new List<string>() { ForkWhiteRoom2 });
+		worldGraph.Add(ForkWhiteRoomBlackHallway, new List<string>() { ForkWhiteRoom2, TransitionWhiteRoomFork });
 		worldGraph.Add(ForkWhiteRoom3, new List<string>() { ForkWhiteRoom2 });
 		worldGraph.Add(ForkBlackRoom, new List<string>() { Fork });
 		worldGraph.Add(ForkBlackRoom2, new List<string>() { });
@@ -446,7 +449,8 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		worldGraph.Add(TutorialRoom, new List<string>() { TutorialHallway, Axis });
 		worldGraph.Add(Transition23, new List<string>() { HexPillarRoom, Level3 });
 		worldGraph.Add(Transition34, new List<string>() { Level3, Level4 });
-		worldGraph.Add(TransitionWhiteRoomFork, new List<string>() { ForkWhiteRoom, ForkWhiteRoom3, ForkOctagon });
+		worldGraph.Add(TransitionWhiteRoomFork, new List<string>() { WhiteRoom1BackRoom, ForkWhiteRoom3, ForkOctagon, ForkWhiteRoomBlackHallway });
+		worldGraph.Add(WhiteRoom1BackRoom, new List<string>() { ForkWhiteRoom, TransitionWhiteRoomFork });
 
 		worldGraph.Add(MetaEdgeDetection, new List<string>() { ForkWhiteRoom });
 		worldGraph.Add(PortalTestScene, new List<string>() { });

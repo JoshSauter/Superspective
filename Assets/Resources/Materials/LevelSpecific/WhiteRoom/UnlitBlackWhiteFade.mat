@@ -22,7 +22,7 @@ Material:
     m_Floats:
     - _ColorChangeWidth: 30
     m_Colors:
-    - _Color: {r: 0.13330406, g: 0.13330406, b: 0.13330406, a: 1}
+    - _Color: {r: 0.1333034, g: 0.1333034, b: 0.1333034, a: 1}
     - _Color2: {r: 1, g: 1, b: 1, a: 1}
     - _ColorChangeAxis: {r: 0, g: 1, b: 1, a: 1}
     - _ColorChangePoint: {r: 0, g: -268, b: -29, a: 1}

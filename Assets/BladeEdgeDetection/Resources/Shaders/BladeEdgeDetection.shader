@@ -387,9 +387,8 @@
 
 				
 #ifdef CHECK_PORTAL_DEPTH
-				// return portalDepthSamples[0];
-				//return fixed4(allSamplesBehindPortal, allSamplesBehindPortal, allSamplesBehindPortal, 1);
-				if (allSamplesBehindPortal > 0) {
+				// minDepthValue check to get rid of lines from CullEverything material against nothing
+				if (allSamplesBehindPortal > 0 || minDepthValue > .99) {
 					//return fixed4(1,1,.7,1);
 					//clip(-1);
 					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray);
