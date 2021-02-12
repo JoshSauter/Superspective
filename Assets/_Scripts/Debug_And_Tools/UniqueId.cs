@@ -11,7 +11,7 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
     [ContextMenu("Copy ID to clipboard")]
-    void DoSomething() {
+    void CopyUniqueId() {
         GUIUtility.systemCopyBuffer = uniqueId;
     }
     

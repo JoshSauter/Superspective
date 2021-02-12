@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(DimensionPillar))]
 [RequireComponent(typeof(EpitaphRenderer))]
@@ -19,6 +20,10 @@ public class ChangeColorsOnPillarActive : MonoBehaviour {
         thisRenderer = GetComponent<EpitaphRenderer>();
         optionalGlass = GetComponentInChildren<GlassGlow>();
         DimensionPillar.OnActivePillarChanged += ChangeColors;
+    }
+
+    void OnDestroy() {
+        DimensionPillar.OnActivePillarChanged -= ChangeColors;
     }
 
     void ChangeColors(DimensionPillar previousPillar) {

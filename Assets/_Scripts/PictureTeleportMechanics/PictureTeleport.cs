@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 using NaughtyAttributes;
@@ -11,7 +10,7 @@ using SerializableClasses;
 namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
-    public class PictureTeleport : MonoBehaviour, SaveableObject {
+    public class PictureTeleport : SaveableObject<PictureTeleport, PictureTeleport.PictureTeleportSave> {
         UniqueId _id;
         UniqueId id {
             get {
@@ -37,6 +36,7 @@ namespace PictureTeleportMechanics {
         public string bigFrameName;
 
         ViewLockObject viewLockObject;
+        [Header("Target position/rotation is local to the BigFrame destination\n(so that it is still valid if moved around)")]
         public Vector3 targetPosition;
         public Vector3 targetRotation;
         public Vector3 targetCameraPosition;
@@ -49,11 +49,13 @@ namespace PictureTeleportMechanics {
         const float ssaoMultiplier = .75f;
         public float ssaoBlendTimeRemaining = 0f;
 
-        void Awake() {
+        new void Awake() {
+            base.Awake();
             viewLockObject = GetComponent<ViewLockObject>();
         }
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
             ssao = EpitaphScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
             startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
@@ -74,18 +76,21 @@ namespace PictureTeleportMechanics {
         }
 
         void TeleportPlayer() {
+            BigFrame bigFrameToTeleportTo = bigFrameIsInSameScene
+                ? bigFrame
+                : bigFrames[BigFrameKey(LevelManager.instance.GetSceneName(bigFrameLevel), bigFrameName)];
             if (bigFrameIsInSameScene) {
-                bigFrame.TurnOnFrame();
+                bigFrameToTeleportTo.TurnOnFrame();
             }
             else {
-                bigFrames[BigFrameKey(LevelManager.instance.GetSceneName(bigFrameLevel), bigFrameName)].TurnOnFrame();
+                bigFrameToTeleportTo.TurnOnFrame();
                 LevelManager.instance.SwitchActiveScene(bigFrameLevel);
             }
             Transform player = Player.instance.transform;
             Transform camContainer = EpitaphScreen.instance.playerCamera.transform.parent;
 
-            player.position = targetPosition;
-            player.rotation = Quaternion.Euler(targetRotation);
+            player.position = bigFrameToTeleportTo.transform.TransformPoint(targetPosition);
+            player.rotation = bigFrameToTeleportTo.transform.rotation * Quaternion.Euler(targetRotation);
             camContainer.localPosition = targetCameraPosition;
             camContainer.localRotation = Quaternion.Euler(targetCameraRotation);
             ssao.m_OcclusionIntensity = startSsaoIntensity;
@@ -95,12 +100,10 @@ namespace PictureTeleportMechanics {
         }
 
         #region Saving
-        public bool SkipSave { get; set; }
-
-        public string ID => $"PictureTeleport_{id.uniqueId}";
+        public override string ID => $"PictureTeleport_{id.uniqueId}";
 
         [Serializable]
-        class PictureTeleportSave {
+        public class PictureTeleportSave : SerializableSaveObject<PictureTeleport> {
             SerializableVector3 targetPosition;
             SerializableVector3 targetRotation;
             SerializableVector3 targetCameraPosition;
@@ -121,7 +124,7 @@ namespace PictureTeleportMechanics {
                 this.ssaoBlendTimeRemaining = script.ssaoBlendTimeRemaining;
             }
 
-            public void LoadSave(PictureTeleport script) {
+            public override void LoadSave(PictureTeleport script) {
                 script.targetPosition = this.targetPosition;
                 script.targetRotation = this.targetRotation;
                 script.targetCameraPosition = this.targetCameraPosition;
@@ -131,16 +134,6 @@ namespace PictureTeleportMechanics {
                 script.ssao.m_OcclusionIntensity = this.curSsaoIntensity;
                 script.ssaoBlendTimeRemaining = this.ssaoBlendTimeRemaining;
             }
-        }
-
-        public object GetSaveObject() {
-            return new PictureTeleportSave(this);
-        }
-
-        public void LoadFromSavedObject(object savedObject) {
-            PictureTeleportSave save = savedObject as PictureTeleportSave;
-
-            save.LoadSave(this);
         }
         #endregion
     }

@@ -9,7 +9,7 @@ using SerializableClasses;
 using System.Linq;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3ExitBars : MonoBehaviour, SaveableObject {
+    public class WhiteRoom3ExitBars : SaveableObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave> {
         public PowerTrail[] powerTrails;
         public Transform[] bars;
         public GameObject invisibleWall;
@@ -20,7 +20,8 @@ namespace LevelSpecific.WhiteRoom {
         bool wasSolvedLastFrame = false;
         bool solved => numSolved == powerTrails.Length;
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
             foreach (var powerTrail in powerTrails) {
                 powerTrail.OnPowerFinish += () => numSolved++;
                 powerTrail.OnDepowerBegin += () => numSolved--;
@@ -43,12 +44,10 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         #region Saving
-        public bool SkipSave { get; set; }
-
-        public string ID => "WhiteRoom3ExitBars";
+        public override string ID => "WhiteRoom3ExitBars";
 
         [Serializable]
-        class WhiteRoom3ExitBarsSave {
+        public class WhiteRoom3ExitBarsSave : SerializableSaveObject<WhiteRoom3ExitBars> {
             int numSolved;
             bool wasSolvedLastFrame;
             List<SerializableVector3> barPositions;
@@ -59,23 +58,13 @@ namespace LevelSpecific.WhiteRoom {
                 this.barPositions = exitBars.bars.Select<Transform, SerializableVector3>(b => b.position).ToList();
             }
 
-            public void LoadSave(WhiteRoom3ExitBars exitBars) {
+            public override void LoadSave(WhiteRoom3ExitBars exitBars) {
                 exitBars.numSolved = this.numSolved;
                 exitBars.wasSolvedLastFrame = this.wasSolvedLastFrame;
                 for (int i = 0; i < exitBars.bars.Length; i++) {
                     exitBars.bars[i].position = this.barPositions[i];
 				}
             }
-        }
-
-        public object GetSaveObject() {
-            return new WhiteRoom3ExitBarsSave(this);
-        }
-
-        public void LoadFromSavedObject(object savedObject) {
-            WhiteRoom3ExitBarsSave save = savedObject as WhiteRoom3ExitBarsSave;
-
-            save.LoadSave(this);
         }
         #endregion
     }

@@ -223,13 +223,15 @@ MonoBehaviour:
     backwardPillarName: 
     powerTrail: {fileID: 0}
     setPowerIsOn: 1
+    dimensionObjects: []
+    visibilityState: 0
 --- !u!43 &100267698
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591864
+  m_Name: pb_Mesh2328296
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -393,7 +395,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591966
+  m_Name: pb_Mesh2328398
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1131,6 +1133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0823832ee611fe44c9cbac6598797d4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   realBlackRoomPortal: {fileID: 981450061}
   fakeBlackRoomPortal: {fileID: 2069148451}
 --- !u!43 &197251511
@@ -1139,7 +1142,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591758
+  m_Name: pb_Mesh2328190
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1303,7 +1306,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591744
+  m_Name: pb_Mesh2328176
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1600,9 +1603,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2
@@ -2026,7 +2031,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591826
+  m_Name: pb_Mesh2328258
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2200,7 +2205,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591794
+  m_Name: pb_Mesh2328226
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2714,7 +2719,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591980
+  m_Name: pb_Mesh2328412
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2878,7 +2883,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh3054286
+  m_Name: pb_Mesh2328324
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -3835,7 +3840,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592186
+  m_Name: pb_Mesh2328618
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4349,7 +4354,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591878
+  m_Name: pb_Mesh2328310
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4513,7 +4518,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591712
+  m_Name: pb_Mesh2328144
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5411,7 +5416,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592110
+  m_Name: pb_Mesh2328542
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5575,7 +5580,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591842
+  m_Name: pb_Mesh2328274
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -6519,9 +6524,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 0
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2
@@ -15157,8 +15164,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 174395a181897ac4faef38492df39ac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerQuadrant: 0
   DEBUG: 0
+  _playerQuadrant: 0
+  debugMode: 0
   setAsActiveOnStart: 0
   pillarKey: 
   dimensionWallPrefab: {fileID: 2399391013733540048, guid: 768fe6b695ffee444bdfec8d2ca85cf0,
@@ -15171,6 +15179,7 @@ MonoBehaviour:
     radians: 0
   cameraAngleRelativeToPillar:
     radians: 0
+  heightOverride: -1
 --- !u!114 &782990515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15190,7 +15199,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592010
+  m_Name: pb_Mesh2328442
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -15354,7 +15363,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592062
+  m_Name: pb_Mesh2328494
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -16265,6 +16274,8 @@ MonoBehaviour:
     backwardPillarName: 
     powerTrail: {fileID: 0}
     setPowerIsOn: 1
+    dimensionObjects: []
+    visibilityState: 0
 --- !u!65 &917830801
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16781,6 +16792,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  debugMode: 0
   channel: BlackRoom
   changeActiveSceneOnTeleport: 1
   changeCameraEdgeDetection: 0
@@ -16818,6 +16830,7 @@ MonoBehaviour:
   edgeColorGradientTexture: {fileID: 0}
   renderRecursivePortals: 0
   compositePortal: 0
+  doubleSidedPortals: 0
   renderers: []
   colliders: []
   otherPortal: {fileID: 0}
@@ -16957,7 +16970,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592198
+  m_Name: pb_Mesh2328630
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -17285,7 +17298,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591938
+  m_Name: pb_Mesh2328370
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -18303,7 +18316,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591994
+  m_Name: pb_Mesh2328426
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19517,7 +19530,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591656
+  m_Name: pb_Mesh2328088
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20370,7 +20383,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591730
+  m_Name: pb_Mesh2328162
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20754,6 +20767,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  debugMode: 0
   channel: WhiteRoom
   changeActiveSceneOnTeleport: 1
   changeCameraEdgeDetection: 0
@@ -20791,6 +20805,7 @@ MonoBehaviour:
   edgeColorGradientTexture: {fileID: 0}
   renderRecursivePortals: 0
   compositePortal: 0
+  doubleSidedPortals: 0
   renderers: []
   colliders: []
   otherPortal: {fileID: 0}
@@ -20930,7 +20945,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591776
+  m_Name: pb_Mesh2328208
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -21094,7 +21109,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592152
+  m_Name: pb_Mesh2328584
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -22175,7 +22190,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592074
+  m_Name: pb_Mesh2328506
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -22375,7 +22390,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592124
+  m_Name: pb_Mesh2328556
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -22539,7 +22554,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591694
+  m_Name: pb_Mesh2328126
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -22742,9 +22757,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2
@@ -24102,7 +24119,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11592212
+  m_Name: pb_Mesh2328644
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -24266,7 +24283,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591808
+  m_Name: pb_Mesh2328240
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -25234,6 +25251,8 @@ MonoBehaviour:
     backwardPillarName: 
     powerTrail: {fileID: 0}
     setPowerIsOn: 1
+    dimensionObjects: []
+    visibilityState: 0
 --- !u!65 &1954558351
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26289,9 +26308,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 0
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2
@@ -26695,6 +26716,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
+  debugMode: 0
   channel: FakeBlackRoom
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -26732,6 +26754,7 @@ MonoBehaviour:
   edgeColorGradientTexture: {fileID: 0}
   renderRecursivePortals: 0
   compositePortal: 0
+  doubleSidedPortals: 0
   renderers: []
   colliders: []
   otherPortal: {fileID: 0}
@@ -26871,7 +26894,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh11591950
+  m_Name: pb_Mesh2328382
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

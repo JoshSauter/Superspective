@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(UniqueId))]
-public class CubeSpawner : MonoBehaviour, SaveableObject {
+public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSave> {
     public enum GrowCubeState {
         Idle,
         Growing,
@@ -27,7 +27,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
     const float shrinkTime = 0.4f;
 
     public int maxNumberOfCubesThatCanBeSpawned = 1;
-    public PickupObject cubePrefab;
+    public DynamicObject cubePrefab;
     public AnimationCurve cubeGrowCurve;
     public AnimationCurve cubeShrinkCurve;
 
@@ -85,13 +85,24 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
     [ShowNativeProperty]
     int numberOfIrreplaceableCubes => objectsGrabbedFromSpawner.Count(o => !o.isReplaceable);
 
-    IEnumerator Start() {
+    protected override void Awake() {
+        base.Awake();
+        
         thisCollider = GetComponent<Collider>();
+    }
+
+    protected override void Init() {
+        StartCoroutine(Initialize());
+    }
+
+    IEnumerator Initialize() {
         yield return new WaitForSeconds(0.5f);
         if (objectBeingSuspended == null) SpawnNewCube();
     }
 
     void Update() {
+        if (!hasInitialized) return;
+
         if (objectBeingSuspended == null && numberOfIrreplaceableCubes < maxNumberOfCubesThatCanBeSpawned)
             SpawnNewCube();
 
@@ -129,11 +140,10 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
 
     void SpawnNewCube() {
         const float randomizeOffset = 1.0f;
-        PickupObject newCube = Instantiate(
-            cubePrefab,
-            thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset),
-            new Quaternion()
-        );
+        PickupObject newCube = Instantiate(cubePrefab, transform).GetComponent<PickupObject>();
+        newCube.transform.SetParent(null);
+        newCube.transform.position =
+            thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset);
         objectBeingSuspended = newCube;
         SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
         newCube.GetComponent<GravityObject>().useGravity = false;
@@ -212,7 +222,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
             }
             else {
                 cube.transform.localScale = Vector3.zero;
-                Destroy(cube.gameObject);
+                cube.GetComponent<DynamicObject>().Destroy();
                 objectShrinking = null;
                 shrinkCubeState = ShrinkCubeState.Idle;
             }
@@ -220,13 +230,11 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"CubeSpawner_{id.uniqueId}";
+    public override string ID => $"CubeSpawner_{id.uniqueId}";
 
     [Serializable]
-    class CubeSpawnerSave {
+    public class CubeSpawnerSave : SerializableSaveObject<CubeSpawner> {
         int baseDimensionForCubes;
         SerializableAnimationCurve cubeGrowCurve;
         SerializableAnimationCurve cubeShrinkCurve;
@@ -243,7 +251,7 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
             baseDimensionForCubes = spawner.baseDimensionForCubes;
         }
 
-        public void LoadSave(CubeSpawner spawner) {
+        public override void LoadSave(CubeSpawner spawner) {
             spawner.cubeGrowCurve = cubeGrowCurve;
             spawner.cubeShrinkCurve = cubeShrinkCurve;
             spawner.objectBeingSuspended = objectBeingSuspended;
@@ -254,16 +262,6 @@ public class CubeSpawner : MonoBehaviour, SaveableObject {
                 spawner.rigidbodyOfObjectBeingSuspended = spawner.objectBeingSuspended.GetComponent<Rigidbody>();
             spawner.baseDimensionForCubes = baseDimensionForCubes;
         }
-    }
-
-    public object GetSaveObject() {
-        return new CubeSpawnerSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        CubeSpawnerSave save = savedObject as CubeSpawnerSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

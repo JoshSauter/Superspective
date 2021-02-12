@@ -7,7 +7,7 @@ using SerializableClasses;
 using UnityEngine;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
-public class CameraFollow : MonoBehaviour, SaveableObject {
+public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFollowSave> {
     public delegate void CameraFollowUpdate(Vector3 offset, Vector3 positionDiffFromLastFrame);
 
     public const float desiredLerpSpeed = 30f; // currentLerpSpeed will approach this value after not being changed for a while
@@ -25,13 +25,15 @@ public class CameraFollow : MonoBehaviour, SaveableObject {
 
     float timeSinceCurrentLerpSpeedWasModified;
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         headbob = Player.instance.GetComponent<Headbob>();
         relativeStartPosition = transform.localPosition;
         worldPositionLastFrame = transform.position;
     }
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
         TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
         Portal.OnAnyPortalTeleportSimple += obj => {
             if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame();
@@ -100,13 +102,11 @@ public class CameraFollow : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // There's only one player so we don't need a UniqueId here
-    public string ID => "CameraFollow";
+    public override string ID => "CameraFollow";
 
     [Serializable]
-    class CameraFollowSave {
+    public class CameraFollowSave : SerializableSaveObject<CameraFollow> {
         float currentLerpSpeed;
         SerializableVector3 relativePositionLastFrame;
         SerializableVector3 relativeStartPosition;
@@ -124,7 +124,7 @@ public class CameraFollow : MonoBehaviour, SaveableObject {
             timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
         }
 
-        public void LoadSave(CameraFollow cam) {
+        public override void LoadSave(CameraFollow cam) {
             cam.shouldFollow = shouldFollow;
             cam.currentLerpSpeed = currentLerpSpeed;
             cam.relativeStartPosition = relativeStartPosition;
@@ -132,16 +132,6 @@ public class CameraFollow : MonoBehaviour, SaveableObject {
             cam.worldPositionLastFrame = worldPositionLastFrame;
             cam.timeSinceCurrentLerpSpeedWasModified = timeSinceCurrentLerpSpeedWasModified;
         }
-    }
-
-    public object GetSaveObject() {
-        return new CameraFollowSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        CameraFollowSave save = savedObject as CameraFollowSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

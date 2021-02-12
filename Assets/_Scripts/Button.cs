@@ -4,7 +4,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class Button : MonoBehaviour, SaveableObject {
+public class Button : SaveableObject<Button, Button.ButtonSave> {
     public enum State {
         ButtonDepressed,
         ButtonPressing,
@@ -62,7 +62,8 @@ public class Button : MonoBehaviour, SaveableObject {
 
     public bool buttonPressed => state == State.ButtonPressed;
 
-    public virtual void Awake() {
+    protected override void Awake() {
+        base.Awake();
         interactableObject = GetComponent<InteractableObject>();
         if (interactableObject == null) interactableObject = gameObject.AddComponent<InteractableObject>();
         interactableObject.OnLeftMouseButton += OnLeftMouseButton;
@@ -129,19 +130,19 @@ public class Button : MonoBehaviour, SaveableObject {
     }
 
     protected void TriggerButtonPressBeginEvents() {
-        if (OnButtonPressBegin != null) OnButtonPressBegin(this);
+        OnButtonPressBegin?.Invoke(this);
     }
 
     protected void TriggerButtonPressFinishEvents() {
-        if (OnButtonPressFinish != null) OnButtonPressFinish(this);
+        OnButtonPressFinish?.Invoke(this);
     }
 
     protected void TriggerButtonDepressBeginEvents() {
-        if (OnButtonDepressBegin != null) OnButtonDepressBegin(this);
+        OnButtonDepressBegin?.Invoke(this);
     }
 
     protected void TriggerButtonDepressFinishEvents() {
-        if (OnButtonDepressFinish != null) OnButtonDepressFinish(this);
+        OnButtonDepressFinish?.Invoke(this);
     }
 
 #region events
@@ -154,13 +155,11 @@ public class Button : MonoBehaviour, SaveableObject {
 #endregion
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"Button_{id.uniqueId}";
+    public override string ID => $"Button_{id.uniqueId}";
 
     [Serializable]
-    class ButtonSave {
+    public class ButtonSave : SerializableSaveObject<Button> {
         public float timeSinceStateChange;
         SerializableAnimationCurve buttonDepressCurve;
         SerializableAnimationCurve buttonPressCurve;
@@ -189,7 +188,7 @@ public class Button : MonoBehaviour, SaveableObject {
             timeBetweenPressEndDepressStart = button.timeBetweenPressEndDepressStart;
         }
 
-        public void LoadSave(Button button) {
+        public override void LoadSave(Button button) {
             button.state = (State) state;
             button.timeSinceStateChange = timeSinceStateChange;
             button.depressedPos = depressedPos;
@@ -203,16 +202,6 @@ public class Button : MonoBehaviour, SaveableObject {
             button.depressAfterPress = depressAfterPress;
             button.timeBetweenPressEndDepressStart = timeBetweenPressEndDepressStart;
         }
-    }
-
-    public object GetSaveObject() {
-        return new ButtonSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        ButtonSave save = savedObject as ButtonSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

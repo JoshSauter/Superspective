@@ -4,7 +4,7 @@ using Saving;
 using SerializableClasses;
 using UnityEngine;
 
-public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
+public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerLookSave> {
     public delegate void ViewLockAction();
 
     public enum State {
@@ -15,8 +15,6 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
     }
 
     const int lookAmountMultiplier = 14;
-
-    public bool DEBUG;
 
     // Previously Coroutine local variables
     public Quaternion rotationBeforeViewLock;
@@ -38,7 +36,6 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
     public float outsideMultiplier = 1f;
     State _state;
 
-    DebugLogger debug;
     Vector3 endPos;
     Quaternion endRot;
     Transform playerTransform;
@@ -65,7 +62,8 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
     /// </summary>
     public float normalizedY => rotationY / yClamp;
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         playerTransform = gameObject.transform;
         cameraContainerTransform = playerTransform.GetChild(0);
         cameraInitialLocalPos = cameraContainerTransform.localPosition;
@@ -82,8 +80,6 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 
     // Use this for initialization
     void Start() {
-        debug = new DebugLogger(this, () => DEBUG);
-
         //print(cameraTransform.rotation.x + ", " + cameraTransform.rotation.y + ", " + cameraTransform.rotation.z + ", " + cameraTransform.rotation.w);
         //print(cameraTransform.position.x + ", " + cameraTransform.position.y + ", " + cameraTransform.position.z);
     }
@@ -135,8 +131,7 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 
     void UpdateLockedView() {
         Vector2 moveDirection =
-            Vector2.Scale(PlayerButtonInput.instance.RightStick, new Vector2(sensitivityX, sensitivityY)) *
-            generalSensitivity * lookAmountMultiplier;
+            Vector2.Scale(PlayerButtonInput.instance.RightStick, new Vector2(sensitivityX, sensitivityY)) * (generalSensitivity * lookAmountMultiplier);
         MoveCursor(moveDirection);
     }
 
@@ -288,13 +283,11 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
 
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // There's only one PlayerLook so we don't need a UniqueId here
-    public string ID => "PlayerLook";
+    public override string ID => "PlayerLook";
 
     [Serializable]
-    class PlayerLookSave {
+    public class PlayerLookSave : SerializableSaveObject<PlayerLook> {
         SerializableVector3 cameraLocalPosition;
         SerializableQuaternion cameraLocalRotation;
         bool cursorVisible;
@@ -346,11 +339,17 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
             yClamp = playerLook.yClamp;
             outsideMultiplier = playerLook.outsideMultiplier;
 
-            lockState = (int) Cursor.lockState;
-            cursorVisible = Cursor.visible;
+            if (TempMenu.instance.menuIsOpen) {
+                lockState = (int) TempMenu.instance.cachedLockMode;
+                cursorVisible = false;
+            }
+            else {
+                lockState = (int) Cursor.lockState;
+                cursorVisible = Cursor.visible;
+            }
         }
 
-        public void LoadSave(PlayerLook playerLook) {
+        public override void LoadSave(PlayerLook playerLook) {
             playerLook.cameraContainerTransform.localPosition = cameraLocalPosition;
             playerLook.cameraContainerTransform.localRotation = cameraLocalRotation;
 
@@ -372,21 +371,10 @@ public class PlayerLook : Singleton<PlayerLook>, SaveableObject {
             playerLook.rotationY = rotationY;
             playerLook.yClamp = yClamp;
             playerLook.outsideMultiplier = outsideMultiplier;
-
+            
             Cursor.lockState = (CursorLockMode) lockState;
             Cursor.visible = cursorVisible;
         }
-    }
-
-    public object GetSaveObject() {
-        return new PlayerLookSave(this);
-        ;
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        PlayerLookSave save = savedObject as PlayerLookSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

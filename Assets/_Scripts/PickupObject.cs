@@ -10,7 +10,7 @@ using UnityEngine;
 using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
-public class PickupObject : MonoBehaviour, SaveableObject {
+public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave> {
     public delegate void PickupObjectAction(PickupObject obj);
 
     public delegate void PickupObjectSimpleAction();
@@ -26,7 +26,6 @@ public class PickupObject : MonoBehaviour, SaveableObject {
     public static PickupObjectAction OnAnyDrop;
 
     static float currentPitch = 1f;
-    public bool DEBUG;
 
     public bool isReplaceable = true;
     public bool isHeld;
@@ -38,7 +37,6 @@ public class PickupObject : MonoBehaviour, SaveableObject {
     UniqueId _id;
     bool _interactable = true;
     float currentCooldown;
-    DebugLogger debug;
     InteractableGlow interactableGlow;
     InteractableObject interactableObject;
     public PickupObjectAction OnDrop;
@@ -70,8 +68,12 @@ public class PickupObject : MonoBehaviour, SaveableObject {
 
     bool onCooldown => currentCooldown > 0;
 
-    void Awake() {
-        debug = new DebugLogger(gameObject, () => DEBUG);
+    protected override void Awake() {
+        base.Awake();
+        AssignReferences();
+    }
+
+    void AssignReferences() {
         if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
         if (thisGravity == null) thisGravity = GetComponent<GravityObject>();
 
@@ -86,7 +88,8 @@ public class PickupObject : MonoBehaviour, SaveableObject {
         if (portalableObject == null) portalableObject = GetComponent<PortalableObject>();
     }
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
         player = Player.instance.transform;
         playerCam = EpitaphScreen.instance.playerCamera.transform;
 
@@ -286,13 +289,11 @@ public class PickupObject : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"PickupObject_{id.uniqueId}";
+    public override string ID => $"PickupObject_{id.uniqueId}";
 
     [Serializable]
-    class PickupObjectSave {
+    public class PickupObjectSave : SerializableSaveObject<PickupObject> {
         SerializableVector3 angularVelocity;
         float currentCooldown;
         bool interactable;
@@ -325,8 +326,8 @@ public class PickupObject : MonoBehaviour, SaveableObject {
             currentCooldown = obj.currentCooldown;
         }
 
-        public void LoadSave(PickupObject obj) {
-            obj.Awake();
+        public override void LoadSave(PickupObject obj) {
+            obj.AssignReferences();
 
             obj.transform.position = position;
             obj.transform.rotation = rotation;
@@ -343,16 +344,6 @@ public class PickupObject : MonoBehaviour, SaveableObject {
             obj.isHeld = isHeld;
             obj.currentCooldown = currentCooldown;
         }
-    }
-
-    public object GetSaveObject() {
-        return new PickupObjectSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        PickupObjectSave save = savedObject as PickupObjectSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

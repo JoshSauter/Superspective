@@ -6,7 +6,8 @@ namespace LevelSpecific.HexPillarRoom {
 	public class HexPillarFloat : ObjectHover {
 
 		// Use this for initialization
-		void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			maxDisplacementUp = Mathf.Log10(transform.localScale.magnitude) / 2;
 			period = maxDisplacementUp * 150;
 		}

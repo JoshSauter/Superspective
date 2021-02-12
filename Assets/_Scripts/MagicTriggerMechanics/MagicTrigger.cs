@@ -11,9 +11,10 @@ using UnityEditor;
 
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
-	public class MagicTrigger : MonoBehaviour, SaveableObject {
+	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave> {
 		UniqueId _id;
-		public UniqueId id {
+
+		UniqueId id {
 			get {
 				if (_id == null) {
 					_id = GetComponent<UniqueId>();
@@ -21,8 +22,6 @@ namespace MagicTriggerMechanics {
 				return _id;
 			}
 		}
-		public bool DEBUG;
-		public DebugLogger debug;
 
 		[HorizontalLine(color: EColor.Yellow)]
 		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
@@ -47,8 +46,8 @@ namespace MagicTriggerMechanics {
 		protected bool hasTriggeredOnStay = false;
 		protected bool hasNegativeTriggeredOnStay = false;
 
-		protected virtual void Awake() {
-			debug = new DebugLogger(this, () => DEBUG);
+		protected override void Awake() {
+			base.Awake();
 			gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 		}
 
@@ -161,8 +160,7 @@ namespace MagicTriggerMechanics {
 		}
 
 		#region Saving
-		public bool SkipSave { get; set; }
-		public string ID {
+		public override string ID {
 			get {
 				if (id == null || id.uniqueId == null) {
 					throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
@@ -173,7 +171,7 @@ namespace MagicTriggerMechanics {
 		//public string ID => $"MagicTrigger_{id.uniqueId}";
 
 		[Serializable]
-		class MagicTriggerSave {
+		public class MagicTriggerSave : SerializableSaveObject<MagicTrigger> {
 			List<List<bool>> gameObjectsToEnableState = new List<List<bool>>();
 			List<List<bool>> gameObjectsToDisableState = new List<List<bool>>();
 			List<List<bool>> scriptsToEnableState = new List<List<bool>>();
@@ -189,22 +187,30 @@ namespace MagicTriggerMechanics {
 					List<bool> scriptsToDisableState = new List<bool>();
 					if (action.objectsToEnable != null) {
 						foreach (var objToEnable in action.objectsToEnable) {
-							objectsToEnableState.Add(objToEnable.activeSelf);
+							if (objToEnable != null) {
+								objectsToEnableState.Add(objToEnable.activeSelf);
+							}
 						}
 					}
 					if (action.objectsToDisable != null) {
 						foreach (var objToDisable in action.objectsToDisable) {
-							objectsToDisableState.Add(objToDisable.activeSelf);
+							if (objToDisable != null) {
+								objectsToDisableState.Add(objToDisable.activeSelf);
+							}
 						}
 					}
 					if (action.scriptsToEnable != null) {
 						foreach (var scriptToEnable in action.scriptsToEnable) {
-							scriptsToEnableState.Add(scriptToEnable.enabled);
+							if (scriptToEnable != null) {
+								scriptsToEnableState.Add(scriptToEnable.enabled);
+							}
 						}
 					}
 					if (action.scriptsToDisable != null) {
 						foreach (var scriptToDisable in action.scriptsToDisable) {
-							scriptsToDisableState.Add(scriptToDisable.enabled);
+							if (scriptToDisable != null) {
+								scriptsToDisableState.Add(scriptToDisable.enabled);
+							}
 						}
 					}
 					this.gameObjectsToEnableState.Add(objectsToEnableState);
@@ -216,7 +222,7 @@ namespace MagicTriggerMechanics {
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
 			}
 
-			public void LoadSave(MagicTrigger magicTrigger) {
+			public override void LoadSave(MagicTrigger magicTrigger) {
 				for (int i = 0; i < magicTrigger.actionsToTrigger.Count; i++) {
 					TriggerAction action = magicTrigger.actionsToTrigger[i];
 
@@ -245,16 +251,6 @@ namespace MagicTriggerMechanics {
 				magicTrigger.hasTriggeredOnStay = this.hasTriggeredOnStay;
 				magicTrigger.hasNegativeTriggeredOnStay = this.hasNegativeTriggeredOnStay;
 			}
-		}
-
-		public object GetSaveObject() {
-			return new MagicTriggerSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			MagicTriggerSave save = savedObject as MagicTriggerSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

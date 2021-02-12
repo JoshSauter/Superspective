@@ -100,8 +100,8 @@ namespace EpitaphUtils {
 
         static void GetComponentsInChildrenRecursivelyHelper<T>(Transform parent, ref List<T> componentsSoFar)
             where T : Component {
-            T maybeComponent = parent.GetComponent<T>();
-            if (maybeComponent != default(T)) componentsSoFar.Add(maybeComponent);
+            T[] maybeComponents = parent.GetComponents<T>();
+            componentsSoFar.AddRange(maybeComponents.Where(maybeComponent => maybeComponent != default(T)));
 
             foreach (Transform child in parent) {
                 GetComponentsInChildrenRecursivelyHelper(child, ref componentsSoFar);
@@ -872,7 +872,7 @@ namespace EpitaphUtils {
             this.context = context;
 
             if (context is GameObject) {
-                SaveableObject saveableContext = (context as GameObject).GetComponent<SaveableObject>();
+                ISaveableObject saveableContext = (context as GameObject).GetComponent<ISaveableObject>();
                 if (saveableContext != null) {
                     try {
                         id = saveableContext.ID;

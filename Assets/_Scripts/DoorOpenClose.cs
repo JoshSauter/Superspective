@@ -6,7 +6,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class DoorOpenClose : MonoBehaviour, SaveableObject {
+public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpenCloseSave> {
     public enum DoorState {
         Closed,
         Opening,
@@ -15,7 +15,6 @@ public class DoorOpenClose : MonoBehaviour, SaveableObject {
     }
 
     const float targetLocalXScale = 0;
-    public bool DEBUG;
     public AnimationCurve doorOpenCurve;
     public AnimationCurve doorCloseCurve;
 
@@ -67,7 +66,8 @@ public class DoorOpenClose : MonoBehaviour, SaveableObject {
         }
     }
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
         closedScale = doorPieces[0].localScale;
         openedScale = new Vector3(targetLocalXScale, closedScale.y, closedScale.z);
@@ -202,15 +202,15 @@ public class DoorOpenClose : MonoBehaviour, SaveableObject {
 #endregion
 
 #region Saving
-    public bool SkipSave {
+    public override bool SkipSave {
         get => !gameObject.activeInHierarchy;
         set { }
     }
 
-    public string ID => $"DoorOpenClose_{id.uniqueId}";
+    public override string ID => $"DoorOpenClose_{id.uniqueId}";
 
     [Serializable]
-    class DoorOpenCloseSave {
+    public class DoorOpenCloseSave : SerializableSaveObject<DoorOpenClose> {
         public float timeBetweenEachDoorPiece;
         public float timeForEachDoorPieceToOpen;
         public float timeForEachDoorPieceToClose;
@@ -248,7 +248,7 @@ public class DoorOpenClose : MonoBehaviour, SaveableObject {
             timeForEachDoorPieceToClose = door.timeForEachDoorPieceToClose;
         }
 
-        public void LoadSave(DoorOpenClose door) {
+        public override void LoadSave(DoorOpenClose door) {
             door.doorOpenCurve = doorOpenCurve;
             door.doorCloseCurve = doorCloseCurve;
 
@@ -270,16 +270,6 @@ public class DoorOpenClose : MonoBehaviour, SaveableObject {
             door.timeForEachDoorPieceToOpen = timeForEachDoorPieceToOpen;
             door.timeForEachDoorPieceToClose = timeForEachDoorPieceToClose;
         }
-    }
-
-    public object GetSaveObject() {
-        return new DoorOpenCloseSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        DoorOpenCloseSave save = savedObject as DoorOpenCloseSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

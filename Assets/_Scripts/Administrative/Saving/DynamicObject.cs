@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections;
+using EpitaphUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Saving.DynamicObjectManager;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,8 +11,11 @@ namespace Saving {
     // Dynamic objects are objects that may be created or destroyed at runtime
     // They must provide what type of object they are so they can be instantiated from a prefab if it does not exist
 	// They are loaded before SaveableObjects so that the instance exists for other Component loads
-	[ExecuteInEditMode]
-    public class DynamicObject : MonoBehaviour, SaveableObject {
+    public class DynamicObject : MonoBehaviour, ISaveableObject {        
+	    [SerializeField]
+	    protected bool DEBUG = false;
+		DebugLogger debug;
+	    
 		UniqueId _id;
 		public UniqueId id {
 			get {
@@ -29,11 +33,15 @@ namespace Saving {
 		public bool SkipSave { get; set; }
 		public string ID => id.uniqueId;
 		public bool isGlobal = true;
+		bool hasRegistered = false;
+
+		string SceneName => gameObject.scene.name;
+		SaveManagerForScene SaveForScene => SaveManager.GetSaveManagerForScene(SceneName);
 
 		PickupObject pickup;
 
 		void OnValidate() {
-			if ((gameObject.scene == null || gameObject.scene.name == null || gameObject.scene.name == "") && (prefabPath == null || prefabPath == "")) {
+			if ((gameObject.scene == null || string.IsNullOrEmpty(SceneName)) && string.IsNullOrEmpty(prefabPath)) {
 #if UNITY_EDITOR
 				prefabPath = AssetDatabase.GetAssetPath(this)
 					// Strip prefix and suffix to get the Resources-relative path
@@ -42,17 +50,79 @@ namespace Saving {
 #endif
 			}
 		}
-
+		
 		void Awake() {
+			debug = new DebugLogger(gameObject, () => true);
 			if (prefabPath == "") {
-				Debug.LogError($"{gameObject.name}: No prefab for this DynamicObject", gameObject);
+				debug.LogError($"{gameObject.name}: No prefab for this DynamicObject");
 			}
 			pickup = GetComponent<PickupObject>();
 		}
 
+		IEnumerator Start() {
+			yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+			
+			Register();
+		}
+
+		public void Register() {
+			if (this == null || hasRegistered) {
+				return;
+			}
+
+			RegistrationStatus dynamicObjectRegistrationStatus = DynamicObjectManager.RegisterDynamicObject(this, SceneName);
+			bool dynamicObjectManagerRegistered = dynamicObjectRegistrationStatus.IsSuccess() || (SaveManager.isCurrentlyLoadingSave && !dynamicObjectRegistrationStatus.IsAlreadyDestroyed());
+			bool saveManagerRegistered = SaveForScene.RegisterDynamicObject(this);
+			if (dynamicObjectManagerRegistered && saveManagerRegistered) {
+				debug.Log($"Registration succeeded for {this.name}, scene {SceneName}");
+				hasRegistered = true;
+			}
+			else {
+				debug.LogError($"Registration failed. DynamicObjectManager registration succeeded: {dynamicObjectManagerRegistered}, SaveManagerForScene registration succeeded: {saveManagerRegistered}");
+				Destroy(gameObject);
+			}
+		}
+		
+		public void RegisterDynamicObjectUponCreation(string idOfCreatedObj) {
+			if (this != null && id.uniqueId == idOfCreatedObj) {
+				Register();
+			}
+		}
+
+		// DynamicObject.Destroy should be used instead of Object.Destroy to ensure proper record keeping
+		// for when the object is explicitly destroyed (not just from a scene change, etc)
+		public void Destroy() {
+			// Application.isPlaying check needed because this script is ExecuteOnEditMode for the automatic prefab path setup
+			// Apparently this means OnDestroy is called when entering Play Mode
+			// Note: This probably isn't needed anymore since moving from OnDestroy method
+			if (!Application.isPlaying) {
+				return;
+			}
+			
+			// Finally, ignore DynamicObjects that are destroyed solely because the scene they are in is being unloaded
+			if (!LevelManager.instance.loadedSceneNames.Contains(gameObject.scene.name)) {
+				return;
+			}
+			
+			bool unregistered = SaveForScene.UnregisterDynamicObject(this);
+			bool markedAsDestroyed = DynamicObjectManager.MarkDynamicObjectAsDestroyed(this, SceneName);
+
+			if (unregistered && markedAsDestroyed) {
+				debug.Log($"Marked as Destroyed in scene {SceneName}");
+			}
+			else {
+				debug.LogError($"Failed in Destroy. Unregistration successful: {unregistered}, Marked as destroyed successful: {markedAsDestroyed}");
+			}
+
+			Destroy(gameObject);
+		}
+
 		void Update() {
 			if (pickup != null && pickup.isHeld) {
-				SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByName(LevelManager.instance.activeSceneName));
+				Scene activeScene = SceneManager.GetSceneByName(LevelManager.instance.activeSceneName);
+				if (gameObject.scene != activeScene) {
+					ChangeScene(activeScene);
+				}
 			}
 		}
 
@@ -60,10 +130,30 @@ namespace Saving {
 		void OnCollisionEnter(Collision collision) {
 			if (isGlobal) {
 				Scene sceneOfContact = collision.collider.gameObject.scene;
+				if (sceneOfContact.name == LevelManager.ManagerScene) {
+					return;
+				}
+				
 				if (transform.parent != null) {
 					transform.parent = null;
 				}
-				SceneManager.MoveGameObjectToScene(gameObject, sceneOfContact);
+
+				if (gameObject.scene != sceneOfContact) {
+					ChangeScene(sceneOfContact);
+				}
+			}
+		}
+
+		void ChangeScene(Scene newScene) {
+			if (gameObject.scene != newScene) {
+				// Deregister the DynamicObject in the old SaveManagerForScene
+				SaveForScene.UnregisterDynamicObject(this);
+				// Move the GameObject to the new scene
+				SceneManager.MoveGameObjectToScene(gameObject, newScene);
+				// Update the record of the DynamicObject in DynamicObjectManager
+				DynamicObjectManager.ChangeDynamicObjectScene(this, SceneName);
+				// Re-register the DynamicObject in the new SaveManagerForScene
+				SaveForScene.RegisterDynamicObject(this);
 			}
 		}
 
@@ -77,18 +167,18 @@ namespace Saving {
 			public DynamicObjectSave(DynamicObject obj) {
 				this.prefabPath = obj.prefabPath;
 				this.isGlobal = obj.isGlobal;
-				this.scene = obj.gameObject.scene.name;
+				this.scene = obj.SceneName;
 				this.active = obj.gameObject.activeSelf;
 			}
 
 			public void LoadSave(DynamicObject obj) {
 				obj.prefabPath = this.prefabPath;
 				obj.isGlobal = this.isGlobal;
-				if (scene != null && scene != "") {
+				if (!string.IsNullOrEmpty(scene)) {
 					if (obj.transform.parent != null) {
 						obj.transform.SetParent(null);
 					}
-					SceneManager.MoveGameObjectToScene(obj.gameObject, SceneManager.GetSceneByName(scene));
+					obj.ChangeScene(SceneManager.GetSceneByName(scene));
 				}
 				obj.gameObject.SetActive(this.active);
 			}
@@ -98,8 +188,8 @@ namespace Saving {
 			return new DynamicObjectSave(this);
 		}
 
-		public void LoadFromSavedObject(object savedObject) {
-			(savedObject as DynamicObjectSave).LoadSave(this);
+		public void RestoreStateFromSave(object savedObject) {
+			(savedObject as DynamicObjectSave)?.LoadSave(this);
 		}
 	}
 }

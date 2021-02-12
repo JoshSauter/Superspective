@@ -7,7 +7,7 @@ using System;
 using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
-	public class ValveControl : MonoBehaviour, SaveableObject {
+	public class ValveControl : SaveableObject<ValveControl, ValveControl.ValveControlSave> {
 		const float lookSpeedMultiplier = 0.5f;
 		InteractableObject interactableObject;
 		PlayerLook playerLook;
@@ -17,7 +17,8 @@ namespace LevelSpecific.BlackRoom {
 		public delegate void ValveRotate(Angle diff);
 		public event ValveRotate OnValveRotate;
 
-		public void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			interactableObject = GetComponent<InteractableObject>();
 			if (interactableObject == null) {
 				interactableObject = gameObject.AddComponent<InteractableObject>();
@@ -25,7 +26,8 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			playerLook = PlayerLook.instance;
 		}
 
@@ -66,12 +68,12 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		public bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+		public override bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
 
-		public string ID => $"{transform.parent.name}_ValveControl";
+		public override string ID => $"{transform.parent.name}_ValveControl";
 
 		[Serializable]
-		class ValveControlSave {
+		public class ValveControlSave : SerializableSaveObject<ValveControl> {
 			SerializableQuaternion rotation;
 			bool isActive;
 			Angle prevAngle;
@@ -82,21 +84,11 @@ namespace LevelSpecific.BlackRoom {
 				this.prevAngle = toggle.prevAngle;
 			}
 
-			public void LoadSave(ValveControl toggle) {
+			public override void LoadSave(ValveControl toggle) {
 				toggle.transform.rotation = this.rotation;
 				toggle.isActive = this.isActive;
 				toggle.prevAngle = this.prevAngle;
 			}
-		}
-
-		public object GetSaveObject() {
-			return new ValveControlSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ValveControlSave save = savedObject as ValveControlSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

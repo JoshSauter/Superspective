@@ -1,15 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
-using EpitaphUtils;
+﻿using UnityEngine;
 using Saving;
 using System;
 using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
-	public class LightProjector : MonoBehaviour, SaveableObject {
-		public bool DEBUG = false;
+	public class LightProjector : SaveableObject<LightProjector, LightProjector.LightProjectorSave> {
 		const float minSize = .5f;
 		const float maxSize = 2.5f;
 		float currentSize = 1;
@@ -34,14 +29,16 @@ namespace LevelSpecific.BlackRoom {
 		const float upAndDownAnimLerpSpeed = 10f;
 		const float verticalMovespeed = .15f;
 
-		void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			upAndDownAnim = GetComponent<Animator>();
 			sideToSideAnim = transform.parent.GetComponent<Animator>();
 			desiredUpAndDownAnimTime = curUpAndDownAnimTime;
 			desiredCircumferenceRotation = curCircumferenceRotation;
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			if (upAndDownAnim != null) {
 				upAndDownAnim.Play("ProjectorUpDown", 0, curUpAndDownAnimTime);
 			}
@@ -143,12 +140,10 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		public bool SkipSave { get; set; }
-
-		public string ID => $"{gameObject.name}";
+		public override string ID => $"{gameObject.name}";
 
 		[Serializable]
-		class LightProjectorSave {
+		public class LightProjectorSave : SerializableSaveObject<LightProjector> {
 			float currentSize;
 
 			float curSideToSideAnimTime;
@@ -173,7 +168,7 @@ namespace LevelSpecific.BlackRoom {
 				this.desiredUpAndDownAnimTime = lightProjector.desiredUpAndDownAnimTime;
 			}
 
-			public void LoadSave(LightProjector lightProjector) {
+			public override void LoadSave(LightProjector lightProjector) {
 				lightProjector.currentSize = this.currentSize;
 
 				lightProjector.curSideToSideAnimTime = this.curSideToSideAnimTime;
@@ -187,16 +182,6 @@ namespace LevelSpecific.BlackRoom {
 
 				lightProjector.ChangeFrustumSize(1);
 			}
-		}
-
-		public object GetSaveObject() {
-			return new LightProjectorSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			LightProjectorSave save = savedObject as LightProjectorSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

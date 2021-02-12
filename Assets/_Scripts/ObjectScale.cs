@@ -4,7 +4,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class ObjectScale : MonoBehaviour, SaveableObject {
+public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSave> {
     public float minSize = 1f;
     public float maxSize = 1f;
     public float period = 3f;
@@ -24,11 +24,11 @@ public class ObjectScale : MonoBehaviour, SaveableObject {
     // Update is called once per frame
     void Update() {
         timeElapsed += Time.deltaTime;
-        transform.localScale = startScale.normalized * startScale.magnitude * Mathf.Lerp(
+        transform.localScale = startScale.normalized * (startScale.magnitude * Mathf.Lerp(
             minSize,
             maxSize,
             Mathf.Cos(timeElapsed * 2 * Mathf.PI / period) * 0.5f + 0.5f
-        );
+        ));
     }
 
     void OnEnable() {
@@ -41,13 +41,10 @@ public class ObjectScale : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"ObjectScale_{id.uniqueId}";
+    public override string ID => $"ObjectScale_{id.uniqueId}";
 
     [Serializable]
-    class ObjectScaleSave {
+    public class ObjectScaleSave : SerializableSaveObject<ObjectScale> {
         float maxSize;
         float minSize;
         float period;
@@ -66,7 +63,7 @@ public class ObjectScale : MonoBehaviour, SaveableObject {
             scale = script.transform.localScale;
         }
 
-        public void LoadSave(ObjectScale script) {
+        public override void LoadSave(ObjectScale script) {
             script.minSize = minSize;
             script.maxSize = maxSize;
             script.period = period;
@@ -74,16 +71,6 @@ public class ObjectScale : MonoBehaviour, SaveableObject {
             script.timeElapsed = timeElapsed;
             script.transform.localScale = scale;
         }
-    }
-
-    public object GetSaveObject() {
-        return new ObjectScaleSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        ObjectScaleSave save = savedObject as ObjectScaleSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

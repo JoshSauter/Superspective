@@ -15,7 +15,7 @@ public enum VisibilityState {
 };
 
 [RequireComponent(typeof(UniqueId))]
-public class DimensionObject : MonoBehaviour, SaveableObject {
+public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
 	UniqueId _id;
 	public UniqueId id {
 		get {
@@ -26,10 +26,8 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	public bool DEBUG = false;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	public bool ignoreChildrenWithDimensionObject = true;
-	protected DebugLogger debug;
 
 	protected bool initialized = false;
 	[Range(0, 1)]
@@ -57,8 +55,8 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	public event DimensionObjectStateChangeAction OnStateChange;
 	#endregion
 
-	protected virtual void Awake() {
-		debug = new DebugLogger(this, () => DEBUG);
+	protected override void Awake() {
+		base.Awake();
 
 		renderers = GetAllEpitaphRenderers().ToArray();
 		if (renderers.Length == 0) {
@@ -70,14 +68,19 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 		startingLayers = GetAllStartingLayers(renderers);
 	}
 
-	public virtual IEnumerator Start() {
+	protected override void Init() {
 		SetChannelValuesInMaterials();
 
-		if (!initialized) {
-			yield return new WaitUntil(() => gameObject.IsInLoadedScene());
-			SwitchVisibilityState(startingVisibilityState, true);
-			initialized = true;
+		if (!initialized && gameObject.activeInHierarchy) {
+			StartCoroutine(Initialize());
 		}
+	}
+
+	IEnumerator Initialize() {
+		yield return new WaitUntil(() => gameObject.IsInLoadedScene());
+		
+		SwitchVisibilityState(startingVisibilityState, true);
+		initialized = true;
 	}
 
 	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
@@ -311,19 +314,10 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 	#endregion
 
 	#region Saving
-	public bool SkipSave { get; set; }
-	public virtual string ID => $"DimensionObject_{id.uniqueId}";
-	//public virtual string ID {
-	//	get {
-	//		if (id == null || id.uniqueId == null) {
-	//			throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
-	//		}
-	//		return $"DimensionObjectBase_{id.uniqueId}";
-	//	}
-	//}
+	public override string ID => $"DimensionObject_{id.uniqueId}";
 
 	[Serializable]
-	class DimensionObjectSave {
+	public class DimensionObjectSave : SerializableSaveObject<DimensionObject> {
 		bool treatChildrenAsOneObjectRecursively;
 		bool ignoreChildrenWithDimensionObject;
 		bool disableColliderWhileInvisible;
@@ -350,7 +344,7 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 			this.visibilityState = (int)dimensionObj.visibilityState;
 		}
 
-		public void LoadSave(DimensionObject dimensionObj) {
+		public override void LoadSave(DimensionObject dimensionObj) {
 			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
 			dimensionObj.ignoreChildrenWithDimensionObject = this.ignoreChildrenWithDimensionObject;
 			dimensionObj.disableColliderWhileInvisible = this.disableColliderWhileInvisible;
@@ -364,16 +358,6 @@ public class DimensionObject : MonoBehaviour, SaveableObject {
 
 			dimensionObj.SwitchVisibilityState(dimensionObj.visibilityState, true);
 		}
-	}
-
-	public virtual object GetSaveObject() {
-		return new DimensionObjectSave(this);
-	}
-
-	public virtual void LoadFromSavedObject(object savedObject) {
-		DimensionObjectSave save = savedObject as DimensionObjectSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

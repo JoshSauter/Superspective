@@ -2,7 +2,7 @@
 using Saving;
 using UnityEngine;
 
-public class Headbob : MonoBehaviour, SaveableObject {
+public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     const float minPeriod = .24f;
     const float maxPeriod = .87f;
     const float minAmplitude = .5f;
@@ -20,7 +20,8 @@ public class Headbob : MonoBehaviour, SaveableObject {
     float curAmplitude = 1f;
     PlayerMovement playerMovement;
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
         playerMovement = GetComponent<PlayerMovement>();
     }
 
@@ -50,12 +51,10 @@ public class Headbob : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    // There's only one player so we don't need a UniqueId here
-    public bool SkipSave { get; set; }
-    public string ID => "Headbob";
+    public override string ID => "Headbob";
 
     [Serializable]
-    class HeadbobSave {
+    public class HeadbobSave : SerializableSaveObject<Headbob> {
         float curAmplitude;
         float curBobAmount;
         float curPeriod;
@@ -71,24 +70,13 @@ public class Headbob : MonoBehaviour, SaveableObject {
             curAmplitude = headbob.curAmplitude;
         }
 
-        public void LoadSave(Headbob headbob) {
+        public override void LoadSave(Headbob headbob) {
             headbob.curBobAmount = curBobAmount;
             headbob.t = t;
             headbob.curPeriod = curPeriod;
             headbob.headbobAmount = headbobAmount;
             headbob.curAmplitude = curAmplitude;
         }
-    }
-
-    public object GetSaveObject() {
-        return new HeadbobSave(this);
-        ;
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        HeadbobSave save = savedObject as HeadbobSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

@@ -5,7 +5,7 @@
     }
     SubShader {
 		Tags  { 
-			"RenderType" = "PortalMaterial" "Queue" = "Geometry" "PortalTag" = "True"
+			"RenderType" = "PortalMaterial" "Queue" = "Geometry" "PortalTag" = "Standard"
 		}
 
         Pass {

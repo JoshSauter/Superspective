@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SerializableClasses;
 
-public class Player : Singleton<Player>, SaveableObject {
+public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public PlayerLook look;
 	public PlayerMovement movement;
 	public Headbob headbob;
@@ -13,11 +13,12 @@ public class Player : Singleton<Player>, SaveableObject {
 	public PickupObject heldObject;
 	public bool isHoldingSomething { get { return heldObject != null; } }
 
-	public Collider collider;
-	public Renderer renderer;
+	public new Collider collider;
+	public new Renderer renderer;
 	public Vector3 playerSize { get { return renderer.bounds.size; } }
 
-	void Awake() {
+	protected override void Awake() {
+		base.Awake();
 		renderer = GetComponentInChildren<Renderer>();
 		collider = GetComponentInChildren<Collider>();
 		look = GetComponent<PlayerLook>();
@@ -32,12 +33,11 @@ public class Player : Singleton<Player>, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
-	public string ID => "Player";
+	public override string ID => "Player";
 
 	[Serializable]
-	class PlayerSave {
+	public class PlayerSave : SerializableSaveObject<Player> {
 		SerializableVector3 position;
 		SerializableQuaternion rotation;
 		SerializableVector3 localScale;
@@ -48,21 +48,11 @@ public class Player : Singleton<Player>, SaveableObject {
 			this.localScale = player.transform.localScale;
 		}
 
-		public void LoadSave(Player player) {
+		public override void LoadSave(Player player) {
 			player.transform.position = this.position;
 			player.transform.rotation = this.rotation;
 			player.transform.localScale = this.localScale;
 		}
-	}
-
-	public object GetSaveObject() {
-		return new PlayerSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		PlayerSave save = savedObject as PlayerSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

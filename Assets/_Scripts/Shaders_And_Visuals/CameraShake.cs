@@ -5,8 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraShake : Singleton<CameraShake>, SaveableObject {
-	public bool DEBUG = false;
+public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.CameraShakeSave> {
 	bool isUsingCurve;
 	bool _isShaking = false;
 	bool isShaking {
@@ -109,13 +108,11 @@ public class CameraShake : Singleton<CameraShake>, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
-	public string ID => "CameraShake";
+	public override string ID => "CameraShake";
 
 	[Serializable]
-	class CameraShakeSave {
-		bool DEBUG;
+	public class CameraShakeSave : SerializableSaveObject<CameraShake> {
 		bool isUsingCurve;
 		bool isShaking;
 
@@ -131,7 +128,6 @@ public class CameraShake : Singleton<CameraShake>, SaveableObject {
 		SerializableVector2 totalOffsetApplied;
 
 		public CameraShakeSave(CameraShake cameraShake) {
-			this.DEBUG = cameraShake.DEBUG;
 			this.isUsingCurve = cameraShake.isUsingCurve;
 			this.isShaking = cameraShake.isShaking;
 			this.appliedOffset = cameraShake.appliedOffset;
@@ -147,8 +143,7 @@ public class CameraShake : Singleton<CameraShake>, SaveableObject {
 			this.totalOffsetApplied = cameraShake.totalOffsetApplied;
 		}
 
-		public void LoadSave(CameraShake cameraShake) {
-			cameraShake.DEBUG = this.DEBUG;
+		public override void LoadSave(CameraShake cameraShake) {
 			cameraShake.isUsingCurve = this.isUsingCurve;
 			cameraShake._isShaking = this.isShaking;
 			cameraShake.appliedOffset = this.appliedOffset;
@@ -161,17 +156,6 @@ public class CameraShake : Singleton<CameraShake>, SaveableObject {
 			cameraShake.timeShaking = this.timeShaking;
 			cameraShake.totalOffsetApplied = this.totalOffsetApplied;
 		}
-	}
-
-	public object GetSaveObject() {
-		CameraShakeSave s = new CameraShakeSave(this);
-		return s;
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		CameraShakeSave save = savedObject as CameraShakeSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

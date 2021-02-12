@@ -6,7 +6,7 @@ using UnityEngine;
 
 // TODO: Change the simple localScale modification to a dissolve shader
 [RequireComponent(typeof(UniqueId))]
-public class MaterializeObject : MonoBehaviour, SaveableObject {
+public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeObject.MaterializeObjectSave> {
     public delegate void MaterializeAction();
 
     public enum State {
@@ -69,7 +69,9 @@ public class MaterializeObject : MonoBehaviour, SaveableObject {
                     break;
                 case State.Dematerialized:
                     OnDematerializeEnd?.Invoke();
-                    if (destroyObjectOnDematerialize) Destroy(gameObject);
+                    if (destroyObjectOnDematerialize) {
+                        GetComponent<DynamicObject>().Destroy();
+                    }
                     break;
             }
 
@@ -77,7 +79,8 @@ public class MaterializeObject : MonoBehaviour, SaveableObject {
         }
     }
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         thisPickupObj = GetComponent<PickupObject>();
 
         startScale = transform.localScale;
@@ -144,13 +147,11 @@ public class MaterializeObject : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"MaterializeObject_{id.uniqueId}";
+    public override string ID => $"MaterializeObject_{id.uniqueId}";
 
     [Serializable]
-    class MaterializeObjectSave {
+    public class MaterializeObjectSave : SerializableSaveObject<MaterializeObject> {
         SerializableAnimationCurve animCurve;
         SerializableVector3 curScale;
         float dematerializeTime;
@@ -171,7 +172,7 @@ public class MaterializeObject : MonoBehaviour, SaveableObject {
             curScale = materialize.transform.localScale;
         }
 
-        public void LoadSave(MaterializeObject materialize) {
+        public override void LoadSave(MaterializeObject materialize) {
             materialize.state = state;
             materialize.timeSinceStateChange = timeSinceStateChange;
             materialize.destroyObjectOnDematerialize = destroyObjectOnDematerialize;
@@ -181,16 +182,6 @@ public class MaterializeObject : MonoBehaviour, SaveableObject {
             materialize.startScale = startScale;
             materialize.transform.localScale = curScale;
         }
-    }
-
-    public object GetSaveObject() {
-        return new MaterializeObjectSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        MaterializeObjectSave save = savedObject as MaterializeObjectSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

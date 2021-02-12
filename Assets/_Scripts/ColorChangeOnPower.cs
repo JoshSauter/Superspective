@@ -6,7 +6,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
+public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChangeOnPower.ColorChangeOnPowerSave> {
     public enum ActivationTiming {
         OnPowerBegin,
         OnPowerFinish,
@@ -44,7 +44,8 @@ public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
         timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;
 
     // Use this for initialization
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         if (powerTrailToReactTo == null) powerTrailToReactTo = GetComponent<PowerTrail>();
         if (powerTrailToReactTo == null) {
             Debug.LogWarning("No Power Trail to react to, disabling color change script", gameObject);
@@ -138,13 +139,10 @@ public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
-    // There's only one player so we don't need a UniqueId here
-    public string ID => $"{poweredColor:F3}_{id.uniqueId}";
+    public override string ID => $"{poweredColor:F3}_{id.uniqueId}";
 
     [Serializable]
-    class ColorChangeOnPowerSave {
+    public class ColorChangeOnPowerSave : SerializableSaveObject<ColorChangeOnPower> {
         SerializableAnimationCurve colorChangeAnimationCurve;
 
         SerializableColor currentColor;
@@ -173,7 +171,7 @@ public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
             }
         }
 
-        public void LoadSave(ColorChangeOnPower colorChange) {
+        public override void LoadSave(ColorChangeOnPower colorChange) {
             colorChange.timing = (ActivationTiming) timing;
             colorChange.useMaterialAsStartColor = useMaterialAsStartColor;
             colorChange.depoweredColor = depoweredColor;
@@ -185,16 +183,6 @@ public class ColorChangeOnPower : MonoBehaviour, SaveableObject {
 
             if (currentColor != null && currentEmission != null) colorChange.SetColor(currentColor, currentEmission);
         }
-    }
-
-    public object GetSaveObject() {
-        return new ColorChangeOnPowerSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        ColorChangeOnPowerSave save = savedObject as ColorChangeOnPowerSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

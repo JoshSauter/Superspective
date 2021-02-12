@@ -1,15 +1,24 @@
-﻿using Audio;
-using EpitaphUtils;
+﻿using System;
+using Audio;
 using NaughtyAttributes;
 using Saving;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Tayx.Graphy.Utils.NumString;
+using SerializableClasses;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
-	public class ForkElevator : MonoBehaviour, SaveableObject {
+	[RequireComponent(typeof(UniqueId))]
+	public class ForkElevator : SaveableObject<ForkElevator, ForkElevator.ForkElevatorSave> {
+		UniqueId _id;
+
+		UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
+		
 		public enum State {
 			Idle,
 			DoorsClosing,
@@ -17,7 +26,8 @@ namespace LevelSpecific.Fork {
 			DoorsOpening
 		}
 
-		[SerializeField][ReadOnly]
+		[SerializeField]
+		[ReadOnly]
 		State _state = State.Idle;
 		public State state {
 			get { return _state; }
@@ -49,15 +59,13 @@ namespace LevelSpecific.Fork {
 
 		bool playerStandingInElevator = false;
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			raisedHeight = transform.parent.position.y;
 			loweredHeight = raisedHeight - height;
 
 			elevatorButton.OnButtonPressBegin += (ctx) => RaiseLowerElevator(true);
 			elevatorButton.OnButtonDepressBegin += (ctx) => RaiseLowerElevator(false);
-
-			// Saving
-			ID = GetComponent<UniqueId>().uniqueId;
 		}
 
 		void FixedUpdate() {
@@ -189,9 +197,11 @@ namespace LevelSpecific.Fork {
 		}
 
 #region Saving
-		[System.Serializable]
-		class ForkElevatorSave {
-			SerializableClasses.SerializableVector3 position;
+		public override string ID => $"Elevator_{id.uniqueId}";
+		
+		[Serializable]
+		public class ForkElevatorSave : SerializableSaveObject<ForkElevator> {
+			SerializableVector3 position;
 			int state;
 			bool goingDown;
 			float timeElapsedSinceStateChange;
@@ -212,7 +222,7 @@ namespace LevelSpecific.Fork {
 				this.position = elevator.transform.parent.position;
 			}
 
-			public void LoadSave(ForkElevator elevator) {
+			public override void LoadSave(ForkElevator elevator) {
 				elevator.state = (State)this.state;
 				elevator.goingDown = this.goingDown;
 				elevator.timeElapsedSinceStateChange = this.timeElapsedSinceStateChange;
@@ -241,19 +251,6 @@ namespace LevelSpecific.Fork {
 						break;
 				}
 			}
-		}
-
-		public bool SkipSave { get; set; }
-		public string ID { get; private set; }
-		public object GetSaveObject() {
-			ForkElevatorSave save = new ForkElevatorSave(this);
-			return save;
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ForkElevatorSave save = savedObject as ForkElevatorSave;
-
-			save.LoadSave(this);
 		}
 #endregion
 	}

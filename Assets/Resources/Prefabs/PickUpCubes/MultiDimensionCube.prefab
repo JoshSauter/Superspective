@@ -143,6 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17128bce5ada30849bc3db494a064870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   pickupCube: {fileID: 1544007497055716616}
   thisCollider: {fileID: 0}
   kinematicCollider: {fileID: 1544007496323721984}
@@ -190,6 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   prefabPath: Prefabs/PickUpCubes/MultiDimensionCube
   isGlobal: 1
 --- !u!114 &1544007497055716626
@@ -204,6 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   thisRigidbody: {fileID: 0}
   useGravity: 1
   gravityDirection: {x: 0, y: -1, z: 0}
@@ -408,9 +411,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 1
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2
@@ -4474,9 +4479,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
+  ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
+  disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 2
   visibilityState: 2

@@ -6,7 +6,7 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzleManager : MonoBehaviour, SaveableObject {
+	public class ColorPuzzleManager : SaveableObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
 		bool hasSetActivePuzzleToZero = false;
 		int _activePuzzle;
 		public int activePuzzle {
@@ -23,12 +23,18 @@ namespace LevelSpecific.BlackRoom {
 		}
 		ColorPuzzle[] puzzles;
 
-		void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			puzzles = GetComponentsInChildren<ColorPuzzle>();
 		}
 
-		IEnumerator Start() {
+		protected override void Start() {
+			base.Start();
 			ColorPuzzle.OnColorPuzzleSolvedStateChange += HandlePuzzleSolvedStateChange;
+			StartCoroutine(Initialize());
+		}
+
+		IEnumerator Initialize() {
 			yield return null;
 			if (!hasSetActivePuzzleToZero) {
 				hasSetActivePuzzleToZero = true;
@@ -45,12 +51,11 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		public bool SkipSave { get; set; }
 		// There's only one player so we don't need a UniqueId here
-		public string ID => "ColorPuzzleManager";
+		public override string ID => "ColorPuzzleManager";
 
 		[Serializable]
-		class ColorPuzzleManagerSave {
+		public class ColorPuzzleManagerSave : SerializableSaveObject<ColorPuzzleManager> {
 			bool hasSetActivePuzzleToZero;
 			int activePuzzle;
 
@@ -59,20 +64,10 @@ namespace LevelSpecific.BlackRoom {
 				this.activePuzzle = puzzleManager.activePuzzle;
 			}
 
-			public void LoadSave(ColorPuzzleManager puzzleManager) {
+			public override void LoadSave(ColorPuzzleManager puzzleManager) {
 				puzzleManager.hasSetActivePuzzleToZero = this.hasSetActivePuzzleToZero;
 				puzzleManager.activePuzzle = this.activePuzzle;
 			}
-		}
-
-		public object GetSaveObject() {
-			return new ColorPuzzleManagerSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ColorPuzzleManagerSave save = savedObject as ColorPuzzleManagerSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

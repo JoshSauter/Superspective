@@ -6,7 +6,7 @@ using UnityEngine;
 using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
-public class Panel : MonoBehaviour, SaveableObject {
+public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     public enum State {
         Deactivated,
         Activating,
@@ -68,7 +68,8 @@ public class Panel : MonoBehaviour, SaveableObject {
 
     public bool activated => state == State.Activated || state == State.Activating;
 
-    protected virtual void Awake() {
+    protected override void Awake() {
+        base.Awake();
         // Set up references
         thisRenderer = gameObject.GetComponent<EpitaphRenderer>();
         if (thisRenderer == null) thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
@@ -80,7 +81,8 @@ public class Panel : MonoBehaviour, SaveableObject {
     }
 
     // Use this for initialization
-    protected virtual void Start() {
+    protected override void Start() {
+        base.Start();
         gemButton.OnButtonPressFinish += ctx => PanelActivate();
         gemButton.OnButtonDepressBegin += ctx => PanelDeactivate();
 
@@ -178,13 +180,10 @@ public class Panel : MonoBehaviour, SaveableObject {
 #endregion
 
 #region Saving
-    public bool SkipSave { get; set; }
-
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"Panel_{id.uniqueId}";
+    public override string ID => $"Panel_{id.uniqueId}";
 
     [Serializable]
-    class PanelSave {
+    public class PanelSave : SerializableSaveObject<Panel> {
         float colorLerpTime;
         SerializableColor endColor;
         SerializableColor gemColor;
@@ -203,7 +202,7 @@ public class Panel : MonoBehaviour, SaveableObject {
             soundActivated = script.soundActivated;
         }
 
-        public void LoadSave(Panel script) {
+        public override void LoadSave(Panel script) {
             script.state = state;
             script.timeSinceStateChange = timeSinceStateChange;
             script.gemColor = gemColor;
@@ -212,16 +211,6 @@ public class Panel : MonoBehaviour, SaveableObject {
             script.colorLerpTime = colorLerpTime;
             script.soundActivated = soundActivated;
         }
-    }
-
-    public object GetSaveObject() {
-        return new PanelSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        PanelSave save = savedObject as PanelSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

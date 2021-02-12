@@ -7068,13 +7068,15 @@ GameObject:
   - component: {fileID: 338539320}
   - component: {fileID: 338539319}
   - component: {fileID: 338539318}
+  - component: {fileID: 338539323}
+  - component: {fileID: 338539322}
   m_Layer: 28
   m_Name: MiddleGlassDimensionWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &338539317
 Transform:
   m_ObjectHideFlags: 0
@@ -7251,6 +7253,33 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &338539322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338539316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78adad7697cb4be9aa48b1c744e9fef0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  setAsInactiveOnStart: 1
+--- !u!114 &338539323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338539316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 838f9b38-1052-4b54-9e46-84314e2a027c
 --- !u!1 &339205750
 GameObject:
   m_ObjectHideFlags: 0
@@ -22812,7 +22841,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-387472
+  m_Name: pb_Mesh2326946
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -23780,7 +23809,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-180122
+  m_Name: pb_Mesh2314404
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -30782,7 +30811,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 1
-  visibilityState: 2
+  visibilityState: 0
 --- !u!114 &1340281315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30870,6 +30899,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   debugMode: 0
   channel: WhiteRoomToTransition
   changeActiveSceneOnTeleport: 1
@@ -35803,6 +35833,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   debugMode: 1
   channel: WhiteRoomToTransition
   changeActiveSceneOnTeleport: 1
@@ -44928,7 +44959,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUG: 1
+  DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   channel: 1
@@ -44937,7 +44968,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   startingVisibilityState: 1
-  visibilityState: 2
+  visibilityState: 0
 --- !u!114 &1803735303
 MonoBehaviour:
   m_ObjectHideFlags: 0

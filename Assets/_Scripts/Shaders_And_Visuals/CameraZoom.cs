@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraZoom : MonoBehaviour, SaveableObject {
+public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> {
     public float defaultFOV = 90f;
     public const float zoomFOV = 30f;
     public float currentFOV => mainCamera.fieldOfView;
@@ -17,17 +17,23 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
     public List<Camera> otherCameras = new List<Camera>();
     PlayerButtonInput input;
 
-	void Awake() {
+    protected override void Awake() {
+	    base.Awake();
 		mainCamera = GetComponent<Camera>();
 		defaultFOV = mainCamera.fieldOfView;
 	}
 
-    IEnumerator Start() {
+    protected override void Start() {
+	    base.Start();
         playerLook = PlayerLook.instance;
         input = PlayerButtonInput.instance;
 
-        yield return new WaitForSeconds(1f);
-        otherCameras.Add(VirtualPortalCamera.instance.portalCamera);
+        StartCoroutine(Initialize());
+    }
+
+    IEnumerator Initialize() {
+	    yield return new WaitForSeconds(1f);
+	    otherCameras.Add(VirtualPortalCamera.instance.portalCamera);
     }
 
     void Update() {
@@ -40,12 +46,11 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
-	public string ID => "CameraZoom";
+	public override string ID => "CameraZoom";
 
 	[Serializable]
-	class CameraZoomSave {
+	public class CameraZoomSave : SerializableSaveObject<CameraZoom> {
 		float defaultFOV;
 		bool zoomed;
 		float currentFOV;
@@ -56,21 +61,11 @@ public class CameraZoom : MonoBehaviour, SaveableObject {
 			this.currentFOV = zoom.currentFOV;
 		}
 
-		public void LoadSave(CameraZoom zoom) {
+		public override void LoadSave(CameraZoom zoom) {
 			zoom.defaultFOV = this.defaultFOV;
 			zoom.zoomed = this.zoomed;
 			zoom.mainCamera.fieldOfView = this.currentFOV;
 		}
-	}
-
-	public object GetSaveObject() {
-		return new CameraZoomSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		CameraZoomSave save = savedObject as CameraZoomSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

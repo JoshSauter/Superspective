@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3RoseBars : MonoBehaviour, SaveableObject {
+    public class WhiteRoom3RoseBars : SaveableObject<WhiteRoom3RoseBars, WhiteRoom3RoseBars.WhiteRoom3RoseBarsSave> {
         public PowerTrail powerTrail;
         public Button powerButton;
         public GameObject invisibleWall;
@@ -18,7 +18,8 @@ namespace LevelSpecific.WhiteRoom {
         bool barsWereUpLastFrame = true;
         public bool barsAreUp = true;
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
             powerButton.OnButtonPressBegin += (ctx) => powerTrail.powerIsOn = true;
             powerButton.OnButtonDepressFinish += (ctx) => powerTrail.powerIsOn = false;
 
@@ -42,12 +43,10 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         #region Saving
-        public bool SkipSave { get; set; }
-
-        public string ID => "WhiteRoom3RoseBars";
+        public override string ID => "WhiteRoom3RoseBars";
 
         [Serializable]
-        class WhiteRoom3RoseBarsSave {
+        public class WhiteRoom3RoseBarsSave : SerializableSaveObject<WhiteRoom3RoseBars> {
             bool barsWereUpLastFrame;
             bool barsAreUp;
             bool invisibleWallActive;
@@ -60,7 +59,7 @@ namespace LevelSpecific.WhiteRoom {
                 this.barPositions = roseBars.bars.Select<GameObject, SerializableVector3>(b => b.transform.position).ToList();
             }
 
-            public void LoadSave(WhiteRoom3RoseBars roseBars) {
+            public override void LoadSave(WhiteRoom3RoseBars roseBars) {
                 roseBars.barsWereUpLastFrame = this.barsWereUpLastFrame;
                 roseBars.barsAreUp = this.barsAreUp;
                 roseBars.invisibleWall.SetActive(this.invisibleWallActive);
@@ -68,16 +67,6 @@ namespace LevelSpecific.WhiteRoom {
                     roseBars.bars[i].transform.position = this.barPositions[i];
                 }
             }
-        }
-
-        public object GetSaveObject() {
-            return new WhiteRoom3RoseBarsSave(this);
-        }
-
-        public void LoadFromSavedObject(object savedObject) {
-            WhiteRoom3RoseBarsSave save = savedObject as WhiteRoom3RoseBarsSave;
-
-            save.LoadSave(this);
         }
         #endregion
     }

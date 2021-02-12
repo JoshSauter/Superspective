@@ -6,9 +6,10 @@ using Saving;
 using System;
 
 [RequireComponent(typeof(UniqueId))]
-public class MultiDimensionCube : MonoBehaviour, SaveableObject {
+public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimensionCube.MultiDimensionCubeSave> {
 	UniqueId _id;
-	public UniqueId id {
+
+	UniqueId id {
 		get {
 			if (_id == null) {
 				_id = GetComponent<UniqueId>();
@@ -71,7 +72,8 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	void Awake() {
+	protected override void Awake() {
+		base.Awake();
 		interactableObject = GetComponent<InteractableObject>();
 		if (interactableObject == null) {
 			interactableObject = gameObject.AddComponent<InteractableObject>();
@@ -95,9 +97,12 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
 
 		DynamicObjectManager.OnDynamicObjectCreated += SetUniqueIdsUponCreation;
+		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
+		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
 	}
 
-	void OnDestroy() {
+	protected override void OnDestroy() {
+		base.OnDestroy();
 		DynamicObjectManager.OnDynamicObjectCreated -= SetUniqueIdsUponCreation;
 	}
 
@@ -108,13 +113,14 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	void Start() {
+	protected override void Start() {
+		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
+		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
+		base.Start();
+		
 		pickupCube.OnPickupSimple += OnPickup;
 
 		cubeTransforms = corporealCubeDimensionObj.transform.GetComponentsInChildrenRecursively<Transform>();
-
-		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
-		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
 
 		corporealCubeDimensionObj.OnStateChange += HandleStateChange;
 	}
@@ -245,11 +251,10 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
-	public string ID => $"MultiDimensionCube_{id.uniqueId}";
+	public override string ID => $"MultiDimensionCube_{id.uniqueId}";
 
 	[Serializable]
-	class MultiDimensionCubeSave {
+	public class MultiDimensionCubeSave : SerializableSaveObject<MultiDimensionCube> {
 		int state;
 		float timeSinceStateChange;
 
@@ -258,20 +263,10 @@ public class MultiDimensionCube : MonoBehaviour, SaveableObject {
 			this.timeSinceStateChange = multiDimensionCube.timeSinceStateChange;
 		}
 
-		public void LoadSave(MultiDimensionCube multiDimensionCube) {
+		public override void LoadSave(MultiDimensionCube multiDimensionCube) {
 			multiDimensionCube._state = (State)this.state;
 			multiDimensionCube.timeSinceStateChange = this.timeSinceStateChange;
 		}
-	}
-
-	public object GetSaveObject() {
-		return new MultiDimensionCubeSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		MultiDimensionCubeSave save = savedObject as MultiDimensionCubeSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

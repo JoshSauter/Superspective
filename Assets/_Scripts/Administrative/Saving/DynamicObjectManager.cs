@@ -6,14 +6,42 @@ using System;
 using static Saving.DynamicObject;
 using UnityEngine.SceneManagement;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using EpitaphUtils;
 
 namespace Saving {
+	public enum RegistrationStatus {
+		ExistingRecordInAnotherScene,
+		ExistingRecordIsDestroyed,
+		RegisteredSuccessfully
+	}
+	public static class RegistrationStatusExtensions {
+		public static bool IsSuccess(this RegistrationStatus status) {
+			return status == RegistrationStatus.RegisteredSuccessfully;
+		}
+
+		public static bool IsAlreadyDestroyed(this RegistrationStatus status) {
+			return status == RegistrationStatus.ExistingRecordIsDestroyed;
+		}
+	}
 	public static class DynamicObjectManager {
-		// Scene: ID => DynamicObject
-		public static Dictionary<string, Dictionary<string, DynamicObject>> dynamicObjectsInActiveScenes = new Dictionary<string, Dictionary<string, DynamicObject>>();
-		public static Dictionary<string, Dictionary<string, DynamicObjectSave>> dynamicObjectsInInactiveScenes = new Dictionary<string, Dictionary<string, DynamicObjectSave>>();
-		public static Dictionary<string, string> allDynamicObjectsSceneById = new Dictionary<string, string>();
+		// A DynamicObjectRecord keeps track of all DynamicObjects that have ever existed in this save file
+		// This includes DynamicObjects that have ceased to exist, so they are not recreated when their original scene is loaded
+		[Serializable]
+		struct DynamicObjectRecord {
+			public string id;
+			public string sceneName;
+			public bool isDestroyed;
+
+			public DynamicObjectRecord(DynamicObject dynamicObject) {
+				this.id = dynamicObject.ID;
+				this.sceneName = dynamicObject.gameObject.scene.name;
+				this.isDestroyed = false;
+			}
+		}
+		// ID => Record
+		static Dictionary<string, DynamicObjectRecord> allDynamicObjectRecords = new Dictionary<string, DynamicObjectRecord>();
 
 		public delegate void DynamicObjectCreated(string id);
 		public static event DynamicObjectCreated OnDynamicObjectCreated;
@@ -24,97 +52,93 @@ namespace Saving {
 
 		const string filename = "DynamicObjects.save";
 
-		public enum DynamicObjectType {
-			NotSet,
-			PickupCube,
-			PickupCubeRed,
-			PickupCubeGreen,
-			PickupCubeBlue,
-			MultiDimensionCube
-		}
-
-		const string prefabPathPrefix = "Prefabs/";
-		const string pickupCubePrefabPath = "PickUpCubes/PickUpCube";
-		const string pickupCubeRedPrefabPath = "PickUpCubes/PickUpCubeRed";
-		const string pickupCubeGreenPrefabPath = "PickUpCubes/PickUpCubeGreen";
-		const string pickupCubeBluePrefabPath = "PickUpCubes/PickUpCubeBlue";
-		const string multiDimensionCubePrefabPath = "PickUpCubes/MultiDimensionCube";
-
-		static string GetPrefabPathSuffix(DynamicObjectType type) {
-			switch (type) {
-				case DynamicObjectType.PickupCube:
-					return pickupCubePrefabPath;
-				case DynamicObjectType.PickupCubeRed:
-					return pickupCubeRedPrefabPath;
-				case DynamicObjectType.PickupCubeGreen:
-					return pickupCubeGreenPrefabPath;
-				case DynamicObjectType.PickupCubeBlue:
-					return pickupCubeBluePrefabPath;
-				case DynamicObjectType.MultiDimensionCube:
-					return multiDimensionCubePrefabPath;
-				default:
-					return "";
-			}
-		}
-
-		public static DynamicObject CreateInstanceFromSavedInfo(DynamicObjectSave dynamicObjSave) {
+		public static DynamicObject CreateInstanceFromSavedInfo(string id, DynamicObjectSave dynamicObjSave) {
 			string prefabPath = dynamicObjSave.prefabPath;
 			DynamicObject prefab = Resources.Load<DynamicObject>(prefabPath);
 			if (prefab == null) {
 				Debug.LogError($"Can't instantiate dynamic object from prefabPath: {prefabPath}");
 				return null;
 			}
-			DynamicObject newObject = GameObject.Instantiate(prefab);
+			// Use the SaveManagerForScene to instantiate the object directly into the appropriate scene
+			DynamicObject newObject = GameObject.Instantiate(prefab, SaveManager.GetSaveManagerForScene(dynamicObjSave.scene).transform);
+			newObject.transform.SetParent(null);
 			newObject.prefabPath = dynamicObjSave.prefabPath;
-			if (newObject.gameObject.scene.name != dynamicObjSave.scene) {
-				SceneManager.MoveGameObjectToScene(newObject.gameObject, SceneManager.GetSceneByName(dynamicObjSave.scene));
+
+			newObject.id.uniqueId = id;
+			dynamicObjSave.LoadSave(newObject);
+			newObject.RegisterDynamicObjectUponCreation(id);
+			OnDynamicObjectCreated?.Invoke(id);
+			// Any SaveableObjects on the newly created DynamicObject need to register themselves before Start(), do it now
+			foreach (var saveable in newObject.transform.GetComponentsInChildrenRecursively<SaveableObject>()) {
+				var saveableObject = (ISaveableObject)saveable;
+				saveableObject.Register();
 			}
 			return newObject;
 		}
-
-		static void InitializeDynamicObjectsDict() {
-			var allDynamicObjects = Resources.FindObjectsOfTypeAll<DynamicObject>()
-				.Where(d => d.ID != null && d.ID != "" && !d.SkipSave && d.gameObject.scene.name != null);
-			dynamicObjectsInActiveScenes = allDynamicObjects
-				.GroupBy(d => d.gameObject.scene.name)
-				.ToDictionary(d => d.Key, d => d.ToList())
-				.ToDictionary(kv => kv.Key, kv => kv.Value.ToDictionary(d => d.ID));
-			allDynamicObjectsSceneById = allDynamicObjects
-				.ToDictionary(d => d.ID, d => d.gameObject.scene.name);
-		}
-
-		public static void DeleteAllExistingDynamicObjects() {
-			InitializeDynamicObjectsDict();
-
-			List<string> scenes = dynamicObjectsInActiveScenes.Keys.ToList();
-			foreach (var sceneName in scenes) {
-				DeleteExistingDynamicObjects(sceneName);
-			}
-		}
-
-		public static void DeleteExistingDynamicObjects(string sceneName) {
-			InitializeDynamicObjectsDict();
-
-			Dictionary<string, DynamicObject> dynamicObjectsInScene = dynamicObjectsInActiveScenes[sceneName];
-
-			List<string> ids = dynamicObjectsInScene.Keys.ToList();
-			foreach (var id in ids) {
-				GameObject objToBeDeleted = dynamicObjectsInScene[id].gameObject;
-				dynamicObjectsInScene.Remove(id);
-				allDynamicObjectsSceneById.Remove(id);
-				GameObject.Destroy(objToBeDeleted);
+		
+		// Will be called from a DynamicObject's Awake call, but not during DynamicObject scene change
+		public static RegistrationStatus RegisterDynamicObject(DynamicObject dynamicObject, string sceneName) {
+			string id = dynamicObject.ID;
+			if (allDynamicObjectRecords.ContainsKey(id)) {
+				// Disallow DynamicObject registration if it already exists in another scene (use ChangeDynamicObjectScene to update the scene)
+				if (allDynamicObjectRecords[id].sceneName != sceneName) {
+					Debug.LogError($"Trying to register DynamicObject {dynamicObject}, scene {sceneName}, but existing record for id {id} is in a different scene: {allDynamicObjectRecords[id].sceneName}");
+					return RegistrationStatus.ExistingRecordInAnotherScene;
+				}
+				// Disallow DynamicObject registration if we have a record of the object having been destroyed
+				if (allDynamicObjectRecords[id].isDestroyed) {
+					Debug.LogError($"Trying to register DynamicObject {dynamicObject}, scene {sceneName}, but existing record for id {id} has been destroyed");
+					return RegistrationStatus.ExistingRecordIsDestroyed;
+				}
+				
+				// Existing record is (likely) for the object being registered, nothing to update
+				return RegistrationStatus.RegisteredSuccessfully;
 			}
 
-			if (dynamicObjectsInScene.Count == 0) {
-				dynamicObjectsInActiveScenes.Remove(sceneName);
-			}
+			allDynamicObjectRecords.Add(id, new DynamicObjectRecord(dynamicObject));
+			return RegistrationStatus.RegisteredSuccessfully;
 		}
 
-		public static void SaveAllDynamicObjectsToDisk(string saveFileName) {
+		public static bool MarkDynamicObjectAsDestroyed(DynamicObject dynamicObject, string sceneName) {
+			string id = dynamicObject.ID;
+			if (!allDynamicObjectRecords.ContainsKey(id)) {
+				Debug.LogError($"Trying to mark DynamicObject {dynamicObject} as destroyed, but allDynamicObjectRecords contains no entry for {id}");
+				return false;
+			}
+
+			if (allDynamicObjectRecords[id].sceneName != sceneName) {
+				Debug.LogError($"Trying to mark DynamicObject {dynamicObject} in scene {sceneName} as destroyed, but existing entry for id {id} is in a different scene: {allDynamicObjectRecords[id].sceneName}");
+				return false;
+			}
+
+			DynamicObjectRecord record = allDynamicObjectRecords[id];
+			record.isDestroyed = true;
+			allDynamicObjectRecords[id] = record;
+			return true;
+		}
+
+		public static bool ChangeDynamicObjectScene(DynamicObject dynamicObject, string newScene) {
+			string id = dynamicObject.ID;
+			if (!allDynamicObjectRecords.ContainsKey(id)) {
+				Debug.LogError($"Trying to change scene for DynamicObject {dynamicObject}, but there is no entry for id {id}");
+				return false;
+			}
+
+			if (allDynamicObjectRecords[id].sceneName == newScene) {
+				Debug.LogWarning($"Trying to change scene for DynamicObject {dynamicObject}, but existing entry for id {id} is already in {newScene}. Nothing to do.");
+				return true;
+			}
+
+			DynamicObjectRecord record = allDynamicObjectRecords[id];
+			record.sceneName = newScene;
+			allDynamicObjectRecords[id] = record;
+			return true;
+		}
+
+		public static void SaveDynamicObjectRecords(string saveFileName) {
 			string directoryPath = SavePath(saveFileName);
 			string saveFile = $"{directoryPath}/{filename}";
-
-			InitializeDynamicObjectsDict();
+			
 			DynamicObjectsSaveFile save = DynamicObjectsSaveFile.CreateSaveFileFromCurrentState();
 
 			BinaryFormatter bf = new BinaryFormatter();
@@ -124,55 +148,14 @@ namespace Saving {
 			file.Close();
 		}
 
-		public static void SaveDynamicObjectsForScene(string sceneName) {
-			if (dynamicObjectsInActiveScenes.ContainsKey(sceneName)) {
-				InitializeDynamicObjectsDict();
-				Dictionary<string, DynamicObjectSave> dynamicObjectSavesForScene = dynamicObjectsInActiveScenes[sceneName]
-					.ToDictionary(kv => kv.Key, kv => kv.Value.GetSaveObject() as DynamicObjectSave);
-
-				dynamicObjectsInActiveScenes.Remove(sceneName);
-				dynamicObjectsInInactiveScenes[sceneName] = dynamicObjectSavesForScene;
+		public static void DeleteAllExistingDynamicObjectsAndClearState() {
+			foreach (var scene in LevelManager.instance.loadedSceneNames) {
+				SaveManager.GetSaveManagerForScene(scene)?.DeleteAllDynamicObjectsInScene();
 			}
 		}
 
-		public static void LoadDynamicObjectsFromDisk(string saveFileName) {
-			DynamicObjectsSaveFile save = GetDynamicObjectsSaveFile(saveFileName);
-
-			LoadFromSaveFile(save);
-		}
-
-		public static void LoadFromSaveFile(DynamicObjectsSaveFile save) {
-			DeleteAllExistingDynamicObjects();
-			dynamicObjectsInInactiveScenes = save.serializedDynamicObjects;
-
-			foreach (var activeScene in LevelManager.instance.loadedSceneNames) {
-				LoadDynamicObjectsForScene(activeScene);
-			}
-		}
-
-		public static void LoadDynamicObjectsForScene(string sceneName) {
-			if (dynamicObjectsInInactiveScenes.ContainsKey(sceneName)) {
-				InitializeDynamicObjectsDict();
-
-				Dictionary<string, DynamicObjectSave> savedSceneInfo = dynamicObjectsInInactiveScenes[sceneName];
-				Dictionary<string, DynamicObject> loadedSceneInfo = new Dictionary<string, DynamicObject>();
-				foreach (var id in savedSceneInfo.Keys) {
-					// Skip object creation if an object with that ID already exists
-					if (dynamicObjectsInActiveScenes.ContainsKey(sceneName) && dynamicObjectsInActiveScenes[sceneName].ContainsKey(id)) {
-						continue;
-					}
-					DynamicObjectSave savedObject = savedSceneInfo[id];
-
-					DynamicObject newDynamicObject = CreateInstanceFromSavedInfo(savedObject);
-					newDynamicObject.id.uniqueId = id;
-					savedObject.LoadSave(newDynamicObject);
-					OnDynamicObjectCreated?.Invoke(id);
-					loadedSceneInfo.Add(id, newDynamicObject);
-				}
-
-				dynamicObjectsInActiveScenes[sceneName] = loadedSceneInfo;
-				dynamicObjectsInInactiveScenes.Remove(sceneName);
-			}
+		public static void LoadAllDynamicObjectRecords(string saveFileName) {
+			GetDynamicObjectsSaveFile(saveFileName)?.LoadSaveFile();
 		}
 
 		static DynamicObjectsSaveFile GetDynamicObjectsSaveFile(string saveFileName) {
@@ -194,26 +177,18 @@ namespace Saving {
 
 		[Serializable]
 		public class DynamicObjectsSaveFile {
-			public Dictionary<string, Dictionary<string, DynamicObjectSave>> serializedDynamicObjects = new Dictionary<string, Dictionary<string, DynamicObjectSave>>();
+			Dictionary<string, DynamicObjectRecord> dynamicObjectRecords;
 
 			public static DynamicObjectsSaveFile CreateSaveFileFromCurrentState() {
-				DynamicObjectsSaveFile save = new DynamicObjectsSaveFile();
-				save.serializedDynamicObjects = new Dictionary<string, Dictionary<string, DynamicObjectSave>>();
-				foreach (var kv in dynamicObjectsInActiveScenes) {
-					string scene = kv.Key;
-					Dictionary<string, DynamicObject> dynamicObjectsInScene = kv.Value;
-
-					Dictionary<string, DynamicObjectSave> idToSaveObj = new Dictionary<string, DynamicObjectSave>();
-					foreach (var idToObject in dynamicObjectsInScene) {
-						idToSaveObj.Add(idToObject.Key, idToObject.Value.GetSaveObject() as DynamicObjectSave);
-					}
-					save.serializedDynamicObjects.Add(kv.Key, kv.Value.ToDictionary(idToObj => idToObj.Key, idToObj => idToObj.Value.GetSaveObject() as DynamicObjectSave));
-				}
-				foreach (var kv in dynamicObjectsInInactiveScenes) {
-					save.serializedDynamicObjects.Add(kv.Key, kv.Value);
-				}
+				DynamicObjectsSaveFile save = new DynamicObjectsSaveFile {
+					dynamicObjectRecords = DynamicObjectManager.allDynamicObjectRecords
+				};
 
 				return save;
+			}
+
+			public void LoadSaveFile() {
+				DynamicObjectManager.allDynamicObjectRecords = dynamicObjectRecords;
 			}
 		}
 	}

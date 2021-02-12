@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace PictureTeleportMechanics {
 	[RequireComponent(typeof(UniqueId))]
-    public class BigFrame : MonoBehaviour, SaveableObject {
+    public class BigFrame : SaveableObject<BigFrame, BigFrame.BigFrameSave> {
 		UniqueId _id;
 		UniqueId id {
 			get {
@@ -37,7 +37,8 @@ namespace PictureTeleportMechanics {
 			disableFrameTrigger.OnMagicTriggerStayOneTime += (ctx) => TurnOffFrame();
 		}
 
-		void Awake() {
+        protected override void Awake() {
+	        base.Awake();
 			frameRenderer = GetComponent<Renderer>();
 			frameCollider = GetComponent<Collider>();
 		}
@@ -83,12 +84,10 @@ namespace PictureTeleportMechanics {
 		}
 
 		#region Saving
-		public bool SkipSave { get; set; }
-
-		public string ID => $"BigFrame_{id.uniqueId}";
+		public override string ID => $"BigFrame_{id.uniqueId}";
 
 		[Serializable]
-		class BigFrameSave {
+		public class BigFrameSave : SerializableSaveObject<BigFrame> {
 			bool frameEnabled;
 			bool disableFrameTriggerEnabled;
 
@@ -97,21 +96,11 @@ namespace PictureTeleportMechanics {
 				this.disableFrameTriggerEnabled = bigFrame.disableFrameTrigger.enabled;
 			}
 
-			public void LoadSave(BigFrame bigFrame) {
+			public override void LoadSave(BigFrame bigFrame) {
 				bigFrame.frameRenderer.enabled = this.frameEnabled;
 				bigFrame.frameCollider.enabled = this.frameEnabled;
 				bigFrame.disableFrameTrigger.enabled = this.disableFrameTriggerEnabled;
 			}
-		}
-
-		public object GetSaveObject() {
-			return new BigFrameSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			BigFrameSave save = savedObject as BigFrameSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

@@ -9,7 +9,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
+public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave> {
     // Jump Settings
     public enum JumpState {
         JumpReady,
@@ -34,12 +34,10 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 
     // How far do we move into the step before raycasting down?
     const float _stepOverbiteMagnitude = 0.15f;
-    public bool DEBUG;
     public bool autoRun;
     public Rigidbody thisRigidbody;
 
     readonly List<ContactPoint> allContactThisFrame = new List<ContactPoint>();
-    DebugLogger debug;
     PlayerButtonInput input;
 
     float jumpCooldownRemaining; // Prevents player from jumping again while > 0
@@ -76,7 +74,8 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
     string ground => grounded.ground?.gameObject.name ?? "";
 
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         input = PlayerButtonInput.instance;
         debug = new DebugLogger(this, () => DEBUG);
         thisRigidbody = GetComponent<Rigidbody>();
@@ -336,7 +335,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
                 Vector3 bottomOfPlayerToContactPoint = contact.point - bottomOfPlayer;
                 Vector3 rayDirection = Vector3.ProjectOnPlane(bottomOfPlayerToContactPoint, transform.up).normalized;
                 if (rayDirection.magnitude > 0) {
-                    Debug.DrawRay(rayLowStartPos, rayDirection * thisCollider.radius * 2, Color.blue);
+                    Debug.DrawRay(rayLowStartPos, rayDirection * (thisCollider.radius * 2), Color.blue);
                     rayHit = contact.otherCollider.Raycast(
                         new Ray(rayLowStartPos, rayDirection),
                         out hitInfo,
@@ -370,8 +369,8 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
                                stepOverbiteMagnitude;
 
         // Start the raycast position directly above the contact point with the step
-        Debug.DrawRay(contact.point, transform.up * maxStepHeight * 0.8f, Color.blue, 10);
-        Vector3 raycastStartPos = contact.point + transform.up * maxStepHeight * 0.8f;
+        Debug.DrawRay(contact.point, transform.up * (maxStepHeight * 0.8f), Color.blue, 10);
+        Vector3 raycastStartPos = contact.point + transform.up * (maxStepHeight * 0.8f);
         // Move the raycast inwards towards the stair (we will be raycasting down at the stair)
         Debug.DrawRay(raycastStartPos, stepOverbite, Color.red, 10);
         raycastStartPos += stepOverbite;
@@ -485,7 +484,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
     const int framesToWaitAfterLeavingGround = 3;
 
     // Dot(face normal, transform.up) must be greater than this value to be considered "ground"
-    public const float isGroundThreshold = 0.85f;
+    public const float isGroundThreshold = 0.675f;
     public const float isGroundedSpherecastDistance = 0.5f;
 #endregion
 
@@ -498,15 +497,12 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 #endregion
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // There's only one player so we don't need a UniqueId here
-    public string ID => "PlayerMovement";
+    public override string ID => "PlayerMovement";
 
     [Serializable]
-    class PlayerMovementSave {
+    public class PlayerMovementSave : SerializableSaveObject<PlayerMovement> {
         bool autoRun;
-        bool DEBUG;
 
         float jumpCooldownRemaining;
 
@@ -524,7 +520,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
         bool underMinJumpTime;
 
         public PlayerMovementSave(PlayerMovement playerMovement) {
-            DEBUG = playerMovement.DEBUG;
             autoRun = playerMovement.autoRun;
             jumpState = (int) playerMovement.jumpState;
             timeSpentJumping = playerMovement.timeSpentJumping;
@@ -542,8 +537,7 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
             stopped = playerMovement.stopped;
         }
 
-        public void LoadSave(PlayerMovement playerMovement) {
-            playerMovement.DEBUG = DEBUG;
+        public override void LoadSave(PlayerMovement playerMovement) {
             playerMovement.autoRun = autoRun;
             playerMovement.jumpState = (JumpState) jumpState;
             playerMovement.timeSpentJumping = timeSpentJumping;
@@ -561,17 +555,6 @@ public class PlayerMovement : Singleton<PlayerMovement>, SaveableObject {
 
             playerMovement.stopped = stopped;
         }
-    }
-
-    public object GetSaveObject() {
-        return new PlayerMovementSave(this);
-        ;
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        PlayerMovementSave save = savedObject as PlayerMovementSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

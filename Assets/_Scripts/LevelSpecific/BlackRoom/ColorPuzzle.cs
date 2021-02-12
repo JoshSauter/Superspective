@@ -7,7 +7,7 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzle : MonoBehaviour, SaveableObject {
+	public class ColorPuzzle : SaveableObject<ColorPuzzle, ColorPuzzle.ColorPuzzleSave> {
 		public Transform smallPuzzleParent;
 		public bool solved = false;
 		public bool isActive = false;
@@ -21,7 +21,8 @@ namespace LevelSpecific.BlackRoom {
 		public delegate void ColorPuzzleSolvedStateChange(ColorPuzzle puzzle, bool isSolved);
 		public static event ColorPuzzleSolvedStateChange OnColorPuzzleSolvedStateChange;
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			solutionNodes = GetComponentsInChildren<ColorPuzzleNode>();
 			lightBlockers = GetComponentsInChildren<LightBlocker>();
 			smallPuzzle = CreateSmallPuzzlePieces().transform;
@@ -34,7 +35,9 @@ namespace LevelSpecific.BlackRoom {
 
 		void Update() {
 			transform.localPosition = Vector3.Lerp(transform.localPosition, (isActive) ? activePos : inactivePos, 5 * Time.deltaTime);
-			smallPuzzle.localPosition = transform.localPosition;
+			if (smallPuzzle != null) {
+				smallPuzzle.localPosition = transform.localPosition;
+			}
 		}
 
 		void HandleSolutionNodeStateChange(ColorPuzzleNode node, bool isSolved) {
@@ -76,11 +79,11 @@ namespace LevelSpecific.BlackRoom {
 			isActive = active;
 		}
 
-		public bool SkipSave { get; set; }
-		public string ID => $"BlackRoom_ColorPuzzle{transform.GetSiblingIndex()}";
+#region Saving
+		public override string ID => $"BlackRoom_ColorPuzzle{transform.GetSiblingIndex()}";
 
 		[Serializable]
-		public class ColorPuzzleSave {
+		public class ColorPuzzleSave : SerializableSaveObject<ColorPuzzle> {
 			bool solved;
 			bool isActive;
 			public ColorPuzzleSave(ColorPuzzle colorPuzzle) {
@@ -88,20 +91,11 @@ namespace LevelSpecific.BlackRoom {
 				this.isActive = colorPuzzle.isActive;
 			}
 
-			public void LoadSave(ColorPuzzle colorPuzzle) {
+			public override void LoadSave(ColorPuzzle colorPuzzle) {
 				colorPuzzle.solved = this.solved;
 				colorPuzzle.isActive = this.isActive;
 			}
 		}
-
-		public object GetSaveObject() {
-			return new ColorPuzzleSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ColorPuzzleSave save = savedObject as ColorPuzzleSave;
-
-			save.LoadSave(this);
-		}
 	}
+#endregion
 }

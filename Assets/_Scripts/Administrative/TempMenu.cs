@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TempMenu : MonoBehaviour {
+public class TempMenu : Singleton<TempMenu> {
 	public bool menuIsOpen => tempMenu.activeInHierarchy;
 	public GameObject tempMenu;
 	public Slider generalSensitivitySlider;
@@ -11,7 +11,7 @@ public class TempMenu : MonoBehaviour {
 	public Slider ySensitivitySlider;
 	public Slider headbobSlider;
 
-	CursorLockMode cachedLockMode;
+	public CursorLockMode cachedLockMode;
 
     void Start() {
 		generalSensitivitySlider.onValueChanged.AddListener(delegate {

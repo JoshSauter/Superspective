@@ -3,7 +3,7 @@
 public class ButtonHold : Button {
     bool buttonHeld;
 
-    public override void Awake() {
+    protected override void Awake() {
         base.Awake();
 
         interactableObject.OnLeftMouseButtonUp += () => buttonHeld = false;

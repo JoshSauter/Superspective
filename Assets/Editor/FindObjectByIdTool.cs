@@ -23,7 +23,7 @@ public class FindObjectByIdTool : ScriptableWizard {
 
     public void FindObjectById() {
         List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
-            .OfType<SaveableObject>()
+            .OfType<ISaveableObject>()
             .Where(s => HasValidId(s) && s.ID == id)
             .OfType<MonoBehaviour>()
             .ToList();
@@ -38,11 +38,11 @@ public class FindObjectByIdTool : ScriptableWizard {
             Selection.objects = matches.Select(s => s.gameObject).ToArray();
     }
 
-    bool HasValidId(SaveableObject obj) {
+    bool HasValidId(ISaveableObject obj) {
         try {
             string s = obj.ID;
 
-            return s != null && s != "";
+            return !string.IsNullOrEmpty(s);
         }
         catch {
             return false;

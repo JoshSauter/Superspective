@@ -9,7 +9,7 @@ namespace LevelSpecific.EmptyRoom {
 		public DimensionPillar pillar;
 		public MagicTrigger pillarActiveTrigger;
 
-		override protected void Start() {
+		protected override void Start() {
 			base.Start();
 
 			gemButton.OnButtonPressBegin += SpawnPillar;

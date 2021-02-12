@@ -12,7 +12,7 @@ using SerializableClasses;
 // If this object goes across the 180° + dimensionShiftAngle (when the player is standing in the direction of pillar's transform.forward from pillar),
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 [RequireComponent(typeof(UniqueId))]
-public class PillarDimensionObject : DimensionObject, SaveableObject {
+public class PillarDimensionObject : DimensionObject {
 	[SerializeField]
 	[Range(0, 7)]
 	int _dimension = 0;
@@ -81,7 +81,7 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		}
 	}
 
-	public override IEnumerator Start() {
+	protected override void Init() {
 		pillarsSet = new HashSet<DimensionPillar>(pillars);
 		renderers = GetAllEpitaphRenderers().ToArray();
 
@@ -93,8 +93,6 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		DimensionPillar.OnActivePillarChanged += activePillarChangedHandler;
 
 		HandleNewPillar();
-
-		yield break;
 	}
 
 	void HandleNewPillar() {
@@ -107,7 +105,8 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 		}
 	}
 
-	void OnDestroy() {
+	protected override void OnDestroy() {
+		base.OnDestroy();
 		DimensionPillar.OnActivePillarChanged -= activePillarChangedHandler;
 	}
 
@@ -411,35 +410,31 @@ public class PillarDimensionObject : DimensionObject, SaveableObject {
 	public override string ID => $"PillarDimensionObject_{id.uniqueId}";
 
 	[Serializable]
-	class PillarDimensionObjectSave {
-		public object dimensionObjectSave;
-
+	public class PillarDimensionObjectSave : DimensionObjectSave {
 		SerializableReference<DimensionPillar>[] pillars;
 		int dimension;
 
-		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj, object dimensionObjBaseSave) {
-			this.dimensionObjectSave = dimensionObjBaseSave;
-
+		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj) : base(dimensionObj) {
 			this.pillars = dimensionObj.pillars.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToArray();
 			this.dimension = dimensionObj.Dimension;
 		}
 
 		public void LoadSave(PillarDimensionObject dimensionObj) {
+			base.LoadSave(dimensionObj);
 			dimensionObj.pillars = this.pillars.Select<SerializableReference<DimensionPillar>, DimensionPillar>(p => p).ToArray();
 
 			dimensionObj.Dimension = this.dimension;
 		}
 	}
-
+	
 	public override object GetSaveObject() {
-		return new PillarDimensionObjectSave(this, base.GetSaveObject());
+		return new PillarDimensionObjectSave(this);
 	}
 
-	public override void LoadFromSavedObject(object savedObject) {
+	public override void RestoreStateFromSave(object savedObject) {
 		PillarDimensionObjectSave save = savedObject as PillarDimensionObjectSave;
 
-		base.LoadFromSavedObject(save.dimensionObjectSave);
-		save.LoadSave(this);
+		save?.LoadSave(this);
 	}
 	#endregion
 }

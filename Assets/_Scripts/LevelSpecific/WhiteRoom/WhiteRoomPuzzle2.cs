@@ -6,9 +6,11 @@ using UnityEngine;
 using System.Linq;
 using System;
 using PowerTrailMechanics;
+using Saving;
+using SerializableClasses;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoomPuzzle2 : MonoBehaviour {
+    public class WhiteRoomPuzzle2 : SaveableObject<WhiteRoomPuzzle2, WhiteRoomPuzzle2.WhiteRoomPuzzle2Save> {
         [Serializable]
         public class PowerReceptacle {
             public int powerGenerated;
@@ -100,10 +102,10 @@ namespace LevelSpecific.WhiteRoom {
         public ParticleSystem laserToReceiverStart, laserToReceiver;
         RotateObject outerHexRotate, innerHexRotate;
         float outerHexRotateObjectSpeed, innerHexRotateObjectSpeed;
-        float valueOutOfRangeRotationSpeedMultiplier = 8f;
+        const float valueOutOfRangeRotationSpeedMultiplier = 8f;
         Vector3 desiredOuterHexRotation, desiredInnerHexRotation;
-        float trackingSlerpSpeed = 4f;
-        float isLookingAtThreshold = 0.825f;
+        const float trackingSlerpSpeed = 4f;
+        const float isLookingAtThreshold = 0.825f;
 
         public PowerTrail powerTrailToPortal;
         public Lightpost laserReceiver;
@@ -113,34 +115,39 @@ namespace LevelSpecific.WhiteRoom {
         Material obeliskLightMaterial;
         // Allocate once to save GC every frame
         const int GRADIENT_ARRAY_SIZE = 10;
-        float[] floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
-        Color[] colorGradientBuffer = new Color[GRADIENT_ARRAY_SIZE];
+        readonly float[] floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
+        readonly Color[] colorGradientBuffer = new Color[GRADIENT_ARRAY_SIZE];
         public Transform valueLine;
-        Vector3 valueLineTop = new Vector3(0, 46, 0);
-        Vector3 valueLIneBot = new Vector3(0, 21.74f, 0);
-        Vector3 valueLineScaleMin = new Vector3(0.82f, 1f, 0.82f);
-        Vector3 valueLineScaleMax = new Vector3(1.175f, 1f, 1.165f);
+        readonly Vector3 valueLineTop = new Vector3(0, 46, 0);
+        readonly Vector3 valueLIneBot = new Vector3(0, 21.74f, 0);
+        readonly Vector3 valueLineScaleMin = new Vector3(0.82f, 1f, 0.82f);
+        readonly Vector3 valueLineScaleMax = new Vector3(1.175f, 1f, 1.165f);
 
-        void Awake() {
+        protected override void Awake() {
+            base.Awake();
             outerHexRotate = outerHex.GetComponent<RotateObject>();
             innerHexRotate = innerHex.GetComponent<RotateObject>();
             outerHexRotateObjectSpeed = outerHexRotate.rotationsPerSecondY;
             innerHexRotateObjectSpeed = innerHexRotate.rotationsPerSecondZ;
 
             obeliskLightShader = Shader.Find("Custom/GradientUnlitEmissive");
-            obeliskLightMaterial = new Material(obeliskLightShader);
-            obeliskLightMaterial.hideFlags = HideFlags.HideAndDontSave;
+            obeliskLightMaterial = new Material(obeliskLightShader) {
+                hideFlags = HideFlags.HideAndDontSave
+            };
             obeliskLight.material = obeliskLightMaterial;
         }
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
             playerCamera = EpitaphScreen.instance.playerCamera.transform;
 
             base9Symbols = Resources.LoadAll<Sprite>("Images/Base9/").OrderBy(s => int.Parse(s.name)).ToArray();
 
             white = whiteToBlack.GetColor(colorProp);
             black = blackToWhite.GetColor(colorProp);
+        }
 
+        protected override void Init() {
             foreach (var powerReceptacle in powerReceptacles) {
                 powerReceptacle.powerTrail.OnPowerFinish += () => actualValue += powerReceptacle.powerGenerated;
                 powerReceptacle.powerTrail.OnDepowerBegin += () => actualValue -= powerReceptacle.powerGenerated;
@@ -164,6 +171,8 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         void Update() {
+            if (!hasInitialized) return;
+            
             if (Input.GetKey("9")) {
                 actualValue = Mathf.Clamp(actualValue + 1, -80, 80);
             }
@@ -412,5 +421,43 @@ namespace LevelSpecific.WhiteRoom {
             valueLine.localScale = Vector3.Lerp(valueLineScaleMax, valueLineScaleMin, t);
 		}
 		#endregion
+        
+#region Saving
+        public override string ID => "WhiteRoomPuzzle2";
+
+        [Serializable]
+        public class WhiteRoomPuzzle2Save : SerializableSaveObject<WhiteRoomPuzzle2> {
+            int actualValue;
+            float displayedValue;
+            HexState hexState;
+            float timeSinceHexStateChanged;
+            float[] floatGradientBuffer;
+            SerializableColor[] colorGradientBuffer;
+            
+            public WhiteRoomPuzzle2Save(WhiteRoomPuzzle2 script) {
+                this.actualValue = script.actualValue;
+                this.displayedValue = script.displayedValue;
+                this.hexState = script.hexState;
+                this.timeSinceHexStateChanged = script.timeSinceHexStateChanged;
+                this.floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
+                this.colorGradientBuffer = new SerializableColor[GRADIENT_ARRAY_SIZE];
+                for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
+                    this.floatGradientBuffer[i] = script.floatGradientBuffer[i];
+                    this.colorGradientBuffer[i] = script.colorGradientBuffer[i];
+                }
+            }
+
+            public override void LoadSave(WhiteRoomPuzzle2 script) {
+                script.actualValue = this.actualValue;
+                script.displayedValue = this.displayedValue;
+                script._hexState = this.hexState;
+                script.timeSinceHexStateChanged = this.timeSinceHexStateChanged;
+                for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
+                    script.floatGradientBuffer[i] = this.floatGradientBuffer[i];
+                    script.colorGradientBuffer[i] = this.colorGradientBuffer[i];
+                }
+            }
+        }
+#endregion
 	}
 }

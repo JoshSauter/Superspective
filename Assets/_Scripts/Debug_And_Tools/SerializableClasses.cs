@@ -282,15 +282,22 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
-	public class SerializableReference<T> where T : MonoBehaviour, SaveableObject {
-		string referencedSceneName;
-		string referencedObjId;
+	public class SerializableReference<T> where T : MonoBehaviour, ISaveableObject {
+		public string referencedSceneName;
+		public string referencedObjId;
 
 		public T Reference {
 			get {
 				SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(referencedSceneName);
-				if (saveManagerForScene != null && saveManagerForScene.saveableObjects.ContainsKey(referencedObjId)) {
-					return saveManagerForScene.saveableObjects[referencedObjId] as T;
+				if (saveManagerForScene != null) {
+					ISaveableObject saveableObject = saveManagerForScene.GetSaveableObject(referencedObjId);
+					if (saveableObject != null) {
+						return saveableObject as T;
+					}
+					else {
+						Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");
+						return null;
+					}
 				}
 				else {
 					Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");

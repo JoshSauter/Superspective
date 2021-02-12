@@ -6,7 +6,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class CubeReceptacle : MonoBehaviour, SaveableObject {
+public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> {
     public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 
     public delegate void CubeReceptacleActionSimple();
@@ -79,7 +79,8 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
 
     public bool isCubeInReceptacle => cubeInReceptacle != null;
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
         AddTriggerZone();
         colorCoded = GetComponent<ColorCoded>();
     }
@@ -268,13 +269,11 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-
     // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public string ID => $"CubeReceptacle_{id.uniqueId}";
+    public override string ID => $"CubeReceptacle_{id.uniqueId}";
 
     [Serializable]
-    class CubeReceptacleSave {
+    public class CubeReceptacleSave : SerializableSaveObject<CubeReceptacle> {
         SerializableReference<PickupObject> cubeInReceptacle;
         SerializableVector3 endPos;
         SerializableQuaternion endRot;
@@ -298,7 +297,7 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
             cubeInReceptacle = receptacle.cubeInReceptacle;
         }
 
-        public void LoadSave(CubeReceptacle receptacle) {
+        public override void LoadSave(CubeReceptacle receptacle) {
             receptacle.state = state;
             receptacle.timeSinceStateChange = timeSinceStateChange;
 
@@ -309,17 +308,10 @@ public class CubeReceptacle : MonoBehaviour, SaveableObject {
             receptacle.endPos = endPos;
 
             receptacle.cubeInReceptacle = cubeInReceptacle;
+            if (receptacle.cubeInReceptacle != null) {
+                receptacle.cubeInReceptacle.OnPickupSimple += receptacle.ReleaseFromReceptacle;
+            }
         }
-    }
-
-    public object GetSaveObject() {
-        return new CubeReceptacleSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        CubeReceptacleSave save = savedObject as CubeReceptacleSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

@@ -1,19 +1,22 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using PortalMechanics;
 using MagicTriggerMechanics;
 using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class TogglePortalRender : MonoBehaviour, SaveableObject {
+	public class TogglePortalRender : SaveableObject<TogglePortalRender, TogglePortalRender.TogglePortalRenderSave> {
 		bool initialized = false;
 		public DoorOpenClose enableDoor;
 		public MagicTrigger disableTrigger;
 		Portal portal;
 
-		IEnumerator Start() {
+		protected override void Start() {
+			base.Start();
+			StartCoroutine(Initialize());
+		}
+
+		IEnumerator Initialize() {
 			while (portal == null || portal.otherPortal == null) {
 				portal = GetComponent<Portal>();
 				yield return null;
@@ -23,7 +26,7 @@ namespace LevelSpecific.BlackRoom {
 				initialized = true;
 				PausePortalRendering();
 			}
-			enableDoor.OnDoorOpenStart += () => ResumePortalRendering();
+			enableDoor.OnDoorOpenStart += ResumePortalRendering;
 			disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
 		}
 
@@ -38,31 +41,19 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		public bool SkipSave { get; set; }
-
-		public string ID => "TogglePortalRender";
+		public override string ID => "TogglePortalRender";
 
 		[Serializable]
-		class TogglePortalRenderSave {
+		public class TogglePortalRenderSave : SerializableSaveObject<TogglePortalRender> {
 			bool initialized;
 
 			public TogglePortalRenderSave(TogglePortalRender toggle) {
 				this.initialized = toggle.initialized;
 			}
 
-			public void LoadSave(TogglePortalRender toggle) {
+			public override void LoadSave(TogglePortalRender toggle) {
 				toggle.initialized = this.initialized;
 			}
-		}
-
-		public object GetSaveObject() {
-			return new TogglePortalRenderSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			TogglePortalRenderSave save = savedObject as TogglePortalRenderSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

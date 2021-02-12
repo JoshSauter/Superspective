@@ -332,7 +332,7 @@
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
 #ifdef CHECK_PORTAL_DEPTH
-				half allSamplesBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
+				half anySamplesBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
 #endif
 				float maxDepthRatio = 0;
 				float maxNormalDiff = 0;
@@ -348,7 +348,7 @@
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
 
 #ifdef CHECK_PORTAL_DEPTH
-					allSamplesBehindPortal *= SampleBehindPortal(uvPositions.UVs[x]);
+					anySamplesBehindPortal = max(anySamplesBehindPortal, SampleBehindPortal(uvPositions.UVs[x]));
 #endif
 
 					/////////////////////////
@@ -388,7 +388,7 @@
 				
 #ifdef CHECK_PORTAL_DEPTH
 				// minDepthValue check to get rid of lines from CullEverything material against nothing
-				if (allSamplesBehindPortal > 0 || minDepthValue > .99) {
+				if (anySamplesBehindPortal > 0 || minDepthValue > .99) {
 					//return fixed4(1,1,.7,1);
 					//clip(-1);
 					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray);

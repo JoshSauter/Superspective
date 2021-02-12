@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
@@ -7,11 +8,12 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
 using Saving;
+using SerializableClasses;
 using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
-	public class Portal : MonoBehaviour, SaveableObject {
+	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
 		UniqueId id;
 
 		UniqueId UniqueId {
@@ -26,7 +28,6 @@ namespace PortalMechanics {
 		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
-		public bool debugMode = false;
 		public string channel = "<Not set>";
 
 		public bool changeActiveSceneOnTeleport = false;
@@ -86,7 +87,6 @@ namespace PortalMechanics {
 		public static event SimplePortalTeleportAction BeforeAnyPortalTeleportSimple;
 		public static event SimplePortalTeleportAction OnAnyPortalTeleportSimple;
 		#endregion
-		DebugLogger debug;
 
 #if UNITY_EDITOR
 		void OnDrawGizmosSelected() {
@@ -108,8 +108,8 @@ namespace PortalMechanics {
 #endif
 
 		#region MonoBehaviour Methods
-		protected virtual void Awake() {
-			debug = new DebugLogger(gameObject, () => debugMode);
+		protected override void Awake() {
+			base.Awake();
 			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
 			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
 			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
@@ -179,7 +179,8 @@ namespace PortalMechanics {
 			portalMaterial.SetTexture("_DepthNormals", internalDepthNormalsTextureCopy);
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			playerCamera = EpitaphScreen.instance.playerCamera.transform;
 			playerCameraFollow = playerCamera.GetComponent<CameraFollow>();
 
@@ -670,15 +671,16 @@ namespace PortalMechanics {
 		#endregion
 
 		#region Saving
-		[System.Serializable]
-		class PortalSave {
-			bool DEBUG;
+		public override string ID => $"Portal_{UniqueId.uniqueId}";
+		
+		[Serializable]
+		public class PortalSave : SerializableSaveObject<Portal> {
 			string channel;
 			bool changeActiveSceneOnTeleport;
 			bool changeCameraEdgeDetection;
 			int edgeColorMode;
-			SerializableClasses.SerializableColor edgeColor;
-			SerializableClasses.SerializableGradient edgeColorGradient;
+			SerializableColor edgeColor;
+			SerializableGradient edgeColorGradient;
 			bool renderRecursivePortals;
 			bool compositePortal;
 			bool teleportingPlayer = false;
@@ -687,7 +689,6 @@ namespace PortalMechanics {
 			bool pauseRenderingAndLogic = false;
 
 			public PortalSave(Portal portal) {
-				this.DEBUG = portal.debugMode;
 				this.channel = portal.channel;
 				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
 				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;
@@ -701,8 +702,7 @@ namespace PortalMechanics {
 				this.pauseRenderingAndLogic = portal.pauseRenderingAndLogic;
 			}
 
-			public void LoadSave(Portal portal) {
-				portal.debugMode = this.DEBUG;
+			public override void LoadSave(Portal portal) {
 				portal.channel = this.channel;
 				portal.changeActiveSceneOnTeleport = this.changeActiveSceneOnTeleport;
 				portal.changeCameraEdgeDetection = this.changeCameraEdgeDetection;
@@ -715,18 +715,6 @@ namespace PortalMechanics {
 				portal.pauseRenderingOnly = this.pauseRenderingOnly;
 				portal.pauseRenderingAndLogic = this.pauseRenderingAndLogic;
 			}
-		}
-
-		public bool SkipSave { get; set; }
-		public string ID => $"Portal_{UniqueId.uniqueId}";
-		public object GetSaveObject() {
-			return new PortalSave(this); ;
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			PortalSave save = savedObject as PortalSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

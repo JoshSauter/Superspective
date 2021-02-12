@@ -5,11 +5,12 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-    public class ToggleBlackRoomEnabled : MonoBehaviour, SaveableObject {
+    public class ToggleBlackRoomEnabled : SaveableObject<ToggleBlackRoomEnabled, ToggleBlackRoomEnabled.ToggleBlackRoomEnabledSave> {
         public GameObject blackRoomRoot;
         DoorOpenClose door;
 
-        void Start() {
+        protected override void Start() {
+	        base.Start();
             door = GetComponent<DoorOpenClose>();
             door.OnDoorOpenStart += () => EnableBlackRoom();
             door.OnDoorCloseEnd += () => DisableBlackRoomIfInMainHallway();
@@ -27,31 +28,19 @@ namespace LevelSpecific.BlackRoom {
         }
 
 		#region Saving
-		public bool SkipSave { get; set; }
-
-		public string ID => "ToggleBlackRoomEnabled";
+		public override string ID => "ToggleBlackRoomEnabled";
 
 		[Serializable]
-		class ToggleBlackRoomEnabledSave {
+		public class ToggleBlackRoomEnabledSave : SerializableSaveObject<ToggleBlackRoomEnabled> {
 			bool blackRoomEnabled;
 
 			public ToggleBlackRoomEnabledSave(ToggleBlackRoomEnabled toggle) {
 				this.blackRoomEnabled = toggle.blackRoomRoot.activeSelf;
 			}
 
-			public void LoadSave(ToggleBlackRoomEnabled toggle) {
+			public override void LoadSave(ToggleBlackRoomEnabled toggle) {
 				toggle.blackRoomRoot.SetActive(this.blackRoomEnabled);
 			}
-		}
-
-		public object GetSaveObject() {
-			return new ToggleBlackRoomEnabledSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ToggleBlackRoomEnabledSave save = savedObject as ToggleBlackRoomEnabledSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

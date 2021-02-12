@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
-public class DimensionPillar : MonoBehaviour, SaveableObject {
+public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.DimensionPillarSave> {
 	UniqueId id;
 
 	UniqueId uniqueId {
@@ -29,9 +29,6 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		set {
 			DimensionPillar prevActive = _activePillar;
 			_activePillar = value;
-			if (value != null) {
-				value.Initialize();
-			}
 			OnActivePillarChanged?.Invoke(prevActive);
 		}
 	}
@@ -65,8 +62,6 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		}
 	}
 
-	public bool debugMode = false;
-	DebugLogger debug;
 	public bool setAsActiveOnStart = false;
 	bool initialized = false;
 
@@ -78,11 +73,6 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	[Range(1, 123)]
 	public int maxDimension;
 	public int curDimension;
-
-	// TO REMOVE:
-	public bool overrideDimensionShiftAngle = false;
-	public Angle dimensionShiftAngle;
-	public Angle cameraAngleRelativeToPillar;
 
 	public int heightOverride = -1;
 	public bool HeightOverridden => heightOverride != -1;
@@ -101,18 +91,15 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 
 	public delegate void ActivePillarChangedEvent(DimensionPillar previousActivePillar);
 	public static event ActivePillarChangedEvent OnActivePillarChanged;
-
-	public delegate void PlayerMoveAroundPillarEvent(int dimension, Angle angle);
-	public event PlayerMoveAroundPillarEvent OnPlayerMoveAroundPillar;
 #endregion
 
-	void Awake() {
-		debug = new DebugLogger(this, () => debugMode);
+	protected override void Awake() {
+		base.Awake();
 		InitializeDimensionWall();
 	}
 
-	void Start() {
-		Initialize();
+	protected override void Start() {
+		base.Start();
 		InitializeDictEntry();
 
 		if (setAsActiveOnStart) {
@@ -133,16 +120,6 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		//UpdateRelativeCameraAngle();
     }
 
-	void Initialize() {
-		if (initialized) return;
-
-		if (!overrideDimensionShiftAngle) {
-			dimensionShiftAngle = DimensionShiftAngle() + Angle.Degrees(0.01f);
-		}
-		cameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
-		initialized = true;
-	}
-
 	Angle.Quadrant GetQuadrant(Vector3 position) {
 		bool parallelPlaneTest = DimensionShiftParallelPlane.GetSide(position);
 		bool perpendicularPlaneTest = DimensionShiftPerpendicularPlane.GetSide(position);
@@ -161,24 +138,6 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		else /*if (!parallelPlaneTest && perpendicularPlaneTest)*/ {
 			return Angle.Quadrant.IV;
 		}
-	}
-
-	void UpdateRelativeCameraAngle(bool forceUpdate = false) {
-		Angle newCameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
-		Angle angleDiff = newCameraAngleRelativeToPillar.WrappedAngleDiff(cameraAngleRelativeToPillar);
-		if (angleDiff.degrees == 0 && !forceUpdate) return;
-
-		bool clockwise = angleDiff.radians >= 0;
-
-		UpdateDimensionShifting(cameraAngleRelativeToPillar, newCameraAngleRelativeToPillar, clockwise);
-		newCameraAngleRelativeToPillar = PillarAngleOfPlayerCamera() + curDimension * Angle.D360;
-
-		if (OnPlayerMoveAroundPillar != null) {
-			OnPlayerMoveAroundPillar(curDimension, newCameraAngleRelativeToPillar);
-			debug.Log("Prev: " + cameraAngleRelativeToPillar + "\nNew: " + newCameraAngleRelativeToPillar);
-		}
-
-		cameraAngleRelativeToPillar = newCameraAngleRelativeToPillar;
 	}
 
 	void ShiftDimensionUp() {
@@ -201,38 +160,11 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 		debug.Log("Shift to dimension " + curDimension);
 	}
 
-	void UpdateDimensionShifting(Angle prevAngle, Angle newAngle, bool clockwise) {
-		bool shiftDimensionUp = clockwise && Angle.IsAngleBetween((curDimension+1) * Angle.D360, prevAngle, newAngle);
-		bool shiftDimensionDown = !clockwise && Angle.IsAngleBetween(curDimension * Angle.D360, newAngle, prevAngle);
-
-		if (shiftDimensionUp) {
-			ShiftDimensionUp();
-		}
-		if (shiftDimensionDown) {
-			ShiftDimensionDown();
-		}
-	}
-
 	Angle DimensionShiftAngle() {
 		//Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
 		//PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(DimensionShiftVector);
 		return polar.angle;
-	}
-
-	/// <summary>
-	/// Calculates the Angle of the point relative to this Pillar, where 0 degrees is the dimensionShiftAngle and the value increases clockwise
-	/// </summary>
-	/// <param name="p">Point in space to find the relative Angle of</param>
-	/// <returns></returns>
-	public Angle PillarAngleOfPoint(Vector3 p) {
-		Vector3 pillarToPoint = p - transform.position;
-		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
-		return (dimensionShiftAngle - polar.angle).normalized;
-	}
-
-	public Angle PillarAngleOfPlayerCamera() {
-		return PillarAngleOfPoint(EpitaphScreen.instance.playerCamera.transform.position);
 	}
 
 	// Wrap-around logic for incrementing dimension values
@@ -263,9 +195,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
-
-	public string ID {
+	public override string ID {
 		get {
 			if (uniqueId == null || uniqueId.uniqueId == null) {
 				throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
@@ -276,7 +206,7 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 	//public string ID => $"DimensionPillar_{id.uniqueId}";
 
 	[Serializable]
-	class DimensionPillarSave {
+	public class DimensionPillarSave : SerializableSaveObject<DimensionPillar> {
 		bool setAsActiveOnStart;
 
 		bool initialized;
@@ -292,12 +222,9 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 			this.initialized = dimensionPillar.initialized;
 			this.maxDimension = dimensionPillar.maxDimension;
 			this.curDimension = dimensionPillar.curDimension;
-			this.overrideDimensionShiftAngle = dimensionPillar.overrideDimensionShiftAngle;
-			this.dimensionShiftAngle = dimensionPillar.dimensionShiftAngle;
-			this.cameraAngleRelativeToPillar = dimensionPillar.cameraAngleRelativeToPillar;
 		}
 
-		public void LoadSave(DimensionPillar dimensionPillar) {
+		public override void LoadSave(DimensionPillar dimensionPillar) {
 			dimensionPillar.initialized = this.initialized;
 			dimensionPillar.maxDimension = this.maxDimension;
 			if (dimensionPillar.curDimension != this.curDimension) {
@@ -305,25 +232,11 @@ public class DimensionPillar : MonoBehaviour, SaveableObject {
 				dimensionPillar.OnDimensionChange?.Invoke(dimensionPillar.curDimension, this.curDimension);
 			}
 			dimensionPillar.curDimension = this.curDimension;
-			dimensionPillar.overrideDimensionShiftAngle = this.overrideDimensionShiftAngle;
-			dimensionPillar.dimensionShiftAngle = this.dimensionShiftAngle;
-			dimensionPillar.cameraAngleRelativeToPillar = this.cameraAngleRelativeToPillar - Angle.Degrees(0.001f);
 
 			if (setAsActiveOnStart) {
 				DimensionPillar.ActivePillar = dimensionPillar;
-				dimensionPillar.UpdateRelativeCameraAngle(true);
 			}
 		}
-	}
-
-	public object GetSaveObject() {
-		return new DimensionPillarSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		DimensionPillarSave save = savedObject as DimensionPillarSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }

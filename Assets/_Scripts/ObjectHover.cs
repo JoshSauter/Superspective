@@ -4,7 +4,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class ObjectHover : MonoBehaviour, SaveableObject {
+public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSave> {
     const float hoveringPauseLerp = 0.1f;
     public bool useLocalCoordinates = true;
     public float maxDisplacementUp = 0.125f;
@@ -29,7 +29,8 @@ public class ObjectHover : MonoBehaviour, SaveableObject {
     }
 
     // Use this for initialization
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         up = useLocalCoordinates ? transform.up : Vector3.up;
         forward = useLocalCoordinates ? transform.forward : Vector3.forward;
         right = useLocalCoordinates ? transform.right : Vector3.right;
@@ -55,11 +56,10 @@ public class ObjectHover : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-    public string ID => $"ObjectHover_{id.uniqueId}";
+    public override string ID => $"ObjectHover_{id.uniqueId}";
 
     [Serializable]
-    class ObjectHoverSave {
+    public class ObjectHoverSave : SerializableSaveObject<ObjectHover> {
         SerializableVector3 displacementCounter;
         SerializableVector3 forward;
         bool hoveringPaused;
@@ -90,7 +90,7 @@ public class ObjectHover : MonoBehaviour, SaveableObject {
             timeElapsed = script.timeElapsed;
         }
 
-        public void LoadSave(ObjectHover script) {
+        public override void LoadSave(ObjectHover script) {
             script.useLocalCoordinates = useLocalCoordinates;
             script.maxDisplacementUp = maxDisplacementUp;
             script.maxDisplacementForward = maxDisplacementForward;
@@ -104,16 +104,6 @@ public class ObjectHover : MonoBehaviour, SaveableObject {
             script.hoveringPaused = hoveringPaused;
             script.timeElapsed = timeElapsed;
         }
-    }
-
-    public object GetSaveObject() {
-        return new ObjectHoverSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        ObjectHoverSave save = savedObject as ObjectHoverSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

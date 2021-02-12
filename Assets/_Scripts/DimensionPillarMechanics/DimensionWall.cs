@@ -20,7 +20,9 @@ public class DimensionWall : MonoBehaviour {
 		}
 	}
 
-	Vector3 BottomOfPillar { get { return pillarRenderer.bounds.center - pillar.transform.up * pillarRenderer.bounds.size.y / 2f; } }
+	Vector3 BottomOfPillar => pillarRenderer.bounds.center - pillar.transform.up * pillarRenderer.bounds.size.y / 2f;
+
+	Vector3 PlayerCamWorldPos => EpitaphScreen.instance.playerCamera.transform.position;
 
 	public float PillarHeight {
 		get {
@@ -45,30 +47,27 @@ public class DimensionWall : MonoBehaviour {
 	void InitializeWallTransform() {
 		transform.SetParent(transform);
 		transform.localScale = new Vector3(dimensionWallWidth / transform.localScale.x, PillarHeight / transform.localScale.y, 1 / transform.localScale.z);
-		transform.position = new Vector3(0, PillarHeight / 2f + BottomOfPillar.y, 0);
+		transform.localPosition = new Vector3(0, 0, 0);
 	}
 
 	void Update() {
-		UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
+		//UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
 		UpdateWallRotation();
 		UpdateWallSize();
-		UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
+		//UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
 
 		thisRenderer.enabled = (pillar == DimensionPillar.ActivePillar);
 	}
 
-	void UpdateWallPosition(float radsOffset) {
-		Angle cameraAngle = pillar.dimensionShiftAngle - pillar.PillarAngleOfPlayerCamera();
-		float colliderLength = transform.lossyScale.z;
-		PolarCoordinate oppositePolar = new PolarCoordinate(colliderLength / 2f, Angle.Radians(cameraAngle.radians + radsOffset)) {
-			y = transform.position.y
-		};
-		transform.position = oppositePolar.PolarToCartesian() + new Vector3(BottomOfPillar.x, 0, BottomOfPillar.z);
-		transform.localPosition = new Vector3(transform.localPosition.x, PillarHeight / 2f, transform.localPosition.z);
+	Angle AngleOfPlayerCamera() {
+		Vector3 pillarToPoint = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
+		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
+		PolarCoordinate dimensionShiftPolar = PolarCoordinate.CartesianToPolar(pillar.DimensionShiftVector);
+		return dimensionShiftPolar.angle - polar.angle;
 	}
 
 	void UpdateWallRotation() {
-		transform.LookAt(new Vector3(BottomOfPillar.x, transform.position.y, BottomOfPillar.z));
+		transform.localEulerAngles = new Vector3(0, AngleOfPlayerCamera().degrees - radsOffsetForDimensionWall * Mathf.Rad2Deg, 0);
 	}
 
 	void UpdateWallSize() {

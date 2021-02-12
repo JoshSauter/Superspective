@@ -3443,11 +3443,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5559bdf01982dac4e9e33c3b5f6df9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugMode: 1
+  DEBUG: 0
   startingScene: 18
   defaultPlayerPosition: 1
   activeSceneName: 
   loadedSceneNames: []
+  currentlyLoadingSceneNames: []
+  currentlyUnloadingSceneNames: []
 --- !u!1 &394815695
 GameObject:
   m_ObjectHideFlags: 0
@@ -5405,6 +5407,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c64a417e00857664196cef9bc2ea48e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   noClipOn: 0
   slowMoveSpeed: 10
   moveSpeed: 30
@@ -5422,6 +5425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69762f1aa877fda4ea5c017df44892f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   look: {fileID: 0}
   movement: {fileID: 0}
   headbob: {fileID: 0}
@@ -5446,7 +5450,7 @@ Transform:
   - {fileID: 1308027151}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5491,6 +5495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c304049bfa2a74545b88203a105bd4db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   viewBobCurve:
     serializedVersion: 2
     m_Curve:
@@ -9003,6 +9008,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1051691394}
+  - component: {fileID: 1051691395}
   m_Layer: 0
   m_Name: --- ManagerObjects ---
   m_TagString: Untagged
@@ -9024,6 +9030,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1051691395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051691393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c94d13167eaded34ba828563cd7287b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1066512383
 GameObject:
   m_ObjectHideFlags: 0
@@ -15092,6 +15110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23080fdd6271c07448ec761b56883742, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   currentLerpSpeed: 45
   relativeStartPosition: {x: 0, y: 0, z: 0}
   relativePositionLastFrame: {x: 0, y: 0, z: 0}
@@ -15300,6 +15319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543dc804960a8c64b9a7d40169eeee43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   debugMode: 0
   doubleSidedEdges: 0
   checkPortalDepth: 1
@@ -15354,6 +15374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3e106f67c3316343b8ef39a73b59268, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   defaultFOV: 90
   zoomed: 0
   otherCameras:
@@ -15373,7 +15394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0

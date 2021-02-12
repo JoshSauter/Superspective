@@ -11,7 +11,7 @@ using SerializableClasses;
 
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
-	public class PortalableObject : MonoBehaviour, SaveableObject {
+	public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
 		UniqueId _id;
 		UniqueId id {
 			get {
@@ -21,8 +21,6 @@ namespace PortalMechanics {
 				return _id;
 			}
 		}
-
-		public bool DEBUG = false;
 
 		Portal _sittingInPortal;
 		Portal _hoveredThroughPortal;
@@ -113,7 +111,8 @@ namespace PortalMechanics {
 
 		RaycastHits thisFrameRaycastHits;
 
-		void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			interact = GetComponent<InteractableObject>();
 			pickupObject = GetComponent<PickupObject>();
 
@@ -131,7 +130,8 @@ namespace PortalMechanics {
 			pickupObject.OnDropSimple += HandleDrop;
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			OnObjectTeleported += UpdateGrabbedThroughPortalAfterObjectTeleports;
 			Portal.BeforeAnyPortalTeleport += (Portal inPortal, Collider objBeingTeleported) => UpdateGrabbedThroughPortalAfterPlayerTeleports(inPortal);
 		}
@@ -274,19 +274,18 @@ namespace PortalMechanics {
 				case "Custom/UnlitTransparent":
 					return new Material(Shader.Find("Custom/UnlitTransparentPortalCopy"));
 				default:
-					Debug.LogWarning("No matching portalCopyShader for shader " + material.shader.name);
+					debug.LogWarning("No matching portalCopyShader for shader " + material.shader.name);
 					return null;
 			}
 		}
 
 
 		#region Saving
-		public bool SkipSave { get; set; }
 		// All components on PickupCubes share the same uniqueId so we need to qualify with component name
-		public string ID => $"PortalableObject_{id.uniqueId}";
+		public override string ID => $"PortalableObject_{id.uniqueId}";
 
 		[Serializable]
-		class PortalableObjectSave {
+		public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {
 			SerializableReference<Portal> sittingInPortal;
 			SerializableReference<Portal> hoveredThroughPortal;
 			SerializableReference<Portal> grabbedThroughPortal;
@@ -306,7 +305,7 @@ namespace PortalMechanics {
 				}
 			}
 
-			public void LoadSave(PortalableObject obj) {
+			public override void LoadSave(PortalableObject obj) {
 				if (this.sittingInPortal != null) {
 					obj.sittingInPortal = this.sittingInPortal;
 				}
@@ -317,16 +316,6 @@ namespace PortalMechanics {
 					obj.grabbedThroughPortal = this.grabbedThroughPortal;
 				}
 			}
-		}
-
-		public object GetSaveObject() {
-			return new PortalableObjectSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			PortalableObjectSave save = savedObject as PortalableObjectSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

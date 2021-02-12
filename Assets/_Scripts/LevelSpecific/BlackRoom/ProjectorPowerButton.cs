@@ -7,13 +7,18 @@ using System;
 
 namespace LevelSpecific.BlackRoom {
 	[RequireComponent(typeof(Button))]
-	public class ProjectorPowerButton : MonoBehaviour, SaveableObject {
+	public class ProjectorPowerButton : SaveableObject<ProjectorPowerButton, ProjectorPowerButton.ProjectorPowerButtonSave> {
 		public PowerTrail powerTrail;
 		public bool projectorTurnedOn = false;
 		public LightProjector projector;
 		Button b;
 
-		IEnumerator Start() {
+		protected override void Start() {
+			base.Start();
+			StartCoroutine(Initialize());
+		}
+
+		IEnumerator Initialize() {
 			yield return null;
 			b = GetComponent<Button>();
 			b.OnButtonPressBegin += ctx => TurnOnPowerTrail();
@@ -50,33 +55,23 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		public bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+		public override bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
 
-		public string ID => $"{gameObject.name}";
+		public override string ID => $"{gameObject.name}";
 
 		[Serializable]
-		class ProjectorPowerButtonSave {
+		public class ProjectorPowerButtonSave : SerializableSaveObject<ProjectorPowerButton> {
 			bool projectorTurnedOn;
 
 			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) {
 				this.projectorTurnedOn = projectorPowerButton.projectorTurnedOn;
 			}
 
-			public void LoadSave(ProjectorPowerButton projectorPowerButton) {
+			public override void LoadSave(ProjectorPowerButton projectorPowerButton) {
 				if (this.projectorTurnedOn) {
 					projectorPowerButton.TurnOnProjector();
 				}
 			}
-		}
-
-		public object GetSaveObject() {
-			return new ProjectorPowerButtonSave(this);
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			ProjectorPowerButtonSave save = savedObject as ProjectorPowerButtonSave;
-
-			save.LoadSave(this);
 		}
 		#endregion
 	}

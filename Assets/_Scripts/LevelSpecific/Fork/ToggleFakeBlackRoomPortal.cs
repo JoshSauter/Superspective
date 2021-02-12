@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
-    public class ToggleFakeBlackRoomPortal : MonoBehaviour, SaveableObject {
+    public class ToggleFakeBlackRoomPortal : SaveableObject<ToggleFakeBlackRoomPortal, ToggleFakeBlackRoomPortal.ToggleFakeBlackRoomPortalSave> {
         public Portal realBlackRoomPortal;
         public Portal fakeBlackRoomPortal;
         BladeEdgeDetection edgeDetection;
 
         bool edgesAreBlack = true;
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
             edgeDetection = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
             realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
@@ -37,31 +38,19 @@ namespace LevelSpecific.Fork {
         }
 
         #region Saving
-        public bool SkipSave { get; set; }
-
-        public string ID => "ToggleFakeBlackRoomPortal";
+        public override string ID => "ToggleFakeBlackRoomPortal";
 
         [Serializable]
-        class ToggleFakeBlackRoomPortalSave {
+        public class ToggleFakeBlackRoomPortalSave : SerializableSaveObject<ToggleFakeBlackRoomPortal> {
             bool edgesAreBlack;
 
             public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) {
                 this.edgesAreBlack = toggle.edgesAreBlack;
             }
 
-            public void LoadSave(ToggleFakeBlackRoomPortal toggle) {
+            public override void LoadSave(ToggleFakeBlackRoomPortal toggle) {
                 toggle.edgesAreBlack = this.edgesAreBlack;
             }
-        }
-
-        public object GetSaveObject() {
-            return new ToggleFakeBlackRoomPortalSave(this);
-        }
-
-        public void LoadFromSavedObject(object savedObject) {
-            ToggleFakeBlackRoomPortalSave save = savedObject as ToggleFakeBlackRoomPortalSave;
-
-            save.LoadSave(this);
         }
         #endregion
     }

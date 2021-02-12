@@ -11,7 +11,7 @@ public struct ViewLockInfo {
 
 [RequireComponent(typeof(UniqueId))]
 [RequireComponent(typeof(Collider))]
-public class ViewLockObject : MonoBehaviour, SaveableObject {
+public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.ViewLockObjectSave> {
     public delegate void ViewLockEvent();
 
     public ViewLockInfo[] viewLockOptions;
@@ -63,7 +63,8 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
 
     bool isLockedOnThisObject => state != PlayerLook.State.ViewUnlocked;
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         hitbox = GetComponent<Collider>();
         hitbox.isTrigger = true;
 
@@ -72,7 +73,8 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
         interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
     }
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
         playerCamera = EpitaphScreen.instance.playerCamera.transform;
     }
 
@@ -112,15 +114,15 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
     }
 
 #region Saving
-    public bool SkipSave {
+    public override bool SkipSave {
         get => hitbox == null;
         set { }
     }
 
-    public string ID => $"ViewLockObject_{id.uniqueId}";
+    public override string ID => $"ViewLockObject_{id.uniqueId}";
 
     [Serializable]
-    class ViewLockObjectSave {
+    public class ViewLockObjectSave : SerializableSaveObject<ViewLockObject> {
         bool colliderEnabled;
         int state;
 
@@ -129,20 +131,10 @@ public class ViewLockObject : MonoBehaviour, SaveableObject {
             colliderEnabled = viewLockObject.hitbox.enabled;
         }
 
-        public void LoadSave(ViewLockObject viewLockObject) {
-            viewLockObject.state = (PlayerLook.State) state;
+        public override void LoadSave(ViewLockObject viewLockObject) {
+            viewLockObject._state = (PlayerLook.State) state;
             viewLockObject.hitbox.enabled = colliderEnabled;
         }
-    }
-
-    public object GetSaveObject() {
-        return new ViewLockObjectSave(this);
-    }
-
-    public void LoadFromSavedObject(object savedObject) {
-        ViewLockObjectSave save = savedObject as ViewLockObjectSave;
-
-        save.LoadSave(this);
     }
 #endregion
 }

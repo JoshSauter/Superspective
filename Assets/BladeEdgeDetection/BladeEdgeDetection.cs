@@ -7,7 +7,7 @@ using SerializableClasses;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
-public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
+public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDetection.BladeEdgeDetectionSave> {
 	public enum EdgeColorMode {
 		SimpleColor,
 		Gradient,
@@ -219,11 +219,10 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
-	public string ID => $"{gameObject.name}_BladeEdgeDetection";
+	public override string ID => $"{gameObject.name}_BladeEdgeDetection";
 
 	[Serializable]
-	class BladeEdgeDetectionSave {
+	public class BladeEdgeDetectionSave : SerializableSaveObject<BladeEdgeDetection> {
 		bool debugMode;
 		bool doubleSidedEdges;
 		bool checkPortalDepth;
@@ -254,7 +253,7 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 			this.edgeColorGradient = edgeDetection.edgeColorGradient;
 		}
 
-		public void LoadSave(BladeEdgeDetection edgeDetection) {
+		public override void LoadSave(BladeEdgeDetection edgeDetection) {
 			edgeDetection.debugMode = this.debugMode;
 			edgeDetection.doubleSidedEdges = this.doubleSidedEdges;
 			edgeDetection.checkPortalDepth = this.checkPortalDepth;
@@ -268,16 +267,6 @@ public class BladeEdgeDetection : MonoBehaviour, SaveableObject {
 			edgeDetection.edgeColor = this.edgeColor;
 			edgeDetection.edgeColorGradient = this.edgeColorGradient;
 		}
-	}
-
-	public object GetSaveObject() {
-		return new BladeEdgeDetectionSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		BladeEdgeDetectionSave save = savedObject as BladeEdgeDetectionSave;
-
-		save?.LoadSave(this);
 	}
 	#endregion
 }

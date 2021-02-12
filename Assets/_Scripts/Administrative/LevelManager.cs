@@ -1,13 +1,15 @@
-﻿#define TEST_BUILD
+﻿// Remove this when making release versions to not include the test scene in the build
+#define TEST_BUILD
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using EpitaphUtils;
 using NaughtyAttributes;
 using Saving;
-using UnityEngine.Serialization;
 using static Saving.SaveManagerForScene;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -45,9 +47,7 @@ public enum Level {
 	WhiteRoom1BackRoom
 }
 
-public class LevelManager : Singleton<LevelManager>, SaveableObject {
-	public bool debugMode = false;
-	DebugLogger debug;
+public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
 	[OnValueChanged("LoadDefaultPlayerPosition")]
 	public Level startingScene;
 	bool initialized = false;
@@ -74,7 +74,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		SetVector3($"{PositionKeyPrefix}.{sceneName}", Player.instance.transform.position);
 		SetVector3($"{RotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
 
-		if (debugMode) {
+		if (DEBUG) {
 			Debug.Log($"Starting position for player set to {Player.instance.transform.position} for scene {sceneName}");
 		}
 	}
@@ -164,11 +164,11 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 	[Button("Load default player position")]
 	void LoadDefaultPlayerPosition() {
-		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition
 #if !UNITY_EDITOR
-			|| true
+		return;
 #endif
-		) return;
+		
+		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
 
 		string sceneName = GetSceneName();
 		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
@@ -181,7 +181,7 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			Player.instance.transform.position = pos;
 			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
 		}
-		if (debugMode) {
+		if (DEBUG) {
 			if (!HasVector3(positionKey)) {
 				Debug.LogError($"No position key found for {positionKey}");
 			}
@@ -205,10 +205,24 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public string activeSceneName;
 	public Level ActiveScene => GetLevel(activeSceneName);
 	public List<string> loadedSceneNames;
-	List<string> currentlyLoadingSceneNames;
-	List<string> currentlyUnloadingSceneNames;
+	public List<string> currentlyLoadingSceneNames;
+	public List<string> currentlyUnloadingSceneNames;
 	public bool IsCurrentlyLoadingScenes => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
 
+	/// <summary>
+	/// Order of events:
+	/// 1) BeforeActiveSceneChange
+	/// 2) (if saving) BeforeSceneSaveState - foreach scene being unloaded
+	/// 3) BeforeSceneUnload - foreach scene being unloaded
+	/// 4) BeforeSceneLoad - for the scene becoming active, if it's not already loaded
+	/// 5) BeforeSceneLoad - foreach connected scene being loaded
+	/// --- Awake(), possibly Start() happens here for newly loaded objects ---
+	/// 5.5) OnActiveSceneChange - just before AfterSceneLoad, only for the active scene
+	/// 6) AfterSceneLoad/AfterSceneUnload - in order that the scenes are loaded in from SceneManager
+	/// 7) (if load from disk) BeforeSceneRestoreDynamicObjects - foreach scene loaded
+	/// 8) (if load from disk) BeforeSceneRestoreState - foreach scene loaded
+	/// 9) (if load from disk) AfterSceneRestoreState - foreach scene loaded
+	/// </summary>
 	public delegate void ActiveSceneChange();
 	public event ActiveSceneChange OnActiveSceneChange;
 	public delegate void ActiveSceneWillChange(string nextSceneName);
@@ -219,6 +233,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 	public event SceneLoadUnload BeforeSceneLoad;
 	public event SceneLoadUnload AfterSceneUnload;
 	public event SceneLoadUnload AfterSceneLoad;
+	public event SceneLoadUnload BeforeSceneRestoreDynamicObjects;
+	public event SceneLoadUnload BeforeSceneRestoreState;
+	public event SceneLoadUnload AfterSceneRestoreState;
+	public event SceneLoadUnload BeforeSceneSaveState;
 
 #region level names
 	public const string ManagerScene = "_ManagerScene";
@@ -254,9 +272,9 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 #endregion
 
-	public void Awake() {
+	protected override void Awake() {
+		base.Awake();
 		hasLoadedDefaultPlayerPosition = false;
-        debug = new DebugLogger(this, () => debugMode);
 
 		loadedSceneNames = new List<string>();
 		currentlyLoadingSceneNames = new List<string>();
@@ -270,7 +288,8 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		PopulateAlreadyLoadedScenes();
 #endif
 
-		activeSceneName = enumToSceneName[startingScene];
+		//SwitchActiveScene(startingScene);
+		//activeSceneName = enumToSceneName[startingScene];
 	}
 
 	void Start() {
@@ -335,7 +354,9 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			BeforeSceneLoad?.Invoke(levelName);
 
 			scenesToBeLoadedFromDisk.Add(levelName);
-			SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
+			if (ShouldLoadScene(levelName)) {
+				SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
+			}
 		}
 		else {
 			if (!hasLoadedDefaultPlayerPosition) {
@@ -351,7 +372,9 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 				BeforeSceneLoad?.Invoke(connectedSceneName);
 
 				scenesToBeLoadedFromDisk.Add(connectedSceneName);
-				SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
+				if (ShouldLoadScene(connectedSceneName)) {
+					SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
+				}
 			}
 		}
 
@@ -361,17 +384,27 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 
 		if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
 			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-				DynamicObjectManager.LoadDynamicObjectsForScene(sceneToBeLoaded);
+				BeforeSceneRestoreDynamicObjects?.Invoke(sceneToBeLoaded);
 			}
-
-			foreach (string loadedScene in loadedSceneNames) {
-				SaveManager.GetSaveManagerForScene(loadedScene).InitializeSaveableObjectsDict();
+			
+			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(sceneToBeLoaded);
+				SaveFileForScene saveFileForScene = saveManagerForScene.GetSaveFromDisk(SaveManager.temp);
+				saveManagerForScene?.LoadDynamicObjectsFromSaveFile(saveFileForScene);
+			}
+			
+			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				BeforeSceneRestoreState?.Invoke(sceneToBeLoaded);
 			}
 
 			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
 				SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(sceneToBeLoaded);
 				SaveFileForScene saveFileForScene = saveManagerForScene.GetSaveFromDisk(SaveManager.temp);
-				saveManagerForScene?.LoadSceneFromSaveFile(saveFileForScene);
+				saveManagerForScene?.RestoreStateFromSaveFile(saveFileForScene);
+			}
+			
+			foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				AfterSceneRestoreState?.Invoke(sceneToBeLoaded);
 			}
 		}
 	}
@@ -468,18 +501,31 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			}
 		}
 
-		foreach (string sceneToDeactivate in scenesToDeactivate) {
-			BeforeSceneUnload?.Invoke(sceneToDeactivate);
+		if (saveDeactivatingScenesToDisk) {
+			foreach (var sceneToDeactivate in scenesToDeactivate) {
+				BeforeSceneSaveState?.Invoke(sceneToDeactivate);
+			}
+		}
 
-			if (saveDeactivatingScenesToDisk) {
-				DynamicObjectManager.SaveDynamicObjectsForScene(sceneToDeactivate);
+		if (saveDeactivatingScenesToDisk) {
+			foreach (string sceneToDeactivate in scenesToDeactivate) {
 				SaveManagerForScene saveForScene = SaveManager.GetSaveManagerForScene(sceneToDeactivate);
 				saveForScene?.SaveScene(SaveManager.temp);
 			}
-
-			SceneManager.UnloadSceneAsync(sceneToDeactivate);
+		}
+		
+		// Update internal state before starting any unload scene calls
+		foreach (var sceneToDeactivate in scenesToDeactivate) {
 			loadedSceneNames.Remove(sceneToDeactivate);
 			currentlyUnloadingSceneNames.Add(sceneToDeactivate);
+		}
+		
+		foreach (var sceneToDeactivate in scenesToDeactivate) {
+			BeforeSceneUnload?.Invoke(sceneToDeactivate);
+		}
+		
+		foreach (var sceneToDeactivate in scenesToDeactivate) {
+			SceneManager.UnloadSceneAsync(sceneToDeactivate);
 		}
 	}
 
@@ -526,6 +572,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 		}
 	}
 
+	bool ShouldLoadScene(string sceneToLoad) {
+		return sceneToLoad != ManagerScene && !SceneManager.GetSceneByName(sceneToLoad).isLoaded;
+	}
+
 #if UNITY_EDITOR
 	/// <summary>
 	/// When ran from the Editor, checks every scene in the build settings to see which are loaded.
@@ -543,12 +593,11 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 #endif
 
 #region Saving
-	public bool SkipSave { get; set; }
 	// There's only one LevelManager so we don't need a UniqueId here
-	public string ID => "LevelManager";
+	public override string ID => "LevelManager";
 
 	[Serializable]
-	class LevelManagerSave {
+	public class LevelManagerSave : SerializableSaveObject<LevelManager> {
 		bool initialized;
 		string activeScene;
 
@@ -557,20 +606,10 @@ public class LevelManager : Singleton<LevelManager>, SaveableObject {
 			this.activeScene = levelManager.activeSceneName;
 		}
 
-		public void LoadSave(LevelManager levelManager) {
+		public override void LoadSave(LevelManager levelManager) {
 			levelManager.initialized = this.initialized;
 			levelManager.SwitchActiveScene(activeScene, false, false, false, false);
 		}
-	}
-
-	public object GetSaveObject() {
-		return new LevelManagerSave(this);
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		LevelManagerSave save = savedObject as LevelManagerSave;
-
-		save?.LoadSave(this);
 	}
 #endregion
 }

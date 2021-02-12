@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using EpitaphUtils;
@@ -20,9 +21,16 @@ namespace PowerTrailMechanics {
 	}
 
 	[RequireComponent(typeof(UniqueId))]
-	public class PowerTrail : MonoBehaviour, SaveableObject {
-		public bool DEBUG = false;
-		public DebugLogger debug;
+	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave> {
+		UniqueId _id;
+		UniqueId id {
+			get {
+				if (_id == null) {
+					_id = GetComponent<UniqueId>();
+				}
+				return _id;
+			}
+		}
 
 		public enum PowerTrailState {
 			depowered,
@@ -105,17 +113,16 @@ namespace PowerTrailMechanics {
 		}
 		bool isInitialized = false;
 
-		void Awake() {
+		protected override void Awake() {
+			base.Awake();
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
 			gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
-
-			// Saving
-			ID = GetComponent<UniqueId>().uniqueId;
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			if (renderers == null || renderers.Length == 0) {
 				renderers = GetComponents<Renderer>();
 			}
@@ -123,7 +130,6 @@ namespace PowerTrailMechanics {
 				colliders = renderers.Select(r => r.GetComponent<Collider>()).Where(c => c != null).ToArray();
 			}
 			materials = renderers.Select(r => r.material).ToArray();
-			debug = new DebugLogger(this, () => DEBUG);
 			PopulateTrailInfo();
 			if (useDurationInsteadOfSpeed) {
 				speed = maxDistance / targetDuration;
@@ -305,7 +311,7 @@ namespace PowerTrailMechanics {
 			Vector3 closestPoint = Vector3.zero;
 			float minDistance = maxSoundDistance + 1f;
 			// If the player is within maxSoundDistance from any collider of this PowerTrail
-			if (Physics.OverlapSphere(Player.instance.transform.position, maxSoundDistance, 1 << gameObject.layer).Where(c => colliders.Contains(c)).Any()) {
+			if (Physics.OverlapSphere(Player.instance.transform.position, maxSoundDistance, 1 << gameObject.layer).Any(c => colliders.Contains(c))) {
 				//Debug.Log($"PLAYER CLOSE TO {gameObject.name}");
 				for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
 					if (interpolationValues[i] == 0) continue;
@@ -421,9 +427,10 @@ namespace PowerTrailMechanics {
 		}
 #endregion
 #region Saving
-		[System.Serializable]
-		class PowerTrailSave {
-			public bool DEBUG;
+		public override string ID => $"PowerTrail_{id.uniqueId}";
+		
+		[Serializable]
+		public class PowerTrailSave : SerializableSaveObject<PowerTrail> {
 			public bool reverseVisibility;
 			public bool useDurationInsteadOfSpeed;
 			public bool useSeparateSpeedsForPowerOnOff;
@@ -438,7 +445,6 @@ namespace PowerTrailMechanics {
 			public int state;
 
 			public PowerTrailSave(PowerTrail powerTrail) {
-				this.DEBUG = powerTrail.DEBUG;
 				this.reverseVisibility = powerTrail.reverseVisibility;
 				this.useDurationInsteadOfSpeed = powerTrail.useDurationInsteadOfSpeed;
 				this.useSeparateSpeedsForPowerOnOff = powerTrail.useSeparateSpeedsForPowerOnOff;
@@ -453,8 +459,7 @@ namespace PowerTrailMechanics {
 				this.state = (int)powerTrail._state;
 			}
 
-			public void LoadSave(PowerTrail powerTrail) {
-				powerTrail.DEBUG = this.DEBUG;
+			public override void LoadSave(PowerTrail powerTrail) {
 				powerTrail.reverseVisibility = this.reverseVisibility;
 				powerTrail.useDurationInsteadOfSpeed = this.useDurationInsteadOfSpeed;
 				powerTrail.useSeparateSpeedsForPowerOnOff = this.useSeparateSpeedsForPowerOnOff;
@@ -475,18 +480,6 @@ namespace PowerTrailMechanics {
 				powerTrail.powerIsOn = this.powerIsOn;
 				powerTrail._state = (PowerTrailState)this.state;
 			}
-		}
-
-		public bool SkipSave { get; set; }
-		public string ID { get; private set; }
-		public object GetSaveObject() {
-			return new PowerTrailSave(this); ;
-		}
-
-		public void LoadFromSavedObject(object savedObject) {
-			PowerTrailSave save = savedObject as PowerTrailSave;
-
-			save.LoadSave(this);
 		}
 #endregion
 #region EditorGizmos

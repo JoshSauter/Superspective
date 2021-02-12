@@ -1,13 +1,11 @@
 ﻿using Saving;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
-public class NoClipMode : MonoBehaviour, SaveableObject {
+public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	Transform playerCamera;
 	PlayerMovement playerMovement;
 	Rigidbody playerRigidbody;
@@ -20,7 +18,8 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
 	public float sprintSpeed = 125;
 	public float middleMouseVerticalSpeed = 10;
 
-    void Start() {
+	protected override void Start() {
+		base.Start();
 		playerMovement = GetComponent<PlayerMovement>();
 		playerRigidbody = GetComponent<Rigidbody>();
 		playerCollider = GetComponent<Collider>();
@@ -40,9 +39,9 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
 			float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : Input.GetKey(KeyCode.LeftControl) ? slowMoveSpeed : moveSpeed;
 
 			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = middleMouseScroll * transform.up * middleMouseVerticalSpeed;
+			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
 
-			transform.position += (verticalScroll + moveDirection) * Time.deltaTime * speed;
+			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed);
 		}
     }
 
@@ -55,32 +54,21 @@ public class NoClipMode : MonoBehaviour, SaveableObject {
 	}
 
 	#region Saving
-	public bool SkipSave { get; set; }
 	// There's only one player so we don't need a UniqueId here
-	public string ID => "NoClipMode";
+	public override string ID => "NoClipMode";
 
 	[Serializable]
-	class NoClipSave {
+	public class NoClipSave : SerializableSaveObject<NoClipMode> {
 		bool noClipOn;
 
 		public NoClipSave(NoClipMode noClip) {
 			this.noClipOn = noClip.noClipOn;
 		}
 
-		public void LoadSave(NoClipMode noClip) {
+		public override void LoadSave(NoClipMode noClip) {
 			noClip.noClipOn = !this.noClipOn;
 			noClip.ToggleNoClip();
 		}
-	}
-
-	public object GetSaveObject() {
-		return new NoClipSave(this); ;
-	}
-
-	public void LoadFromSavedObject(object savedObject) {
-		NoClipSave save = savedObject as NoClipSave;
-
-		save.LoadSave(this);
 	}
 	#endregion
 }
