@@ -165,6 +165,12 @@ namespace PowerTrailMechanics {
 
 			// DEBUG: Remove this from Update after debugging
 			//PopulateStaticGPUInfo();
+			Material[] nowMaterials = renderers.Select(r => r.material).ToArray();
+			if (materials != null && nowMaterials != null && !materials.SequenceEqual(nowMaterials)) {
+				materials = nowMaterials;
+				PopulateStaticGPUInfo();
+			}
+			
 
 			UpdateInterpolationValues(nextDistance);
 

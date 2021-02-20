@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using LevelManagement;
 
 public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     CanvasGroup bannerGroup;
     [Serializable]
     public struct Banner {
-        public Level level;
+        public Levels level;
         public GameObject banner;
     }
     public Banner[] banners;
-    public Dictionary<Level, GameObject> levelToBanner = new Dictionary<Level, GameObject>();
-    public Level lastBannerLoaded = Level.ManagerScene;
-    public Level queuedBanner = Level.ManagerScene;
+    public Dictionary<Levels, GameObject> levelToBanner = new Dictionary<Levels, GameObject>();
+    public Levels lastBannerLoaded = Levels.ManagerScene;
+    public Levels queuedBanner = Levels.ManagerScene;
     public bool isPlayingBanner;
 
     float fadeTime = 2.5f;
@@ -28,13 +29,13 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     }
 
     void Update() {
-        if (!isPlayingBanner && queuedBanner != lastBannerLoaded && queuedBanner != Level.ManagerScene) {
+        if (!isPlayingBanner && queuedBanner != lastBannerLoaded && queuedBanner != Levels.ManagerScene) {
             PlayBanner(queuedBanner);
-            queuedBanner = Level.ManagerScene;
+            queuedBanner = Levels.ManagerScene;
         }
     }
 
-    public void PlayBanner(Level level) {
+    public void PlayBanner(Levels level) {
         // If we're not already playing a banner
         if (!isPlayingBanner) {
             // If we have a banner prepared for this level
@@ -48,13 +49,13 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         }
         // If we're playing a banner and attempt to queue up the same banner
         else {
-            queuedBanner = Level.ManagerScene;
+            queuedBanner = Levels.ManagerScene;
         }
     }
 
-    IEnumerator PlayBannerCoroutine(Level level) {
+    IEnumerator PlayBannerCoroutine(Levels level) {
         // managerScene acts as a flag value for "not set"
-        if (lastBannerLoaded != Level.ManagerScene) {
+        if (lastBannerLoaded != Levels.ManagerScene) {
             levelToBanner[lastBannerLoaded].SetActive(false);
         }
         levelToBanner[level].SetActive(true);
@@ -67,7 +68,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         while (timeElapsed < fadeTime) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (queuedBanner != Level.ManagerScene && queuedBanner != level) {
+            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
                 timeElapsed += 2 * Time.deltaTime;
             }
             float t = timeElapsed / fadeTime;
@@ -81,7 +82,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         while (timeElapsed < displayTime) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (queuedBanner != Level.ManagerScene && queuedBanner != level) {
+            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
                 timeElapsed += 2 * Time.deltaTime;
             }
 
@@ -92,7 +93,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         while (timeElapsed < fadeTime) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (queuedBanner != Level.ManagerScene && queuedBanner != level) {
+            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
                 timeElapsed += 2 * Time.deltaTime;
             }
             float t = timeElapsed / fadeTime;

@@ -85,6 +85,11 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     [ShowNativeProperty]
     int numberOfIrreplaceableCubes => objectsGrabbedFromSpawner.Count(o => !o.isReplaceable);
 
+    private bool ReplaceableCube(PickupObject o) {
+        // Objects may be null if they're moved to another scene
+        return o == null || o.isReplaceable;
+    }
+
     protected override void Awake() {
         base.Awake();
         

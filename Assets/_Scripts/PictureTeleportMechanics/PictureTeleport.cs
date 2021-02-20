@@ -4,6 +4,7 @@ using UnityStandardAssets.ImageEffects;
 using NaughtyAttributes;
 using Saving;
 using System;
+using LevelManagement;
 using SerializableClasses;
 
 // TODO: Change this to work with local position offset from bigFrame position instead of just a world position
@@ -31,7 +32,7 @@ namespace PictureTeleportMechanics {
         [ShowIf("bigFrameIsInSameScene")]
         public BigFrame bigFrame;
         [HideIf("bigFrameIsInSameScene")]
-        public Level bigFrameLevel;
+        public Levels bigFrameLevel;
         [HideIf("bigFrameIsInSameScene")]
         public string bigFrameName;
 
@@ -48,6 +49,10 @@ namespace PictureTeleportMechanics {
         float startSsaoIntensity;
         const float ssaoMultiplier = .75f;
         public float ssaoBlendTimeRemaining = 0f;
+
+        public delegate void PictureTeleportEvent();
+
+        public PictureTeleportEvent OnPictureTeleport;
 
         new void Awake() {
             base.Awake();
@@ -97,6 +102,8 @@ namespace PictureTeleportMechanics {
             PlayerLook.instance.rotationY = targetLookY;
             PlayerLook.instance.rotationBeforeViewLock = camContainer.rotation;
             Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;
+            
+            OnPictureTeleport?.Invoke();
         }
 
         #region Saving

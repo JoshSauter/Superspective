@@ -68,7 +68,7 @@ namespace LevelSpecific.WhiteRoom {
         float currentValueNegativeSymbolAlpha = 0f;
 
         public Material whiteToBlack, blackToWhite;
-        Color white, black;
+        public Color white, black;
         const string colorProp = "_Color";
         const string colorProp2 = "_Color2";
 
@@ -135,6 +135,9 @@ namespace LevelSpecific.WhiteRoom {
                 hideFlags = HideFlags.HideAndDontSave
             };
             obeliskLight.material = obeliskLightMaterial;
+            
+            white = Resources.Load<Material>("Materials/Unlit/Unlit").GetColor(colorProp);
+            black = Resources.Load<Material>("Materials/Unlit/UnlitBlack").GetColor(colorProp);
         }
 
         protected override void Start() {
@@ -142,9 +145,6 @@ namespace LevelSpecific.WhiteRoom {
             playerCamera = EpitaphScreen.instance.playerCamera.transform;
 
             base9Symbols = Resources.LoadAll<Sprite>("Images/Base9/").OrderBy(s => int.Parse(s.name)).ToArray();
-
-            white = whiteToBlack.GetColor(colorProp);
-            black = blackToWhite.GetColor(colorProp);
         }
 
         protected override void Init() {

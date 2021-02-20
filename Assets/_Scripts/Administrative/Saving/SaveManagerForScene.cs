@@ -48,7 +48,7 @@ namespace Saving {
         public bool UnregisterSaveableObject(ISaveableObject saveableObject) {
             string id = saveableObject.ID;
             if (!saveableObjects.ContainsKey(id)) {
-                debug.LogWarning($"Attempting to remove saveableObject with id: {id}, but no entry for that id exists.");
+                //debug.LogWarning($"Attempting to remove saveableObject with id: {id}, but no entry for that id exists.");
                 return false;
             }
             

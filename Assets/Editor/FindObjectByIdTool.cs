@@ -24,7 +24,7 @@ public class FindObjectByIdTool : ScriptableWizard {
     public void FindObjectById() {
         List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
             .OfType<ISaveableObject>()
-            .Where(s => HasValidId(s) && s.ID == id)
+            .Where(s => HasValidId(s) && s.ID.Contains(id))
             .OfType<MonoBehaviour>()
             .ToList();
 

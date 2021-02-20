@@ -50,8 +50,10 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         void SetEdgeColors(bool on) {
-            portal.changeCameraEdgeDetection = on;
-            portal.otherPortal.changeCameraEdgeDetection = on;
+            if (portal.otherPortal != null) {
+                portal.changeCameraEdgeDetection = on;
+                portal.otherPortal.changeCameraEdgeDetection = on;
+            }
         }
 
 #region Saving

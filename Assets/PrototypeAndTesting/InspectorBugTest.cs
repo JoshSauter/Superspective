@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PowerTrailMechanics;
 using System;
+using LevelManagement;
 using MagicTriggerMechanics;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -59,17 +60,17 @@ namespace MagicTriggerMechanics2 {
 		public GameObject[] objectsToDisable;
 		public MonoBehaviour[] scriptsToEnable;
 		public MonoBehaviour[] scriptsToDisable;
-		public Level levelForward;
-		public Level levelBackward;
+		public Levels levelForward;
+		public Levels levelBackward;
 		public bool forwardSameScenePillar = true;
 		public bool backwardSameScenePillar = true;
 		// Setting up references for pillars in same scene can be done directly
 		public DimensionPillar forwardPillar;
 		public DimensionPillar backwardPillar;
 		// Setting up references for pillars in different scenes has to be done through scene + gameObject names
-		public Level forwardPillarLevel;
+		public Levels forwardPillarLevel;
 		public string forwardPillarName;
-		public Level backwardPillarLevel;
+		public Levels backwardPillarLevel;
 		public string backwardPillarName;
 		public PowerTrail powerTrail;
 		public bool setPowerIsOn = true;
@@ -174,7 +175,7 @@ namespace MagicTriggerMechanics2 {
 			DimensionPillar.ActivePillar = backwardPillar;
 		}
 
-		string PillarKey(Level level, string name) {
+		string PillarKey(Levels level, string name) {
 			return LevelManager.instance.GetSceneName(level) + " " + name;
 		}
 

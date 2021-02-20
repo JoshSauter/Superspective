@@ -4,9 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using EpitaphUtils;
+using LevelManagement;
 
 public class OutOfBounds : MonoBehaviour {
-	public Level levelToLoad;
+	public Levels levelToLoad;
 
 	Image redBackground;
 	Image blackForeground;

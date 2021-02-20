@@ -29,6 +29,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     public float receptacleSize = 1f;
     public float receptableDepth = 0.5f;
     public PickupObject cubeInReceptacle;
+    public bool playSound = true;
     UniqueId _id;
     State _state = State.Empty;
 
@@ -219,7 +220,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         startPos = cubeInReceptacle.transform.position;
         endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
 
-        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
+        if (playSound) {
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
+        }
 
         state = State.CubeEnterRotate;
     }
@@ -229,7 +232,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
         state = State.CubeExiting;
 
-        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+        if (playSound) {
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+        }
 
         startPos = cubeInReceptacle.transform.position;
         endPos = transform.TransformPoint(0, 1.5f, 0);
@@ -254,7 +259,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     void ReleaseCubeFromReceptacle() {
         state = State.CubeExiting;
 
-        AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+        if (playSound) {
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+        }
 
         cubeInReceptacle.shouldFollow = false;
         cubeInReceptacle.interactable = false;

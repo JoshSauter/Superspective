@@ -36,7 +36,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         }
     }
 
-    PlayerLook.State state {
+    public PlayerLook.State state {
         get => _state;
         set {
             if (state == value) return;

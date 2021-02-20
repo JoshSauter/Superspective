@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using LevelManagement;
 using PortalMechanics;
 using Saving;
 using UnityEngine;
@@ -38,6 +39,10 @@ namespace EpitaphUtils {
     }
 
     public static class Utils {
+        public static V GetValue<K, V>(this IDictionary<K, V> dict, K key, V defaultValue = default) {
+            return dict.TryGetValue(key, out V value) ? value : defaultValue;
+        }
+        
         public static T GetCopyOf<T>(this Component comp, T other) where T : Component {
             Type type = comp.GetType();
             if (type != other.GetType()) return null; // type mis-match

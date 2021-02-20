@@ -8,6 +8,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using static Saving.SaveManagerForScene;
 using System.Reflection;
+using EpitaphUtils;
+using LevelManagement;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 using UnityEditor;
@@ -25,23 +27,20 @@ namespace Saving {
 			}
 
             if (!activeScenes.ContainsKey(sceneName)) {
-                if (createIfMissing) {
-                    AddSaveManagerForScene(sceneName);
-                }
-                else {
-                    return null;
-                }
+                return createIfMissing ? AddSaveManagerForScene(sceneName) : null;
             }
             return activeScenes[sceneName];
 		}
 
         public static SaveManagerForScene AddSaveManagerForScene(string sceneName) {
-            if (!activeScenes.ContainsKey(sceneName)) {
+            bool validScene = sceneName == LevelManager.ManagerScene || LevelManager.instance.loadedSceneNames.Contains(sceneName);
+            
+            if (!activeScenes.ContainsKey(sceneName) && validScene) {
                 SaveManagerForScene saveForScene = new GameObject($"{sceneName} Save Manager").AddComponent<SaveManagerForScene>();
                 SceneManager.MoveGameObjectToScene(saveForScene.gameObject, SceneManager.GetSceneByName(sceneName));
                 activeScenes[sceneName] = saveForScene;
             }
-            return activeScenes[sceneName];
+            return activeScenes.GetValue(sceneName);
 		}
 
         public static void RemoveSaveManagerForScene(string sceneName) {

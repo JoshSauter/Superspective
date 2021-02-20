@@ -282,6 +282,8 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
+	// TODO: Make this an Either<T, S> where T : SaveableObject<T, S> where S : SerializableSaveObject<T>
+	// TODO: This way scripts cannot assume that their cross-scene references are loaded
 	public class SerializableReference<T> where T : MonoBehaviour, ISaveableObject {
 		public string referencedSceneName;
 		public string referencedObjId;
@@ -295,12 +297,12 @@ namespace SerializableClasses {
 						return saveableObject as T;
 					}
 					else {
-						Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");
+						//Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");
 						return null;
 					}
 				}
 				else {
-					Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");
+					Debug.LogWarning($"Can't restore reference for id: {referencedObjId} because scene {referencedSceneName} didn't get a SaveManagerForScene");
 					return null;
 				}
 			}

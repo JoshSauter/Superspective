@@ -10,7 +10,6 @@ using UnityEngine;
 public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle1.WhiteRoomPuzzle1Save> {
     public PowerTrail powerTrail;
     public MagicTrigger fakePortalTrigger;
-    public MagicTrigger backRoomTrigger;
 
 	// Fake portal movement
     public GameObject fakePortal;
@@ -35,21 +34,6 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	public SerializableReference<DimensionObject> holeCoverReference;
 	DimensionObject holeCover => holeCoverReference.Reference;
 	
-	public SerializableReference<DimensionObject> backRoomDimensionWallLeftReference;
-	DimensionObject backRoomDimensionWallLeft => backRoomDimensionWallLeftReference.Reference;
-	
-	public SerializableReference<DimensionObject> backRoomDimensionWallRightReference;
-	DimensionObject backRoomDimensionWallRight => backRoomDimensionWallRightReference.Reference;
-
-	public SerializableReference<DimensionObject> backRoomCullEverythingWallLeftReference;
-	DimensionObject backRoomCullEverythingWallLeft => backRoomCullEverythingWallLeftReference.Reference;
-	
-	public SerializableReference<DimensionObject> backRoomCullEverythingWallRightReference;
-	DimensionObject backRoomCullEverythingWallRight => backRoomCullEverythingWallRightReference.Reference;
-
-	public SerializableReference<GameObjectRef> backRoomMiddleGlassDimensionWallReference;
-	GameObject backRoomMiddleGlassDimensionWall => backRoomMiddleGlassDimensionWallReference.Reference.gameObject;
-	
 	public enum State {
         Unsolved,
         FakePortalPowered,
@@ -64,23 +48,23 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
             if (_state == value) {
                 return;
 			}
-
+            
 			switch (value) {
 				case State.Unsolved:
 					fakePortalTargetPos = fakePortalUnsolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedDown;
-					archToNextRoom.SwitchVisibilityState(VisibilityState.invisible, true);
-					holeCover.SwitchVisibilityState(VisibilityState.invisible, true);
+					archToNextRoom?.SwitchVisibilityState(VisibilityState.invisible, true);
+					holeCover?.SwitchVisibilityState(VisibilityState.invisible, true);
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedUp;
-					archToNextRoom.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
-					holeCover.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
+					archToNextRoom?.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
+					holeCover?.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
 					break;
 				case State.WalkedThroughFakePortal:
-					archToNextRoom.SwitchVisibilityState(VisibilityState.visible, true);
-					holeCover.SwitchVisibilityState(VisibilityState.visible, true);
+					archToNextRoom?.SwitchVisibilityState(VisibilityState.visible, true);
+					holeCover?.SwitchVisibilityState(VisibilityState.visible, true);
 					break;
 				default:
 					break;
@@ -122,33 +106,6 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 				restoreFakePortalPlaneTrigger.SetActive(true);
 			}
 		};
-
-		yield return new WaitForSeconds(1f);
-
-		TriggerAction action1 = new TriggerAction {
-			action = TriggerActionType.ChangeVisibilityState,
-			actionTiming = ActionTiming.OnceWhileOnStay,
-			dimensionObjects = new[] { backRoomDimensionWallLeft, backRoomDimensionWallRight },
-			visibilityState = VisibilityState.partiallyVisible
-		};
-		
-		TriggerAction action2 = new TriggerAction {
-			action = TriggerActionType.ChangeVisibilityState,
-			actionTiming = ActionTiming.OnceWhileOnStay,
-			dimensionObjects = new[] { backRoomCullEverythingWallLeft, backRoomCullEverythingWallRight },
-			visibilityState = VisibilityState.partiallyInvisible
-		};
-
-		TriggerAction action3 = new TriggerAction() {
-			action = TriggerActionType.ToggleGameObjects,
-			actionTiming = ActionTiming.OnceWhileOnStay,
-			objectsToEnable = new[] { backRoomMiddleGlassDimensionWall },
-			objectsToDisable = new GameObject[0]
-		};
-
-		backRoomTrigger.actionsToTrigger.Add(action1);
-		backRoomTrigger.actionsToTrigger.Add(action2);
-		backRoomTrigger.actionsToTrigger.Add(action3);
 	}
 
     void Update() {

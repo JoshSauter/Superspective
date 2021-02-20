@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using EpitaphUtils;
+using LevelManagement;
 
 namespace Saving {
 	public enum RegistrationStatus {

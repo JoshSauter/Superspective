@@ -43,7 +43,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     Vector2 reticleStartPos;
     Vector3 startPos;
     Quaternion startRot;
-    float timeSinceStateChange;
+    public float timeSinceStateChange;
     float viewLockTime;
     float viewUnlockTime;
 

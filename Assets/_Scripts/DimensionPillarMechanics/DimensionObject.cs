@@ -78,6 +78,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	IEnumerator Initialize() {
 		yield return new WaitUntil(() => gameObject.IsInLoadedScene());
+		yield return null;
 		
 		SwitchVisibilityState(startingVisibilityState, true);
 		initialized = true;
@@ -260,12 +261,16 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	Material GetDimensionObjectMaterial(Material normalMaterial) {
 		Material newMaterial = null;
+		bool powerTrailShader = false;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
 				break;
 			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolve"));
+				break;
+			case "Unlit/Texture":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitTexture"));
 				break;
 			case "Custom/UnlitDissolveTransparent":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolveTransparent"));
@@ -293,6 +298,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionWater"));
 				break;
 			case "Custom/PowerTrailLight":
+				powerTrailShader = true;
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPowerTrail"));
 				break;
 			case "Portals/PortalMaterial":
@@ -308,6 +314,14 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 		if (newMaterial != null && normalMaterial != null) {
 			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
+			
+			// Special case handling
+			if (powerTrailShader) {
+				newMaterial.SetVectorArray("_NodePositions", normalMaterial.GetVectorArray("_NodePositions"));
+				newMaterial.SetFloatArray("_StartPositionIDs", normalMaterial.GetFloatArray("_StartPositionIDs"));
+				newMaterial.SetFloatArray("_EndPositionIDs", normalMaterial.GetFloatArray("_EndPositionIDs"));
+				newMaterial.SetFloatArray("_InterpolationValues", normalMaterial.GetFloatArray("_InterpolationValues"));
+			}
 		}
 		return (newMaterial != null) ? newMaterial : normalMaterial;
 	}

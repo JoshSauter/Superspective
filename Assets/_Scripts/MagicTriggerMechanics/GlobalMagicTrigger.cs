@@ -1,17 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using LevelManagement;
 using UnityEngine;
 
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
     public class GlobalMagicTrigger : MagicTrigger {
 		public bool sceneMustBeActive = true;
-		Level thisScene = Level.ManagerScene;
+		Levels thisScene = Levels.ManagerScene;
 
 		bool IsActive() {
 			bool isActive = enabled;
 			if (sceneMustBeActive) {
-				if (thisScene == Level.ManagerScene) {
+				if (thisScene == Levels.ManagerScene) {
 					thisScene = LevelManager.instance.GetLevel(gameObject.scene.name);
 				}
 				isActive = isActive && thisScene == LevelManager.instance.ActiveScene;

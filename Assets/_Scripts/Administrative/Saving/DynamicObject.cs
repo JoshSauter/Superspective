@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using EpitaphUtils;
+using LevelManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
@@ -57,12 +58,25 @@ namespace Saving {
 				debug.LogError($"{gameObject.name}: No prefab for this DynamicObject");
 			}
 			pickup = GetComponent<PickupObject>();
+			
+			LevelManager.instance.BeforeSceneRestoreState += RegisterOnLevelChangeEvents;
+			LevelManager.instance.BeforeSceneSaveState += RegisterOnLevelChangeEvents;
 		}
 
 		IEnumerator Start() {
 			yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
 			
 			Register();
+		}
+		
+		void RegisterOnLevelChangeEvents(string scene) {
+			if (hasRegistered) return;
+            
+			if (scene == SceneName) {
+				Register();
+				LevelManager.instance.BeforeSceneRestoreState -= RegisterOnLevelChangeEvents;
+				LevelManager.instance.BeforeSceneSaveState -= RegisterOnLevelChangeEvents;
+			}
 		}
 
 		public void Register() {
@@ -72,13 +86,13 @@ namespace Saving {
 
 			RegistrationStatus dynamicObjectRegistrationStatus = DynamicObjectManager.RegisterDynamicObject(this, SceneName);
 			bool dynamicObjectManagerRegistered = dynamicObjectRegistrationStatus.IsSuccess() || (SaveManager.isCurrentlyLoadingSave && !dynamicObjectRegistrationStatus.IsAlreadyDestroyed());
-			bool saveManagerRegistered = SaveForScene.RegisterDynamicObject(this);
-			if (dynamicObjectManagerRegistered && saveManagerRegistered) {
+			if (dynamicObjectManagerRegistered) {
+				SaveForScene.RegisterDynamicObject(this);
 				debug.Log($"Registration succeeded for {this.name}, scene {SceneName}");
 				hasRegistered = true;
 			}
 			else {
-				debug.LogError($"Registration failed. DynamicObjectManager registration succeeded: {dynamicObjectManagerRegistered}, SaveManagerForScene registration succeeded: {saveManagerRegistered}");
+				debug.LogError($"Registration failed. DynamicObjectManager registration result: {dynamicObjectManagerRegistered}");
 				Destroy(gameObject);
 			}
 		}
@@ -115,6 +129,13 @@ namespace Saving {
 			}
 
 			Destroy(gameObject);
+		}
+
+		void OnDestroy() {
+			if (LevelManager.instance != null) {
+				LevelManager.instance.BeforeSceneRestoreState -= RegisterOnLevelChangeEvents;
+				LevelManager.instance.BeforeSceneSaveState -= RegisterOnLevelChangeEvents;
+			}
 		}
 
 		void Update() {

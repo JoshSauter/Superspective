@@ -1,4 +1,5 @@
 ﻿using System;
+using LevelManagement;
 using UnityEngine;
 using NaughtyAttributes;
 using PowerTrailMechanics;
@@ -38,17 +39,17 @@ namespace MagicTriggerMechanics {
 		public GameObject[] objectsToDisable;
 		public MonoBehaviour[] scriptsToEnable;
 		public MonoBehaviour[] scriptsToDisable;
-		public Level levelForward;
-		public Level levelBackward;
+		public Levels levelForward;
+		public Levels levelBackward;
 		public bool forwardSameScenePillar = true;
 		public bool backwardSameScenePillar = true;
 		// Setting up references for pillars in same scene can be done directly
 		public DimensionPillar forwardPillar;
 		public DimensionPillar backwardPillar;
 		// Setting up references for pillars in different scenes has to be done through scene + gameObject names
-		public Level forwardPillarLevel;
+		public Levels forwardPillarLevel;
 		public string forwardPillarName;
-		public Level backwardPillarLevel;
+		public Levels backwardPillarLevel;
 		public string backwardPillarName;
 		public PowerTrail powerTrail;
 		public bool setPowerIsOn = true;
@@ -165,7 +166,7 @@ namespace MagicTriggerMechanics {
 			DimensionPillar.ActivePillar = backwardPillar;
 		}
 
-		string PillarKey(Level level, string name) {
+		string PillarKey(Levels level, string name) {
 			return LevelManager.instance.GetSceneName(level) + " " + name;
 		}
 
@@ -229,7 +230,7 @@ namespace MagicTriggerMechanics {
 			GUIContent powerTrailLabel = new GUIContent("Power trail:");
 			GUIContent setPowerIsOnLabel = new GUIContent("Power On/Off:");
 			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
-			GUIContent visibilityStatelabel = new GUIContent("Visibility State:");
+			GUIContent visibilityStateLabel = new GUIContent("Visibility State:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -288,7 +289,7 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerActionType.ChangeVisibilityState:
 					EditorGUILayout.PropertyField(dimensionObjects, dimensionObjectsLabel);
-					EditorGUILayout.PropertyField(visibilityState, visibilityStatelabel);
+					EditorGUILayout.PropertyField(visibilityState, visibilityStateLabel);
 					break;
 				default:
 					break;
@@ -299,7 +300,7 @@ namespace MagicTriggerMechanics {
 			EditorGUILayout.Space();
 		}
 
-		void AddSeparator() {
+		static void AddSeparator() {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}
 	}
