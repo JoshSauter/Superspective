@@ -192,7 +192,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
         State state;
         float timeSinceStateChange;
 
-        public PanelSave(Panel script) {
+        public PanelSave(Panel script) : base(script) {
             state = script.state;
             timeSinceStateChange = script.timeSinceStateChange;
             gemColor = script.gemColor;

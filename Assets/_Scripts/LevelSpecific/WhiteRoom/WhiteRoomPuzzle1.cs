@@ -5,7 +5,10 @@ using SerializableClasses;
 using System;
 using System.Collections;
 using EpitaphUtils;
+using Library.Functional;
 using UnityEngine;
+using DimensionObjectReference = SerializableClasses.SerializableReference<DimensionObject, DimensionObject.DimensionObjectSave>;
+using MaybeDimensionObject = Library.Functional.Either<DimensionObject, DimensionObject.DimensionObjectSave>;
 
 public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle1.WhiteRoomPuzzle1Save> {
     public PowerTrail powerTrail;
@@ -28,11 +31,11 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 	// We trade out the ToCathedral DimensionObject for ToCathedral PillarDimensionObject after player walks through fake portal
 	// These are SerializableReferences because they come from another scene (WhiteRoomBackRoom)
-	public SerializableReference<DimensionObject> archToNextRoomReference;
-	DimensionObject archToNextRoom => archToNextRoomReference.Reference;
+	public DimensionObjectReference archToNextRoomReference;
+	MaybeDimensionObject archToNextRoom => archToNextRoomReference.Reference;
 	
-	public SerializableReference<DimensionObject> holeCoverReference;
-	DimensionObject holeCover => holeCoverReference.Reference;
+	public DimensionObjectReference holeCoverReference;
+	MaybeDimensionObject holeCover => holeCoverReference.Reference;
 	
 	public enum State {
         Unsolved,
@@ -53,18 +56,36 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 				case State.Unsolved:
 					fakePortalTargetPos = fakePortalUnsolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedDown;
-					archToNextRoom?.SwitchVisibilityState(VisibilityState.invisible, true);
-					holeCover?.SwitchVisibilityState(VisibilityState.invisible, true);
+					archToNextRoom?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.invisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.invisible
+					);
+					holeCover?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.invisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.invisible
+					);
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedUp;
-					archToNextRoom?.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
-					holeCover?.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
+					archToNextRoom?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.partiallyVisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.partiallyVisible
+					);
+					holeCover?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.partiallyVisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.partiallyVisible
+					);
 					break;
 				case State.WalkedThroughFakePortal:
-					archToNextRoom?.SwitchVisibilityState(VisibilityState.visible, true);
-					holeCover?.SwitchVisibilityState(VisibilityState.visible, true);
+					archToNextRoom?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.visible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.visible
+					);
+					holeCover?.MatchAction(
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.visible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.visible
+					);
 					break;
 				default:
 					break;
@@ -148,7 +169,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 		float fakePortalLerpSpeed;
 
-		public WhiteRoomPuzzle1Save(WhiteRoomPuzzle1 script) {
+		public WhiteRoomPuzzle1Save(WhiteRoomPuzzle1 script) : base(script) {
 			this.state = (int)script.state;
 			this.fakePortalPos = script.fakePortal.transform.position;
 			this.fakePortalActive = script.fakePortal.activeSelf;

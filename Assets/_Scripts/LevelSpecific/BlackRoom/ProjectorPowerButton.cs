@@ -63,7 +63,7 @@ namespace LevelSpecific.BlackRoom {
 		public class ProjectorPowerButtonSave : SerializableSaveObject<ProjectorPowerButton> {
 			bool projectorTurnedOn;
 
-			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) {
+			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) : base(projectorPowerButton) {
 				this.projectorTurnedOn = projectorPowerButton.projectorTurnedOn;
 			}
 

@@ -10,6 +10,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using EpitaphUtils;
 using LevelManagement;
+using Library.Functional;
+using Object = UnityEngine.Object;
 
 namespace Saving {
 	public enum RegistrationStatus {
@@ -54,15 +56,23 @@ namespace Saving {
 		const string filename = "DynamicObjects.save";
 
 		public static DynamicObject CreateInstanceFromSavedInfo(string id, DynamicObjectSave dynamicObjSave) {
+			// Use a root GameObject to instantiate the object directly into the appropriate scene
+			DynamicObject InstantiateInScene(DynamicObject dynamicObjectPrefab, string sceneName) {
+				List<GameObject> gameObjects = new List<GameObject>();
+				SceneManager.GetSceneByName(dynamicObjSave.scene).GetRootGameObjects(gameObjects);
+				DynamicObject newDynamicObject = Object.Instantiate(dynamicObjectPrefab, gameObjects[0].transform);
+				newDynamicObject.transform.SetParent(null);
+
+				return newDynamicObject;
+			}
+			
 			string prefabPath = dynamicObjSave.prefabPath;
 			DynamicObject prefab = Resources.Load<DynamicObject>(prefabPath);
 			if (prefab == null) {
 				Debug.LogError($"Can't instantiate dynamic object from prefabPath: {prefabPath}");
 				return null;
 			}
-			// Use the SaveManagerForScene to instantiate the object directly into the appropriate scene
-			DynamicObject newObject = GameObject.Instantiate(prefab, SaveManager.GetSaveManagerForScene(dynamicObjSave.scene).transform);
-			newObject.transform.SetParent(null);
+			DynamicObject newObject = InstantiateInScene(prefab, dynamicObjSave.scene);
 			newObject.prefabPath = dynamicObjSave.prefabPath;
 
 			newObject.id.uniqueId = id;
@@ -100,8 +110,11 @@ namespace Saving {
 			return RegistrationStatus.RegisteredSuccessfully;
 		}
 
-		public static bool MarkDynamicObjectAsDestroyed(DynamicObject dynamicObject, string sceneName) {
-			string id = dynamicObject.ID;
+		public static bool MarkDynamicObjectAsDestroyed(Either<DynamicObject, DynamicObjectSave> dynamicObject, string sceneName) {
+			string id = dynamicObject.Match(
+				dynamicObj => dynamicObj.ID,
+				dynamicObjSave => dynamicObjSave.ID
+			);
 			if (!allDynamicObjectRecords.ContainsKey(id)) {
 				Debug.LogError($"Trying to mark DynamicObject {dynamicObject} as destroyed, but allDynamicObjectRecords contains no entry for {id}");
 				return false;
@@ -136,23 +149,15 @@ namespace Saving {
 			return true;
 		}
 
-		public static void SaveDynamicObjectRecords(string saveFileName) {
-			string directoryPath = SavePath(saveFileName);
-			string saveFile = $"{directoryPath}/{filename}";
-			
-			DynamicObjectsSaveFile save = DynamicObjectsSaveFile.CreateSaveFileFromCurrentState();
-
-			BinaryFormatter bf = new BinaryFormatter();
-			Directory.CreateDirectory(directoryPath);
-			FileStream file = File.Create(saveFile);
-			bf.Serialize(file, save);
-			file.Close();
+		public static DynamicObjectsSaveFile GetDynamicObjectRecordsSave() {
+			return DynamicObjectsSaveFile.CreateSaveFileFromCurrentState();
 		}
 
 		public static void DeleteAllExistingDynamicObjectsAndClearState() {
 			foreach (var scene in LevelManager.instance.loadedSceneNames) {
-				SaveManager.GetSaveManagerForScene(scene)?.DeleteAllDynamicObjectsInScene();
+				SaveManager.GetOrCreateSaveManagerForScene(scene)?.DeleteAllDynamicObjectsInScene();
 			}
+			allDynamicObjectRecords.Clear();
 		}
 
 		public static void LoadAllDynamicObjectRecords(string saveFileName) {

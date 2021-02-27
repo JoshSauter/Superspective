@@ -54,7 +54,7 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
 
         float timeElapsed;
 
-        public ObjectScaleSave(ObjectScale script) {
+        public ObjectScaleSave(ObjectScale script) : base(script) {
             minSize = script.minSize;
             maxSize = script.maxSize;
             period = script.period;

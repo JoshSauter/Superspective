@@ -42,7 +42,7 @@ public class RotateObject : SaveableObject<RotateObject, RotateObject.RotateObje
         readonly float rotationsPerSecondZ;
 
         readonly SerializableQuaternion rotation;
-        public RotateObjectSave(RotateObject rotate) {
+        public RotateObjectSave(RotateObject rotate) : base(rotate) {
             this.useLocalCoordinates = rotate.useLocalCoordinates;
             this.rotationsPerSecondX = rotate.rotationsPerSecondX;
             this.rotationsPerSecondY = rotate.rotationsPerSecondY;

@@ -47,7 +47,7 @@ namespace LevelSpecific.BlackRoom {
 		public class TogglePortalRenderSave : SerializableSaveObject<TogglePortalRender> {
 			bool initialized;
 
-			public TogglePortalRenderSave(TogglePortalRender toggle) {
+			public TogglePortalRenderSave(TogglePortalRender toggle) : base(toggle) {
 				this.initialized = toggle.initialized;
 			}
 

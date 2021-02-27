@@ -59,7 +59,7 @@ namespace LevelSpecific.BlackRoom {
 			bool hasSetActivePuzzleToZero;
 			int activePuzzle;
 
-			public ColorPuzzleManagerSave(ColorPuzzleManager puzzleManager) {
+			public ColorPuzzleManagerSave(ColorPuzzleManager puzzleManager) : base(puzzleManager) {
 				this.hasSetActivePuzzleToZero = puzzleManager.hasSetActivePuzzleToZero;
 				this.activePuzzle = puzzleManager.activePuzzle;
 			}

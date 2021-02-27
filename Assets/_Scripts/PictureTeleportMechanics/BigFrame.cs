@@ -91,7 +91,7 @@ namespace PictureTeleportMechanics {
 			bool frameEnabled;
 			bool disableFrameTriggerEnabled;
 
-			public BigFrameSave(BigFrame bigFrame) {
+			public BigFrameSave(BigFrame bigFrame) : base(bigFrame) {
 				this.frameEnabled = bigFrame.frameRenderer.enabled;
 				this.disableFrameTriggerEnabled = bigFrame.disableFrameTrigger.enabled;
 			}

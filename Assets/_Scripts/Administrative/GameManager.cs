@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using LevelManagement;
 using UnityEngine;
 using Saving;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-public class GameManager : MonoBehaviour {
-    void Start() {
-        Application.quitting += () => SaveManager.DeleteSave(SaveManager.temp);
-
-        SaveManager.AddSaveManagerForScene(gameObject.scene.name);
+public class GameManager : Singleton<GameManager> {
+    public bool gameHasLoaded = false;
+    IEnumerator Start() {
+        MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
+        SaveManager.GetOrCreateSaveManagerForScene(gameObject.scene.name);
+        yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+        yield return new WaitForSeconds(1f);
+        gameHasLoaded = true;
+        MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
     }
 
     void Update() {

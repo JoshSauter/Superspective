@@ -13,7 +13,7 @@ namespace LevelSpecific.BlackRoom {
 		[System.Serializable]
 		public struct LightSourceBlocker {
 			public string name;
-			public UnityEngine.Transform source;
+			public Transform source;
 			public Material lightBlockerMaterial;
 			public Mesh mesh;
 			public List<Vector3> vertsToUse;
@@ -21,9 +21,9 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		public LightSourceBlocker[] blockers;
-		public UnityEngine.Transform redSource;
-		public UnityEngine.Transform greenSource;
-		public UnityEngine.Transform blueSource;
+		public Transform redSource;
+		public Transform greenSource;
+		public Transform blueSource;
 
 		Mesh thisMesh;
 		MeshRenderer thisRenderer;
@@ -58,7 +58,7 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		List<Vector3> GetVertsToUseForSource(UnityEngine.Transform lightSource, List<Vector3> vertices) {
+		List<Vector3> GetVertsToUseForSource(Transform lightSource, List<Vector3> vertices) {
 			return vertices.Where(v => {
 				Vector3 ray = v - lightSource.position;
 				RaycastHit hitInfo;
@@ -93,7 +93,7 @@ namespace LevelSpecific.BlackRoom {
 
 		void BuildMeshForBlocker(ref LightSourceBlocker blocker) {
 			if (blocker.mesh == null) {
-				UnityEngine.Transform source = blocker.source;
+				Transform source = blocker.source;
 				GameObject go = new GameObject();
 				go.layer = source.gameObject.layer;
 				go.name = gameObject.name + " " + blocker.name;

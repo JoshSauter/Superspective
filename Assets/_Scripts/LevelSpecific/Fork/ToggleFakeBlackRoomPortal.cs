@@ -44,7 +44,7 @@ namespace LevelSpecific.Fork {
         public class ToggleFakeBlackRoomPortalSave : SerializableSaveObject<ToggleFakeBlackRoomPortal> {
             bool edgesAreBlack;
 
-            public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) {
+            public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) : base(toggle) {
                 this.edgesAreBlack = toggle.edgesAreBlack;
             }
 

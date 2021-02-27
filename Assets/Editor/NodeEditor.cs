@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(NodeSystem))]
-public class NodeEditor : Editor {
+public class NodeEditor : UnityEditor.Editor {
     Camera sceneViewCam;
     SceneView sv;
 

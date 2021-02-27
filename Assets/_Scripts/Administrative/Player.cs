@@ -42,7 +42,7 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 		SerializableQuaternion rotation;
 		SerializableVector3 localScale;
 
-		public PlayerSave(Player player) {
+		public PlayerSave(Player player) : base(player) {
 			this.position = player.transform.position;
 			this.rotation = player.transform.rotation;
 			this.localScale = player.transform.localScale;

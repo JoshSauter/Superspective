@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor(typeof(CreaseShading))]
-    internal class CreaseShadingEditor : Editor {
+    internal class CreaseShadingEditor : UnityEditor.Editor {
         SerializedObject serObj;
 
         SerializedProperty m_intensity;

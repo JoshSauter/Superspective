@@ -13,7 +13,7 @@ namespace LevelSpecific.WhiteRoom {
         Portal portal;
         bool poweredNow = false;
         public PowerTrail powerTrail;
-        public SerializableReference<MagicTrigger>[] blackHallwayLoopTeleporters;
+        public SerializableReference<MagicTrigger, MagicTrigger.MagicTriggerSave>[] blackHallwayLoopTeleporters;
 
         protected override void Awake() {
             base.Awake();
@@ -45,7 +45,7 @@ namespace LevelSpecific.WhiteRoom {
             SetEdgeColors(poweredNow);
 
             foreach (var teleporter in blackHallwayLoopTeleporters) {
-                teleporter.Reference?.gameObject.SetActive(!poweredNow);
+                teleporter.GetOrNull()?.gameObject.SetActive(!poweredNow);
             }
         }
 
@@ -65,7 +65,7 @@ namespace LevelSpecific.WhiteRoom {
         public class PortalToBlackHallwaySave : SerializableSaveObject<PortalToBlackHallway> {
             readonly bool poweredNow;
 
-            public PortalToBlackHallwaySave(PortalToBlackHallway script) {
+            public PortalToBlackHallwaySave(PortalToBlackHallway script) : base(script) {
                 this.poweredNow = script.poweredNow;
             }
 

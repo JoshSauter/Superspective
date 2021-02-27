@@ -78,7 +78,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     protected override void Awake() {
         base.Awake();
         input = PlayerButtonInput.instance;
-        debug = new DebugLogger(this, () => DEBUG);
         thisRigidbody = GetComponent<Rigidbody>();
         thisCollider = GetComponent<CapsuleCollider>();
         thisRenderer = GetComponentInChildren<MeshRenderer>();
@@ -89,8 +88,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         movespeed = walkSpeed;
 
         thisRigidbody.isKinematic = true;
-        yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitUntil(() => GameManager.instance.gameHasLoaded);
         thisRigidbody.isKinematic = false;
     }
 
@@ -520,7 +518,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         float timeSpentJumping;
         bool underMinJumpTime;
 
-        public PlayerMovementSave(PlayerMovement playerMovement) {
+        public PlayerMovementSave(PlayerMovement playerMovement) : base(playerMovement) {
             autoRun = playerMovement.autoRun;
             jumpState = (int) playerMovement.jumpState;
             timeSpentJumping = playerMovement.timeSpentJumping;

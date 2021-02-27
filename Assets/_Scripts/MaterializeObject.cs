@@ -161,7 +161,7 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
         State state;
         float timeSinceStateChange;
 
-        public MaterializeObjectSave(MaterializeObject materialize) {
+        public MaterializeObjectSave(MaterializeObject materialize) : base(materialize) {
             state = materialize.state;
             timeSinceStateChange = materialize.timeSinceStateChange;
             destroyObjectOnDematerialize = materialize.destroyObjectOnDematerialize;

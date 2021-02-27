@@ -120,7 +120,7 @@ namespace PictureTeleportMechanics {
             float curSsaoIntensity;
             float ssaoBlendTimeRemaining;
 
-            public PictureTeleportSave(PictureTeleport script) {
+            public PictureTeleportSave(PictureTeleport script) : base(script) {
                 this.targetPosition = script.targetPosition;
                 this.targetRotation = script.targetRotation;
                 this.targetCameraPosition = script.targetCameraPosition;

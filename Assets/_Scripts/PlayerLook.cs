@@ -85,7 +85,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     }
 
     void Update() {
-        if (frozen) return;
+        if (frozen || !GameManager.instance.gameHasLoaded) return;
 
         timeSinceStateChange += Time.deltaTime;
 
@@ -316,7 +316,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         float viewUnlockTime;
         float yClamp;
 
-        public PlayerLookSave(PlayerLook playerLook) {
+        public PlayerLookSave(PlayerLook playerLook) : base(playerLook) {
             cameraLocalPosition = playerLook.cameraContainerTransform.localPosition;
             cameraLocalRotation = playerLook.cameraContainerTransform.localRotation;
 

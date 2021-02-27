@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Audio;
 using NaughtyAttributes;
 using Saving;
@@ -57,6 +58,7 @@ namespace LevelSpecific.Fork {
 		float curSpeed = 0f;
 		const float maxSpeed = 6f;
 
+		List<PickupObject> otherObjectsInElevator = new List<PickupObject>();
 		bool playerStandingInElevator = false;
 
 		protected override void Start() {
@@ -166,9 +168,16 @@ namespace LevelSpecific.Fork {
 				Vector3 nextPos = curPos;
 				nextPos.y = nextHeight;
 				elevator.position = nextPos;
+
+				Vector3 diff = nextPos - curPos;
 				if (playerStandingInElevator) {
-					Player.instance.transform.position += nextPos - curPos;
+					Player.instance.transform.position += diff;
 				}
+
+				foreach (var pickupObj in otherObjectsInElevator) {
+					pickupObj.transform.position += diff;
+				}
+				otherObjectsInElevator.Clear();
 			}
 			else {
 				CameraShake.instance.CancelShake();
@@ -179,6 +188,14 @@ namespace LevelSpecific.Fork {
 				goingDown = !goingDown;
 
 				state = State.DoorsOpening;
+			}
+		}
+
+		void OnTriggerStay(Collider other) {
+			if (other.gameObject.TryGetComponent(out PickupObject pickup)) {
+				if (!otherObjectsInElevator.Contains(pickup)) {
+					otherObjectsInElevator.Add(pickup);
+				}
 			}
 		}
 
@@ -211,7 +228,7 @@ namespace LevelSpecific.Fork {
 
 			bool playerStandingInElevator;
 
-			public ForkElevatorSave(ForkElevator elevator) {
+			public ForkElevatorSave(ForkElevator elevator) : base(elevator) {
 				this.state = (int)elevator.state;
 				this.goingDown = elevator.goingDown;
 				this.timeElapsedSinceStateChange = elevator.timeElapsedSinceStateChange;

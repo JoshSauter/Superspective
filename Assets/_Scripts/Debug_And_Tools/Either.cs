@@ -1,69 +1,72 @@
-﻿namespace Library.Functional
-{
-    using System;
+﻿using System;
 
+namespace Library.Functional {
     /// <summary>
-    /// Functional data data to represent a discriminated
-    /// union of two possible types.
+    ///     Functional data data to represent a discriminated
+    ///     union of two possible types.
     /// </summary>
     /// <typeparam name="TL">Type of "Left" item.</typeparam>
     /// <typeparam name="TR">Type of "Right" item.</typeparam>
-    public class Either<TL, TR>
-    {
-        private readonly TL left;
-        private readonly TR right;
-        private readonly bool isLeft;
+    public class Either<TL, TR> {
+        readonly bool isLeft;
+        readonly TL left;
+        readonly TR right;
 
-        public Either(TL left)
-        {
+        public Either(TL left) {
             this.left = left;
-            this.isLeft = true;
+            isLeft = true;
         }
 
-        public Either(TR right)
-        {
+        public Either(TR right) {
             this.right = right;
-            this.isLeft = false;
+            isLeft = false;
         }
 
-        public T Match<T>(Func<TL, T> leftFunc, Func<TR, T> rightFunc)
-        {
-            if (leftFunc == null)
-            {
-                throw new ArgumentNullException(nameof(leftFunc));
-            }
+        public T Match<T>(Func<TL, T> leftFunc, Func<TR, T> rightFunc) {
+            if (leftFunc == null) throw new ArgumentNullException(nameof(leftFunc));
 
-            if (rightFunc == null)
-            {
-                throw new ArgumentNullException(nameof(rightFunc));
-            }
+            if (rightFunc == null) throw new ArgumentNullException(nameof(rightFunc));
 
-            return this.isLeft ? leftFunc(this.left) : rightFunc(this.right);
+            return isLeft ? leftFunc(left) : rightFunc(right);
+        }
+
+        public void MatchAction(Action<TL> leftAction, Action<TR> rightAction) {
+            if (leftAction == null) throw new ArgumentNullException(nameof(leftAction));
+
+            if (rightAction == null) throw new ArgumentNullException(nameof(rightAction));
+
+            if (isLeft) {
+                leftAction(left);
+            }
+            else {
+                rightAction(right);
+            }
         }
 
         /// <summary>
-        /// If right value is assigned, execute an action on it.
+        ///     If right value is assigned, execute an action on it.
         /// </summary>
         /// <param name="rightAction">Action to execute.</param>
-        public void DoRight(Action<TR> rightAction)
-        {
-            if (rightAction == null)
-            {
-                throw new ArgumentNullException(nameof(rightAction));
-            }
+        public void DoRight(Action<TR> rightAction) {
+            if (rightAction == null) throw new ArgumentNullException(nameof(rightAction));
 
-            if (!this.isLeft)
-            {                
-                rightAction(this.right);
-            }
+            if (!isLeft) rightAction(right);
         }
 
-        public TL LeftOrDefault() => this.Match(l => l, r => default(TL));
+        public TL LeftOrDefault() {
+            return Match(l => l, r => default);
+        }
 
-        public TR RightOrDefault() => this.Match(l => default(TR), r => r);
+        public TR RightOrDefault() {
+            return Match(l => default, r => r);
+        }
 
-        public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
+        public static implicit operator Either<TL, TR>(TL left) {
+            return new Either<TL, TR>(left);
+        }
 
-        public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);
+        public static implicit operator Either<TL, TR>(TR right) {
+            return new Either<TL, TR>(right);
+        }
     }
 }

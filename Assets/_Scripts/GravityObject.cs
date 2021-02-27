@@ -51,7 +51,7 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
         float gravityMagnitude;
         bool useGravity;
 
-        public GravityObjectSave(GravityObject obj) {
+        public GravityObjectSave(GravityObject obj) : base(obj) {
             useGravity = obj.useGravity;
             gravityDirection = obj.gravityDirection;
             gravityMagnitude = obj.gravityMagnitude;

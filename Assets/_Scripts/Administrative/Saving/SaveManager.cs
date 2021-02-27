@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using static Saving.SaveManagerForScene;
 using System.Reflection;
 using EpitaphUtils;
@@ -17,34 +15,20 @@ using UnityEditor;
 
 namespace Saving {
     public static class SaveManager {
+        public static bool DEBUG = false;
         public static bool isCurrentlyLoadingSave = false;
-        public static Dictionary<string, SaveManagerForScene> activeScenes = new Dictionary<string, SaveManagerForScene>();
-        public const string temp = "temp";
+        public static readonly Dictionary<string, SaveManagerForScene> saveManagers = new Dictionary<string, SaveManagerForScene>();
 
-        public static SaveManagerForScene GetSaveManagerForScene(string sceneName, bool createIfMissing = true) {
+        public static SaveManagerForScene GetOrCreateSaveManagerForScene(string sceneName) {
             if (string.IsNullOrEmpty(sceneName)) {
                 return null;
 			}
 
-            if (!activeScenes.ContainsKey(sceneName)) {
-                return createIfMissing ? AddSaveManagerForScene(sceneName) : null;
+            if (!saveManagers.ContainsKey(sceneName)) {
+                saveManagers.Add(sceneName, new SaveManagerForScene(sceneName));
             }
-            return activeScenes[sceneName];
-		}
-
-        public static SaveManagerForScene AddSaveManagerForScene(string sceneName) {
-            bool validScene = sceneName == LevelManager.ManagerScene || LevelManager.instance.loadedSceneNames.Contains(sceneName);
             
-            if (!activeScenes.ContainsKey(sceneName) && validScene) {
-                SaveManagerForScene saveForScene = new GameObject($"{sceneName} Save Manager").AddComponent<SaveManagerForScene>();
-                SceneManager.MoveGameObjectToScene(saveForScene.gameObject, SceneManager.GetSceneByName(sceneName));
-                activeScenes[sceneName] = saveForScene;
-            }
-            return activeScenes.GetValue(sceneName);
-		}
-
-        public static void RemoveSaveManagerForScene(string sceneName) {
-            activeScenes.Remove(sceneName);
+            return saveManagers[sceneName];
 		}
 
 		static string SavePath(string saveFileName) {
@@ -52,25 +36,14 @@ namespace Saving {
         }
 
         public static void Save(string saveName) {
-            Directory.CreateDirectory(SavePath(saveName));
-
-            CopyDirectory(SavePath(temp), SavePath(saveName));
-
-            // Make sure we initialize SaveManagerForScene for each loaded scene
-            foreach (var sceneName in LevelManager.instance.loadedSceneNames) {
-                GetSaveManagerForScene(sceneName);
-			}
-
-            DynamicObjectManager.SaveDynamicObjectRecords(saveName);
-
-            foreach (var saveForScene in activeScenes.Values) {
-                saveForScene.SaveScene(saveName);
-            }
+            Debug.Log($"--- Saving Save File: {saveName} ---");
+            SaveFile.CreateSaveFileFromCurrentState(saveName).WriteToDisk();
         }
 
         public static async void Load(string saveName) {
+            Debug.Log($"--- Loading Save File: {saveName} ---");
+            
             isCurrentlyLoadingSave = true;
-            CopyDirectory(SavePath(saveName), SavePath(temp));
 
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
             Time.timeScale = 0f;
@@ -78,37 +51,50 @@ namespace Saving {
             // Clear out existing DynamicObjects so they don't stick around when the new save file is loaded
             DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
             
-            SaveManagerForScene saveManagerForManagerScene = GetSaveManagerForScene(LevelManager.ManagerScene);
-            SaveFileForScene saveFileForManagerScene = saveManagerForManagerScene.GetSaveFromDisk(saveName);
-            saveManagerForManagerScene.RestoreStateFromSaveFile(saveFileForManagerScene);
+            // Get the save file from disk
+            SaveFile save = SaveFile.RetrieveSaveFileFromDisk(saveName);
+            
+            // Create a SaveManager for ManagerScene and restore its state
+            SaveManagerForScene saveManagerForManagerScene = GetOrCreateSaveManagerForScene(LevelManager.ManagerScene);
+            saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
 
             Debug.Log("Waiting for scenes to be loaded...");
             await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
             Debug.Log("All scenes loaded into memory, loading save...");
 
             // Load records of all DynamicObjects from disk
-            DynamicObjectManager.LoadAllDynamicObjectRecords(saveName);
-
-            Dictionary<SaveManagerForScene, SaveFileForScene> savesForScenes = LevelManager.instance.loadedSceneNames
-                .Select(activeScene => GetSaveManagerForScene(activeScene))
-                .ToDictionary(saveManagerForScene => saveManagerForScene.GetSaveFromDisk(saveName))
-                // Swap Keys and Values
-                .ToDictionary(kp => kp.Value, kp => kp.Key);
+            save.dynamicObjects.LoadSaveFile();
 
             // Load all DynamicObjects for each scene
-            foreach (var save in savesForScenes) {
-                SaveManagerForScene saveManager = save.Key;
-                SaveFileForScene saveFile = save.Value;
-                saveManager?.LoadDynamicObjectsFromSaveFile(saveFile);
+            foreach (var kv in save.scenes) {
+                string sceneName = kv.Key;
+                SaveFileForScene saveFileForScene = kv.Value;
+                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
+                saveManager.LoadDynamicObjectsStateFromSaveFile(saveFileForScene);
+            }
+            
+            Dictionary<string, SaveFileForScene> loadedScenes = save.scenes
+                .Where(kv => LevelManager.instance.loadedSceneNames.Contains(kv.Key))
+                .ToDictionary();
+            Dictionary<string, SaveFileForScene> unloadedScenes = save.scenes
+                .Except(loadedScenes)
+                .ToDictionary();
+            
+            // Restore state for all unloaded scenes from the save file
+            foreach (var kv in unloadedScenes) {
+                string sceneName = kv.Key;
+                SaveFileForScene saveFileForScene = kv.Value;
+                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
+                saveManager.LoadSaveableObjectsStateFromSaveFile(saveFileForScene);
             }
 
-            // Step 3: Load data for every objects in each scene (starting with the ManagerScene)
-            saveManagerForManagerScene.RestoreStateFromSaveFile(saveFileForManagerScene);
-
-            foreach (var save in savesForScenes) {
-                SaveManagerForScene saveManager = save.Key;
-                SaveFileForScene saveFile = save.Value;
-                saveManager.RestoreStateFromSaveFile(saveFile);
+            // Load data for every object in each loaded scene (starting with the ManagerScene)
+            saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
+            foreach (var kv in loadedScenes) {
+                string sceneName = kv.Key;
+                SaveFileForScene saveFileForScene = kv.Value;
+                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
+                saveManager.LoadSaveableObjectsStateFromSaveFile(saveFileForScene);
             }
 
             // Play the level change banner and remove the black overlay

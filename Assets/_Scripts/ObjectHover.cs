@@ -75,7 +75,7 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
         SerializableVector3 up;
         bool useLocalCoordinates;
 
-        public ObjectHoverSave(ObjectHover script) {
+        public ObjectHoverSave(ObjectHover script) : base(script) {
             useLocalCoordinates = script.useLocalCoordinates;
             maxDisplacementUp = script.maxDisplacementUp;
             maxDisplacementForward = script.maxDisplacementForward;

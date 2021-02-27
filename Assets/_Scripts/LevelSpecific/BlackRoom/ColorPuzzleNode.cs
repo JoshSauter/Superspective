@@ -7,11 +7,9 @@ namespace LevelSpecific.BlackRoom {
 		bool _isSolved = false;
 		public bool isSolved {
 			get { return _isSolved; }
-			set {
+			private set {
 				_isSolved = value;
-				if (OnSolutionNodeStateChange != null) {
-					OnSolutionNodeStateChange(this, value);
-				}
+				OnSolutionNodeStateChange?.Invoke(this, value);
 			}
 		}
 		public Color solution = Color.black;
@@ -63,12 +61,12 @@ namespace LevelSpecific.BlackRoom {
 
 		bool IsWithinCone(LightProjector projector) {
 			Vector3 testPos = transform.position;
-			UnityEngine.Transform cone = projector.transform.GetChild(0);
+			Transform cone = projector.transform.GetChild(0);
 			if (!cone.gameObject.activeSelf) {
 				return false;
 			}
-			Vector3 tipToCenterOfBaseWorld = -cone.up * coneHeight * cone.localScale.y;
-			Vector3 tipToEdgeOfBaseWorld = tipToCenterOfBaseWorld + cone.right * coneRadius * cone.localScale.x;
+			Vector3 tipToCenterOfBaseWorld = -cone.up * (coneHeight * cone.localScale.y);
+			Vector3 tipToEdgeOfBaseWorld = tipToCenterOfBaseWorld + cone.right * (coneRadius * cone.localScale.x);
 			Vector3 tipToTestPointWorld = testPos - cone.position;
 			if (projector == green) {
 				Debug.DrawRay(cone.position, tipToCenterOfBaseWorld, Color.white);

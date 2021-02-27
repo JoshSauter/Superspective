@@ -689,7 +689,7 @@ namespace PortalMechanics {
 			bool pauseRenderingOnly = false;
 			bool pauseRenderingAndLogic = false;
 
-			public PortalSave(Portal portal) {
+			public PortalSave(Portal portal) : base(portal) {
 				this.channel = portal.channel;
 				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
 				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;

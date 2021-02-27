@@ -1,15 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using EpitaphUtils;
-using NaughtyAttributes;
 using Saving;
 using System;
-using UnityEngine.Serialization;
+using System.Collections.Generic;
+using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
+// TODO: ActivePillar logic needs some work
 [RequireComponent(typeof(UniqueId))]
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
 public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.DimensionPillarSave> {
+	public static Dictionary<string, PillarReference> allPillars = new Dictionary<string, PillarReference>();
+	
 	UniqueId id;
 
 	UniqueId uniqueId {
@@ -18,18 +19,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 				id = GetComponent<UniqueId>();
 			}
 			return id;
-		}
-	}
-
-	public static Dictionary<string, DimensionPillar> pillars = new Dictionary<string, DimensionPillar>();
-
-	static DimensionPillar _activePillar;
-	public static DimensionPillar ActivePillar {
-		get { return _activePillar; }
-		set {
-			DimensionPillar prevActive = _activePillar;
-			_activePillar = value;
-			OnActivePillarChanged?.Invoke(prevActive);
 		}
 	}
 
@@ -88,36 +77,18 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 
 	public delegate void DimensionChangeWithDirectionEvent(int prevDimension, int curDimension, DimensionSwitch direction);
 	public event DimensionChangeWithDirectionEvent OnDimensionChangeWithDirection;
-
-	public delegate void ActivePillarChangedEvent(DimensionPillar previousActivePillar);
-	public static event ActivePillarChangedEvent OnActivePillarChanged;
 #endregion
 
 	protected override void Awake() {
 		base.Awake();
 		InitializeDimensionWall();
-	}
-
-	protected override void Start() {
-		base.Start();
-		InitializeDictEntry();
-
-		if (setAsActiveOnStart) {
-			ActivePillar = this;
+		if (!allPillars.ContainsKey(ID)) {
+			allPillars.Add(ID, this);
 		}
-	}
-	void InitializeDictEntry() {
-		if (pillarKey == "") {
-			pillarKey = gameObject.scene.name + " " + gameObject.name;
-		}
-		pillars[pillarKey] = this;
 	}
 
 	void FixedUpdate() {
-		if (ActivePillar != this) return;
-
 		PlayerQuadrant = GetQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
-		//UpdateRelativeCameraAngle();
     }
 
 	Angle.Quadrant GetQuadrant(Vector3 position) {
@@ -183,17 +154,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		dimensionWall = dimensionWallGO.GetComponent<DimensionWall>();
 	}
 
-	[ContextMenu("Print active pillar details")]
-	void PrintActivePillarName() {
-		if (DimensionPillar.ActivePillar == null) {
-			Debug.Log("Active pillar is null");
-		}
-		else {
-			Debug.Log("Active pillar is: " + ActivePillar.gameObject.name + " in Scene: " + ActivePillar.gameObject.scene.name +
-				"\nThis pillar is active? " + (ActivePillar == this), ActivePillar.gameObject);
-		}
-	}
-
 	#region Saving
 	public override string ID {
 		get {
@@ -207,18 +167,11 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 
 	[Serializable]
 	public class DimensionPillarSave : SerializableSaveObject<DimensionPillar> {
-		bool setAsActiveOnStart;
-
 		bool initialized;
 		int maxDimension;
 		int curDimension;
 
-		bool overrideDimensionShiftAngle;
-		Angle dimensionShiftAngle;
-		Angle cameraAngleRelativeToPillar;
-
-		public DimensionPillarSave(DimensionPillar dimensionPillar) {
-			this.setAsActiveOnStart = DimensionPillar.ActivePillar == dimensionPillar;
+		public DimensionPillarSave(DimensionPillar dimensionPillar) : base(dimensionPillar) {
 			this.initialized = dimensionPillar.initialized;
 			this.maxDimension = dimensionPillar.maxDimension;
 			this.curDimension = dimensionPillar.curDimension;
@@ -232,10 +185,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 				dimensionPillar.OnDimensionChange?.Invoke(dimensionPillar.curDimension, this.curDimension);
 			}
 			dimensionPillar.curDimension = this.curDimension;
-
-			if (setAsActiveOnStart) {
-				DimensionPillar.ActivePillar = dimensionPillar;
-			}
 		}
 	}
 	#endregion

@@ -52,7 +52,7 @@ namespace LevelSpecific.WhiteRoom {
             bool invisibleWallActive;
             List<SerializableVector3> barPositions;
 
-            public WhiteRoom3RoseBarsSave(WhiteRoom3RoseBars roseBars) {
+            public WhiteRoom3RoseBarsSave(WhiteRoom3RoseBars roseBars) : base(roseBars) {
                 this.barsWereUpLastFrame = roseBars.barsWereUpLastFrame;
                 this.barsAreUp = roseBars.barsAreUp;
                 this.invisibleWallActive = roseBars.invisibleWall.activeSelf;

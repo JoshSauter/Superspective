@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {

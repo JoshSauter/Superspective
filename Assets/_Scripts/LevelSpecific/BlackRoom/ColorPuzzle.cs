@@ -86,7 +86,7 @@ namespace LevelSpecific.BlackRoom {
 		public class ColorPuzzleSave : SerializableSaveObject<ColorPuzzle> {
 			bool solved;
 			bool isActive;
-			public ColorPuzzleSave(ColorPuzzle colorPuzzle) {
+			public ColorPuzzleSave(ColorPuzzle colorPuzzle) : base(colorPuzzle) {
 				this.solved = colorPuzzle.solved;
 				this.isActive = colorPuzzle.isActive;
 			}

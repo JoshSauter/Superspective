@@ -12,8 +12,8 @@ namespace LevelSpecific.BlackRoom {
         protected override void Start() {
 	        base.Start();
             door = GetComponent<DoorOpenClose>();
-            door.OnDoorOpenStart += () => EnableBlackRoom();
-            door.OnDoorCloseEnd += () => DisableBlackRoomIfInMainHallway();
+            door.OnDoorOpenStart += EnableBlackRoom;
+            door.OnDoorCloseEnd += DisableBlackRoomIfInMainHallway;
         }
 
         void EnableBlackRoom() {
@@ -34,7 +34,7 @@ namespace LevelSpecific.BlackRoom {
 		public class ToggleBlackRoomEnabledSave : SerializableSaveObject<ToggleBlackRoomEnabled> {
 			bool blackRoomEnabled;
 
-			public ToggleBlackRoomEnabledSave(ToggleBlackRoomEnabled toggle) {
+			public ToggleBlackRoomEnabledSave(ToggleBlackRoomEnabled toggle) : base(toggle) {
 				this.blackRoomEnabled = toggle.blackRoomRoot.activeSelf;
 			}
 

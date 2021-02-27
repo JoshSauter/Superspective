@@ -39,6 +39,10 @@ namespace EpitaphUtils {
     }
 
     public static class Utils {
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> keyValuePairs) {
+            return keyValuePairs.ToDictionary(kv => kv.Key, kv => kv.Value);
+        }
+        
         public static V GetValue<K, V>(this IDictionary<K, V> dict, K key, V defaultValue = default) {
             return dict.TryGetValue(key, out V value) ? value : defaultValue;
         }
@@ -270,6 +274,12 @@ namespace EpitaphUtils {
             }
 
             return sum / maxIndex;
+        }
+    }
+    
+    public static class GuidEx {
+        public static bool IsGuid(this string value) {
+            return Guid.TryParse(value, out _);
         }
     }
 

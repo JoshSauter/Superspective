@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using EpitaphUtils;
 using NaughtyAttributes;
 using Saving;
@@ -9,6 +10,7 @@ using SerializableClasses;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
+using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
 [RequireComponent(typeof(UniqueId))]
 public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSave> {
@@ -45,7 +47,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     UniqueId _id;
     ShrinkCubeState _shrinkCubeState;
     Vector3 growEndSize;
-    Queue<PickupObject> objectsGrabbedFromSpawner = new Queue<PickupObject>();
+    Queue<PickupObjectReference> objectsGrabbedFromSpawner = new Queue<PickupObjectReference>();
     PickupObject objectShrinking;
     Vector3 shrinkStartSize;
     Collider thisCollider;
@@ -79,11 +81,18 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         }
     }
 
+    private bool ReferenceIsReplaceable(PickupObjectReference obj) {
+        return obj.Reference.Match(
+            pickupObject => pickupObject.isReplaceable,
+            saveObject => saveObject.isReplaceable
+        );
+    }
+    
     [ShowNativeProperty]
-    int numberOfReplaceableCubes => objectsGrabbedFromSpawner.Count(o => o.isReplaceable);
+    int numberOfReplaceableCubes => objectsGrabbedFromSpawner.Count(ReferenceIsReplaceable);
 
     [ShowNativeProperty]
-    int numberOfIrreplaceableCubes => objectsGrabbedFromSpawner.Count(o => !o.isReplaceable);
+    int numberOfIrreplaceableCubes => objectsGrabbedFromSpawner.Count(reference => !ReferenceIsReplaceable(reference));
 
     private bool ReplaceableCube(PickupObject o) {
         // Objects may be null if they're moved to another scene
@@ -96,17 +105,8 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         thisCollider = GetComponent<Collider>();
     }
 
-    protected override void Init() {
-        StartCoroutine(Initialize());
-    }
-
-    IEnumerator Initialize() {
-        yield return new WaitForSeconds(0.5f);
-        if (objectBeingSuspended == null) SpawnNewCube();
-    }
-
     void Update() {
-        if (!hasInitialized) return;
+        if (!hasInitialized || SaveManager.isCurrentlyLoadingSave) return;
 
         if (objectBeingSuspended == null && numberOfIrreplaceableCubes < maxNumberOfCubesThatCanBeSpawned)
             SpawnNewCube();
@@ -172,13 +172,21 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
     public void DestroyCubeAlreadyGrabbedFromSpawner() {
         if (numberOfReplaceableCubes > 0 && objectsGrabbedFromSpawner.Count == maxNumberOfCubesThatCanBeSpawned) {
-            objectShrinking = objectsGrabbedFromSpawner.First(o => o.isReplaceable);
+            PickupObjectReference objToDestroy = objectsGrabbedFromSpawner.First(ReferenceIsReplaceable);
+            objToDestroy.Reference.MatchAction(
+                // If the object is loaded, play the shrink animation for this cube
+                pickupObject => {
+                    objectShrinking = pickupObject;
+                    
+                    shrinkStartSize = objectShrinking.transform.localScale;
+                    shrinkCubeState = ShrinkCubeState.Shrinking;
+                },
+                // If the object is not loaded, just destroy it directly
+                saveObject => saveObject.Destroy()
+                );
             // Workaround because the Queue class has no built-in support for removing specific elements
             objectsGrabbedFromSpawner =
-                new Queue<PickupObject>(objectsGrabbedFromSpawner.Where(o => o != objectShrinking));
-
-            shrinkStartSize = objectShrinking.transform.localScale;
-            shrinkCubeState = ShrinkCubeState.Shrinking;
+                new Queue<PickupObjectReference>(objectsGrabbedFromSpawner.Where(o => o != objToDestroy));
         }
     }
 
@@ -243,26 +251,22 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         int baseDimensionForCubes;
         SerializableAnimationCurve cubeGrowCurve;
         SerializableAnimationCurve cubeShrinkCurve;
-        SerializableReference<PickupObject> objectBeingSuspended;
-        Queue<SerializableReference<PickupObject>> objectsGrabbedFromSpawner;
+        PickupObjectReference objectBeingSuspended;
+        Queue<PickupObjectReference> objectsGrabbedFromSpawner;
 
-        public CubeSpawnerSave(CubeSpawner spawner) {
+        public CubeSpawnerSave(CubeSpawner spawner) : base(spawner) {
             cubeGrowCurve = spawner.cubeGrowCurve;
             cubeShrinkCurve = spawner.cubeShrinkCurve;
             objectBeingSuspended = spawner.objectBeingSuspended;
-            objectsGrabbedFromSpawner = new Queue<SerializableReference<PickupObject>>(
-                spawner.objectsGrabbedFromSpawner.Select<PickupObject, SerializableReference<PickupObject>>(o => o)
-            );
+            objectsGrabbedFromSpawner = spawner.objectsGrabbedFromSpawner;
             baseDimensionForCubes = spawner.baseDimensionForCubes;
         }
 
         public override void LoadSave(CubeSpawner spawner) {
             spawner.cubeGrowCurve = cubeGrowCurve;
             spawner.cubeShrinkCurve = cubeShrinkCurve;
-            spawner.objectBeingSuspended = objectBeingSuspended;
-            spawner.objectsGrabbedFromSpawner = new Queue<PickupObject>(
-                objectsGrabbedFromSpawner.Select<SerializableReference<PickupObject>, PickupObject>(o => o)
-            );
+            spawner.objectBeingSuspended = objectBeingSuspended.GetOrNull();
+            spawner.objectsGrabbedFromSpawner = this.objectsGrabbedFromSpawner;
             if (spawner.objectBeingSuspended != null)
                 spawner.rigidbodyOfObjectBeingSuspended = spawner.objectBeingSuspended.GetComponent<Rigidbody>();
             spawner.baseDimensionForCubes = baseDimensionForCubes;

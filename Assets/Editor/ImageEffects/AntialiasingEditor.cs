@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor(typeof (Antialiasing))]
-    public class AntialiasingEditor : Editor
+    public class AntialiasingEditor : UnityEditor.Editor
     {
         SerializedObject serObj;
 

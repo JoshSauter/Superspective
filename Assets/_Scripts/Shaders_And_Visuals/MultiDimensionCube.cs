@@ -258,7 +258,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		int state;
 		float timeSinceStateChange;
 
-		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) {
+		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) : base(multiDimensionCube) {
 			this.state = (int)multiDimensionCube.state;
 			this.timeSinceStateChange = multiDimensionCube.timeSinceStateChange;
 		}

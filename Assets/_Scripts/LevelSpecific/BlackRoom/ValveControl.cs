@@ -78,7 +78,7 @@ namespace LevelSpecific.BlackRoom {
 			bool isActive;
 			Angle prevAngle;
 
-			public ValveControlSave(ValveControl toggle) {
+			public ValveControlSave(ValveControl toggle) : base(toggle) {
 				this.rotation = toggle.transform.rotation;
 				this.isActive = toggle.isActive;
 				this.prevAngle = toggle.prevAngle;

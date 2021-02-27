@@ -25,7 +25,7 @@ namespace LevelSpecific.WhiteRoom {
         public class WhiteRoomFakePortalRenderingSave : SerializableSaveObject<WhiteRoomFakePortalRendering> {
             bool rendererEnabled;
 
-            public WhiteRoomFakePortalRenderingSave(WhiteRoomFakePortalRendering script) {
+            public WhiteRoomFakePortalRenderingSave(WhiteRoomFakePortalRendering script) : base(script) {
                 this.rendererEnabled = script.thisRenderer.enabled;
             }
 

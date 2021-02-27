@@ -177,36 +177,36 @@ namespace LevelManagement {
 		return;
 #endif
 
-			if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
+		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
 
-			string sceneName = GetSceneName();
-			string positionKey = $"{PositionKeyPrefix}.{sceneName}";
-			string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
+		string sceneName = GetSceneName();
+		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
+		string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
 
-			if (HasVector3(positionKey) && HasVector3(rotationKey)) {
-				Vector3 pos = GetVector3(positionKey);
-				Vector3 eulerRot = GetVector3(rotationKey);
+		if (HasVector3(positionKey) && HasVector3(rotationKey)) {
+			Vector3 pos = GetVector3(positionKey);
+			Vector3 eulerRot = GetVector3(rotationKey);
 
-				Player.instance.transform.position = pos;
-				Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
+			Player.instance.transform.position = pos;
+			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
+		}
+
+		if (DEBUG) {
+			if (!HasVector3(positionKey)) {
+				Debug.LogError($"No position key found for {positionKey}");
 			}
 
-			if (DEBUG) {
-				if (!HasVector3(positionKey)) {
-					Debug.LogError($"No position key found for {positionKey}");
-				}
-
-				if (!HasVector3(rotationKey)) {
-					Debug.LogError($"No rotation key found for {rotationKey}");
-				}
+			if (!HasVector3(rotationKey)) {
+				Debug.LogError($"No rotation key found for {rotationKey}");
 			}
+		}
 
-			// Hijacking this to display level banner on load, even when it's already the active scene
-			LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[sceneName]);
+		// Hijacking this to display level banner on load, even when it's already the active scene
+		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[sceneName]);
 #if UNITY_EDITOR
-			if (EditorApplication.isPlaying)
+		if (EditorApplication.isPlaying)
 #endif
-				hasLoadedDefaultPlayerPosition = true;
+			hasLoadedDefaultPlayerPosition = true;
 		}
 #endregion
 		[SerializeField]
@@ -214,7 +214,7 @@ namespace LevelManagement {
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build
 		Dictionary<string, Level> levels;
 		Dictionary<Levels, string> enumToSceneName;
-		Dictionary<string, Levels> sceneNameToEnum;
+		public Dictionary<string, Levels> sceneNameToEnum;
 		public string activeSceneName;
 		public Levels ActiveScene => GetLevel(activeSceneName);
 		public List<string> loadedSceneNames;
@@ -255,7 +255,7 @@ namespace LevelManagement {
 		/// <summary>
 		/// Order of events:
 		/// 1) BeforeActiveSceneChange
-		/// 2) (if saving) BeforeSceneSaveState - foreach scene being unloaded
+		/// 2) (if saving) BeforeSceneSerializeState - foreach scene being unloaded
 		/// 3) BeforeSceneUnload - foreach scene being unloaded
 		/// 4) BeforeSceneLoad - for the scene becoming active, if it's not already loaded
 		/// 5) BeforeSceneLoad - foreach connected scene being loaded
@@ -283,7 +283,7 @@ namespace LevelManagement {
 		public event SceneLoadUnload BeforeSceneRestoreDynamicObjects;
 		public event SceneLoadUnload BeforeSceneRestoreState;
 		public event SceneLoadUnload AfterSceneRestoreState;
-		public event SceneLoadUnload BeforeSceneSaveState;
+		public event SceneLoadUnload BeforeSceneSerializeState;
 
 		public const string ManagerScene = "_ManagerScene";
 
@@ -396,7 +396,7 @@ namespace LevelManagement {
 				return;
 			}
 			
-			Debug.LogWarning($"Switching to level {levelName}");
+			Debug.Log($"Switching to level {levelName}");
 
 			BeforeActiveSceneChange?.Invoke(levelName);
 
@@ -454,9 +454,8 @@ namespace LevelManagement {
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(sceneToBeLoaded);
-					SaveFileForScene saveFileForScene = saveManagerForScene.GetSaveFromDisk(SaveManager.temp);
-					saveManagerForScene?.LoadDynamicObjectsFromSaveFile(saveFileForScene);
+					SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToBeLoaded);
+					saveManagerForScene.RestoreDynamicObjectStateForScene();
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
@@ -464,9 +463,8 @@ namespace LevelManagement {
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(sceneToBeLoaded);
-					SaveFileForScene saveFileForScene = saveManagerForScene.GetSaveFromDisk(SaveManager.temp);
-					saveManagerForScene?.RestoreStateFromSaveFile(saveFileForScene);
+					SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToBeLoaded);
+					saveManagerForScene.RestoreSaveableObjectStateForScene();
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
@@ -505,7 +503,7 @@ namespace LevelManagement {
 		/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph.
 		/// </summary>
 		/// <param name="selectedScene"></param>
-		void DeactivateUnrelatedScenes(string selectedScene, bool saveDeactivatingScenesToDisk) {
+		void DeactivateUnrelatedScenes(string selectedScene, bool serializeDeactivatingScenes) {
 			List<string> scenesToDeactivate = new List<string>();
 			foreach (string currentlyActiveScene in loadedSceneNames) {
 				if (currentlyActiveScene != selectedScene &&
@@ -514,16 +512,16 @@ namespace LevelManagement {
 				}
 			}
 
-			if (saveDeactivatingScenesToDisk) {
+			if (serializeDeactivatingScenes) {
 				foreach (var sceneToDeactivate in scenesToDeactivate) {
-					BeforeSceneSaveState?.Invoke(sceneToDeactivate);
+					BeforeSceneSerializeState?.Invoke(sceneToDeactivate);
 				}
 			}
 
-			if (saveDeactivatingScenesToDisk) {
+			if (serializeDeactivatingScenes) {
 				foreach (string sceneToDeactivate in scenesToDeactivate) {
-					SaveManagerForScene saveForScene = SaveManager.GetSaveManagerForScene(sceneToDeactivate);
-					saveForScene?.SaveScene(SaveManager.temp);
+					SaveManagerForScene saveForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToDeactivate);
+					saveForScene.SerializeStateForScene();
 				}
 			}
 
@@ -616,7 +614,7 @@ namespace LevelManagement {
 			string activeScene;
 			QueuedSceneSwitch queuedActiveSceneSwitch;
 
-			public LevelManagerSave(LevelManager levelManager) {
+			public LevelManagerSave(LevelManager levelManager) : base(levelManager) {
 				this.initialized = levelManager.initialized;
 				this.activeScene = levelManager.activeSceneName;
 				this.queuedActiveSceneSwitch = levelManager.queuedActiveSceneSwitch;

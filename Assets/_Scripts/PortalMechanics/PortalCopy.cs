@@ -123,6 +123,10 @@ public class PortalCopy : MonoBehaviour {
     }
 
     void TransformCopy(Portal inPortal) {
+        if (inPortal == null) {
+            return;
+        }
+        
         // Position
         transform.position = inPortal.TransformPoint(original.transform.position);
 

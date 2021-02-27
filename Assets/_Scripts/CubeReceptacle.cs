@@ -281,7 +281,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
 
     [Serializable]
     public class CubeReceptacleSave : SerializableSaveObject<CubeReceptacle> {
-        SerializableReference<PickupObject> cubeInReceptacle;
+        SerializableReference<PickupObject, PickupObject.PickupObjectSave> cubeInReceptacle;
         SerializableVector3 endPos;
         SerializableQuaternion endRot;
 
@@ -291,7 +291,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         State state;
         float timeSinceStateChange;
 
-        public CubeReceptacleSave(CubeReceptacle receptacle) {
+        public CubeReceptacleSave(CubeReceptacle receptacle) : base(receptacle) {
             state = receptacle.state;
             timeSinceStateChange = receptacle.timeSinceStateChange;
 
@@ -314,7 +314,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             receptacle.startPos = startPos;
             receptacle.endPos = endPos;
 
-            receptacle.cubeInReceptacle = cubeInReceptacle;
+            receptacle.cubeInReceptacle = cubeInReceptacle?.GetOrNull();
             if (receptacle.cubeInReceptacle != null) {
                 receptacle.cubeInReceptacle.OnPickupSimple += receptacle.ReleaseFromReceptacle;
             }

@@ -343,9 +343,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		int curDimensionSetInMaterial;
 
 		int startingVisibilityState;
-		int visibilityState;
+		public int visibilityState;
 
-		public DimensionObjectSave(DimensionObject dimensionObj) {
+		public DimensionObjectSave(DimensionObject dimensionObj) : base(dimensionObj) {
 			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
 			this.ignoreChildrenWithDimensionObject = dimensionObj.ignoreChildrenWithDimensionObject;
 			this.disableColliderWhileInvisible = dimensionObj.disableColliderWhileInvisible;

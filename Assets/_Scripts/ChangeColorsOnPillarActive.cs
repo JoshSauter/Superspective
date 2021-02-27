@@ -6,6 +6,7 @@ using UnityEngine;
 public class ChangeColorsOnPillarActive : MonoBehaviour {
     public bool changeColorsOnActive;
     public bool changeColorsOnInactive;
+    bool wasActive;
 
     public Color activeColor = new Color(0.372549f, 0.1215686f, 0.9058824f);
     public Color inactiveColor = new Color(.2f, .2f, .2f);
@@ -19,22 +20,21 @@ public class ChangeColorsOnPillarActive : MonoBehaviour {
         thisPillar = GetComponent<DimensionPillar>();
         thisRenderer = GetComponent<EpitaphRenderer>();
         optionalGlass = GetComponentInChildren<GlassGlow>();
-        DimensionPillar.OnActivePillarChanged += ChangeColors;
+
+        wasActive = thisPillar.enabled;
     }
 
-    void OnDestroy() {
-        DimensionPillar.OnActivePillarChanged -= ChangeColors;
-    }
-
-    void ChangeColors(DimensionPillar previousPillar) {
-        if (changeColorsOnActive && DimensionPillar.ActivePillar == thisPillar) {
+    void Update() {
+        if (changeColorsOnActive && thisPillar.enabled && !wasActive) {
+            wasActive = true;
             thisRenderer.SetMainColor(activeColor);
             if (optionalGlass != null) {
                 optionalGlass.enabled = true;
                 optionalGlass.glowColor = activeColor;
             }
         }
-        else if (changeColorsOnInactive && previousPillar == thisPillar) {
+        else if (changeColorsOnInactive && !thisPillar.enabled && wasActive) {
+            wasActive = false;
             thisRenderer.SetMainColor(inactiveColor);
             if (optionalGlass != null) optionalGlass.enabled = false;
         }

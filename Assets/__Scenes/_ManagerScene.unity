@@ -3444,7 +3444,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  startingScene: 25
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -3485,7 +3485,7 @@ MonoBehaviour:
     connectedLevels: 0d00000015000000
   - level: 21
     levelName: _TransitionWhiteRoom_Fork
-    connectedLevels: 18000000140000001600000013000000
+    connectedLevels: 180000001400000016000000
   - level: 20
     levelName: _Fork_WhiteRoom3
     connectedLevels: 12000000
@@ -4642,6 +4642,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbb6e1213a67b545a58fafcc1d79119, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameHasLoaded: 0
 --- !u!4 &532170870
 Transform:
   m_ObjectHideFlags: 0
@@ -5444,6 +5445,7 @@ MonoBehaviour:
   rotationY: 0
   yClamp: 85
   outsideMultiplier: 1
+  timeSinceStateChange: 0
 --- !u!54 &623971845
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5520,8 +5522,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 163, y: -423.25, z: 881.5}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: -396.5, z: 32.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1554336841}
@@ -15455,13 +15457,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18180,7 +18182,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

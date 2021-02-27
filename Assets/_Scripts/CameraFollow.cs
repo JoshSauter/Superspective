@@ -115,7 +115,7 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         float timeSinceCurrentLerpSpeedWasModified;
         SerializableVector3 worldPositionLastFrame;
 
-        public CameraFollowSave(CameraFollow cam) {
+        public CameraFollowSave(CameraFollow cam) : base(cam) {
             shouldFollow = cam.shouldFollow;
             currentLerpSpeed = cam.currentLerpSpeed;
             relativeStartPosition = cam.relativeStartPosition;

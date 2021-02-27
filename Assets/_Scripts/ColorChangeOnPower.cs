@@ -155,7 +155,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         int timing;
         bool useMaterialAsStartColor;
 
-        public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) {
+        public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) : base(colorChange) {
             timing = (int) colorChange.timing;
             useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
             depoweredColor = colorChange.depoweredColor;

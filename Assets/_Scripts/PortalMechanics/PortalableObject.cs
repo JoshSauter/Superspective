@@ -59,7 +59,7 @@ namespace PortalMechanics {
 			get {
 				return _grabbedThroughPortal;
 			}
-			set {
+			private set {
 				_grabbedThroughPortal = value;
 				if (copyShouldBeEnabled && portalInteractingWith != null) {
 					if (fakeCopyInstance == null) {
@@ -92,6 +92,10 @@ namespace PortalMechanics {
 					useOtherPortal = true;
 				}
 
+				if (portal == null) {
+					return null;
+				}
+				
 				return useOtherPortal ? portal.otherPortal : portal;
 			}
 		}
@@ -286,11 +290,11 @@ namespace PortalMechanics {
 
 		[Serializable]
 		public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {
-			SerializableReference<Portal> sittingInPortal;
-			SerializableReference<Portal> hoveredThroughPortal;
-			SerializableReference<Portal> grabbedThroughPortal;
+			SerializableReference<Portal, Portal.PortalSave> sittingInPortal;
+			SerializableReference<Portal, Portal.PortalSave> hoveredThroughPortal;
+			SerializableReference<Portal, Portal.PortalSave> grabbedThroughPortal;
 
-			public PortalableObjectSave(PortalableObject obj) {
+			public PortalableObjectSave(PortalableObject obj) : base(obj) {
 				sittingInPortal = null;
 				hoveredThroughPortal = null;
 				grabbedThroughPortal = null;
@@ -306,14 +310,15 @@ namespace PortalMechanics {
 			}
 
 			public override void LoadSave(PortalableObject obj) {
+				// GetOrNull valid here because if this saved value is set, it should have to be loaded
 				if (this.sittingInPortal != null) {
-					obj.sittingInPortal = this.sittingInPortal;
+					obj.sittingInPortal = this.sittingInPortal.GetOrNull();
 				}
 				if (this.hoveredThroughPortal != null) {
-					obj.hoveredThroughPortal = this.hoveredThroughPortal;
+					obj.hoveredThroughPortal = this.hoveredThroughPortal.GetOrNull();
 				}
 				if (this.grabbedThroughPortal != null) {
-					obj.grabbedThroughPortal = this.grabbedThroughPortal;
+					obj.grabbedThroughPortal = this.grabbedThroughPortal.GetOrNull();
 				}
 			}
 		}

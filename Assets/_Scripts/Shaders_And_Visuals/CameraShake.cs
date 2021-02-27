@@ -127,7 +127,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 		float timeShaking;
 		SerializableVector2 totalOffsetApplied;
 
-		public CameraShakeSave(CameraShake cameraShake) {
+		public CameraShakeSave(CameraShake cameraShake) : base(cameraShake) {
 			this.isUsingCurve = cameraShake.isUsingCurve;
 			this.isShaking = cameraShake.isShaking;
 			this.appliedOffset = cameraShake.appliedOffset;

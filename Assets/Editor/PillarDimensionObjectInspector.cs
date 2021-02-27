@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CustomEditor(typeof(PillarDimensionObject))]
 [CanEditMultipleObjects]
-public class PillarDimensionObjectInspector : Editor {
+public class PillarDimensionObjectInspector : UnityEditor.Editor {
     SerializedProperty channel;
 
     SerializedProperty colliderBoundsOverride;

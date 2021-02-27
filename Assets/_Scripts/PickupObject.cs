@@ -299,7 +299,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         bool interactable;
         bool isHeld;
 
-        bool isReplaceable;
+        public bool isReplaceable;
         SerializableVector3 localScale;
         float mass;
 
@@ -309,7 +309,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
         SerializableVector3 velocity;
 
-        public PickupObjectSave(PickupObject obj) {
+        public PickupObjectSave(PickupObject obj) : base(obj) {
             position = obj.transform.position;
             rotation = obj.transform.rotation;
             localScale = obj.transform.localScale;

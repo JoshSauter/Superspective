@@ -124,9 +124,21 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     }
 
     public void PressButton() {
-        if (state == State.ButtonPressed)
+        if (state == State.ButtonDepressed) {
+            depressedPos = transform.position;
+            pressedPos = depressedPos + transform.up * depressDistance;
+        }
+        else if (state == State.ButtonPressed) {
+            pressedPos = transform.position;
+            depressedPos = pressedPos - transform.up * depressDistance;
+        }
+
+        if (state == State.ButtonPressed) {
             state = State.ButtonDepressing;
-        else if (state == State.ButtonDepressed) state = State.ButtonPressing;
+        }
+        else if (state == State.ButtonDepressed) {
+            state = State.ButtonPressing;
+        }
     }
 
     protected void TriggerButtonPressBeginEvents() {
@@ -173,7 +185,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         float timeToDepressButton;
         float timeToPressButton;
 
-        public ButtonSave(Button button) {
+        public ButtonSave(Button button) : base(button) {
             state = (int) button.state;
             timeSinceStateChange = button.timeSinceStateChange;
             depressedPos = button.depressedPos;

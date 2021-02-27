@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections;
 using EpitaphUtils;
+using LevelManagement;
+using NaughtyAttributes;
+using Saving;
 using UnityEngine;
 
 namespace Saving {
@@ -9,13 +13,9 @@ namespace Saving {
     /// </summary>
     /// <typeparam name="T">Type of class whose state should be saved</typeparam>
     /// <typeparam name="S">Type of the serializable Save class</typeparam>
-    public abstract class SingletonSaveableObject<T, S> : MonoBehaviour, ISaveableObject
+    public abstract class SingletonSaveableObject<T, S> : SaveableObject
         where S : SerializableSaveObject<T>
-        where T : MonoBehaviour, ISaveableObject {
-        [SerializeField]
-        protected bool DEBUG = false;
-        public DebugLogger debug;
-        
+        where T : SaveableObject {
         static T _instance = null;
 
         public static T instance {
@@ -40,34 +40,17 @@ namespace Saving {
                 return _instance;
             }
         }
-        
-        string scene => gameObject.scene.name;
-        
-        protected virtual void Awake() {
-            debug = new DebugLogger(gameObject, () => DEBUG);
-            Register();
-        }
 
-        public void Register() {
-            SaveManager.GetSaveManagerForScene(scene).RegisterSaveableObject(this);
-        }
-
-        protected virtual void OnDestroy() {
-            SaveManager.GetSaveManagerForScene(scene, false)?.UnregisterSaveableObject(this);
-        }
-
-        public abstract string ID { get; }
-
-        public object GetSaveObject() {
+        public override SerializableSaveObject GetSaveObject() {
             return (S)Activator.CreateInstance(typeof(S), new object[] { this });
         }
 
-        public void RestoreStateFromSave(object savedObject) {
+        public override void RestoreStateFromSave(SerializableSaveObject savedObject) {
             S save = savedObject as S;
 
             save?.LoadSave(this as T);
         }
 
-        public bool SkipSave { get; set; }
+        public override bool SkipSave { get; set; }
     }
 }

@@ -61,7 +61,7 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	public class NoClipSave : SerializableSaveObject<NoClipMode> {
 		bool noClipOn;
 
-		public NoClipSave(NoClipMode noClip) {
+		public NoClipSave(NoClipMode noClip) : base(noClip) {
 			this.noClipOn = noClip.noClipOn;
 		}
 

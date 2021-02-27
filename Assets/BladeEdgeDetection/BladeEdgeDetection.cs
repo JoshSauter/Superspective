@@ -238,7 +238,7 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		SerializableColor edgeColor;
 		SerializableGradient edgeColorGradient;
 
-		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) {
+		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) : base(edgeDetection) {
 			this.debugMode = edgeDetection.debugMode;
 			this.doubleSidedEdges = edgeDetection.doubleSidedEdges;
 			this.checkPortalDepth = edgeDetection.checkPortalDepth;

@@ -9,16 +9,15 @@ using UnityEditor;
 
 namespace MagicTriggerMechanics {
 	public enum TriggerActionType {
-		DisableSelfScript,
-		DisableSelfGameObject,
-		EnableDisableScripts,
-		EnableDisableGameObjects,
-		ToggleScripts,              // Enables scripts when triggered forward, disables when triggered negatively
-		ToggleGameObjects,          // Enables GameObjects when triggered forward, disables when triggered negatively
-		ChangeLevel,
-		ChangeActivePillar,
-		PowerOrDepowerPowerTrail,
-		ChangeVisibilityState
+		DisableSelfScript = 0,
+		DisableSelfGameObject = 1,
+		EnableDisableScripts = 2,
+		EnableDisableGameObjects = 3,
+		ToggleScripts = 4,              // Enables scripts when triggered forward, disables when triggered negatively
+		ToggleGameObjects = 5,          // Enables GameObjects when triggered forward, disables when triggered negatively
+		ChangeLevel = 6,
+		PowerOrDepowerPowerTrail = 8,
+		ChangeVisibilityState = 9
 	}
 
 	[Flags]
@@ -84,10 +83,10 @@ namespace MagicTriggerMechanics {
 					}
 					return;
 				case TriggerActionType.ChangeLevel:
-					LevelManager.instance.SwitchActiveScene(levelForward);
-					return;
-				case TriggerActionType.ChangeActivePillar:
-					TriggerPillarChangeForward();
+					// ManagerScene is a flag that we don't want to change level in this direction
+					if (levelForward != Levels.ManagerScene) {
+						LevelManager.instance.SwitchActiveScene(levelForward);
+					}
 					return;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					powerTrail.powerIsOn = setPowerIsOn;
@@ -121,10 +120,10 @@ namespace MagicTriggerMechanics {
 					}
 					return;
 				case TriggerActionType.ChangeLevel:
-					LevelManager.instance.SwitchActiveScene(levelBackward);
-					return;
-				case TriggerActionType.ChangeActivePillar:
-					TriggerPillarChangeBackward();
+					// ManagerScene is a flag that we don't want to change level in this direction
+					if (levelBackward != Levels.ManagerScene) {
+						LevelManager.instance.SwitchActiveScene(levelBackward);
+					}
 					return;
 				case TriggerActionType.DisableSelfScript:
 				case TriggerActionType.DisableSelfGameObject:
@@ -142,28 +141,6 @@ namespace MagicTriggerMechanics {
 				default:
 					return;
 			}
-		}
-
-		void TriggerPillarChangeForward() {
-			if (forwardPillar == null && !forwardSameScenePillar) {
-				string pillarKey = PillarKey(forwardPillarLevel, forwardPillarName);
-				if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
-					forwardPillar = DimensionPillar.pillars[pillarKey];
-				}
-			}
-
-			DimensionPillar.ActivePillar = forwardPillar;
-		}
-
-		void TriggerPillarChangeBackward() {
-			if (backwardPillar == null && !backwardSameScenePillar) {
-				string pillarKey = PillarKey(backwardPillarLevel, backwardPillarName);
-				if (DimensionPillar.pillars.ContainsKey(pillarKey)) {
-					backwardPillar = DimensionPillar.pillars[pillarKey];
-				}
-			}
-
-			DimensionPillar.ActivePillar = backwardPillar;
 		}
 
 		string PillarKey(Levels level, string name) {
@@ -257,31 +234,6 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.ChangeLevel:
 					EditorGUILayout.PropertyField(levelForward, forwardLevelLabel);
 					EditorGUILayout.PropertyField(levelBackward, backwardLevelLabel);
-					break;
-				case TriggerActionType.ChangeActivePillar:
-					EditorGUIUtility.labelWidth = 250;
-					EditorGUILayout.PropertyField(forwardSameScenePillar, forwardSameScenePillarLabel);
-					EditorGUIUtility.labelWidth = defaultWidth;
-					if (forwardSameScenePillar.boolValue) {
-						EditorGUILayout.PropertyField(forwardPillar, forwardPillarLabel);
-					}
-					else {
-						EditorGUILayout.PropertyField(forwardPillarLevel, levelOfPillarLabel);
-						EditorGUILayout.PropertyField(forwardPillarName, nameOfPillarLabel);
-					}
-
-					EditorGUILayout.Space();
-
-					EditorGUIUtility.labelWidth = 250;
-					EditorGUILayout.PropertyField(backwardSameScenePillar, backwardSameScenePillarLabel);
-					EditorGUIUtility.labelWidth = defaultWidth;
-					if (forwardSameScenePillar.boolValue) {
-						EditorGUILayout.PropertyField(backwardPillar, backwardPillarLabel);
-					}
-					else {
-						EditorGUILayout.PropertyField(backwardPillarLevel, levelOfPillarLabel);
-						EditorGUILayout.PropertyField(backwardPillarName, nameOfPillarLabel);
-					}
 					break;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					EditorGUILayout.PropertyField(powerTrail, powerTrailLabel);

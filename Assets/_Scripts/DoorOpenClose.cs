@@ -228,7 +228,7 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
         DoorState state;
         float timeSinceStateChange;
 
-        public DoorOpenCloseSave(DoorOpenClose door) {
+        public DoorOpenCloseSave(DoorOpenClose door) : base(door) {
             doorOpenCurve = door.doorOpenCurve;
             doorCloseCurve = door.doorCloseCurve;
 

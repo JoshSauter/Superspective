@@ -62,7 +62,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
 
         float t;
 
-        public HeadbobSave(Headbob headbob) {
+        public HeadbobSave(Headbob headbob) : base(headbob) {
             curBobAmount = headbob.curBobAmount;
             t = headbob.t;
             curPeriod = headbob.curPeriod;

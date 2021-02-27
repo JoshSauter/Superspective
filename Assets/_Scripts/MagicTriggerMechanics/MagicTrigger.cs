@@ -179,7 +179,7 @@ namespace MagicTriggerMechanics {
 			bool hasTriggeredOnStay;
 			bool hasNegativeTriggeredOnStay;
 
-			public MagicTriggerSave(MagicTrigger magicTrigger) {
+			public MagicTriggerSave(MagicTrigger magicTrigger) : base(magicTrigger) {
 				foreach (var action in magicTrigger.actionsToTrigger) {
 					List<bool> objectsToEnableState = new List<bool>();
 					List<bool> objectsToDisableState = new List<bool>();

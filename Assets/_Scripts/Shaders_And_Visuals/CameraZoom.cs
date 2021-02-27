@@ -55,7 +55,7 @@ public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> 
 		bool zoomed;
 		float currentFOV;
 
-		public CameraZoomSave(CameraZoom zoom) {
+		public CameraZoomSave(CameraZoom zoom) : base(zoom) {
 			this.defaultFOV = zoom.defaultFOV;
 			this.zoomed = zoom.zoomed;
 			this.currentFOV = zoom.currentFOV;

@@ -52,7 +52,7 @@ namespace LevelSpecific.WhiteRoom {
             bool wasSolvedLastFrame;
             List<SerializableVector3> barPositions;
 
-            public WhiteRoom3ExitBarsSave(WhiteRoom3ExitBars exitBars) {
+            public WhiteRoom3ExitBarsSave(WhiteRoom3ExitBars exitBars) : base(exitBars) {
                 this.numSolved = exitBars.numSolved;
                 this.wasSolvedLastFrame = exitBars.wasSolvedLastFrame;
                 this.barPositions = exitBars.bars.Select<Transform, SerializableVector3>(b => b.position).ToList();

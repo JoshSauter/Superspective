@@ -37,7 +37,7 @@ namespace Saving {
 		bool hasRegistered = false;
 
 		string SceneName => gameObject.scene.name;
-		SaveManagerForScene SaveForScene => SaveManager.GetSaveManagerForScene(SceneName);
+		SaveManagerForScene SaveForScene => SaveManager.GetOrCreateSaveManagerForScene(SceneName);
 
 		PickupObject pickup;
 
@@ -60,7 +60,7 @@ namespace Saving {
 			pickup = GetComponent<PickupObject>();
 			
 			LevelManager.instance.BeforeSceneRestoreState += RegisterOnLevelChangeEvents;
-			LevelManager.instance.BeforeSceneSaveState += RegisterOnLevelChangeEvents;
+			LevelManager.instance.BeforeSceneSerializeState += RegisterOnLevelChangeEvents;
 		}
 
 		IEnumerator Start() {
@@ -75,7 +75,7 @@ namespace Saving {
 			if (scene == SceneName) {
 				Register();
 				LevelManager.instance.BeforeSceneRestoreState -= RegisterOnLevelChangeEvents;
-				LevelManager.instance.BeforeSceneSaveState -= RegisterOnLevelChangeEvents;
+				LevelManager.instance.BeforeSceneSerializeState -= RegisterOnLevelChangeEvents;
 			}
 		}
 
@@ -106,19 +106,7 @@ namespace Saving {
 		// DynamicObject.Destroy should be used instead of Object.Destroy to ensure proper record keeping
 		// for when the object is explicitly destroyed (not just from a scene change, etc)
 		public void Destroy() {
-			// Application.isPlaying check needed because this script is ExecuteOnEditMode for the automatic prefab path setup
-			// Apparently this means OnDestroy is called when entering Play Mode
-			// Note: This probably isn't needed anymore since moving from OnDestroy method
-			if (!Application.isPlaying) {
-				return;
-			}
-			
-			// Finally, ignore DynamicObjects that are destroyed solely because the scene they are in is being unloaded
-			if (!LevelManager.instance.loadedSceneNames.Contains(gameObject.scene.name)) {
-				return;
-			}
-			
-			bool unregistered = SaveForScene.UnregisterDynamicObject(this);
+			bool unregistered = SaveForScene.UnregisterDynamicObject(ID);
 			bool markedAsDestroyed = DynamicObjectManager.MarkDynamicObjectAsDestroyed(this, SceneName);
 
 			if (unregistered && markedAsDestroyed) {
@@ -127,6 +115,9 @@ namespace Saving {
 			else {
 				debug.LogError($"Failed in Destroy. Unregistration successful: {unregistered}, Marked as destroyed successful: {markedAsDestroyed}");
 			}
+			
+			// Unregister any other SaveableObject scripts that may have existed on this object
+			SaveForScene.UnregisterAllAssociatedObjects(ID);
 
 			Destroy(gameObject);
 		}
@@ -134,7 +125,7 @@ namespace Saving {
 		void OnDestroy() {
 			if (LevelManager.instance != null) {
 				LevelManager.instance.BeforeSceneRestoreState -= RegisterOnLevelChangeEvents;
-				LevelManager.instance.BeforeSceneSaveState -= RegisterOnLevelChangeEvents;
+				LevelManager.instance.BeforeSceneSerializeState -= RegisterOnLevelChangeEvents;
 			}
 		}
 
@@ -168,7 +159,7 @@ namespace Saving {
 		void ChangeScene(Scene newScene) {
 			if (gameObject.scene != newScene) {
 				// Deregister the DynamicObject in the old SaveManagerForScene
-				SaveForScene.UnregisterDynamicObject(this);
+				SaveForScene.UnregisterDynamicObject(ID);
 				// Move the GameObject to the new scene
 				SceneManager.MoveGameObjectToScene(gameObject, newScene);
 				// Update the record of the DynamicObject in DynamicObjectManager
@@ -179,20 +170,20 @@ namespace Saving {
 		}
 
 		[Serializable]
-		public class DynamicObjectSave {
+		public class DynamicObjectSave : SerializableSaveObject<DynamicObject> {
 			public string prefabPath;
 			public bool isGlobal;
 			public string scene;
 			public bool active;
 
-			public DynamicObjectSave(DynamicObject obj) {
+			public DynamicObjectSave(DynamicObject obj) : base(obj) {
 				this.prefabPath = obj.prefabPath;
 				this.isGlobal = obj.isGlobal;
 				this.scene = obj.SceneName;
 				this.active = obj.gameObject.activeSelf;
 			}
 
-			public void LoadSave(DynamicObject obj) {
+			public override void LoadSave(DynamicObject obj) {
 				obj.prefabPath = this.prefabPath;
 				obj.isGlobal = this.isGlobal;
 				if (!string.IsNullOrEmpty(scene)) {
@@ -203,13 +194,19 @@ namespace Saving {
 				}
 				obj.gameObject.SetActive(this.active);
 			}
+
+			// Similar to DynamicObject.Destroy but for objects in unloaded scenes
+			public override void Destroy() {
+				base.Destroy();
+				DynamicObjectManager.MarkDynamicObjectAsDestroyed(this, scene);
+			}
 		}
 
-		public object GetSaveObject() {
+		public SerializableSaveObject GetSaveObject() {
 			return new DynamicObjectSave(this);
 		}
 
-		public void RestoreStateFromSave(object savedObject) {
+		public void RestoreStateFromSave(SerializableSaveObject savedObject) {
 			(savedObject as DynamicObjectSave)?.LoadSave(this);
 		}
 	}

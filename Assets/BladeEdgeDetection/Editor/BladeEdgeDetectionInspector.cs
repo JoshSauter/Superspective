@@ -5,7 +5,7 @@ using UnityEditor;
 
 [CustomEditor(typeof(BladeEdgeDetection))]
 [CanEditMultipleObjects]
-public class BladeEdgeDetectionInspector : Editor {
+public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 	SerializedProperty debugMode;
 
 	bool thicknessHelp = false;

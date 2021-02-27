@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Library.Functional;
+using EpitaphUtils;
 
 namespace SerializableClasses {
 	/// <summary>
@@ -282,34 +284,37 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
-	// TODO: Make this an Either<T, S> where T : SaveableObject<T, S> where S : SerializableSaveObject<T>
-	// TODO: This way scripts cannot assume that their cross-scene references are loaded
-	public class SerializableReference<T> where T : MonoBehaviour, ISaveableObject {
+	public abstract class SerializableReference {
 		public string referencedSceneName;
 		public string referencedObjId;
+	}
 
-		public T Reference {
+	[Serializable]
+	public class SerializableReference<T, S> : SerializableReference
+		where T : MonoBehaviour, ISaveableObject
+		where S : SerializableSaveObject<T> {
+
+		public Either<T, S> Reference {
 			get {
-				SaveManagerForScene saveManagerForScene = SaveManager.GetSaveManagerForScene(referencedSceneName);
-				if (saveManagerForScene != null) {
-					ISaveableObject saveableObject = saveManagerForScene.GetSaveableObject(referencedObjId);
-					if (saveableObject != null) {
-						return saveableObject as T;
-					}
-					else {
-						//Debug.LogError($"Can't restore reference for id: {referencedObjId} in scene {referencedSceneName}");
-						return null;
-					}
-				}
-				else {
-					Debug.LogWarning($"Can't restore reference for id: {referencedObjId} because scene {referencedSceneName} didn't get a SaveManagerForScene");
-					return null;
-				}
+				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
+				return saveManagerForScene?.GetSaveableObject(referencedObjId).Match(
+					// Map the results to the appropriate types
+					saveableObject => new Either<T, S>(saveableObject as T),
+					serializedSaveObject => new Either<T, S>(serializedSaveObject as S)
+				);
 			}
 			set {
 				if (value != null) {
-					referencedSceneName = value.gameObject.scene.name;
-					referencedObjId = value.ID;
+					value.MatchAction(
+						saveableObject => {
+							referencedSceneName = saveableObject.gameObject.scene.name;
+							referencedObjId = saveableObject.ID;
+						},
+						serializedSaveObject => {
+							referencedSceneName = serializedSaveObject.sceneName;
+							referencedObjId = serializedSaveObject.ID;
+						}
+					);
 				}
 				else {
 					referencedSceneName = "";
@@ -318,17 +323,47 @@ namespace SerializableClasses {
 			}
 		}
 
-		public static implicit operator T(SerializableReference<T> instance) {
-			return instance?.Reference;
+		public T GetOrNull() {
+			return Reference.Match(
+				saveableObject => saveableObject,
+				other => null
+			);
 		}
 
-		public static implicit operator SerializableReference<T>(T obj) {
-			if (obj != null) {
-				return new SerializableReference<T> { Reference = obj };
+		// Implicit SerializableReference creation from SaveableObject
+		public static implicit operator SerializableReference<T, S>(T obj) {
+			return obj != null ? new SerializableReference<T, S> { Reference = obj } : null;
+		}
+		
+		// Implicit SerializableReference creation from SerializableSaveObject
+		public static implicit operator SerializableReference<T, S>(S serializedObj) {
+			return serializedObj != null ? new SerializableReference<T, S> { Reference = serializedObj } : null;
+		}
+	}
+
+	[Serializable]
+	public class SerializableDictionary<K, V> {
+		List<K> keys;
+		List<V> values;
+		
+		public Dictionary<K, V> Dictionary {
+			get {
+				return keys
+					.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value))
+					.ToDictionary();
 			}
-			else {
-				return null;
+			set {
+				keys = new List<K>(value.Keys);
+				values = new List<V>(value.Values);
 			}
+		}
+
+		public static implicit operator Dictionary<K, V>(SerializableDictionary<K, V> instance) {
+			return instance?.Dictionary;
+		}
+
+		public static implicit operator SerializableDictionary<K, V>(Dictionary<K, V> dict) {
+			return new SerializableDictionary<K, V>() { Dictionary = dict };
 		}
 	}
 }

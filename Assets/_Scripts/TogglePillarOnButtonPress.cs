@@ -14,10 +14,12 @@ public class TogglePillarOnButtonPress : MonoBehaviour {
     }
 
     void ToggleActivePillarPress(Button b) {
-        DimensionPillar.ActivePillar = buttonPressedPillar;
+        buttonPressedPillar.enabled = true;
+        buttonDepressedPillar.enabled = false;
     }
 
     void ToggleActivePillarDepress(Button b) {
-        DimensionPillar.ActivePillar = buttonDepressedPillar;
+        buttonPressedPillar.enabled = false;
+        buttonDepressedPillar.enabled = true;
     }
 }

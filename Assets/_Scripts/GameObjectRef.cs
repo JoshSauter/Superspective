@@ -19,6 +19,8 @@ public class GameObjectRef : SaveableObject<GameObjectRef, GameObjectRef.GameObj
     
     // GameObjectRefSave is never actually used since this object always skips saving.
     public class GameObjectRefSave : SerializableSaveObject<GameObjectRef> {
+        public GameObjectRefSave(GameObjectRef script) : base(script) {}
+        
         public override void LoadSave(GameObjectRef saveableScript) {
             throw new System.NotImplementedException();
         }

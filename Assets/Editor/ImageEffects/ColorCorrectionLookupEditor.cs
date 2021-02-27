@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor (typeof(ColorCorrectionLookup))]
-    internal class ColorCorrectionLookupEditor : Editor
+    internal class ColorCorrectionLookupEditor : UnityEditor.Editor
     {
         SerializedObject serObj;
 

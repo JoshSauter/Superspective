@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor (typeof(CameraMotionBlur))]
-    internal class CameraMotionBlurEditor : Editor
+    internal class CameraMotionBlurEditor : UnityEditor.Editor
     {
         SerializedObject serObj;
 

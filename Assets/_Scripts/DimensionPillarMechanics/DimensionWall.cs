@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using EpitaphUtils;
-using UnityEngine.Rendering;
 
 public class DimensionWall : MonoBehaviour {
 	Renderer thisRenderer;
@@ -51,12 +48,11 @@ public class DimensionWall : MonoBehaviour {
 	}
 
 	void Update() {
-		//UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
+		thisRenderer.enabled = pillar.enabled;
+		if (!pillar.enabled) return;
+
 		UpdateWallRotation();
 		UpdateWallSize();
-		//UpdateWallPosition(radsOffsetForDimensionWall * Mathf.PI);
-
-		thisRenderer.enabled = (pillar == DimensionPillar.ActivePillar);
 	}
 
 	Angle AngleOfPlayerCamera() {

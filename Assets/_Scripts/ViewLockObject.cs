@@ -126,7 +126,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         bool colliderEnabled;
         int state;
 
-        public ViewLockObjectSave(ViewLockObject viewLockObject) {
+        public ViewLockObjectSave(ViewLockObject viewLockObject) : base(viewLockObject) {
             state = (int) viewLockObject.state;
             colliderEnabled = viewLockObject.hitbox.enabled;
         }

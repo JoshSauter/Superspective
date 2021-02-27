@@ -434,7 +434,7 @@ namespace LevelSpecific.WhiteRoom {
             float[] floatGradientBuffer;
             SerializableColor[] colorGradientBuffer;
             
-            public WhiteRoomPuzzle2Save(WhiteRoomPuzzle2 script) {
+            public WhiteRoomPuzzle2Save(WhiteRoomPuzzle2 script) : base(script) {
                 this.actualValue = script.actualValue;
                 this.displayedValue = script.displayedValue;
                 this.hexState = script.hexState;

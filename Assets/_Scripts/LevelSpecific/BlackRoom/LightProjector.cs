@@ -155,7 +155,7 @@ namespace LevelSpecific.BlackRoom {
 			float curUpAndDownAnimTime;
 			float desiredUpAndDownAnimTime;
 
-			public LightProjectorSave(LightProjector lightProjector) {
+			public LightProjectorSave(LightProjector lightProjector) : base(lightProjector) {
 				this.currentSize = lightProjector.currentSize;
 
 				this.curSideToSideAnimTime = lightProjector.curSideToSideAnimTime;

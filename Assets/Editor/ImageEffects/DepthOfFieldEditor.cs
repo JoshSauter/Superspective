@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor(typeof(DepthOfField))]
-    internal class DepthOfFieldEditor : Editor
+    internal class DepthOfFieldEditor : UnityEditor.Editor
     {
         SerializedObject serObj;
 

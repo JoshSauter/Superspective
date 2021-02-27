@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using NaughtyAttributes;
 using EpitaphUtils;
 using System;
 using Saving;
-using SerializableClasses;
+using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
 // DimensionObjectBase.baseDimension is the lower dimension that this object exists in
 // If this object goes across the 180° + dimensionShiftAngle (when the player is standing in the direction of pillar's transform.forward from pillar),
@@ -43,14 +42,19 @@ public class PillarDimensionObject : DimensionObject {
 	[ReadOnly]
 	float maxAngle;
 
+	struct DimensionPillarPlanes {
+		public Plane leftParallel;
+		public Plane rightParallel;
+		// Only used for drawing debug planes
+		public float maxDistance;
+	}
+
 	// The active pillar that this object is setting its visibility state based off of
-	public DimensionPillar pillar => pillarsSet.Contains(DimensionPillar.ActivePillar) || pillars.Length == 0 ? DimensionPillar.ActivePillar : null;
-	public DimensionPillar[] pillars;
-	HashSet<DimensionPillar> pillarsSet = new HashSet<DimensionPillar>();
-	Dictionary<DimensionPillar, Plane> leftParallels = new Dictionary<DimensionPillar, Plane>();
-	Dictionary<DimensionPillar, Plane> rightParallels = new Dictionary<DimensionPillar, Plane>();
-	// Only used for drawing debug planes
-	Dictionary<DimensionPillar, float> maxDistances = new Dictionary<DimensionPillar, float>();
+	DimensionPillar activePillar;
+	// Optional allow-list of pillars to react to, else will react to any active pillar
+	public PillarReference[] pillars;
+	// Key == pillar.ID
+	readonly Dictionary<string, DimensionPillarPlanes> pillarPlanes = new Dictionary<string, DimensionPillarPlanes>();
 
 	Vector3 minAngleVector, maxAngleVector;
 
@@ -62,8 +66,6 @@ public class PillarDimensionObject : DimensionObject {
 
 	public delegate void DimensionObjectAction();
 	public event DimensionObjectAction OnBaseDimensionChange;
-
-	DimensionPillar.ActivePillarChangedEvent activePillarChangedHandler;
 
 	protected override void Awake() {
 		base.Awake();
@@ -82,67 +84,82 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	protected override void Init() {
-		pillarsSet = new HashSet<DimensionPillar>(pillars);
 		renderers = GetAllEpitaphRenderers().ToArray();
 
-		foreach (var p in pillars) {
-			DeterminePlanes(p);
-		}
-
-		activePillarChangedHandler = (prev) => HandleNewPillar();
-		DimensionPillar.OnActivePillarChanged += activePillarChangedHandler;
-
-		HandleNewPillar();
+		HandlePillarChanged();
 	}
 
-	void HandleNewPillar() {
-		if (pillar != null) {
-			DeterminePlanes(pillar);
-
+	void HandlePillarChanged() {
+		if (activePillar != null) {
 			playerQuadrant = DetermineQuadrant(camPos);
-			dimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.DimensionShiftVector);
+			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
 			UpdateState(true);
 		}
 	}
 
-	protected override void OnDestroy() {
-		base.OnDestroy();
-		DimensionPillar.OnActivePillarChanged -= activePillarChangedHandler;
-	}
-
-	void GetCollidersRecursivelyHelper(Transform parent, ref List<Collider> collidersSoFar) {
-		Collider thisCollider = parent.GetComponent<Collider>();
-		if (thisCollider != null) {
-			collidersSoFar.Add(thisCollider);
-		}
-
-		if (parent.childCount > 0) {
-			foreach (Transform child in parent) {
-				GetCollidersRecursivelyHelper(child, ref collidersSoFar);
+	void FixedUpdate() {
+		if (!hasInitialized) return;
+		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
+		
+		DimensionPillar DetermineActivePillar() {
+			DimensionPillar FindNearestDimensionPillar() {
+				// Only look for a new closest pillar if the object moved or we don't already have one
+				if (!(thisObjectMoving || activePillar == null)) {
+					return activePillar;
+				}
+				
+				if (DimensionPillar.allPillars.Count > 0) {
+					return DimensionPillar.allPillars.Values
+						// Only consider pillars which are loaded and enabled
+						.Where(pillarRef => pillarRef.GetOrNull()?.enabled ?? false)
+						.Select(pillarRef => pillarRef.GetOrNull())
+						// Find the closest pillar
+						.OrderBy(pillar => Vector3.Distance(pillar.transform.position, transform.position))
+						.FirstOrDefault();
+				}
+				else {
+					return null;
+				}
+			}
+			
+			if (pillars != null && pillars.Length > 0) {
+				// Only consider pillars which are loaded and enabled
+				return pillars.Where(reference => reference.GetOrNull()?.enabled ?? false)
+					.Select(reference => reference.GetOrNull())
+					.FirstOrDefault();
+			}
+			else {
+				return FindNearestDimensionPillar();
 			}
 		}
-	}
-
-	void FixedUpdate() {
-		if (pillar == null) return;
+		
+		DimensionPillar prevPillar = activePillar;
+		activePillar = DetermineActivePillar();
+		if (activePillar == null) return;
+		
 		if (DEBUG) {
-			Debug.DrawRay(pillar.transform.position, minAngleVector, Color.cyan);
-			Debug.DrawRay(pillar.transform.position, maxAngleVector, Color.blue);
+			Debug.DrawRay(activePillar.transform.position, minAngleVector, Color.cyan);
+			Debug.DrawRay(activePillar.transform.position, maxAngleVector, Color.blue);
 		}
 
-		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
-		if (thisObjectMoving) {
-			DeterminePlanes(pillar);
+		if (thisObjectMoving || !pillarPlanes.ContainsKey(activePillar.ID)) {
+			DeterminePlanes(activePillar);
+		}
+
+		// If the pillar changed this frame, handle this immediately
+		if (prevPillar != activePillar) {
+			HandlePillarChanged();
 		}
 
 		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.Opposite (moving objects only)
-		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(pillar.transform.position + pillar.DimensionShiftVector);
+		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
 		if (thisObjectMoving) {
+			//debug.Log($"CurDimensionShiftQuadrant: {dimensionShiftQuadrant}\nNextDimensionShiftQuadrant: {nextDimensionShiftQuadrant}");
 			if (dimensionShiftQuadrant == Quadrant.Opposite && nextDimensionShiftQuadrant == Quadrant.Right) {
-				Dimension = pillar.NextDimension(Dimension);
+				Dimension = activePillar.NextDimension(Dimension);
 			}
 			else if (dimensionShiftQuadrant == Quadrant.Right && nextDimensionShiftQuadrant == Quadrant.Opposite) {
-				Dimension = pillar.PrevDimension(Dimension);
+				Dimension = activePillar.PrevDimension(Dimension);
 			}
 		}
 
@@ -153,7 +170,7 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	void UpdateState(bool forceUpdate = false) {
-		VisibilityState nextState = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension);
+		VisibilityState nextState = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, activePillar.curDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
 			SwitchVisibilityState(nextState, true);
@@ -179,17 +196,17 @@ public class PillarDimensionObject : DimensionObject {
 	// if this the player were in that dimension. This is not very performant but there's probably a smarter way to do this.
 	// This is identical to the method below it except that it holds the object's dimension constant and tries different values of pillar.curDimension
 	public int GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
-		if (pillar == null) {
+		if (activePillar == null) {
 			return -1;
 		}
 
 		// Don't need to check all the dimensions if we already are in the right one
 		if (desiredVisibility(visibilityState)) {
-			return pillar.curDimension;
+			return activePillar.curDimension;
 		}
 
 		// Try each dimension, test what the visibility state would be there
-		for (int i = 0; i <= pillar.maxDimension; i++) {
+		for (int i = 0; i <= activePillar.maxDimension; i++) {
 			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, i))) {
 				return i;
 			}
@@ -202,6 +219,9 @@ public class PillarDimensionObject : DimensionObject {
 	// Iterates through the dimension pillar's possible dimensions and checks what the visibility state would be
 	// if this object were in that dimension. This is not very performant but there's probably a smarter way to do this.
 	public int GetDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
+		if (activePillar == null) {
+			return -1;
+		}
 		int tempDimension = _dimension;
 
 		// Don't need to check all the dimensions if we already are in the right one
@@ -210,9 +230,9 @@ public class PillarDimensionObject : DimensionObject {
 		}
 
 		// Try each dimension, test what the visibility state would be there
-		for (int i = 0; i <= pillar.maxDimension; i++) {
+		for (int i = 0; i <= activePillar.maxDimension; i++) {
 			_dimension = i;
-			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, pillar.curDimension))) {
+			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, activePillar.curDimension))) {
 				_dimension = tempDimension;
 				return i;
 			}
@@ -224,19 +244,19 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	public VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
-		if (pillar == null) {
+		if (activePillar == null) {
 			return visibilityState;
 		}
-		if (HasGoneToNextDimension(pillar, playerQuadrant, dimensionShiftQuadrant)) {
-			dimension = pillar.PrevDimension(dimension);
+		if (HasGoneToNextDimension(activePillar, playerQuadrant, dimensionShiftQuadrant)) {
+			dimension = activePillar.PrevDimension(dimension);
 		}
 
 		switch (playerQuadrant) {
 			case Quadrant.Opposite:
-				if (dimension == this.Dimension) {
+				if (dimension == Dimension) {
 					return VisibilityState.partiallyVisible;
 				}
-				else if (dimension == pillar.NextDimension(this.Dimension)) {
+				else if (dimension == activePillar.NextDimension(Dimension)) {
 					return VisibilityState.partiallyInvisible;
 				}
 				else {
@@ -246,7 +266,7 @@ public class PillarDimensionObject : DimensionObject {
 			case Quadrant.SameSide:
 			case Quadrant.Right:
 				if ((int)dimensionShiftQuadrant < (int)playerQuadrant) {
-					if (dimension == pillar.NextDimension(this.Dimension)) {
+					if (dimension == activePillar.NextDimension(Dimension)) {
 						return VisibilityState.visible;
 					}
 					else {
@@ -254,7 +274,7 @@ public class PillarDimensionObject : DimensionObject {
 					}
 				}
 				else {
-					if (dimension == this.Dimension) {
+					if (dimension == Dimension) {
 						return VisibilityState.visible;
 					}
 					else {
@@ -267,8 +287,8 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	Quadrant DetermineQuadrant(Vector3 position) {
-		bool leftPlaneTest = leftParallels[pillar].GetSide(position);
-		bool rightPlaneTest = rightParallels[pillar].GetSide(position);
+		bool leftPlaneTest = pillarPlanes[activePillar.ID].leftParallel.GetSide(position);
+		bool rightPlaneTest = pillarPlanes[activePillar.ID].rightParallel.GetSide(position);
 
 		if (leftPlaneTest && rightPlaneTest) {
 			return Quadrant.Left;
@@ -290,7 +310,7 @@ public class PillarDimensionObject : DimensionObject {
 		Vector3 projectedPillarCenter = Vector3.ProjectOnPlane(pillar.transform.position, pillar.Axis);
 		Vector3 projectedVerticalPillarOffset = pillar.transform.position - projectedPillarCenter;
 
-		List<Vector3> allCorners = renderers.SelectMany(r => CornersOfRenderer(r)).ToList();
+		List<Vector3> allCorners = renderers.SelectMany(CornersOfRenderer).ToList();
 		Vector3 positionAvg = renderers.Aggregate(Vector3.zero, (acc, r) => acc + Vector3.ProjectOnPlane(r.GetRendererBounds().center, pillar.Axis));
 		positionAvg /= renderers.Length;
 		positionAvg += projectedVerticalPillarOffset;
@@ -330,10 +350,13 @@ public class PillarDimensionObject : DimensionObject {
 
 		Vector3 minAngleNormalVector = Vector3.Cross(minAngleVector.normalized, pillar.Axis);
 		Vector3 maxAngleNormalVector = Vector3.Cross(maxAngleVector.normalized, pillar.Axis);
-		leftParallels[pillar] = new Plane(minAngleNormalVector, pillar.transform.position);
-		rightParallels[pillar] = new Plane(maxAngleNormalVector, pillar.transform.position);
+		DimensionPillarPlanes thisPillarPlanes = new DimensionPillarPlanes {
+			leftParallel = new Plane(minAngleNormalVector, pillar.transform.position),
+			rightParallel = new Plane(maxAngleNormalVector, pillar.transform.position),
+			maxDistance = maxDistance
+		};
 
-		maxDistances[pillar] = maxDistance;
+		pillarPlanes[pillar.ID] = thisPillarPlanes;
 
 		// Don't spam the console with a moving object updating this info every frame
 		if (DEBUG && !thisObjectMoves) {
@@ -387,9 +410,10 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	void OnDrawGizmosSelected() {
-		if (DEBUG && pillar != null) {
-			DrawPlanes(pillar.transform.position, leftParallels[pillar].normal, pillar.dimensionWall.PillarHeight, 2f*maxDistances[pillar]);
-			DrawPlanes(pillar.transform.position, rightParallels[pillar].normal, pillar.dimensionWall.PillarHeight, 2f*maxDistances[pillar]);
+		if (DEBUG && activePillar != null) {
+			DimensionPillarPlanes thisPillarPlanes = pillarPlanes[activePillar.ID];
+			DrawPlanes(activePillar.transform.position, thisPillarPlanes.leftParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance);
+			DrawPlanes(activePillar.transform.position, thisPillarPlanes.rightParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance);
 		}
 	}
 
@@ -411,27 +435,27 @@ public class PillarDimensionObject : DimensionObject {
 
 	[Serializable]
 	public class PillarDimensionObjectSave : DimensionObjectSave {
-		SerializableReference<DimensionPillar>[] pillars;
+		PillarReference[] pillars;
 		int dimension;
 
 		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj) : base(dimensionObj) {
-			this.pillars = dimensionObj.pillars.Select<DimensionPillar, SerializableReference<DimensionPillar>>(p => p).ToArray();
+			this.pillars = dimensionObj.pillars;
 			this.dimension = dimensionObj.Dimension;
 		}
 
 		public void LoadSave(PillarDimensionObject dimensionObj) {
 			base.LoadSave(dimensionObj);
-			dimensionObj.pillars = this.pillars.Select<SerializableReference<DimensionPillar>, DimensionPillar>(p => p).ToArray();
+			dimensionObj.pillars = this.pillars;
 
 			dimensionObj.Dimension = this.dimension;
 		}
 	}
 	
-	public override object GetSaveObject() {
+	public override SerializableSaveObject GetSaveObject() {
 		return new PillarDimensionObjectSave(this);
 	}
 
-	public override void RestoreStateFromSave(object savedObject) {
+	public override void RestoreStateFromSave(SerializableSaveObject savedObject) {
 		PillarDimensionObjectSave save = savedObject as PillarDimensionObjectSave;
 
 		save?.LoadSave(this);

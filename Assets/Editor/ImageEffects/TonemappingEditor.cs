@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.ImageEffects
 {
     [CustomEditor (typeof(Tonemapping))]
-    internal class TonemappingEditor : Editor
+    internal class TonemappingEditor : UnityEditor.Editor
     {
         SerializedObject serObj;
 

@@ -450,7 +450,7 @@ namespace PowerTrailMechanics {
 			public bool powerIsOn;
 			public int state;
 
-			public PowerTrailSave(PowerTrail powerTrail) {
+			public PowerTrailSave(PowerTrail powerTrail) : base(powerTrail) {
 				this.reverseVisibility = powerTrail.reverseVisibility;
 				this.useDurationInsteadOfSpeed = powerTrail.useDurationInsteadOfSpeed;
 				this.useSeparateSpeedsForPowerOnOff = powerTrail.useSeparateSpeedsForPowerOnOff;
