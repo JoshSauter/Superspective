@@ -1,5 +1,5 @@
-﻿using EpitaphUtils;
-using EpitaphUtils.PortalUtils;
+﻿using SuperspectiveUtils;
+using SuperspectiveUtils.PortalUtils;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +30,7 @@ public class Interact : Singleton<Interact> {
             return;
         }
 
-        cam = EpitaphScreen.instance.playerCamera;
+        cam = SuperspectiveScreen.instance.playerCamera;
         reticleUnselectColor = reticle.color;
         reticleOutsideUnselectColor = reticleOutside.color;
     }
@@ -78,7 +78,7 @@ public class Interact : Singleton<Interact> {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
         Vector2 screenPos = Vector2.Scale(
             reticlePos,
-            new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight)
+            new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
         );
 
         Ray ray = cam.ScreenPointToRay(screenPos);
@@ -89,7 +89,7 @@ public class Interact : Singleton<Interact> {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
         Vector2 screenPos = Vector2.Scale(
             reticlePos,
-            new Vector2(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight)
+            new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
         );
 
         Ray ray = cam.ScreenPointToRay(screenPos);

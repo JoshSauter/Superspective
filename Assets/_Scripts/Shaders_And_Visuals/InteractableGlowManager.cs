@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	public bool DEBUG = false;
@@ -63,7 +63,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// </summary>
 	int RebuildCommandBuffer() {
 		commandBuffer.Clear();
-		commandBuffer.GetTemporaryRT(blurPassRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
+		commandBuffer.GetTemporaryRT(blurPassRenderTexID, SuperspectiveScreen.currentWidth >> 1, SuperspectiveScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(blurPassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
 
@@ -79,7 +79,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 		}
 
 		// Prepass
-		commandBuffer.GetTemporaryRT(prePassRenderTexID, EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 0, FilterMode.Bilinear);
+		commandBuffer.GetTemporaryRT(prePassRenderTexID, SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 0, FilterMode.Bilinear);
 		commandBuffer.SetRenderTarget(prePassRenderTexID);
 		commandBuffer.ClearRenderTarget(true, true, Color.clear);
 		foreach (var glowObject in glowableObjects) {
@@ -92,9 +92,9 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 			}
 		}
 
-		commandBuffer.GetTemporaryRT(tempRenderTexID, EpitaphScreen.currentWidth >> 1, EpitaphScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
+		commandBuffer.GetTemporaryRT(tempRenderTexID, SuperspectiveScreen.currentWidth >> 1, SuperspectiveScreen.currentHeight >> 1, 0, FilterMode.Bilinear);
 
-		blurTexelSize = new Vector2(1.5f / (EpitaphScreen.currentWidth >> 1), 1.5f / (EpitaphScreen.currentHeight >> 1));
+		blurTexelSize = new Vector2(1.5f / (SuperspectiveScreen.currentWidth >> 1), 1.5f / (SuperspectiveScreen.currentHeight >> 1));
 		commandBuffer.SetGlobalVector(blurSizeID, blurTexelSize);
 
 		for (int i = 0; i < blurIterations; i++) {

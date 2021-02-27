@@ -29,7 +29,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     public AnimationCurve colorChangeAnimationCurve;
     public float timeToChangeColor = 0.25f;
     public PowerTrail powerTrailToReactTo;
-    public EpitaphRenderer[] renderers;
+    public SuperspectiveRenderer[] renderers;
     UniqueId _id;
     float timeElapsedSinceStateChange;
 
@@ -53,13 +53,13 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
             return;
         }
 
-        if (renderers == null || renderers.Length == 0) renderers = GetComponents<EpitaphRenderer>();
+        if (renderers == null || renderers.Length == 0) renderers = GetComponents<SuperspectiveRenderer>();
         if (renderers == null || renderers.Length == 0) {
-            renderers = new EpitaphRenderer[1];
-            renderers[0] = gameObject.AddComponent<EpitaphRenderer>();
+            renderers = new SuperspectiveRenderer[1];
+            renderers[0] = gameObject.AddComponent<SuperspectiveRenderer>();
         }
 
-        foreach (EpitaphRenderer r in renderers) {
+        foreach (SuperspectiveRenderer r in renderers) {
             if (useMaterialAsStartColor) {
                 depoweredColor = r.GetMainColor();
                 depoweredEmission = r.GetColor("_EmissionColor");
@@ -124,7 +124,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     }
 
     void SetColor(Color color, Color emission) {
-        foreach (EpitaphRenderer r in renderers) {
+        foreach (SuperspectiveRenderer r in renderers) {
             r.SetMainColor(color);
             r.SetColor("_EmissionColor", emission);
         }

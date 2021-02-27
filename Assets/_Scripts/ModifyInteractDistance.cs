@@ -1,4 +1,4 @@
-using EpitaphUtils;
+using SuperspectiveUtils;
 using UnityEngine;
 
 public class ModifyInteractDistance : MonoBehaviour {

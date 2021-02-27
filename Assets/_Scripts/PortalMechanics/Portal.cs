@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
@@ -182,11 +182,11 @@ namespace PortalMechanics {
 
 		protected override void Start() {
 			base.Start();
-			playerCamera = EpitaphScreen.instance.playerCamera.transform;
+			playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 			playerCameraFollow = playerCamera.GetComponent<CameraFollow>();
 
-			CreateRenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
-			EpitaphScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
+			CreateRenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
+			SuperspectiveScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
 
 			if (pauseRenderingOnly || pauseRenderingAndLogic) {
 				DefaultMaterial();
@@ -591,7 +591,7 @@ namespace PortalMechanics {
 		}
 
 		void SwapEdgeDetectionColors() {
-			BladeEdgeDetection playerED = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
+			BladeEdgeDetection playerED = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
 			EDColors tempEDColors = new EDColors {
 				edgeColorMode = playerED.edgeColorMode,

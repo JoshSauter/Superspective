@@ -28,7 +28,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     bool soundActivated;
 
     Color startColor, endColor;
-    EpitaphRenderer thisRenderer;
+    SuperspectiveRenderer thisRenderer;
     float timeSinceStateChange;
 
     UniqueId id {
@@ -71,12 +71,12 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     protected override void Awake() {
         base.Awake();
         // Set up references
-        thisRenderer = gameObject.GetComponent<EpitaphRenderer>();
-        if (thisRenderer == null) thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
+        thisRenderer = gameObject.GetComponent<SuperspectiveRenderer>();
+        if (thisRenderer == null) thisRenderer = gameObject.AddComponent<SuperspectiveRenderer>();
 
         gemButton = GetComponentInChildren<Button>();
-        EpitaphRenderer gemButtonRenderer = gemButton.GetComponent<EpitaphRenderer>();
-        if (gemButtonRenderer == null) gemButtonRenderer = gemButton.gameObject.AddComponent<EpitaphRenderer>();
+        SuperspectiveRenderer gemButtonRenderer = gemButton.GetComponent<SuperspectiveRenderer>();
+        if (gemButtonRenderer == null) gemButtonRenderer = gemButton.gameObject.AddComponent<SuperspectiveRenderer>();
         gemColor = gemButtonRenderer.GetMainColor();
     }
 

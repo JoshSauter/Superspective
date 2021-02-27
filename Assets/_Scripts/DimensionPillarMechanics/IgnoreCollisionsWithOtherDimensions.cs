@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 	public PillarDimensionObject corporealDimensionObject;

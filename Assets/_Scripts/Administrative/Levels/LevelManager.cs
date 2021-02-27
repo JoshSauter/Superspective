@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using NaughtyAttributes;
 using Saving;
 using static Saving.SaveManagerForScene;

@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEditor;
 #endif
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
@@ -89,7 +89,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			excludes.Add(myCamera.transform);
 			excludes.Add(myCamera);
 			if (myCamera.GetComponent<AudioListener>()) excludes.Add(myCamera.GetComponent<AudioListener>());
-			if (myCamera.GetComponent<EpitaphScreen>()) excludes.Add(myCamera.GetComponent<EpitaphScreen>());
+			if (myCamera.GetComponent<SuperspectiveScreen>()) excludes.Add(myCamera.GetComponent<SuperspectiveScreen>());
 			if (myCamera.GetComponent<MaskBufferRenderTextures>()) excludes.Add(myCamera.GetComponent<MaskBufferRenderTextures>());
 			if (myCamera.GetComponent<SketchOverlay>()) excludes.Add(myCamera.GetComponent<SketchOverlay>());
 			if (myCamera.GetComponent("FlareLayer")) excludes.Add(myCamera.GetComponent("FlareLayer"));

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using LevelManagement;
 using MagicTriggerMechanics;
 using PortalMechanics;

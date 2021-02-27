@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class SketchOverlay : MonoBehaviour {
 	public float timeBetweenShifts = 0.1f;

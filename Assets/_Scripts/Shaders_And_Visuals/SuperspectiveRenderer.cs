@@ -4,7 +4,7 @@ using UnityEngine;
 using NaughtyAttributes;
 
 [RequireComponent(typeof(Renderer))]
-public class EpitaphRenderer : MonoBehaviour {
+public class SuperspectiveRenderer : MonoBehaviour {
 	public enum PropBlockType {
 		Color,
 		Float,

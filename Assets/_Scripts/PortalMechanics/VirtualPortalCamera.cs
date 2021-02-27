@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using System.Linq;
 using NaughtyAttributes;
 using System;
@@ -57,8 +57,8 @@ namespace PortalMechanics {
 
 			public static RecursiveTextures CreateTextures() {
 				RecursiveTextures recursiveTextures = new RecursiveTextures {
-					mainTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, RenderTextureFormat.DefaultHDR),
-					depthNormalsTexture = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat)
+					mainTexture = new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, RenderTextureFormat.DefaultHDR),
+					depthNormalsTexture = new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat)
 				};
 				return recursiveTextures;
 			}
@@ -104,7 +104,7 @@ namespace PortalMechanics {
 
 		void Start() {
 			debug = new DebugLogger(gameObject, () => DEBUG);
-			mainCamera = EpitaphScreen.instance.playerCamera;
+			mainCamera = SuperspectiveScreen.instance.playerCamera;
 			portalCamera = GetComponent<Camera>();
 			mainCameraEdgeDetection = mainCamera.GetComponent<BladeEdgeDetection>();
 			portalCameraEdgeDetection = GetComponent<BladeEdgeDetection>();
@@ -112,9 +112,9 @@ namespace PortalMechanics {
 			depthNormalsReplacementShader = Shader.Find("Custom/CustomDepthNormalsTexture");
 			portalMaskReplacementShader = Shader.Find("Hidden/PortalMask");
 
-			EpitaphScreen.instance.OnPlayerCamPreRender += RenderPortals;
-			//EpitaphScreen.instance.OnPlayerCamPreRender += RenderPortals2;
-			EpitaphScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
+			SuperspectiveScreen.instance.OnPlayerCamPreRender += RenderPortals;
+			//SuperspectiveScreen.instance.OnPlayerCamPreRender += RenderPortals2;
+			SuperspectiveScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
 
 			renderStepTextures = new List<RecursiveTextures>();
 			portalMaskTextures = new List<RenderTexture>();
@@ -142,7 +142,7 @@ namespace PortalMechanics {
 				camProjectionMatrix = mainCamera.projectionMatrix,
 				edgeColors = new EDColors(mainCameraEdgeDetection)
 			};
-			Camera maskCam = EpitaphScreen.instance.portalMaskCamera;
+			Camera maskCam = SuperspectiveScreen.instance.portalMaskCamera;
 			Matrix4x4 maskCamOriginalProjMatrix = maskCam.projectionMatrix;
 			maskCam.transform.SetParent(transform, false);
 			SetCameraSettings(portalCamera, camSettings);
@@ -181,7 +181,7 @@ namespace PortalMechanics {
 				finishedPortalTexture.Key.SetDepthNormalsTexture(finishedPortalTexture.Value.depthNormalsTexture);
 			}
 
-			maskCam.transform.SetParent(EpitaphScreen.instance.playerCamera.transform, false);
+			maskCam.transform.SetParent(SuperspectiveScreen.instance.playerCamera.transform, false);
 			maskCam.projectionMatrix = mainCamera.projectionMatrix;
 			RenderPortalMaskTexture(false);
 
@@ -251,10 +251,10 @@ namespace PortalMechanics {
 			RenderPortalMaskTexture(true);
 			if (DEBUG) {
 				while (portalMaskTextures.Count <= index) {
-					portalMaskTextures.Add(new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24, EpitaphScreen.instance.portalMaskCamera.targetTexture.format));
+					portalMaskTextures.Add(new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, SuperspectiveScreen.instance.portalMaskCamera.targetTexture.format));
 				}
 				
-				Graphics.CopyTexture(EpitaphScreen.instance.portalMaskCamera.targetTexture, portalMaskTextures[index]); 
+				Graphics.CopyTexture(SuperspectiveScreen.instance.portalMaskCamera.targetTexture, portalMaskTextures[index]); 
 			}
 
 			debug.Log($"Rendering: {index} to {portal.name}'s RenderTexture, depth: {depth}");
@@ -285,7 +285,7 @@ namespace PortalMechanics {
 		/// Renders the portalMaskCamera with the portalMaskReplacementShader, then sets the result as _PortalMask global texture
 		/// </summary>
 		void RenderPortalMaskTexture(bool usePortalCamProjMatrix) {
-			Camera maskCam = EpitaphScreen.instance.portalMaskCamera;
+			Camera maskCam = SuperspectiveScreen.instance.portalMaskCamera;
 			Matrix4x4 originalProjMatrix = maskCam.projectionMatrix;
 			if (usePortalCamProjMatrix) {
 				maskCam.projectionMatrix = portalCamera.projectionMatrix;

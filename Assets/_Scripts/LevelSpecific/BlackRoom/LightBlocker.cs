@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 namespace LevelSpecific.BlackRoom {
 	public class LightBlocker : MonoBehaviour {

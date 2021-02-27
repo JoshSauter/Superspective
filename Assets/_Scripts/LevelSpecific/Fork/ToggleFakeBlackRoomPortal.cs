@@ -15,7 +15,7 @@ namespace LevelSpecific.Fork {
 
         protected override void Start() {
             base.Start();
-            edgeDetection = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
+            edgeDetection = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
             realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
             fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);

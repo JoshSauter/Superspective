@@ -18,13 +18,13 @@ namespace LevelSpecific.BlackRoom {
 		Color solutionColor;
 		Color solutionEmissionColor;
 		public LightProjector red, green, blue;
-		EpitaphRenderer thisRenderer;
+		SuperspectiveRenderer thisRenderer;
 
 		public delegate void SolutionNodeStateChange(ColorPuzzleNode node, bool solved);
 		public static event SolutionNodeStateChange OnSolutionNodeStateChange;
 
 		void Start() {
-			thisRenderer = GetComponent<EpitaphRenderer>();
+			thisRenderer = GetComponent<SuperspectiveRenderer>();
 			solutionColor = thisRenderer.GetMainColor();
 			solutionEmissionColor = thisRenderer.GetColor("_EmissionColor");
 		}

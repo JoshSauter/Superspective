@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 namespace LevelSpecific.TutorialHallway {
 	public class ThirdRoomTeleporterDoor : MonoBehaviour {

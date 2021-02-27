@@ -13,16 +13,16 @@ namespace LevelSpecific.WhiteRoom {
 
         float t = 0f;
         float turnOnSpeed = 4f;
-        EpitaphRenderer r;
+        SuperspectiveRenderer r;
 
         const string emissionColorKey = "_EmissionColor";
 
         bool powered => powerTrail.distance > turnOnAtDistance;
 
         IEnumerator Start() {
-            r = GetComponent<EpitaphRenderer>();
+            r = GetComponent<SuperspectiveRenderer>();
             if (r == null) {
-                r = gameObject.AddComponent<EpitaphRenderer>();
+                r = gameObject.AddComponent<SuperspectiveRenderer>();
             }
 
             yield return null;

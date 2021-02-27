@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using EpitaphUtils;
-using EpitaphUtils.ShaderUtils;
-using EpitaphUtils.PortalUtils;
+using SuperspectiveUtils;
+using SuperspectiveUtils.ShaderUtils;
+using SuperspectiveUtils.PortalUtils;
 using System.Linq;
 using NaughtyAttributes;
 using Saving;

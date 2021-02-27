@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace UnityEditor {
-    internal class StandardShaderGUIEpitaph : ShaderGUI {
+    internal class StandardShaderGUISuperspective : ShaderGUI {
         public enum BlendMode {
             Opaque,
             Cutout,

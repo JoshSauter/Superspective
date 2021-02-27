@@ -13,14 +13,14 @@ public class ToggleEdgeDetectionDebug : Singleton<ToggleEdgeDetectionDebug> {
 	}
 	
 	void ToggleDebugMode () {
-		BladeEdgeDetection ed = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
+		BladeEdgeDetection ed = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 		if (ed != null) {
 			ed.debugMode = !ed.debugMode;
 		}
 	}
 
 	void ToggleDoubleSidedEdges() {
-		BladeEdgeDetection ed = EpitaphScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
+		BladeEdgeDetection ed = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 		if (ed != null) {
 			ed.doubleSidedEdges = !ed.doubleSidedEdges;
 		}

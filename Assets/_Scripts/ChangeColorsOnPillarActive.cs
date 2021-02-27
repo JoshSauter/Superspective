@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(DimensionPillar))]
-[RequireComponent(typeof(EpitaphRenderer))]
+[RequireComponent(typeof(SuperspectiveRenderer))]
 public class ChangeColorsOnPillarActive : MonoBehaviour {
     public bool changeColorsOnActive;
     public bool changeColorsOnInactive;
@@ -13,12 +13,12 @@ public class ChangeColorsOnPillarActive : MonoBehaviour {
     GlassGlow optionalGlass;
 
     DimensionPillar thisPillar;
-    EpitaphRenderer thisRenderer;
+    SuperspectiveRenderer thisRenderer;
 
     // Use this for initialization
     void Awake() {
         thisPillar = GetComponent<DimensionPillar>();
-        thisRenderer = GetComponent<EpitaphRenderer>();
+        thisRenderer = GetComponent<SuperspectiveRenderer>();
         optionalGlass = GetComponentInChildren<GlassGlow>();
 
         wasActive = thisPillar.enabled;

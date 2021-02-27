@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Library.Functional;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 namespace SerializableClasses {
 	/// <summary>

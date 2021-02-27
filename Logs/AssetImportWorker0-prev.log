@@ -15,11 +15,11 @@ C:/Users/Josh-PC/Documents/GitHub/Epitaph
 -logFile
 Logs/AssetImportWorker0.log
 -srvPort
-52167
+50554
 Successfully changed project path to: C:/Users/Josh-PC/Documents/GitHub/Epitaph
 C:/Users/Josh-PC/Documents/GitHub/Epitaph
 Using Asset Import Pipeline V2.
-Refreshing native plugins compatible for Editor in 60.20 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 59.04 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Initialize engine version: 2020.2.0b14 (dc0b50340a64)
 [Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/Resources/UnitySubsystems
@@ -35,25 +35,25 @@ Initialize mono
 Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/Managed'
 Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
 Mono config path = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56468
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56800
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.001669 seconds.
+Registered in 0.001615 seconds.
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 52.65 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 62.65 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  1.130 seconds
+- Completed reload, in  1.115 seconds
 Platform modules already initialized, skipping
 Registering precompiled user dll's ...
-Registered in 0.003219 seconds.
+Registered in 0.003484 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.64 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -67,34 +67,34 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.825 seconds
+- Completed reload, in  0.862 seconds
 Platform modules already initialized, skipping
 ========================================================================
 Worker process is ready to serve import requests
 Launched and connected shader compiler UnityShaderCompiler.exe after 0.03 seconds
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2424 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 224.4 MB.
-System memory in use after: 224.3 MB.
+System memory in use before: 224.6 MB.
+System memory in use after: 224.5 MB.
 
 Unloading 33 unused Assets to reduce memory usage. Loaded Objects now: 2888.
-Total: 2.508400 ms (FindLiveObjects: 0.495000 ms CreateObjectMapping: 0.157600 ms MarkObjects: 1.454500 ms  DeleteObjects: 0.399300 ms)
+Total: 2.926600 ms (FindLiveObjects: 0.466100 ms CreateObjectMapping: 0.182600 ms MarkObjects: 1.527900 ms  DeleteObjects: 0.748600 ms)
 
 ========================================================================
 Received Import Request.
-  path: Assets/_Scripts/DimensionPillarMechanics/DimensionObject.cs
-  artifactKey: Guid(b4ea316fe3a25174f9d3994aac48de70) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/DimensionPillarMechanics/DimensionObject.cs using Guid(b4ea316fe3a25174f9d3994aac48de70) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '49bebda16720d1918242e2550d7ec580') in 0.041294 seconds
-  Import took 0.045230 seconds .
+  path: Assets/_Scripts/Administrative/Saving/DynamicObject.cs
+  artifactKey: Guid(575564a52d0f1964d8022fffa86333dd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/Administrative/Saving/DynamicObject.cs using Guid(575564a52d0f1964d8022fffa86333dd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '622f141cdef72ca439fedd8ab73da084') in 0.046839 seconds
+  Import took 0.051521 seconds .
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001857 seconds.
+Registered in 0.007956 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.98 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -108,24 +108,32 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.796 seconds
+- Completed reload, in  0.809 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.6 MB.
-System memory in use after: 208.5 MB.
+System memory in use before: 208.8 MB.
+System memory in use after: 208.7 MB.
 
 Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2890.
-Total: 3.948000 ms (FindLiveObjects: 0.649400 ms CreateObjectMapping: 0.321000 ms MarkObjects: 2.567000 ms  DeleteObjects: 0.408200 ms)
+Total: 2.754100 ms (FindLiveObjects: 0.358900 ms CreateObjectMapping: 0.178400 ms MarkObjects: 1.674300 ms  DeleteObjects: 0.540900 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 1013.338560 seconds.
+  path: Assets/_Scripts/Administrative/Saving/DynamicObject.cs
+  artifactKey: Guid(575564a52d0f1964d8022fffa86333dd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/Administrative/Saving/DynamicObject.cs using Guid(575564a52d0f1964d8022fffa86333dd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'bca21a2f14f9b00177c13dca8bc88032') in 0.009542 seconds
+  Import took 0.015771 seconds .
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001943 seconds.
+Registered in 0.002357 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.95 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.58 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -139,24 +147,55 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.820 seconds
+- Completed reload, in  0.850 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.7 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2892.
+Total: 2.206400 ms (FindLiveObjects: 0.287100 ms CreateObjectMapping: 0.143300 ms MarkObjects: 1.374400 ms  DeleteObjects: 0.400100 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001923 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.031 seconds
 Platform modules already initialized, skipping
 Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2892.
-Total: 2.028000 ms (FindLiveObjects: 0.204500 ms CreateObjectMapping: 0.092100 ms MarkObjects: 1.335700 ms  DeleteObjects: 0.394700 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2894.
+Total: 2.887100 ms (FindLiveObjects: 0.570200 ms CreateObjectMapping: 0.293100 ms MarkObjects: 1.550500 ms  DeleteObjects: 0.468500 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001928 seconds.
+Registered in 0.002210 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -172,19 +211,19 @@ RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
 - Completed reload, in  0.815 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.82 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2894.
-Total: 2.500000 ms (FindLiveObjects: 0.245400 ms CreateObjectMapping: 0.121200 ms MarkObjects: 1.711900 ms  DeleteObjects: 0.420600 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2896.
+Total: 3.810900 ms (FindLiveObjects: 0.444300 ms CreateObjectMapping: 0.175600 ms MarkObjects: 2.598300 ms  DeleteObjects: 0.590600 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001871 seconds.
+Registered in 0.002004 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
@@ -201,117 +240,148 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.784 seconds
+- Completed reload, in  0.789 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2896.
-Total: 1.981600 ms (FindLiveObjects: 0.203400 ms CreateObjectMapping: 0.090700 ms MarkObjects: 1.271000 ms  DeleteObjects: 0.415700 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002480 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.811 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.6 MB.
-System memory in use after: 208.5 MB.
+System memory in use before: 208.8 MB.
+System memory in use after: 208.7 MB.
 
 Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2898.
-Total: 2.580200 ms (FindLiveObjects: 0.304100 ms CreateObjectMapping: 0.116400 ms MarkObjects: 1.730300 ms  DeleteObjects: 0.428100 ms)
+Total: 3.102900 ms (FindLiveObjects: 0.442100 ms CreateObjectMapping: 0.232400 ms MarkObjects: 1.900500 ms  DeleteObjects: 0.526500 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002501 seconds.
+Registered in 0.001912 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.823 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2900.
-Total: 2.297500 ms (FindLiveObjects: 0.289800 ms CreateObjectMapping: 0.111800 ms MarkObjects: 1.449600 ms  DeleteObjects: 0.445300 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.001907 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.747 seconds
-Platform modules already initialized, skipping
 Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2902.
-Total: 2.377900 ms (FindLiveObjects: 0.280900 ms CreateObjectMapping: 0.111400 ms MarkObjects: 1.543900 ms  DeleteObjects: 0.440400 ms)
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.920 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2900.
+Total: 2.743800 ms (FindLiveObjects: 0.345600 ms CreateObjectMapping: 0.133300 ms MarkObjects: 1.817500 ms  DeleteObjects: 0.445700 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.003380 seconds.
+Registered in 0.003554 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.007 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2902.
+Total: 2.471200 ms (FindLiveObjects: 0.346800 ms CreateObjectMapping: 0.171900 ms MarkObjects: 1.505300 ms  DeleteObjects: 0.446000 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.003042 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.843 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2904.
+Total: 5.470500 ms (FindLiveObjects: 0.491500 ms CreateObjectMapping: 0.490500 ms MarkObjects: 3.474500 ms  DeleteObjects: 0.913800 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001877 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.814 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2906.
+Total: 3.008300 ms (FindLiveObjects: 0.400700 ms CreateObjectMapping: 0.309300 ms MarkObjects: 1.819200 ms  DeleteObjects: 0.477900 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002857 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.69 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -327,22 +397,115 @@ RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
 - Completed reload, in  0.938 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
+System memory in use before: 208.8 MB.
+System memory in use after: 208.7 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2904.
-Total: 2.807400 ms (FindLiveObjects: 0.264300 ms CreateObjectMapping: 0.100300 ms MarkObjects: 1.995300 ms  DeleteObjects: 0.445700 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2908.
+Total: 2.332800 ms (FindLiveObjects: 0.395600 ms CreateObjectMapping: 0.131200 ms MarkObjects: 1.385800 ms  DeleteObjects: 0.419000 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001892 seconds.
+Registered in 0.001964 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.819 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2910.
+Total: 3.517500 ms (FindLiveObjects: 0.464000 ms CreateObjectMapping: 0.215800 ms MarkObjects: 2.239500 ms  DeleteObjects: 0.596600 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001964 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.775 seconds
+Platform modules already initialized, skipping
 Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2912.
+Total: 2.361900 ms (FindLiveObjects: 0.372300 ms CreateObjectMapping: 0.156400 ms MarkObjects: 1.417800 ms  DeleteObjects: 0.414400 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002309 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.806 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.9 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2914.
+Total: 3.117900 ms (FindLiveObjects: 0.385700 ms CreateObjectMapping: 0.159500 ms MarkObjects: 1.970200 ms  DeleteObjects: 0.601500 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002524 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -358,50 +521,19 @@ RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
 - Completed reload, in  0.867 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.90 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.7 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2906.
-Total: 3.058600 ms (FindLiveObjects: 0.375000 ms CreateObjectMapping: 0.141300 ms MarkObjects: 2.063900 ms  DeleteObjects: 0.476900 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2917.
+Total: 2.256300 ms (FindLiveObjects: 0.225900 ms CreateObjectMapping: 0.108200 ms MarkObjects: 1.416200 ms  DeleteObjects: 0.503800 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002765 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.844 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2908.
-Total: 3.327300 ms (FindLiveObjects: 0.799300 ms CreateObjectMapping: 0.239600 ms MarkObjects: 1.715100 ms  DeleteObjects: 0.571100 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002882 seconds.
+Registered in 0.004128 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
@@ -418,24 +550,56 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.834 seconds
+- Completed reload, in  0.813 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 208.9 MB.
+System memory in use after: 208.8 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2910.
-Total: 3.250000 ms (FindLiveObjects: 0.374800 ms CreateObjectMapping: 0.183700 ms MarkObjects: 2.239500 ms  DeleteObjects: 0.450600 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2919.
+Total: 2.372200 ms (FindLiveObjects: 0.238600 ms CreateObjectMapping: 0.109700 ms MarkObjects: 1.425300 ms  DeleteObjects: 0.597600 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 11695.376020 seconds.
+  path: Assets/_Scripts/PowerTrails
+  artifactKey: Guid(ca2b0beb760e607438517e797ebe4cb3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/PowerTrails using Guid(ca2b0beb760e607438517e797ebe4cb3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'bf5491d43310966d5c95400f9147a1c5') in 0.009672 seconds
+  Import took 0.014661 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.933025 seconds.
+  path: Assets/_Scripts/PowerTrails/PoweredFromCubeReceptacle.cs
+  artifactKey: Guid(b41d612db3dde5c4aafd45c6778f3831) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/PowerTrails/PoweredFromCubeReceptacle.cs using Guid(b41d612db3dde5c4aafd45c6778f3831) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '48fbba2ad015488eab954dc01a07fc65') in 0.006866 seconds
+  Import took 0.010330 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.446165 seconds.
+  path: Assets/_Scripts/PowerTrails/PowerTrail.cs
+  artifactKey: Guid(c838c8f4153013640af2f4cb65d2af25) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/PowerTrails/PowerTrail.cs using Guid(c838c8f4153013640af2f4cb65d2af25) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '00aae8b63d9fd092dcf1792eb88b5587') in 0.005811 seconds
+  Import took 0.010393 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.020696 seconds.
+  path: Assets/_Scripts/PowerTrails/PowerTrail.cs
+  artifactKey: Guid(c838c8f4153013640af2f4cb65d2af25) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scripts/PowerTrails/PowerTrail.cs using Guid(c838c8f4153013640af2f4cb65d2af25) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '00aae8b63d9fd092dcf1792eb88b5587') in 0.003279 seconds
+  Import took 0.006985 seconds .
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002984 seconds.
+Registered in 0.001930 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -449,179 +613,24 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.884 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.60 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2912.
-Total: 2.697400 ms (FindLiveObjects: 0.418200 ms CreateObjectMapping: 0.170000 ms MarkObjects: 1.640800 ms  DeleteObjects: 0.466800 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002031 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.76 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.846 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.56 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2914.
-Total: 4.595800 ms (FindLiveObjects: 0.819400 ms CreateObjectMapping: 0.369100 ms MarkObjects: 2.587400 ms  DeleteObjects: 0.818400 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.001934 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.828 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.92 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2916.
-Total: 2.699800 ms (FindLiveObjects: 0.377000 ms CreateObjectMapping: 0.186700 ms MarkObjects: 1.678800 ms  DeleteObjects: 0.455300 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.001950 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.875 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.64 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2918.
-Total: 2.731600 ms (FindLiveObjects: 0.499600 ms CreateObjectMapping: 0.184000 ms MarkObjects: 1.534500 ms  DeleteObjects: 0.512300 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.005622 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.73 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.846 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.69 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2920.
-Total: 2.515300 ms (FindLiveObjects: 0.374200 ms CreateObjectMapping: 0.156200 ms MarkObjects: 1.501300 ms  DeleteObjects: 0.482200 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002452 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.90 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.841 seconds
+- Completed reload, in  0.778 seconds
 Platform modules already initialized, skipping
 Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2922.
-Total: 2.280900 ms (FindLiveObjects: 0.270000 ms CreateObjectMapping: 0.118500 ms MarkObjects: 1.450300 ms  DeleteObjects: 0.440600 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2921.
+Total: 2.109200 ms (FindLiveObjects: 0.230700 ms CreateObjectMapping: 0.094700 ms MarkObjects: 1.344500 ms  DeleteObjects: 0.438300 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.001874 seconds.
+Registered in 0.002772 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.76 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -635,55 +644,24 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.944 seconds
+- Completed reload, in  1.271 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.70 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.68 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2924.
-Total: 2.740200 ms (FindLiveObjects: 0.591600 ms CreateObjectMapping: 0.216100 ms MarkObjects: 1.501300 ms  DeleteObjects: 0.429700 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2923.
+Total: 3.451300 ms (FindLiveObjects: 1.024200 ms CreateObjectMapping: 0.240900 ms MarkObjects: 1.696800 ms  DeleteObjects: 0.487700 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002170 seconds.
+Registered in 0.002071 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.79 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  1.034 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2926.
-Total: 3.871000 ms (FindLiveObjects: 0.687100 ms CreateObjectMapping: 0.339200 ms MarkObjects: 2.355200 ms  DeleteObjects: 0.487700 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002316 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -699,22 +677,22 @@ RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
 - Completed reload, in  0.831 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.7 MB.
-System memory in use after: 208.6 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2928.
-Total: 2.970500 ms (FindLiveObjects: 0.286400 ms CreateObjectMapping: 0.147500 ms MarkObjects: 2.075600 ms  DeleteObjects: 0.459500 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2925.
+Total: 2.587200 ms (FindLiveObjects: 0.271900 ms CreateObjectMapping: 0.127400 ms MarkObjects: 1.728500 ms  DeleteObjects: 0.458000 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002547 seconds.
+Registered in 0.002433 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.60 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -728,24 +706,24 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.846 seconds
+- Completed reload, in  0.781 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2930.
-Total: 2.437100 ms (FindLiveObjects: 0.301600 ms CreateObjectMapping: 0.123600 ms MarkObjects: 1.496500 ms  DeleteObjects: 0.514300 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2927.
+Total: 2.604800 ms (FindLiveObjects: 0.356900 ms CreateObjectMapping: 0.163500 ms MarkObjects: 1.636100 ms  DeleteObjects: 0.447400 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002361 seconds.
+Registered in 0.001929 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.82 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -759,176 +737,21 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  1.330 seconds
+- Completed reload, in  0.905 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.81 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.69 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2932.
-Total: 2.869500 ms (FindLiveObjects: 0.433100 ms CreateObjectMapping: 0.172800 ms MarkObjects: 1.724000 ms  DeleteObjects: 0.538400 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002293 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.79 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  1.013 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
 System memory in use before: 208.9 MB.
 System memory in use after: 208.8 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2934.
-Total: 2.660200 ms (FindLiveObjects: 0.329500 ms CreateObjectMapping: 0.128000 ms MarkObjects: 1.736600 ms  DeleteObjects: 0.465000 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2929.
+Total: 2.696500 ms (FindLiveObjects: 0.598700 ms CreateObjectMapping: 0.219700 ms MarkObjects: 1.425300 ms  DeleteObjects: 0.451500 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002442 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.72 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.971 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2936.
-Total: 3.479300 ms (FindLiveObjects: 0.527300 ms CreateObjectMapping: 0.169700 ms MarkObjects: 2.203400 ms  DeleteObjects: 0.576500 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002968 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.879 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.76 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2938.
-Total: 3.032900 ms (FindLiveObjects: 0.581000 ms CreateObjectMapping: 0.211800 ms MarkObjects: 1.763800 ms  DeleteObjects: 0.474900 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002020 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.76 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.835 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2940.
-Total: 3.292900 ms (FindLiveObjects: 0.577400 ms CreateObjectMapping: 0.401400 ms MarkObjects: 1.772300 ms  DeleteObjects: 0.539600 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002241 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.834 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2942.
-Total: 3.152000 ms (FindLiveObjects: 0.341700 ms CreateObjectMapping: 0.122200 ms MarkObjects: 2.093700 ms  DeleteObjects: 0.593000 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002766 seconds.
+Registered in 0.002202 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.66 ms, found 0 plugins.
@@ -945,21 +768,114 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.854 seconds
+- Completed reload, in  0.809 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 1.00 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2944.
-Total: 3.819500 ms (FindLiveObjects: 0.409400 ms CreateObjectMapping: 0.145200 ms MarkObjects: 2.634200 ms  DeleteObjects: 0.624600 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2931.
+Total: 3.815600 ms (FindLiveObjects: 0.442100 ms CreateObjectMapping: 0.213300 ms MarkObjects: 2.567300 ms  DeleteObjects: 0.591200 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002304 seconds.
+Registered in 0.002499 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.99 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.980 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 209.0 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2933.
+Total: 2.221100 ms (FindLiveObjects: 0.325800 ms CreateObjectMapping: 0.128500 ms MarkObjects: 1.343700 ms  DeleteObjects: 0.422200 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001998 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.867 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.76 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 209.0 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2935.
+Total: 4.388800 ms (FindLiveObjects: 0.589300 ms CreateObjectMapping: 0.282300 ms MarkObjects: 2.899000 ms  DeleteObjects: 0.615400 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002240 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.860 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.69 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.1 MB.
+System memory in use after: 209.0 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2937.
+Total: 3.099000 ms (FindLiveObjects: 0.772000 ms CreateObjectMapping: 0.213600 ms MarkObjects: 1.644200 ms  DeleteObjects: 0.467500 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001943 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
@@ -976,125 +892,52 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.840 seconds
+- Completed reload, in  0.877 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.0 MB.
+System memory in use after: 208.9 MB.
+
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2939.
+Total: 2.951700 ms (FindLiveObjects: 0.322800 ms CreateObjectMapping: 0.225000 ms MarkObjects: 1.811300 ms  DeleteObjects: 0.590600 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001956 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 1.52 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.638 seconds
 Platform modules already initialized, skipping
 Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.1 MB.
+System memory in use after: 209.0 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2946.
-Total: 2.724600 ms (FindLiveObjects: 0.395600 ms CreateObjectMapping: 0.153200 ms MarkObjects: 1.708200 ms  DeleteObjects: 0.466200 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002919 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.72 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.815 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.80 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.8 MB.
-System memory in use after: 208.7 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2948.
-Total: 3.284800 ms (FindLiveObjects: 0.415300 ms CreateObjectMapping: 0.185700 ms MarkObjects: 1.997000 ms  DeleteObjects: 0.685300 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2941.
+Total: 2.573500 ms (FindLiveObjects: 0.334600 ms CreateObjectMapping: 0.135600 ms MarkObjects: 1.636400 ms  DeleteObjects: 0.465400 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.002146 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.79 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.823 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.58 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2950.
-Total: 2.783200 ms (FindLiveObjects: 0.378700 ms CreateObjectMapping: 0.107000 ms MarkObjects: 1.875000 ms  DeleteObjects: 0.420100 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.001917 seconds.
-Begin MonoManager ReloadAssembly
-Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 1.29 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  0.839 seconds
-Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 1.07 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
-
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2952.
-Total: 2.767900 ms (FindLiveObjects: 0.298300 ms CreateObjectMapping: 0.132400 ms MarkObjects: 1.878000 ms  DeleteObjects: 0.457700 ms)
-
-========================================================================
-Received Prepare
-Refreshing native plugins compatible for Editor in 5.72 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 24 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 165.7 MB.
-System memory in use after: 165.6 MB.
-
-Unloading 23 unused Assets to reduce memory usage. Loaded Objects now: 2952.
-Total: 3.155600 ms (FindLiveObjects: 0.330900 ms CreateObjectMapping: 0.119500 ms MarkObjects: 2.205400 ms  DeleteObjects: 0.497800 ms)
-
-========================================================================
-Received Prepare
-Registering precompiled user dll's ...
-Registered in 0.002464 seconds.
+Registered in 0.002005 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
 Refreshing native plugins compatible for Editor in 0.47 ms, found 0 plugins.
@@ -1111,24 +954,24 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.886 seconds
+- Completed reload, in  0.889 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.49 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.1 MB.
+System memory in use after: 209.0 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2954.
-Total: 3.382600 ms (FindLiveObjects: 0.567000 ms CreateObjectMapping: 0.598500 ms MarkObjects: 1.779800 ms  DeleteObjects: 0.436000 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2943.
+Total: 2.978000 ms (FindLiveObjects: 0.295800 ms CreateObjectMapping: 0.120600 ms MarkObjects: 2.113400 ms  DeleteObjects: 0.446800 ms)
 
 ========================================================================
 Received Prepare
 Registering precompiled user dll's ...
-Registered in 0.003112 seconds.
+Registered in 0.001939 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
 File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
@@ -1142,47 +985,46 @@ Invoked RoslynAnalysisRunner static constructor.
 RoslynAnalysisRunner will not be running.
 RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  0.852 seconds
+- Completed reload, in  0.788 seconds
 Platform modules already initialized, skipping
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.51 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2205 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 208.9 MB.
-System memory in use after: 208.8 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.1 MB.
+System memory in use after: 209.0 MB.
 
-Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2956.
-Total: 2.982400 ms (FindLiveObjects: 0.283400 ms CreateObjectMapping: 0.108800 ms MarkObjects: 2.129400 ms  DeleteObjects: 0.459500 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2945.
+Total: 2.612900 ms (FindLiveObjects: 0.392900 ms CreateObjectMapping: 0.205400 ms MarkObjects: 1.538500 ms  DeleteObjects: 0.474600 ms)
 
 ========================================================================
 Received Prepare
-Refreshing native plugins compatible for Editor in 4.65 ms, found 0 plugins.
+Registering precompiled user dll's ...
+Registered in 0.001999 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.73 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 24 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 165.7 MB.
-System memory in use after: 165.6 MB.
+System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
+File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
-Unloading 23 unused Assets to reduce memory usage. Loaded Objects now: 2956.
-Total: 2.142400 ms (FindLiveObjects: 0.282900 ms CreateObjectMapping: 0.104700 ms MarkObjects: 1.326600 ms  DeleteObjects: 0.426700 ms)
-
-========================================================================
-Received Prepare
-Refreshing native plugins compatible for Editor in 5.71 ms, found 0 plugins.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.866 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.55 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 24 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 165.7 MB.
-System memory in use after: 165.6 MB.
+Unloading 2206 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 209.1 MB.
+System memory in use after: 209.0 MB.
 
-Unloading 23 unused Assets to reduce memory usage. Loaded Objects now: 2956.
-Total: 3.921600 ms (FindLiveObjects: 0.452400 ms CreateObjectMapping: 0.130000 ms MarkObjects: 2.791400 ms  DeleteObjects: 0.546000 ms)
+Unloading 25 unused Assets to reduce memory usage. Loaded Objects now: 2947.
+Total: 3.131700 ms (FindLiveObjects: 0.255100 ms CreateObjectMapping: 0.104700 ms MarkObjects: 2.283700 ms  DeleteObjects: 0.486700 ms)
 
-========================================================================
-Received Prepare
-Refreshing native plugins compatible for Editor in 4.99 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 24 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 165.7 MB.
-System memory in use after: 165.6 MB.
-
-Unloading 23 unused Assets to reduce memory usage. Loaded Objects now: 2956.
-Total: 2.662200 ms (FindLiveObjects: 0.233800 ms CreateObjectMapping: 0.095200 ms MarkObjects: 1.895400 ms  DeleteObjects: 0.436900 ms)
-
+AssetImportWorkerClient::OnTransportError - code=2 error=End of file

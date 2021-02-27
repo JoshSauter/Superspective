@@ -75,7 +75,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
 
     protected override void Start() {
         base.Start();
-        playerCamera = EpitaphScreen.instance.playerCamera.transform;
+        playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
     }
 
     void Update() {

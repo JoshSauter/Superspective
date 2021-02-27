@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using NaughtyAttributes;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using System;
 using Saving;
 using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
@@ -62,7 +62,7 @@ public class PillarDimensionObject : DimensionObject {
 	public Rigidbody thisRigidbody;
 	public Collider colliderBoundsOverride;
 
-	Vector3 camPos => EpitaphScreen.instance.playerCamera.transform.position;
+	Vector3 camPos => SuperspectiveScreen.instance.playerCamera.transform.position;
 
 	public delegate void DimensionObjectAction();
 	public event DimensionObjectAction OnBaseDimensionChange;
@@ -84,7 +84,7 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	protected override void Init() {
-		renderers = GetAllEpitaphRenderers().ToArray();
+		renderers = GetAllSuperspectiveRenderers().ToArray();
 
 		HandlePillarChanged();
 	}
@@ -364,7 +364,7 @@ public class PillarDimensionObject : DimensionObject {
 		}
 	}
 
-	Vector3[] CornersOfRenderer(EpitaphRenderer renderer) {
+	Vector3[] CornersOfRenderer(SuperspectiveRenderer renderer) {
 		// Use Collider as bounds if override specified
 		if (colliderBoundsOverride != null) {
 			Bounds bounds = colliderBoundsOverride.bounds;

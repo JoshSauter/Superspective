@@ -10,7 +10,7 @@ public class GlowComposite : MonoBehaviour {
 
 	void OnEnable() {
 		_compositeMat = new Material(Shader.Find("Hidden/GlowComposite"));
-		test = new RenderTexture(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight, 24);
+		test = new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24);
 	}
 
 	void OnRenderImage(RenderTexture src, RenderTexture dst) {

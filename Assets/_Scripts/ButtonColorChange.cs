@@ -14,7 +14,7 @@ public class ButtonColorChange : MonoBehaviour {
     public Color pressEmission = Color.black;
 
     public Button buttonToReactTo;
-    EpitaphRenderer r;
+    SuperspectiveRenderer r;
 
     // Use this for initialization
     void Start() {
@@ -25,8 +25,8 @@ public class ButtonColorChange : MonoBehaviour {
             return;
         }
 
-        r = GetComponent<EpitaphRenderer>();
-        if (r == null) r = gameObject.AddComponent<EpitaphRenderer>();
+        r = GetComponent<SuperspectiveRenderer>();
+        if (r == null) r = gameObject.AddComponent<SuperspectiveRenderer>();
 
         if (useMaterialAsStartColor) {
             startColor = r.GetMainColor();

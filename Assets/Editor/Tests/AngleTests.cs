@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NUnit.Framework;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class AngleTests {
 

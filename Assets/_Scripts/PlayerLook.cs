@@ -1,5 +1,5 @@
 ﻿using System;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
@@ -188,7 +188,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         debug.Log("Locking view for " + lockObject.gameObject.name);
         PlayerMovement.instance.StopMovement();
         Player.instance.cameraFollow.enabled = false;
-        EpitaphScreen.instance.playerCamera.transform.localPosition = Vector3.zero;
+        SuperspectiveScreen.instance.playerCamera.transform.localPosition = Vector3.zero;
         Interact.instance.enabled = false;
         OnViewLockEnterBegin?.Invoke();
 
@@ -261,8 +261,8 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     void MoveCursor(Vector2 direction) {
         Reticle.instance.MoveReticle(
             new Vector2(
-                Input.mousePosition.x / EpitaphScreen.currentWidth,
-                Input.mousePosition.y / EpitaphScreen.currentHeight
+                Input.mousePosition.x / SuperspectiveScreen.currentWidth,
+                Input.mousePosition.y / SuperspectiveScreen.currentHeight
             )
         );
     }

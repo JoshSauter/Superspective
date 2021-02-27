@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -35,7 +35,7 @@ namespace MagicTriggerMechanics {
 
 		public float Evaluate(Transform triggerTransform, GameObject player) {
 			Vector3 realTargetDirection = targetDirection;
-			Transform cameraTransform = EpitaphScreen.instance.playerCamera.transform;
+			Transform cameraTransform = SuperspectiveScreen.instance.playerCamera.transform;
 			switch (triggerCondition) {
 				case TriggerConditionType.PlayerFacingDirection:
 					realTargetDirection = (useLocalCoordinates) ? triggerTransform.TransformDirection(targetDirection) : targetDirection;
@@ -66,9 +66,9 @@ namespace MagicTriggerMechanics {
 					return Vector3.Dot(playerMovement.curVelocity.normalized, realTargetDirection.normalized);
 				}
 				case TriggerConditionType.RendererVisible:
-					return targetRenderer.IsVisibleFrom(EpitaphScreen.instance.playerCamera) ? 1 : -1;
+					return targetRenderer.IsVisibleFrom(SuperspectiveScreen.instance.playerCamera) ? 1 : -1;
 				case TriggerConditionType.RendererNotVisible:
-					return targetRenderer.IsVisibleFrom(EpitaphScreen.instance.playerCamera) ? -1 : 1;
+					return targetRenderer.IsVisibleFrom(SuperspectiveScreen.instance.playerCamera) ? -1 : 1;
 				case TriggerConditionType.PlayerInDirectionFromPoint:
 					realTargetDirection = (useLocalCoordinates) ? triggerTransform.TransformDirection(targetDirection) : targetDirection;
 					Vector3 realTargetPosition = (useLocalCoordinates) ? triggerTransform.TransformPoint(targetPosition) : targetPosition;

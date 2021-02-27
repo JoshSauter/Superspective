@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
-namespace EpitaphUtils {
+namespace SuperspectiveUtils {
     [Serializable]
     public struct IntVector2 {
         public int x, y;

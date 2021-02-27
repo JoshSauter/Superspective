@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using Saving;
 using System;
 
@@ -50,7 +50,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 	InteractableObject interactableObject;
 	public PickupObject pickupCube;
 	PillarDimensionObject corporealCubeDimensionObj, invertedCubeDimensionObj;
-	EpitaphRenderer cubeFrameRenderer, corporealGlassRenderer, invertedCubeRenderer, raymarchRenderer;
+	SuperspectiveRenderer cubeFrameRenderer, corporealGlassRenderer, invertedCubeRenderer, raymarchRenderer;
 
 	Transform[] cubeTransforms;
 
@@ -86,10 +86,10 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		corporealCubeDimensionObj = corporealCube.GetComponent<PillarDimensionObject>();
 		invertedCubeDimensionObj = invertedCube.GetComponent<PillarDimensionObject>();
 
-		cubeFrameRenderer = corporealCube.GetComponent<EpitaphRenderer>();
-		corporealGlassRenderer = corporealCube.Find("Glass").GetComponent<EpitaphRenderer>();
-		invertedCubeRenderer = invertedCube.GetComponent<EpitaphRenderer>();
-		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<EpitaphRenderer>();
+		cubeFrameRenderer = corporealCube.GetComponent<SuperspectiveRenderer>();
+		corporealGlassRenderer = corporealCube.Find("Glass").GetComponent<SuperspectiveRenderer>();
+		invertedCubeRenderer = invertedCube.GetComponent<SuperspectiveRenderer>();
+		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<SuperspectiveRenderer>();
 
 		thisCollider = GetComponent<BoxCollider>();
 		defaultPhysicsMaterial = thisCollider.material;

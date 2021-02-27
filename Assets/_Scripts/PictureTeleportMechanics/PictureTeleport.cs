@@ -61,7 +61,7 @@ namespace PictureTeleportMechanics {
 
         protected override void Start() {
             base.Start();
-            ssao = EpitaphScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
+            ssao = SuperspectiveScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
             startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;
@@ -92,7 +92,7 @@ namespace PictureTeleportMechanics {
                 LevelManager.instance.SwitchActiveScene(bigFrameLevel);
             }
             Transform player = Player.instance.transform;
-            Transform camContainer = EpitaphScreen.instance.playerCamera.transform.parent;
+            Transform camContainer = SuperspectiveScreen.instance.playerCamera.transform.parent;
 
             player.position = bigFrameToTeleportTo.transform.TransformPoint(targetPosition);
             player.rotation = bigFrameToTeleportTo.transform.rotation * Quaternion.Euler(targetRotation);

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class DimensionWall : MonoBehaviour {
 	Renderer thisRenderer;
@@ -19,7 +19,7 @@ public class DimensionWall : MonoBehaviour {
 
 	Vector3 BottomOfPillar => pillarRenderer.bounds.center - pillar.transform.up * pillarRenderer.bounds.size.y / 2f;
 
-	Vector3 PlayerCamWorldPos => EpitaphScreen.instance.playerCamera.transform.position;
+	Vector3 PlayerCamWorldPos => SuperspectiveScreen.instance.playerCamera.transform.position;
 
 	public float PillarHeight {
 		get {
@@ -56,7 +56,7 @@ public class DimensionWall : MonoBehaviour {
 	}
 
 	Angle AngleOfPlayerCamera() {
-		Vector3 pillarToPoint = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
+		Vector3 pillarToPoint = SuperspectiveScreen.instance.playerCamera.transform.position - transform.position;
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
 		PolarCoordinate dimensionShiftPolar = PolarCoordinate.CartesianToPolar(pillar.DimensionShiftVector);
 		return dimensionShiftPolar.angle - polar.angle;
@@ -71,7 +71,7 @@ public class DimensionWall : MonoBehaviour {
 
 		Vector3 origin = new Vector3(BottomOfPillar.x, transform.position.y, BottomOfPillar.z);
 		Ray checkForWalls = new Ray(origin, transform.position - origin);
-		Physics.SphereCast(checkForWalls, 0.2f, out hitInfo, EpitaphScreen.instance.playerCamera.farClipPlane, roomBoundsMask);
+		Physics.SphereCast(checkForWalls, 0.2f, out hitInfo, SuperspectiveScreen.instance.playerCamera.farClipPlane, roomBoundsMask);
 		//Debug.DrawRay(checkForWalls.origin, checkForWalls.direction * maxColliderLength, Color.blue, 0.1f);
 
 		Vector3 originalSize = transform.localScale;
@@ -82,7 +82,7 @@ public class DimensionWall : MonoBehaviour {
 			transform.localScale = new Vector3(originalSize.x, originalSize.y, distanceToWall);
 		}
 		else {
-			transform.localScale = new Vector3(originalSize.x, originalSize.y, EpitaphScreen.instance.playerCamera.farClipPlane);
+			transform.localScale = new Vector3(originalSize.x, originalSize.y, SuperspectiveScreen.instance.playerCamera.farClipPlane);
 			//print("Nothing hit"); Debug.DrawRay(checkForWalls.origin, checkForWalls.direction * mainCamera.farClipPlane, Color.blue, 10f);
 		}
 	}

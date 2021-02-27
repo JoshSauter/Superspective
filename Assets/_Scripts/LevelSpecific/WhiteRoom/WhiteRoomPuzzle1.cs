@@ -4,7 +4,7 @@ using Saving;
 using SerializableClasses;
 using System;
 using System.Collections;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using Library.Functional;
 using UnityEngine;
 using DimensionObjectReference = SerializableClasses.SerializableReference<DimensionObject, DimensionObject.DimensionObjectSave>;

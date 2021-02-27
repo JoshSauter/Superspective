@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
-using EpitaphUtils.ShaderUtils;
+using SuperspectiveUtils;
+using SuperspectiveUtils.ShaderUtils;
 using System.Linq;
 using Saving;
 using System;
@@ -37,9 +37,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public bool disableColliderWhileInvisible = true;
 	protected int curDimensionSetInMaterial;
 
-	public EpitaphRenderer[] renderers;
-	public Dictionary<EpitaphRenderer, Material[]> startingMaterials;
-	public Dictionary<EpitaphRenderer, int> startingLayers;
+	public SuperspectiveRenderer[] renderers;
+	public Dictionary<SuperspectiveRenderer, Material[]> startingMaterials;
+	public Dictionary<SuperspectiveRenderer, int> startingLayers;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
 	public VisibilityState visibilityState = VisibilityState.visible;
@@ -58,7 +58,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	protected override void Awake() {
 		base.Awake();
 
-		renderers = GetAllEpitaphRenderers().ToArray();
+		renderers = GetAllSuperspectiveRenderers().ToArray();
 		if (renderers.Length == 0) {
 			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
 			enabled = false;
@@ -84,7 +84,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		initialized = true;
 	}
 
-	public void OverrideStartingMaterials(Dictionary<EpitaphRenderer, Material[]> newStartingMaterials) {
+	public void OverrideStartingMaterials(Dictionary<SuperspectiveRenderer, Material[]> newStartingMaterials) {
 		startingMaterials = newStartingMaterials;
 	}
 
@@ -148,7 +148,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// Material Change Logic //
 	///////////////////////////
 	#region materials
-	void SetMaterials(EpitaphRenderer renderer) {
+	void SetMaterials(SuperspectiveRenderer renderer) {
 		if (!startingMaterials.ContainsKey(renderer)) {
 			startingMaterials.Add(renderer, renderer.GetMaterials());
 			startingLayers.Add(renderer, renderer.gameObject.layer);
@@ -214,30 +214,30 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 	}
 
-	protected List<EpitaphRenderer> GetAllEpitaphRenderers() {
-		List<EpitaphRenderer> allRenderers = new List<EpitaphRenderer>();
+	protected List<SuperspectiveRenderer> GetAllSuperspectiveRenderers() {
+		List<SuperspectiveRenderer> allRenderers = new List<SuperspectiveRenderer>();
 		if (!treatChildrenAsOneObjectRecursively) {
-			EpitaphRenderer thisRenderer = GetComponent<EpitaphRenderer>();
+			SuperspectiveRenderer thisRenderer = GetComponent<SuperspectiveRenderer>();
 			if (thisRenderer == null && GetComponent<Renderer>() != null) {
-				thisRenderer = gameObject.AddComponent<EpitaphRenderer>();
+				thisRenderer = gameObject.AddComponent<SuperspectiveRenderer>();
 			}
 			if (thisRenderer != null) {
 				allRenderers.Add(thisRenderer);
 			}
 		}
 		else {
-			SetEpitaphRenderersRecursively(transform, ref allRenderers);
+			SetSuperspectiveRenderersRecursively(transform, ref allRenderers);
 		}
 		return allRenderers;
 	}
 
-	void SetEpitaphRenderersRecursively(Transform parent, ref List<EpitaphRenderer> renderersSoFar) {
+	void SetSuperspectiveRenderersRecursively(Transform parent, ref List<SuperspectiveRenderer> renderersSoFar) {
 		// Children who have DimensionObject scripts are treated on only by their own settings
 		if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
 
-		EpitaphRenderer thisRenderer = parent.GetComponent<EpitaphRenderer>();
+		SuperspectiveRenderer thisRenderer = parent.GetComponent<SuperspectiveRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
-			thisRenderer = parent.gameObject.AddComponent<EpitaphRenderer>();
+			thisRenderer = parent.gameObject.AddComponent<SuperspectiveRenderer>();
 		}
 
 		if (thisRenderer != null) {
@@ -246,16 +246,16 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 		if (parent.childCount > 0) {
 			foreach (Transform child in parent) {
-				SetEpitaphRenderersRecursively(child, ref renderersSoFar);
+				SetSuperspectiveRenderersRecursively(child, ref renderersSoFar);
 			}
 		}
 	}
 
-	Dictionary<EpitaphRenderer, Material[]> GetAllStartingMaterials(EpitaphRenderer[] renderers) {
+	Dictionary<SuperspectiveRenderer, Material[]> GetAllStartingMaterials(SuperspectiveRenderer[] renderers) {
 		return renderers.ToDictionary(r => r, r => r.GetMaterials());
 	}
 
-	Dictionary<EpitaphRenderer, int> GetAllStartingLayers(EpitaphRenderer[] renderers) {
+	Dictionary<SuperspectiveRenderer, int> GetAllStartingLayers(SuperspectiveRenderer[] renderers) {
 		return renderers.ToDictionary(r => r, r => r.gameObject.layer);
 	}
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using PictureTeleportMechanics;
 using PortalMechanics;
 using SerializableClasses;

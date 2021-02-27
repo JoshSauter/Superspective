@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(EpitaphRenderer))]
+[RequireComponent(typeof(SuperspectiveRenderer))]
 public class GlassGlow : MonoBehaviour {
     const string emissionColorName = "_EmissionColor";
     public Color glowColor = Color.white;
     Color startEmissionColor;
-    EpitaphRenderer thisRenderer;
+    SuperspectiveRenderer thisRenderer;
 
     // Use this for initialization
     void Start() {
-        thisRenderer = GetComponent<EpitaphRenderer>();
+        thisRenderer = GetComponent<SuperspectiveRenderer>();
         startEmissionColor = thisRenderer.GetColor(emissionColorName);
     }
 

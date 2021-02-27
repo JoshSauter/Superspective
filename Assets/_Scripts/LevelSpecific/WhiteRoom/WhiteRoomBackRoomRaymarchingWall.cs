@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using UnityEngine;
 
 public class WhiteRoomBackRoomRaymarchingWall : MonoBehaviour {

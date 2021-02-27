@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using LevelManagement;
 using Library.Functional;
 using Object = UnityEngine.Object;

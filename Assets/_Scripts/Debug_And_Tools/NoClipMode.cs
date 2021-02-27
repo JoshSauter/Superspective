@@ -23,7 +23,7 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 		playerMovement = GetComponent<PlayerMovement>();
 		playerRigidbody = GetComponent<Rigidbody>();
 		playerCollider = GetComponent<Collider>();
-		playerCamera = EpitaphScreen.instance.playerCamera.transform;
+		playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 		input = PlayerButtonInput.instance;
     }
 

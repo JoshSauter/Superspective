@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 public class DesirePlatformRiseFall : MonoBehaviour {
 	Rigidbody panelRigidbody;
@@ -104,13 +104,13 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 
 	void ColorNotch(float curLook) {
 		if (curLook > deadZone) {
-			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, notchGreen, "_EmissionColor");
+			SuperspectiveUtils.Utils.SetColorForRenderer(notchRenderer, notchGreen, "_EmissionColor");
 		}
 		else if (curLook < -deadZone) {
-			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, notchRed, "_EmissionColor");
+			SuperspectiveUtils.Utils.SetColorForRenderer(notchRenderer, notchRed, "_EmissionColor");
 		}
 		else {
-			EpitaphUtils.Utils.SetColorForRenderer(notchRenderer, Color.white, "_EmissionColor");
+			SuperspectiveUtils.Utils.SetColorForRenderer(notchRenderer, Color.white, "_EmissionColor");
 		}
 	}
 

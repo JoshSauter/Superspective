@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 
 [ExecuteInEditMode]
-public class EpitaphScreen : Singleton<EpitaphScreen> {
+public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 	public Camera playerCamera;
 	public MonoBehaviour[] postProcessEffects;
 	public Camera[] dimensionCameras;

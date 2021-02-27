@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using Audio;
-using EpitaphUtils;
-using EpitaphUtils.PortalUtils;
+using SuperspectiveUtils;
+using SuperspectiveUtils.PortalUtils;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
@@ -91,7 +91,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     protected override void Start() {
         base.Start();
         player = Player.instance.transform;
-        playerCam = EpitaphScreen.instance.playerCamera.transform;
+        playerCam = SuperspectiveScreen.instance.playerCamera.transform;
 
         PlayerButtonInput.instance.OnAction1Press += Drop;
 

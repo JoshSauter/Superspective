@@ -10,10 +10,10 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	void Start () {
 		visibilityMaskTextures = new RenderTexture[numVisibilityMaskChannels];
 
-		EpitaphScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
-		CreateAllRenderTextures(EpitaphScreen.currentWidth, EpitaphScreen.currentHeight);
+		SuperspectiveScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
+		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
-		EpitaphScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
 	}
 
 	void OnDisable() {
@@ -45,9 +45,9 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 
 	void CreateAllRenderTextures(int currentWidth, int currentHeight) {
 		for (int i = 0; i < numVisibilityMaskChannels; i++) {
-			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], EpitaphScreen.instance.dimensionCameras[i]);
+			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], SuperspectiveScreen.instance.dimensionCameras[i]);
 		}
-		CreateRenderTexture(currentWidth, currentHeight, out portalMaskTexture, EpitaphScreen.instance.portalMaskCamera);
+		CreateRenderTexture(currentWidth, currentHeight, out portalMaskTexture, SuperspectiveScreen.instance.portalMaskCamera);
 	}
 
 	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {

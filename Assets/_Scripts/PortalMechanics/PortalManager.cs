@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using System.Linq;
 using UnityStandardAssets.ImageEffects;
 
@@ -96,7 +96,7 @@ namespace PortalMechanics {
 		/// Instantiates portalCamera as a copy of the player's Camera with post-processing effects copied, as a child of the PortalManager, and disables the Camera.
 		/// </summary>
 		void InitializeVirtualPortalCamera() {
-			Camera playerCam = EpitaphScreen.instance.playerCamera;
+			Camera playerCam = SuperspectiveScreen.instance.playerCamera;
 			portalCamera = new GameObject("VirtualPortalCamera").AddComponent<Camera>();
 			portalCamera.transform.SetParent(transform, false);
 			portalCamera.enabled = false;

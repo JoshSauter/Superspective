@@ -343,5 +343,5 @@ Shader "Custom/Standard (Specular setup) with border"
 		}
 
 			FallBack "VertexLit"
-			CustomEditor "StandardShaderGUIEpitaph"
+			CustomEditor "StandardShaderGUISuperspective"
 }

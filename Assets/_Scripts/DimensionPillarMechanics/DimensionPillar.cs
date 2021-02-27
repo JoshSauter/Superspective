@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using Saving;
 using System;
 using System.Collections.Generic;
@@ -88,7 +88,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 	void FixedUpdate() {
-		PlayerQuadrant = GetQuadrant(EpitaphScreen.instance.playerCamera.transform.position);
+		PlayerQuadrant = GetQuadrant(SuperspectiveScreen.instance.playerCamera.transform.position);
     }
 
 	Angle.Quadrant GetQuadrant(Vector3 position) {
@@ -132,7 +132,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 	Angle DimensionShiftAngle() {
-		//Vector3 pillarToCamera = EpitaphScreen.instance.playerCamera.transform.position - transform.position;
+		//Vector3 pillarToCamera = SuperspectiveScreen.instance.playerCamera.transform.position - transform.position;
 		//PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(DimensionShiftVector);
 		return polar.angle;

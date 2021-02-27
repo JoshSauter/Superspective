@@ -1,4 +1,4 @@
-using EpitaphUtils;
+using SuperspectiveUtils;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -142,7 +142,7 @@ namespace LevelSpecific.WhiteRoom {
 
         protected override void Start() {
             base.Start();
-            playerCamera = EpitaphScreen.instance.playerCamera.transform;
+            playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 
             base9Symbols = Resources.LoadAll<Sprite>("Images/Base9/").OrderBy(s => int.Parse(s.name)).ToArray();
         }

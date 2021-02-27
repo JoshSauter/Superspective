@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using EpitaphUtils;
+using SuperspectiveUtils;
 using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
