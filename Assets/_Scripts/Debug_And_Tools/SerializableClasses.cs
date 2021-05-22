@@ -287,6 +287,44 @@ namespace SerializableClasses {
 	public abstract class SerializableReference {
 		public string referencedSceneName;
 		public string referencedObjId;
+		
+		// Implicit SerializableReference creation from SaveableObject
+		public static implicit operator SerializableReference(SaveableObject obj) {
+			return obj != null ? new SerializableReference<SaveableObject, SerializableSaveObject<SaveableObject>> { Reference = obj } : null;
+		}
+		
+		// Implicit SerializableReference creation from SerializableSaveObject
+		public static implicit operator SerializableReference(SerializableSaveObject<SaveableObject> serializedObj) {
+			return serializedObj != null ? new SerializableReference<SaveableObject, SerializableSaveObject<SaveableObject>> { Reference = serializedObj } : null;
+		}
+
+		public Either<SaveableObject, SerializableSaveObject> Reference {
+			get {
+				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
+				return saveManagerForScene?.GetSaveableObject(referencedObjId).Match(
+					saveableObject => new Either<SaveableObject, SerializableSaveObject>(saveableObject),
+					serializedSaveObject => new Either<SaveableObject, SerializableSaveObject>(serializedSaveObject)
+				);
+			}
+			set {
+				if (value != null) {
+					value.MatchAction(
+						saveableObject => {
+							referencedSceneName = saveableObject.gameObject.scene.name;
+							referencedObjId = saveableObject.ID;
+						},
+						serializedSaveObject => {
+							referencedSceneName = serializedSaveObject.sceneName;
+							referencedObjId = serializedSaveObject.ID;
+						}
+					);
+				}
+				else {
+					referencedSceneName = "";
+					referencedObjId = "";
+				}
+			}
+		}
 	}
 
 	[Serializable]
@@ -294,7 +332,7 @@ namespace SerializableClasses {
 		where T : MonoBehaviour, ISaveableObject
 		where S : SerializableSaveObject<T> {
 
-		public Either<T, S> Reference {
+		public new Either<T, S> Reference {
 			get {
 				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
 				return saveManagerForScene?.GetSaveableObject(referencedObjId).Match(

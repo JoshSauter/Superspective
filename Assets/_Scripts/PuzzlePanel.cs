@@ -59,7 +59,7 @@ public class PuzzlePanel : MonoBehaviour {
     void SubscribeToButtonEvents() {
         for (int i = 0; i < puzzleButtons.Length; i++) {
             puzzleButtons[i].OnButtonPressFinish += UpdatePuzzleState;
-            puzzleButtons[i].OnButtonDepressFinish += UpdatePuzzleState;
+            puzzleButtons[i].OnButtonUnpressFinish += UpdatePuzzleState;
         }
     }
 
@@ -132,12 +132,12 @@ public class PuzzlePanel : MonoBehaviour {
     Button SetUpNewButton(GameObject buttonGO) {
         Button b = buttonGO.AddComponent<Button>();
         b.buttonPressCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        b.buttonDepressCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+        b.buttonUnpressCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
         b.timeToPressButton = 0.25f;
-        b.timeToDepressButton = 0.125f;
-        b.depressDistance = 0;
-        b.depressAfterPress = false;
+        b.timeToUnpressButton = 0.125f;
+        b.pressDistance = 0;
+        b.unpressAfterPress = false;
         b.timeBetweenPressEndDepressStart = 0;
 
         ButtonColorChange c = b.gameObject.AddComponent<ButtonColorChange>();

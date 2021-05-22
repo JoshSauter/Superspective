@@ -10,7 +10,7 @@ using UnityEngine;
 using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
-public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave> {
+public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave>, AudioJobOnGameObject {
     public delegate void PickupObjectAction(PickupObject obj);
 
     public delegate void PickupObjectSimpleAction();
@@ -34,7 +34,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public Rigidbody thisRigidbody;
 
     public PortalableObject portalableObject;
-    UniqueId _id;
     bool _interactable = true;
     float currentCooldown;
     InteractableGlow interactableGlow;
@@ -51,12 +50,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     readonly float rotateToRightAngleTime = 0.35f;
 
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
+    public Transform GetObjectToPlayAudioOn(AudioJob _) => transform;
 
     public bool interactable {
         get => _interactable;
@@ -257,7 +251,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             // Pitch goes 1 -> 1.25 -> 1.5 -> 1
             currentPitch = (currentPitch - .75f) % .75f + 1f;
             pickupSound.audio.pitch = currentPitch;
-            AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, gameObject, true);
+            AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, this, true);
 
             OnPickupSimple?.Invoke();
             OnPickup?.Invoke(this);
@@ -279,7 +273,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             isHeld = false;
             currentCooldown = pickupDropCooldown;
 
-            AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, gameObject, true);
+            AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, this, true);
 
             OnDropSimple?.Invoke();
             OnDrop?.Invoke(this);
@@ -289,8 +283,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"PickupObject_{id.uniqueId}";
 
     [Serializable]
     public class PickupObjectSave : SerializableSaveObject<PickupObject> {
@@ -307,6 +299,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         SerializableVector3 position;
         SerializableQuaternion rotation;
 
+        bool kinematicRigidbody;
         SerializableVector3 velocity;
 
         public PickupObjectSave(PickupObject obj) : base(obj) {
@@ -318,6 +311,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
                 velocity = obj.thisRigidbody.velocity;
                 angularVelocity = obj.thisRigidbody.angularVelocity;
                 mass = obj.thisRigidbody.mass;
+                kinematicRigidbody = obj.thisRigidbody.isKinematic;
             }
 
             isReplaceable = obj.isReplaceable;
@@ -337,6 +331,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
                 obj.thisRigidbody.velocity = velocity;
                 obj.thisRigidbody.angularVelocity = angularVelocity;
                 obj.thisRigidbody.mass = mass;
+                obj.thisRigidbody.isKinematic = kinematicRigidbody;
             }
 
             obj.isReplaceable = isReplaceable;

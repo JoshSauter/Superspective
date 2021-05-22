@@ -5,12 +5,21 @@ using SuperspectiveUtils;
 
 namespace Saving {
     [Serializable]
-    public abstract class SerializableSaveObject {
+    public class SerializableSaveObject {
         public string ID;
         // AssociationID is the UUID component of ID, or, if there is none, just ID
         // It is used to find all associated objects to be deregistered if a save object is Destroyed while unloaded
         public string associationID;
         public string sceneName;
+
+        protected SerializableSaveObject() { }
+
+        public SerializableSaveObject(SaveableObject saveableObject) {
+            this.ID = saveableObject.ID;
+            string lastPart = saveableObject.ID.Split('_').Last();
+            this.associationID = lastPart.IsGuid() ? lastPart : this.ID;
+            this.sceneName = saveableObject.gameObject.scene.name;
+        }
     }
 
     [Serializable]

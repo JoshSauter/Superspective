@@ -7,16 +7,6 @@ using UnityEngine;
 public class GameObjectRef : SaveableObject<GameObjectRef, GameObjectRef.GameObjectRefSave> {
     public bool setAsInactiveOnStart = false;
     
-    UniqueId _id;
-    public UniqueId id {
-        get {
-            if (_id == null) {
-                _id = GetComponent<UniqueId>();
-            }
-            return _id;
-        }
-    }
-    
     // GameObjectRefSave is never actually used since this object always skips saving.
     public class GameObjectRefSave : SerializableSaveObject<GameObjectRef> {
         public GameObjectRefSave(GameObjectRef script) : base(script) {}

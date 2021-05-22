@@ -13,6 +13,7 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	PlayerButtonInput input;
 
 	public bool noClipOn = false;
+	float speed;
 	public float slowMoveSpeed = 15f;
 	public float moveSpeed = 45;
 	public float sprintSpeed = 125;
@@ -25,7 +26,8 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 		playerCollider = GetComponent<Collider>();
 		playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 		input = PlayerButtonInput.instance;
-    }
+		speed = moveSpeed;
+	}
 
     void Update() {
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G)) {
@@ -36,8 +38,9 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 			Vector2 moveInput = input.LeftStick;
 
 			Vector3 moveDirection = playerCamera.forward * moveInput.y + playerCamera.right * moveInput.x;
-			float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : Input.GetKey(KeyCode.LeftControl) ? slowMoveSpeed : moveSpeed;
+			float desiredSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : Input.GetKey(KeyCode.LeftControl) ? slowMoveSpeed : moveSpeed;
 
+			speed = Mathf.Lerp(speed, desiredSpeed, Time.deltaTime * 6f);
 			float middleMouseScroll = Input.mouseScrollDelta.y;
 			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
 

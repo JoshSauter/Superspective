@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using LevelManagement;
 using SuperspectiveUtils;
 using NaughtyAttributes;
 using Saving;
@@ -44,7 +45,6 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
     public int baseDimensionForCubes;
     GrowCubeState _growCubeState;
-    UniqueId _id;
     ShrinkCubeState _shrinkCubeState;
     Vector3 growEndSize;
     Queue<PickupObjectReference> objectsGrabbedFromSpawner = new Queue<PickupObjectReference>();
@@ -53,13 +53,6 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     Collider thisCollider;
     float timeSinceGrowCubeStateChanged;
     float timeSinceShrinkCubeStateChanged;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public GrowCubeState growCubeState {
         get => _growCubeState;
@@ -106,7 +99,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     }
 
     void Update() {
-        if (!hasInitialized || SaveManager.isCurrentlyLoadingSave) return;
+        if (!hasInitialized || GameManager.instance.IsCurrentlyLoading) return;
 
         if (objectBeingSuspended == null && numberOfIrreplaceableCubes < maxNumberOfCubesThatCanBeSpawned)
             SpawnNewCube();
@@ -243,8 +236,6 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     }
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"CubeSpawner_{id.uniqueId}";
 
     [Serializable]
     public class CubeSpawnerSave : SerializableSaveObject<CubeSpawner> {

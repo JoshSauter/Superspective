@@ -13,7 +13,7 @@ namespace MagicTriggerMechanics {
 			bool isActive = enabled;
 			if (sceneMustBeActive) {
 				if (thisScene == Levels.ManagerScene) {
-					thisScene = LevelManager.instance.GetLevel(gameObject.scene.name);
+					thisScene = gameObject.scene.name.ToLevel();
 				}
 				isActive = isActive && thisScene == LevelManager.instance.ActiveScene;
 			}
@@ -34,27 +34,27 @@ namespace MagicTriggerMechanics {
 				debug.Log($"Triggering MagicTrigger for {gameObject.name}!");
 
 				ExecuteActionsForTiming(ActionTiming.EveryFrameOnStay);
-				OnMagicTriggerStay?.Invoke(player);
+				OnMagicTriggerStay?.Invoke();
 				if (!hasTriggeredOnStay) {
 					hasTriggeredOnStay = true;
 					hasNegativeTriggeredOnStay = false;
 
 					ExecuteActionsForTiming(ActionTiming.OnceWhileOnStay);
-					OnMagicTriggerStayOneTime?.Invoke(player);
+					OnMagicTriggerStayOneTime?.Invoke();
 				}
 			}
 			// Negative Magic Events triggered (negative triggers cannot turn self off)
 			else if (allConditionsNegativelySatisfied) {
 				debug.Log("Triggering NegativeMagicTrigger!");
 				ExecuteNegativeActionsForTiming(ActionTiming.EveryFrameOnStay);
-				OnNegativeMagicTriggerStay?.Invoke(player);
+				OnNegativeMagicTriggerStay?.Invoke();
 
 				if (!hasNegativeTriggeredOnStay) {
 					hasNegativeTriggeredOnStay = true;
 					hasTriggeredOnStay = false;
 
 					ExecuteNegativeActionsForTiming(ActionTiming.OnceWhileOnStay);
-					OnNegativeMagicTriggerStayOneTime?.Invoke(player);
+					OnNegativeMagicTriggerStayOneTime?.Invoke();
 				}
 			}
 		}

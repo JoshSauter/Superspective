@@ -12,16 +12,6 @@ namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
     public class PictureTeleport : SaveableObject<PictureTeleport, PictureTeleport.PictureTeleportSave> {
-        UniqueId _id;
-        UniqueId id {
-            get {
-                if (_id == null) {
-                    _id = GetComponent<UniqueId>();
-                }
-                return _id;
-            }
-        }
-
         public static Dictionary<string, BigFrame> bigFrames = new Dictionary<string, BigFrame>();
 
         public static string BigFrameKey(string scene, string name) {
@@ -83,7 +73,7 @@ namespace PictureTeleportMechanics {
         void TeleportPlayer() {
             BigFrame bigFrameToTeleportTo = bigFrameIsInSameScene
                 ? bigFrame
-                : bigFrames[BigFrameKey(LevelManager.instance.GetSceneName(bigFrameLevel), bigFrameName)];
+                : bigFrames[BigFrameKey(bigFrameLevel.ToName(), bigFrameName)];
             if (bigFrameIsInSameScene) {
                 bigFrameToTeleportTo.TurnOnFrame();
             }
@@ -107,7 +97,6 @@ namespace PictureTeleportMechanics {
         }
 
         #region Saving
-        public override string ID => $"PictureTeleport_{id.uniqueId}";
 
         [Serializable]
         public class PictureTeleportSave : SerializableSaveObject<PictureTeleport> {

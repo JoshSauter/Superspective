@@ -112,12 +112,12 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 		yield return new WaitUntil(() => gameObject.IsInActiveScene());
 		state = State.Unsolved;
 
-		fakePortalTrigger.OnMagicTriggerStayOneTime += (ctx) => {
+		fakePortalTrigger.OnMagicTriggerStayOneTime += () => {
 			if (state == State.FakePortalPowered) {
 				state = State.WalkedThroughFakePortal;
 			}
 		};
-		fakePortalTrigger.OnNegativeMagicTriggerStayOneTime += (ctx) => {
+		fakePortalTrigger.OnNegativeMagicTriggerStayOneTime += () => {
 			if (state == State.WalkedThroughFakePortal) {
 				state = State.FakePortalPowered;
 			}

@@ -11,14 +11,6 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     public bool useGravity = true;
     public Vector3 gravityDirection = Physics.gravity.normalized;
     public float gravityMagnitude = Physics.gravity.magnitude;
-    UniqueId _id;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     protected override void Awake() {
         base.Awake();
@@ -42,8 +34,6 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     }
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"GravityObject_{id.uniqueId}";
 
     [Serializable]
     public class GravityObjectSave : SerializableSaveObject<GravityObject> {

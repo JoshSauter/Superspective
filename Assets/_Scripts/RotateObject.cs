@@ -6,14 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(UniqueId))]
 public class RotateObject : SaveableObject<RotateObject, RotateObject.RotateObjectSave> {
     public bool importantToSave = false;
-    UniqueId _id;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
     public bool useLocalCoordinates = true;
 
     public float rotationsPerSecondX;
@@ -32,7 +24,6 @@ public class RotateObject : SaveableObject<RotateObject, RotateObject.RotateObje
 #region Saving
     // Many usages of RotateObject have no gameplay impact and do not need to be saved. Mark importantToSave as true if you want to save it
     public override bool SkipSave => !importantToSave;
-    public override string ID => $"RotateObject_{id.uniqueId}";
 
     [Serializable]
     public class RotateObjectSave : SerializableSaveObject<RotateObject> {

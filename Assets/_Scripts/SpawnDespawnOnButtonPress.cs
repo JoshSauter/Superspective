@@ -9,14 +9,6 @@ public class SpawnDespawnOnButtonPress : MonoBehaviour {
     public GameObject[] objectsToDisable;
     public MonoBehaviour[] scriptsToEnable;
     public MonoBehaviour[] scriptsToDisable;
-    UniqueId _id;
-
-    public UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     // Use this for initialization
     void Awake() {
@@ -25,7 +17,7 @@ public class SpawnDespawnOnButtonPress : MonoBehaviour {
 
     void Start() {
         button.OnButtonPressBegin += ctx => EnableDisableObjects();
-        button.OnButtonDepressBegin += ctx => ReverseEnableDisableObjects();
+        button.OnButtonUnpressBegin += ctx => ReverseEnableDisableObjects();
     }
 
     void EnableDisableObjects() {
@@ -65,8 +57,6 @@ public class SpawnDespawnOnButtonPress : MonoBehaviour {
     }
 
 #region Saving
-    public bool SkipSave { get; set; }
-    public string ID => $"SpawnDespawnOnButtonPress_{id.uniqueId}";
 
     [Serializable]
     class SpawnDespawnOnButtonPressSave {

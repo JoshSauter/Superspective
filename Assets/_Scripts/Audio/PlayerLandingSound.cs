@@ -4,9 +4,10 @@ using UnityEngine;
 using PortalMechanics;
 using SuperspectiveUtils;
 using Audio;
+using Saving;
 using static Audio.AudioManager;
 
-public class PlayerLandingSound : MonoBehaviour {
+public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 	//public SoundEffectOld shoeSound;
 	//public SoundEffectOld thumpSound;
 	AudioJob ruffleSound;
@@ -24,23 +25,20 @@ public class PlayerLandingSound : MonoBehaviour {
 	float maxHeight;
 	bool keepTrackOfPlayerAirHeight = false;
 
-	string id = "PlayerLandingSound";
+	public override string ID => "PlayerLandingSound";
 
-    void Start() {
+	public Transform GetObjectToPlayAudioOn(AudioJob _) => transform;
+
+	protected override void Start() {
+		base.Start();
 		playerMovement = GetComponent<PlayerMovement>();
 		
-		ruffleSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, id);
-		thumpSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, id);
+		ruffleSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
+		thumpSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
 
 		ruffleStartVolume = ruffleSound.audio.volume;
 		thumpStartVolume = thumpSound.audio.volume;
-
-		Portal.OnAnyPortalTeleport += HandlePlayerTeleported;
     }
-
-	void HandlePlayerTeleported(Portal inPortal, Collider objTeleported) {
-		if (!objTeleported.gameObject.TaggedAsPlayer()) return;
-	}
 
     void FixedUpdate() {
         if (wasGrounded && !playerMovement.grounded.isGrounded) {
@@ -77,7 +75,7 @@ public class PlayerLandingSound : MonoBehaviour {
 						float thumpVolume = thumpStartVolume + Mathf.Lerp(-volumeDelta, volumeDelta, Mathf.InverseLerp(2 * minSpeed, 2 * maxSpeed, simulatedSpeedOfImpact));
 						thumpSound.audio.volume = thumpVolume;
 
-						AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingThump, id, gameObject);
+						AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingThump, ID, this);
 					}
 
 				}

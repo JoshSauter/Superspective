@@ -9,6 +9,13 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 
+static class ComposableListExt {
+    public static List<T> ComposableAdd<T>(this List<T> list, T add) {
+        list.Add(add);
+        return list;
+    }
+}
+
 [InitializeOnLoad]
 class UnloadScenesBeforePlay {
     const string playerPrefsKey = "StoredLevelsFromEditMode";
@@ -38,11 +45,23 @@ class UnloadScenesBeforePlay {
     }
     
     static void UnloadAllScenesExcept(string sceneName) {
+        List<String> scenesThatShouldRemainLoaded = LevelManager.instance.allLevels
+            .Find(lvl => lvl.level == LevelManager.instance.startingScene).connectedLevels
+            .ComposableAdd(LevelManager.instance.startingScene)
+            .Select(lvl => lvl.ToName())
+            .ToList();
+
         int numScenes = SceneManager.sceneCount;
         List<Scene> scenesThatGotUnloaded = new List<Scene>();
         for (int i = 0; i < numScenes; i++) {
             Scene scene = SceneManager.GetSceneAt(i);
-            if (scene.name != sceneName) {
+            
+            // Save all open scenes upon entering play mode
+            if (scene.isDirty) {
+                EditorSceneManager.SaveScene(scene);
+            }
+            
+            if (scene.name != sceneName && !scenesThatShouldRemainLoaded.Contains(scene.name)) {
                 scenesThatGotUnloaded.Add(scene);
             }
         }
@@ -51,9 +70,6 @@ class UnloadScenesBeforePlay {
         
         foreach (var sceneToUnload in scenesThatGotUnloaded) {
             try {
-                if (sceneToUnload.isDirty) {
-                    EditorSceneManager.SaveScene(sceneToUnload);
-                }
                 EditorSceneManager.CloseScene(sceneToUnload, true);
             }
             catch (Exception e) {

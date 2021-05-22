@@ -17,7 +17,7 @@ namespace PowerTrailMechanics {
             if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOnOnly)
                 button.OnButtonPressBegin += b => thisPowerTrail.powerIsOn = true;
             if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOffOnly)
-                button.OnButtonDepressFinish += b => thisPowerTrail.powerIsOn = false;
+                button.OnButtonUnpressFinish += b => thisPowerTrail.powerIsOn = false;
         }
     }
 }

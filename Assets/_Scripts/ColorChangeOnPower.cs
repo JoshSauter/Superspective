@@ -30,15 +30,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     public float timeToChangeColor = 0.25f;
     public PowerTrail powerTrailToReactTo;
     public SuperspectiveRenderer[] renderers;
-    UniqueId _id;
     float timeElapsedSinceStateChange;
-
-    public UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     bool reverseColors =>
         timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;

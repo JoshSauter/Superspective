@@ -21,17 +21,7 @@ namespace PowerTrailMechanics {
 	}
 
 	[RequireComponent(typeof(UniqueId))]
-	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave> {
-		UniqueId _id;
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
-
+	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
 		public enum PowerTrailState {
 			depowered,
 			partiallyPowered,
@@ -139,7 +129,7 @@ namespace PowerTrailMechanics {
 			}
 
 			PopulateStaticGPUInfo();
-			AudioManager.instance.PlayWithUpdate(AudioName.PowerTrailHum, ID, UpdateAudio);
+			AudioManager.instance.PlayWithUpdate(AudioName.PowerTrailHum, ID, this);
 			SetStartState();
 		}
 
@@ -287,9 +277,9 @@ namespace PowerTrailMechanics {
 			else return distance;
 		}
 #region Audio
-		void UpdateAudio(AudioJob audioJob) {
+		public void UpdateAudio(AudioJob audioJob) {
 			if (this == null || gameObject == null) {
-				audioJob.removeSound = true;
+				audioJob.Stop();
 				return;
 			}
 
@@ -365,7 +355,6 @@ namespace PowerTrailMechanics {
 		}
 #endregion
 #region Saving
-		public override string ID => $"PowerTrail_{id.uniqueId}";
 		
 		[Serializable]
 		public class PowerTrailSave : SerializableSaveObject<PowerTrail> {

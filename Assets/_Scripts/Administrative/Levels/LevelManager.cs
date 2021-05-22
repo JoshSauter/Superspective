@@ -16,6 +16,16 @@ using UnityEditor;
 #endif
 
 namespace LevelManagement {
+	public static class LevelsEnumExt {
+		public static string ToName(this Levels level) {
+			return LevelManager.enumToSceneName[level];
+		}
+
+		public static Levels ToLevel(this string levelName) {
+			return LevelManager.enumToSceneName[levelName];
+		}
+	}
+	
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: You MUST append any new additions to the END of the enum, else it fucks with serialization
@@ -161,11 +171,7 @@ namespace LevelManagement {
 		string GetSceneName() {
 			string sceneName = activeSceneName;
 			if (!Application.isPlaying) {
-				if (enumToSceneName == null) {
-					PopulateScenes();
-				}
-
-				sceneName = enumToSceneName[startingScene];
+				sceneName = startingScene.ToName();
 			}
 
 			return sceneName;
@@ -202,7 +208,7 @@ namespace LevelManagement {
 		}
 
 		// Hijacking this to display level banner on load, even when it's already the active scene
-		LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[sceneName]);
+		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
 #if UNITY_EDITOR
 		if (EditorApplication.isPlaying)
 #endif
@@ -210,17 +216,46 @@ namespace LevelManagement {
 		}
 #endregion
 		[SerializeField]
-		List<Level> allLevels;
+		public List<Level> allLevels;
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build
 		Dictionary<string, Level> levels;
-		Dictionary<Levels, string> enumToSceneName;
-		public Dictionary<string, Levels> sceneNameToEnum;
+		internal static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
+			{ Levels.ManagerScene, "_ManagerScene" },
+			{ Levels.TestScene, "_TestScene" },
+			{ Levels.EmptyRoom, "_EmptyRoom" },
+			{ Levels.HexPillarRoom, "_HexPillarRoom" },
+			{ Levels.Library, "_Library" },
+			{ Levels.Level3, "_Level3" },
+			{ Levels.Level4, "_Level4" },
+			{ Levels.Axis, "_Axis" },
+			{ Levels.Fork, "_Fork" },
+			{ Levels.ForkOctagon, "_ForkOctagon" },
+			{ Levels.ForkWhiteRoom, "_Fork_WhiteRoom" },
+			{ Levels.WhiteRoom1BackRoom, "_WhiteRoom1_BackRoom" },
+			{ Levels.TransitionWhiteRoomFork, "_TransitionWhiteRoom_Fork" },
+			{ Levels.ForkWhiteRoom3, "_Fork_WhiteRoom3" },
+			{ Levels.ForkWhiteRoom2, "_Fork_WhiteRoom2" },
+			{ Levels.ForkWhiteRoomBlackHallway, "_WhiteRoom_BlackHallway" },
+			{ Levels.BehindForkTransition, "_BehindForkTransition" },
+			{ Levels.ForkBlackRoom, "_Fork_BlackRoom" },
+			{ Levels.ForkBlackRoom2, "_Fork_BlackRoom2" },
+			{ Levels.InvisFloor, "_InvisFloor" },
+			{ Levels.TutorialHallway, "_TutorialHallway" },
+			{ Levels.TutorialRoom, "_TutorialRoom" },
+			{ Levels.Transition23, "_Transition2_3" },
+			{ Levels.Transition34, "_Transition3_4" },
+			{ Levels.MetaEdgeDetection, "_Meta_EdgeDetection" },
+			{ Levels.PortalTestScene, "PortalTestScene" }
+		};
 		public string activeSceneName;
-		public Levels ActiveScene => GetLevel(activeSceneName);
+		public Levels ActiveScene => activeSceneName.ToLevel();
 		public List<string> loadedSceneNames;
 		public List<string> currentlyLoadingSceneNames;
 		public List<string> currentlyUnloadingSceneNames;
 		QueuedSceneSwitch queuedActiveSceneSwitch;
+		
+		public bool isCurrentlySwitchingScenes;
+
 		[Serializable]
 		class QueuedSceneSwitch {
 			readonly string levelName;
@@ -295,14 +330,19 @@ namespace LevelManagement {
 			currentlyLoadingSceneNames = new List<string>();
 			currentlyUnloadingSceneNames = new List<string>();
 
-			PopulateScenes();
-
+#if UNITY_EDITOR || TEST_BUILD
+			levels = allLevels.ToDictionary(l => l.level.ToName(), l => l);
+#else
+			levels = allLevels.Where(l => l.level.ToName().ToLower().Contains("test")).ToDictionary(l => l.level, l => l);
+#endif
+			
 #if UNITY_EDITOR
 			PopulateAlreadyLoadedScenes();
 #endif
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
 			SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
 			SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
 			SceneManager.sceneUnloaded += FinishUnloadingScene;
@@ -395,6 +435,10 @@ namespace LevelManagement {
 				debug.LogWarning("Level " + levelName + " already the active scene.");
 				return;
 			}
+
+			isCurrentlySwitchingScenes = true;
+			// Immediately turn on the loading icon instead of waiting for a frame into the loading
+			LoadingIcon.instance.state = LoadingIcon.State.Loading;
 			
 			Debug.Log($"Switching to level {levelName}");
 
@@ -403,7 +447,7 @@ namespace LevelManagement {
 			activeSceneName = levelName;
 
 			if (playBanner) {
-				LevelChangeBanner.instance.PlayBanner(sceneNameToEnum[activeSceneName]);
+				LevelChangeBanner.instance.PlayBanner(enumToSceneName[activeSceneName]);
 			}
 
 			// First unload any scene no longer needed
@@ -471,32 +515,8 @@ namespace LevelManagement {
 					AfterSceneRestoreState?.Invoke(sceneToBeLoaded);
 				}
 			}
-		}
-
-		public string GetSceneName(Levels level) {
-			return enumToSceneName[level];
-		}
-
-		public Levels GetLevel(string sceneName) {
-			return sceneNameToEnum[sceneName];
-		}
-
-		void PopulateScenes() {
-#if UNITY_EDITOR || TEST_BUILD
-			levels = allLevels.ToDictionary(l => l.levelName, l => l);
-#else
-			levels = allLevels.Where(l => l.levelName.ToLower().Contains("test")).ToDictionary(l => l.level, l => l);
-#endif
-			enumToSceneName = new Dictionary<Levels, string>();
-			sceneNameToEnum = new Dictionary<string, Levels>();
-
-			foreach (var level in levels) {
-				sceneNameToEnum[level.Key] = level.Value.level;
-			}
-
-			foreach (var kv in sceneNameToEnum) {
-				enumToSceneName[kv.Value] = kv.Key;
-			}
+			
+			isCurrentlySwitchingScenes = false;
 		}
 
 		/// <summary>

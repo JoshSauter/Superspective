@@ -18,8 +18,8 @@ namespace LevelSpecific.Transition2_3 {
 		void Start() {
 			fog = Camera.main.GetComponent<GlobalFog>();
 
-			trigger.OnMagicTriggerStayOneTime += (ctx) => ToggleForward();
-			trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ToggleBackward();
+			trigger.OnMagicTriggerStayOneTime += ToggleForward;
+			trigger.OnNegativeMagicTriggerStayOneTime += ToggleBackward;
 		}
 
 		void ToggleForward() {

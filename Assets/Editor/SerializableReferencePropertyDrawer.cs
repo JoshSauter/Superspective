@@ -5,6 +5,7 @@ using System.Linq;
 using Saving;
 using SerializableClasses;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Editor {
@@ -70,6 +71,10 @@ namespace Editor {
             }
             
             List<SaveableObject> FindObjectById(string sceneName, string id) {
+                if (!EditorSceneManager.GetSceneByName(sceneName).isLoaded) {
+                    return new List<SaveableObject>();
+                }
+                
                 List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
                     .Where(s => HasValidId(s) && s.ID.Contains(id))
                     .Where(s => s.gameObject.scene.name == sceneName)

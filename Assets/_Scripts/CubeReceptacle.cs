@@ -6,7 +6,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> {
+public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave>, AudioJobOnGameObject {
     public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 
     public delegate void CubeReceptacleActionSimple();
@@ -30,7 +30,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     public float receptableDepth = 0.5f;
     public PickupObject cubeInReceptacle;
     public bool playSound = true;
-    UniqueId _id;
     State _state = State.Empty;
 
     ColorCoded colorCoded;
@@ -42,13 +41,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     Quaternion startRot;
 
     BoxCollider triggerZone;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public State state {
         get => _state;
@@ -79,6 +71,8 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     }
 
     public bool isCubeInReceptacle => cubeInReceptacle != null;
+    
+    public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
     protected override void Start() {
         base.Start();
@@ -221,7 +215,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         endPos = transform.TransformPoint(0, transform.InverseTransformPoint(startPos).y, 0);
 
         if (playSound) {
-            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, gameObject);
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, this);
         }
 
         state = State.CubeEnterRotate;
@@ -233,7 +227,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         state = State.CubeExiting;
 
         if (playSound) {
-            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, this);
         }
 
         startPos = cubeInReceptacle.transform.position;
@@ -260,7 +254,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         state = State.CubeExiting;
 
         if (playSound) {
-            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, gameObject);
+            AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleExit, ID, this);
         }
 
         cubeInReceptacle.shouldFollow = false;
@@ -276,8 +270,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     }
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"CubeReceptacle_{id.uniqueId}";
 
     [Serializable]
     public class CubeReceptacleSave : SerializableSaveObject<CubeReceptacle> {

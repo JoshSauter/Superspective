@@ -338,7 +338,12 @@ namespace Saving {
             
             serializedSaveObjects.Clear();
             foreach (SaveableObject saveableObject in saveableObjects.Values) {
-                serializedSaveObjects[saveableObject.ID] = saveableObject.GetSaveObject();
+                try {
+                    serializedSaveObjects[saveableObject.ID] = saveableObject.GetSaveObject();
+                }
+                catch (Exception e) {
+                    Debug.LogError($"Error while trying to get save object for {saveableObject} in scene {sceneName}:\n{e}");
+                }
             }
             saveableObjects.Clear();
             

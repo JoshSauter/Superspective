@@ -44,6 +44,11 @@ namespace Saving {
             Debug.Log($"--- Loading Save File: {saveName} ---");
             
             isCurrentlyLoadingSave = true;
+            
+            if (LevelManager.instance.IsCurrentlyLoadingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
+                Debug.Log("Waiting for in-progress scene loading to finish before starting load...");
+                await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes && !LevelManager.instance.isCurrentlySwitchingScenes);
+            }
 
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
             Time.timeScale = 0f;

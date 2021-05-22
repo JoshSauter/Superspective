@@ -27,7 +27,7 @@ namespace LevelSpecific.BlackRoom {
 				PausePortalRendering();
 			}
 			enableDoor.OnDoorOpenStart += ResumePortalRendering;
-			disableTrigger.OnMagicTriggerStayOneTime += ctx => PausePortalRendering();
+			disableTrigger.OnMagicTriggerStayOneTime += PausePortalRendering;
 		}
 
 		void ResumePortalRendering() {

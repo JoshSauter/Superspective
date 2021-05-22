@@ -16,16 +16,6 @@ public enum VisibilityState {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
-	UniqueId _id;
-	public UniqueId id {
-		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
-			}
-			return _id;
-		}
-	}
-
 	public bool treatChildrenAsOneObjectRecursively = false;
 	public bool ignoreChildrenWithDimensionObject = true;
 
@@ -328,7 +318,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	#endregion
 
 	#region Saving
-	public override string ID => $"DimensionObject_{id.uniqueId}";
 
 	[Serializable]
 	public class DimensionObjectSave : SerializableSaveObject<DimensionObject> {

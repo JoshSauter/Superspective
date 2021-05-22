@@ -10,7 +10,7 @@ public class TogglePillarOnButtonPress : MonoBehaviour {
     void Start() {
         thisButton = GetComponent<Button>();
         thisButton.OnButtonPressBegin += ToggleActivePillarPress;
-        thisButton.OnButtonDepressBegin += ToggleActivePillarDepress;
+        thisButton.OnButtonUnpressBegin += ToggleActivePillarUnpress;
     }
 
     void ToggleActivePillarPress(Button b) {
@@ -18,7 +18,7 @@ public class TogglePillarOnButtonPress : MonoBehaviour {
         buttonDepressedPillar.enabled = false;
     }
 
-    void ToggleActivePillarDepress(Button b) {
+    void ToggleActivePillarUnpress(Button b) {
         buttonPressedPillar.enabled = false;
         buttonDepressedPillar.enabled = true;
     }

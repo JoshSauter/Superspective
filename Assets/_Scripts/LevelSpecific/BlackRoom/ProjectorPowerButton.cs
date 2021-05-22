@@ -22,7 +22,7 @@ namespace LevelSpecific.BlackRoom {
 			yield return null;
 			b = GetComponent<Button>();
 			b.OnButtonPressBegin += ctx => TurnOnPowerTrail();
-			b.OnButtonDepressBegin += ctx => TurnOffPowerTrail();
+			b.OnButtonUnpressBegin += ctx => TurnOffPowerTrail();
 			powerTrail.OnPowerFinish += TurnOnProjector;
 			powerTrail.OnDepowerBegin += TurnOffProjector;
 

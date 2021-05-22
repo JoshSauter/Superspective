@@ -8,18 +8,10 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
     public float minSize = 1f;
     public float maxSize = 1f;
     public float period = 3f;
-    UniqueId _id;
 
     Vector3 startScale;
 
     float timeElapsed;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     // Update is called once per frame
     void Update() {
@@ -41,7 +33,6 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
     }
 
 #region Saving
-    public override string ID => $"ObjectScale_{id.uniqueId}";
 
     [Serializable]
     public class ObjectScaleSave : SerializableSaveObject<ObjectScale> {

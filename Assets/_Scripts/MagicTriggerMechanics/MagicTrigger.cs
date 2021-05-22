@@ -12,24 +12,13 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave> {
-		UniqueId _id;
-
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
-
 		[HorizontalLine(color: EColor.Yellow)]
 		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
 		[HorizontalLine(color: EColor.Green)]
 		public List<TriggerAction> actionsToTrigger = new List<TriggerAction>();
 
 		#region events
-		public delegate void MagicAction(GameObject player);
+		public delegate void MagicAction();
 		// These events are fired when the trigger condition specified is met
 		public MagicAction OnMagicTriggerStay;
 		public MagicAction OnMagicTriggerEnter;
@@ -72,27 +61,27 @@ namespace MagicTriggerMechanics {
 					debug.Log($"Triggering MagicTrigger for {gameObject.name}!");
 
 					ExecuteActionsForTiming(ActionTiming.EveryFrameOnStay);
-					OnMagicTriggerStay?.Invoke(player);
+					OnMagicTriggerStay?.Invoke();
 					if (!hasTriggeredOnStay) {
 						hasTriggeredOnStay = true;
 						hasNegativeTriggeredOnStay = false;
 
 						ExecuteActionsForTiming(ActionTiming.OnceWhileOnStay);
-						OnMagicTriggerStayOneTime?.Invoke(player);
+						OnMagicTriggerStayOneTime?.Invoke();
 					}
 				}
 				// Negative Magic Events triggered (negative triggers cannot turn self off)
 				else if (allConditionsNegativelySatisfied) {
 					debug.Log("Triggering NegativeMagicTrigger!");
 					ExecuteNegativeActionsForTiming(ActionTiming.EveryFrameOnStay);
-					OnNegativeMagicTriggerStay?.Invoke(player);
+					OnNegativeMagicTriggerStay?.Invoke();
 
 					if (!hasNegativeTriggeredOnStay) {
 						hasNegativeTriggeredOnStay = true;
 						hasTriggeredOnStay = false;
 
 						ExecuteNegativeActionsForTiming(ActionTiming.OnceWhileOnStay);
-						OnNegativeMagicTriggerStayOneTime?.Invoke(player);
+						OnNegativeMagicTriggerStayOneTime?.Invoke();
 					}
 				}
 			}
@@ -111,11 +100,11 @@ namespace MagicTriggerMechanics {
 				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
 				if (allConditionsSatisfied) {
 					ExecuteActionsForTiming(ActionTiming.OnEnter);
-					OnMagicTriggerEnter?.Invoke(player);
+					OnMagicTriggerEnter?.Invoke();
 				}
 				else if (allConditionsNegativelySatisfied) {
 					ExecuteNegativeActionsForTiming(ActionTiming.OnEnter);
-					OnNegativeMagicTriggerEnter?.Invoke(player);
+					OnNegativeMagicTriggerEnter?.Invoke();
 				}
 			}
 		}
@@ -127,7 +116,7 @@ namespace MagicTriggerMechanics {
 				GameObject player = other.gameObject;
 				ExecuteActionsForTiming(ActionTiming.OnExit);
 				ExecuteNegativeActionsForTiming(ActionTiming.OnExit);
-				OnMagicTriggerExit?.Invoke(player);
+				OnMagicTriggerExit?.Invoke();
 
 				if (hasTriggeredOnStay) {
 					hasTriggeredOnStay = false;
@@ -160,15 +149,6 @@ namespace MagicTriggerMechanics {
 		}
 
 		#region Saving
-		public override string ID {
-			get {
-				if (id == null || id.uniqueId == null) {
-					throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
-				}
-				return $"MagicTrigger_{id.uniqueId}";
-			}
-		}
-		//public string ID => $"MagicTrigger_{id.uniqueId}";
 
 		[Serializable]
 		public class MagicTriggerSave : SerializableSaveObject<MagicTrigger> {

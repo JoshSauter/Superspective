@@ -8,11 +8,19 @@ using UnityEditor;
 #endif
 
 public class GameManager : Singleton<GameManager> {
+    // There are lots of ways the game can be in a loading state, this aggregates all of them into one
+    public bool IsCurrentlyLoading =>
+        !gameHasLoaded ||
+        LevelManager.instance.IsCurrentlyLoadingScenes ||
+        LevelManager.instance.isCurrentlySwitchingScenes ||
+        SaveManager.isCurrentlyLoadingSave;
+    
     public bool gameHasLoaded = false;
     IEnumerator Start() {
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
         SaveManager.GetOrCreateSaveManagerForScene(gameObject.scene.name);
         yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+        yield return new WaitUntil(() => !LevelManager.instance.isCurrentlySwitchingScenes);
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;

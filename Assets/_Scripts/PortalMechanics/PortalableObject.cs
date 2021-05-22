@@ -12,16 +12,6 @@ using SerializableClasses;
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
-		UniqueId _id;
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
-
 		Portal _sittingInPortal;
 		Portal _hoveredThroughPortal;
 		Portal _grabbedThroughPortal;
@@ -285,8 +275,6 @@ namespace PortalMechanics {
 
 
 		#region Saving
-		// All components on PickupCubes share the same uniqueId so we need to qualify with component name
-		public override string ID => $"PortalableObject_{id.uniqueId}";
 
 		[Serializable]
 		public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {

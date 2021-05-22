@@ -12,6 +12,8 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
+	public UniqueId uniqueId => id;
+	
 	[SerializeField]
 	[Range(0, 7)]
 	int _dimension = 0;
@@ -113,6 +115,7 @@ public class PillarDimensionObject : DimensionObject {
 						// Only consider pillars which are loaded and enabled
 						.Where(pillarRef => pillarRef.GetOrNull()?.enabled ?? false)
 						.Select(pillarRef => pillarRef.GetOrNull())
+						.Where(pillar => pillar.IsInActiveScene())
 						// Find the closest pillar
 						.OrderBy(pillar => Vector3.Distance(pillar.transform.position, transform.position))
 						.FirstOrDefault();
@@ -431,7 +434,6 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	#region Saving
-	public override string ID => $"PillarDimensionObject_{id.uniqueId}";
 
 	[Serializable]
 	public class PillarDimensionObjectSave : DimensionObjectSave {

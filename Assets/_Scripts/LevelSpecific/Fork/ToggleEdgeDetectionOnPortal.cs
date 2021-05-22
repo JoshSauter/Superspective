@@ -27,8 +27,8 @@ namespace LevelSpecific.Fork {
 				edgeColorGradientTexture = outPortal.edgeColorGradientTexture
 			};
 
-			trigger.OnMagicTriggerStayOneTime += (ctx) => ResetInPortalEdgeDetection();
-			trigger.OnNegativeMagicTriggerStayOneTime += (ctx) => ResetOutPortalEdgeDetection();
+			trigger.OnMagicTriggerStayOneTime += ResetInPortalEdgeDetection;
+			trigger.OnNegativeMagicTriggerStayOneTime += ResetOutPortalEdgeDetection;
 		}
 
 		void ResetInPortalEdgeDetection() {

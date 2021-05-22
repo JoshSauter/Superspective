@@ -6,7 +6,7 @@ using UnityEngine;
 using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
-public class Panel : SaveableObject<Panel, Panel.PanelSave> {
+public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
     public enum State {
         Deactivated,
         Activating,
@@ -21,7 +21,6 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     readonly float maxVolume = 1f;
     readonly float minPitch = 0.5f;
     readonly float minVolume = 0.25f;
-    UniqueId _id;
     State _state;
 
     // Sound settings
@@ -30,13 +29,6 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     Color startColor, endColor;
     SuperspectiveRenderer thisRenderer;
     float timeSinceStateChange;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public State state {
         get => _state;
@@ -84,12 +76,12 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
     protected override void Start() {
         base.Start();
         gemButton.OnButtonPressFinish += ctx => PanelActivate();
-        gemButton.OnButtonDepressBegin += ctx => PanelDeactivate();
+        gemButton.OnButtonUnpressBegin += ctx => PanelDeactivate();
 
         gemButton.OnButtonPressBegin += ctx => soundActivated = true;
-        gemButton.OnButtonDepressBegin += ctx => soundActivated = false;
+        gemButton.OnButtonUnpressBegin += ctx => soundActivated = false;
 
-        AudioManager.instance.PlayWithUpdate(AudioName.PanelHum, ID, UpdateSound);
+        AudioManager.instance.PlayWithUpdate(AudioName.PanelHum, ID, this);
     }
 
     void Update() {
@@ -126,9 +118,9 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
         }
     }
 
-    void UpdateSound(AudioJob audioJob) {
+    public void UpdateAudio(AudioJob audioJob) {
         if (this == null || gameObject == null) {
-            audioJob.removeSound = true;
+            audioJob.Stop();
             return;
         }
 
@@ -180,7 +172,6 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave> {
 #endregion
 
 #region Saving
-    public override string ID => $"Panel_{id.uniqueId}";
 
     [Serializable]
     public class PanelSave : SerializableSaveObject<Panel> {

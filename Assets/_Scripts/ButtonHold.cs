@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ButtonHold : Button {
     bool buttonHeld;
@@ -14,46 +15,33 @@ public class ButtonHold : Button {
     public event ButtonAction OnButtonHeld;
 #endregion
 
-    protected override void UpdateButton() {
+    protected override void UpdateState() {
         if (timeSinceStateChange == 0 && state == State.ButtonPressing) buttonHeld = true;
-
-        timeSinceStateChange += Time.deltaTime;
+        
         switch (state) {
-            case State.ButtonDepressed:
-                break;
-            case State.ButtonPressed:
-                if (depressAfterPress && timeSinceStateChange > timeBetweenPressEndDepressStart || !buttonHeld)
-                    state = State.ButtonDepressing;
+            case State.ButtonUnpressed:
                 break;
             case State.ButtonPressing:
-                if (timeSinceStateChange < timeToPressButton) {
-                    float t = timeSinceStateChange / timeToPressButton;
-
-                    transform.position = Vector3.Lerp(depressedPos, pressedPos, buttonPressCurve.Evaluate(t));
-                }
-                else {
-                    transform.position = pressedPos;
+                if (timeSinceStateChange > timeToPressButton) {
                     state = State.ButtonPressed;
                 }
-
                 break;
-            case State.ButtonDepressing:
-                buttonHeld = false;
-                if (timeSinceStateChange < timeToDepressButton) {
-                    float t = timeSinceStateChange / timeToDepressButton;
-
-                    transform.position = Vector3.Lerp(pressedPos, depressedPos, buttonDepressCurve.Evaluate(t));
+            case State.ButtonPressed:
+                if (unpressAfterPress && timeSinceStateChange > timeBetweenPressEndDepressStart || !buttonHeld) {
+                    state = State.ButtonUnpressing;
                 }
-                else {
-                    transform.position = pressedPos;
-                    state = State.ButtonDepressed;
-                }
-
                 break;
+            case State.ButtonUnpressing:
+                if (timeSinceStateChange > timeToUnpressButton) {
+                    state = State.ButtonUnpressed;
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-    }
 
-    protected void TriggerButtonHeldEvents() {
-        if (OnButtonHeld != null) OnButtonHeld(this);
+        if (buttonHeld) {
+            OnButtonHeld?.Invoke(this);
+        }
     }
 }

@@ -2808,6 +2808,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79cbd88b49b61534f87292c6667d61f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
 --- !u!4 &298879240
 Transform:
   m_ObjectHideFlags: 0
@@ -3448,87 +3449,62 @@ MonoBehaviour:
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
-    levelName: _ManagerScene
     connectedLevels: 
   - level: 1
-    levelName: _TestScene
     connectedLevels: 
   - level: 2
-    levelName: _EmptyRoom
     connectedLevels: 07000000
   - level: 3
-    levelName: _HexPillarRoom
     connectedLevels: 0700000004000000
   - level: 4
-    levelName: _Library
     connectedLevels: 0300000007000000
   - level: 5
-    levelName: _Level3
     connectedLevels: 090000000a000000
   - level: 6
-    levelName: _Level4
     connectedLevels: 0a000000
   - level: 11
-    levelName: _Axis
     connectedLevels: 0700000008000000
   - level: 12
-    levelName: _Fork
-    connectedLevels: 150000000d0000000e00000016000000
+    connectedLevels: 150000000d0000000e000000160000000c0000000c0000000c0000000c000000
   - level: 22
-    levelName: _ForkOctagon
-    connectedLevels: 150000000c000000
+    connectedLevels: 150000000c000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000
   - level: 13
-    levelName: _Fork_WhiteRoom
     connectedLevels: 0c0000001000000018000000
   - level: 24
-    levelName: _WhiteRoom1_BackRoom
     connectedLevels: 0d00000015000000
   - level: 21
-    levelName: _TransitionWhiteRoom_Fork
-    connectedLevels: 180000001400000016000000
+    connectedLevels: 180000001400000016000000150000001500000015000000150000001500000015000000150000001500000015000000150000001500000015000000150000001500000015000000150000001500000015000000
   - level: 20
-    levelName: _Fork_WhiteRoom3
     connectedLevels: 12000000
   - level: 18
-    levelName: _Fork_WhiteRoom2
     connectedLevels: 13000000
   - level: 19
-    levelName: _WhiteRoom_BlackHallway
     connectedLevels: 1200000019000000
   - level: 25
-    levelName: _BehindForkTransition
     connectedLevels: 130000001500000016000000
   - level: 14
-    levelName: _Fork_BlackRoom
     connectedLevels: 0c000000
   - level: 23
-    levelName: _Fork_BlackRoom2
     connectedLevels: 
   - level: 15
-    levelName: _InvisFloor
     connectedLevels: 
   - level: 7
-    levelName: _TutorialHallway
     connectedLevels: 0200000008000000
   - level: 8
-    levelName: _TutorialRoom
     connectedLevels: 070000000b000000
   - level: 9
-    levelName: _Transition2_3
     connectedLevels: 0300000005000000
   - level: 10
-    levelName: _Transition3_4
     connectedLevels: 0500000006000000
   - level: 16
-    levelName: _Meta_EdgeDetection
     connectedLevels: 0d000000
   - level: 17
-    levelName: PortalTestScene
     connectedLevels: 
   activeSceneName: 
   loadedSceneNames: []
   currentlyLoadingSceneNames: []
   currentlyUnloadingSceneNames: []
+  isCurrentlySwitchingScenes: 0
 --- !u!1 &394815695
 GameObject:
   m_ObjectHideFlags: 0
@@ -5523,7 +5499,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.5, z: 32.5}
+  m_LocalPosition: {x: 0, y: -396.5, z: 36.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1554336841}
@@ -5531,7 +5507,7 @@ Transform:
   - {fileID: 1308027151}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5647,6 +5623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b72f45e6bf997824b9b3b9ace2db3ed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   volumeDelta: 0.3
   minSpeed: 6
   maxSpeed: 40
@@ -6213,6 +6190,95 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &723189107
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 723189108}
+  - component: {fileID: 723189110}
+  - component: {fileID: 723189109}
+  - component: {fileID: 723189111}
+  m_Layer: 5
+  m_Name: LoadingIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &723189108
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723189107}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1535199396}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.9, y: 0.05}
+  m_AnchorMax: {x: 1, y: 0.25}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &723189109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723189107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: 95da03e9302312a4491910cbf55e5b09, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: f8d2d8ee0bcc7c74fb7324ea5cf409ce, type: 3}
+  m_Type: 3
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &723189110
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723189107}
+  m_CullTransparentMesh: 1
+--- !u!114 &723189111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723189107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a6fd1891b9a62b4db316f5bf1878e80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
 --- !u!1 &730404353
 GameObject:
   m_ObjectHideFlags: 0
@@ -13211,6 +13277,7 @@ RectTransform:
   - {fileID: 293964183}
   - {fileID: 1280100046}
   - {fileID: 1038374369}
+  - {fileID: 723189108}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -13534,7 +13601,7 @@ Camera:
   m_Depth: -2
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1572864
+    m_Bits: 1572928
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -15270,7 +15337,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 792640567
+    m_Bits: 792640631
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -15457,7 +15524,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
@@ -17966,7 +18033,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh27662
+  m_Name: pb_Mesh18622
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

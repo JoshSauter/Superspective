@@ -7,17 +7,6 @@ using System;
 
 [RequireComponent(typeof(UniqueId))]
 public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimensionCube.MultiDimensionCubeSave> {
-	UniqueId _id;
-
-	UniqueId id {
-		get {
-			if (_id == null) {
-				_id = GetComponent<UniqueId>();
-			}
-			return _id;
-		}
-	}
-
 	public enum State {
 		Materialized,
 		Materializing
@@ -97,8 +86,8 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
 
 		DynamicObjectManager.OnDynamicObjectCreated += SetUniqueIdsUponCreation;
-		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
-		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
+		corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
+		invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
 	}
 
 	protected override void OnDestroy() {
@@ -108,14 +97,14 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 
 	void SetUniqueIdsUponCreation(string id) {
 		if (id == this.id.uniqueId) {
-			corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
-			invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
+			corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
+			invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
 		}
 	}
 
 	protected override void Start() {
-		corporealCubeDimensionObj.id.uniqueId = $"CorporealCube_{ID}";
-		invertedCubeDimensionObj.id.uniqueId = $"InvertedCube_{ID}";
+		corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
+		invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
 		base.Start();
 		
 		pickupCube.OnPickupSimple += OnPickup;
@@ -251,7 +240,6 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 	}
 
 	#region Saving
-	public override string ID => $"MultiDimensionCube_{id.uniqueId}";
 
 	[Serializable]
 	public class MultiDimensionCubeSave : SerializableSaveObject<MultiDimensionCube> {

@@ -1,20 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Saving;
 using UnityEngine;
 
 namespace Audio {
 	[RequireComponent(typeof(Rigidbody))]
-    public class CubeImpactSound : MonoBehaviour {
-		UniqueId _id;
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
-
+    public class CubeImpactSound : SaveableObject, AudioJobOnGameObject {
 		float minSpeed = 5f;
 		float maxSpeed = 25f;
 
@@ -42,7 +33,7 @@ namespace Audio {
 				audio.pitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
 			}
 
-			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, gameObject, shouldPlay, AudioSettingsOverride);
+			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, this, shouldPlay, AudioSettingsOverride);
 			timeSinceLastSound = 0f;
 			curVolume = nextVolume;
 		}
@@ -50,5 +41,7 @@ namespace Audio {
 		void Update() {
 			timeSinceLastSound += Time.deltaTime;
 		}
-	}
+
+		public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
+    }
 }

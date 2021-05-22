@@ -12,7 +12,6 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
     public float maxDisplacementRight;
     public float period = 1f;
     public bool hoveringPaused;
-    UniqueId _id;
 
     Vector3 displacementCounter = Vector3.zero;
     Vector3 forward;
@@ -20,13 +19,6 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
 
     float timeElapsed;
     Vector3 up;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     // Use this for initialization
     protected override void Awake() {
@@ -56,7 +48,6 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
     }
 
 #region Saving
-    public override string ID => $"ObjectHover_{id.uniqueId}";
 
     [Serializable]
     public class ObjectHoverSave : SerializableSaveObject<ObjectHover> {

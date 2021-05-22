@@ -7,10 +7,36 @@ using UnityEngine;
 
 namespace Saving {
     public abstract class SaveableObject : MonoBehaviour, ISaveableObject {
-        public abstract string ID { get; }
-        public abstract SerializableSaveObject GetSaveObject();
-        public abstract void RestoreStateFromSave(SerializableSaveObject savedObject);
-        public abstract bool SkipSave { get; set; }
+        UniqueId _id;
+        protected UniqueId id {
+            get {
+                if (_id == null) {
+                    _id = GetComponent<UniqueId>();
+                }
+                return _id;
+            }
+        }
+        public virtual string ID {
+            get {
+                if (id == null || string.IsNullOrEmpty(id.uniqueId)) {
+                    throw new Exception($"{gameObject.name}.{GetType().Name} in {gameObject.scene.name} doesn't have a uniqueId set");
+                }
+                return $"{GetType().Name}_{id.uniqueId}";
+            }
+        }
+
+        public virtual SerializableSaveObject GetSaveObject() {
+            return new SerializableSaveObject(this);
+        }
+
+        public virtual void RestoreStateFromSave(SerializableSaveObject savedObject) {}
+        
+        // Anything that doesn't specify types for associated SerializableSaveObject shouldn't have anything to actually save to disk
+        // Parameterized version SaveableObject<T, S> overrides this to be false
+        public virtual bool SkipSave {
+            get { return true; }
+            set { }
+        }
         /// <summary>
         /// Init is similar to Awake() and Start(), but it is only called after the LevelManager is done loading scenes
         /// Or, on SceneManagerForScene.AfterSceneRestoreState, whichever one happens first
@@ -34,8 +60,7 @@ namespace Saving {
         protected bool hasInitialized = false;
         bool hasRegistered = false;
         
-        [SerializeField]
-        protected bool DEBUG = false;
+        public bool DEBUG = false;
         DebugLogger _debug;
         public DebugLogger debug => _debug ??= new DebugLogger(gameObject, () => DEBUG);
 
@@ -89,8 +114,7 @@ namespace Saving {
         }
 
         IEnumerator InitCoroutine() {
-            yield return new WaitUntil(() => GameManager.instance.gameHasLoaded);
-            yield return new WaitWhile(() => LevelManager.instance.IsCurrentlyLoadingScenes);
+            yield return new WaitWhile(() => GameManager.instance.IsCurrentlyLoading);
             if (!hasInitialized) {
                 Init();
                 hasInitialized = true;

@@ -38,6 +38,17 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class DictionaryExt {
+        public static Dictionary<K, V2> MapValues<K, V1, V2>(this Dictionary<K, V1> source, Func<V1, V2> transform) {
+            Dictionary<K, V2> target = new Dictionary<K, V2>();
+            foreach (var kv in source) {
+                target[kv.Key] = transform(kv.Value);
+            }
+
+            return target;
+        }
+    }
+
     public static class Utils {
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> keyValuePairs) {
             return keyValuePairs.ToDictionary(kv => kv.Key, kv => kv.Value);

@@ -8,6 +8,7 @@ using System;
 using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
+using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom {
     public class WhiteRoomPuzzle2 : SaveableObject<WhiteRoomPuzzle2, WhiteRoomPuzzle2.WhiteRoomPuzzle2Save> {
@@ -96,8 +97,11 @@ namespace LevelSpecific.WhiteRoom {
         public bool solved => hexState == HexState.CorrectValue;
         Transform playerCamera;
         public Transform outerHex, innerHex;
-        public Gradient lowerBoundColors;
-        public Gradient upperBoundColors;
+        [FormerlySerializedAs("lowerBoundColors")]
+        public Gradient baseObeliskGradient;
+        [FormerlySerializedAs("upperBoundColors")]
+        [GradientUsageAttribute(true)]
+        public Gradient emissionObeliskGradient;
         public ParticleSystem outerParticles, innerParticles;
         public ParticleSystem laserToReceiverStart, laserToReceiver;
         RotateObject outerHexRotate, innerHexRotate;
@@ -335,10 +339,10 @@ namespace LevelSpecific.WhiteRoom {
             else {
                 float t = Mathf.InverseLerp(-80f, 80f, displayedValue);
                 ParticleSystem.MainModule outerParticlesMain = outerParticles.main;
-                outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(lowerBoundColors.Evaluate(t), upperBoundColors.Evaluate(t));
+                outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
 
                 ParticleSystem.MainModule innerParticlesMain = innerParticles.main;
-                innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(lowerBoundColors.Evaluate(t), upperBoundColors.Evaluate(t));
+                innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
             }
         }
 
@@ -356,17 +360,17 @@ namespace LevelSpecific.WhiteRoom {
         /// Populates _ColorGradient with the colors of each colorKey in lowerBoundColors (as well as values for the times filled in as described above)
         /// </summary>
         void SetObeliskLightColorGradients() {
-            Color startColor = lowerBoundColors.Evaluate(0);
-            Color endColor = lowerBoundColors.Evaluate(1);
+            Color startColor = baseObeliskGradient.Evaluate(0);
+            Color endColor = baseObeliskGradient.Evaluate(1);
             float startAlpha = startColor.a;
             float endAlpha = endColor.a;
 
-            obeliskLightMaterial.SetFloatArray("_ColorGradientKeyTimes", GetGradientFloatValues(0f, lowerBoundColors.colorKeys.Select(x => x.time), 1f));
-            obeliskLightMaterial.SetColorArray("_ColorGradient", GetGradientColorValues(startColor, lowerBoundColors.colorKeys.Select(x => x.color), endColor));
-            obeliskLightMaterial.SetFloatArray("_AlphaGradientKeyTimes", GetGradientFloatValues(0f, lowerBoundColors.alphaKeys.Select(x => x.time), 1f));
-            obeliskLightMaterial.SetFloatArray("_AlphaGradient", GetGradientFloatValues(startAlpha, lowerBoundColors.alphaKeys.Select(x => x.alpha), endAlpha));
+            obeliskLightMaterial.SetFloatArray("_ColorGradientKeyTimes", GetGradientFloatValues(0f, baseObeliskGradient.colorKeys.Select(x => x.time), 1f));
+            obeliskLightMaterial.SetColorArray("_ColorGradient", GetGradientColorValues(startColor, baseObeliskGradient.colorKeys.Select(x => x.color), endColor));
+            obeliskLightMaterial.SetFloatArray("_AlphaGradientKeyTimes", GetGradientFloatValues(0f, baseObeliskGradient.alphaKeys.Select(x => x.time), 1f));
+            obeliskLightMaterial.SetFloatArray("_AlphaGradient", GetGradientFloatValues(startAlpha, baseObeliskGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 
-            obeliskLightMaterial.SetInt("_ColorGradientMode", lowerBoundColors.mode == GradientMode.Blend ? 0 : 1);
+            obeliskLightMaterial.SetInt("_ColorGradientMode", baseObeliskGradient.mode == GradientMode.Blend ? 0 : 1);
         }
 
         /// <summary>
@@ -375,17 +379,17 @@ namespace LevelSpecific.WhiteRoom {
         /// Populates _ColorGradient with the colors of each colorKey in lowerBoundColors (as well as values for the times filled in as described above)
         /// </summary>
         void SetObeliskLightEmissionColorGradients() {
-            Color startColor = upperBoundColors.Evaluate(0);
-            Color endColor = upperBoundColors.Evaluate(1);
+            Color startColor = emissionObeliskGradient.Evaluate(0);
+            Color endColor = emissionObeliskGradient.Evaluate(1);
             float startAlpha = startColor.a;
             float endAlpha = endColor.a;
 
-            obeliskLightMaterial.SetFloatArray("_EmissionColorGradientKeyTimes", GetGradientFloatValues(0f, upperBoundColors.colorKeys.Select(x => x.time), 1f));
-            obeliskLightMaterial.SetColorArray("_EmissionColorGradient", GetGradientColorValues(startColor, upperBoundColors.colorKeys.Select(x => x.color), endColor));
-            obeliskLightMaterial.SetFloatArray("_EmissionAlphaGradientKeyTimes", GetGradientFloatValues(0f, upperBoundColors.alphaKeys.Select(x => x.time), 1f));
-            obeliskLightMaterial.SetFloatArray("_EmissionAlphaGradient", GetGradientFloatValues(startAlpha, upperBoundColors.alphaKeys.Select(x => x.alpha), endAlpha));
+            obeliskLightMaterial.SetFloatArray("_EmissionColorGradientKeyTimes", GetGradientFloatValues(0f, emissionObeliskGradient.colorKeys.Select(x => x.time), 1f));
+            obeliskLightMaterial.SetColorArray("_EmissionColorGradient", GetGradientColorValues(startColor, emissionObeliskGradient.colorKeys.Select(x => x.color), endColor));
+            obeliskLightMaterial.SetFloatArray("_EmissionAlphaGradientKeyTimes", GetGradientFloatValues(0f, emissionObeliskGradient.alphaKeys.Select(x => x.time), 1f));
+            obeliskLightMaterial.SetFloatArray("_EmissionAlphaGradient", GetGradientFloatValues(startAlpha, emissionObeliskGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 
-            obeliskLightMaterial.SetInt("_EmissionColorGradientMode", upperBoundColors.mode == GradientMode.Blend ? 0 : 1);
+            obeliskLightMaterial.SetInt("_EmissionColorGradientMode", emissionObeliskGradient.mode == GradientMode.Blend ? 0 : 1);
         }
 
         // Actually just populates the float buffer with the values provided, then returns a reference to the float buffer

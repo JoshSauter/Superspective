@@ -11,7 +11,7 @@ public struct ViewLockInfo {
 
 [RequireComponent(typeof(UniqueId))]
 [RequireComponent(typeof(Collider))]
-public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.ViewLockObjectSave> {
+public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.ViewLockObjectSave>, AudioJobOnGameObject {
     public delegate void ViewLockEvent();
 
     public ViewLockInfo[] viewLockOptions;
@@ -19,7 +19,6 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public float viewUnlockTime = 0.25f;
 
     public Collider hitbox;
-    UniqueId _id;
 
     PlayerLook.State _state;
     InteractableObject interactableObject;
@@ -28,13 +27,6 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public ViewLockEvent OnViewLockExitBegin;
     public ViewLockEvent OnViewLockExitFinish;
     Transform playerCamera;
-
-    public UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public PlayerLook.State state {
         get => _state;
@@ -61,6 +53,8 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         }
     }
 
+    public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
+
     bool isLockedOnThisObject => state != PlayerLook.State.ViewUnlocked;
 
     protected override void Awake() {
@@ -85,7 +79,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public void OnLeftMouseButtonDown() {
         if (PlayerLook.instance.state == PlayerLook.State.ViewUnlocked) {
             hitbox.enabled = false;
-            AudioManager.instance.PlayOnGameObject(AudioName.ViewLockObject, ID, gameObject, true);
+            AudioManager.instance.PlayOnGameObject(AudioName.ViewLockObject, ID, this, true);
             PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
             state = PlayerLook.State.ViewLocking;
         }
@@ -118,8 +112,6 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         get => hitbox == null;
         set { }
     }
-
-    public override string ID => $"ViewLockObject_{id.uniqueId}";
 
     [Serializable]
     public class ViewLockObjectSave : SerializableSaveObject<ViewLockObject> {

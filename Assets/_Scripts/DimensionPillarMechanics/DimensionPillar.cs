@@ -111,7 +111,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		}
 	}
 
-	void ShiftDimensionUp() {
+	public void ShiftDimensionUp() {
 		int prevDimension = curDimension;
 		curDimension = NextDimension(curDimension);
 
@@ -121,7 +121,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		debug.Log("Shift to dimension " + curDimension);
 	}
 
-	void ShiftDimensionDown() {
+	public void ShiftDimensionDown() {
 		int prevDimension = curDimension;
 		curDimension = PrevDimension(curDimension);
 
@@ -155,16 +155,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 	#region Saving
-	public override string ID {
-		get {
-			if (uniqueId == null || uniqueId.uniqueId == null) {
-				throw new Exception($"{gameObject.name} in {gameObject.scene.name} doesn't have a uniqueId set");
-			}
-			return $"DimensionPillar_{uniqueId.uniqueId}";
-		}
-	}
-	//public string ID => $"DimensionPillar_{id.uniqueId}";
-
 	[Serializable]
 	public class DimensionPillarSave : SerializableSaveObject<DimensionPillar> {
 		bool initialized;

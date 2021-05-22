@@ -47,7 +47,13 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		for (int i = 0; i < numVisibilityMaskChannels; i++) {
 			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], SuperspectiveScreen.instance.dimensionCameras[i]);
 		}
-		CreateRenderTexture(currentWidth, currentHeight, out portalMaskTexture, SuperspectiveScreen.instance.portalMaskCamera);
+
+		CreateRenderTexture(
+			currentWidth,
+			currentHeight,
+			out portalMaskTexture,
+			SuperspectiveScreen.instance.portalMaskCamera
+		);
 	}
 
 	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {

@@ -9,15 +9,6 @@ using UnityEngine;
 namespace PictureTeleportMechanics {
 	[RequireComponent(typeof(UniqueId))]
     public class BigFrame : SaveableObject<BigFrame, BigFrame.BigFrameSave> {
-		UniqueId _id;
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
 
 		public Renderer frameRenderer;
 		public Collider frameCollider;
@@ -34,7 +25,7 @@ namespace PictureTeleportMechanics {
 				disableFrameTrigger.enabled = true;
 			}
 
-			disableFrameTrigger.OnMagicTriggerStayOneTime += (ctx) => TurnOffFrame();
+			disableFrameTrigger.OnMagicTriggerStayOneTime += TurnOffFrame;
 		}
 
         protected override void Awake() {
@@ -84,7 +75,6 @@ namespace PictureTeleportMechanics {
 		}
 
 		#region Saving
-		public override string ID => $"BigFrame_{id.uniqueId}";
 
 		[Serializable]
 		public class BigFrameSave : SerializableSaveObject<BigFrame> {

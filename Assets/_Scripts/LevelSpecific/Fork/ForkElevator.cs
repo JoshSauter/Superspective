@@ -8,18 +8,7 @@ using UnityEngine;
 
 namespace LevelSpecific.Fork {
 	[RequireComponent(typeof(UniqueId))]
-	public class ForkElevator : SaveableObject<ForkElevator, ForkElevator.ForkElevatorSave> {
-		UniqueId _id;
-
-		UniqueId id {
-			get {
-				if (_id == null) {
-					_id = GetComponent<UniqueId>();
-				}
-				return _id;
-			}
-		}
-		
+	public class ForkElevator : SaveableObject<ForkElevator, ForkElevator.ForkElevatorSave>, AudioJobOnGameObject {
 		public enum State {
 			Idle,
 			DoorsClosing,
@@ -61,13 +50,15 @@ namespace LevelSpecific.Fork {
 		List<PickupObject> otherObjectsInElevator = new List<PickupObject>();
 		bool playerStandingInElevator = false;
 
+		public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
+
 		protected override void Start() {
 			base.Start();
 			raisedHeight = transform.parent.position.y;
 			loweredHeight = raisedHeight - height;
 
 			elevatorButton.OnButtonPressBegin += (ctx) => RaiseLowerElevator(true);
-			elevatorButton.OnButtonDepressBegin += (ctx) => RaiseLowerElevator(false);
+			elevatorButton.OnButtonUnpressBegin += (ctx) => RaiseLowerElevator(false);
 		}
 
 		void FixedUpdate() {
@@ -101,7 +92,7 @@ namespace LevelSpecific.Fork {
 		void UpdateDoorClosingAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				invisibleElevatorWall.SetActive(true);
-				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, ID, gameObject, true);
+				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, ID, this, true);
 				CameraShake.instance.Shake(timeToLockDoors, 0.25f, 0f);
 			}
 
@@ -123,7 +114,7 @@ namespace LevelSpecific.Fork {
 				// Transition state to ElevatorMoving after waiting .1 additional seconds
 				if (timeElapsedSinceStateChange >= totalAnimationTime + 0.1f) {
 					CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
-					AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, gameObject, true);
+					AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, this, true);
 
 					state = State.ElevatorMoving;
 				}
@@ -132,7 +123,7 @@ namespace LevelSpecific.Fork {
 
 		void UpdateDoorOpeningAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
-				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, ID, gameObject, true);
+				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, ID, this, true);
 				CameraShake.instance.Shake(timeToUnlockDoors, 0.25f, 0f);
 			}
 
@@ -214,7 +205,6 @@ namespace LevelSpecific.Fork {
 		}
 
 #region Saving
-		public override string ID => $"Elevator_{id.uniqueId}";
 		
 		[Serializable]
 		public class ForkElevatorSave : SerializableSaveObject<ForkElevator> {
@@ -248,25 +238,6 @@ namespace LevelSpecific.Fork {
 				elevator.curSpeed = this.curSpeed;
 				elevator.playerStandingInElevator = this.playerStandingInElevator;
 				elevator.transform.parent.position = this.position;
-
-				float t = 0f;
-				switch (elevator.state) {
-					case State.ElevatorMoving:
-						t = Mathf.InverseLerp(elevator.loweredHeight, elevator.raisedHeight, elevator.transform.parent.position.y);
-						if (elevator.goingDown) t = 1 - t;
-						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
-						break;
-					case State.DoorsOpening:
-						float totalAnimationTime = timeToUnlockDoors + (elevator.lockBars.Length / 2) * unlockBarDelayTime;
-						t = elevator.timeElapsedSinceStateChange / totalAnimationTime;
-						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
-						break;
-					case State.DoorsClosing:
-						totalAnimationTime = timeToLockDoors + (elevator.lockBars.Length / 2) * lockBarDelayTime;
-						t = elevator.timeElapsedSinceStateChange / totalAnimationTime;
-						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, elevator.ID, elevator.gameObject, false, (audio) => audio.time = t * audio.clip.length);
-						break;
-				}
 			}
 		}
 #endregion

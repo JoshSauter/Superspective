@@ -144,7 +144,7 @@ namespace MagicTriggerMechanics {
 		}
 
 		string PillarKey(Levels level, string name) {
-			return LevelManager.instance.GetSceneName(level) + " " + name;
+			return level.ToName() + " " + name;
 		}
 
 		bool HasTiming(ActionTiming timing) {

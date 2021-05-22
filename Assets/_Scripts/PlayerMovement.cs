@@ -10,7 +10,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave> {
+public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
     // Jump Settings
     public enum JumpState {
         JumpReady,
@@ -74,6 +74,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     [ShowNativeProperty]
     string ground => grounded.ground?.gameObject.name ?? "";
 
+    public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
     protected override void Awake() {
         base.Awake();
@@ -274,7 +275,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     /// </summary>
     void Jump() {
         OnJump?.Invoke();
-        AudioManager.instance.PlayOnGameObject(AudioName.PlayerJump, ID, gameObject);
+        AudioManager.instance.PlayOnGameObject(AudioName.PlayerJump, ID, this);
 
         timeSpentJumping = 0.0f;
         underMinJumpTime = true;

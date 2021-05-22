@@ -5,8 +5,10 @@ Mechanics:
  - PickupCubes which can travel through Portals and around Pillars
  - Can stand on PickupCubes in other dimension
  - Teleporting picture frames
+ - PickupSpheres that power nearby PowerTrail (have to make it travel along the PowerTrail path or something)
 
  Story:
   - Analogue for predetermination and lack of free will, perhaps at the end giving the player a choice that leads to one of two endings
 
   Misc Notes:
+  - Elevator: Subtle, rising shephard's tone when going up, falling shephard's tone when going down in the background

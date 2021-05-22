@@ -99,7 +99,6 @@ Shader "Custom/GradientUnlitEmissive"
 				// sample the texture
 				fixed4 col = GradientColor(i.t);
 
-				// apply fog
 				float t = 2*i.t - 1;
 				float p = 2*_Power - 1;
 				if ((t > 0 && t < p) || (t < 0 && t > p)) {

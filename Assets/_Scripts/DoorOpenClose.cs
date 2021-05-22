@@ -21,7 +21,6 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
     public float timeBetweenEachDoorPiece = 0.4f;
     public float timeForEachDoorPieceToOpen = 2f;
     public float timeForEachDoorPieceToClose = 0.5f;
-    UniqueId _id;
     DoorState _state = DoorState.Closed;
 
     Vector3 closedScale;
@@ -34,13 +33,6 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
     bool playerWasInTriggerZoneLastFrame;
     bool queueDoorClose;
     float timeSinceStateChange;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public DoorState state {
         get => _state;
@@ -206,8 +198,6 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
         get => !gameObject.activeInHierarchy;
         set { }
     }
-
-    public override string ID => $"DoorOpenClose_{id.uniqueId}";
 
     [Serializable]
     public class DoorOpenCloseSave : SerializableSaveObject<DoorOpenClose> {

@@ -21,7 +21,6 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
     public float dematerializeTime = .5f;
 
     public AnimationCurve animCurve;
-    UniqueId _id;
 
     State _state;
 
@@ -31,13 +30,6 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
 
     PickupObject thisPickupObj;
     float timeSinceStateChange;
-
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
 
     public State state {
         get => _state;
@@ -147,8 +139,6 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
     }
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"MaterializeObject_{id.uniqueId}";
 
     [Serializable]
     public class MaterializeObjectSave : SerializableSaveObject<MaterializeObject> {

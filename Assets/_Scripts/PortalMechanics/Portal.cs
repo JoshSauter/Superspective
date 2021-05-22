@@ -210,7 +210,7 @@ namespace PortalMechanics {
 
 		bool test = false;
 		void FixedUpdate() {
-			bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position)) < 0.99f;
+			bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position, true)) < 0.99f;
 			if (playerIsCloseToPortal && !test) {
 				test = true;
 				//Debug.Break();
@@ -271,7 +271,7 @@ namespace PortalMechanics {
 		public void OnTriggerStay(Collider other) {
 			if (!portalIsEnabled) return;
 
-			Vector3 closestPoint = ClosestPoint(other.transform.position);
+			Vector3 closestPoint = ClosestPoint(other.transform.position, true);
 			// TODO: This check doesn't work properly, player will rapidly teleport back and forth if standing in the middle
 			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
 			if (!objectShouldBeTeleported) return;
@@ -372,17 +372,25 @@ namespace PortalMechanics {
 			}
 		}
 
-		public Vector3 ClosestPoint(Vector3 point) {
+		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false) {
 			float minDistance = float.MaxValue;
 			Vector3 closestPoint = point + Vector3.up * minDistance;
 			foreach (var c in colliders) {
-				if (!c.gameObject.activeSelf || !c.enabled) continue;
+				bool colliderActive = c.gameObject.activeSelf;
+				bool colliderEnabled = c.enabled;
+				if (ignoreDisabledColliders && (!colliderActive || !colliderEnabled)) continue;
+				
+				//  Closest point does not work with disabled colliders, so we temporarily turn it on for the calculation
+				c.enabled = true;
+
 				Vector3 thisClosestPoint = c.ClosestPoint(point);
 				float thisDistance = Vector3.Distance(thisClosestPoint, point);
 				if (thisDistance < minDistance) {
 					minDistance = thisDistance;
 					closestPoint = thisClosestPoint;
 				}
+
+				c.enabled = colliderEnabled;
 			}
 			return closestPoint;
 		}
@@ -672,7 +680,6 @@ namespace PortalMechanics {
 		#endregion
 
 		#region Saving
-		public override string ID => $"Portal_{UniqueId.uniqueId}";
 		
 		[Serializable]
 		public class PortalSave : SerializableSaveObject<Portal> {

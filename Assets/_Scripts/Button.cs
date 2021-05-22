@@ -2,14 +2,15 @@
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 public class Button : SaveableObject<Button, Button.ButtonSave> {
     public enum State {
-        ButtonDepressed,
+        ButtonUnpressed,
         ButtonPressing,
         ButtonPressed,
-        ButtonDepressing
+        ButtonUnpressing
     }
 
     public float timeSinceStateChange;
@@ -17,32 +18,35 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     public InteractableObject interactableObject;
 
     public AnimationCurve buttonPressCurve;
-    public AnimationCurve buttonDepressCurve;
+    [FormerlySerializedAs("buttonDepressCurve")]
+    public AnimationCurve buttonUnpressCurve;
     public float timeToPressButton = 1f;
-    public float timeToDepressButton = 0.5f;
-    public float depressDistance = 1f;
+    [FormerlySerializedAs("timeToDepressButton")]
+    public float timeToUnpressButton = 0.5f;
+    [FormerlySerializedAs("depressDistance")]
+    public float pressDistance = 1f;
 
-    public bool depressAfterPress;
+    [FormerlySerializedAs("depressAfterPress")]
+    public bool unpressAfterPress;
     public float timeBetweenPressEndDepressStart = 0.5f;
-    UniqueId _id;
-    State _state = State.ButtonDepressed;
-    protected Vector3 depressedPos;
-    protected Vector3 pressedPos;
+    State _state = State.ButtonUnpressed;
+    
+#region events
+    public delegate void ButtonAction(Button button);
 
-    UniqueId id {
-        get {
-            if (_id == null) _id = GetComponent<UniqueId>();
-            return _id;
-        }
-    }
+    public event ButtonAction OnButtonPressBegin;
+    public event ButtonAction OnButtonPressFinish;
+    public event ButtonAction OnButtonUnpressBegin;
+    public event ButtonAction OnButtonUnpressFinish;
+#endregion
 
     public State state {
         get => _state;
         set {
             if (_state == value) return;
             switch (value) {
-                case State.ButtonDepressed:
-                    OnButtonDepressFinish?.Invoke(this);
+                case State.ButtonUnpressed:
+                    OnButtonUnpressFinish?.Invoke(this);
                     break;
                 case State.ButtonPressing:
                     OnButtonPressBegin?.Invoke(this);
@@ -50,8 +54,8 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
                 case State.ButtonPressed:
                     OnButtonPressFinish?.Invoke(this);
                     break;
-                case State.ButtonDepressing:
-                    OnButtonDepressBegin?.Invoke(this);
+                case State.ButtonUnpressing:
+                    OnButtonUnpressBegin?.Invoke(this);
                     break;
             }
 
@@ -60,115 +64,96 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         }
     }
 
+    float distanceCurrentlyPressed = 0f;
+
     public bool buttonPressed => state == State.ButtonPressed;
 
     protected override void Awake() {
         base.Awake();
         interactableObject = GetComponent<InteractableObject>();
         if (interactableObject == null) interactableObject = gameObject.AddComponent<InteractableObject>();
-        interactableObject.OnLeftMouseButton += OnLeftMouseButton;
+        interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 
-        Vector3 startPos = transform.position;
-        if (state == State.ButtonDepressed) {
-            depressedPos = startPos;
-            pressedPos = depressedPos + transform.up * depressDistance;
-        }
-        else if (state == State.ButtonPressed) {
-            pressedPos = startPos;
-            depressedPos = pressedPos - transform.up * depressDistance;
+        if (state == State.ButtonPressed) {
+            distanceCurrentlyPressed = pressDistance;
         }
     }
 
     void Update() {
-        UpdateButton();
+        UpdateState();
+        timeSinceStateChange += Time.deltaTime;
+        UpdateButtonPosition();
     }
 
-    public virtual void OnLeftMouseButton() {
+    protected virtual void UpdateState() {
+        switch (state) {
+            case State.ButtonUnpressed:
+                break;
+            case State.ButtonPressing:
+                if (timeSinceStateChange > timeToPressButton) {
+                    state = State.ButtonPressed;
+                }
+                break;
+            case State.ButtonPressed:
+                if (unpressAfterPress && timeSinceStateChange > timeBetweenPressEndDepressStart) {
+                    state = State.ButtonUnpressing;
+                }
+                break;
+            case State.ButtonUnpressing:
+                if (timeSinceStateChange > timeToUnpressButton) {
+                    state = State.ButtonUnpressed;
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public virtual void OnLeftMouseButtonDown() {
         PressButton();
     }
 
-    protected virtual void UpdateButton() {
-        timeSinceStateChange += Time.deltaTime;
+    protected virtual void UpdateButtonPosition() {
+        float t = timeSinceStateChange / timeToPressButton;
         switch (state) {
-            case State.ButtonDepressed:
-                break;
+            case State.ButtonUnpressed:
             case State.ButtonPressed:
-                if (depressAfterPress && timeSinceStateChange > timeBetweenPressEndDepressStart)
-                    state = State.ButtonDepressing;
                 break;
             case State.ButtonPressing:
                 if (timeSinceStateChange < timeToPressButton) {
-                    float t = timeSinceStateChange / timeToPressButton;
-
-                    transform.position = Vector3.Lerp(depressedPos, pressedPos, buttonPressCurve.Evaluate(t));
+                    float delta = Time.deltaTime * (pressDistance / timeToPressButton);
+                    distanceCurrentlyPressed += delta;
+                    transform.position += delta * transform.up;
                 }
                 else {
-                    transform.position = pressedPos;
-                    state = State.ButtonPressed;
+                    transform.position += (pressDistance - distanceCurrentlyPressed) * transform.up;
+                    distanceCurrentlyPressed = pressDistance;
                 }
-
                 break;
-            case State.ButtonDepressing:
-                if (timeSinceStateChange < timeToDepressButton) {
-                    float t = timeSinceStateChange / timeToDepressButton;
-
-                    transform.position = Vector3.Lerp(pressedPos, depressedPos, buttonDepressCurve.Evaluate(t));
+            case State.ButtonUnpressing:
+                if (timeSinceStateChange < timeToUnpressButton) {
+                    float delta = Time.deltaTime * (pressDistance / timeToUnpressButton);
+                    distanceCurrentlyPressed -= delta;
+                    transform.position -= delta * transform.up;
                 }
                 else {
-                    transform.position = pressedPos;
-                    state = State.ButtonDepressed;
+                    transform.position -= (distanceCurrentlyPressed) * transform.up;
+                    distanceCurrentlyPressed = 0f;
                 }
-
                 break;
         }
     }
 
     public void PressButton() {
-        if (state == State.ButtonDepressed) {
-            depressedPos = transform.position;
-            pressedPos = depressedPos + transform.up * depressDistance;
-        }
-        else if (state == State.ButtonPressed) {
-            pressedPos = transform.position;
-            depressedPos = pressedPos - transform.up * depressDistance;
-        }
-
-        if (state == State.ButtonPressed) {
-            state = State.ButtonDepressing;
-        }
-        else if (state == State.ButtonDepressed) {
+        if (state == State.ButtonUnpressed) {
             state = State.ButtonPressing;
         }
+        else if (state == State.ButtonPressed) {
+            state = State.ButtonUnpressing;
+        }
     }
-
-    protected void TriggerButtonPressBeginEvents() {
-        OnButtonPressBegin?.Invoke(this);
-    }
-
-    protected void TriggerButtonPressFinishEvents() {
-        OnButtonPressFinish?.Invoke(this);
-    }
-
-    protected void TriggerButtonDepressBeginEvents() {
-        OnButtonDepressBegin?.Invoke(this);
-    }
-
-    protected void TriggerButtonDepressFinishEvents() {
-        OnButtonDepressFinish?.Invoke(this);
-    }
-
-#region events
-    public delegate void ButtonAction(Button button);
-
-    public event ButtonAction OnButtonPressBegin;
-    public event ButtonAction OnButtonPressFinish;
-    public event ButtonAction OnButtonDepressBegin;
-    public event ButtonAction OnButtonDepressFinish;
-#endregion
 
 #region Saving
-    // All components on PickupCubes share the same uniqueId so we need to qualify with component name
-    public override string ID => $"Button_{id.uniqueId}";
 
     [Serializable]
     public class ButtonSave : SerializableSaveObject<Button> {
@@ -178,8 +163,6 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
         bool depressAfterPress;
         float depressDistance;
-        SerializableVector3 depressedPos;
-        SerializableVector3 pressedPos;
         int state;
         float timeBetweenPressEndDepressStart;
         float timeToDepressButton;
@@ -188,30 +171,26 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         public ButtonSave(Button button) : base(button) {
             state = (int) button.state;
             timeSinceStateChange = button.timeSinceStateChange;
-            depressedPos = button.depressedPos;
-            pressedPos = button.pressedPos;
             buttonPressCurve = button.buttonPressCurve;
-            buttonDepressCurve = button.buttonDepressCurve;
+            buttonDepressCurve = button.buttonUnpressCurve;
             timeToPressButton = button.timeToPressButton;
-            timeToDepressButton = button.timeToDepressButton;
-            depressDistance = button.depressDistance;
+            timeToDepressButton = button.timeToUnpressButton;
+            depressDistance = button.pressDistance;
 
-            depressAfterPress = button.depressAfterPress;
+            depressAfterPress = button.unpressAfterPress;
             timeBetweenPressEndDepressStart = button.timeBetweenPressEndDepressStart;
         }
 
         public override void LoadSave(Button button) {
             button.state = (State) state;
             button.timeSinceStateChange = timeSinceStateChange;
-            button.depressedPos = depressedPos;
-            button.pressedPos = pressedPos;
             button.buttonPressCurve = buttonPressCurve;
-            button.buttonDepressCurve = buttonDepressCurve;
+            button.buttonUnpressCurve = buttonDepressCurve;
             button.timeToPressButton = timeToPressButton;
-            button.timeToDepressButton = timeToDepressButton;
-            button.depressDistance = depressDistance;
+            button.timeToUnpressButton = timeToDepressButton;
+            button.pressDistance = depressDistance;
 
-            button.depressAfterPress = depressAfterPress;
+            button.unpressAfterPress = depressAfterPress;
             button.timeBetweenPressEndDepressStart = timeBetweenPressEndDepressStart;
         }
     }

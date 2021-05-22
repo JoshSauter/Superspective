@@ -30,7 +30,8 @@ public class TeleportEnter : MonoBehaviour {
         trigger.OnMagicTriggerStayOneTime -= TeleportTriggered;
     }
 
-    void TeleportTriggered(GameObject player) {
+    void TeleportTriggered() {
+        GameObject player = Player.instance.gameObject;
         Debug.Assert(
             teleportExit != null,
             "Please specify the teleport exit for " + gameObject.scene.name + ": " + gameObject.name
@@ -38,7 +39,7 @@ public class TeleportEnter : MonoBehaviour {
 
         TriggerEventsBeforeTeleport(player);
 
-        Vector3 teleportDisplacement = TeleporterDisplacement() + teleportOffset;
+        Vector3 teleportDisplacement = TeleporterDisplacement(player.transform) + teleportOffset;
         Vector3 displacementToCenter = teleportEnter.transform.position - player.transform.position;
 
         TeleportPlayer(player);
@@ -70,8 +71,9 @@ public class TeleportEnter : MonoBehaviour {
         return Mathf.DeltaAngle(angleEnter, angleExit);
     }
 
-    Vector3 TeleporterDisplacement() {
-        return teleportExit.transform.position - teleportEnter.transform.position;
+    Vector3 TeleporterDisplacement(Transform player) {
+        return teleportExit.transform.TransformPoint(teleportEnter.transform.InverseTransformPoint(player.position)) - player.position;
+        // teleportExit.transform.position - teleportEnter.transform.position;
     }
 
     void TeleportPlayer(GameObject player) {

@@ -9,7 +9,7 @@ using SerializableClasses;
 using System.Linq;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3ExitBars : SaveableObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave> {
+    public class WhiteRoom3ExitBars : SaveableObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave>, AudioJobOnGameObject {
         public PowerTrail[] powerTrails;
         public Transform[] bars;
         public GameObject invisibleWall;
@@ -28,9 +28,11 @@ namespace LevelSpecific.WhiteRoom {
             }
         }
 
+        public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => barRoot.transform;
+
         void Update() {
             if (solved && !wasSolvedLastFrame) {
-                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, barRoot);
+                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
             }
 
             invisibleWall.SetActive(!solved);

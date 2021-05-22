@@ -24,7 +24,7 @@ struct v2f {
 v2f vert(appdata_base v) {
 	v2f o;
 	o.pos = UnityObjectToClipPos(v.vertex);
-	o.nz.xyz = float3(0,0,0);
+	o.nz.xyz = float3(1,0,0);
 	o.nz.w = .99999;
 	return o;
 }

@@ -184,7 +184,7 @@ Shader "Hidden/JG/ColorfulFog"
 		DecodeDepthNormal(portalMaskSample, portalDepthValue, portalNormalValue);
 
 		half sampleIsBehindPortal = rawDepth > portalDepthValue-0.00373 && portalDepthValue < 1;
-		if (sampleIsBehindPortal) {
+		if (sampleIsBehindPortal && portalDepthValue != .998) {
 			return sceneColor;
 		}
 

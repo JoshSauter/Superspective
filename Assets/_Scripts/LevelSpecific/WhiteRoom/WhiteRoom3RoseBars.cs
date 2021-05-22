@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3RoseBars : SaveableObject<WhiteRoom3RoseBars, WhiteRoom3RoseBars.WhiteRoom3RoseBarsSave> {
+    public class WhiteRoom3RoseBars : SaveableObject<WhiteRoom3RoseBars, WhiteRoom3RoseBars.WhiteRoom3RoseBarsSave>, AudioJobOnGameObject {
         public PowerTrail powerTrail;
         public Button powerButton;
         public GameObject invisibleWall;
@@ -18,10 +18,12 @@ namespace LevelSpecific.WhiteRoom {
         bool barsWereUpLastFrame = true;
         public bool barsAreUp = true;
 
+        public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
+
         protected override void Start() {
             base.Start();
             powerButton.OnButtonPressBegin += (ctx) => powerTrail.powerIsOn = true;
-            powerButton.OnButtonDepressFinish += (ctx) => powerTrail.powerIsOn = false;
+            powerButton.OnButtonUnpressFinish += (ctx) => powerTrail.powerIsOn = false;
 
             powerTrail.OnPowerFinish += () => barsAreUp = false;
             powerTrail.OnDepowerBegin += () => barsAreUp = true;
@@ -29,7 +31,7 @@ namespace LevelSpecific.WhiteRoom {
 
         void Update() {
             if (!barsAreUp && barsWereUpLastFrame) {
-                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, gameObject);
+                AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
             }
 
             invisibleWall.SetActive(barsAreUp);

@@ -38,7 +38,7 @@ public class ButtonColorChange : MonoBehaviour {
         }
 
         buttonToReactTo.OnButtonPressFinish += ButtonPressFinish;
-        buttonToReactTo.OnButtonDepressFinish += ButtonDepressFinish;
+        buttonToReactTo.OnButtonUnpressFinish += ButtonUnpressFinish;
     }
 
     void Update() {
@@ -69,13 +69,13 @@ public class ButtonColorChange : MonoBehaviour {
                     Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t))
                 );
                 break;
-            case Button.State.ButtonDepressing:
-                t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToDepressButton;
+            case Button.State.ButtonUnpressing:
+                t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToUnpressButton;
 
-                r.SetMainColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonDepressCurve.Evaluate(t)));
+                r.SetMainColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
                 r.SetColor(
                     "_EmissionColor",
-                    Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonDepressCurve.Evaluate(t))
+                    Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t))
                 );
                 break;
         }
@@ -86,7 +86,7 @@ public class ButtonColorChange : MonoBehaviour {
         r.SetColor("_EmissionColor", pressEmission);
     }
 
-    void ButtonDepressFinish(Button b) {
+    void ButtonUnpressFinish(Button b) {
         r.SetMainColor(startColor);
         r.SetColor("_EmissionColor", startEmission);
     }
