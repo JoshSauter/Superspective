@@ -3445,13 +3445,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  startingScene: 12
+  startingScene: 1
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
     connectedLevels: 
   - level: 1
-    connectedLevels: 
+    connectedLevels: 010000000100000001000000010000000100000001000000010000000100000001000000
   - level: 2
     connectedLevels: 07000000
   - level: 3
@@ -3465,9 +3465,9 @@ MonoBehaviour:
   - level: 11
     connectedLevels: 0700000008000000
   - level: 12
-    connectedLevels: 150000000d0000000e000000160000000c0000000c0000000c0000000c000000
+    connectedLevels: 150000000d0000000e000000160000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c000000
   - level: 22
-    connectedLevels: 150000000c000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000
+    connectedLevels: 150000000c00000016000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000160000001600000016000000
   - level: 13
     connectedLevels: 0c0000001000000018000000
   - level: 24
@@ -5498,8 +5498,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.5, z: 36.5}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -301.15344, y: 40.960052, z: 104.46604}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1554336841}
@@ -5507,7 +5507,7 @@ Transform:
   - {fileID: 1308027151}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
