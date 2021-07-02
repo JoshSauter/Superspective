@@ -42,7 +42,7 @@ public class DimensionWall : MonoBehaviour {
     }
 
 	void InitializeWallTransform() {
-		transform.SetParent(transform);
+		//transform.SetParent(transform);
 		transform.localScale = new Vector3(dimensionWallWidth / transform.localScale.x, PillarHeight / transform.localScale.y, 1 / transform.localScale.z);
 		transform.localPosition = new Vector3(0, 0, 0);
 	}

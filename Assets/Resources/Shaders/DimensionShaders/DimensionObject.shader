@@ -46,7 +46,8 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				float test = ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				//return fixed4(test, 0.1, 0.1, 1);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog

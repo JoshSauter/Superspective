@@ -87,6 +87,7 @@ public class PillarDimensionObject : DimensionObject {
 
 	protected override void Init() {
 		renderers = GetAllSuperspectiveRenderers().ToArray();
+		colliders = transform.GetComponentsInChildrenRecursively<Collider>();
 
 		HandlePillarChanged();
 	}

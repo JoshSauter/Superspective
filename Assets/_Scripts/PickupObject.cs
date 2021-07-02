@@ -89,7 +89,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
         PlayerButtonInput.instance.OnAction1Press += Drop;
 
-        PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively(transform);
+        PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(transform);
         if (thisDimensionObject != null) thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 
         playerCamPosLastFrame = playerCam.transform.position;
@@ -241,8 +241,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public void Pickup() {
         if (!isHeld && !onCooldown && interactable) {
-            if (transform.parent != null) transform.SetParent(null);
-
             thisGravity.useGravity = false;
             thisRigidbody.isKinematic = false;
             isHeld = true;

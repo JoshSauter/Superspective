@@ -27,7 +27,7 @@ public class JunkPillar : MonoBehaviour {
 
     Transform SpawnPillar(Vector3 origin) {
         Transform root = new GameObject("PillarRoot").transform;
-        root.SetParent(transform);
+        //root.SetParent(transform);
         root.localPosition = origin;
         int numPieces = Random.Range(minNumberOfPieces, maxNumberOfPieces);
 
@@ -54,7 +54,7 @@ public class JunkPillar : MonoBehaviour {
     void SpawnPiece(Transform root, float height, Vector3 horizontalOffset, Vector3 scale) {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.GetComponent<Renderer>().sharedMaterial = pieceMaterial;
-        go.transform.SetParent(root);
+        //go.transform.SetParent(root);
         go.transform.localPosition = horizontalOffset + new Vector3(Random.Range(-1, 1), height, Random.Range(-1, 1));
         go.transform.localScale = scale;
         Vector3 randomEuler = Random.insideUnitSphere;

@@ -7,7 +7,7 @@ using SuperspectiveUtils;
 public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 	public Camera playerCamera;
 	public MonoBehaviour[] postProcessEffects;
-	public Camera[] dimensionCameras;
+	public Camera dimensionCamera;
 	public Camera portalMaskCamera;
 	public static int currentWidth;
 	public static int currentHeight;
@@ -27,11 +27,8 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 
 		playerCamera = GetComponent<Camera>();
 		Camera[] childrenCams = transform.GetComponentsInChildrenOnly<Camera>();
-		dimensionCameras = new Camera[MaskBufferRenderTextures.numVisibilityMaskChannels];
-		for (int i = 0; i < MaskBufferRenderTextures.numVisibilityMaskChannels; i++) {
-			dimensionCameras[i] = childrenCams[i];
-		}
-		portalMaskCamera = childrenCams[MaskBufferRenderTextures.numVisibilityMaskChannels];
+		dimensionCamera = childrenCams[0];
+		portalMaskCamera = childrenCams[1];
 	}
 
 	// Update is called once per frame

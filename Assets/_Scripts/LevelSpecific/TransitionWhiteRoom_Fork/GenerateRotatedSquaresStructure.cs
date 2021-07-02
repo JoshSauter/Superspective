@@ -29,7 +29,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
 				Debug.LogError(scale);
 
 				GameObject go = Instantiate(copy);
-				go.transform.SetParent(transform);
+				//go.transform.SetParent(transform);
 				go.transform.position = curPos;
 				go.transform.rotation = Quaternion.Euler(0, curRotation, 0);
 				go.transform.localScale = new Vector3(scale, heightOfEachStep, scale);

@@ -16,11 +16,12 @@ public enum VisibilityState {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+	const int NUM_CHANNELS = 16;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	public bool ignoreChildrenWithDimensionObject = true;
 
 	protected bool initialized = false;
-	[Range(0, 1)]
+	[Range(0, NUM_CHANNELS-1)]
 	public int channel;
 	public bool reverseVisibilityStates = false;
 	public bool ignoreMaterialChanges = false;
@@ -28,6 +29,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	protected int curDimensionSetInMaterial;
 
 	public SuperspectiveRenderer[] renderers;
+	public Collider[] colliders;
 	public Dictionary<SuperspectiveRenderer, Material[]> startingMaterials;
 	public Dictionary<SuperspectiveRenderer, int> startingLayers;
 
@@ -48,17 +50,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	protected override void Awake() {
 		base.Awake();
 
-		renderers = GetAllSuperspectiveRenderers().ToArray();
-		if (renderers.Length == 0) {
-			Debug.LogError("No renderers found for: " + gameObject.name, gameObject);
-			enabled = false;
-		}
-		
-		startingMaterials = GetAllStartingMaterials(renderers);
-		startingLayers = GetAllStartingLayers(renderers);
+		FindDefaultMaterials();
 	}
 
 	protected override void Init() {
+		SetupDimensionCollisionLogic();
 		SetChannelValuesInMaterials();
 
 		if (!initialized && gameObject.activeInHierarchy) {
@@ -72,6 +68,33 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		
 		SwitchVisibilityState(startingVisibilityState, true);
 		initialized = true;
+	}
+
+	void SetupDimensionCollisionLogic() {
+		HashSet<GameObject> rigidbodies = new HashSet<GameObject>(
+			renderers.SelectMany(r => r.GetComponentsInChildren<Rigidbody>().Select(rb => rb.gameObject)));
+		HashSet<GameObject> colliders = new HashSet<GameObject>(
+			renderers.SelectMany(r => r.GetComponentsInChildren<Collider>().Select(c => c.gameObject)));
+		HashSet<GameObject> renderedObjectsWithColliderAndRigidbody = new HashSet<GameObject>(rigidbodies);
+		renderedObjectsWithColliderAndRigidbody.IntersectWith(colliders);
+
+		foreach (var objToAddCollisionLogicTo in renderedObjectsWithColliderAndRigidbody) {
+			if (objToAddCollisionLogicTo.GetComponentInChildren<DimensionObjectCollisions>() == null) {
+				CreateTriggerZone(objToAddCollisionLogicTo.transform);
+			}
+		}
+	}
+	
+	void CreateTriggerZone(Transform parent) {
+		GameObject triggerGO = new GameObject("IgnoreCollisionsTriggerZone") {
+			layer = LayerMask.NameToLayer("Ignore Raycast")
+		};
+		triggerGO.transform.SetParent(parent, false);
+		DimensionObjectCollisions collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
+		collisionLogic.colliderOfObject = parent.GetComponent<Collider>();
+		collisionLogic.rigidbodyOfObject = parent.GetComponent<Rigidbody>();
+		SphereCollider trigger = triggerGO.AddComponent<SphereCollider>();
+		trigger.isTrigger = true;
 	}
 
 	public void OverrideStartingMaterials(Dictionary<SuperspectiveRenderer, Material[]> newStartingMaterials) {
@@ -133,11 +156,23 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		return nextStates[visibilityState].Contains(nextState);
 	}
 	#endregion
-
+	
 	///////////////////////////
 	// Material Change Logic //
 	///////////////////////////
 	#region materials
+	public void FindDefaultMaterials() {
+		renderers = GetAllSuperspectiveRenderers().ToArray();
+		// TODO: Move this to a place that makes more sense
+		colliders = transform.GetComponentsInChildrenRecursively<Collider>();
+		if (renderers.Length == 0) {
+			debug.LogError("No renderers found for: " + gameObject.name);
+		}
+		
+		startingMaterials = GetAllStartingMaterials(renderers);
+		startingLayers = GetAllStartingLayers(renderers);
+	}
+	
 	void SetMaterials(SuperspectiveRenderer renderer) {
 		if (!startingMaterials.ContainsKey(renderer)) {
 			startingMaterials.Add(renderer, renderer.GetMaterials());
@@ -198,7 +233,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	void SetChannelValuesInMaterials(bool turnOn = true) {
 		foreach (var r in renderers) {
-			float[] buffer = r.GetFloatArray("_Channels") ?? new float[2];
+			float[] buffer = r.GetFloatArray("_Channels") ?? new float[NUM_CHANNELS];
 			buffer[channel] = turnOn ? 1 : 0;
 			r.SetFloatArray("_Channels", buffer);
 		}
@@ -255,6 +290,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
+				break;
+			case "Custom/UnlitTransparent":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitTransparent"));
 				break;
 			case "Custom/UnlitDissolve":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolve"));

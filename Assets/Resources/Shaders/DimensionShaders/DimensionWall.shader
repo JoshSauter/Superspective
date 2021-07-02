@@ -1,12 +1,12 @@
-﻿Shader "Custom/DimensionShaders/DimensionWall"
-{
-    SubShader
-    {
+﻿Shader "Custom/DimensionShaders/DimensionWall" {
+	Properties {
+		_Channel("Channel", Int) = 0
+	}
+    SubShader {
         Tags { "Queue"="Background-1000" }
         LOD 100
 
-		Pass
-        {
+		Pass {
 			Blend One One
 			ZWrite Off
 
@@ -15,6 +15,9 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "DimensionShaderHelpers.cginc"
+
+            uniform int _Channel;
 
 			struct appdata {
 				float4 vertex : POSITION;
@@ -32,7 +35,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				return fixed4(1,0,0,1);
+				return ColorFromChannel(_Channel);
 			}
             ENDCG
         }

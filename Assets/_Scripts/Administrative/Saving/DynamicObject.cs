@@ -146,11 +146,10 @@ namespace Saving {
 					return;
 				}
 				
-				if (transform.parent != null) {
-					transform.parent = null;
-				}
-
 				if (gameObject.scene != sceneOfContact) {
+					if (transform.parent != null) {
+						transform.parent = null;
+					}
 					ChangeScene(sceneOfContact);
 				}
 			}
@@ -188,7 +187,7 @@ namespace Saving {
 				obj.isGlobal = this.isGlobal;
 				if (!string.IsNullOrEmpty(scene)) {
 					if (obj.transform.parent != null) {
-						obj.transform.SetParent(null);
+						//obj.transform.SetParent(null);
 					}
 					obj.ChangeScene(SceneManager.GetSceneByName(scene));
 				}

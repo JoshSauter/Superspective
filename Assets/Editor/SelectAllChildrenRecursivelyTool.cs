@@ -33,18 +33,18 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
     public void SelectAllChildrenWithType<T>() where T : Component {
         List<GameObject> newSelection = new List<GameObject>();
         foreach (GameObject go in Selection.gameObjects) {
-            SelectAllChildrenRecusively<T>(go, ref newSelection);
+            SelectAllChildrenRecursively<T>(go, ref newSelection);
         }
 
         Selection.objects = newSelection.ToArray();
     }
 
-    public void SelectAllChildrenRecusively<T>(GameObject curNode, ref List<GameObject> selectionSoFar)
+    public void SelectAllChildrenRecursively<T>(GameObject curNode, ref List<GameObject> selectionSoFar)
         where T : Component {
         if (curNode.GetComponent<T>() != null) selectionSoFar.Add(curNode);
 
         foreach (T child in curNode.transform.GetComponentsInChildren<T>(selectInactive)) {
-            if (child.gameObject != curNode) SelectAllChildrenRecusively<T>(child.gameObject, ref selectionSoFar);
+            if (child.gameObject != curNode) SelectAllChildrenRecursively<T>(child.gameObject, ref selectionSoFar);
         }
     }
 

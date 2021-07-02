@@ -152,13 +152,13 @@ namespace SuperspectiveUtils {
         }
 
         // Recursively search up the transform tree through parents to find a DimensionObject
-        public static PillarDimensionObject FindDimensionObjectRecursively(Transform go) {
-            PillarDimensionObject dimensionObj = go.GetComponent<PillarDimensionObject>();
+        public static T FindDimensionObjectRecursively<T>(Transform go) where T : DimensionObject {
+            T dimensionObj = go.GetComponent<T>();
             Transform parent = go.parent;
             if (dimensionObj != null)
                 return dimensionObj;
             if (parent != null)
-                return FindDimensionObjectRecursively(parent);
+                return FindDimensionObjectRecursively<T>(parent);
             return null;
         }
 

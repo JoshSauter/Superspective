@@ -312,7 +312,7 @@ namespace Audio {
 			}
 			else {
 				GameObject newAudioGO = new GameObject(id);
-				newAudioGO.transform.SetParent(soundsRoot);
+				//newAudioGO.transform.SetParent(soundsRoot);
 				newAudioGO.transform.position = Vector3.zero;
 
 				AudioSettings settings = defaultSettings[audioType];

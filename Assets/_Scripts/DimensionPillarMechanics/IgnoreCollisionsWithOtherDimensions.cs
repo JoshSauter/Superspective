@@ -50,7 +50,7 @@ public class IgnoreCollisionsWithOtherDimensions : MonoBehaviour {
 
 	void OnTriggerStay(Collider other) {
 		if (corporealDimensionObject == null) return;
-		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively(other.gameObject.transform);
+		PillarDimensionObject otherDimensionObj = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(other.gameObject.transform);
 		if (otherDimensionObj != null) {
 			int testDimension = corporealDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible || v == VisibilityState.partiallyVisible);
 			if (testDimension == -1) {

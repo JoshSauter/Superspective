@@ -2,14 +2,15 @@
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
-	public const int numVisibilityMaskChannels = 2;
-	public RenderTexture[] visibilityMaskTextures;
+	public RenderTexture visibilityMaskTexture;
 	public RenderTexture portalMaskTexture;
+	static readonly int ResolutionX = Shader.PropertyToID("_ResolutionX");
+	static readonly int ResolutionY = Shader.PropertyToID("_ResolutionY");
+	static readonly int DimensionMask = Shader.PropertyToID("_DimensionMask");
+	static readonly int PortalMask = Shader.PropertyToID("_PortalMask");
 
 	// Use this for initialization
 	void Start () {
-		visibilityMaskTextures = new RenderTexture[numVisibilityMaskChannels];
-
 		SuperspectiveScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
@@ -28,25 +29,23 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	// Update is called once per frame
 	void Update () {
 		// Will write to global texture named _DimensionMask
-		for (int i = 0; i < numVisibilityMaskChannels; i++) {
-			Shader.SetGlobalTexture("_DimensionMask" + i, visibilityMaskTextures[i]);
-		}
+		Shader.SetGlobalTexture(DimensionMask, visibilityMaskTexture);
 
 		// Will write to global texture named _PortalMask
-		Shader.SetGlobalTexture("_PortalMask", portalMaskTexture);
+		Shader.SetGlobalTexture(PortalMask, portalMaskTexture);
 	}
 
 	void ReleaseAllTextures() {
-		for (int i = 0; i < numVisibilityMaskChannels; i++) {
-			visibilityMaskTextures[i].Release();
-		}
+		visibilityMaskTexture.Release();
 		portalMaskTexture.Release();
 	}
 
 	void CreateAllRenderTextures(int currentWidth, int currentHeight) {
-		for (int i = 0; i < numVisibilityMaskChannels; i++) {
-			CreateRenderTexture(currentWidth, currentHeight, out visibilityMaskTextures[i], SuperspectiveScreen.instance.dimensionCameras[i]);
-		}
+		CreateRenderTexture(
+			currentWidth,
+			currentHeight,
+			out visibilityMaskTexture,
+			SuperspectiveScreen.instance.dimensionCamera);
 
 		CreateRenderTexture(
 			currentWidth,
@@ -61,8 +60,8 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		rt.enableRandomWrite = true;
 		rt.Create();
 
-		Shader.SetGlobalFloat("_ResolutionX", currentWidth);
-		Shader.SetGlobalFloat("_ResolutionY", currentHeight);
+		Shader.SetGlobalFloat(ResolutionX, currentWidth);
+		Shader.SetGlobalFloat(ResolutionY, currentHeight);
 
 		targetCamera.targetTexture = rt;
 

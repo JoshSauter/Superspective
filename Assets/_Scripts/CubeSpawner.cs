@@ -139,7 +139,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     void SpawnNewCube() {
         const float randomizeOffset = 1.0f;
         PickupObject newCube = Instantiate(cubePrefab, transform).GetComponent<PickupObject>();
-        newCube.transform.SetParent(null);
+        //newCube.transform.SetParent(null);
         newCube.transform.position =
             thisCollider.bounds.center + Random.insideUnitSphere * Random.Range(0, randomizeOffset);
         objectBeingSuspended = newCube;

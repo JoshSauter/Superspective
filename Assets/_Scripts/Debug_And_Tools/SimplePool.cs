@@ -154,7 +154,7 @@ public class SimplePool : Singleton<SimplePool> {
 			}
 			if (rootObj == null) {
 				rootObj = new GameObject(name);
-				rootObj.transform.SetParent(transform);
+				//rootObj.transform.SetParent(transform);
 			}
 			poolRoots[prefab.gameObject] = rootObj.transform;
 		}
