@@ -42,9 +42,6 @@
 			float _DissolveValue;
 			float _EmissionAmount;
 			float4 _EmissionColor;
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
 			struct v2f {
 				UNITY_FOG_COORDS(1)
@@ -61,7 +58,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				ClipDimensionObject(i.vertex);
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);

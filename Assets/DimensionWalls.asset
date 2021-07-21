@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f1ca63a91b17724bbd99c8fa67e0180, type: 3}
+  m_Name: DimensionWalls
+  m_EditorClassIdentifier: 
+  array:
+  - {fileID: 2100000, guid: 1758619b89396a449941f8d775e8c9a5, type: 2}
+  - {fileID: 2100000, guid: 1b82b1c17e351c646864fc6af050a3ae, type: 2}
+  - {fileID: 2100000, guid: 677944ed5af73fd499f6d44c534dda9b, type: 2}
+  - {fileID: 2100000, guid: 041989cc84da7be45923be01df97b36d, type: 2}
+  - {fileID: 2100000, guid: 9cb0312ebe1047c49ac50b8687b46762, type: 2}
+  - {fileID: 2100000, guid: ea910d3124412f54dbdb075b19f1a5c1, type: 2}
+  - {fileID: 2100000, guid: 47ae9e0d6d70a254fa92efabd9233557, type: 2}
+  - {fileID: 2100000, guid: a974999bb6732814fbf76bc7957c715a, type: 2}
+  - {fileID: 0}
+  - {fileID: 2100000, guid: 6647bba947657ab4ab98502e088aaa2d, type: 2}

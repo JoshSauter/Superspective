@@ -54,9 +54,6 @@ fixed4 _BurnColor;
 float _BurnSize;
 float _DissolveValue;
 
-int _Channels[NUM_CHANNELS];
-int _Inverse;
-
 struct v2f {
     float4 pos : SV_POSITION;
 	float2 texcoord : TEXCOORD0;
@@ -81,7 +78,7 @@ v2f vert( appdata_full v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
+	ClipDimensionObject(i.pos.xy);
 
     half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 	if (_Color.a == 0) clip(-test);
@@ -209,8 +206,6 @@ CGPROGRAM
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
 uniform sampler2D _DepthNormals;
-uniform int _Channels[NUM_CHANNELS];
-uniform int _Inverse;
 
 struct appdata {
 	float4 vertex : POSITION;
@@ -229,7 +224,7 @@ v2f vert(appdata v) {
 }
 
 fixed4 frag(v2f i) : SV_Target {
-    ClipDimensionObjectFromScreenSpaceCoords(i.screenPos, _Channels, _Inverse);
+    ClipDimensionObjectFromScreenSpaceCoords(i.screenPos);
 	float2 uv = i.screenPos.xy / i.screenPos.w;
 
 	fixed4 col = tex2D(_DepthNormals, uv);
@@ -346,9 +341,6 @@ CGPROGRAM
 #include "UnityCG.cginc"
 #include "DimensionShaders/DimensionShaderHelpers.cginc"
 
-int _Channels[NUM_CHANNELS];
-int _Inverse;
-
 struct v2f {
     float4 pos : SV_POSITION;
     float4 nz : TEXCOORD0;
@@ -371,7 +363,7 @@ v2f vert( appdata_base v ) {
 
 fixed4 frag(v2f i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
+	ClipDimensionObject(i.pos.xy);
 
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }

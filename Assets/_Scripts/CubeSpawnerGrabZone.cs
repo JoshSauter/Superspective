@@ -29,7 +29,18 @@ public class CubeSpawnerGrabZone : MonoBehaviour {
 
     void Update() {
         if (cubeSpawner.cubeSpawned != null) {
-            cubeInteractable = playerInZone;
+            cubeInteractable = playerInZone || cubeSpawner.cubeSpawned.isHeld;
+            DimensionObject cubeDimensionObj =
+                cubeSpawner.cubeSpawned.FindDimensionObjectRecursively<DimensionObject>();
+            if (cubeDimensionObj != null) {
+                VisibilityState desiredVisibility = cubeSpawner.cubeSpawned.isHeld
+                    ? VisibilityState.visible
+                    : VisibilityState.partiallyVisible;
+
+                if (cubeDimensionObj.visibilityState != desiredVisibility) {
+                    cubeDimensionObj.SwitchVisibilityState(desiredVisibility);
+                }
+            }
         }
     }
 

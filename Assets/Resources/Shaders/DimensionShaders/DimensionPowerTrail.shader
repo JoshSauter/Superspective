@@ -13,11 +13,11 @@
     SubShader {
 		Tags { "Queue"="Geometry" "RenderType"="DimensionObject" }
 	    CGPROGRAM
-		#include "DimensionShaderHelpers.cginc"
 	    #pragma surface surf NoLighting fullforwardshadows
 		
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
+		#include "DimensionShaderHelpers.cginc"
 		
         sampler2D _MainTex;
 
@@ -32,9 +32,6 @@
         half _Metallic;
         fixed4 _Color;
 	    fixed4 _EmissionColor;
-        
-		int _Channels[NUM_CHANNELS];
-		int _Inverse;
 
         // Power trail info
         #define MAX_NODES 512
@@ -72,7 +69,7 @@
 
         void surf (Input IN, inout SurfaceOutput o) {
 			float2 coords = IN.screenPos.xy / IN.screenPos.w;
-			ClipDimensionObjectFromScreenSpaceCoords(coords, _Channels, _Inverse);
+			ClipDimensionObjectFromScreenSpaceCoords(coords);
             // DEBUG
             //float test = worldSdf(IN.worldPos);
             // ENDDEBUG

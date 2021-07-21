@@ -13,8 +13,6 @@ GameObject:
   - component: {fileID: 6870849168451778784}
   - component: {fileID: 2485003750493034713}
   - component: {fileID: 4266575705483429953}
-  - component: {fileID: 8255623797134127297}
-  - component: {fileID: 7462050356141801267}
   m_Layer: 0
   m_Name: BackWallLights
   m_TagString: Untagged
@@ -330,42 +328,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &8255623797134127297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120569817454394722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: af3a0d2b-7a74-43ef-af02-55984eea680f
---- !u!114 &7462050356141801267
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120569817454394722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 0
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 1
-  channel: 13
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 1
-  visibilityState: 1
 --- !u!1 &247148083228880462
 GameObject:
   m_ObjectHideFlags: 0
@@ -1050,7 +1012,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0fa00c54083e93b498c370371cabcaf8, type: 2}
+  - {fileID: 2100000, guid: ea910d3124412f54dbdb075b19f1a5c1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3903,7 +3865,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 14
+  channel: 6
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -3911,6 +3873,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &1176246306741710002
 GameObject:
   m_ObjectHideFlags: 0
@@ -5477,7 +5441,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 980c7754b1d36424782638a2a3453c46, type: 2}
+  - {fileID: 2100000, guid: 47ae9e0d6d70a254fa92efabd9233557, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6239,8 +6203,6 @@ GameObject:
   - component: {fileID: 4862040804895047250}
   - component: {fileID: 4965825923371552539}
   - component: {fileID: 760990407166189587}
-  - component: {fileID: 5018024310703591742}
-  - component: {fileID: 6277837407910274900}
   m_Layer: 0
   m_Name: BackWallLights
   m_TagString: Untagged
@@ -6556,42 +6518,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &5018024310703591742
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1870643778217824669}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: d509f2ba-fe18-4d68-b3c3-3444fab525b8
---- !u!114 &6277837407910274900
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1870643778217824669}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 0
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 1
-  channel: 14
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 1
-  visibilityState: 1
 --- !u!1 &1898267281534016520
 GameObject:
   m_ObjectHideFlags: 0
@@ -11072,8 +10998,6 @@ GameObject:
   - component: {fileID: 6660261959010435862}
   - component: {fileID: 4273774250457902306}
   - component: {fileID: 4360865136114321097}
-  - component: {fileID: 5119843016197194791}
-  - component: {fileID: 4976584627755789247}
   m_Layer: 0
   m_Name: BackWallLights
   m_TagString: Untagged
@@ -11389,42 +11313,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &5119843016197194791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2992770030744881810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: e22d1a03-e093-4d39-bc2e-5a409fa62bb8
---- !u!114 &4976584627755789247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2992770030744881810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 0
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 1
-  channel: 15
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 1
-  visibilityState: 1
 --- !u!1 &3013366446620073043
 GameObject:
   m_ObjectHideFlags: 0
@@ -11649,7 +11537,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 02cc1604f097ddf4282f1b501c6cc433, type: 2}
+  - {fileID: 2100000, guid: 9cb0312ebe1047c49ac50b8687b46762, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14130,7 +14018,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 15
+  channel: 7
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -14138,6 +14026,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &3101847050833539416
 GameObject:
   m_ObjectHideFlags: 0
@@ -20559,8 +20449,6 @@ GameObject:
   - component: {fileID: 4271745855091826337}
   - component: {fileID: 6614746129905901091}
   - component: {fileID: 8182702547392565210}
-  - component: {fileID: 5266130050414075174}
-  - component: {fileID: 3791219345199410942}
   m_Layer: 0
   m_Name: BackWallLights
   m_TagString: Untagged
@@ -20876,42 +20764,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &5266130050414075174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4544645835574544599}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: bc956242-67ce-4761-ab55-5ce1538d14fe
---- !u!114 &3791219345199410942
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4544645835574544599}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 1
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 1
-  channel: 12
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 1
-  visibilityState: 1
 --- !u!1 &4588139263208331648
 GameObject:
   m_ObjectHideFlags: 0
@@ -40996,7 +40848,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 13
+  channel: 5
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -41004,6 +40856,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &5880621703877866871
 GameObject:
   m_ObjectHideFlags: 0
@@ -47908,7 +47762,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c91c830349635f241a8bac318e438365, type: 2}
+  - {fileID: 2100000, guid: 041989cc84da7be45923be01df97b36d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -48009,8 +47863,6 @@ GameObject:
   - component: {fileID: 3914297216753165411}
   - component: {fileID: 4829033818388224311}
   - component: {fileID: 2668581011910785070}
-  - component: {fileID: 7985936993353478708}
-  - component: {fileID: 2210573010869436761}
   m_Layer: 0
   m_Name: Roof
   m_TagString: Untagged
@@ -49001,42 +48853,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &7985936993353478708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8383155323267319043}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: 7cd1c9fb-5046-480e-b163-0cbc9abe9f1d
---- !u!114 &2210573010869436761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8383155323267319043}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 0
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 0
-  channel: 12
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 3
-  visibilityState: 3
 --- !u!1 &8568583919941153785
 GameObject:
   m_ObjectHideFlags: 0
@@ -52172,10 +51988,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUG: 1
+  DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 12
+  channel: 4
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -52183,6 +51999,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &8812595268707195703
 GameObject:
   m_ObjectHideFlags: 0

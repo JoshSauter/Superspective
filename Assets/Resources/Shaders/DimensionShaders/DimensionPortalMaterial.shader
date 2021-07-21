@@ -38,11 +38,8 @@
 				uniform sampler2D _MainTex;
 				uniform sampler2D _DepthNormals;
 			
-				uniform int _Channels[NUM_CHANNELS];
-				uniform int _Inverse;
-
 				fixed4 frag(v2f i) : SV_Target {
-					ClipDimensionObject(i.vertex, _Channels, _Inverse);
+					ClipDimensionObject(i.vertex);
 					float2 uv = i.screenPos.xy / i.screenPos.w;
 
 					fixed4 col = tex2D(_MainTex, uv);

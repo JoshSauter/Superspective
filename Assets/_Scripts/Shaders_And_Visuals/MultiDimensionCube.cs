@@ -111,7 +111,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 
 		cubeTransforms = corporealCubeDimensionObj.transform.GetComponentsInChildrenRecursively<Transform>();
 
-		corporealCubeDimensionObj.OnStateChange += HandleStateChange;
+		corporealCubeDimensionObj.OnStateChangeSimple += HandleStateChange;
 	}
 
 	void FixedUpdate() {

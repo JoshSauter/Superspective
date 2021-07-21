@@ -15,17 +15,6 @@ using UnityEngine.Serialization;
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
-		UniqueId id;
-
-		UniqueId UniqueId {
-			get {
-				if (id == null) {
-					id = GetComponent<UniqueId>();
-				}
-				return id;
-			}
-		}
-
 		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]

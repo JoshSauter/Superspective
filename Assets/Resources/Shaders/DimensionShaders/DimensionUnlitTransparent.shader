@@ -36,9 +36,6 @@ Shader "Custom/DimensionShaders/DimensionUnlitTransparent" {
 			float4 _Color;
 			float4 _EmissionColor;
 			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
-			
 			v2f vert (appdata v) {
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
@@ -47,7 +44,7 @@ Shader "Custom/DimensionShaders/DimensionUnlitTransparent" {
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				ClipDimensionObject(i.vertex);
 				// sample the texture
 				fixed4 col = _Color;
 				// apply fog
@@ -71,9 +68,6 @@ Shader "Custom/DimensionShaders/DimensionUnlitTransparent" {
 			#pragma multi_compile_shadowcaster
 			#include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
-
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 			
 			struct v2f {
 				V2F_SHADOW_CASTER;
@@ -89,7 +83,7 @@ Shader "Custom/DimensionShaders/DimensionUnlitTransparent" {
 			}
 
 			float4 frag( v2f i ) : SV_Target {
-				ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
+				ClipDimensionObject(i.pos.xy);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

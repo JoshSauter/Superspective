@@ -20,9 +20,6 @@ Shader "Custom/DimensionShaders/DimensionRaymarching"
 
             #include "UnityCG.cginc"
 			#include "DimensionShaderHelpers.cginc"
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
             struct v2f
             {
@@ -142,7 +139,7 @@ Shader "Custom/DimensionShaders/DimensionRaymarching"
             }
 
             fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.clipPos, _Channels, _Inverse);
+				ClipDimensionObject(i.clipPos);
 
                 float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
                 float depth = 100;

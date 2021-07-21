@@ -1,17 +1,25 @@
-﻿using SuperspectiveUtils;
-using SuperspectiveUtils.PortalUtils;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using SuperspectiveUtils;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class Interact : Singleton<Interact> {
     public const float defaultInteractionDistance = 6.5f;
     public bool DEBUG;
+    // For debug GUI
+    string nameOfFirstObjectHit = "";
+    readonly GUIStyle style = new GUIStyle();
     public LayerMask layerMask;
     public Image reticle;
     public Image reticleOutside;
     public float interactionDistance = defaultInteractionDistance;
 
-    public InteractableObject objectHovered;
+    public InteractableObject interactableObjectHovered;
     Camera cam;
     DebugLogger debug;
     readonly Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
@@ -19,7 +27,6 @@ public class Interact : Singleton<Interact> {
     readonly Color reticleSelectColor = new Color(0.15f, 1, 0.15f, 0.9f);
 
     Color reticleUnselectColor;
-    //int layerMask;
 
     // Use this for initialization
     void Start() {
@@ -35,38 +42,39 @@ public class Interact : Singleton<Interact> {
         reticleOutsideUnselectColor = reticleOutside.color;
     }
 
+
     // Update is called once per frame
     void Update() {
         InteractableObject newObjectHovered = FindInteractableObjectHovered();
         if (newObjectHovered != null && !newObjectHovered.interactable) newObjectHovered = null;
 
         // If we were previously hovering over a different object, send a MouseHoverExit event to that object
-        if (objectHovered != null && newObjectHovered != objectHovered) {
+        if (interactableObjectHovered != null && newObjectHovered != interactableObjectHovered) {
             //Debug.LogWarning(objectHovered.name + ".OnMouseHoverExit()");
-            objectHovered.OnMouseHoverExit?.Invoke();
+            interactableObjectHovered.OnMouseHoverExit?.Invoke();
         }
 
         // If we are hovering a new object that's not already hovered, send a MouseHover event to that object
-        if (newObjectHovered != null && newObjectHovered != objectHovered) {
+        if (newObjectHovered != null && newObjectHovered != interactableObjectHovered) {
             //Debug.LogWarning(newObjectHovered.name + ".OnMouseHover()");
             newObjectHovered.OnMouseHoverEnter?.Invoke();
         }
 
         // Update which object is now selected
-        objectHovered = newObjectHovered;
-        objectHovered?.OnMouseHover?.Invoke();
+        interactableObjectHovered = newObjectHovered;
+        interactableObjectHovered?.OnMouseHover?.Invoke();
 
-        if (objectHovered != null) {
+        if (interactableObjectHovered != null) {
             reticle.color = reticleSelectColor;
             reticleOutside.color = reticleOutsideSelectColor;
             // If the left mouse button is being held down, interact with the object selected
             if (Input.GetMouseButton(0)) {
                 // If left mouse button was clicked this frame, call OnLeftMouseButtonDown
-                if (Input.GetMouseButtonDown(0)) objectHovered.OnLeftMouseButtonDown?.Invoke();
-                objectHovered.OnLeftMouseButton?.Invoke();
+                if (Input.GetMouseButtonDown(0)) interactableObjectHovered.OnLeftMouseButtonDown?.Invoke();
+                interactableObjectHovered.OnLeftMouseButton?.Invoke();
             }
             // If we released the left mouse button this frame, call OnLeftMouseButtonUp
-            else if (Input.GetMouseButtonUp(0)) objectHovered.OnLeftMouseButtonUp?.Invoke();
+            else if (Input.GetMouseButtonUp(0)) interactableObjectHovered.OnLeftMouseButtonUp?.Invoke();
         }
         else {
             reticle.color = reticleUnselectColor;
@@ -74,18 +82,22 @@ public class Interact : Singleton<Interact> {
         }
     }
 
-    public RaycastHits GetRaycastHits() {
+    public Vector2 PixelPositionOfReticle() {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
-        Vector2 screenPos = Vector2.Scale(
+        return Vector2.Scale(
             reticlePos,
             new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
         );
-
-        Ray ray = cam.ScreenPointToRay(screenPos);
-        return PortalUtils.RaycastThroughPortals(ray.origin, ray.direction, interactionDistance, layerMask);
     }
 
-    public RaycastHits GetAnyDistanceRaycastHits() {
+    public SuperspectiveRaycast GetRaycastHits() {
+        Vector2 screenPos = PixelPositionOfReticle();
+
+        Ray ray = cam.ScreenPointToRay(screenPos);
+        return RaycastUtils.Raycast(ray.origin, ray.direction, interactionDistance, layerMask);
+    }
+
+    public SuperspectiveRaycast GetAnyDistanceRaycastHits() {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
         Vector2 screenPos = Vector2.Scale(
             reticlePos,
@@ -93,17 +105,30 @@ public class Interact : Singleton<Interact> {
         );
 
         Ray ray = cam.ScreenPointToRay(screenPos);
-        return PortalUtils.RaycastThroughPortals(ray.origin, ray.direction, float.MaxValue, layerMask);
+        return RaycastUtils.Raycast(ray.origin, ray.direction, float.MaxValue, layerMask);
     }
 
     InteractableObject FindInteractableObjectHovered() {
-        RaycastHits hitObject = GetRaycastHits();
+        SuperspectiveRaycast raycastResult = GetRaycastHits();
 
-        if (hitObject.raycastWasAHit && hitObject.lastRaycast.hitInfo.collider != null) {
-            debug.Log("Hovering over " + hitObject.lastRaycast.hitInfo.collider.gameObject.name);
-            return hitObject.lastRaycast.hitInfo.collider.GetComponent<InteractableObject>();
+        if (raycastResult.hitObject) {
+            nameOfFirstObjectHit = raycastResult.firstObjectHit.collider.name;
+            if (raycastResult.firstObjectHit.collider.gameObject.TryGetComponent(out InteractableObject interactable)) {
+                return interactable;
+            }
+        }
+        else {
+            nameOfFirstObjectHit = "";
         }
 
         return null;
+    }
+
+    void OnGUI() {
+        if (DEBUG) {
+            GUI.depth = 2;
+            style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;
+            GUI.Label(new Rect(5, 80, 200, 25), $"Object Hovered: {nameOfFirstObjectHit}", style);
+        }
     }
 }

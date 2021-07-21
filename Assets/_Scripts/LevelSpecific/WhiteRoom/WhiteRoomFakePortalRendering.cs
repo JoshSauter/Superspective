@@ -10,7 +10,7 @@ namespace LevelSpecific.WhiteRoom {
 
 		protected override void Start() {
 			base.Start();
-			fakePortalSides.OnStateChange += OnVisibilityStateChange;
+			fakePortalSides.OnStateChangeSimple += OnVisibilityStateChange;
 		}
 
 		void OnVisibilityStateChange(VisibilityState unused) {

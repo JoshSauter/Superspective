@@ -55,9 +55,6 @@
 		float3 _WaterFogColor;
 		float _WaterFogDensity;
 		float _RefractionStrength;
-		
-		int _Channels[NUM_CHANNELS];
-		int _Inverse;
 
 		void ResetAlpha(Input IN, SurfaceOutputStandard o, inout fixed4 color) {
 			color.a = 1;
@@ -120,7 +117,7 @@
 
 		void surf(Input IN, inout SurfaceOutputStandard o) {
 			float2 coords = IN.screenPos.xy / IN.screenPos.w;
-			ClipDimensionObjectFromScreenSpaceCoords(coords, _Channels, _Inverse);
+			ClipDimensionObjectFromScreenSpaceCoords(coords);
 			
 			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
 			flow.xy = flow.xy * 2 - 1;

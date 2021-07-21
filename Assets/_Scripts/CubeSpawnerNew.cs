@@ -13,6 +13,7 @@ public class CubeSpawnerNew : MonoBehaviour {
     public DimensionObject backWall;
     public Button button;
     const float spawnOffset = 12;
+    static float timeToFallHalfway = Mathf.Sqrt(spawnOffset / Physics.gravity.magnitude);
     public DynamicObject cubePrefab;
     public PickupObject cubeSpawned;
     [Header("Cube grabbed from spawner:")]
@@ -23,6 +24,7 @@ public class CubeSpawnerNew : MonoBehaviour {
     const float glassRaiseDelay = 0.25f;
     const float glassOffset = 1.5f;
     const float glassMoveTime = 1.2f;
+    float startHeight;
 
     enum State {
         // Initial state
@@ -56,6 +58,8 @@ public class CubeSpawnerNew : MonoBehaviour {
     void Awake() {
         button.OnButtonPressBegin += (_) => SpawnNewCube();
         button.OnButtonUnpressBegin += (_) => DestroyCubeAlreadyGrabbedFromSpawner();
+
+        startHeight = glass.transform.localPosition.y;
     }
 
     bool ReferenceIsReplaceable(PickupObjectReference obj) {
@@ -75,12 +79,25 @@ public class CubeSpawnerNew : MonoBehaviour {
             case State.NoCubeSpawned:
                 break;
             case State.CubeSpawnedButNotTaken:
+                // Restore collision for the cube halfway through its fall
+                if (timeSinceStateChanged > timeToFallHalfway) {
+                    foreach (var newCubeColliders in cubeSpawned.GetComponentInParent<DimensionObject>().colliders) {
+                        newCubeColliders.enabled = true;
+                    }
+                }
+                else {
+                    // Disable new cube's colliders for the first half of the fall
+                    foreach (var newCubeColliders in cubeSpawned.GetComponentInParent<DimensionObject>().colliders) {
+                        newCubeColliders.enabled = false;
+                    }
+                }
+
                 if (timeSinceStateChanged > glassLowerDelay && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
                     float time = timeSinceStateChanged - glassLowerDelay;
                     float t = time / glassMoveTime;
                     
-                    Vector3 startPos = new Vector3(glass.localPosition.x, 0, glass.localPosition.z);
-                    Vector3 endPos = new Vector3(glass.localPosition.x, -glassOffset, glass.localPosition.z);
+                    Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
+                    Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
                     glass.localPosition = Vector3.Lerp(startPos, endPos, t*t);
                 }
                 break;
@@ -89,8 +106,8 @@ public class CubeSpawnerNew : MonoBehaviour {
                     float time = timeSinceStateChanged - glassRaiseDelay;
                     float t = time / glassMoveTime;
 
-                    Vector3 startPos = new Vector3(glass.localPosition.x, 0, glass.localPosition.z);
-                    Vector3 endPos = new Vector3(glass.localPosition.x, -glassOffset, glass.localPosition.z);
+                    Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
+                    Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
                     glass.localPosition = Vector3.Lerp(endPos, startPos, t*t);
                 }
                 break;
@@ -108,13 +125,14 @@ public class CubeSpawnerNew : MonoBehaviour {
         newCube.transform.SetParent(null);
         newCube.transform.localScale = cubePrefab.transform.localScale;
         newCube.transform.position = transform.position + transform.up * spawnOffset;
-        newCube.transform.Rotate(Random.insideUnitSphere.normalized, Random.Range(0, 25f));
+        newCube.transform.Rotate(Random.insideUnitSphere.normalized, Random.Range(0, 20f));
+        newCube.thisGravity.gravityDirection = -transform.up;
         SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
         // Create a parent object to place the DimensionObject script on that the cube will be a child of
         GameObject cubeParent = new GameObject("CubeDimensionObjectParent");
         DimensionObject parentDimensionObj = cubeParent.AddComponent<DimensionObject>();
-        parentDimensionObj.DEBUG = true;
+        //parentDimensionObj.DEBUG = true;
         parentDimensionObj.startingVisibilityState = VisibilityState.partiallyVisible;
         parentDimensionObj.treatChildrenAsOneObjectRecursively = true;
         parentDimensionObj.ignoreChildrenWithDimensionObject = false;
@@ -127,7 +145,8 @@ public class CubeSpawnerNew : MonoBehaviour {
         newCube.transform.SetParent(cubeParent.transform);
         parentDimensionObj.FindDefaultMaterials();
         parentDimensionObj.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
-
+        parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyVisible, true);
+        
         Physics.IgnoreCollision(roofCollider, newCube.GetComponent<Collider>(), true);
         
         PillarDimensionObject[] dimensionObjs =
@@ -185,17 +204,13 @@ public class CubeSpawnerNew : MonoBehaviour {
         }
     }
 
-    void OnTriggerEnter(Collider other) {
-        PickupObject cube = other.GetComponent<PickupObject>();
-        if (cube != null && cube == cubeSpawned) {
-            Physics.IgnoreCollision(roofCollider, cube.GetComponent<Collider>(), false);
-        }
-    }
-
     void OnTriggerExit(Collider other) {
         PickupObject cube = other.GetComponent<PickupObject>();
         if (cube != null && cube == cubeSpawned) {
             state = State.CubeTaken;
+            
+            // Restore collision with the roof of the Cube Spawner when the cube is taken from the spawner
+            Physics.IgnoreCollision(roofCollider, cube.GetComponent<Collider>(), false);
 
             // When the cube is removed from the spawner, reset its DimensionObject channel to their default
             DimensionObject originalDimensionObj = cubePrefab.GetComponentInChildren<DimensionObject>();

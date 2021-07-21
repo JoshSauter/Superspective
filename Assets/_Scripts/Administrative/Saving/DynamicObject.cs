@@ -58,6 +58,14 @@ namespace Saving {
 				debug.LogError($"{gameObject.name}: No prefab for this DynamicObject");
 			}
 			pickup = GetComponent<PickupObject>();
+
+			StartCoroutine(SubscribeToEventsOnceLevelManagerExists());
+		}
+
+		IEnumerator SubscribeToEventsOnceLevelManagerExists() {
+			while (LevelManager.instance == null) {
+				yield return null;
+			}
 			
 			LevelManager.instance.BeforeSceneRestoreState += RegisterOnLevelChangeEvents;
 			LevelManager.instance.BeforeSceneSerializeState += RegisterOnLevelChangeEvents;

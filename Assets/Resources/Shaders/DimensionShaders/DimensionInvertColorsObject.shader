@@ -30,9 +30,6 @@
             float4 _MainTex_ST;
 			
 			float4 _Color;
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
 			struct appdata
 			{
@@ -56,7 +53,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				ClipDimensionObject(i.vertex);
 
 				return _Color;
 			}

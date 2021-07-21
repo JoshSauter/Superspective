@@ -41,10 +41,7 @@
 			float _BurnSize;
 			float _DissolveValue;
 			float _EmissionAmount;
-
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
-
+			
 			struct v2f
 			{
 				UNITY_FOG_COORDS(1)
@@ -62,7 +59,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				ClipDimensionObject(i.vertex);
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);
@@ -103,8 +100,6 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 			float _DissolveValue;
 			fixed4 _Color;
 			fixed4 _Color2;
@@ -130,7 +125,7 @@
 				half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
 				if (_Color.a == 0) clip(-test);
 				if (_Color2.a == 0) clip(test);
-				ClipDimensionObject(i.pos.xy, _Channels, _Inverse);
+				ClipDimensionObject(i.pos.xy);
 				SHADOW_CASTER_FRAGMENT(i)
 			}
 			ENDCG

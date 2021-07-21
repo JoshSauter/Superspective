@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using Audio;
 using SuperspectiveUtils;
-using SuperspectiveUtils.PortalUtils;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
@@ -90,7 +90,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         PlayerButtonInput.instance.OnAction1Press += Drop;
 
         PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(transform);
-        if (thisDimensionObject != null) thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
+        if (thisDimensionObject != null) thisDimensionObject.OnStateChangeSimple += HandleDimensionObjectStateChange;
 
         playerCamPosLastFrame = playerCam.transform.position;
 
@@ -128,7 +128,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             float holdDistanceToUse = holdDistance +
                                       0.5f * Mathf.Abs(Vector3.Dot(Player.instance.transform.up, playerCam.forward));
             Vector3 targetPos = portalableObject == null
-                ? TargetHoldPosition(holdDistanceToUse, out RaycastHits raycastHits)
+                ? TargetHoldPosition(holdDistanceToUse, out SuperspectiveRaycast raycastHits)
                 : TargetHoldPositionThroughPortal(holdDistanceToUse, out raycastHits);
 
             Vector3 diff = targetPos - thisRigidbody.position;
@@ -138,9 +138,9 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
                 followLerpSpeed * Time.fixedDeltaTime
             );
             bool movingTowardsPlayer =
-                Vector3.Dot(newVelocity.normalized, -raycastHits.lastRaycast.ray.direction) > 0.5f;
-            if (raycastHits.totalDistance < minDistanceFromPlayer && movingTowardsPlayer)
-                newVelocity = Vector3.ProjectOnPlane(newVelocity, raycastHits.lastRaycast.ray.direction);
+                Vector3.Dot(newVelocity.normalized, -raycastHits.raycastParts.Last().ray.direction) > 0.5f;
+            if (raycastHits.distance < minDistanceFromPlayer && movingTowardsPlayer)
+                newVelocity = Vector3.ProjectOnPlane(newVelocity, raycastHits.raycastParts.Last().ray.direction);
 
             //Vector3 velBefore = thisRigidbody.velocity;
             thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
@@ -182,7 +182,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         transform.rotation = destinationRotation;
     }
 
-    Vector3 TargetHoldPosition(float holdDistance, out RaycastHits raycastHits) {
+    Vector3 TargetHoldPosition(float holdDistance, out SuperspectiveRaycast raycastHits) {
         // TODO: Don't work with strings every frame, clean this up
         int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
         int layerMask = ~((1 << ignoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
@@ -191,14 +191,26 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         int tempLayer = gameObject.layer;
         gameObject.layer = ignoreRaycastLayer;
 
-        raycastHits = PortalUtils.RaycastThroughPortals(playerCam.position, playerCam.forward, holdDistance, layerMask);
-        Vector3 targetPos = raycastHits.finalPosition;
+        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance, layerMask);
+        
+        Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
         gameObject.layer = tempLayer;
 
         return targetPos;
     }
+    
+    Vector3 PositionAtFirstObjectOrEndOfRaycast(SuperspectiveRaycast raycast) {
+        if (raycast.hitObject) {
+            // Assumes a transform scale of 1,1,1 corresponds to 1 unit^3 volume
+            return raycast.firstObjectHit.point - transform.lossyScale.x * raycast.firstObjectHit.normal;
+        }
+        else {
+            SuperspectiveRaycastPart lastPart = raycast.raycastParts.Last();
+            return lastPart.ray.origin + lastPart.ray.direction * lastPart.distance;
+        }
+    }
 
-    Vector3 TargetHoldPositionThroughPortal(float holdDistance, out RaycastHits raycastHits) {
+    Vector3 TargetHoldPositionThroughPortal(float holdDistance, out SuperspectiveRaycast raycastHits) {
         // TODO: Don't work with strings every frame, clean this up
         int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
         int layerMask = ~((1 << ignoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
@@ -213,21 +225,21 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             portalableObject.fakeCopyInstance.gameObject.layer = ignoreRaycastLayer;
         }
 
-        raycastHits = PortalUtils.RaycastThroughPortals(playerCam.position, playerCam.forward, holdDistance, layerMask);
-        Vector3 targetPos = raycastHits.finalPosition;
+        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance, layerMask);
+        Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
 
         gameObject.layer = tempLayer;
         if (portalableObject.copyIsEnabled) portalableObject.fakeCopyInstance.gameObject.layer = tempLayerPortalCopy;
 
         bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null &&
                                           portalableObject.grabbedThroughPortal.portalIsEnabled &&
-                                          !raycastHits.raycastHitAnyPortal;
+                                          !raycastHits.hitPortal;
         bool throughInPortalToOutPortal =
-            portalableObject.grabbedThroughPortal == null && raycastHits.raycastHitAnyPortal;
+            portalableObject.grabbedThroughPortal == null && raycastHits.hitPortal;
         if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
             Portal inPortal = throughOutPortalToInPortal
                 ? portalableObject.grabbedThroughPortal
-                : raycastHits.firstRaycast.portalHit.otherPortal;
+                : raycastHits.firstPortalHit.otherPortal;
 
             targetPos = inPortal.TransformPoint(targetPos);
         }

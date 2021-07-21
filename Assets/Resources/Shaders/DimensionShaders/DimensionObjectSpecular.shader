@@ -92,12 +92,9 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#pragma fragment fragBaseNew
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
 			half4 fragBaseNew(VertexOutputForwardBase i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Channels, _Inverse);
+				ClipDimensionObject(i.pos);
 				return fragBase(i);
 			}
 
@@ -136,12 +133,9 @@ Shader "Custom/DimensionShaders/DimensionObjectSpecular"
 			#pragma fragment fragAddNew
 			#include "UnityStandardCoreForward.cginc"
 			#include "DimensionShaderHelpers.cginc"
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
 			half4 fragAddNew(VertexOutputForwardAdd i) : SV_TARGET {
-				ClipDimensionObject(i.pos, _Channels, _Inverse);
+				ClipDimensionObject(i.pos);
 				return fragAdd(i);
 			}
 

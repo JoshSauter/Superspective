@@ -1,9 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using SuperspectiveUtils;
+using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	public RenderTexture visibilityMaskTexture;
 	public RenderTexture portalMaskTexture;
+	public int visibilityMaskValue; // The value of the visibility masks at the reticle
 	static readonly int ResolutionX = Shader.PropertyToID("_ResolutionX");
 	static readonly int ResolutionY = Shader.PropertyToID("_ResolutionY");
 	static readonly int DimensionMask = Shader.PropertyToID("_DimensionMask");
@@ -15,6 +20,55 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
 		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+        
+		StartCoroutine(RequestVisibilityMask());
+	}
+
+	IEnumerator RequestVisibilityMask() {
+		while (true) {
+			yield return new WaitForSeconds(0.25f);
+            
+			Vector2 pixelPositionOfReticle = Interact.instance.PixelPositionOfReticle();
+			AsyncGPUReadback.Request(
+				MaskBufferRenderTextures.instance.visibilityMaskTexture,
+				0,
+				(int)pixelPositionOfReticle.x,
+				1,
+				(int)pixelPositionOfReticle.y,
+				1,
+				0,
+				1,
+				MaskBufferRenderTextures.instance.visibilityMaskTexture.graphicsFormat,
+				OnCompleteReadback
+			);
+		}
+	}
+	void OnCompleteReadback(AsyncGPUReadbackRequest request) {
+		if (request.hasError) {
+			Debug.LogError("GPU readback error detected");
+			return;
+		}
+
+		// This happens when the delayed async readback happens as we're exiting play mode
+		if (MaskBufferRenderTextures.instance == null ||
+		    MaskBufferRenderTextures.instance.visibilityMaskTexture == null) {
+			return;
+		}
+        
+		// Read the color of the visibility mask texture to determine which visibility masks are active on cursor
+		Texture2D visibilityMaskTex = new Texture2D(
+			1,
+			1,
+			GraphicsFormatUtility.GetTextureFormat(MaskBufferRenderTextures.instance.visibilityMaskTexture.graphicsFormat),
+			false
+		);
+		visibilityMaskTex.LoadRawTextureData(request.GetData<Color32>());
+		visibilityMaskTex.Apply();
+
+		// Only one pixel so we can sample at 0, 0
+		Color sample = visibilityMaskTex.GetPixel(0, 0);
+
+		visibilityMaskValue = DimensionShaderUtils.MaskValueFromSample(sample.linear);
 	}
 
 	void OnDisable() {
@@ -56,7 +110,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	}
 
 	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {
-		rt = new RenderTexture(currentWidth, currentHeight, 24);
+		rt = new RenderTexture(currentWidth, currentHeight, 24, RenderTextureFormat.ARGB32);
 		rt.enableRandomWrite = true;
 		rt.Create();
 

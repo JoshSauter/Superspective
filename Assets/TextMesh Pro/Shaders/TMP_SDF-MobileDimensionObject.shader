@@ -120,9 +120,6 @@ SubShader {
 			#endif
 		};
 
-		int _Channels[NUM_CHANNELS];
-		int _Inverse;
-
 		pixel_t VertShader(vertex_t input)
 		{
 			pixel_t output;
@@ -200,7 +197,7 @@ SubShader {
 		// PIXEL SHADER
 		fixed4 PixShader(pixel_t input) : SV_Target
 		{
-			ClipDimensionObject(input.vertex, _Channels, _Inverse);
+			ClipDimensionObject(input.vertex);
 			UNITY_SETUP_INSTANCE_ID(input);
 
 			half d = tex2D(_MainTex, input.texcoord0.xy).a * input.param.x;

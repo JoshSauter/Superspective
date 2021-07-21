@@ -1,6 +1,7 @@
 ﻿Shader "Custom/DimensionShaders/DimensionWall" {
 	Properties {
 		_Channel("Channel", Int) = 0
+		_StencilValue("Channel+1", Int) = 1
 	}
     SubShader {
         Tags { "Queue"="Background-1000" }
@@ -9,6 +10,12 @@
 		Pass {
 			Blend One One
 			ZWrite Off
+			
+			Stencil {
+				Ref [_StencilValue]
+				Comp Greater
+				Pass Replace
+			}
 
             CGPROGRAM
             #pragma vertex vert
@@ -17,7 +24,10 @@
             #include "UnityCG.cginc"
             #include "DimensionShaderHelpers.cginc"
 
-            uniform int _Channel;
+            // Make sure _Channel (also defined sometimes in DimensionShaderHelpers) is always defined
+#ifdef USE_ADVANCED_CHANNEL_LOGIC
+			int _Channel;
+#endif
 
 			struct appdata {
 				float4 vertex : POSITION;

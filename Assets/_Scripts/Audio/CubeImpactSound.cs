@@ -16,7 +16,6 @@ namespace Audio {
 		float minPitch = 0.6f;
 		float maxPitch = 1.2f;
 
-		float speedToSwitchSound = 15f;
 		float timeSinceLastSound = 0f;
 		float cooldown = 0.05f;
 
@@ -33,6 +32,7 @@ namespace Audio {
 				audio.pitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
 			}
 
+			debug.LogWarning($"{gameObject.name} collided with {collision.collider.gameObject.name} at speed {impactSpeed:F1}");
 			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, this, shouldPlay, AudioSettingsOverride);
 			timeSinceLastSound = 0f;
 			curVolume = nextVolume;

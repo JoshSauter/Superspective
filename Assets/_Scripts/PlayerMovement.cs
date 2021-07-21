@@ -85,7 +85,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     }
 
     // Use this for initialization
-    IEnumerator Start() {
+    new IEnumerator Start() {
+        base.Start();
         movespeed = walkSpeed;
 
         thisRigidbody.isKinematic = true;

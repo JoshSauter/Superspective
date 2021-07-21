@@ -14770,7 +14770,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 15
+  channel: 7
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -14778,6 +14778,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &1604229267482999240
 GameObject:
   m_ObjectHideFlags: 0
@@ -15002,7 +15004,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 02cc1604f097ddf4282f1b501c6cc433, type: 2}
+  - {fileID: 2100000, guid: 9cb0312ebe1047c49ac50b8687b46762, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -23471,7 +23473,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 980c7754b1d36424782638a2a3453c46, type: 2}
+  - {fileID: 2100000, guid: 47ae9e0d6d70a254fa92efabd9233557, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -29985,7 +29987,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 14
+  channel: 6
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -29993,6 +29995,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &3440788723039553833
 GameObject:
   m_ObjectHideFlags: 0
@@ -32007,7 +32011,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0fa00c54083e93b498c370371cabcaf8, type: 2}
+  - {fileID: 2100000, guid: ea910d3124412f54dbdb075b19f1a5c1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -40288,10 +40292,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DEBUG: 1
+  DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 12
+  channel: 4
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -40299,6 +40303,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &5222183634145934024
 GameObject:
   m_ObjectHideFlags: 0
@@ -40952,8 +40958,6 @@ GameObject:
   - component: {fileID: 702735547429962232}
   - component: {fileID: 8977594326878387372}
   - component: {fileID: 1916926638613749173}
-  - component: {fileID: 5855033248706009007}
-  - component: {fileID: 2395763979045921986}
   m_Layer: 0
   m_Name: Roof
   m_TagString: Untagged
@@ -41944,42 +41948,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &5855033248706009007
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5459503545273491608}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: b773e64f-a73a-43f8-80a7-06e5c46b04b8
---- !u!114 &2395763979045921986
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5459503545273491608}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DEBUG: 0
-  treatChildrenAsOneObjectRecursively: 1
-  ignoreChildrenWithDimensionObject: 0
-  channel: 12
-  reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
-  disableColliderWhileInvisible: 1
-  renderers: []
-  colliders: []
-  startingVisibilityState: 3
-  visibilityState: 3
 --- !u!1 &5504975135112035526
 GameObject:
   m_ObjectHideFlags: 0
@@ -42040,7 +42008,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c91c830349635f241a8bac318e438365, type: 2}
+  - {fileID: 2100000, guid: 041989cc84da7be45923be01df97b36d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -61355,7 +61323,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
-  channel: 13
+  channel: 5
   reverseVisibilityStates: 0
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
@@ -61363,6 +61331,8 @@ MonoBehaviour:
   colliders: []
   startingVisibilityState: 1
   visibilityState: 1
+  useAdvancedChannelLogic: 0
+  channelLogic: 
 --- !u!1 &8160803845895462908
 GameObject:
   m_ObjectHideFlags: 0

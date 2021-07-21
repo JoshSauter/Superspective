@@ -40,9 +40,6 @@ SubShader {
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-			
-			int _Channels[NUM_CHANNELS];
-			int _Inverse;
 
             v2f vert (appdata_t v) {
                 v2f o;
@@ -55,7 +52,7 @@ SubShader {
             }
 
             fixed4 frag (v2f i) : SV_Target {
-				ClipDimensionObject(i.vertex, _Channels, _Inverse);
+				ClipDimensionObject(i.vertex);
                 fixed4 col = tex2D(_MainTex, i.texcoord);
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 UNITY_OPAQUE_ALPHA(col.a);

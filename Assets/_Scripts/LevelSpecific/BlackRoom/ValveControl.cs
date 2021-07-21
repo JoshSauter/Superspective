@@ -62,7 +62,8 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		Angle GetAngleOfMouse() {
-			Vector3 mouseLocation = Interact.instance.GetRaycastHits().lastRaycast.hitInfo.point;
+			SuperspectiveRaycast raycast = Interact.instance.GetRaycastHits();
+			Vector3 mouseLocation = raycast.hitObject ? raycast.firstObjectHit.point : raycast.finalPosition;
 			Vector3 localMouseLocation = transform.InverseTransformPoint(mouseLocation);
 			return PolarCoordinate.CartesianToPolar(localMouseLocation).angle;
 		}

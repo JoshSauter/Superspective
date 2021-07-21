@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using SuperspectiveUtils;
 using SuperspectiveUtils.ShaderUtils;
-using SuperspectiveUtils.PortalUtils;
 using System.Linq;
 using NaughtyAttributes;
 using Saving;
@@ -103,7 +102,7 @@ namespace PortalMechanics {
 		public PortalObjectAction BeforeObjectTeleported;
 		public PortalObjectAction OnObjectTeleported;
 
-		RaycastHits thisFrameRaycastHits;
+		SuperspectiveRaycast thisFrameRaycastHits;
 
 		protected override void Awake() {
 			base.Awake();
@@ -153,7 +152,7 @@ namespace PortalMechanics {
 				}
 			}
 
-			if (!thisFrameRaycastHits.raycastHitAnyPortal && grabbedThroughPortal != null) {
+			if (!thisFrameRaycastHits.hitPortal && grabbedThroughPortal != null) {
 				//pickupObject.Drop();
 			}
 		}
@@ -203,8 +202,8 @@ namespace PortalMechanics {
 		}
 
 		void RecalculateHoveredThroughPortal() {
-			bool hoveredOnPickupObj = thisFrameRaycastHits.raycastWasAHit && thisFrameRaycastHits.objectHit == this.gameObject;
-			bool hoveredOnPortalCopy = thisFrameRaycastHits.raycastWasAHit && copyIsEnabled && thisFrameRaycastHits.objectHit == fakeCopyInstance.gameObject;
+			bool hoveredOnPickupObj = thisFrameRaycastHits.hitObject && thisFrameRaycastHits.firstObjectHit.collider.gameObject == this.gameObject;
+			bool hoveredOnPortalCopy = thisFrameRaycastHits.hitObject && copyIsEnabled && thisFrameRaycastHits.firstObjectHit.collider.gameObject == fakeCopyInstance.gameObject;
 			hoveredThroughPortal = grabbedThroughPortal != null ? grabbedThroughPortal : (hoveredOnPickupObj || hoveredOnPortalCopy) ? InteractedThroughPortal() : null;
 		}
 
@@ -213,8 +212,8 @@ namespace PortalMechanics {
 		}
 
 		Portal InteractedThroughPortal() {
-			bool hoveredOnPortalCopy = copyIsEnabled && thisFrameRaycastHits.raycastWasAHit && thisFrameRaycastHits.lastRaycast.hitInfo.collider.gameObject == fakeCopyInstance.gameObject;
-			Portal hoveredThroughPortal = thisFrameRaycastHits.firstRaycast.portalHit;
+			bool hoveredOnPortalCopy = copyIsEnabled && thisFrameRaycastHits.hitObject && thisFrameRaycastHits.firstObjectHit.collider.gameObject == fakeCopyInstance.gameObject;
+			Portal hoveredThroughPortal = thisFrameRaycastHits.firstPortalHit;
 			if (sittingInPortal == hoveredThroughPortal) {
 				hoveredThroughPortal = null;
 			}

@@ -53,11 +53,9 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 
 	public void SetColor(string colorName, Color color) {
-		if (GetMaterial().HasProperty(colorName)) {
-			r.GetPropertyBlock(propBlock);
-			propBlock.SetColor(colorName, color);
-			r.SetPropertyBlock(propBlock);
-		}
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetColor(colorName, color);
+		r.SetPropertyBlock(propBlock);
 	}
 
 	public void SetMainColor(Color color) {
@@ -87,11 +85,9 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 
 	public void SetFloat(string propName, float value) {
-		if (GetMaterial().HasProperty(propName)) {
-			r.GetPropertyBlock(propBlock);
-			propBlock.SetFloat(propName, value);
-			r.SetPropertyBlock(propBlock);
-		}
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetFloat(propName, value);
+		r.SetPropertyBlock(propBlock);
 	}
 
 	public float GetFloat(string propName) {
@@ -100,11 +96,9 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 
 	public void SetInt(string propName, int value) {
-		if (GetMaterial().HasProperty(propName)) {
-			r.GetPropertyBlock(propBlock);
-			propBlock.SetInt(propName, value);
-			r.SetPropertyBlock(propBlock);
-		}
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetInt(propName, value);
+		r.SetPropertyBlock(propBlock);
 	}
 
 	public int GetInt(string propName) {

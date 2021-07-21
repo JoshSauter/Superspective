@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using LevelManagement;
 using PortalMechanics;
 using Saving;
@@ -108,6 +109,29 @@ namespace SuperspectiveUtils {
             return o.CompareTag("Player");
         }
 
+        public static string FullPath(this GameObject o) {
+            if (o == null) {
+                return "(null)";
+            }
+            string path = "";
+            Transform curNode = o.transform;
+            while (curNode != null) {
+                path = String.Concat($"{curNode.name}.", path);
+                curNode = curNode.parent;
+            }
+
+            return path;
+        }
+
+        public static string FullPath(this Component c) {
+            if (c != null && c.gameObject != null) {
+                return FullPath(c.gameObject);
+            }
+            else {
+                return "(null)";
+            }
+        }
+
         public static T PasteComponent<T>(this GameObject go, T toAdd) where T : Component {
             return go.AddComponent<T>().GetCopyOf(toAdd);
         }
@@ -152,7 +176,7 @@ namespace SuperspectiveUtils {
         }
 
         // Recursively search up the transform tree through parents to find a DimensionObject
-        public static T FindDimensionObjectRecursively<T>(Transform go) where T : DimensionObject {
+        public static T FindDimensionObjectRecursively<T>(this Transform go) where T : DimensionObject {
             T dimensionObj = go.GetComponent<T>();
             Transform parent = go.parent;
             if (dimensionObj != null)
@@ -161,6 +185,12 @@ namespace SuperspectiveUtils {
                 return FindDimensionObjectRecursively<T>(parent);
             return null;
         }
+
+        public static T FindDimensionObjectRecursively<T>(this Component c) where T : DimensionObject =>
+            FindDimensionObjectRecursively<T>(c.transform);
+
+        public static T FindDimensionObjectRecursively<T>(this GameObject o) where T : DimensionObject =>
+            FindDimensionObjectRecursively<T>(o.transform);
 
         public static Transform[] GetChildren(this Transform parent) {
             return parent.GetComponentsInChildrenOnly<Transform>();
@@ -911,25 +941,28 @@ namespace SuperspectiveUtils {
         }
 
         public void Log(object message) {
+            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             if (enabled.Invoke())
                 Debug.Log(
-                    $"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
+                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
         }
 
         public void LogWarning(object message) {
+            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             if (enabled.Invoke())
                 Debug.LogWarning(
-                    $"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
+                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
         }
 
         public void LogError(object message) {
+            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             if (enabled.Invoke())
                 Debug.LogError(
-                    $"{message}\n───────\nGameObject: {context.name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
+                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
         }
@@ -1129,159 +1162,6 @@ namespace SuperspectiveUtils {
                         material.renderQueue = (int) RenderQueue.Transparent;
                         break;
                 }
-            }
-        }
-    }
-
-    namespace PortalUtils {
-        public class RaycastHits {
-            public List<RaycastThroughPortalInfo> hitInfos = new List<RaycastThroughPortalInfo>();
-            public bool raycastHitAnyPortal;
-            public bool raycastWasAHit;
-            public float totalDistance;
-
-            public GameObject objectHit {
-                get {
-                    if (raycastWasAHit)
-                        return lastRaycast.hitInfo.collider.gameObject;
-                    return null;
-                }
-            }
-
-            public Vector3 finalPosition {
-                get {
-                    if (raycastWasAHit)
-                        return lastRaycast.hitInfo.point;
-                    return lastRaycast.ray.origin + lastRaycast.ray.direction * lastRaycast.distance;
-                }
-            }
-
-            public RaycastThroughPortalInfo firstRaycast => hitInfos[0];
-            public RaycastThroughPortalInfo lastRaycast => hitInfos[hitInfos.Count - 1];
-
-            public void AddHitInfo(RaycastThroughPortalInfo hitInfo) {
-                hitInfos.Add(hitInfo);
-                if (hitInfo.portalHit != null) raycastHitAnyPortal = true;
-            }
-        }
-
-        public struct RaycastThroughPortalInfo {
-            public Ray ray;
-            public float distance;
-            public RaycastHit hitInfo;
-            public Portal portalHit;
-
-            public RaycastThroughPortalInfo(Ray ray, float distance, RaycastHit raycastHit, Portal portalHit) {
-                this.ray = ray;
-                this.distance = distance;
-                hitInfo = raycastHit;
-                this.portalHit = portalHit;
-            }
-        }
-
-        public static class PortalUtils {
-            public static RaycastHits RaycastThroughPortals(
-                Vector3 start,
-                Vector3 direction,
-                float maxDistance,
-                int layermask
-            ) {
-                return RaycastThroughPortalsHelper(start, direction, maxDistance, layermask, 0, new RaycastHits());
-            }
-
-            static RaycastHits RaycastThroughPortalsHelper(
-                Vector3 start,
-                Vector3 direction,
-                float maxDistance,
-                int layermask,
-                float distanceTraveledSoFar,
-                RaycastHits raycastHits
-            ) {
-                //Debug.Log("Distance travelled: " + distanceTraveledSoFar);
-                // Bad distance value
-                if (distanceTraveledSoFar > maxDistance) {
-                    raycastHits.raycastWasAHit = false;
-                    raycastHits.totalDistance = maxDistance;
-                    return raycastHits;
-                }
-
-                RaycastHit thisHitInfo = new RaycastHit();
-                float rayDistance = maxDistance - distanceTraveledSoFar;
-                Ray testRay = new Ray(start, direction);
-
-                bool raycastResult = false;
-                if (raycastHits.hitInfos.Count > 0 && raycastHits.lastRaycast.portalHit != null) {
-                    Collider[] outPortalOfLastRaycastHitColliders =
-                        raycastHits.lastRaycast.portalHit.otherPortal.colliders;
-                    foreach (Collider c in outPortalOfLastRaycastHitColliders) {
-                        int tempLayer = c.gameObject.layer;
-                        c.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
-                        raycastResult = Physics.Raycast(
-                            testRay,
-                            out thisHitInfo,
-                            rayDistance,
-                            layermask,
-                            QueryTriggerInteraction.Collide
-                        );
-                        c.gameObject.layer = tempLayer;
-                    }
-                }
-                else
-                    raycastResult = Physics.Raycast(
-                        testRay,
-                        out thisHitInfo,
-                        rayDistance,
-                        layermask,
-                        QueryTriggerInteraction.Collide
-                    );
-
-                // Raycast hit something
-                if (raycastResult) {
-                    Debug.DrawLine(testRay.origin, testRay.origin + testRay.direction * rayDistance, Color.green, 0.1f);
-                    float newTotalDistanceTraveled = distanceTraveledSoFar + thisHitInfo.distance;
-
-                    raycastHits.totalDistance = newTotalDistanceTraveled;
-
-                    Portal portalHit = thisHitInfo.collider.gameObject.GetComponent<Portal>();
-                    if (portalHit == null) {
-                        PortalCollider portalCollider = thisHitInfo.collider.gameObject.GetComponent<PortalCollider>();
-                        if (portalCollider != null) portalHit = portalCollider.portal;
-                    }
-
-                    if (portalHit == null && thisHitInfo.collider.gameObject.name.Contains("VolumetricPortal"))
-                        portalHit = thisHitInfo.collider.gameObject.transform.parent?.GetComponent<Portal>();
-                    // Raycast hit a portal, fire a new one on the other side of the portal
-                    if (portalHit != null && portalHit.portalIsEnabled) {
-                        Vector3 newStart = portalHit.TransformPoint(thisHitInfo.point);
-
-                        Vector3 newDirection = portalHit.TransformDirection(direction);
-
-                        raycastHits.AddHitInfo(
-                            new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, portalHit)
-                        );
-
-                        return RaycastThroughPortalsHelper(
-                            newStart,
-                            newDirection,
-                            maxDistance,
-                            layermask,
-                            newTotalDistanceTraveled,
-                            raycastHits
-                        );
-                    }
-                    // Raycast hit a non-portal object, return that info
-
-                    raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, null));
-                    raycastHits.raycastWasAHit = true;
-                    return raycastHits;
-                }
-                // Raycast didn't hit anything
-
-                Debug.DrawLine(testRay.origin, testRay.origin + testRay.direction * rayDistance, Color.red, 0.1f);
-                raycastHits.raycastWasAHit = false;
-                raycastHits.totalDistance = maxDistance;
-                raycastHits.AddHitInfo(new RaycastThroughPortalInfo(testRay, rayDistance, thisHitInfo, null));
-                return raycastHits;
             }
         }
     }

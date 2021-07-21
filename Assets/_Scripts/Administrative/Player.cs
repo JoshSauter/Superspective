@@ -27,7 +27,8 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 		cameraFollow = GetComponentInChildren<CameraFollow>();
 	}
 
-	void Start() {
+	protected override void Start() {
+		base.Start();
 		PickupObject.OnAnyPickup += (PickupObject objPickedUp) => heldObject = objPickedUp;
 		PickupObject.OnAnyDrop += (PickupObject objDropped) => { if (objDropped == heldObject) heldObject = null; };
 	}
