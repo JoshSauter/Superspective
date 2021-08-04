@@ -10,35 +10,21 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
 public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.DimensionPillarSave> {
 	public static Dictionary<string, PillarReference> allPillars = new Dictionary<string, PillarReference>();
-	
-	UniqueId id;
-
-	UniqueId uniqueId {
-		get {
-			if (id == null) {
-				id = GetComponent<UniqueId>();
-			}
-			return id;
-		}
-	}
 
 	public Vector3 DimensionShiftVector => transform.forward;
 	public Vector3 Axis => transform.up;
-	public Plane DimensionShiftParallelPlane {
+	Plane DimensionShiftParallelPlane {
 		get {
 			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(DimensionShiftVector.normalized, Axis);
 			return new Plane(dimensionShiftPlaneNormalVector, transform.position);
 		}
 	}
-	public Plane DimensionShiftPerpendicularPlane {
-		get {
-			return new Plane(DimensionShiftVector.normalized, transform.position);
-		}
-	}
+	Plane DimensionShiftPerpendicularPlane => new Plane(DimensionShiftVector.normalized, transform.position);
+
 	[SerializeField]
 	Angle.Quadrant _playerQuadrant;
-	public Angle.Quadrant PlayerQuadrant {
-		get { return _playerQuadrant; }
+	Angle.Quadrant PlayerQuadrant {
+		get => _playerQuadrant;
 		set {
 			if (PlayerQuadrant == Angle.Quadrant.I && value == Angle.Quadrant.IV) {
 				ShiftDimensionUp();
@@ -51,7 +37,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		}
 	}
 
-	public bool setAsActiveOnStart = false;
 	bool initialized = false;
 
 	public string pillarKey;
@@ -129,13 +114,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Down);
 
 		debug.Log("Shift to dimension " + curDimension);
-	}
-
-	Angle DimensionShiftAngle() {
-		//Vector3 pillarToCamera = SuperspectiveScreen.instance.playerCamera.transform.position - transform.position;
-		//PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToCamera);
-		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(DimensionShiftVector);
-		return polar.angle;
 	}
 
 	// Wrap-around logic for incrementing dimension values

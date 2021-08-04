@@ -142,8 +142,9 @@ public class PillarDimensionObject : DimensionObject {
 		if (activePillar == null) return;
 		
 		if (DEBUG) {
-			Debug.DrawRay(activePillar.transform.position, minAngleVector, Color.cyan);
-			Debug.DrawRay(activePillar.transform.position, maxAngleVector, Color.blue);
+			Vector3 pillarPos = activePillar.transform.position;
+			Debug.DrawRay(pillarPos, minAngleVector, Color.cyan);
+			Debug.DrawRay(pillarPos, maxAngleVector, Color.blue);
 		}
 
 		if (thisObjectMoving || !pillarPlanes.ContainsKey(activePillar.ID)) {

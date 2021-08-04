@@ -228,22 +228,22 @@ namespace Audio {
 		// Public Interface //
 		//////////////////////
 		// Plays an AudioClip, should only be used for global (non-3D) sounds
-		public void Play(AudioName audioType, string uniqueIdentifier, bool shouldForcePlay = false, Action<AudioSource> settingsOverride = null) {
+		public void Play(AudioName audioType, string uniqueIdentifier, bool shouldForcePlay = false, Action<AudioJob> settingsOverride = null) {
 			AudioJob audioJob = GetOrCreateJob(audioType, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
-				settingsOverride?.Invoke(audioJob.audio);
+				settingsOverride?.Invoke(audioJob);
 				audioJob.audio.Play();
 			}
 		}
 
 		// Plays an AudioClip at the given position
-		public void PlayAtLocation(AudioName audioType, string uniqueIdentifier, Vector3 location, bool shouldForcePlay = false, Action<AudioSource> settingsOverride = null) {
+		public void PlayAtLocation(AudioName audioType, string uniqueIdentifier, Vector3 location, bool shouldForcePlay = false, Action<AudioJob> settingsOverride = null) {
 			AudioJob audioJob = GetOrCreateJob(audioType, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
 				audioJob.audio.transform.position = location;
-				settingsOverride?.Invoke(audioJob.audio);
+				settingsOverride?.Invoke(audioJob);
 				audioJob.audio.Play();
 			}
 		}
@@ -254,7 +254,7 @@ namespace Audio {
 			string uniqueIdentifier,
 			T audioJobOnGameObject,
 			bool shouldForcePlay = false,
-			Action<AudioSource> settingsOverride = null
+			Action<AudioJob> settingsOverride = null
 		) where T : SaveableObject, AudioJobOnGameObject {
 			AudioJob audioJob = GetOrCreateJob(audioType, uniqueIdentifier, settingsOverride);
 
@@ -265,7 +265,7 @@ namespace Audio {
 				serializableUpdateAudioOnGameObject[audioJob.id] = audioJobOnGameObject;
 				updateAudioJobs[audioJob.id] = update;
 
-				settingsOverride?.Invoke(audioJob.audio);
+				settingsOverride?.Invoke(audioJob);
 				audioJob.audio.Play();
 			}
 		}
@@ -276,7 +276,7 @@ namespace Audio {
 			string uniqueIdentifier,
 			T customUpdate,
 			bool shouldForcePlay = false,
-			Action<AudioSource> settingsOverride = null
+			Action<AudioJob> settingsOverride = null
 		) where T : SaveableObject, CustomAudioJob {
 			AudioJob audioJob = GetOrCreateJob(audioType, uniqueIdentifier, settingsOverride);
 
@@ -286,7 +286,7 @@ namespace Audio {
 					updateAudioJobs[audioJob.id] = customUpdate.UpdateAudio;
 				}
 
-				settingsOverride?.Invoke(audioJob.audio);
+				settingsOverride?.Invoke(audioJob);
 				audioJob.audio.Play();
 			}
 		}
@@ -303,7 +303,7 @@ namespace Audio {
 			return $"{uniqueIdentifier}/{audioName}";
 		}
 
-		public AudioJob GetOrCreateJob(AudioName audioType, string uniqueIdentifier, Action<AudioSource> settingsOverride = null) {
+		public AudioJob GetOrCreateJob(AudioName audioType, string uniqueIdentifier, Action<AudioJob> settingsOverride = null) {
 			string id = Id(audioType, uniqueIdentifier);
 
 			AudioJob audioJob;
@@ -312,13 +312,12 @@ namespace Audio {
 			}
 			else {
 				GameObject newAudioGO = new GameObject(id);
-				//newAudioGO.transform.SetParent(soundsRoot);
+				newAudioGO.transform.SetParent(soundsRoot);
 				newAudioGO.transform.position = Vector3.zero;
 
 				AudioSettings settings = defaultSettings[audioType];
 
 				AudioSource newAudioSource = newAudioGO.PasteComponent(settings.audioSource);
-				settingsOverride?.Invoke(newAudioSource);
 
 				newAudioGO.name = id;
 				audioJob = new AudioJob {
@@ -328,6 +327,7 @@ namespace Audio {
 					basePitch = newAudioSource.pitch,
 					randomizedPitch = UnityEngine.Random.Range(-settings.randomizePitch, settings.randomizePitch)
 				};
+				settingsOverride?.Invoke(audioJob);
 
 				newAudioSource.pitch += audioJob.randomizedPitch;
 				audioJobs.Add(audioJob.id, audioJob);

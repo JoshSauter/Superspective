@@ -27,9 +27,9 @@ namespace Audio {
 
 			bool shouldPlay = timeSinceLastSound > cooldown || nextVolume > curVolume;
 
-			void AudioSettingsOverride(AudioSource audio) {
-				audio.volume = nextVolume;
-				audio.pitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
+			void AudioSettingsOverride(AudioManager.AudioJob audio) {
+				audio.audio.volume = nextVolume;
+				audio.basePitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
 			}
 
 			debug.LogWarning($"{gameObject.name} collided with {collision.collider.gameObject.name} at speed {impactSpeed:F1}");

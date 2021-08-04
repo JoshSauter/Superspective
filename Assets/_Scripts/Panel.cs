@@ -128,27 +128,27 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
 
         if (soundActivated && audioJob.audio.volume < maxVolume) {
             float soundLerpSpeedOn = 1f;
-            float newPitch = Mathf.Clamp(audioJob.audio.pitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
+            float newPitch = Mathf.Clamp(audioJob.basePitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
             float newVolume = Mathf.Clamp(
                 audioJob.audio.volume + Time.deltaTime * soundLerpSpeedOn,
                 minVolume,
                 maxVolume
             );
 
-            audioJob.audio.pitch = newPitch;
+            audioJob.basePitch = newPitch;
             audioJob.audio.volume = newVolume;
         }
 
         if (!soundActivated && audioJob.audio.volume > minVolume) {
             float soundLerpSpeedOff = .333f;
-            float newPitch = Mathf.Clamp(audioJob.audio.pitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
+            float newPitch = Mathf.Clamp(audioJob.basePitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
             float newVolume = Mathf.Clamp(
                 audioJob.audio.volume - Time.deltaTime * soundLerpSpeedOff,
                 minVolume,
                 maxVolume
             );
 
-            audioJob.audio.pitch = newPitch;
+            audioJob.basePitch = newPitch;
             audioJob.audio.volume = newVolume;
         }
     }

@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "com.dbrizov.naughtyattributes": {
-      "version": "https://github.com/dbrizov/NaughtyAttributes.git#upm",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "8361c4c50a4f375cfac3cdb67ebd3babf15c42d8"
-    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

@@ -260,7 +260,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
             // Pitch goes 1 -> 1.25 -> 1.5 -> 1
             currentPitch = (currentPitch - .75f) % .75f + 1f;
-            pickupSound.audio.pitch = currentPitch;
+            pickupSound.basePitch = currentPitch;
             AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, this, true);
 
             OnPickupSimple?.Invoke();

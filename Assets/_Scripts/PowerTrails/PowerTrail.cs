@@ -334,7 +334,7 @@ namespace PowerTrailMechanics {
 				//debug.Log($"PLAYER IS {minDistance} FROM {gameObject.name}");
 				audioJob.audio.transform.position = closestPoint;
 				audioJob.audio.volume = distance / maxDistance;
-				audioJob.audio.pitch = 0.5f * (distance / maxDistance);
+				audioJob.basePitch = 0.5f * (distance / maxDistance);
 			}
 			else {
 				audioJob.audio.volume = 0f;

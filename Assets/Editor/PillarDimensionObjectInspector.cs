@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CustomEditor(typeof(PillarDimensionObject))]
 [CanEditMultipleObjects]
-public class PillarDimensionObjectInspector : UnityEditor.Editor {
+public class PillarDimensionObjectInspector : DimensionObjectInspector {
     SerializedProperty channel;
 
     SerializedProperty colliderBoundsOverride;
@@ -28,6 +28,7 @@ public class PillarDimensionObjectInspector : UnityEditor.Editor {
     SerializedProperty visibilityState;
 
     protected virtual void OnEnable() {
+        base.OnEnable();
         DEBUG = serializedObject.FindProperty("DEBUG");
         treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
         ignoreChildrenWithDimensionObject = serializedObject.FindProperty("ignoreChildrenWithDimensionObject");
@@ -50,6 +51,7 @@ public class PillarDimensionObjectInspector : UnityEditor.Editor {
     }
 
     public override void OnInspectorGUI() {
+        base.OnInspectorGUI();
         serializedObject.Update();
 
         DEBUG.boolValue = EditorGUILayout.Toggle("Debug?", DEBUG.boolValue);
