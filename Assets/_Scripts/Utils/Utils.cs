@@ -21,21 +21,54 @@ namespace SuperspectiveUtils {
         }
     }
 
+    [Serializable]
     public struct TransformInfo {
         public Vector3 position;
         public Quaternion rotation;
         public Vector3 scale;
 
-        public TransformInfo(Transform t) {
-            position = t.position;
-            rotation = t.rotation;
-            scale = t.localScale;
+        public TransformInfo(Transform t, bool asWorldTransform = true) {
+            position = asWorldTransform ? t.position : t.localPosition;
+            rotation = asWorldTransform ? t.rotation : t.localRotation;
+            scale = asWorldTransform ? t.lossyScale : t.localScale;
         }
 
-        public void ApplyToTransform(Transform t) {
-            t.position = position;
-            t.rotation = rotation;
-            t.localScale = scale;
+        public TransformInfo(Transform t, Transform localToParent) {
+            Transform originalParent = t.parent;
+            int originalSiblingIndex = t.GetSiblingIndex();
+            t.SetParent(localToParent, true);
+            position = t.localPosition;
+            rotation = t.rotation;
+            scale = t.localScale;
+            t.SetParent(originalParent);
+            t.SetSiblingIndex(originalSiblingIndex);
+        }
+
+        public void ApplyToTransform(Transform t, bool asWorldTransform = true) {
+            if (asWorldTransform) {
+                t.position = position;
+                t.rotation = rotation;
+                t.localScale = Vector3.one;
+                // this simulates what it would be like to set lossyScale considering the way unity treats it
+                // From: https://forum.unity.com/threads/solved-why-is-transform-lossyscale-readonly.363594/
+                var m = t.worldToLocalMatrix;
+                m.SetColumn(3, new Vector4(0f, 0f, 0f, 1f));
+                t.localScale = m.MultiplyPoint(scale);
+                t.localScale = scale;
+            }
+            else {
+                t.localPosition = position;
+                t.localRotation = rotation;
+                t.localScale = Vector3.one;
+            }
+        }
+
+        public static TransformInfo Lerp(TransformInfo a, TransformInfo b, float t) {
+            return new TransformInfo {
+                position = Vector3.Lerp(a.position, b.position, t),
+                rotation = Quaternion.Slerp(a.rotation, b.rotation, t),
+                scale = Vector3.Lerp(a.scale, b.scale, t)
+            };
         }
     }
 

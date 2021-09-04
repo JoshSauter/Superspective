@@ -9,23 +9,23 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Editor {
-    [CustomPropertyDrawer(typeof(SerializableReference<,>))]
+    [CustomPropertyDrawer(typeof(SerializableReference))]
     public class SerializableReferencePropertyDrawer : PropertyDrawer {
         bool viewAsReference = true;
         SaveableObject cachedReference;
         string cachedSceneName;
         string cachedId;
-        
+
         public override void OnGUI(
             Rect position,
             SerializedProperty property,
             GUIContent label
         ) {
             EditorGUI.BeginProperty(position, label, property);
-            
+
             int indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
-            
+
             SerializedProperty referencedSceneName = property.FindPropertyRelative("referencedSceneName");
             SerializedProperty referencedObjId = property.FindPropertyRelative("referencedObjId");
 
@@ -35,19 +35,16 @@ namespace Editor {
             Rect referenceRect = new Rect(position.x, position.y + 20, position.width, height);
             Rect sceneNameRect = new Rect(position.x, position.y + 20, position.width, height);
             Rect idRect = new Rect(position.x, position.y + 40, position.width, height);
-            
+
             viewAsReference = EditorGUI.Toggle(sameSceneRect, "View as reference?", viewAsReference);
 
             if (viewAsReference) {
-                // Gets the T in SaveableObject<T, S>
-                Type genericReferenceType = fieldInfo.FieldType.IsArray ?
-                    fieldInfo.FieldType.GetElementType().GetGenericArguments()[0] :
-                    fieldInfo.FieldType.GetGenericArguments()[0];
-                
+                Type genericReferenceType = GetSaveableObjectType();
+
                 if (cachedId != referencedObjId.stringValue || cachedSceneName != referencedSceneName.stringValue) {
                     cachedId = referencedObjId.stringValue;
                     cachedSceneName = referencedSceneName.stringValue;
-                    
+
                     // If the current ID & sceneName are present, try to update the cached reference accordingly
                     if (!string.IsNullOrEmpty(cachedId) && !string.IsNullOrEmpty(cachedSceneName)) {
                         List<SaveableObject> matches = FindObjectById(cachedSceneName, cachedId);
@@ -56,9 +53,14 @@ namespace Editor {
                         }
                     }
                 }
-                
+
                 SaveableObject prevReference = cachedReference;
-                cachedReference = EditorGUI.ObjectField(referenceRect, cachedReference, genericReferenceType, viewAsReference) as SaveableObject;
+                cachedReference = EditorGUI.ObjectField(
+                    referenceRect,
+                    cachedReference,
+                    genericReferenceType,
+                    viewAsReference
+                ) as SaveableObject;
 
                 if (cachedReference != prevReference && cachedReference != null) {
                     referencedSceneName.stringValue = cachedReference.gameObject.scene.name;
@@ -69,43 +71,57 @@ namespace Editor {
                 EditorGUI.PropertyField(sceneNameRect, referencedSceneName);
                 EditorGUI.PropertyField(idRect, referencedObjId);
             }
-            
-            List<SaveableObject> FindObjectById(string sceneName, string id) {
-                if (!EditorSceneManager.GetSceneByName(sceneName).isLoaded) {
-                    return new List<SaveableObject>();
-                }
-                
-                List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
-                    .Where(s => HasValidId(s) && s.ID.Contains(id))
-                    .Where(s => s.gameObject.scene.name == sceneName)
-                    .ToList();
+        }
 
-                if (matches.Count == 0) {
-                    Debug.LogError($"No object with id {id} found in scene {sceneName}");
-                    return null;
-                }
-                else if (matches.Count > 1) {
-                    Debug.LogWarning($"Multiple objects with id {id} found in scene {sceneName}.");
-                    return matches;
-                }
-                else
-                    return matches;
+        protected virtual Type GetSaveableObjectType() {
+            return typeof(SaveableObject);
+        }
+
+        List<SaveableObject> FindObjectById(string sceneName, string id) {
+            if (!EditorSceneManager.GetSceneByName(sceneName).isLoaded) {
+                return new List<SaveableObject>();
             }
+                
+            List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
+                .Where(s => HasValidId(s) && s.ID.Contains(id))
+                .Where(s => s.gameObject.scene.name == sceneName)
+                .ToList();
 
-            bool HasValidId(ISaveableObject obj) {
-                try {
-                    string s = obj.ID;
+            if (matches.Count == 0) {
+                Debug.LogError($"No object with id {id} found in scene {sceneName}");
+                return null;
+            }
+            else if (matches.Count > 1) {
+                Debug.LogWarning($"Multiple objects with id {id} found in scene {sceneName}.");
+                return matches;
+            }
+            else
+                return matches;
+        }
 
-                    return !string.IsNullOrEmpty(s);
-                }
-                catch {
-                    return false;
-                }
+        bool HasValidId(ISaveableObject obj) {
+            try {
+                string s = obj.ID;
+
+                return !string.IsNullOrEmpty(s);
+            }
+            catch {
+                return false;
             }
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             return viewAsReference ? 40 : 60;
+        }
+    }
+    
+    [CustomPropertyDrawer(typeof(SerializableReference<,>))]
+    public class SerializableReferencePropertyDrawerTyped : SerializableReferencePropertyDrawer {
+        protected override Type GetSaveableObjectType() {
+            // Gets the T in SaveableObject<T, S>
+            return fieldInfo.FieldType.IsArray
+                ? fieldInfo.FieldType.GetElementType().GetGenericArguments()[0]
+                : fieldInfo.FieldType.GetGenericArguments()[0];
         }
     }
     

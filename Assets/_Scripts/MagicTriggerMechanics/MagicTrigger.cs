@@ -37,7 +37,9 @@ namespace MagicTriggerMechanics {
 
 		protected override void Awake() {
 			base.Awake();
-			gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+			if (gameObject.layer != LayerMask.NameToLayer("Portal")) {
+				gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+			}
 		}
 
 		void OnDisable() {

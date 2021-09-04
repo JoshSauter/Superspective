@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using LevelManagement;
+using UnityEngine.UI;
 
 public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     CanvasGroup bannerGroup;
     [Serializable]
     public struct Banner {
         public Levels level;
-        public GameObject banner;
+        public Image banner;
     }
     public Banner[] banners;
-    public Dictionary<Levels, GameObject> levelToBanner = new Dictionary<Levels, GameObject>();
+    public Dictionary<Levels, Image> levelToBanner = new Dictionary<Levels, Image>();
     public Levels lastBannerLoaded = Levels.ManagerScene;
     public Levels queuedBanner = Levels.ManagerScene;
     public bool isPlayingBanner;
@@ -24,7 +25,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         bannerGroup = GetComponent<CanvasGroup>();
 
         foreach (var banner in banners) {
-            levelToBanner[banner.level] = banner.banner; 
+            levelToBanner[banner.level] = banner.banner;
         }
     }
 
@@ -53,28 +54,51 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         }
     }
 
+    // TODO: Make separate coroutine to track banner position and color state each frame
     IEnumerator PlayBannerCoroutine(Levels level) {
         // managerScene acts as a flag value for "not set"
         if (lastBannerLoaded != Levels.ManagerScene) {
-            levelToBanner[lastBannerLoaded].SetActive(false);
+            levelToBanner[lastBannerLoaded].gameObject.SetActive(false);
         }
-        levelToBanner[level].SetActive(true);
+        RectTransform banner = levelToBanner[level].rectTransform;
+        Image bannerImage = levelToBanner[level];
+        banner.gameObject.SetActive(true);
 
         lastBannerLoaded = level;
 
         isPlayingBanner = true;
         float timeElapsed = 0f;
+        float lerpToMatchFlythroughCamSpeed = 2f;
+        Color originalColor = bannerImage.color;
+        float defaultBannerYMidpoint = (banner.anchorMax.y + banner.anchorMin.y) / 2f;
+        float bannerYMidpoint = defaultBannerYMidpoint;
+        Vector2 halfBannerSize = (banner.anchorMax - banner.anchorMin) / 2f;
 
         while (timeElapsed < fadeTime) {
-            timeElapsed += Time.deltaTime;
-            // If another banner is queued up, speed up the animation
-            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
-                timeElapsed += 2 * Time.deltaTime;
+            // Hold the LevelChangeBanner up if we're doing a CameraFlythrough
+            if (!CameraFlythrough.instance.isPlayingFlythrough) {
+                float timeElapsedThisFrame = Time.deltaTime;
+                // If another banner is queued up, speed up the animation
+                if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
+                    timeElapsedThisFrame += 2 * Time.deltaTime;
+                }
+
+                timeElapsed += timeElapsedThisFrame;
+                float t = timeElapsed / fadeTime;
+                
+                bannerImage.color = Color.Lerp(bannerImage.color, originalColor, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
+                bannerYMidpoint = Mathf.Lerp(bannerYMidpoint, defaultBannerYMidpoint, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
+
+                bannerGroup.alpha = t*t;
             }
-            float t = timeElapsed / fadeTime;
+            else {
+                bannerImage.color = Color.Lerp(bannerImage.color, Color.clear, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
+                bannerYMidpoint = Mathf.Lerp(bannerYMidpoint, 1 - halfBannerSize.y, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
+                // bannerYMidpoint = 1 - halfBannerSize.y;
+            }
 
-            bannerGroup.alpha = t*t;
-
+            banner.anchorMin = new Vector2(0.5f - halfBannerSize.x, bannerYMidpoint - halfBannerSize.y);
+            banner.anchorMax = new Vector2(0.5f + halfBannerSize.x, bannerYMidpoint + halfBannerSize.y);
             yield return null;
         }
 
@@ -105,4 +129,8 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
 
         isPlayingBanner = false;
     }
+
+    // IEnumerator BannerColorAndPositionTracker(Levels level) {
+    //     
+    // }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Audio {
     public interface AudioJobOnGameObject {
@@ -7,7 +8,12 @@ namespace Audio {
 
     public static class AudioJobOnGameObjectExt {
         public static void UpdateAudio(this AudioJobOnGameObject audioJobOnGameObject, AudioManager.AudioJob audioJob) {
-            audioJob.audio.transform.position = audioJobOnGameObject.GetObjectToPlayAudioOn(audioJob).position;
+            try {
+                audioJob.audio.transform.position = audioJobOnGameObject.GetObjectToPlayAudioOn(audioJob).position;
+            }
+            catch (Exception) {
+                audioJob.Stop();
+            }
         }
     }
 }

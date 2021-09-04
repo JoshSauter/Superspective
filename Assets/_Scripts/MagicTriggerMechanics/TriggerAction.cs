@@ -17,7 +17,8 @@ namespace MagicTriggerMechanics {
 		ToggleGameObjects = 5,          // Enables GameObjects when triggered forward, disables when triggered negatively
 		ChangeLevel = 6,
 		PowerOrDepowerPowerTrail = 8,
-		ChangeVisibilityState = 9
+		ChangeVisibilityState = 9,
+		PlayCameraFlythrough = 10
 	}
 
 	[Flags]
@@ -54,6 +55,7 @@ namespace MagicTriggerMechanics {
 		public bool setPowerIsOn = true;
 		public DimensionObject[] dimensionObjects;
 		public VisibilityState visibilityState;
+		public Levels flythroughCameraLevel;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -96,6 +98,9 @@ namespace MagicTriggerMechanics {
 						dimensionObject.SwitchVisibilityState(visibilityState);
 					}
 					break;
+				case TriggerActionType.PlayCameraFlythrough:
+					CameraFlythrough.instance.PlayForLevel(flythroughCameraLevel);
+					break;
 				default:
 					return;
 			}
@@ -129,6 +134,7 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.DisableSelfGameObject:
 				case TriggerActionType.EnableDisableScripts:
 				case TriggerActionType.EnableDisableGameObjects:
+				case TriggerActionType.PlayCameraFlythrough:
 					return;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					powerTrail.powerIsOn = !setPowerIsOn;
@@ -192,6 +198,8 @@ namespace MagicTriggerMechanics {
 			SerializedProperty dimensionObjects = property.FindPropertyRelative("dimensionObjects");
 			SerializedProperty visibilityState = property.FindPropertyRelative("visibilityState");
 
+			SerializedProperty flythroughCameraLevel = property.FindPropertyRelative("flythroughCameraLevel");
+
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
@@ -208,6 +216,7 @@ namespace MagicTriggerMechanics {
 			GUIContent setPowerIsOnLabel = new GUIContent("Power On/Off:");
 			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
 			GUIContent visibilityStateLabel = new GUIContent("Visibility State:");
+			GUIContent flythroughCameraLabel = new GUIContent("Flythrough Camera Level:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -242,6 +251,9 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.ChangeVisibilityState:
 					EditorGUILayout.PropertyField(dimensionObjects, dimensionObjectsLabel);
 					EditorGUILayout.PropertyField(visibilityState, visibilityStateLabel);
+					break;
+				case TriggerActionType.PlayCameraFlythrough:
+					EditorGUILayout.PropertyField(flythroughCameraLevel, flythroughCameraLabel);
 					break;
 				default:
 					break;

@@ -32,6 +32,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	public WeightedEdgeMode weightedEdgeMode = WeightedEdgeMode.Unweighted;
 	public float depthWeightEffect = 0f;
 	public float normalWeightEffect = 0f;
+	public float depthWeightMin = 0f;
+	public float normalWeightMin = 0f;
 
 	// Edge color options
 	public EdgeColorMode edgeColorMode = EdgeColorMode.SimpleColor;
@@ -66,6 +68,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	static readonly int WeightedEdgeModeID = Shader.PropertyToID("_WeightedEdgeMode");
 	static readonly int DepthWeightEffectID = Shader.PropertyToID("_DepthWeightEffect");
 	static readonly int NormalWeightEffectID = Shader.PropertyToID("_NormalWeightEffect");
+	static readonly int DepthWeightMinID = Shader.PropertyToID("_DepthWeightMin");
+	static readonly int NormalWeightMinID = Shader.PropertyToID("_NormalWeightMin");
 	
 	static readonly int GradientKeyTimesID = Shader.PropertyToID("_GradientKeyTimes");
 	static readonly int EdgeColorGradientID = Shader.PropertyToID("_EdgeColorGradient");
@@ -123,7 +127,9 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		shaderMaterial.SetInt(WeightedEdgeModeID, (int)weightedEdgeMode);
 		shaderMaterial.SetFloat(DepthWeightEffectID, depthWeightEffect);
 		shaderMaterial.SetFloat(NormalWeightEffectID, normalWeightEffect);
-
+		shaderMaterial.SetFloat(DepthWeightMinID, depthWeightMin);
+		shaderMaterial.SetFloat(NormalWeightMinID, normalWeightMin);
+		
 		Graphics.Blit(source, destination, shaderMaterial);
 	}
 
@@ -233,6 +239,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		int weightedEdgeMode;
 		float depthWeightEffect;
 		float normalWeightEffect;
+		float depthWeightMin;
+		float normalWeightMin;
 
 		int edgeColorMode;
 		SerializableColor edgeColor;
@@ -251,6 +259,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 			this.edgeColorMode = (int)edgeDetection.edgeColorMode;
 			this.edgeColor = edgeDetection.edgeColor;
 			this.edgeColorGradient = edgeDetection.edgeColorGradient;
+			this.depthWeightMin = edgeDetection.depthWeightMin;
+			this.normalWeightMin = edgeDetection.normalWeightMin;
 		}
 
 		public override void LoadSave(BladeEdgeDetection edgeDetection) {
@@ -263,6 +273,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 			edgeDetection.weightedEdgeMode = (WeightedEdgeMode)this.weightedEdgeMode;
 			edgeDetection.depthWeightEffect = this.depthWeightEffect;
 			edgeDetection.normalWeightEffect = this.normalWeightEffect;
+			edgeDetection.depthWeightMin = this.depthWeightMin;
+			edgeDetection.normalWeightMin = this.normalWeightMin;
 			edgeDetection.edgeColorMode = (EdgeColorMode)this.edgeColorMode;
 			edgeDetection.edgeColor = this.edgeColor;
 			edgeDetection.edgeColorGradient = this.edgeColorGradient;

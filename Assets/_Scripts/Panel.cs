@@ -118,7 +118,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
         }
     }
 
-    public void UpdateAudio(AudioJob audioJob) {
+    public void UpdateAudioJob(AudioJob audioJob) {
         if (this == null || gameObject == null) {
             audioJob.Stop();
             return;

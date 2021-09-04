@@ -9,6 +9,7 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public PlayerLook look;
 	public PlayerMovement movement;
 	public Headbob headbob;
+	public Camera playerCam => SuperspectiveScreen.instance.playerCamera;
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
 	public bool isHoldingSomething { get { return heldObject != null; } }

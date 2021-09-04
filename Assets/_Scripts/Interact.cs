@@ -129,6 +129,19 @@ public class Interact : Singleton<Interact> {
             GUI.depth = 2;
             style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;
             GUI.Label(new Rect(5, 80, 200, 25), $"Object Hovered: {nameOfFirstObjectHit}", style);
+
+            String binaryMask = Convert.ToString(MaskBufferRenderTextures.instance.visibilityMaskValue, 2);
+            String maskPrintStatement = "";
+            for (int i = 0; i < binaryMask.Length; i++) {
+                char digit = binaryMask[binaryMask.Length - 1 - i];
+                maskPrintStatement += $"\n{i}:\t{digit}";
+            }
+            style.normal.textColor = Color.blue;
+            GUI.Label(
+                new Rect(5, 105, 200, 25),
+                $"Mask Values: {maskPrintStatement}",
+                style
+            );
         }
     }
 }

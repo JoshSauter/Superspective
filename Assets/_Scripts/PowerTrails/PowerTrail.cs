@@ -277,7 +277,7 @@ namespace PowerTrailMechanics {
 			else return distance;
 		}
 #region Audio
-		public void UpdateAudio(AudioJob audioJob) {
+		public void UpdateAudioJob(AudioJob audioJob) {
 			if (this == null || gameObject == null) {
 				audioJob.Stop();
 				return;

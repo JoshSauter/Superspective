@@ -46,7 +46,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
     float movespeed;
 
-    bool stopped;
+    bool stopped =>
+        PlayerLook.instance.state != PlayerLook.State.ViewUnlocked || CameraFlythrough.instance.isPlayingFlythrough;
 
     CapsuleCollider thisCollider;
     MeshRenderer thisRenderer;
@@ -442,12 +443,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     }
 
     public void StopMovement() {
-        stopped = true;
         thisRigidbody.velocity = Vector3.zero;
-    }
-
-    public void ResumeMovement() {
-        stopped = false;
     }
 
     class StepFound {
@@ -512,7 +508,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
         SerializableVector3 playerGravityDirection;
 
-        bool stopped;
         bool thisRigidbodyKinematic;
         float thisRigidbodyMass;
         bool thisRigidbodyUseGravity;
@@ -534,8 +529,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             thisRigidbodyKinematic = playerMovement.thisRigidbody.isKinematic;
             thisRigidbodyUseGravity = playerMovement.thisRigidbody.useGravity;
             thisRigidbodyMass = playerMovement.thisRigidbody.mass;
-
-            stopped = playerMovement.stopped;
         }
 
         public override void LoadSave(PlayerMovement playerMovement) {
@@ -553,8 +546,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             playerMovement.thisRigidbody.isKinematic = thisRigidbodyKinematic;
             playerMovement.thisRigidbody.useGravity = thisRigidbodyUseGravity;
             playerMovement.thisRigidbody.mass = thisRigidbodyMass;
-
-            playerMovement.stopped = stopped;
         }
     }
 #endregion

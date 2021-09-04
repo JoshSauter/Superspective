@@ -78,7 +78,6 @@ GameObject:
   - component: {fileID: 1544007497055716618}
   - component: {fileID: 1544007497055716626}
   - component: {fileID: 1544007497055716625}
-  - component: {fileID: 1544007497055716629}
   m_Layer: 0
   m_Name: MultiDimensionCube
   m_TagString: Untagged
@@ -223,20 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1544007497055716629
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1544007497055716613}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb4edbd9b1c43234cbe19d0ded62bf7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  corporealDimensionObject: {fileID: 6107882940263038359}
-  kinematicCollider: {fileID: 1544007496323721984}
+  DEBUG: 0
 --- !u!1 &1544007497585443698
 GameObject:
   m_ObjectHideFlags: 0
@@ -417,8 +403,13 @@ MonoBehaviour:
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
   renderers: []
+  colliders: []
   startingVisibilityState: 2
   visibilityState: 2
+  collisionMatrix: 0100000000000100000000000100010000000100
+  isBeingDestroyed: 0
+  useAdvancedChannelLogic: 0
+  channelLogic: 
   _dimension: 0
   playerQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -550,9 +541,9 @@ GameObject:
   - component: {fileID: 5123301575377272360}
   - component: {fileID: 5742847739417737746}
   - component: {fileID: 4478531533605895389}
-  - component: {fileID: 6107882940263038359}
-  - component: {fileID: 4478531533605895390}
-  - component: {fileID: 7270838391755129759}
+  - component: {fileID: 4452167694973447809}
+  - component: {fileID: 642909617350064207}
+  - component: {fileID: 2236468050090428861}
   m_Layer: 0
   m_Name: CorporealCube
   m_TagString: Untagged
@@ -4465,7 +4456,20 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!114 &6107882940263038359
+--- !u!114 &4452167694973447809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6107882940263038358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
+--- !u!114 &642909617350064207
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4485,8 +4489,14 @@ MonoBehaviour:
   ignoreMaterialChanges: 0
   disableColliderWhileInvisible: 1
   renderers: []
+  colliders:
+  - {fileID: 1544007497055716627}
   startingVisibilityState: 2
   visibilityState: 2
+  collisionMatrix: 0100000000000100000000000100010000000100
+  isBeingDestroyed: 0
+  useAdvancedChannelLogic: 0
+  channelLogic: 
   _dimension: 0
   playerQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -4496,7 +4506,7 @@ MonoBehaviour:
   thisObjectMoves: 1
   thisRigidbody: {fileID: 1544007497055716628}
   colliderBoundsOverride: {fileID: 0}
---- !u!114 &4478531533605895390
+--- !u!114 &2236468050090428861
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4510,20 +4520,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   printLookupValue: 0
   lookupType: 2
-  lookupString: _Dimension
---- !u!114 &7270838391755129759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6107882940263038358}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueId: 
+  lookupString: Look up anything
 --- !u!1 &7133245003016936568
 GameObject:
   m_ObjectHideFlags: 0

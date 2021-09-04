@@ -55,6 +55,8 @@
 			int _WeightedEdgeMode;		// 0 == Constant edge weight, 1 == Varies on depth differences, 2 == Varies on normal differences, 3 == Varies on depth and normal differences
 			float _DepthWeightEffect;
 			float _NormalWeightEffect;
+			float _DepthWeightMin;
+			float _NormalWeightMin;
 
 			// Edge Colors
 			int _ColorMode;				// 0 == Simple color, 1 == Gradient from inspector, 2 == Color ramp (gradient) texture
@@ -283,6 +285,8 @@
 				float normalEdgeWeight = saturate(normalDiff / (0.0001 + _NormalWeightEffect * 17 * NORMAL_THRESHOLD_CONSTANT));
 				depthEdgeWeight = depthEdge * max(depthEdgeWeight, 1 - (_WeightedEdgeMode & 1));
 				normalEdgeWeight = normalEdge * max(normalEdgeWeight, 1 - (_WeightedEdgeMode & 2));
+				depthEdgeWeight = lerp(_DepthWeightMin, 1, depthEdgeWeight);
+				normalEdgeWeight = lerp(_NormalWeightMin, 1, normalEdgeWeight);
 
 				float edgeWeight = max(depthEdgeWeight, normalEdgeWeight);
 

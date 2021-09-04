@@ -80,6 +80,13 @@ namespace Saving {
                 hasRegistered = true;
             }
         }
+
+        // Unregister can be explicitly called to tell the SaveManager we shouldn't attempt to save this
+        public void Unregister() {
+            if (hasRegistered && !string.IsNullOrEmpty(SceneName) && Application.isPlaying) {
+                SaveManager.GetOrCreateSaveManagerForScene(SceneName)?.UnregisterSaveableObject(ID);
+            }
+        }
         
         protected virtual void Awake() {
 #if UNITY_EDITOR

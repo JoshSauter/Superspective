@@ -55,7 +55,7 @@
     }
 		    SubShader
     {
-		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "HideDepthNormal" }
+		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "CullEverything" }
 
         Pass
         {

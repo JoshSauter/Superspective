@@ -223,7 +223,9 @@ public class CubeSpawnerNew : MonoBehaviour {
             }
             
             // Also remove the dimension parent object
-            cube.transform.parent.GetComponent<DimensionObject>().SwitchVisibilityState(VisibilityState.visible, true);
+            DimensionObject dimensionParent = cube.transform.parent.GetComponent<DimensionObject>();
+            dimensionParent.SwitchVisibilityState(VisibilityState.visible, true);
+            dimensionParent.Unregister();
             Transform parent = cube.transform.parent;
             cube.transform.SetParent(null);
             Destroy(parent.gameObject);

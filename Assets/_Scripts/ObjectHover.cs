@@ -2,18 +2,30 @@
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSave> {
     const float hoveringPauseLerp = 0.1f;
     public bool useLocalCoordinates = true;
-    public float maxDisplacementUp = 0.125f;
-    public float maxDisplacementForward;
-    public float maxDisplacementRight;
+    [FormerlySerializedAs("maxDisplacementUp")]
+    public float yAmplitude = 0.125f;
+    [FormerlySerializedAs("maxDisplacementForward")]
+    public float zAmplitude;
+    [FormerlySerializedAs("maxDisplacementRight")]
+    public float xAmplitude;
+
+    public enum LoopMode {
+        SinWave,    // Smoothly goes up and down on a period
+        RampAndCut  // Only goes in the amplitude direction, then snaps back to initial position at period restart
+    }
+
+    public LoopMode loopMode;
+    public float periodOffset;
     public float period = 1f;
     public bool hoveringPaused;
 
-    Vector3 displacementCounter = Vector3.zero;
+    Vector3 currentOffset = Vector3.zero;
     Vector3 forward;
     Vector3 right;
 
@@ -26,37 +38,51 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
         up = useLocalCoordinates ? transform.up : Vector3.up;
         forward = useLocalCoordinates ? transform.forward : Vector3.forward;
         right = useLocalCoordinates ? transform.right : Vector3.right;
+
+        timeElapsed = periodOffset;
     }
 
     // Update is called once per frame
     void FixedUpdate() {
-        if (!hoveringPaused) {
-            timeElapsed += Time.fixedDeltaTime;
-            float t = Time.fixedDeltaTime * Mathf.Cos(Mathf.PI * 2 * timeElapsed / period);
-            Vector3 displacementUp = maxDisplacementUp * t * up;
-            Vector3 displacementForward = maxDisplacementForward * t * forward;
-            Vector3 displacementRight = maxDisplacementRight * t * right;
-            Vector3 displacementVector = displacementUp + displacementForward + displacementRight;
-            displacementCounter += displacementVector;
-            transform.position += displacementVector;
+        if (hoveringPaused) return;
+        
+        timeElapsed += Time.fixedDeltaTime;
+        timeElapsed %= period;
+        float t = timeElapsed / period;
+
+        switch (loopMode) {
+            case LoopMode.SinWave:
+                t = Mathf.Sin(Mathf.PI * 2 * t);
+                break;
+            case LoopMode.RampAndCut:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-        else {
-            Vector3 thisFrameMovement = -hoveringPauseLerp * displacementCounter;
-            transform.position += thisFrameMovement;
-            displacementCounter += thisFrameMovement;
-        }
+        
+        Vector3 nextOffsetUp = yAmplitude * t * up;
+        Vector3 nextOffsetForward = zAmplitude * t * forward;
+        Vector3 nextOffsetRight = xAmplitude * t * right;
+        Vector3 nextOffset = nextOffsetUp + nextOffsetForward + nextOffsetRight;
+
+        Vector3 thisDisplacement = (nextOffset - currentOffset);
+        
+        transform.position += thisDisplacement;
+        currentOffset = nextOffset;
     }
 
 #region Saving
 
     [Serializable]
     public class ObjectHoverSave : SerializableSaveObject<ObjectHover> {
-        SerializableVector3 displacementCounter;
+        SerializableVector3 currentOffset;
         SerializableVector3 forward;
         bool hoveringPaused;
-        float maxDisplacementForward;
-        float maxDisplacementRight;
-        float maxDisplacementUp;
+        float zAmplitude;
+        float xAmplitude;
+        float yAmplitude;
+        LoopMode loopMode;
+        float periodOffset;
         float period;
 
         SerializableVector3 position;
@@ -68,30 +94,34 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
 
         public ObjectHoverSave(ObjectHover script) : base(script) {
             useLocalCoordinates = script.useLocalCoordinates;
-            maxDisplacementUp = script.maxDisplacementUp;
-            maxDisplacementForward = script.maxDisplacementForward;
-            maxDisplacementRight = script.maxDisplacementRight;
+            yAmplitude = script.yAmplitude;
+            zAmplitude = script.zAmplitude;
+            xAmplitude = script.xAmplitude;
+            loopMode = script.loopMode;
+            periodOffset = script.periodOffset;
             period = script.period;
             up = script.up;
             forward = script.forward;
             right = script.right;
             position = script.transform.position;
-            displacementCounter = script.displacementCounter;
+            currentOffset = script.currentOffset;
             hoveringPaused = script.hoveringPaused;
             timeElapsed = script.timeElapsed;
         }
 
         public override void LoadSave(ObjectHover script) {
             script.useLocalCoordinates = useLocalCoordinates;
-            script.maxDisplacementUp = maxDisplacementUp;
-            script.maxDisplacementForward = maxDisplacementForward;
-            script.maxDisplacementRight = maxDisplacementRight;
+            script.yAmplitude = yAmplitude;
+            script.zAmplitude = zAmplitude;
+            script.xAmplitude = xAmplitude;
+            script.loopMode = loopMode;
+            script.periodOffset = periodOffset;
             script.period = period;
             script.up = up;
             script.forward = forward;
             script.right = right;
             script.transform.position = position;
-            script.displacementCounter = displacementCounter;
+            script.currentOffset = currentOffset;
             script.hoveringPaused = hoveringPaused;
             script.timeElapsed = timeElapsed;
         }

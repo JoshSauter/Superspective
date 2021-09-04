@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 using SuperspectiveUtils;
@@ -8,12 +9,19 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	public DimensionObject dimensionObject;
 
 	HashSet<DimensionObject> dimensionObjectsIgnored = new HashSet<DimensionObject>();
-	HashSet<Collider> collidersIgnored = new HashSet<Collider>();
+	// Collider ignored -> whether or not it's ignored as part of dimensionObjectsIgnored
+	Dictionary<Collider, bool> collidersIgnored = new Dictionary<Collider, bool>();
 
 	[ShowNativeProperty]
 	public int dimensionObjectsIgnoredCount => dimensionObjectsIgnored.Count;
 	[ShowNativeProperty]
 	public int collidersIgnoredCount => collidersIgnored.Count;
+
+	[Button("Print current state")]
+	void PrintIgnoreInfo() {
+		Debug.Log($"DimensionObjects Ignored:\n{string.Join("\n", dimensionObjectsIgnored)}");
+		Debug.Log($"Colliders Ignored:\n{string.Join("\n", collidersIgnored)}");
+	}
 
 	void Start() {
 		dimensionObject.OnStateChangeSimple += OnThisDimensionObjectVisibilityStateChange;
@@ -22,12 +30,12 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	void OnThisDimensionObjectVisibilityStateChange(VisibilityState newState) {
 		List<DimensionObject> dimensionObjectsIgnoredCopy = new List<DimensionObject>(dimensionObjectsIgnored);
 		foreach (var otherDimensionObject in dimensionObjectsIgnoredCopy) {
-			DetermineCollision(otherDimensionObject);
+			DetermineCollisionWithDimensionObject(otherDimensionObject);
 		}
 
-		List<Collider> remainingCollidersCopy = new List<Collider>(collidersIgnored);
+		List<Collider> remainingCollidersCopy = new List<Collider>(collidersIgnored.Where(kv => !kv.Value).ToDictionary().Keys);
 		foreach (var collider in remainingCollidersCopy) {
-			DetermineCollision(collider);
+			DetermineCollisionWithNonDimensionObject(collider);
 		}
 	}
 
@@ -37,64 +45,71 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		}
 	}
 
-	void DetermineCollision(Collider other) {
+	void DetermineCollisionWithNonDimensionObject(Collider other) {
 		bool shouldCollide = other.TaggedAsPlayer()
 			? dimensionObject.ShouldCollideWithPlayer()
 			: dimensionObject.ShouldCollideWithNonDimensionObject();
 		
 		if (!shouldCollide) {
-			IgnoreCollision(other);
+			IgnoreCollisionWithCollider(other, false);
 		}
 		else {
-			RestoreCollision(other);
+			RestoreCollisionWithCollider(other);
 		}
 	}
 
 	// Second parameter is unused but matches the event shape so we don't subscribe with an anonymous delegate
-	void DetermineCollision(DimensionObject otherDimensionObj, VisibilityState _ = VisibilityState.visible) {
+	void DetermineCollisionWithDimensionObject(DimensionObject otherDimensionObj, VisibilityState _ = VisibilityState.visible) {
 		// Make sure channels are different or we are in a different visibility state
 		if (otherDimensionObj.isBeingDestroyed) {
 			// If the other DimensionObject is being destroyed, treat it as a non DimensionObject
 			if (!dimensionObject.ShouldCollideWithNonDimensionObject()) {
-				IgnoreCollision(otherDimensionObj);
+				IgnoreCollisionWithDimensionObject(otherDimensionObj);
 			}
 			else {
-				RestoreCollision(otherDimensionObj);
+				RestoreCollisionWithDimensionObject(otherDimensionObj);
 			}
 		}
 		else {
 			if (!dimensionObject.ShouldCollideWith(otherDimensionObj)) {
-				IgnoreCollision(otherDimensionObj);
+				IgnoreCollisionWithDimensionObject(otherDimensionObj);
 			}
 			else {
-				RestoreCollision(otherDimensionObj);
+				RestoreCollisionWithDimensionObject(otherDimensionObj);
 			}
 		}
 	}
 
-	void IgnoreCollision(Collider other) {
+	void IgnoreCollisionWithCollider(Collider other, bool partOfDimensionObject) {
+		if (collidersIgnored.ContainsKey(other)) {
+			collidersIgnored[other] = collidersIgnored[other] || partOfDimensionObject;
+			return;
+		}
+		
 		foreach (var thisCollider in dimensionObject.colliders) {
 			Physics.IgnoreCollision(thisCollider, other, true);
 		}
-		collidersIgnored.Add(other);
+		collidersIgnored.Add(other, partOfDimensionObject);
 	}
 
-	void IgnoreCollision(DimensionObject other) {
+	void IgnoreCollisionWithDimensionObject(DimensionObject other) {
 		if (!dimensionObjectsIgnored.Contains(other)) {
 			if (dimensionObject != null) {
 				dimensionObject.debug.Log($"{dimensionObject.name} ignoring collision with {other.name}");
 			}
 
 			foreach (var otherCollider in other.colliders) {
-				IgnoreCollision(otherCollider);
+				IgnoreCollisionWithCollider(otherCollider, true);
 			}
 			
-			other.OnStateChange += DetermineCollision;
+			other.OnStateChange += DetermineCollisionWithDimensionObject;
 			dimensionObjectsIgnored.Add(other);
 		}
 	}
 
-	void RestoreCollision(Collider other) {
+	void RestoreCollisionWithCollider(Collider other) {
+		if (!collidersIgnored.ContainsKey(other)) return;
+		
 		// Sometimes the object we were ignoring collisions with gets destroyed and thus we need a null check
 		if (other != null) {
 			foreach (var thisCollider in dimensionObject.colliders) {
@@ -105,17 +120,17 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		collidersIgnored.Remove(other);
 	}
 
-	void RestoreCollision(DimensionObject other) {
+	void RestoreCollisionWithDimensionObject(DimensionObject other) {
 		if (dimensionObjectsIgnored.Contains(other)) {
 			if (dimensionObject != null) {
 				dimensionObject.debug.Log($"{dimensionObject.name} restoring collision with {other.name}");
 			}
 
 			foreach (var otherCollider in other.colliders) {
-				RestoreCollision(otherCollider);
+				RestoreCollisionWithCollider(otherCollider);
 			}
 
-			other.OnStateChange -= DetermineCollision;
+			other.OnStateChange -= DetermineCollisionWithDimensionObject;
 			dimensionObjectsIgnored.Remove(other);
 		}
 	}
@@ -131,18 +146,18 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	void RestoreAllCollisions() {
 		List<DimensionObject> copyListOfDimensionObjectsIgnored = new List<DimensionObject>(dimensionObjectsIgnored);
 		foreach (var otherDimensionObject in copyListOfDimensionObjectsIgnored) {
-			RestoreCollision(otherDimensionObject);
+			RestoreCollisionWithDimensionObject(otherDimensionObject);
 		}
 	}
 
 	void OnTriggerStay(Collider other) {
-		if (dimensionObject == null || collidersIgnored.Contains(other)) return;
+		if (dimensionObject == null || collidersIgnored.ContainsKey(other)) return;
 		DimensionObject otherDimensionObj = other.FindDimensionObjectRecursively<DimensionObject>();
 		if (otherDimensionObj != null) {
-			DetermineCollision(otherDimensionObj, otherDimensionObj.visibilityState);
+			DetermineCollisionWithDimensionObject(otherDimensionObj, otherDimensionObj.visibilityState);
 		}
 		else {
-			DetermineCollision(other);
+			DetermineCollisionWithNonDimensionObject(other);
 		}
 	}
 }

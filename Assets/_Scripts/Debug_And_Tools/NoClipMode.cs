@@ -13,14 +13,16 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	PlayerButtonInput input;
 
 	public bool noClipOn = false;
+	float desiredSpeed;
 	float speed;
 	public float slowMoveSpeed = 15f;
 	public float moveSpeed = 45;
 	public float sprintSpeed = 125;
-	public float middleMouseVerticalSpeed = 10;
+	public float middleMouseVerticalSpeed = 4;
 
 	protected override void Start() {
 		base.Start();
+		
 		playerMovement = GetComponent<PlayerMovement>();
 		playerRigidbody = GetComponent<Rigidbody>();
 		playerCollider = GetComponent<Collider>();
@@ -35,10 +37,16 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 		}
 
 		if (noClipOn) {
+			if (Input.GetKeyDown(KeyCode.LeftShift)) {
+				desiredSpeed = (desiredSpeed == sprintSpeed) ? moveSpeed : sprintSpeed;
+			}
+			else if (Input.GetKeyDown(KeyCode.LeftControl)) {
+				desiredSpeed = (desiredSpeed == slowMoveSpeed) ? moveSpeed : slowMoveSpeed;
+			}
+			
 			Vector2 moveInput = input.LeftStick;
 
 			Vector3 moveDirection = playerCamera.forward * moveInput.y + playerCamera.right * moveInput.x;
-			float desiredSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : Input.GetKey(KeyCode.LeftControl) ? slowMoveSpeed : moveSpeed;
 
 			speed = Mathf.Lerp(speed, desiredSpeed, Time.deltaTime * 6f);
 			float middleMouseScroll = Input.mouseScrollDelta.y;
@@ -49,6 +57,7 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
     }
 
 	void ToggleNoClip() {
+		desiredSpeed = moveSpeed;
 		noClipOn = !noClipOn;
 		Debug.Log(noClipOn ? "Enabling noclip" : "Disabling noclip");
 		playerMovement.enabled = !noClipOn;

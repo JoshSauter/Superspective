@@ -5,15 +5,31 @@ using UnityEngine;
 
 namespace MagicTriggerMechanics {
     public class CompositeMagicTrigger : MagicTrigger {
+        public Collider[] colliders;
         public CompositeMagicTriggerPiece[] triggerColliders;
         public HashSet<Collider> hasTriggeredEnterThisFrameForCollider = new HashSet<Collider>();
         public HashSet<Collider> hasTriggeredExitThisFrameForCollider = new HashSet<Collider>();
         public HashSet<Collider> hasTriggeredStayThisFrameForCollider = new HashSet<Collider>();
+        
+        protected override void Init() {
+            base.Init();
+            InitializeColliders();
+        }
 
-        protected override void Awake() {
-            base.Awake();
-            Collider[] colliders = transform.GetComponentsInChildren<Collider>();
-            triggerColliders = colliders.Select(c => c.gameObject.AddComponent<CompositeMagicTriggerPiece>()).ToArray();
+        public void InitializeColliders() {
+            if (colliders == null || colliders.Length == 0) {
+                colliders = transform.GetComponentsInChildren<Collider>();
+            }
+
+            CompositeMagicTriggerPiece GetOrCreatePiece(Collider c) {
+                if (c.gameObject.TryGetComponent(out CompositeMagicTriggerPiece trigger)) {
+                    return trigger;
+                }
+                else {
+                    return c.gameObject.AddComponent<CompositeMagicTriggerPiece>();
+                }
+            }
+            triggerColliders = colliders.Select(GetOrCreatePiece).ToArray();
             
             foreach (var trigger in triggerColliders) {
                 trigger.compositeTrigger = this;

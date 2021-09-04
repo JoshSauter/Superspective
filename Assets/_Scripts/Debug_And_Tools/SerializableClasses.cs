@@ -284,7 +284,7 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
-	public abstract class SerializableReference {
+	public class SerializableReference {
 		public string referencedSceneName;
 		public string referencedObjId;
 		

@@ -1,12 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
-using System;
 using System.Linq;
-using System.Net;
 using Saving;
 using SerializableClasses;
+using Random = UnityEngine.Random;
 
 namespace Audio {
 	public class AudioManager : SingletonSaveableObject<AudioManager, AudioManager.AudioManagerSave> {
@@ -18,9 +18,26 @@ namespace Audio {
 			public float timeRunning = 0f;
 			// audio.pitch may be modulated based on Time.timeScale or randomized pitch, this is the unmodified value
 			public float basePitch = 1f;
-			public float randomizedPitch = 0f;
+			// +- range from basePitch that actual pitch could be
+			public float pitchRandomness = 0f;
+			// +- range from basePitch that the current pitch IS (while playing)
+			public float randomizedPitch {
+				get;
+				private set;
+			}
 			public AudioSource audio;
-			public bool stopSound = false;
+
+			public bool stopSound {
+				get;
+				private set;
+			}
+
+			public void Play() {
+				randomizedPitch = Random.Range(-pitchRandomness, pitchRandomness);
+				audio.pitch = basePitch + randomizedPitch;
+				audio.time = 0f;
+				audio.Play();
+			}
 
 			public void Stop() {
 				stopSound = true;
@@ -32,6 +49,7 @@ namespace Audio {
 				readonly AudioName audioType;
 				readonly float timeRunning;
 				readonly float basePitch;
+				readonly float pitchRandomness;
 				readonly float randomizedPitch;
 				readonly bool stopSound;
 
@@ -73,6 +91,7 @@ namespace Audio {
 					this.audioType = audioJob.audioType;
 					this.timeRunning = audioJob.timeRunning;
 					this.basePitch = audioJob.basePitch;
+					this.pitchRandomness = audioJob.pitchRandomness;
 					this.randomizedPitch = audioJob.randomizedPitch;
 					this.stopSound = audioJob.stopSound;
 
@@ -114,6 +133,7 @@ namespace Audio {
 					audioJob.audioType = this.audioType;
 					audioJob.timeRunning = this.timeRunning;
 					audioJob.basePitch = this.basePitch;
+					audioJob.pitchRandomness = this.pitchRandomness;
 					audioJob.randomizedPitch = this.randomizedPitch;
 					audioJob.stopSound = this.stopSound;
 
@@ -158,6 +178,11 @@ namespace Audio {
 
         readonly Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
 
+        // audioJobsToDebug is an optional whitelist of audio jobs to print debug log statements for (partial match)
+        // if empty, will print debug log statements for any audio job
+        [SerializeField]
+        List<string> audioJobsToDebug = new List<string>();
+
         readonly Dictionary<string, Action<AudioJob>> updateAudioJobs = new Dictionary<string, Action<AudioJob>>();
 		// These two are used for serialization and deserialization of the above Dictionary when saving
 		Dictionary<string, SerializableReference> serializableCustomUpdateAudioJobs = new Dictionary<string, SerializableReference>();
@@ -179,12 +204,14 @@ namespace Audio {
 				Action<AudioJob> update = updateJob.Value;
 
 				try {
-					job.audio.pitch = (job.basePitch + job.randomizedPitch) * Time.timeScale;
+					float targetPitch = (job.basePitch + job.randomizedPitch) * Time.timeScale;
+					Log(job.id, $"Setting {job.id} base pitch to {targetPitch}");
+					job.audio.pitch = targetPitch;
 					update.Invoke(job);
 				}
 				catch (Exception e) {
 					debug.LogError($"Error occurred while updating audio job {job.id}: {e}");
-					job.stopSound = true;
+					job.Stop();
 				}
 			}
 
@@ -204,11 +231,12 @@ namespace Audio {
 			// Update the timeRunning on each job
 			foreach (var job in audioJobs.Values) {
 				job.timeRunning += Time.deltaTime;
+				//Log(job.id , $"{job.id} time running: {job.timeRunning}");
 			}
 
 			void RemoveAudio(string id) {
 				AudioSource audioToDestroy = audioJobs[id].audio;
-
+				Log(id, $"Removing audio job {id}");
 				audioJobs.Remove(id);
 				if (serializableCustomUpdateAudioJobs.ContainsKey(id)) {
 					serializableCustomUpdateAudioJobs.Remove(id);
@@ -233,7 +261,7 @@ namespace Audio {
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
 				settingsOverride?.Invoke(audioJob);
-				audioJob.audio.Play();
+				Play(audioJob);
 			}
 		}
 
@@ -244,7 +272,7 @@ namespace Audio {
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
 				audioJob.audio.transform.position = location;
 				settingsOverride?.Invoke(audioJob);
-				audioJob.audio.Play();
+				Play(audioJob);
 			}
 		}
 
@@ -266,7 +294,7 @@ namespace Audio {
 				updateAudioJobs[audioJob.id] = update;
 
 				settingsOverride?.Invoke(audioJob);
-				audioJob.audio.Play();
+				Play(audioJob);
 			}
 		}
 
@@ -287,8 +315,13 @@ namespace Audio {
 				}
 
 				settingsOverride?.Invoke(audioJob);
-				audioJob.audio.Play();
+				Play(audioJob);
 			}
+		}
+
+		private void Play(AudioJob job) {
+			Log(job.id, $"Playing audio job {job.id}");
+			job.Play();
 		}
 
 		public AudioJob GetAudioJob(AudioName audioType, string uniqueIdentifier) {
@@ -311,6 +344,7 @@ namespace Audio {
 				audioJob = audioJobs[id];
 			}
 			else {
+				Log(id, $"Creating new audio job: {id}");
 				GameObject newAudioGO = new GameObject(id);
 				newAudioGO.transform.SetParent(soundsRoot);
 				newAudioGO.transform.position = Vector3.zero;
@@ -325,15 +359,20 @@ namespace Audio {
 					audioType = audioType,
 					audio = newAudioSource,
 					basePitch = newAudioSource.pitch,
-					randomizedPitch = UnityEngine.Random.Range(-settings.randomizePitch, settings.randomizePitch)
+					pitchRandomness = UnityEngine.Random.Range(-settings.randomizePitch, settings.randomizePitch)
 				};
 				settingsOverride?.Invoke(audioJob);
 
-				newAudioSource.pitch += audioJob.randomizedPitch;
 				audioJobs.Add(audioJob.id, audioJob);
 			}
 
 			return audioJob;
+		}
+
+		private void Log(string audioJobId, string msg) {
+			if (audioJobsToDebug == null || audioJobsToDebug.Count == 0 || audioJobsToDebug.Exists(audioJobId.Contains)) {
+				debug.Log(msg);
+			}
 		}
 		
 #region Saving

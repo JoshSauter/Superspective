@@ -78,12 +78,6 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         }
     }
 
-    // Use this for initialization
-    void Start() {
-        //print(cameraTransform.rotation.x + ", " + cameraTransform.rotation.y + ", " + cameraTransform.rotation.z + ", " + cameraTransform.rotation.w);
-        //print(cameraTransform.position.x + ", " + cameraTransform.position.y + ", " + cameraTransform.position.z);
-    }
-
     void Update() {
         if (frozen || !GameManager.instance.gameHasLoaded) return;
 
@@ -171,7 +165,6 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
                 cameraContainerTransform.position = playerTransform.TransformPoint(cameraInitialLocalPos);
                 cameraContainerTransform.rotation = rotationBeforeViewLock;
 
-                PlayerMovement.instance.ResumeMovement();
                 Player.instance.cameraFollow.enabled = true;
                 Interact.instance.enabled = true;
                 Cursor.lockState = CursorLockMode.Locked;

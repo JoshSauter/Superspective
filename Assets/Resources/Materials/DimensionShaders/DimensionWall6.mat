@@ -28,5 +28,6 @@ Material:
     - _Dimension: 3
     - _StencilValue: 7
     - _Value: 2
+    - _WallChannel: 6
     m_Colors: []
   m_BuildTextureStacks: []

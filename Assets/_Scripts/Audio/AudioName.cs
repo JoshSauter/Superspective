@@ -23,6 +23,11 @@ namespace Audio {
 		SoundPuzzleStraightLines,
 		SoundPuzzleSymbols,
 		SoundPuzzleWiggle,
-		MetalCreak
+		MetalCreak,
+		LoopingMachinery,
+		Rainstick,
+		DrumSingleHitLow,
+		LowPulse,
+		EmptyVoid_8152358
 	}
 }

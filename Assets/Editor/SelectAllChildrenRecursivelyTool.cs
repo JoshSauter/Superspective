@@ -10,8 +10,6 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
     public bool selectInactive = true;
     public string typeName;
 
-    bool hasLoadedName = false;
-
     // Called when user clicks "Create" button (may be renamed)
     void OnWizardCreate() {
         PlayerPrefs.SetString(nameKey, typeName);

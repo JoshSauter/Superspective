@@ -64,7 +64,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		 true, false, false, false, false, false,
 		false,  true, false, false, false, false,
 		false, false,  true, false,  true,  true,
-		false, false, false,  true, false, false
+		false, false, false,  true,  true,  true
 	};
 	public const int COLLISION_MATRIX_ROWS = 4;
 	// First 4 columns are VisibilityStates, 5 is Player and 6 is Other Non-DimensionObjects
@@ -78,6 +78,17 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public event DimensionObjectStateChangeAction OnStateChange;
 	public event DimensionObjectStateChangeActionSimple OnStateChangeSimple;
 	#endregion
+
+	void OnValidate() {
+		if (collisionMatrix == null || collisionMatrix.Length < COLLISION_MATRIX_ROWS * COLLISION_MATRIX_COLS) {
+			collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
+				true, false, false, false, false, false,
+				false,  true, false, false, false, false,
+				false, false,  true, false,  true,  true,
+				false, false, false,  true,  true,  true
+			};
+		}
+	}
 
 	protected override void Awake() {
 		base.Awake();
@@ -121,7 +132,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	///////////////////
 	// Physics Logic //
 	///////////////////
-#region physics
+#region Physics
 	void SetupDimensionCollisionLogic() {
 		if (colliders != null && colliders.Length > 0) {
 			CreateTriggerZone();
@@ -224,11 +235,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		return HaveChannelOverlap() && ShouldCollideInSameChannel(a, b);
 	}
 
-	public bool ShouldCollideWithNonDimensionObject() {
+	public virtual bool ShouldCollideWithNonDimensionObject() {
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 1];
 	}
 
-	public bool ShouldCollideWithPlayer() {
+	public virtual bool ShouldCollideWithPlayer() {
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 2];
 	}
 
@@ -238,7 +249,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		return a.collisionMatrix[aVisibility * COLLISION_MATRIX_COLS + bVisibility] && b.collisionMatrix[bVisibility * COLLISION_MATRIX_COLS + aVisibility];
 	}
 	
-	public bool ShouldCollideWith(DimensionObject other) {
+	public virtual bool ShouldCollideWith(DimensionObject other) {
 		return ShouldCollide(this, other);
 	}
 
@@ -259,7 +270,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	////////////////////////
 	// State Change Logic //
 	////////////////////////
-	#region stateChange
+#region State Change
 
 	public virtual void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
 		if (gameObject.activeInHierarchy) {
@@ -308,11 +319,14 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	///////////////////////////
 	// Material Change Logic //
 	///////////////////////////
-	#region materials
+#region Materials
 	public void FindDefaultMaterials() {
 		renderers = GetAllSuperspectiveRenderers().ToArray();
 		// TODO: Move this to a place that makes more sense
-		colliders = GetAllColliders().ToArray();
+		if (colliders == null || colliders.Length == 0) {
+			colliders = GetAllColliders().ToArray();
+		}
+
 		if (renderers.Length == 0) {
 			debug.LogError("No renderers found for: " + gameObject.name);
 		}
@@ -343,11 +357,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 		else {
 			if (visibilityState == VisibilityState.partiallyVisible) {
-				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
 				inverseShader = true;
 			}
 			else if (visibilityState == VisibilityState.partiallyInvisible) {
-				newMaterials = normalMaterials.Select(m => GetDimensionObjectMaterial(m)).ToArray();
+				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
 			}
 			else {
 				newMaterials = normalMaterials;
@@ -472,7 +486,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				break;
 			case "TextMeshPro/Mobile/Distance Field":
 				if (normalMaterial.name.Contains("LiberationSans SDF")) {
-					newMaterial = Resources.Load<Material>("Fonts & Materials/LiberationSans SDF - InGameTextDimensionObject");
+					// TODO: This doesn't create a new Material right now
+					//newMaterial = Resources.Load<Material>("Fonts & Materials/LiberationSans SDF - InGameTextDimensionObject");
+					newMaterial = new Material(Shader.Find("TextMeshPro/Mobile/Distance Field Dimension"));
 				}
 				else {
 					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
@@ -498,6 +514,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
                 break;
 			case "Custom/UnlitNoDepth":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitNoDepth"));
+				break;
+			case "Custom/WhiteRoom/UnlitAngleFade":
+				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitAngleFade"));
 				break;
 			default:
 				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
@@ -715,7 +734,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 								throw new Exception($"Unrecognized operator: {symbol}");
 						}
 					}
-					catch (Exception e) {
+					catch (Exception) {
 						throw new Exception($"Couldn't pop two operands from the stack for operator {symbol}");
 					}
 				}

@@ -5,7 +5,7 @@ using Audio;
 using static Audio.AudioManager;
 
 public class Footsteps : MonoBehaviour {
-	AudioJob audioJob;
+	AudioJob audioJobLeft, audioJobRight;
 	Headbob bob;
 	PlayerMovement playerMovement;
 	float defaultVolume;
@@ -17,6 +17,9 @@ public class Footsteps : MonoBehaviour {
 	// Alternates between true and false so we only play a sound every other step
 	bool shouldForceStepSound = true;
 
+	float panMagnitude = .05f;
+	bool leftFootActive = true;
+
 	// Used for creating and retrieving audio jobs
 	string id = "Footsteps";
 
@@ -25,8 +28,9 @@ public class Footsteps : MonoBehaviour {
 		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
 
 		bob = GetComponent<Headbob>();
-		audioJob = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id);
-		defaultVolume = audioJob.audio.volume;
+		audioJobLeft = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left", SetPanForAudio);
+		audioJobRight = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right", SetPanForAudio);
+		defaultVolume = audioJobLeft.audio.volume;
 
 		if (bob == null) {
 			Debug.LogWarning("Footsteps requires headbob info");
@@ -40,7 +44,14 @@ public class Footsteps : MonoBehaviour {
 
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
-		audioJob.audio.volume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
+		float curVolume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
+		if (leftFootActive) {
+			audioJobLeft.audio.volume = curVolume;
+		}
+		else {
+			audioJobRight.audio.volume = curVolume;
+		}
+
 		if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
 			float thisFrameOffset = thisFrameBobAmount - curBobAmountUnamplified;
@@ -60,7 +71,13 @@ public class Footsteps : MonoBehaviour {
 		}
 	}
 
+    void SetPanForAudio(AudioJob audioJob) {
+	    bool isLeftFoot = audioJob.id.Contains("Left");
+	    audioJob.audio.panStereo = isLeftFoot ? -panMagnitude : panMagnitude;
+    }
+
 	void PlayFootstepAtVolume(bool shouldForcePlay, float tempVolume) {
+		AudioJob audioJob = leftFootActive ? audioJobLeft : audioJobRight;
 		float tmp = audioJob.audio.volume;
 		audioJob.audio.volume = tempVolume;
 		PlayFootstep(shouldForcePlay);
@@ -68,7 +85,11 @@ public class Footsteps : MonoBehaviour {
 	}
 
 	void PlayFootstep(bool shouldForcePlay) {
+		// Since adding left/right foot sounds, shouldForcePlay is just actually whether it should play at all or not
+		if (!shouldForcePlay) return;
 		timeSinceLastHit = 0f;
-		AudioManager.instance.Play(AudioName.PlayerFootstep, id, shouldForcePlay);
+		string audioJobId = leftFootActive ? audioJobLeft.uniqueIdentifier : audioJobRight.uniqueIdentifier;
+		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay);
+		leftFootActive = !leftFootActive;
 	}
 }

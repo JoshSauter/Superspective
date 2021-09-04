@@ -9,7 +9,8 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		Color,
 		Float,
 		Int,
-		FloatArray
+		FloatArray,
+		ColorOnMaterial
 	}
 	[Button("Print Property Block Value")]
 	void PrintLookupValueCallback() {
@@ -134,6 +135,9 @@ public class SuperspectiveRenderer : MonoBehaviour {
 				break;
 			case PropBlockType.FloatArray:
 				Debug.Log(key + ": " + string.Join(", ", propBlock.GetFloatArray(key)));
+				break;
+			case PropBlockType.ColorOnMaterial:
+				Debug.Log($"{key}: {string.Join(", ", r.material.GetColor(key))}");
 				break;
 		}
 	}

@@ -6,7 +6,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="HideDepthNormal" "Queue"="Geometry+1" }
+		Tags { "RenderType"="CullEverything" "Queue"="Geometry+1" }
 		LOD 100
 
 		Pass

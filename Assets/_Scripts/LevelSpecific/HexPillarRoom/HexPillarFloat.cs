@@ -8,8 +8,8 @@ namespace LevelSpecific.HexPillarRoom {
 		// Use this for initialization
 		protected override void Awake() {
 			base.Awake();
-			maxDisplacementUp = Mathf.Log10(transform.localScale.magnitude) / 2;
-			period = maxDisplacementUp * 150;
+			yAmplitude = Mathf.Log10(transform.localScale.magnitude) / 2;
+			period = yAmplitude * 150;
 		}
 	}
 }

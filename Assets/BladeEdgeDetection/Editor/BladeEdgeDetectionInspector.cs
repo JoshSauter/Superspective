@@ -19,6 +19,8 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 	SerializedProperty weightedEdgeMode;
 	SerializedProperty depthWeightEffect;
 	SerializedProperty normalWeightEffect;
+	SerializedProperty depthWeightMin;
+	SerializedProperty normalWeightMin;
 
 	bool edgeColorsHelp = false;
 	SerializedProperty edgeColorMode;
@@ -38,6 +40,8 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 		weightedEdgeMode = serializedObject.FindProperty("weightedEdgeMode");
 		depthWeightEffect = serializedObject.FindProperty("depthWeightEffect");
 		normalWeightEffect = serializedObject.FindProperty("normalWeightEffect");
+		depthWeightMin = serializedObject.FindProperty("depthWeightMin");
+		normalWeightMin = serializedObject.FindProperty("normalWeightMin");
 
 		edgeColorMode = serializedObject.FindProperty("edgeColorMode");
 		edgeColor = serializedObject.FindProperty("edgeColor");
@@ -73,6 +77,7 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 
 		LabelWithHelpButton(ref weightedEdgesHelp, "Weighted edges:");
 		weightedEdgeMode.enumValueIndex = (int)(BladeEdgeDetection.WeightedEdgeMode)EditorGUILayout.EnumPopup("Weighted edge mode: ", (BladeEdgeDetection.WeightedEdgeMode)weightedEdgeMode.enumValueIndex);
+		EditorGUILayout.Space();
 		switch ((BladeEdgeDetection.WeightedEdgeMode)weightedEdgeMode.enumValueIndex) {
 			case BladeEdgeDetection.WeightedEdgeMode.Unweighted:
 				OptionalHelpBox(weightedEdgesHelp, "All edges will have equal strength regardless of depth or normal differences");
@@ -80,15 +85,27 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 			case BladeEdgeDetection.WeightedEdgeMode.WeightedByDepth:
 				OptionalHelpBox(weightedEdgesHelp, "Depth-detected edges will vary in strength depending on magnitude of depth difference");
 				depthWeightEffect.floatValue = EditorGUILayout.FloatField("Depth weight effect: ", depthWeightEffect.floatValue);
+				
+				OptionalHelpBox(weightedEdgesHelp, "Depth min alpha values sets the baseline alpha that weighted edges mode can lower the original color to.");
+				depthWeightMin.floatValue = EditorGUILayout.FloatField("Depth weight min alpha: ", depthWeightMin.floatValue);
 				break;
 			case BladeEdgeDetection.WeightedEdgeMode.WeightedByNormals:
 				OptionalHelpBox(weightedEdgesHelp, "Normal-detected edges will vary in strength depending on magnitude of normal difference");
 				normalWeightEffect.floatValue = EditorGUILayout.FloatField("Normal weight effect: ", normalWeightEffect.floatValue);
+				
+				OptionalHelpBox(weightedEdgesHelp, "Normal min alpha values sets the baseline alpha that weighted edges mode can lower the original color to.");
+				normalWeightMin.floatValue = EditorGUILayout.FloatField("Normal weight min alpha: ", normalWeightMin.floatValue);
 				break;
 			case BladeEdgeDetection.WeightedEdgeMode.WeightedByDepthAndNormals:
 				OptionalHelpBox(weightedEdgesHelp, "All edges will vary in strength depending on magnitude of depth & normal differences");
 				depthWeightEffect.floatValue = EditorGUILayout.FloatField("Depth weight effect: ", depthWeightEffect.floatValue);
 				normalWeightEffect.floatValue = EditorGUILayout.FloatField("Normal weight effect: ", normalWeightEffect.floatValue);
+				
+				EditorGUILayout.Space();
+				
+				OptionalHelpBox(weightedEdgesHelp, "Depth/Normal min alpha values sets the baseline alpha that weighted edges mode can lower the original color to.");
+				depthWeightMin.floatValue = EditorGUILayout.FloatField("Depth weight min alpha: ", depthWeightMin.floatValue);
+				normalWeightMin.floatValue = EditorGUILayout.FloatField("Normal weight min alpha: ", normalWeightMin.floatValue);
 				break;
 		}
 

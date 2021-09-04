@@ -57,7 +57,8 @@ namespace LevelManagement {
 		ForkOctagon,
 		ForkBlackRoom2,
 		WhiteRoom1BackRoom,
-		BehindForkTransition
+		BehindForkTransition,
+		ForkBlackRoom3
 	}
 
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
@@ -245,7 +246,8 @@ namespace LevelManagement {
 			{ Levels.Transition23, "_Transition2_3" },
 			{ Levels.Transition34, "_Transition3_4" },
 			{ Levels.MetaEdgeDetection, "_Meta_EdgeDetection" },
-			{ Levels.PortalTestScene, "PortalTestScene" }
+			{ Levels.PortalTestScene, "PortalTestScene" },
+			{ Levels.ForkBlackRoom3, "_Fork_BlackRoom3" }
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();

@@ -1,6 +1,6 @@
 ﻿Shader "Custom/DimensionShaders/DimensionWall" {
 	Properties {
-		_Channel("Channel", Int) = 0
+		_WallChannel("Channel", Int) = 0
 		_StencilValue("Channel+1", Int) = 1
 	}
     SubShader {
@@ -24,10 +24,7 @@
             #include "UnityCG.cginc"
             #include "DimensionShaderHelpers.cginc"
 
-            // Make sure _Channel (also defined sometimes in DimensionShaderHelpers) is always defined
-#ifdef USE_ADVANCED_CHANNEL_LOGIC
-			int _Channel;
-#endif
+			int _WallChannel;
 
 			struct appdata {
 				float4 vertex : POSITION;
@@ -45,7 +42,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				return ColorFromChannel(_Channel);
+				return ColorFromChannel(_WallChannel);
 			}
             ENDCG
         }

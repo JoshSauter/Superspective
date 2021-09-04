@@ -21,7 +21,9 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
     public Vector3 worldPositionLastFrame;
 
     Headbob headbob;
-    bool shouldFollow = true;
+
+    bool shouldFollow =>
+        Player.instance.look.state == PlayerLook.State.ViewUnlocked && !CameraFlythrough.instance.isPlayingFlythrough;
 
     float timeSinceCurrentLerpSpeedWasModified;
 
@@ -38,7 +40,6 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         Portal.OnAnyPortalTeleportSimple += obj => {
             if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame();
         };
-        Player.instance.look.OnViewLockEnterBegin += HandleViewLockBegin;
         Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
     }
 
@@ -92,12 +93,7 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         worldPositionLastFrame = transform.parent.TransformPoint(relativePositionLastFrame);
     }
 
-    void HandleViewLockBegin() {
-        shouldFollow = false;
-    }
-
     void HandleViewUnlockEnd() {
-        shouldFollow = true;
         RecalculateWorldPositionLastFrame();
     }
 
@@ -110,13 +106,11 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         float currentLerpSpeed;
         SerializableVector3 relativePositionLastFrame;
         SerializableVector3 relativeStartPosition;
-        bool shouldFollow;
 
         float timeSinceCurrentLerpSpeedWasModified;
         SerializableVector3 worldPositionLastFrame;
 
         public CameraFollowSave(CameraFollow cam) : base(cam) {
-            shouldFollow = cam.shouldFollow;
             currentLerpSpeed = cam.currentLerpSpeed;
             relativeStartPosition = cam.relativeStartPosition;
             relativePositionLastFrame = cam.relativePositionLastFrame;
@@ -125,7 +119,6 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         }
 
         public override void LoadSave(CameraFollow cam) {
-            cam.shouldFollow = shouldFollow;
             cam.currentLerpSpeed = currentLerpSpeed;
             cam.relativeStartPosition = relativeStartPosition;
             cam.relativePositionLastFrame = relativePositionLastFrame;

@@ -38,8 +38,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 	bool initialized = false;
-
-	public string pillarKey;
+	
 	[SerializeField]
 	GameObject dimensionWallPrefab;
 	public DimensionWall dimensionWall;

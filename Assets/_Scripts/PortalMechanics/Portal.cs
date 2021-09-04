@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
 using LevelManagement;
+using MagicTriggerMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine.Serialization;
@@ -132,10 +133,40 @@ namespace PortalMechanics {
 			if (colliders.Length == 0) {
 				Debug.LogError("No Colliders found in this object or its children", gameObject);
 				enabled = false;
+				return;
 			}
+			
+			// A CompositeMagicTrigger handles player passing through portals
+			CompositeMagicTrigger trigger = gameObject.AddComponent<CompositeMagicTrigger>();
+			TriggerCondition positionCondition = new TriggerCondition {
+				triggerCondition = TriggerConditionType.PlayerInDirectionFromPoint,
+				useLocalCoordinates = true,
+				targetDirection = Vector3.forward,
+				targetPosition = Vector3.zero,
+				triggerThreshold = 0.01f
+			};
+			TriggerCondition movementCondition = new TriggerCondition {
+				triggerCondition = TriggerConditionType.PlayerMovingDirection,
+				useLocalCoordinates = true,
+				targetDirection = Vector3.forward,
+				triggerThreshold = 0.01f
+			};
+			trigger.triggerConditions = new List<TriggerCondition>() {
+				positionCondition,
+				movementCondition
+			};
+
+			trigger.colliders = colliders;
+			trigger.OnMagicTriggerStayOneTime += () => {
+				playerCameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
+				if (!teleportingPlayer) {
+					StartCoroutine(TeleportPlayer(Player.instance.transform));
+				}
+			};
 
 			foreach (var c in colliders) {
 				if (c.gameObject != this.gameObject) {
+					// PortalColliders handle non-player objects passing through portals
 					c.gameObject.AddComponent<PortalCollider>().portal = this;
 				}
 			}
@@ -260,12 +291,13 @@ namespace PortalMechanics {
 		public void OnTriggerStay(Collider other) {
 			if (!portalIsEnabled) return;
 
-			Vector3 closestPoint = ClosestPoint(other.transform.position, true);
-			// TODO: This check doesn't work properly, player will rapidly teleport back and forth if standing in the middle
-			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
-			if (!objectShouldBeTeleported) return;
-
+			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
+			// in the right position and moving the correct direction before triggering teleport
 			if (!other.TaggedAsPlayer()) {
+				Vector3 closestPoint = ClosestPoint(other.transform.position, true);
+				bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
+				if (!objectShouldBeTeleported) return;
+				
 				PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
 				if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
 					TeleportObject(portalableObj);
@@ -274,12 +306,6 @@ namespace PortalMechanics {
 					objectsInPortal.Remove(portalableObj);
 					otherPortal.objectsInPortal.Add(portalableObj);
 					portalableObj.sittingInPortal = otherPortal;
-				}
-			}
-			else {
-				playerCameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
-				if (!teleportingPlayer) {
-					StartCoroutine(TeleportPlayer(other.transform));
 				}
 			}
 		}

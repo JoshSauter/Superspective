@@ -86,8 +86,11 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	protected override void Init() {
+		base.Init();
 		renderers = GetAllSuperspectiveRenderers().ToArray();
-		colliders = GetAllColliders().ToArray();
+		if (colliders == null || colliders.Length == 0) {
+			colliders = GetAllColliders().ToArray();
+		}
 
 		HandlePillarChanged();
 	}
@@ -97,6 +100,34 @@ public class PillarDimensionObject : DimensionObject {
 			playerQuadrant = DetermineQuadrant(camPos);
 			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
 			UpdateState(true);
+		}
+	}
+
+	public override bool ShouldCollideWithPlayer() {
+		VisibilityState effectiveVisibilityState = reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+		return effectiveVisibilityState != VisibilityState.invisible;
+	}
+
+	public override bool ShouldCollideWithNonDimensionObject() {
+		return true;
+	}
+
+	public override bool ShouldCollideWith(DimensionObject other) {
+		if (other is PillarDimensionObject otherPillarDimensionObj) {
+			int testDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible || v == VisibilityState.partiallyVisible);
+			if (testDimension == -1) {
+				return false;
+			}
+
+			VisibilityState test1 = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, testDimension);
+			VisibilityState test2 = otherPillarDimensionObj.DetermineVisibilityState(otherPillarDimensionObj.playerQuadrant, otherPillarDimensionObj.dimensionShiftQuadrant, testDimension);
+
+			bool areOpposites = test1 == test2.Opposite();
+			return !areOpposites;
+		}
+		else {
+			VisibilityState effectiveVisibilityState = reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+			return effectiveVisibilityState != VisibilityState.invisible;
 		}
 	}
 
