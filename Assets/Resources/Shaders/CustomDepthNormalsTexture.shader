@@ -35,6 +35,33 @@ ENDCG
 	}
 }
 SubShader {
+	Tags { "RenderType"="CullEverythingDimension"}
+	Pass {
+CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+
+#include "DimensionShaders/DimensionShaderHelpers.cginc"
+
+struct v2f {
+	float4 pos : SV_POSITION;
+	float4 nz : TEXCOORD0;
+};
+v2f vert(appdata_base v) {
+	v2f o;
+	o.pos = UnityObjectToClipPos(v.vertex);
+	o.nz.xyz = float3(1,0,0);
+	o.nz.w = .99999;
+	return o;
+}
+fixed4 frag(v2f i) : SV_Target {
+    ClipDimensionObject(i.pos);
+	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+}
+ENDCG
+	}
+}
+SubShader {
     Tags { "RenderType"="DimensionDissolveDoubleSided" }
     Pass {
 
@@ -224,7 +251,7 @@ v2f vert(appdata v) {
 }
 
 fixed4 frag(v2f i) : SV_Target {
-    ClipDimensionObjectFromScreenSpaceCoords(i.screenPos);
+    ClipDimensionObject(i.vertex);
 	float2 uv = i.screenPos.xy / i.screenPos.w;
 
 	fixed4 col = tex2D(_DepthNormals, uv);
@@ -370,48 +397,6 @@ fixed4 frag(v2f i) : SV_Target {
 ENDCG
     }
 }
-    SubShader {
-    Tags { "RenderType"="DimensionPortalMaterial" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-uniform sampler2D _DepthNormals;
-
-struct appdata {
-	float4 vertex : POSITION;
-};
-
-struct v2f {
-	float4 vertex : SV_POSITION;
-	float4 screenPos : TEXCOORD0;
-};
-
-v2f vert(appdata v) {
-	v2f o;
-	o.vertex = UnityObjectToClipPos(v.vertex);
-	o.screenPos = ComputeScreenPos(o.vertex);
-	return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-    ClipDimensionObjectFromScreenSpaceCoords(i.screenPos);
-	float2 uv = i.screenPos.xy / i.screenPos.w;
-
-	fixed4 col = tex2D(_DepthNormals, uv);
-    if (length(col) == 0) {
-     clip(-1);
-	}
-	return col;
-}
-ENDCG
-    }
-}
-
 SubShader {
     Tags { "RenderType"="Opaque" }
     Pass {

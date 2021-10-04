@@ -11,11 +11,11 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	public int visibilityMaskValue; // The value of the visibility masks at the reticle
 	static readonly int ResolutionX = Shader.PropertyToID("_ResolutionX");
 	static readonly int ResolutionY = Shader.PropertyToID("_ResolutionY");
-	static readonly int DimensionMask = Shader.PropertyToID("_DimensionMask");
-	static readonly int PortalMask = Shader.PropertyToID("_PortalMask");
+	public static readonly int DimensionMask = Shader.PropertyToID("_DimensionMask");
+	public static readonly int PortalMask = Shader.PropertyToID("_PortalMask");
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		SuperspectiveScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
@@ -30,7 +30,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
             
 			Vector2 pixelPositionOfReticle = Interact.instance.PixelPositionOfReticle();
 			AsyncGPUReadback.Request(
-				MaskBufferRenderTextures.instance.visibilityMaskTexture,
+				visibilityMaskTexture,
 				0,
 				(int)pixelPositionOfReticle.x,
 				1,
@@ -38,7 +38,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 				1,
 				0,
 				1,
-				MaskBufferRenderTextures.instance.visibilityMaskTexture.graphicsFormat,
+				visibilityMaskTexture.graphicsFormat,
 				OnCompleteReadback
 			);
 		}
@@ -50,8 +50,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		}
 
 		// This happens when the delayed async readback happens as we're exiting play mode
-		if (MaskBufferRenderTextures.instance == null ||
-		    MaskBufferRenderTextures.instance.visibilityMaskTexture == null) {
+		if (instance == null || visibilityMaskTexture == null) {
 			return;
 		}
         
@@ -59,7 +58,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		Texture2D visibilityMaskTex = new Texture2D(
 			1,
 			1,
-			GraphicsFormatUtility.GetTextureFormat(MaskBufferRenderTextures.instance.visibilityMaskTexture.graphicsFormat),
+			GraphicsFormatUtility.GetTextureFormat(visibilityMaskTexture.graphicsFormat),
 			false
 		);
 		visibilityMaskTex.LoadRawTextureData(request.GetData<Color32>());
@@ -99,14 +98,15 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 			currentWidth,
 			currentHeight,
 			out visibilityMaskTexture,
-			SuperspectiveScreen.instance.dimensionCamera);
+			SuperspectiveScreen.instance.dimensionCamera
+		).name = "VisibilityMask";
 
 		CreateRenderTexture(
 			currentWidth,
 			currentHeight,
 			out portalMaskTexture,
 			SuperspectiveScreen.instance.portalMaskCamera
-		);
+		).name = "PortalMask";
 	}
 
 	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {

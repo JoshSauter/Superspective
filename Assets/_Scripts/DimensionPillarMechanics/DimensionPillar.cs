@@ -22,20 +22,7 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	Plane DimensionShiftPerpendicularPlane => new Plane(DimensionShiftVector.normalized, transform.position);
 
 	[SerializeField]
-	Angle.Quadrant _playerQuadrant;
-	Angle.Quadrant PlayerQuadrant {
-		get => _playerQuadrant;
-		set {
-			if (PlayerQuadrant == Angle.Quadrant.I && value == Angle.Quadrant.IV) {
-				ShiftDimensionUp();
-			}
-			else if (PlayerQuadrant == Angle.Quadrant.IV && value == Angle.Quadrant.I) {
-				ShiftDimensionDown();
-			}
-
-			_playerQuadrant = value;
-		}
-	}
+	public Angle.Quadrant playerQuadrant;
 
 	bool initialized = false;
 	
@@ -49,19 +36,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 
 	public int heightOverride = -1;
 	public bool HeightOverridden => heightOverride != -1;
-	
-	public enum DimensionSwitch {
-		Up,
-		Down
-	}
-
-#region events
-	public delegate void DimensionChangeEvent(int prevDimension, int curDimension);
-	public event DimensionChangeEvent OnDimensionChange;
-
-	public delegate void DimensionChangeWithDirectionEvent(int prevDimension, int curDimension, DimensionSwitch direction);
-	public event DimensionChangeWithDirectionEvent OnDimensionChangeWithDirection;
-#endregion
 
 	protected override void Awake() {
 		base.Awake();
@@ -71,8 +45,20 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		}
 	}
 
-	void FixedUpdate() {
-		PlayerQuadrant = GetQuadrant(SuperspectiveScreen.instance.playerCamera.transform.position);
+	void Update() {
+		Camera playerCam = SuperspectiveScreen.instance.playerCamera;
+		Angle.Quadrant prevQuadrant = playerQuadrant;
+		playerQuadrant = GetQuadrant(playerCam.transform.position);
+		
+		if (prevQuadrant == Angle.Quadrant.I && playerQuadrant == Angle.Quadrant.IV) {
+			ShiftDimensionUp();
+		}
+		else if (prevQuadrant == Angle.Quadrant.IV && playerQuadrant == Angle.Quadrant.I) {
+			ShiftDimensionDown();
+		}
+		else if (prevQuadrant != playerQuadrant) {
+			debug.Log($"Prev Quadrant: {prevQuadrant}\nNew Quadrant: {playerQuadrant}");
+		}
     }
 
 	Angle.Quadrant GetQuadrant(Vector3 position) {
@@ -96,23 +82,15 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 	public void ShiftDimensionUp() {
-		int prevDimension = curDimension;
 		curDimension = NextDimension(curDimension);
 
-		OnDimensionChange?.Invoke(prevDimension, curDimension);
-		OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Up);
-
-		debug.Log("Shift to dimension " + curDimension);
+		debug.Log($"Shift to dimension {curDimension}");
 	}
 
 	public void ShiftDimensionDown() {
-		int prevDimension = curDimension;
 		curDimension = PrevDimension(curDimension);
 
-		OnDimensionChange?.Invoke(prevDimension, curDimension);
-		OnDimensionChangeWithDirection?.Invoke(prevDimension, curDimension, DimensionSwitch.Down);
-
-		debug.Log("Shift to dimension " + curDimension);
+		debug.Log($"Shift to dimension {curDimension}");
 	}
 
 	// Wrap-around logic for incrementing dimension values
@@ -147,10 +125,6 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		public override void LoadSave(DimensionPillar dimensionPillar) {
 			dimensionPillar.initialized = this.initialized;
 			dimensionPillar.maxDimension = this.maxDimension;
-			if (dimensionPillar.curDimension != this.curDimension) {
-				dimensionPillar.curDimension = this.curDimension;
-				dimensionPillar.OnDimensionChange?.Invoke(dimensionPillar.curDimension, this.curDimension);
-			}
 			dimensionPillar.curDimension = this.curDimension;
 		}
 	}

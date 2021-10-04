@@ -4,7 +4,7 @@
 		_StencilValue("Channel+1", Int) = 1
 	}
     SubShader {
-        Tags { "Queue"="Background-1000" }
+        Tags { "Queue"="Background-1000" "RenderType"="VisibilityMask" }
         LOD 100
 
 		Pass {
@@ -22,9 +22,10 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "DimensionShaderHelpers.cginc"
+            #include "../DimensionShaderHelpers.cginc"
 
 			int _WallChannel;
+            int _StencilValue;
 
 			struct appdata {
 				float4 vertex : POSITION;

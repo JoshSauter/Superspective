@@ -90,7 +90,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         PlayerButtonInput.instance.OnAction1Press += Drop;
 
         PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(transform);
-        if (thisDimensionObject != null) thisDimensionObject.OnStateChangeSimple += HandleDimensionObjectStateChange;
+        if (thisDimensionObject != null) thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 
         playerCamPosLastFrame = playerCam.transform.position;
 
@@ -247,8 +247,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         return targetPos;
     }
 
-    void HandleDimensionObjectStateChange(VisibilityState nextState) {
-        if (nextState == VisibilityState.invisible && isHeld) Drop();
+    void HandleDimensionObjectStateChange(DimensionObject dimObj) {
+        if (dimObj.visibilityState == VisibilityState.invisible && isHeld) Drop();
     }
 
     public void Pickup() {

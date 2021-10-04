@@ -18,9 +18,6 @@ namespace LevelSpecific.BlackRoom {
 		Vector3 activePos;
 		Vector3 inactivePos;
 
-		public delegate void ColorPuzzleSolvedStateChange(ColorPuzzle puzzle, bool isSolved);
-		public static event ColorPuzzleSolvedStateChange OnColorPuzzleSolvedStateChange;
-
 		protected override void Start() {
 			base.Start();
 			solutionNodes = GetComponentsInChildren<ColorPuzzleNode>();
@@ -44,9 +41,6 @@ namespace LevelSpecific.BlackRoom {
 			if (solutionNodes.Contains(node)) {
 				bool prevSolvedState = solved;
 				solved = solutionNodes.ToList().TrueForAll(n => n.isSolved);
-				if (prevSolvedState != solved && OnColorPuzzleSolvedStateChange != null) {
-					OnColorPuzzleSolvedStateChange(this, solved);
-				}
 			}
 		}
 

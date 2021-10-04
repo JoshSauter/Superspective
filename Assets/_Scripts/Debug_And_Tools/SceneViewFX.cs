@@ -16,7 +16,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 
 #if UNITY_EDITOR
 	SceneView sceneView;
-	Camera sceneViewCamera;
+	public Camera sceneViewCamera;
 
 	Camera myCamera;
 	//[HideInInspector]

@@ -3,8 +3,10 @@
 	Properties
 	{
 		_Color ("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
+		_MainTex ("Main Texture", 2D) = "white" {}
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
+		_EmissionMask ("Emission Mask", 2D) = "clear" {}
 	}
 	SubShader
 	{
@@ -35,25 +37,33 @@
 			{
 				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
+				float2 uv : TEXCOORD0;
+				float2 emissionUv : TEXCOORD1;
 			};
 
 			float4 _Color;
 			float4 _EmissionColor;
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
+			sampler2D _EmissionMask;
+			float4 _EmissionMask_ST;
 			
-			v2f vert (appdata v)
+			v2f vert (appdata_full v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+				o.emissionUv = TRANSFORM_TEX(v.texcoord, _EmissionMask);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = _Color;
+				fixed4 col = _Color * tex2D(_MainTex, i.uv.xy);
 				// apply fog
-				col += _EmissionColor;
+				col += _EmissionColor * tex2D(_EmissionMask, i.uv.xy).r;
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

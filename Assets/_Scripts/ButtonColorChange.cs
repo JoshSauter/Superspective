@@ -2,7 +2,8 @@
 using UnityEngine;
 
 public class ButtonColorChange : MonoBehaviour {
-    public bool useMaterialAsStartColor = true;
+    public bool useMaterialAsStartColor = false;
+    public bool useMaterialAsEndColor = false;
     public Color startColor;
 
     [ColorUsage(true, true)]
@@ -28,6 +29,11 @@ public class ButtonColorChange : MonoBehaviour {
         r = GetComponent<SuperspectiveRenderer>();
         if (r == null) r = gameObject.AddComponent<SuperspectiveRenderer>();
 
+        if (useMaterialAsEndColor) {
+            pressColor = r.GetMainColor();
+            pressEmission = r.GetColor("_EmissionColor");
+        }
+        
         if (useMaterialAsStartColor) {
             startColor = r.GetMainColor();
             startEmission = r.GetColor("_EmissionColor");

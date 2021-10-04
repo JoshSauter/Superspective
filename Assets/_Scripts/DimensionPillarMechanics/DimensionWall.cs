@@ -48,22 +48,26 @@ public class DimensionWall : MonoBehaviour {
 	}
 
 	void Update() {
+		UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
+	}
+
+	public void UpdateStateForCamera(Camera cam) {
 		thisRenderer.enabled = pillar.enabled;
 		if (!pillar.enabled) return;
 
-		UpdateWallRotation();
+		UpdateWallRotation(cam);
 		UpdateWallSize();
 	}
 
-	Angle AngleOfPlayerCamera() {
-		Vector3 pillarToPoint = SuperspectiveScreen.instance.playerCamera.transform.position - transform.position;
+	Angle AngleOfCamera(Camera cam) {
+		Vector3 pillarToPoint = cam.transform.position - transform.position;
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
 		PolarCoordinate dimensionShiftPolar = PolarCoordinate.CartesianToPolar(pillar.DimensionShiftVector);
 		return dimensionShiftPolar.angle - polar.angle;
 	}
 
-	void UpdateWallRotation() {
-		transform.localEulerAngles = new Vector3(0, AngleOfPlayerCamera().degrees - radsOffsetForDimensionWall * Mathf.Rad2Deg, 0);
+	void UpdateWallRotation(Camera cam) {
+		transform.localEulerAngles = new Vector3(0, AngleOfCamera(cam).degrees - radsOffsetForDimensionWall * Mathf.Rad2Deg, 0);
 	}
 
 	void UpdateWallSize() {

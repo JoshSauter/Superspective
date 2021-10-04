@@ -13,7 +13,7 @@ namespace LevelSpecific.WhiteRoom {
 			fakePortalSides.OnStateChangeSimple += OnVisibilityStateChange;
 		}
 
-		void OnVisibilityStateChange(VisibilityState unused) {
+		void OnVisibilityStateChange() {
 			bool allVisible = fakePortalSides.visibilityState == VisibilityState.visible;
 			thisRenderer.enabled = allVisible;
         }

@@ -7,6 +7,7 @@ using System.Linq;
 using Saving;
 using System;
 using NaughtyAttributes;
+using PortalMechanics;
 
 public enum VisibilityState {
 	invisible,
@@ -34,6 +35,7 @@ public static class VisibilityStateExt {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+	public static HashSet<DimensionObject> allDimensionObjects = new HashSet<DimensionObject>();
 	public const int NUM_CHANNELS = 8;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	public bool ignoreChildrenWithDimensionObject = true;
@@ -42,7 +44,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	[Range(0, NUM_CHANNELS-1)]
 	public int channel;
 	public bool reverseVisibilityStates = false;
-	public bool ignoreMaterialChanges = false;
+	// Set to true by Portals to keep them on only Portal or Invisible layers since VisibleButNoPlayerCollision layer
+	// prevents them from being rendered to PortalMask camera
+	public bool ignorePartiallyVisibleLayerChanges = false;
 	public bool disableColliderWhileInvisible = true;
 	protected int curDimensionSetInMaterial;
 
@@ -53,6 +57,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
 	public VisibilityState visibilityState = VisibilityState.visible;
+	public VisibilityState effectiveVisibilityState => reverseVisibilityStates
+		? visibilityState.Opposite()
+		: visibilityState;
 	static Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
 		{ VisibilityState.invisible, new HashSet<VisibilityState> { VisibilityState.partiallyVisible, VisibilityState.partiallyInvisible } },
 		{ VisibilityState.partiallyVisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } },
@@ -73,8 +80,12 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public bool isBeingDestroyed = false;
 
 #region events
-	public delegate void DimensionObjectStateChangeAction(DimensionObject context, VisibilityState visibilityState);
-	public delegate void DimensionObjectStateChangeActionSimple(VisibilityState visibilityState);
+	public delegate void DimensionObjectStateChangeAction(DimensionObject context);
+	public delegate void DimensionObjectStateChangeActionSimple();
+
+	// Immediate will fire immediately after any state change happens
+	public event DimensionObjectStateChangeAction OnStateChangeImmediate;
+	// Non-immediate events wait until end of frame to see if the net visibility state has changed
 	public event DimensionObjectStateChangeAction OnStateChange;
 	public event DimensionObjectStateChangeActionSimple OnStateChangeSimple;
 	#endregion
@@ -83,9 +94,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		if (collisionMatrix == null || collisionMatrix.Length < COLLISION_MATRIX_ROWS * COLLISION_MATRIX_COLS) {
 			collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
 				true, false, false, false, false, false,
-				false,  true, false, false, false, false,
-				false, false,  true, false,  true,  true,
-				false, false, false,  true,  true,  true
+				false, true, false, false, false, false,
+				false, false, true, false, true, true,
+				false, false, false, true, true, true
 			};
 		}
 	}
@@ -97,6 +108,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	}
 
 	protected override void Init() {
+		foreach (var r in renderers) {
+			SetMaterials(r);
+		}
 		SetupDimensionCollisionLogic();
 		SetChannelValuesInMaterials();
 
@@ -112,23 +126,26 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		SwitchVisibilityState(startingVisibilityState, true);
 		initialized = true;
 	}
-
-	public void OverrideStartingMaterials(Dictionary<SuperspectiveRenderer, Material[]> newStartingMaterials) {
-		startingMaterials = newStartingMaterials;
-	}
-
+	
 	void OnDisable() {
+		allDimensionObjects.Remove(this);
 		isBeingDestroyed = true;
 		visibilityState = VisibilityState.visible;
-		OnStateChange?.Invoke(this, VisibilityState.visible);
-		OnStateChangeSimple?.Invoke(VisibilityState.visible);
+		OnStateChangeImmediate?.Invoke(this);
+		OnStateChange?.Invoke(this);
+		OnStateChangeSimple?.Invoke();
 		SetChannelValuesInMaterials(false);
 	}
 
 	void OnEnable() {
+		allDimensionObjects.Add(this);
 		SetChannelValuesInMaterials();
 	}
 	
+	public bool IsVisibleFrom(Camera cam) {
+		return renderers.Any(r => r.r.IsVisibleFrom(cam));
+	}
+
 	///////////////////
 	// Physics Logic //
 	///////////////////
@@ -177,10 +194,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	}
 	
 	public bool IsVisibleFromMask(int maskValue) {
-		VisibilityState effectiveVisibilityState = reverseVisibilityStates
-			? visibilityState.Opposite()
-			: visibilityState;
-
 		bool ChannelOverlap() {
 			if (useAdvancedChannelLogic) {
 				return maskRenderSolution[maskValue] > 0;
@@ -297,18 +310,21 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				visibilityState = VisibilityState.partiallyInvisible;
 				break;
 		}
-
-		if (!ignoreMaterialChanges) {
-			foreach (var r in renderers) {
-				SetMaterials(r);
-			}
-			SetChannelValuesInMaterials();
+		
+		foreach (var r in renderers) {
+			SetShaderProperties(r);
 		}
+		SetChannelValuesInMaterials();
+		
+		OnStateChangeImmediate?.Invoke(this);
 
-		// Give a frame to let new materials switch before calling state change event
-		yield return null;
-		OnStateChangeSimple?.Invoke(nextState);
-		OnStateChange?.Invoke(this, nextState);
+		// Wait until end of frame to let new materials switch before calling state change event (only if it remains this state)
+		yield return new WaitForEndOfFrame();
+		
+		if (nextState == visibilityState) {
+			OnStateChangeSimple?.Invoke();
+			OnStateChange?.Invoke(this);
+		}
 	}
 
 	bool IsValidNextState(VisibilityState nextState) {
@@ -330,56 +346,50 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		if (renderers.Length == 0) {
 			debug.LogError("No renderers found for: " + gameObject.name);
 		}
-		
+
+		SetStartingStateFromCurrentState();
+	}
+
+	public void SetStartingStateFromCurrentState() {
 		startingMaterials = GetAllStartingMaterials(renderers);
 		startingLayers = GetAllStartingLayers(renderers);
 	}
-	
-	void SetMaterials(SuperspectiveRenderer renderer) {
-		if (!startingMaterials.ContainsKey(renderer)) {
-			startingMaterials.Add(renderer, renderer.GetMaterials());
-			startingLayers.Add(renderer, renderer.gameObject.layer);
-		}
-		Material[] normalMaterials = startingMaterials[renderer];
-		Material[] newMaterials;
+
+	void SetShaderProperties(SuperspectiveRenderer renderer) {
 		bool inverseShader = false;
-		if (!reverseVisibilityStates) {
-			if (visibilityState == VisibilityState.partiallyVisible) {
-				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
-			}
-			else if (visibilityState == VisibilityState.partiallyInvisible) {
-				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
-				inverseShader = true;
-			}
-			else {
-				newMaterials = normalMaterials;
-			}
-		}
-		else {
-			if (visibilityState == VisibilityState.partiallyVisible) {
-				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
-				inverseShader = true;
-			}
-			else if (visibilityState == VisibilityState.partiallyInvisible) {
-				newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
-			}
-			else {
-				newMaterials = normalMaterials;
-			}
+		switch (visibilityState) {
+			case VisibilityState.invisible:
+				break;
+			case VisibilityState.partiallyVisible:
+				inverseShader = reverseVisibilityStates;
+				break;
+			case VisibilityState.visible:
+				break;
+			case VisibilityState.partiallyInvisible:
+				inverseShader = !reverseVisibilityStates;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
 
 		switch (visibilityState) {
 			case VisibilityState.invisible:
-				renderer.gameObject.layer = reverseVisibilityStates ? startingLayers[renderer] : LayerMask.NameToLayer("Invisible");
-				break;
-			case VisibilityState.partiallyVisible:
-				renderer.gameObject.layer = reverseVisibilityStates ? startingLayers[renderer] : LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+				renderer.gameObject.layer = reverseVisibilityStates
+					? startingLayers[renderer]
+					: LayerMask.NameToLayer("Invisible");
 				break;
 			case VisibilityState.visible:
-				renderer.gameObject.layer = reverseVisibilityStates ? LayerMask.NameToLayer("Invisible") : startingLayers[renderer];
+				renderer.gameObject.layer = reverseVisibilityStates
+					? LayerMask.NameToLayer("Invisible")
+					: startingLayers[renderer];
 				break;
+			case VisibilityState.partiallyVisible:
 			case VisibilityState.partiallyInvisible:
-				renderer.gameObject.layer = reverseVisibilityStates ? LayerMask.NameToLayer("VisibleButNoPlayerCollision") : startingLayers[renderer];
+				renderer.gameObject.layer = reverseVisibilityStates
+					? (ignorePartiallyVisibleLayerChanges
+						? startingLayers[renderer]
+						: LayerMask.NameToLayer("VisibleButNoPlayerCollision"))
+					: startingLayers[renderer];
 				break;
 		}
 		
@@ -389,8 +399,20 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			            (reverseVisibilityStates && visibilityState != VisibilityState.visible);
 		}
 
-		renderer.SetMaterials(newMaterials);
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
+		renderer.SetInt("_FullyVisible", effectiveVisibilityState == VisibilityState.visible ? 1 : 0);
+	}
+	
+	void SetMaterials(SuperspectiveRenderer renderer) {
+		if (!startingMaterials.ContainsKey(renderer)) {
+			startingMaterials.Add(renderer, renderer.GetMaterials());
+			startingLayers.Add(renderer, renderer.gameObject.layer);
+		}
+		Material[] normalMaterials = startingMaterials[renderer];
+		Material[] newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
+		renderer.SetMaterials(newMaterials);
+		
+		SetShaderProperties(renderer);
 	}
 
 	protected List<Collider> GetAllColliders() {
@@ -462,9 +484,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		return renderers.ToDictionary(r => r, r => r.gameObject.layer);
 	}
 
-	Material GetDimensionObjectMaterial(Material normalMaterial) {
+	public Material GetDimensionObjectMaterial(Material normalMaterial) {
 		Material newMaterial = null;
 		bool powerTrailShader = false;
+		Portal dimensionPortal = null;
 		switch (normalMaterial.shader.name) {
 			case "Custom/Unlit":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
@@ -511,6 +534,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				break;
 			case "Portals/PortalMaterial":
                 newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
+                dimensionPortal = gameObject.GetComponent<Portal>();
+                if (dimensionPortal == null) {
+	                Debug.LogWarning("Couldn't find a Portal component on DimensionPortalMaterial object. If this is intended remove me.");
+                }
                 break;
 			case "Custom/UnlitNoDepth":
 				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitNoDepth"));
@@ -532,6 +559,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				newMaterial.SetFloatArray("_StartPositionIDs", normalMaterial.GetFloatArray("_StartPositionIDs"));
 				newMaterial.SetFloatArray("_EndPositionIDs", normalMaterial.GetFloatArray("_EndPositionIDs"));
 				newMaterial.SetFloatArray("_InterpolationValues", normalMaterial.GetFloatArray("_InterpolationValues"));
+			}
+
+			if (dimensionPortal != null) {
+				dimensionPortal.SetTexturesOnMaterial();
 			}
 		}
 		return (newMaterial != null) ? newMaterial : normalMaterial;
@@ -761,7 +792,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		bool initialized;
 		int channel;
 		bool reverseVisibilityStates;
-		bool ignoreMaterialChanges;
+		bool ignorePartiallyVisibleLayerChanges;
 		int curDimensionSetInMaterial;
 
 		int startingVisibilityState;
@@ -774,7 +805,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			this.initialized = dimensionObj.initialized;
 			this.channel = dimensionObj.channel;
 			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
-			this.ignoreMaterialChanges = dimensionObj.ignoreMaterialChanges;
+			this.ignorePartiallyVisibleLayerChanges = dimensionObj.ignorePartiallyVisibleLayerChanges;
 			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
 			this.startingVisibilityState = (int)dimensionObj.startingVisibilityState;
 			this.visibilityState = (int)dimensionObj.visibilityState;
@@ -787,7 +818,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			dimensionObj.initialized = this.initialized;
 			dimensionObj.channel = this.channel;
 			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
-			dimensionObj.ignoreMaterialChanges = this.ignoreMaterialChanges;
+			dimensionObj.ignorePartiallyVisibleLayerChanges = this.ignorePartiallyVisibleLayerChanges;
 			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;
 			dimensionObj.startingVisibilityState = (VisibilityState)this.startingVisibilityState;
 			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;

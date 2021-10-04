@@ -27,7 +27,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		dimensionObject.OnStateChangeSimple += OnThisDimensionObjectVisibilityStateChange;
 	}
 
-	void OnThisDimensionObjectVisibilityStateChange(VisibilityState newState) {
+	void OnThisDimensionObjectVisibilityStateChange() {
 		List<DimensionObject> dimensionObjectsIgnoredCopy = new List<DimensionObject>(dimensionObjectsIgnored);
 		foreach (var otherDimensionObject in dimensionObjectsIgnoredCopy) {
 			DetermineCollisionWithDimensionObject(otherDimensionObject);
@@ -59,7 +59,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	// Second parameter is unused but matches the event shape so we don't subscribe with an anonymous delegate
-	void DetermineCollisionWithDimensionObject(DimensionObject otherDimensionObj, VisibilityState _ = VisibilityState.visible) {
+	void DetermineCollisionWithDimensionObject(DimensionObject otherDimensionObj) {
 		// Make sure channels are different or we are in a different visibility state
 		if (otherDimensionObj.isBeingDestroyed) {
 			// If the other DimensionObject is being destroyed, treat it as a non DimensionObject
@@ -154,7 +154,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		if (dimensionObject == null || collidersIgnored.ContainsKey(other)) return;
 		DimensionObject otherDimensionObj = other.FindDimensionObjectRecursively<DimensionObject>();
 		if (otherDimensionObj != null) {
-			DetermineCollisionWithDimensionObject(otherDimensionObj, otherDimensionObj.visibilityState);
+			DetermineCollisionWithDimensionObject(otherDimensionObj);
 		}
 		else {
 			DetermineCollisionWithNonDimensionObject(other);

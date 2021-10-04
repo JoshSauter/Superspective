@@ -68,12 +68,12 @@ namespace LevelSpecific.BlackRoom {
 			Vector3 tipToCenterOfBaseWorld = -cone.up * (coneHeight * cone.localScale.y);
 			Vector3 tipToEdgeOfBaseWorld = tipToCenterOfBaseWorld + cone.right * (coneRadius * cone.localScale.x);
 			Vector3 tipToTestPointWorld = testPos - cone.position;
-			if (projector == green) {
-				Debug.DrawRay(cone.position, tipToCenterOfBaseWorld, Color.white);
-				Debug.DrawRay(cone.position, tipToEdgeOfBaseWorld, Color.blue);
-
-				Debug.DrawRay(cone.position, tipToTestPointWorld, Color.red);
-			}
+			// if (projector == green) {
+			// 	Debug.DrawRay(cone.position, tipToCenterOfBaseWorld, Color.white);
+			// 	Debug.DrawRay(cone.position, tipToEdgeOfBaseWorld, Color.blue);
+			//
+			// 	Debug.DrawRay(cone.position, tipToTestPointWorld, Color.red);
+			// }
 
 			float thresholdForWithinCone = Vector3.Dot(tipToCenterOfBaseWorld.normalized, tipToEdgeOfBaseWorld.normalized);
 			float testValue = Vector3.Dot(tipToCenterOfBaseWorld.normalized, tipToTestPointWorld.normalized);

@@ -12,6 +12,7 @@ int _AcceptableMaskValues[1 << NUM_CHANNELS];
 int _Channel;
 #endif
 int _Inverse;
+int _FullyVisible;
 
 inline fixed4 ColorFromChannel(int channel) {
 	// Split evenly across red, blue, green colors to avoid floating point errors
@@ -54,6 +55,7 @@ inline int MaskValueFromSample(fixed4 rgb) {
 
 // These methods are GPU equivalent of the CPU-based code in DimensionUtils.cs
 // When logic in one changes, update the other
+// Returns 1 if channel is included in rgb mask value, 0 otherwise
 inline int TestChannelFromColor(uint channel, fixed4 rgb) {
 	const uint numChannelsPerColor = ceil(NUM_CHANNELS / 3.0);
 	const float maxValue = pow(2, numChannelsPerColor) - 1;
@@ -93,7 +95,7 @@ float ClipDimensionObject(float2 vertex) {
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
 #endif
 
-	clip(-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
+	clip(_FullyVisible-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
 
 	return dimensionTest;
 }
@@ -108,7 +110,7 @@ fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos) {
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
 #endif
 
-	clip(-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
+	clip(_FullyVisible-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
 
 	return dimensionTest;
 }

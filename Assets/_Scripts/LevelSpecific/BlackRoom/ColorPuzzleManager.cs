@@ -7,11 +7,17 @@ using System;
 
 namespace LevelSpecific.BlackRoom {
 	public class ColorPuzzleManager : SaveableObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
-		bool hasSetActivePuzzleToZero = false;
+		public FlashingColor smallGridOverlayFlash;
+		public FlashingColor smallGridOutlineFlash;
+
 		int _activePuzzle;
 		public int activePuzzle {
 			get { return _activePuzzle; }
 			set {
+				if (value == -1) {
+					_activePuzzle = value;
+					return;
+				}
 				if (value == puzzles.Length) {
 					Debug.LogError("All puzzles solved!");
 					return;
@@ -28,26 +34,23 @@ namespace LevelSpecific.BlackRoom {
 			puzzles = GetComponentsInChildren<ColorPuzzle>();
 		}
 
-		protected override void Start() {
-			base.Start();
-			ColorPuzzle.OnColorPuzzleSolvedStateChange += HandlePuzzleSolvedStateChange;
-			StartCoroutine(Initialize());
+		protected override void Init() {
+			activePuzzle = -1;
 		}
 
-		IEnumerator Initialize() {
-			yield return null;
-			if (!hasSetActivePuzzleToZero) {
-				hasSetActivePuzzleToZero = true;
-				activePuzzle = 0;
+		private void Update() {
+			if (Input.GetKeyDown(KeyCode.G)) {
+				smallGridOverlayFlash.Flash(3);
+				smallGridOutlineFlash.Flash(3);
 			}
 		}
 
-		void HandlePuzzleSolvedStateChange(ColorPuzzle puzzle, bool solved) {
-			if (puzzles.ToList().Contains(puzzle)) {
-				if (solved) {
-					activePuzzle++;
-				}
+		public bool CheckSolution() {
+			if (activePuzzle == -1) {
+				return false;
 			}
+
+			return puzzles[activePuzzle].solved;
 		}
 
 		#region Saving
@@ -56,16 +59,13 @@ namespace LevelSpecific.BlackRoom {
 
 		[Serializable]
 		public class ColorPuzzleManagerSave : SerializableSaveObject<ColorPuzzleManager> {
-			bool hasSetActivePuzzleToZero;
 			int activePuzzle;
 
 			public ColorPuzzleManagerSave(ColorPuzzleManager puzzleManager) : base(puzzleManager) {
-				this.hasSetActivePuzzleToZero = puzzleManager.hasSetActivePuzzleToZero;
 				this.activePuzzle = puzzleManager.activePuzzle;
 			}
 
 			public override void LoadSave(ColorPuzzleManager puzzleManager) {
-				puzzleManager.hasSetActivePuzzleToZero = this.hasSetActivePuzzleToZero;
 				puzzleManager.activePuzzle = this.activePuzzle;
 			}
 		}

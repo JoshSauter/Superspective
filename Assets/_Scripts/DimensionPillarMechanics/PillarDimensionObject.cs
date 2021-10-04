@@ -12,19 +12,15 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
+	public static HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
 	public UniqueId uniqueId => id;
 	
 	[SerializeField]
 	[Range(0, 7)]
 	int _dimension = 0;
 	public int Dimension {
-		get { return _dimension; }
-		set {
-			if (value != Dimension) {
-				OnBaseDimensionChange?.Invoke();
-			}
-			_dimension = value;
-		}
+		get => _dimension;
+		set => _dimension = value;
 	}
 
 	public enum Quadrant {
@@ -34,7 +30,7 @@ public class PillarDimensionObject : DimensionObject {
 		Right
 	}
 	[ReadOnly]
-	public Quadrant playerQuadrant;
+	public Quadrant camQuadrant;
 	[ReadOnly]
 	public Quadrant dimensionShiftQuadrant;
 	[SerializeField]
@@ -52,7 +48,7 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	// The active pillar that this object is setting its visibility state based off of
-	DimensionPillar activePillar;
+	public DimensionPillar activePillar;
 	// Optional allow-list of pillars to react to, else will react to any active pillar
 	public PillarReference[] pillars;
 	// Key == pillar.ID
@@ -64,10 +60,18 @@ public class PillarDimensionObject : DimensionObject {
 	public Rigidbody thisRigidbody;
 	public Collider colliderBoundsOverride;
 
-	Vector3 camPos => SuperspectiveScreen.instance.playerCamera.transform.position;
+	Camera playerCam => SuperspectiveScreen.instance.playerCamera;
 
-	public delegate void DimensionObjectAction();
-	public event DimensionObjectAction OnBaseDimensionChange;
+	// For context about rest of current state
+	public Camera camSetUpFor;
+
+	void OnEnable() {
+		allPillarDimensionObjects.Add(this);
+	}
+
+	void OnDisable() {
+		allPillarDimensionObjects.Remove(this);
+	}
 
 	protected override void Awake() {
 		base.Awake();
@@ -97,9 +101,10 @@ public class PillarDimensionObject : DimensionObject {
 
 	void HandlePillarChanged() {
 		if (activePillar != null) {
-			playerQuadrant = DetermineQuadrant(camPos);
+			camSetUpFor = playerCam;
+			camQuadrant = DetermineQuadrant(playerCam.transform.position);
 			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
-			UpdateState(true);
+			UpdateState(activePillar.curDimension, true);
 		}
 	}
 
@@ -119,8 +124,8 @@ public class PillarDimensionObject : DimensionObject {
 				return false;
 			}
 
-			VisibilityState test1 = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, testDimension);
-			VisibilityState test2 = otherPillarDimensionObj.DetermineVisibilityState(otherPillarDimensionObj.playerQuadrant, otherPillarDimensionObj.dimensionShiftQuadrant, testDimension);
+			VisibilityState test1 = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, testDimension);
+			VisibilityState test2 = otherPillarDimensionObj.DetermineVisibilityState(otherPillarDimensionObj.camQuadrant, otherPillarDimensionObj.dimensionShiftQuadrant, testDimension);
 
 			bool areOpposites = test1 == test2.Opposite();
 			return !areOpposites;
@@ -131,7 +136,7 @@ public class PillarDimensionObject : DimensionObject {
 		}
 	}
 
-	void FixedUpdate() {
+	void Update() {
 		if (!hasInitialized) return;
 		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
 		
@@ -199,14 +204,20 @@ public class PillarDimensionObject : DimensionObject {
 			}
 		}
 
-		playerQuadrant = DetermineQuadrant(camPos);
 		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
-
-		UpdateState();
+		
+		UpdateStateForCamera(playerCam, activePillar.curDimension);
 	}
 
-	void UpdateState(bool forceUpdate = false) {
-		VisibilityState nextState = DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, activePillar.curDimension);
+	public void UpdateStateForCamera(Camera cam, int pillarDimension) {
+		camSetUpFor = cam;
+		camQuadrant = DetermineQuadrant(cam.transform.position);
+		
+		UpdateState(pillarDimension);
+	}
+
+	void UpdateState(int pillarDimension, bool forceUpdate = false) {
+		VisibilityState nextState = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, pillarDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
 			SwitchVisibilityState(nextState, true);
@@ -221,7 +232,7 @@ public class PillarDimensionObject : DimensionObject {
 			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.DimensionShiftVector.normalized, pillar.Axis);
 			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
 			//debug.Log($"GetSide: {dimensionShiftPlane.GetSide(camPos)}\nPillar.curDimension: {pillar.curDimension}");
-			return !dimensionShiftPlane.GetSide(camPos);
+			return !dimensionShiftPlane.GetSide(camSetUpFor.transform.position);
 		}
 		else {
 			return false;
@@ -243,7 +254,7 @@ public class PillarDimensionObject : DimensionObject {
 
 		// Try each dimension, test what the visibility state would be there
 		for (int i = 0; i <= activePillar.maxDimension; i++) {
-			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, i))) {
+			if (desiredVisibility(DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, i))) {
 				return i;
 			}
 		}
@@ -268,7 +279,7 @@ public class PillarDimensionObject : DimensionObject {
 		// Try each dimension, test what the visibility state would be there
 		for (int i = 0; i <= activePillar.maxDimension; i++) {
 			_dimension = i;
-			if (desiredVisibility(DetermineVisibilityState(playerQuadrant, dimensionShiftQuadrant, activePillar.curDimension))) {
+			if (desiredVisibility(DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, activePillar.curDimension))) {
 				_dimension = tempDimension;
 				return i;
 			}
@@ -318,7 +329,7 @@ public class PillarDimensionObject : DimensionObject {
 					}
 				}
 			default:
-				throw new Exception($"Unhandled case: {this.playerQuadrant}");
+				throw new Exception($"Unhandled case: {this.camQuadrant}");
 		}
 	}
 

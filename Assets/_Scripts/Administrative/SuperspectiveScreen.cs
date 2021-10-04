@@ -44,6 +44,11 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 	}
 
 	void OnPreRender() {
+#if UNITY_EDITOR
+		if (UnityEditor.EditorApplication.isPaused) {
+			return;
+		}
+#endif
 		OnPlayerCamPreRender?.Invoke();
 	}
 

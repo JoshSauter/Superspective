@@ -10,10 +10,10 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
     public delegate void MaterializeAction();
 
     public enum State {
-        Materializing,
-        Chilling,
+        Materialized,
         Dematerializing,
-        Dematerialized
+        Dematerialized,
+        Materializing
     }
 
     public bool destroyObjectOnDematerialize = true;
@@ -40,7 +40,7 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
                 case State.Materializing:
                     OnMaterializeStart?.Invoke();
                     break;
-                case State.Chilling:
+                case State.Materialized:
                     OnMaterializeEnd?.Invoke();
                     foreach (Collider c in allColliders) {
                         c.enabled = true;
@@ -92,7 +92,7 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
     void UpdateMaterialize() {
         timeSinceStateChange += Time.deltaTime;
         switch (state) {
-            case State.Chilling:
+            case State.Materialized:
                 break;
             case State.Materializing:
                 if (timeSinceStateChange < materializeTime) {
@@ -109,7 +109,7 @@ public class MaterializeObject : SaveableObject<MaterializeObject, MaterializeOb
                         if (rigidbody != null) rigidbody.isKinematic = false;
                     }
 
-                    state = State.Chilling;
+                    state = State.Materialized;
                 }
 
                 break;

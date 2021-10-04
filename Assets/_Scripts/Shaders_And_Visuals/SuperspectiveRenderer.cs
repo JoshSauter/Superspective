@@ -20,6 +20,7 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	public PropBlockType lookupType = PropBlockType.Int;
 	public string lookupString = "Look up anything";
 	public const string mainColor = "_Color";
+	public const string emissionColor = "_EmissionColor";
 
 	Renderer lazy_r;
 	public Renderer r {
@@ -39,8 +40,11 @@ public class SuperspectiveRenderer : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		if (GetMaterial().HasProperty(mainColor)) {
-			SetMainColor(r.material.color);
+		List<string> propertiesToCheckForOnAwake = new List<string>() { mainColor, emissionColor };
+		foreach (string prop in propertiesToCheckForOnAwake) {
+			if (GetMaterial().HasProperty(prop)) {
+				SetColor(prop, r.material.GetColor(prop));
+			}
 		}
 	}
 

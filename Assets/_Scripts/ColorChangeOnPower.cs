@@ -15,7 +15,8 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     }
 
     public ActivationTiming timing = ActivationTiming.OnPowerFinish;
-    public bool useMaterialAsStartColor = true;
+    public bool useMaterialAsStartColor = false;
+    public bool useMaterialAsEndColor = false;
     public Color depoweredColor;
 
     [ColorUsage(true, true)]
@@ -52,6 +53,11 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         }
 
         foreach (SuperspectiveRenderer r in renderers) {
+            if (useMaterialAsEndColor) {
+                poweredColor = r.GetMainColor();
+                poweredEmission = r.GetColor("_EmissionColor");
+            }
+
             if (useMaterialAsStartColor) {
                 depoweredColor = r.GetMainColor();
                 depoweredEmission = r.GetColor("_EmissionColor");
@@ -146,10 +152,12 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         float timeElapsedSinceStateChange;
         int timing;
         bool useMaterialAsStartColor;
+        private bool useMaterialAsEndColor;
 
         public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) : base(colorChange) {
             timing = (int) colorChange.timing;
             useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
+            useMaterialAsEndColor = colorChange.useMaterialAsEndColor;
             depoweredColor = colorChange.depoweredColor;
             depoweredEmission = colorChange.depoweredEmission;
             poweredColor = colorChange.poweredColor;
@@ -166,6 +174,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         public override void LoadSave(ColorChangeOnPower colorChange) {
             colorChange.timing = (ActivationTiming) timing;
             colorChange.useMaterialAsStartColor = useMaterialAsStartColor;
+            colorChange.useMaterialAsEndColor = useMaterialAsEndColor;
             colorChange.depoweredColor = depoweredColor;
             colorChange.depoweredEmission = depoweredEmission;
             colorChange.poweredColor = poweredColor;

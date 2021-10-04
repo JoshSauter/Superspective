@@ -111,7 +111,8 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 
 		cubeTransforms = corporealCubeDimensionObj.transform.GetComponentsInChildrenRecursively<Transform>();
 
-		corporealCubeDimensionObj.OnStateChangeSimple += HandleStateChange;
+		corporealCubeDimensionObj.OnStateChangeImmediate += HandleStateChangeImmediate;
+		corporealCubeDimensionObj.OnStateChange += HandleStateChange;
 	}
 
 	void FixedUpdate() {
@@ -162,15 +163,12 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		}
 	}
 
-	void HandleStateChange(VisibilityState newState) {
+	void HandleStateChangeImmediate(DimensionObject dimensionObj) {
 		if (state != State.Materializing) {
-			switch (newState) {
+			switch (dimensionObj.visibilityState) {
 				case VisibilityState.invisible:
 					// Corporeal cube should be invisible, inverted cube visible
 					SetDissolveValuesForVisibility(corporealCubeVisible: false, invertedCubeVisible: true);
-
-					// Don't allow the players to hold inverted cubes
-					pickupCube.Drop();
 					break;
 				case VisibilityState.partiallyVisible:
 				case VisibilityState.partiallyInvisible:
@@ -184,6 +182,13 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 				default:
 					break;
 			}
+		}
+	}
+	
+	void HandleStateChange(DimensionObject dimensionObj) {
+		if (state != State.Materializing && dimensionObj.visibilityState == VisibilityState.invisible) {
+			// Don't allow the players to hold inverted cubes
+			pickupCube.Drop();
 		}
 	}
 

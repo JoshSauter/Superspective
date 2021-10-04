@@ -9,10 +9,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using SuperspectiveUtils;
 using NaughtyAttributes;
+using ObjectSerializationUtils;
 using Saving;
+using SerializableClasses;
 using static Saving.SaveManagerForScene;
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
+
 #endif
 
 namespace LevelManagement {
@@ -68,6 +72,31 @@ namespace LevelManagement {
 		bool initialized = false;
 
 #region PlayerDefaultLocations
+		const string EdgeDetectionSettingsKeyPrefix = "edgeDetectionSettings";
+		[Serializable]
+		class EDSettings {
+			BladeEdgeDetection.EdgeColorMode edgeColorMode;
+			SerializableColor edgeColor;
+			SerializableGradient edgeColorGradient;
+			// Can't save textures easily
+
+			public EDSettings(BladeEdgeDetection edgeDetection) {
+				this.edgeColorMode = edgeDetection.edgeColorMode;
+				this.edgeColor = edgeDetection.edgeColor;
+
+				this.edgeColorGradient = new Gradient {
+					alphaKeys = edgeDetection.edgeColorGradient.alphaKeys,
+					colorKeys = edgeDetection.edgeColorGradient.colorKeys,
+					mode = edgeDetection.edgeColorGradient.mode
+				};
+			}
+
+			public void ApplyTo(BladeEdgeDetection edgeDetection) {
+				edgeDetection.edgeColorMode = this.edgeColorMode;
+				edgeDetection.edgeColor = this.edgeColor;
+				edgeDetection.edgeColorGradient = this.edgeColorGradient;
+			}
+		}
 		const string PositionKeyPrefix = "playerStartingPositions";
 		const string RotationKeyPrefix = "playerStartingRotations";
 		public bool defaultPlayerPosition = false;
@@ -88,6 +117,12 @@ namespace LevelManagement {
 			string sceneName = GetSceneName();
 			SetVector3($"{PositionKeyPrefix}.{sceneName}", Player.instance.transform.position);
 			SetVector3($"{RotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
+			Camera mainCam = GameObject.Find("Main Camera")?.GetComponent<Camera>();
+			BladeEdgeDetection edgeDetection = (mainCam == null) ? null : mainCam.GetComponent<BladeEdgeDetection>();
+			if (edgeDetection != null) {
+				string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
+				SetEDSettings(edgeDetectionKey, new EDSettings(edgeDetection));
+			}
 
 			if (DEBUG) {
 				Debug.Log(
@@ -101,6 +136,7 @@ namespace LevelManagement {
 			string sceneName = GetSceneName();
 			string positionKey = $"{PositionKeyPrefix}.{sceneName}";
 			string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
+			string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
 
 			if (HasVector3(positionKey)) {
 				RemoveVector3(positionKey);
@@ -109,8 +145,26 @@ namespace LevelManagement {
 			if (HasVector3(rotationKey)) {
 				RemoveVector3(rotationKey);
 			}
+
+			if (PlayerPrefs.HasKey(edgeDetectionKey)) {
+				PlayerPrefs.DeleteKey(edgeDetectionKey);
+			}
 		}
 #endif
+		void SetEDSettings(string key, EDSettings settings) {
+			string serializedSettings = Convert.ToBase64String(settings.SerializeToByteArray());
+			PlayerPrefs.SetString(key, serializedSettings);
+		}
+		
+		EDSettings GetEDSettings(string key) {
+			if (PlayerPrefs.HasKey(key)) {
+				string serializedSettings = PlayerPrefs.GetString(key);
+				return Convert.FromBase64String(serializedSettings).Deserialize<EDSettings>();
+			}
+			else {
+				throw new ArgumentException($"No PlayerPrefs key for {key}");
+			}
+		}
 
 		bool HasVector3(string key) {
 			string xKey = $"{key}.x";
@@ -189,6 +243,7 @@ namespace LevelManagement {
 		string sceneName = GetSceneName();
 		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
 		string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
+		string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
 
 		if (HasVector3(positionKey) && HasVector3(rotationKey)) {
 			Vector3 pos = GetVector3(positionKey);
@@ -196,6 +251,14 @@ namespace LevelManagement {
 
 			Player.instance.transform.position = pos;
 			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
+		}
+
+		if (PlayerPrefs.HasKey(edgeDetectionKey)) {
+			Camera mainCam = GameObject.Find("Main Camera")?.GetComponent<Camera>();
+			BladeEdgeDetection edgeDetection = (mainCam == null) ? null : mainCam.GetComponent<BladeEdgeDetection>();
+			if (edgeDetection != null) {
+				GetEDSettings(edgeDetectionKey).ApplyTo(edgeDetection);
+			}
 		}
 
 		if (DEBUG) {
@@ -211,6 +274,11 @@ namespace LevelManagement {
 		// Hijacking this to display level banner on load, even when it's already the active scene
 		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
 #if UNITY_EDITOR
+		try {
+			EditorSceneManager.SetActiveScene(EditorSceneManager.GetSceneByName(sceneName));
+		}
+		catch { }
+
 		if (EditorApplication.isPlaying)
 #endif
 			hasLoadedDefaultPlayerPosition = true;

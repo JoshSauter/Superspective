@@ -32,7 +32,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
     
     SerializedProperty treatChildrenAsOneObjectRecursively;
     SerializedProperty ignoreChildrenWithDimensionObject;
-    SerializedProperty ignoreMaterialChanges;
+    SerializedProperty ignorePartiallyVisibleLayerChanges;
     SerializedProperty disableColliderWhileInvisible;
     
     SerializedProperty renderers;
@@ -50,7 +50,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
         
         treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
         ignoreChildrenWithDimensionObject = serializedObject.FindProperty("ignoreChildrenWithDimensionObject");
-        ignoreMaterialChanges = serializedObject.FindProperty("ignoreMaterialChanges");
+        ignorePartiallyVisibleLayerChanges = serializedObject.FindProperty("ignorePartiallyVisibleLayerChanges");
         disableColliderWhileInvisible = serializedObject.FindProperty("disableColliderWhileInvisible");
         
         renderers = serializedObject.FindProperty("renderers");
@@ -137,7 +137,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(treatChildrenAsOneObjectRecursively);
             EditorGUILayout.PropertyField(ignoreChildrenWithDimensionObject);
-            EditorGUILayout.PropertyField(ignoreMaterialChanges);
+            EditorGUILayout.PropertyField(ignorePartiallyVisibleLayerChanges);
             EditorGUILayout.PropertyField(disableColliderWhileInvisible);
             EditorGUI.indentLevel--;
         }

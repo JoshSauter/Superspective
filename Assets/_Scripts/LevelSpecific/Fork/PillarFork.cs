@@ -11,9 +11,10 @@ public class PillarFork : MonoBehaviour {
     }
 
     void Update() {
-        float diff = Player.instance.transform.position.x - transform.position.x;
-        bool playerToTheLeft = diff < 0;
-        if (Mathf.Abs(diff) < 0.4f) return;
+        Vector3 diff = Player.instance.transform.position - transform.position;
+        if (Mathf.Abs(diff.x) < 0.4f || diff.z < 0) return;
+        
+        bool playerToTheLeft = diff.x < 0;
         if (playerToTheLeft && pillar.curDimension == 1) {
             pillar.ShiftDimensionDown();
         }

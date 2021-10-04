@@ -15,6 +15,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
     public float timeSinceStateChange;
 
+    public bool oneTimeButton = false;
     public InteractableObject interactableObject;
 
     public AnimationCurve buttonPressCurve;
@@ -114,6 +115,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     }
 
     protected virtual void UpdateButtonPosition() {
+        if (pressDistance <= 0) return;
         float t = timeSinceStateChange / timeToPressButton;
         switch (state) {
             case State.ButtonUnpressed:
@@ -151,6 +153,10 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         else if (state == State.ButtonPressed) {
             state = State.ButtonUnpressing;
         }
+
+        if (oneTimeButton) {
+            interactableObject.interactable = false;
+        }
     }
 
 #region Saving
@@ -167,6 +173,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         float timeBetweenPressEndDepressStart;
         float timeToDepressButton;
         float timeToPressButton;
+        bool oneTimeButton;
 
         public ButtonSave(Button button) : base(button) {
             state = (int) button.state;
@@ -179,6 +186,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
             depressAfterPress = button.unpressAfterPress;
             timeBetweenPressEndDepressStart = button.timeBetweenPressEndDepressStart;
+            oneTimeButton = button.oneTimeButton;
         }
 
         public override void LoadSave(Button button) {
@@ -192,6 +200,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
             button.unpressAfterPress = depressAfterPress;
             button.timeBetweenPressEndDepressStart = timeBetweenPressEndDepressStart;
+            button.oneTimeButton = oneTimeButton;
         }
     }
 #endregion

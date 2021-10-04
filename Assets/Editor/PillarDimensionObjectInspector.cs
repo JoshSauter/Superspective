@@ -9,7 +9,7 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
     
     // PillarDimensionObject properties
     SerializedProperty dimension;
-    SerializedProperty playerQuadrant;
+    SerializedProperty camQuadrant;
     SerializedProperty dimensionShiftQuadrant;
     SerializedProperty minAngle;
     SerializedProperty maxAngle;
@@ -22,7 +22,7 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
         base.OnEnable();
         
         dimension = serializedObject.FindProperty("_dimension");
-        playerQuadrant = serializedObject.FindProperty("playerQuadrant");
+        camQuadrant = serializedObject.FindProperty("camQuadrant");
         dimensionShiftQuadrant = serializedObject.FindProperty("dimensionShiftQuadrant");
         minAngle = serializedObject.FindProperty("minAngle");
         maxAngle = serializedObject.FindProperty("maxAngle");
@@ -68,7 +68,7 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
 
         if (dimensionStateShown) {
             EditorGUI.indentLevel++;
-            EditorGUILayout.LabelField("Player Quadrant:", playerQuadrant.enumDisplayNames[playerQuadrant.intValue]);
+            EditorGUILayout.LabelField("Player Quadrant:", camQuadrant.enumDisplayNames[camQuadrant.intValue]);
             EditorGUILayout.LabelField(
                 "Dimension Shift Quadrant:",
                 dimensionShiftQuadrant.enumDisplayNames[dimensionShiftQuadrant.intValue]

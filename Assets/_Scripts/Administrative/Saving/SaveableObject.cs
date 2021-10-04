@@ -66,7 +66,7 @@ namespace Saving {
 
         // Registration is triggered off an event from SaveManagerForScene that happens after Awake but before Start
         // This allows modifications to IDs (such as with MultiDimensionCube) to take effect before registration
-        public void Register() {
+        public virtual void Register() {
             if (hasRegistered || string.IsNullOrEmpty(SceneName) || !Application.isPlaying) {
                 return;
             }
@@ -82,7 +82,7 @@ namespace Saving {
         }
 
         // Unregister can be explicitly called to tell the SaveManager we shouldn't attempt to save this
-        public void Unregister() {
+        public virtual void Unregister() {
             if (hasRegistered && !string.IsNullOrEmpty(SceneName) && Application.isPlaying) {
                 SaveManager.GetOrCreateSaveManagerForScene(SceneName)?.UnregisterSaveableObject(ID);
             }

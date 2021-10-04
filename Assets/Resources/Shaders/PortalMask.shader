@@ -129,6 +129,7 @@
 				float4 pos : SV_POSITION;
 				float4 nz : TEXCOORD0;
 				float4 worldPos : TEXCOORD1;
+				float4 screenPos : TEXCOORD2;
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
@@ -137,6 +138,7 @@
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				o.pos = UnityObjectToClipPos(v.vertex);
+				o.screenPos = ComputeScreenPos(o.pos);
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 				o.nz.xyz = COMPUTE_VIEW_NORMAL;
 				o.nz.w = COMPUTE_DEPTH_01;

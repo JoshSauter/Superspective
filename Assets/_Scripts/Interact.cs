@@ -84,9 +84,14 @@ public class Interact : Singleton<Interact> {
 
     public Vector2 PixelPositionOfReticle() {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
-        return Vector2.Scale(
+        Vector2 unclampedPos = Vector2.Scale(
             reticlePos,
             new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
+        );
+
+        return new Vector2(
+            Mathf.Clamp(unclampedPos.x, 0, SuperspectiveScreen.currentWidth - 1),
+            Mathf.Clamp(unclampedPos.y, 0, SuperspectiveScreen.currentHeight - 1)
         );
     }
 
