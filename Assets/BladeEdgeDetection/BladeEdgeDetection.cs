@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using Saving;
 using SerializableClasses;
+using UnityEngine.Rendering;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]

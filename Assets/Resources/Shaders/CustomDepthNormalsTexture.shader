@@ -9,390 +9,116 @@ Properties {
 
 CGINCLUDE
 #include "UnityCG.cginc"
+#include "Suberspective/SuberspectiveHelpers.cginc"
+
+struct SuberspectiveDepthNormalsV2F {
+	float4 clipPos : SV_POSITION;
+	float4 nz : TEXCOORD0;
+	float4 screenPos : TEXCOORD1;
+	float3 worldPos : TEXCOORD2;
+	float2 uv : TEXCOORD3;
+#ifdef DISSOLVE_OBJECT
+	float2 dissolveUV : TEXCOORD6;
+#endif
+};
+
+SuberspectiveDepthNormalsV2F SuberspectiveDepthNormalsVert(appdata_base v) {
+	SuberspectiveDepthNormalsV2F o;
+	o.clipPos = UnityObjectToClipPos(v.vertex);
+	o.screenPos = ComputeScreenPos(o.clipPos);
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+#ifdef DISSOLVE_OBJECT
+	o.dissolveUV = TRANSFORM_TEX(v.texcoord, _DissolveTex);
+#endif
+    
+    o.nz.xyz = COMPUTE_VIEW_NORMAL;
+    o.nz.w = COMPUTE_DEPTH_01;
+    return o;
+}
+
+// Copied from SuberspectiveHelpers.cginc
+// Some shaders only need to know which pixels are being rendered or not, this skips the color calculations
+inline void SuberspectiveClipOnly(SuberspectiveDepthNormalsV2F i) {
+#ifdef DIMENSION_OBJECT
+	ClipDimensionObject(i.clipPos);
+#endif
+#ifdef DISSOLVE_OBJECT
+	ClipDissolve(i.dissolveUV);
+#endif
+#ifdef SHUTTERED_OBJECT
+	ClipShutteredAreas(i.worldPos, float4(1,1,1,1));
+#endif
+#ifdef PORTAL_COPY_OBJECT
+	ClipPortalCopy(i.worldPos);
+#endif
+}
+
+fixed4 SuberspectiveDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
+	if (i.nz.w > 1) i.nz.w = 1;
+    SuberspectiveClipOnly(i);
+
+    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
+}
+
 ENDCG
 
+////////////////////////////////
+// Suberspective uber shaders //
+////////////////////////////////
+SubShader {
+    Tags { "RenderType"="Suberspective" }
+    Pass {
+Cull[__CullMode]
+CGPROGRAM
+#pragma vertex SuberspectiveDepthNormalsVert
+#pragma fragment SuberspectiveDepthNormalsFrag
+ENDCG
+    }
+}
 SubShader {
 	Tags { "RenderType"="CullEverything"}
 	Pass {
 CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-struct v2f {
-	float4 pos : SV_POSITION;
-	float4 nz : TEXCOORD0;
-};
-v2f vert(appdata_base v) {
-	v2f o;
-	o.pos = UnityObjectToClipPos(v.vertex);
+#pragma vertex SuberspectiveCullEverythingVert
+#pragma fragment SuberspectiveDepthNormalsFrag
+
+SuberspectiveDepthNormalsV2F SuberspectiveCullEverythingVert(appdata_base v) {
+	SuberspectiveDepthNormalsV2F o;
+	o.clipPos = UnityObjectToClipPos(v.vertex);
+    o.screenPos = ComputeScreenPos(o.clipPos);
+	o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+#ifdef DISSOLVE_OBJECT
+	o.dissolveUV = TRANSFORM_TEX(v.texcoord, _DissolveTex);
+#endif
+    
 	o.nz.xyz = float3(1,0,0);
 	o.nz.w = .99999;
-	return o;
-}
-fixed4 frag(v2f i) : SV_Target {
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-ENDCG
-	}
-}
-SubShader {
-	Tags { "RenderType"="CullEverythingDimension"}
-	Pass {
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-struct v2f {
-	float4 pos : SV_POSITION;
-	float4 nz : TEXCOORD0;
-};
-v2f vert(appdata_base v) {
-	v2f o;
-	o.pos = UnityObjectToClipPos(v.vertex);
-	o.nz.xyz = float3(1,0,0);
-	o.nz.w = .99999;
-	return o;
-}
-fixed4 frag(v2f i) : SV_Target {
-    ClipDimensionObject(i.pos);
-	return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-}
-ENDCG
-	}
-}
-SubShader {
-    Tags { "RenderType"="DimensionDissolveDoubleSided" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-fixed4 _Color;
-fixed4 _Color2;
-sampler2D _MainTex;
-float4 _MainTex_ST;
-sampler2D _BumpMap;
-sampler2D _BurnRamp;
-fixed4 _BurnColor;
-float _BurnSize;
-float _DissolveValue;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-    float4 nz : TEXCOORD1;
-	float4 worldPos : TEXCOORD2;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_full v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy);
-
-    half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
-	if (_Color.a == 0) clip(-test);
-	if (_Color2.a == 0) clip(test);
-
-	if (test < 0) {
-		if (_Color2.a == 0) clip(-1);
-	}
-	else {
-		if (_Color.a == 0) clip(-1);
-	}
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
 ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="DissolveDoubleSided" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-
-fixed4 _Color;
-fixed4 _Color2;
-sampler2D _MainTex;
-float4 _MainTex_ST;
-sampler2D _BumpMap;
-sampler2D _BurnRamp;
-fixed4 _BurnColor;
-float _BurnSize;
-float _DissolveValue;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-    float4 nz : TEXCOORD1;
-	float4 worldPos : TEXCOORD2;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_full v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-
-    half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
-	if (_Color.a == 0) clip(-test);
-	if (_Color2.a == 0) clip(test);
-
-	if (test < 0) {
-		if (_Color2.a == 0) clip(-1);
 	}
-	else {
-		if (_Color.a == 0) clip(-1);
-	}
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
 }
 SubShader {
     Tags { "RenderType"="PortalMaterial" }
     Pass {
 
 CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
+#pragma vertex SuberspectiveDepthNormalsVert
+#pragma fragment SuberspectivePortalDepthNormalsFrag
 
 uniform sampler2D _DepthNormals;
 
-struct appdata {
-	float4 vertex : POSITION;
-};
-
-struct v2f {
-	float4 vertex : SV_POSITION;
-	float4 screenPos : TEXCOORD0;
-};
-
-v2f vert(appdata v) {
-	v2f o;
-	o.vertex = UnityObjectToClipPos(v.vertex);
-	o.screenPos = ComputeScreenPos(o.vertex);
-	return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
+fixed4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
 	float2 uv = i.screenPos.xy / i.screenPos.w;
+    SuberspectiveClipOnly(i);
 
 	fixed4 col = tex2D(_DepthNormals, uv);
     if (length(col) == 0) {
      clip(-1);
 	}
 	return col;
-}
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="DimensionPortalMaterial" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-uniform sampler2D _DepthNormals;
-
-struct appdata {
-	float4 vertex : POSITION;
-};
-
-struct v2f {
-	float4 vertex : SV_POSITION;
-	float4 screenPos : TEXCOORD0;
-};
-
-v2f vert(appdata v) {
-	v2f o;
-	o.vertex = UnityObjectToClipPos(v.vertex);
-	o.screenPos = ComputeScreenPos(o.vertex);
-	return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-    ClipDimensionObject(i.vertex);
-	float2 uv = i.screenPos.xy / i.screenPos.w;
-
-	fixed4 col = tex2D(_DepthNormals, uv);
-    if (length(col) == 0) {
-     clip(-1);
-	}
-	return col;
-}
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="PortalCopy" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-
-float3 _PortalPos;
-float3 _PortalNormal;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_full v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-	
-	float clipTest = -dot(i.worldPos - _PortalPos - _PortalNormal * 0.02, _PortalNormal);
-	if (clipTest == 0) clipTest = -1;
-	clip(clipTest);
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
-}
-SubShader {
-    Tags { "RenderType"="Dissolve" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-
-sampler2D _MainTex;
-float4 _MainTex_ST;
-sampler2D _BumpMap;
-sampler2D _BurnRamp;
-fixed4 _BurnColor;
-float _BurnSize;
-float _DissolveValue;
-
-struct v2f {
-    float4 pos : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-    float4 nz : TEXCOORD1;
-	float4 worldPos : TEXCOORD2;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_full v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-	o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-
-	half test = tex2D(_MainTex, i.texcoord.xy).rgb - _DissolveValue;
-	clip(test);
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
-}
-// New partially visible objects
-SubShader {
-    Tags { "RenderType"="DimensionObject" }
-    Pass {
-
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-#include "DimensionShaders/DimensionShaderHelpers.cginc"
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_base v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
-	ClipDimensionObject(i.pos.xy);
-
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG
     }
@@ -400,79 +126,6 @@ ENDCG
 SubShader {
     Tags { "RenderType"="Opaque" }
     Pass {
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "UnityCG.cginc"
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-float rand(float2 co){
-    return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
-}
-v2f vert( appdata_base v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-	i.nz.w = clamp(i.nz.w, 0, .999);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
-}
-    
-SubShader {
-    Tags { "RenderType"="AffectedByShutter" }
-    Pass {
-Cull Off
-CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#include "LevelSpecific/BlackRoom3/AffectedByShutterHelpers.cginc"
-
-struct v2f {
-    float4 pos : SV_POSITION;
-    float4 nz : TEXCOORD0;
-	float4 worldPos : TEXCOORD1;
-    UNITY_VERTEX_OUTPUT_STEREO
-};
-
-v2f vert( appdata_base v ) {
-    v2f o;
-    UNITY_SETUP_INSTANCE_ID(v);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    o.pos = UnityObjectToClipPos(v.vertex);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.nz.xyz = COMPUTE_VIEW_NORMAL;
-    o.nz.w = COMPUTE_DEPTH_01;
-    return o;
-}
-
-fixed4 frag(v2f i) : SV_Target {
-    ClipShutteredAreas(i.worldPos);
-	i.nz.w = clamp(i.nz.w, 0, .999);
-    return EncodeDepthNormal (i.nz.w, i.nz.xyz);
-}
-ENDCG
-    }
-}
-
-SubShader {
-    Tags { "RenderType"="PortalSurface" }
-    Pass {
-ColorMask BA
 CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
@@ -519,7 +172,6 @@ struct v2f {
     float4 nz : TEXCOORD1;
     UNITY_VERTEX_OUTPUT_STEREO
 };
-uniform float4 _MainTex_ST;
 v2f vert( appdata_base v ) {
     v2f o;
     UNITY_SETUP_INSTANCE_ID(v);
@@ -530,7 +182,6 @@ v2f vert( appdata_base v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 uniform fixed4 _Color;
 fixed4 frag(v2f i) : SV_Target {
@@ -556,7 +207,6 @@ struct v2f {
 	float4 vertexPos : TEXCOORD2;
 	UNITY_VERTEX_OUTPUT_STEREO
 };
-uniform float4 _MainTex_ST;
 v2f vert(appdata_base v) {
 	v2f o;
 	UNITY_SETUP_INSTANCE_ID(v);
@@ -568,7 +218,6 @@ v2f vert(appdata_base v) {
 	o.nz.w = COMPUTE_DEPTH_01;
 	return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 uniform fixed4 _Color;
 fixed4 frag(v2f i) : SV_Target {
@@ -651,7 +300,6 @@ v2f vert( appdata_full v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 fixed4 frag( v2f i ) : SV_Target {
     half alpha = tex2D(_MainTex, i.uv).a;
@@ -733,7 +381,6 @@ v2f vert( appdata v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 fixed4 frag(v2f i) : SV_Target {
     half alpha = tex2D(_MainTex, i.uv).a;
@@ -775,7 +422,6 @@ v2f vert( appdata v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 fixed4 frag(v2f i) : SV_Target {
     fixed4 texcol = tex2D( _MainTex, i.uv );
@@ -814,7 +460,6 @@ v2f vert (appdata_tree_billboard v) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 fixed4 frag(v2f i) : SV_Target {
     fixed4 texcol = tex2D( _MainTex, i.uv );
     clip( texcol.a - 0.001 );
@@ -854,7 +499,6 @@ v2f vert (appdata_full v) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 fixed4 frag(v2f i) : SV_Target {
     fixed4 texcol = tex2D( _MainTex, i.uv );
@@ -895,7 +539,6 @@ v2f vert (appdata_full v) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-uniform sampler2D _MainTex;
 uniform fixed _Cutoff;
 fixed4 frag(v2f i) : SV_Target {
     fixed4 texcol = tex2D( _MainTex, i.uv );

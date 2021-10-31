@@ -51,7 +51,10 @@ public class FlashingColor : MonoBehaviour {
 
     public void Awake() {
         if (renderer == null) {
-            renderer = gameObject.AddComponent<SuperspectiveRenderer>();
+            renderer = gameObject.GetComponent<SuperspectiveRenderer>();
+            if (renderer == null) {
+                renderer = gameObject.AddComponent<SuperspectiveRenderer>();
+            }
         }
     }
 

@@ -122,7 +122,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
                     portalableObject.grabbedThroughPortal.TransformDirection(playerCamPositionalDiff);
             //debug.Log($"Positional diff: {playerCamPositionalDiff:F3}");
             thisRigidbody.MovePosition(transform.position + playerCamPositionalDiff);
-            if (portalableObject != null && portalableObject.copyIsEnabled)
+            if (portalableObject != null && portalableObject.copyIsEnabled && portalableObject.copyShouldBeEnabled)
                 portalableObject.fakeCopyInstance.TransformCopy();
 
             float holdDistanceToUse = holdDistance +
@@ -239,7 +239,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
             Portal inPortal = throughOutPortalToInPortal
                 ? portalableObject.grabbedThroughPortal
-                : raycastHits.firstPortalHit.otherPortal;
+                : raycastHits.firstValidPortalHit.otherPortal;
 
             targetPos = inPortal.TransformPoint(targetPos);
         }

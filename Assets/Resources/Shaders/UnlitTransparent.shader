@@ -63,7 +63,7 @@
 				// sample the texture
 				fixed4 col = _Color * tex2D(_MainTex, i.uv.xy);
 				// apply fog
-				col += _EmissionColor * tex2D(_EmissionMask, i.uv.xy).r;
+				col += _EmissionColor * tex2D(_EmissionMask, i.emissionUv.xy).r;
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

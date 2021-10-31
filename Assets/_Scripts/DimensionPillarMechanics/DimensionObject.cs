@@ -52,7 +52,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	public SuperspectiveRenderer[] renderers;
 	public Collider[] colliders;
-	Dictionary<SuperspectiveRenderer, Material[]> startingMaterials;
 	Dictionary<SuperspectiveRenderer, int> startingLayers;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
@@ -104,12 +103,12 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	protected override void Awake() {
 		base.Awake();
 
-		FindDefaultMaterials();
+		InitializeRenderersAndLayers();
 	}
 
 	protected override void Init() {
 		foreach (var r in renderers) {
-			SetMaterials(r);
+			SetShaderProperties(r);
 		}
 		SetupDimensionCollisionLogic();
 		SetChannelValuesInMaterials();
@@ -285,14 +284,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	////////////////////////
 #region State Change
 
-	public virtual void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		if (gameObject.activeInHierarchy) {
-			StartCoroutine(SwitchVisibilityStateCoroutine(nextState, ignoreTransitionRules));
-		}
-	}
-
-	public virtual IEnumerator SwitchVisibilityStateCoroutine(VisibilityState nextState, bool ignoreTransitionRules = false) {
-		if (!(ignoreTransitionRules || IsValidNextState(nextState))) yield break;
+	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
+		if (!(ignoreTransitionRules || IsValidNextState(nextState))) return;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
 
@@ -317,9 +310,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		SetChannelValuesInMaterials();
 		
 		OnStateChangeImmediate?.Invoke(this);
-
-		// Wait until end of frame to let new materials switch before calling state change event (only if it remains this state)
-		yield return new WaitForEndOfFrame();
 		
 		if (nextState == visibilityState) {
 			OnStateChangeSimple?.Invoke();
@@ -336,9 +326,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// Material Change Logic //
 	///////////////////////////
 #region Materials
-	public void FindDefaultMaterials() {
+	public void InitializeRenderersAndLayers() {
 		renderers = GetAllSuperspectiveRenderers().ToArray();
-		// TODO: Move this to a place that makes more sense
 		if (colliders == null || colliders.Length == 0) {
 			colliders = GetAllColliders().ToArray();
 		}
@@ -347,51 +336,59 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			debug.LogError("No renderers found for: " + gameObject.name);
 		}
 
-		SetStartingStateFromCurrentState();
+		SetStartingLayersFromCurrentLayers();
 	}
 
-	public void SetStartingStateFromCurrentState() {
-		startingMaterials = GetAllStartingMaterials(renderers);
+	public void SetStartingLayersFromCurrentLayers() {
 		startingLayers = GetAllStartingLayers(renderers);
 	}
 
 	void SetShaderProperties(SuperspectiveRenderer renderer) {
-		bool inverseShader = false;
-		switch (visibilityState) {
-			case VisibilityState.invisible:
-				break;
-			case VisibilityState.partiallyVisible:
-				inverseShader = reverseVisibilityStates;
-				break;
-			case VisibilityState.visible:
-				break;
-			case VisibilityState.partiallyInvisible:
-				inverseShader = !reverseVisibilityStates;
-				break;
-			default:
-				throw new ArgumentOutOfRangeException();
+		void SetLayers() {
+			switch (visibilityState) {
+				case VisibilityState.invisible:
+					renderer.gameObject.layer = reverseVisibilityStates
+						? startingLayers[renderer]
+						: LayerMask.NameToLayer("Invisible");
+					break;
+				case VisibilityState.visible:
+					renderer.gameObject.layer = reverseVisibilityStates
+						? LayerMask.NameToLayer("Invisible")
+						: startingLayers[renderer];
+					break;
+				case VisibilityState.partiallyVisible:
+				case VisibilityState.partiallyInvisible:
+					renderer.gameObject.layer = reverseVisibilityStates
+						? (ignorePartiallyVisibleLayerChanges
+							? startingLayers[renderer]
+							: LayerMask.NameToLayer("VisibleButNoPlayerCollision"))
+						: startingLayers[renderer];
+					break;
+			}
 		}
 
-		switch (visibilityState) {
-			case VisibilityState.invisible:
-				renderer.gameObject.layer = reverseVisibilityStates
-					? startingLayers[renderer]
-					: LayerMask.NameToLayer("Invisible");
-				break;
-			case VisibilityState.visible:
-				renderer.gameObject.layer = reverseVisibilityStates
-					? LayerMask.NameToLayer("Invisible")
-					: startingLayers[renderer];
-				break;
-			case VisibilityState.partiallyVisible:
-			case VisibilityState.partiallyInvisible:
-				renderer.gameObject.layer = reverseVisibilityStates
-					? (ignorePartiallyVisibleLayerChanges
-						? startingLayers[renderer]
-						: LayerMask.NameToLayer("VisibleButNoPlayerCollision"))
-					: startingLayers[renderer];
-				break;
+		bool DetermineInverse() {
+			bool inverseShader = false;
+			switch (visibilityState) {
+				case VisibilityState.invisible:
+					break;
+				case VisibilityState.partiallyVisible:
+					inverseShader = reverseVisibilityStates;
+					break;
+				case VisibilityState.visible:
+					break;
+				case VisibilityState.partiallyInvisible:
+					inverseShader = !reverseVisibilityStates;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return inverseShader;
 		}
+		
+		SetLayers();
+		bool inverseShader = DetermineInverse();
 		
 		// Disable colliders while invisible
 		if (disableColliderWhileInvisible && renderer.TryGetComponent(out Collider c)) {
@@ -400,19 +397,21 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
-		renderer.SetInt("_FullyVisible", effectiveVisibilityState == VisibilityState.visible ? 1 : 0);
+		SetDimensionKeyword(renderer, effectiveVisibilityState != VisibilityState.visible);
 	}
-	
-	void SetMaterials(SuperspectiveRenderer renderer) {
-		if (!startingMaterials.ContainsKey(renderer)) {
-			startingMaterials.Add(renderer, renderer.GetMaterials());
-			startingLayers.Add(renderer, renderer.gameObject.layer);
+
+	void SetDimensionKeyword(SuperspectiveRenderer renderer, bool value) {
+		const string keyword = "DIMENSION_OBJECT";
+		foreach (Material material in renderer.r.materials) {
+			if (material.IsKeywordEnabled(keyword) != value) {
+				if (value) {
+					material.EnableKeyword(keyword);
+				}
+				else {
+					material.DisableKeyword(keyword);
+				}
+			}
 		}
-		Material[] normalMaterials = startingMaterials[renderer];
-		Material[] newMaterials = normalMaterials.Select(GetDimensionObjectMaterial).ToArray();
-		renderer.SetMaterials(newMaterials);
-		
-		SetShaderProperties(renderer);
 	}
 
 	protected List<Collider> GetAllColliders() {
@@ -476,96 +475,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 	}
 
-	Dictionary<SuperspectiveRenderer, Material[]> GetAllStartingMaterials(SuperspectiveRenderer[] renderers) {
-		return renderers.ToDictionary(r => r, r => r.GetMaterials());
-	}
-
 	Dictionary<SuperspectiveRenderer, int> GetAllStartingLayers(SuperspectiveRenderer[] renderers) {
 		return renderers.ToDictionary(r => r, r => r.gameObject.layer);
-	}
-
-	public Material GetDimensionObjectMaterial(Material normalMaterial) {
-		Material newMaterial = null;
-		bool powerTrailShader = false;
-		Portal dimensionPortal = null;
-		switch (normalMaterial.shader.name) {
-			case "Custom/Unlit":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObject"));
-				break;
-			case "Custom/UnlitTransparent":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitTransparent"));
-				break;
-			case "Custom/UnlitDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolve"));
-				break;
-			case "Unlit/Texture":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitTexture"));
-				break;
-			case "Custom/UnlitDissolveTransparent":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionDissolveTransparent"));
-				break;
-			case "Standard (Specular setup)":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionObjectSpecular"));
-				break;
-			case "TextMeshPro/Mobile/Distance Field":
-				if (normalMaterial.name.Contains("LiberationSans SDF")) {
-					// TODO: This doesn't create a new Material right now
-					//newMaterial = Resources.Load<Material>("Fonts & Materials/LiberationSans SDF - InGameTextDimensionObject");
-					newMaterial = new Material(Shader.Find("TextMeshPro/Mobile/Distance Field Dimension"));
-				}
-				else {
-					Debug.LogWarning("No DimensionObject font material for " + normalMaterial.name);
-				}
-				break;
-			case "Hidden/Raymarching":
-			case "Hidden/RaymarchingDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionRaymarching"));
-				break;
-			case "Custom/InvertColorsObject":
-			case "Custom/InvertColorsObjectDissolve":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionInvertColorsObject"));
-				break;
-			case "Custom/Water":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionWater"));
-				break;
-			case "Custom/PowerTrailLight":
-				powerTrailShader = true;
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPowerTrail"));
-				break;
-			case "Portals/PortalMaterial":
-                newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionPortalMaterial"));
-                dimensionPortal = gameObject.GetComponent<Portal>();
-                if (dimensionPortal == null) {
-	                Debug.LogWarning("Couldn't find a Portal component on DimensionPortalMaterial object. If this is intended remove me.");
-                }
-                break;
-			case "Custom/UnlitNoDepth":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitNoDepth"));
-				break;
-			case "Custom/WhiteRoom/UnlitAngleFade":
-				newMaterial = new Material(Shader.Find("Custom/DimensionShaders/DimensionUnlitAngleFade"));
-				break;
-			default:
-				debug.LogWarning("No matching dimensionObjectShader for shader " + normalMaterial.shader.name);
-				break;
-		}
-
-		if (newMaterial != null && normalMaterial != null) {
-			newMaterial.CopyMatchingPropertiesFromMaterial(normalMaterial);
-			
-			// Special case handling
-			if (powerTrailShader) {
-				newMaterial.SetVectorArray("_NodePositions", normalMaterial.GetVectorArray("_NodePositions"));
-				newMaterial.SetFloatArray("_StartPositionIDs", normalMaterial.GetFloatArray("_StartPositionIDs"));
-				newMaterial.SetFloatArray("_EndPositionIDs", normalMaterial.GetFloatArray("_EndPositionIDs"));
-				newMaterial.SetFloatArray("_InterpolationValues", normalMaterial.GetFloatArray("_InterpolationValues"));
-			}
-
-			if (dimensionPortal != null) {
-				dimensionPortal.SetTexturesOnMaterial();
-			}
-		}
-		return (newMaterial != null) ? newMaterial : normalMaterial;
 	}
 	#endregion
 	
@@ -583,11 +494,16 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				if (maskRenderSolution == null) {
 					ValidateAndApplyChannelLogic();
 				}
-				r.GetMaterial().EnableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
+
+				foreach (var material in r.GetMaterials()) {
+					material.EnableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
+				}
 				r.SetFloatArray("_AcceptableMaskValues", maskRenderSolution);
 			}
 			else {
-				r.GetMaterial().DisableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
+				foreach (var material in r.GetMaterials()) {
+					material.DisableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
+				}
 				r.SetInt("_Channel", turnOn ? channel : NUM_CHANNELS);
 			}
 		}

@@ -91,6 +91,7 @@ SubShader {
 
 		#include "UnityCG.cginc"
 		#include "UnityUI.cginc"
+		#include "Assets/Resources/Shaders/Suberspective/SuberspectiveTMPHelpers.cginc"
 		#include "TMPro_Properties.cginc"
 
 		struct vertex_t {
@@ -101,22 +102,6 @@ SubShader {
 			float2	texcoord0		: TEXCOORD0;
 			float2	texcoord1		: TEXCOORD1;
 		};
-
-		struct pixel_t {
-			UNITY_VERTEX_INPUT_INSTANCE_ID
-			UNITY_VERTEX_OUTPUT_STEREO
-			float4	vertex			: SV_POSITION;
-			fixed4	faceColor		: COLOR;
-			fixed4	outlineColor	: COLOR1;
-			float4	texcoord0		: TEXCOORD0;			// Texture UV, Mask UV
-			half4	param			: TEXCOORD1;			// Scale(x), BiasIn(y), BiasOut(z), Bias(w)
-			half4	mask			: TEXCOORD2;			// Position in clip space(xy), Softness(zw)
-			#if (UNDERLAY_ON | UNDERLAY_INNER)
-			float4	texcoord1		: TEXCOORD3;			// Texture UV, alpha, reserved
-			half2	underlayParam	: TEXCOORD4;			// Scale(x), Bias(y)
-			#endif
-		};
-
 
 		pixel_t VertShader(vertex_t input)
 		{
@@ -188,6 +173,12 @@ SubShader {
 			output.underlayParam = half2(layerScale, layerBias);
 			#endif
 
+			
+			output.worldPos = mul(unity_ObjectToWorld, input.vertex).xyz;
+#ifdef DISSOLVE_OBJECT
+			output.uv_DissolveTex = TRANSFORM_TEX(input.texcoord, _DissolveTex);
+#endif
+			
 			return output;
 		}
 
@@ -229,6 +220,8 @@ SubShader {
 			#if UNITY_UI_ALPHACLIP
 			clip(c.a - 0.001);
 			#endif
+
+			SuberspectiveClipOnly(input);
 
 			return c;
 		}

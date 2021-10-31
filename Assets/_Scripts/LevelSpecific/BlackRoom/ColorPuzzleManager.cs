@@ -22,12 +22,20 @@ namespace LevelSpecific.BlackRoom {
 					Debug.LogError("All puzzles solved!");
 					return;
 				}
-				puzzles[activePuzzle].SetActive(false);
-				puzzles[value].SetActive(true);
+
+				if (activePuzzle != -1) {
+					puzzles[activePuzzle].SetActive(false);
+				}
+
+				if (activePuzzle < puzzles.Length) {
+					puzzles[value].SetActive(true);
+				}
+
 				_activePuzzle = value;
 			}
 		}
 		ColorPuzzle[] puzzles;
+		public int numPuzzles => puzzles.Length;
 
 		protected override void Awake() {
 			base.Awake();
@@ -38,19 +46,17 @@ namespace LevelSpecific.BlackRoom {
 			activePuzzle = -1;
 		}
 
-		private void Update() {
-			if (Input.GetKeyDown(KeyCode.G)) {
-				smallGridOverlayFlash.Flash(3);
-				smallGridOutlineFlash.Flash(3);
-			}
-		}
-
-		public bool CheckSolution() {
+		public bool CheckSolution(bool outOfRangeDefault = false) {
 			if (activePuzzle == -1) {
-				return false;
+				return outOfRangeDefault;
 			}
 
 			return puzzles[activePuzzle].solved;
+		}
+
+		public void FlashIncorrect() {
+			smallGridOverlayFlash.Flash(3);
+			smallGridOutlineFlash.Flash(3);
 		}
 
 		#region Saving

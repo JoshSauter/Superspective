@@ -64,8 +64,8 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
 
         protected override void Start() {
             base.Start();
-            Shader.SetGlobalVector("_Shutter_Center", transform.position);
-            Shader.SetGlobalFloat("_Shutter_Height", shutters[0].Item2.GetComponent<MeshRenderer>().bounds.size.y);
+            Shader.SetGlobalVector("_ShutterCenter", transform.position);
+            Shader.SetGlobalFloat("_ShutterHeight", shutters[0].Item2.GetComponent<MeshRenderer>().bounds.size.y);
             powerButton.OnButtonPressBegin += (ctx) => NextShutterState();
         }
 

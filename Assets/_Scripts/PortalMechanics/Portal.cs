@@ -65,26 +65,11 @@ namespace PortalMechanics {
 		GameObject volumetricPortalPrefab;
 		Renderer[] volumetricPortals;
 		// This must continuously be set to true in order for the volumetric portals to continue rendering
-		private bool volumetricPortalsShouldBeEnabled = false;
+		private int fixedFramesUntilTurningOffVolumetricPortal = 0;
+		private bool volumetricPortalsShouldBeEnabled => fixedFramesUntilTurningOffVolumetricPortal > 0;
 		private Coroutine resetVolumetricPortalStateAfterRender;
 		Material portalMaterial;
-		Material _dimensionPortalMaterial;
-		// Lazy one-time evaluation of DimensionObjectMaterial from PortalMaterial
-		Material dimensionPortalMaterial {
-			get {
-				if (_dimensionPortalMaterial == null) {
-					if (dimensionObject != null && portalMaterial != null) {
-						_dimensionPortalMaterial = dimensionObject.GetDimensionObjectMaterial(portalMaterial);
-					}
-				}
-
-				return _dimensionPortalMaterial;
-			}
-		}
-
-		private Material effectivePortalMaterial => dimensionObject == null
-			? portalMaterial
-			: dimensionPortalMaterial;
+		
 		Material fallbackMaterial;
 		public Renderer[] renderers;
 		public Collider[] colliders;
@@ -110,6 +95,8 @@ namespace PortalMechanics {
 
 		// May or may not exist on a Portal, affects what the PortalMaterial is
 		public DimensionObject dimensionObject;
+
+		private const float portalThickness = 0.25f;
 
 #region Events
 		public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
@@ -150,7 +137,7 @@ namespace PortalMechanics {
 			base.Awake();
 			
 			dimensionObject = gameObject.FindDimensionObjectRecursively<DimensionObject>();
-			string shaderPath = "Shaders/RecursivePortals/PortalMaterial";
+			string shaderPath = "Shaders/Suberspective/SuberspectivePortal";
 			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
 			fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
 			if (renderers == null || renderers.Length == 0) {
@@ -167,7 +154,7 @@ namespace PortalMechanics {
 					r.material = fallbackMaterial;
 				}
 				else {
-					r.material = effectivePortalMaterial;
+					r.material = portalMaterial;
 				}
 			}
 			if (colliders == null || colliders.Length == 0) {
@@ -217,6 +204,11 @@ namespace PortalMechanics {
 				if (c.gameObject != this.gameObject) {
 					// PortalColliders handle non-player objects passing through portals
 					c.gameObject.AddComponent<PortalCollider>().portal = this;
+					if (c is BoxCollider boxCollider) {
+						var size = boxCollider.size;
+						size = new Vector3(size.x, size.y, portalThickness);
+						boxCollider.size = size;
+					}
 				}
 			}
 
@@ -226,11 +218,11 @@ namespace PortalMechanics {
 				Renderer vp = volumetricPortals[i];
 				Collider collider = colliders[i];
 				Vector3 vpScale = Vector3.one;
-				if (collider is BoxCollider) {
-					vpScale = (collider as BoxCollider).size / 10f;
+				if (collider is BoxCollider boxCollider) {
+					vpScale = boxCollider.size / 10f;
 				}
-				else if (collider is MeshCollider) {
-					vpScale = (collider as MeshCollider).bounds.size / 10f;
+				else if (collider is MeshCollider meshCollider) {
+					vpScale = meshCollider.bounds.size / 10f;
 				}
 				else {
 					Debug.LogError("Collider type: " + collider.GetType().ToString() + " not handled.");
@@ -249,17 +241,22 @@ namespace PortalMechanics {
 		}
 
 		public void SetTexturesOnMaterial() {
-			foreach (var r in renderers) {
-				r.material.mainTexture = internalRenderTexturesCopy.mainTexture;
-				r.material.SetTexture("_DepthNormals", internalRenderTexturesCopy.depthNormalsTexture);
+			void SetTexturesForRenderers(Renderer[] portalRenderers) {
+				foreach (var r in portalRenderers) {
+					r.material.mainTexture = internalRenderTexturesCopy.mainTexture;
+					r.material.SetTexture("_DepthNormals", internalRenderTexturesCopy.depthNormalsTexture);
+				}
 			}
+
+			SetTexturesForRenderers(renderers);
+			SetTexturesForRenderers(volumetricPortals);
 		}
 
 		protected override void Start() {
 			base.Start();
 
 			if (dimensionObject != null) {
-				dimensionObject.SetStartingStateFromCurrentState();
+				dimensionObject.SetStartingLayersFromCurrentLayers();
 				dimensionObject.OnStateChangeSimple += SetTexturesOnMaterial;
 				dimensionObject.ignorePartiallyVisibleLayerChanges = true;
 			}
@@ -275,10 +272,10 @@ namespace PortalMechanics {
 			}
 			else {
 				foreach (var r in renderers) {
-					r.material = effectivePortalMaterial;
+					r.material = portalMaterial;
 				}
 				foreach (var vp in volumetricPortals) {
-					vp.material = effectivePortalMaterial;
+					vp.material = portalMaterial;
 				}
 			}
 		}
@@ -338,7 +335,7 @@ namespace PortalMechanics {
 
 		public void OnTriggerExit(Collider other) {
 			if (other.TaggedAsPlayer()) {
-				volumetricPortalsShouldBeEnabled = false;
+				fixedFramesUntilTurningOffVolumetricPortal = 0;
 			}
 			else {
 				PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
@@ -371,12 +368,13 @@ namespace PortalMechanics {
 			}
 			// If the player is standing in the portal, render the volumetric portal this frame
 			else {
-				volumetricPortalsShouldBeEnabled = true;
+				fixedFramesUntilTurningOffVolumetricPortal = 2;
 			}
 		}
 
 		// Called before render process begins, either enable or disable the volumetric portals for this frame
 		void LateUpdate() {
+			debug.Log(volumetricPortalsShouldBeEnabled);
 			if (volumetricPortalsShouldBeEnabled) {
 				EnableVolumetricPortal();
 			}
@@ -406,13 +404,13 @@ namespace PortalMechanics {
 				return;
 			}
 
-			if (!renderers[0].material.name.Contains(effectivePortalMaterial.name)) {
+			if (!renderers[0].material.name.Contains(portalMaterial.name)) {
 				foreach (var r in renderers) {
-					r.material = effectivePortalMaterial;
+					r.material = portalMaterial;
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.material = effectivePortalMaterial;
+					vp.material = portalMaterial;
 				}
 			}
 
@@ -425,13 +423,13 @@ namespace PortalMechanics {
 				return;
 			}
 
-			if (!renderers[0].material.name.Contains(effectivePortalMaterial.name)) {
+			if (!renderers[0].material.name.Contains(portalMaterial.name)) {
 				foreach (var r in renderers) {
-					r.material = effectivePortalMaterial;
+					r.material = portalMaterial;
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.material = effectivePortalMaterial;
+					vp.material = portalMaterial;
 				}
 			}
 
@@ -657,21 +655,23 @@ namespace PortalMechanics {
 		IEnumerator ResetVolumetricPortalEnableStateAtEndOfFrame() {
 			var wait = new WaitForEndOfFrame();
 			while (gameObject != null) {
-				yield return wait;
+				yield return new WaitForFixedUpdate();
 
-				volumetricPortalsShouldBeEnabled = false;
+				if (fixedFramesUntilTurningOffVolumetricPortal > 0) {
+					fixedFramesUntilTurningOffVolumetricPortal--;
+				}
 			}
 		}
 
 		void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
 			if (anyVolumetricPortalIsDisabled) {
-				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
+				//debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
 				foreach (var vp in volumetricPortals) {
 					if (pauseRenderingAndLogic) continue;
 					else if (pauseRenderingOnly) vp.enabled = true;
 					else {
-						vp.material = effectivePortalMaterial;
+						vp.material = portalMaterial;
 						vp.enabled = true;
 					}
 				}
@@ -681,7 +681,7 @@ namespace PortalMechanics {
 		void DisableVolumetricPortal() {
 			bool anyVolumetricPortalIsEnabled = volumetricPortals.Any(vp => vp.enabled);
 			if (anyVolumetricPortalIsEnabled) {
-				debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
+				//debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
 
 				foreach (var vp in volumetricPortals) {
 					vp.enabled = false;

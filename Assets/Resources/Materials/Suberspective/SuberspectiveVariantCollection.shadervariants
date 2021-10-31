@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SuberspectiveVariantCollection
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 4173dcec1edd44a4d9c7c28ae5a5a3b3, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: DIMENSION_OBJECT
+        passType: 0
+      - keywords: DISSOLVE_OBJECT
+        passType: 0
+      - keywords: DIMENSION_OBJECT DISSOLVE_OBJECT
+        passType: 0
+      - keywords: POWER_TRAIL_OBJECT
+        passType: 0
+  - first: {fileID: 4800000, guid: 969f124acd8c4ec4785076ab7b60e002, type: 3}
+    second:
+      variants:
+      - keywords: _EMISSION
+        passType: 4
+      - keywords: DIMENSION_OBJECT _EMISSION
+        passType: 4

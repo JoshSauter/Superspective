@@ -59,7 +59,32 @@ namespace SuperspectiveUtils {
 
         public RaycastHit firstObjectHit => allObjectHits.First();
 
-        public Portal firstPortalHit {
+        // A "Valid" Portal is a Portal hit in the first raycast, without any object in front of it
+        public Portal firstValidPortalHit {
+            get {
+                try {
+                    // We never hit a portal, don't bother checking
+                    if (!hitPortal) return null;
+                    SuperspectiveRaycastPart firstPart = raycastParts[0];
+                    if (firstPart.hitPortal) {
+                        // if hitObject is true, that means there was an object in front of the portal
+                        if (firstPart.hitObject) {
+                            return null;
+                        }
+                        else {
+                            return firstPart.portalHit;
+                        }
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                catch (Exception _) {
+                    return null;
+                }
+            }
+        }
+        public Portal firstAnyPortalHit {
             get {
                 try {
                     return allPortalsHit.First();
@@ -105,7 +130,7 @@ namespace SuperspectiveUtils {
         // First portal hit by the raycast, if any
         public bool hitPortal => portalHit != null;
         public Portal portalHit;
-        readonly int portalHitIndex;
+        readonly public int portalHitIndex;
 
         public SuperspectiveRaycastPart(Ray ray, float fullRaycastDistance, RaycastHit[] raycastHits) {
             // Make sure we sort the results into distance-based order

@@ -83,7 +83,7 @@ class UnloadScenesBeforePlay {
     static void ReloadAllScenesExcept(string sceneName) {
         List<String> scenesThatGotUnloaded = PlayerPrefs.GetString(playerPrefsKey).Split(',').ToList();
         foreach (var scene in scenesThatGotUnloaded) {
-            if (scene == sceneName) continue;
+            if (scene == sceneName || scene == "") continue;
             
             EditorSceneManager.OpenScene(scene, OpenSceneMode.Additive);
         }

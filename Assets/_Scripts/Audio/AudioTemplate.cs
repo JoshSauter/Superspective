@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
+using UnityEditor;
 using UnityEngine;
 
 namespace Audio {
@@ -22,5 +24,5 @@ namespace Audio {
                 Debug.LogWarning($"Please provide an audio clip to {gameObject.name}'s AudioTemplate.");
 			}
 		}
-	}
+    }
 }

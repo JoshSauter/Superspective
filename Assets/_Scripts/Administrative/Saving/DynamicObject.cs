@@ -167,6 +167,7 @@ namespace Saving {
 			if (gameObject.scene != newScene) {
 				// Deregister the DynamicObject in the old SaveManagerForScene
 				SaveForScene.UnregisterDynamicObject(ID);
+				gameObject.transform.SetParent(null);
 				// Move the GameObject to the new scene
 				SceneManager.MoveGameObjectToScene(gameObject, newScene);
 				// Update the record of the DynamicObject in DynamicObjectManager

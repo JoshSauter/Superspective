@@ -8,8 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UnlitRedEmissive
-  m_Shader: {fileID: 4800000, guid: 7d8d42afd39aaba4ba63eb365d7b92c6, type: 3}
-  m_ShaderKeywords: _EMISSION
+  m_Shader: {fileID: 4800000, guid: 4173dcec1edd44a4d9c7c28ae5a5a3b3, type: 3}
+  m_ShaderKeywords: _ALPHATEST_ON _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -35,7 +35,19 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DissolveBurnRamp:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DissolveTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMask:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -55,23 +67,49 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ShutterNoise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _BumpScale: 1
+    - _CapsuleRadius: 0.25
+    - _Channel: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DissolveBurnSize: 0.5
+    - _DissolveEmissionAmount: 2
+    - _DissolveValue: 0
     - _DstBlend: 0
+    - _EmissionEnabled: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _Inverse: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _ReverseVisibility: 0
+    - _ShutterInverse: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - __BlendOp: 0
+    - __CullMode: 2
+    - __DstBlend: 0
+    - __SrcBlend: 1
+    - __SuberspectiveBlendMode: 0
+    - __ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 0, b: 0, a: 1}
+    - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
+    - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 1, g: 0, b: 0, a: 1}
+    - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
+    - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

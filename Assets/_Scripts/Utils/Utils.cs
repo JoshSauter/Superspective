@@ -169,6 +169,14 @@ namespace SuperspectiveUtils {
             return go.AddComponent<T>().GetCopyOf(toAdd);
         }
 
+        public static T GetOrAddComponent<T>(this GameObject go) where T : Component {
+            return go.TryGetComponent(out T foundComponent) ? foundComponent : go.AddComponent<T>();
+        }
+
+        public static T GetOrAddComponent<T>(this Component component) where T : Component {
+            return GetOrAddComponent<T>(component.gameObject);
+        }
+        
         public static T[] GetComponentsInChildrenRecursively<T>(this Transform parent) where T : Component {
             List<T> components = new List<T>();
             GetComponentsInChildrenRecursivelyHelper(parent, ref components);

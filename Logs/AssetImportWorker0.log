@@ -1,10 +1,10 @@
 Using pre-set license
-Built from '2020.2/staging' branch; Version is '2020.2.0b14 (dc0b50340a64) revision 14420816'; Using compiler version '192528614'; Build Type 'Release'
-OS: 'Windows 10  (10.0.0) 64bit' Language: 'en' Physical Memory: 16178 MB
+Built from '2021.1/staging' branch; Version is '2021.1.23f1 (b50729e604a9) revision 11863849'; Using compiler version '192528614'; Build Type 'Release'
+OS: 'Windows 10 Home; OS build 19042.1288; Version 2009; 64bit' Language: 'en' Physical Memory: 16178 MB
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
 
- COMMAND LINE ARGUMENTS:
-C:\Program Files\Unity\Hub\Editor\2020.2.0b14\Editor\Unity.exe
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\2021.1.23f1\Editor\Unity.exe
 -adb2
 -batchMode
 -noUpm
@@ -15,140 +15,66 @@ C:/Users/Josh/Documents/GitHub/Epitaph
 -logFile
 Logs/AssetImportWorker0.log
 -srvPort
-64924
+60061
 Successfully changed project path to: C:/Users/Josh/Documents/GitHub/Epitaph
 C:/Users/Josh/Documents/GitHub/Epitaph
 Using Asset Import Pipeline V2.
-Refreshing native plugins compatible for Editor in 211.55 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 138.90 ms, found 2 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Initialize engine version: 2020.2.0b14 (dc0b50340a64)
-[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/Resources/UnitySubsystems
+Initialize engine version: 2021.1.23f1 (b50729e604a9)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/2021.1.23f1/Editor/Data/Resources/UnitySubsystems
 [Subsystems] Discovering subsystems at path C:/Users/Josh/Documents/GitHub/Epitaph/Assets
-GfxDevice: creating device client; threaded=0
+GfxDevice: creating device client; threaded=0; jobified=0
 Direct3D:
     Version:  Direct3D 11.0 [level 11.1]
     Renderer: NVIDIA GeForce GTX 1060 with Max-Q Design (ID=0x1c20)
-    Vendor:   
+    Vendor:   NVIDIA
     VRAM:     6052 MB
     Driver:   27.21.14.6231
 Initialize mono
-Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/Managed'
-Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
-Mono config path = 'C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56952
+Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/2021.1.23f1/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/2021.1.23f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
+Mono config path = 'C:/Program Files/Unity/Hub/Editor/2021.1.23f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56024
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
-Register platform support module: C:/Program Files/Unity/Hub/Editor/2020.2.0b14/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.003310 seconds.
+Register platform support module: C:/Program Files/Unity/Hub/Editor/2021.1.23f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.003546 seconds.
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 101.24 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 115.76 ms, found 2 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
 Mono: successfully reloaded assembly
-- Completed reload, in  1.896 seconds
+- Completed reload, in  2.674 seconds
+Domain Reload Profiling:
+	ReloadAssembly (2675ms)
+		BeginReloadAssembly (111ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (0ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (1ms)
+		EndReloadAssembly (941ms)
+			LoadAssemblies (107ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (436ms)
+			ReleaseScriptCaches (0ms)
+			RebuildScriptCaches (60ms)
+			SetupLoadedEditorAssemblies (361ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (11ms)
+				SetLoadedEditorAssemblies (0ms)
+				RefreshPlugins (116ms)
+				BeforeProcessingInitializeOnLoad (2ms)
+				ProcessInitializeOnLoadAttributes (174ms)
+				ProcessInitializeOnLoadMethodAttributes (57ms)
+				AfterProcessingInitializeOnLoad (0ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (0ms)
 Platform modules already initialized, skipping
 Registering precompiled user dll's ...
-Registered in 0.004256 seconds.
+Registered in 0.008498 seconds.
 Begin MonoManager ReloadAssembly
 Native extension for WindowsStandalone target not found
-Refreshing native plugins compatible for Editor in 238.18 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 1.18 ms, found 2 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-System.IO.FileNotFoundException: Could not load file or assembly 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null' or one of its dependencies.
-File name: 'Unity.Analytics.Editor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:LogError (object)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-Invoked RoslynAnalysisRunner static constructor.
-RoslynAnalysisRunner will not be running.
-RoslynAnalysisRunner has terminated.
-Mono: successfully reloaded assembly
-- Completed reload, in  2.200 seconds
-Platform modules already initialized, skipping
-========================================================================
-Worker process is ready to serve import requests
-Launched and connected shader compiler UnityShaderCompiler.exe after 0.05 seconds
-Refreshing native plugins compatible for Editor in 1.35 ms, found 0 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 2570 Unused Serialized files (Serialized files now loaded: 0)
-System memory in use before: 211.3 MB.
-System memory in use after: 211.2 MB.
-
-Unloading 34 unused Assets to reduce memory usage. Loaded Objects now: 3015.
-Total: 4.580100 ms (FindLiveObjects: 0.415600 ms CreateObjectMapping: 0.356300 ms MarkObjects: 3.142700 ms  DeleteObjects: 0.663000 ms)
-
-========================================================================
-Received Import Request.
-  path: Assets/_Scripts/PortalMechanics/PortalManager.cs
-  artifactKey: Guid(9e54567d98ff3cb45b67668f5de2182c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/PortalManager.cs using Guid(9e54567d98ff3cb45b67668f5de2182c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '351f770b6b2dbf4b91ad8afa24b26fcf') in 0.104471 seconds
-  Import took 0.114287 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000677 seconds.
-  path: Assets/_Scripts/PortalMechanics/PortalCopy.cs
-  artifactKey: Guid(c6aad3a791318b34cac8d0396b09740d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/PortalCopy.cs using Guid(c6aad3a791318b34cac8d0396b09740d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '15af2c8500948187a1955ce928cd8064') in 0.026422 seconds
-  Import took 0.036281 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000575 seconds.
-  path: Assets/_Scripts/PowerTrails
-  artifactKey: Guid(ca2b0beb760e607438517e797ebe4cb3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PowerTrails using Guid(ca2b0beb760e607438517e797ebe4cb3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '531933ce8dd775731913eacd36612338') in 0.019142 seconds
-  Import took 0.034853 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000839 seconds.
-  path: Assets/_Scripts/PortalMechanics/Portal.cs
-  artifactKey: Guid(7cbcf6816a61d9d45b7ed2bbf4802092) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/Portal.cs using Guid(7cbcf6816a61d9d45b7ed2bbf4802092) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '2c7baa252c3e66a61a5abd10748c2c84') in 0.020792 seconds
-  Import took 0.031322 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000506 seconds.
-  path: Assets/_Scripts/PortalMechanics
-  artifactKey: Guid(39f80987d5178834f9b6c90b50554b3b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics using Guid(39f80987d5178834f9b6c90b50554b3b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '1094a46c558b255dbc8de6b906d2fe82') in 0.022868 seconds
-  Import took 0.033892 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000592 seconds.
-  path: Assets/_Scripts/PortalMechanics/VirtualPortalCamera.cs
-  artifactKey: Guid(f1997c83422d8064bb6de1cdbb7e14eb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/VirtualPortalCamera.cs using Guid(f1997c83422d8064bb6de1cdbb7e14eb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '6456f3d74addb9a67b308f4c7890646f') in 0.013226 seconds
-  Import took 0.022912 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000396 seconds.
-  path: Assets/_Scripts/PortalMechanics/PortalCollider.cs
-  artifactKey: Guid(f240c1fa7c342f44ba20dd4e1a9914c1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/PortalCollider.cs using Guid(f240c1fa7c342f44ba20dd4e1a9914c1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '2149bca6f5cd5c6c3982b01495b9197d') in 0.017277 seconds
-  Import took 0.026160 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000385 seconds.
-  path: Assets/_Scripts/PortalMechanics/ReflectorPortal.cs
-  artifactKey: Guid(e8ba0b02341ab244eb51a08f90848aa1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/ReflectorPortal.cs using Guid(e8ba0b02341ab244eb51a08f90848aa1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'ded4742f1f4956264a9527c8c5acb2ec') in 0.015544 seconds
-  Import took 0.025988 seconds .
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000397 seconds.
-  path: Assets/_Scripts/PortalMechanics/PortalableObject.cs
-  artifactKey: Guid(cdacce54b553d1349a94f6f1fafa007b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/_Scripts/PortalMechanics/PortalableObject.cs using Guid(cdacce54b553d1349a94f6f1fafa007b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'a30b34e48cf9fcf3f7d3ed1e56e7e6a5') in 0.013254 seconds
-  Import took 0.021051 seconds .
-

@@ -143,7 +143,7 @@ public class CubeSpawnerNew : MonoBehaviour {
         SceneManager.MoveGameObjectToScene(cubeParent, gameObject.scene);
         
         newCube.transform.SetParent(cubeParent.transform);
-        parentDimensionObj.FindDefaultMaterials();
+        parentDimensionObj.InitializeRenderersAndLayers();
         parentDimensionObj.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
         parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyVisible, true);
         

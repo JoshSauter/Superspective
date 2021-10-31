@@ -32,37 +32,36 @@ namespace LevelManagement {
 	
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
-	// ALSO NOTE: You MUST append any new additions to the END of the enum, else it fucks with serialization
-	// TODO: I can fix ^ by explicitly assigning values if I need to
+	// ALSO NOTE: Be careful not to fuck up the serialization
 	[Serializable]
 	public enum Levels {
-		ManagerScene,
-		TestScene,
-		EmptyRoom,
-		HexPillarRoom,
-		Library,
-		Level3,
-		Level4,
-		TutorialHallway,
-		TutorialRoom,
-		Transition23,
-		Transition34,
-		Axis,
-		Fork,
-		ForkWhiteRoom,
-		ForkBlackRoom,
-		InvisFloor,
-		MetaEdgeDetection,
-		PortalTestScene,
-		ForkWhiteRoom2,
-		ForkWhiteRoomBlackHallway,
-		ForkWhiteRoom3,
-		TransitionWhiteRoomFork,
-		ForkOctagon,
-		ForkBlackRoom2,
-		WhiteRoom1BackRoom,
-		BehindForkTransition,
-		ForkBlackRoom3
+		ManagerScene = 0,
+		TestScene = 1,
+		EmptyRoom = 2,
+		HexPillarRoom = 3,
+		Library = 4,
+		Level3 = 5,
+		// Level4 = 6,			// TODO Replace Level4 with next level you add, it's gone
+		TutorialHallway = 7,
+		TutorialRoom = 8,
+		Transition23 = 9,
+		Transition34 = 10,
+		Axis = 11,
+		Fork = 12,
+		ForkWhiteRoom = 13,
+		ForkBlackRoom = 14,
+		InvisFloor = 15,
+		MetaEdgeDetection = 16,
+		PortalTestScene = 17,
+		ForkWhiteRoom2 = 18,
+		ForkWhiteRoomBlackHallway = 19,
+		ForkWhiteRoom3 = 20,
+		TransitionWhiteRoomFork = 21,
+		ForkOctagon = 22,
+		ForkBlackRoom2 = 23,
+		WhiteRoom1BackRoom = 24,
+		BehindForkTransition = 25,
+		ForkBlackRoom3 = 26
 	}
 
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
@@ -274,10 +273,17 @@ namespace LevelManagement {
 		// Hijacking this to display level banner on load, even when it's already the active scene
 		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
 #if UNITY_EDITOR
-		try {
-			EditorSceneManager.SetActiveScene(EditorSceneManager.GetSceneByName(sceneName));
-		}
-		catch { }
+			try {
+				Scene scene = EditorSceneManager.GetSceneByName(sceneName);
+				if (!EditorSceneManager.GetSceneByName(sceneName).IsValid()) {
+					string path = $"Assets/{(sceneName != enumToSceneName[Levels.TestScene] ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
+					scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+				}
+				EditorSceneManager.SetActiveScene(scene);
+			}
+			catch (Exception e) {
+				Debug.LogError(e);
+			}
 
 		if (EditorApplication.isPlaying)
 #endif
@@ -295,7 +301,6 @@ namespace LevelManagement {
 			{ Levels.HexPillarRoom, "_HexPillarRoom" },
 			{ Levels.Library, "_Library" },
 			{ Levels.Level3, "_Level3" },
-			{ Levels.Level4, "_Level4" },
 			{ Levels.Axis, "_Axis" },
 			{ Levels.Fork, "_Fork" },
 			{ Levels.ForkOctagon, "_ForkOctagon" },

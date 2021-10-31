@@ -8,8 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PowerTrailLightWhite
-  m_Shader: {fileID: 4800000, guid: 0abe747eaabbb544f8d72d936698f92f, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: b9f518abcb7253e4ca58884dfa9de204, type: 3}
+  m_ShaderKeywords: POWER_TRAIL_OBJECT _ALPHATEST_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -19,14 +19,65 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _DissolveBurnRamp:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DissolveTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ShutterNoise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
+    - _AmbientMagnitude: 0
+    - _BlendOp: 0
+    - _CapsuleRadius: 0.25
+    - _Channel: 0
+    - _DiffuseMagnitude: 0.025
+    - _DissolveBurnSize: 0.5
+    - _DissolveEmissionAmount: 2
+    - _DissolveValue: 0
+    - _DstBlend: 0
+    - _EmissionEnabled: 1
     - _Glossiness: 0.5
+    - _Inverse: 0
     - _Metallic: 0
+    - _ReverseVisibility: 0
+    - _Shininess: 1
+    - _ShutterInverse: 0
+    - _SpecularMagnitude: 0.15
+    - _SrcBlend: 1
+    - _ZWrite: 1
+    - __BlendOp: 0
+    - __CullMode: 2
+    - __DstBlend: 0
+    - __SrcBlend: 1
+    - __SuberspectiveBlendMode: 0
+    - __ZWrite: 1
     m_Colors:
     - _Color: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
+    - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
+    - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 2.1561174, g: 2.1561174, b: 2.1561174, a: 1}
+    - _EndColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
+    - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
+    - _SpecColor: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 1}
   m_BuildTextureStacks: []

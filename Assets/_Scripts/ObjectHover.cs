@@ -43,7 +43,7 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
     }
 
     // Update is called once per frame
-    void FixedUpdate() {
+    void Update() {
         if (hoveringPaused) return;
         
         timeElapsed += Time.fixedDeltaTime;
@@ -67,8 +67,13 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
 
         Vector3 thisDisplacement = (nextOffset - currentOffset);
         
+        Vector3 prevPos = transform.position;
+        // Apparently setting position always seems to end up with floating point errors even for
+        // axes that have 0 offset. BS that can lead to incorrect displacements over time
         transform.position += thisDisplacement;
-        currentOffset = nextOffset;
+        Vector3 actualDisplacement = transform.position - prevPos;
+        // Account for above issue when setting currentOffset
+        currentOffset = nextOffset + (actualDisplacement - thisDisplacement);
     }
 
 #region Saving

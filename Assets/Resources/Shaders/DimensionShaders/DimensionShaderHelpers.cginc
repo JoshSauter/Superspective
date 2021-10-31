@@ -5,6 +5,7 @@
 float _ResolutionX;
 float _ResolutionY;
 sampler2D _DimensionMask;
+float4 _DimensionMask_ST;
 
 #ifdef USE_ADVANCED_CHANNEL_LOGIC
 int _AcceptableMaskValues[1 << NUM_CHANNELS];
@@ -12,7 +13,6 @@ int _AcceptableMaskValues[1 << NUM_CHANNELS];
 int _Channel;
 #endif
 int _Inverse;
-int _FullyVisible;
 
 inline fixed4 ColorFromChannel(int channel) {
 	// Split evenly across red, blue, green colors to avoid floating point errors
@@ -83,7 +83,7 @@ inline int TestChannelFromColor(uint channel, fixed4 rgb) {
 	}
 }
 
-float ClipDimensionObject(float2 vertex) {
+float ClipDimensionObject(float2 vertex, float disabled = 0.0) {
 	float2 viewportVertex = float2(vertex.x / _ResolutionX, vertex.y / _ResolutionY);
 
 	fixed4 dimensionSample = tex2D(_DimensionMask, viewportVertex);
@@ -95,12 +95,12 @@ float ClipDimensionObject(float2 vertex) {
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
 #endif
 
-	clip(_FullyVisible-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
+	clip(disabled-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
 
 	return dimensionTest;
 }
 
-fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos) {
+fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, float disabled = 0.0) {
 	fixed4 dimensionSample = tex2D(_DimensionMask, screenPos);
 #ifdef USE_ADVANCED_CHANNEL_LOGIC
 	const int maxMaskValue = (1 << NUM_CHANNELS) - 1;
@@ -110,7 +110,7 @@ fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos) {
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
 #endif
 
-	clip(_FullyVisible-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
+	clip(disabled-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
 
 	return dimensionTest;
 }

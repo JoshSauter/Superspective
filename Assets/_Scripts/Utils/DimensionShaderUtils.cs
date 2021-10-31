@@ -4,6 +4,7 @@ namespace SuperspectiveUtils {
     // These methods are CPU equivalent of the GPU-based code in DimensionShaderHelpers.cginc
     // When logic in one changes, update the other
     public static class DimensionShaderUtils {
+        private static int NUM_CHANNELS => DimensionObject.NUM_CHANNELS;
         static readonly int NUM_CHANNELS_PER_COLOR = Mathf.CeilToInt(DimensionObject.NUM_CHANNELS / 3.0f);
         static int MAX_VALUE_PER_CHANNEL = Mathf.RoundToInt(Mathf.Pow(2, NUM_CHANNELS_PER_COLOR) - 1);
         

@@ -18,7 +18,9 @@ Shader "Custom/BlackRoom3/AffectedByShutter" {
             // make fog work
             #pragma multi_compile_fog
 
+            #include "UnityCG.cginc"
             #include "AffectedByShutterHelpers.cginc"
+            fixed4 _Color;
             fixed4 _EmissionColor;
 
             struct appdata {
@@ -41,12 +43,9 @@ Shader "Custom/BlackRoom3/AffectedByShutter" {
             }
 
             fixed4 frag (v2f i) : SV_Target {
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                fixed4 col = ClipShutteredAreas(i.worldPos);
+                fixed4 col = ClipShutteredAreas(i.worldPos, _Color);
                 col += _EmissionColor;
                 return col;
-                return fixed4(0,0,0,1);
             }
             ENDCG
         }

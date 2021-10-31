@@ -8,13 +8,14 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UnlitDissolveTransparent
-  m_Shader: {fileID: 4800000, guid: 12b74b3e9eb2abc4288d6907d877935d, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: b9f518abcb7253e4ca58884dfa9de204, type: 3}
+  m_ShaderKeywords: DISSOLVE_OBJECT _ALPHAPREMULTIPLY_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -23,17 +24,59 @@ Material:
         m_Texture: {fileID: 2800000, guid: 5114234f782fc714498ed9817f1b5815, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: da95f9bdf579802419fba6e34a60d6a6, type: 3}
+    - _DissolveBurnRamp:
+        m_Texture: {fileID: 2800000, guid: 5114234f782fc714498ed9817f1b5815, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DissolveTex:
+        m_Texture: {fileID: 2800000, guid: a82cfc31728f45d499490c9e5ea404ec, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShutterNoise:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
+    - _AmbientMagnitude: 0
     - _BurnSize: 0.15
+    - _CapsuleRadius: 0.25
+    - _Channel: 0
+    - _DiffuseMagnitude: 0.135
+    - _DissolveBurnSize: 0.075
+    - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
     - _EmissionAmount: 2
+    - _EmissionEnabled: 0
+    - _Glossiness: 0.5
+    - _Inverse: 0
+    - _ReverseVisibility: 0
+    - _Shininess: 1
+    - _ShutterInverse: 0
+    - _SpecularMagnitude: 0.112
+    - __BlendOp: 21
+    - __CullMode: 2
+    - __DstBlend: 10
+    - __SrcBlend: 5
+    - __SuberspectiveBlendMode: 1
+    - __ZWrite: 0
     m_Colors:
     - _BurnColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 0.9529412}
     - _Color2: {r: 0, g: 0, b: 0, a: 0}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _DissolveBurnColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DissolveColorAt0: {r: 0.1792452, g: 0.1792452, b: 0.1792452, a: 1}
+    - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
+    - _EmissionColor: {r: 0.42749107, g: 0.42749107, b: 0.42749107, a: 1}
+    - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
+    - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
+    - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

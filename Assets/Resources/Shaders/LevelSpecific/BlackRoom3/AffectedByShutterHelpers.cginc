@@ -1,13 +1,10 @@
 ﻿#define NUM_SHUTTERS 32
 
-#include "UnityCG.cginc"
-
-fixed4 _Color;
-int _Inverse;
-sampler2D _Noise;
+int _ShutterInverse;
+sampler2D _ShutterNoise;
 float _Shutters[NUM_SHUTTERS];
-float3 _Shutter_Center;
-float _Shutter_Height;
+float3 _ShutterCenter;
+float _ShutterHeight;
 
 int ArrayIndex(int index) {
     index = (2 * index + 1);
@@ -22,24 +19,27 @@ float rand(float3 myVector)  {
     
     float2 uv = float2(myVector.x+myVector.z, myVector.y)/100;
     float2 gridUV = round(uv);
-    return tex2D(_Noise, uv).r;
+    return tex2D(_ShutterNoise, uv).r;
 }
-            
-fixed4 ClipShutteredAreas(float3 pos) {
-    float3 diff = pos - _Shutter_Center;
-    float angle = atan2(diff.x, diff.z) + UNITY_PI;
-    const float anglePerShutter = UNITY_PI * 2 / NUM_SHUTTERS;
+
+// Copied from UnityCG.cginc
+#define PI 3.14159265359f
+
+float4 ClipShutteredAreas(float3 pos, float4 col, float disabled = 0.0) {
+    float3 diff = pos - _ShutterCenter;
+    float angle = atan2(diff.x, diff.z) + PI;
+    const float anglePerShutter = PI * 2 / NUM_SHUTTERS;
     int index = angle / anglePerShutter;
     int arrayIndex = ArrayIndex(index);
     int arrayIndexNext = ArrayIndex((index+1)%NUM_SHUTTERS);
     
     float shutterLerpHeight = lerp(_Shutters[arrayIndex], _Shutters[arrayIndexNext], (angle / anglePerShutter) - index);
-    float shutterY = (1 - shutterLerpHeight) * _Shutter_Height;
+    float shutterY = (1 - shutterLerpHeight) * _ShutterHeight;
     float random = 1+rand(diff);
     shutterLerpHeight *= random;
-    if (_Inverse) shutterLerpHeight = 1 - shutterLerpHeight;
+    if (_ShutterInverse) shutterLerpHeight = 1 - shutterLerpHeight;
     int posIsShutteredInY = 0.5*length(diff) > shutterY*random;
-    int result = _Inverse * (1-posIsShutteredInY) + (1-_Inverse) * posIsShutteredInY;
-    clip(-result);
-    return lerp(_Color, 1-_Color, saturate(shutterLerpHeight));
+    int result = _ShutterInverse * (1-posIsShutteredInY) + (1-_ShutterInverse) * posIsShutteredInY;
+    clip(disabled-result);
+    return lerp(col, 1-col, saturate(shutterLerpHeight));
 }
