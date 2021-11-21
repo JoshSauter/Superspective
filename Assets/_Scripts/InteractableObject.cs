@@ -3,6 +3,7 @@ using NaughtyAttributes;
 using UnityEngine;
 
 public class InteractableObject : MonoBehaviour {
+    public InteractableGlow glow;
     public delegate void InteractAction();
 
     public bool interactable = true;
@@ -28,9 +29,7 @@ public class InteractableObject : MonoBehaviour {
         }
 
         if (thisRendererParent != null) {
-            // gameObject.AddComponent<InteractableGlow>().thisRenderer = thisRenderer;
-            InteractableGlow glow = thisRendererParent.gameObject.GetComponent<InteractableGlow>();
-            if (glow == null) glow = thisRendererParent.gameObject.AddComponent<InteractableGlow>();
+            glow = thisRendererParent.gameObject.GetOrAddComponent<InteractableGlow>();
             glow.recursiveChildRenderers = recursiveChildRenderers;
             glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
             glow.overrideGlowColor = overrideGlowColor;

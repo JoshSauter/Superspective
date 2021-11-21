@@ -148,6 +148,8 @@ namespace Saving {
 
 		// GlobalObjects are moved between scenes as they hit objects from various scenes
 		void OnCollisionEnter(Collision collision) {
+			if (pickup != null && pickup.isHeld) return;
+			
 			if (isGlobal) {
 				Scene sceneOfContact = collision.collider.gameObject.scene;
 				if (sceneOfContact.name == LevelManager.ManagerScene) {
@@ -164,7 +166,7 @@ namespace Saving {
 		}
 
 		void ChangeScene(Scene newScene) {
-			if (gameObject.scene != newScene) {
+			if (isGlobal && gameObject.scene != newScene) {
 				// Deregister the DynamicObject in the old SaveManagerForScene
 				SaveForScene.UnregisterDynamicObject(ID);
 				gameObject.transform.SetParent(null);

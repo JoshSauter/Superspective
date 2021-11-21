@@ -43,6 +43,7 @@ namespace LevelSpecific.WhiteRoom {
 
         void HandlePowerTrail(bool poweredNow) {
             SetEdgeColors(poweredNow);
+            portal.changeActiveSceneOnTeleport = poweredNow;
 
             foreach (var teleporter in blackHallwayLoopTeleporters) {
                 teleporter.GetOrNull()?.gameObject.SetActive(!poweredNow);

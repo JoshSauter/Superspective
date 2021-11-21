@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using LevelManagement;
 using UnityEngine;
 using SuperspectiveUtils;
 #if UNITY_EDITOR
@@ -15,7 +17,8 @@ namespace MagicTriggerMechanics {
 		PlayerMovingDirection,
 		RendererVisible,
 		RendererNotVisible,
-		PlayerInDirectionFromPoint
+		PlayerInDirectionFromPoint,
+		LevelsAreActive
 	}
 
 	[Serializable]
@@ -30,6 +33,7 @@ namespace MagicTriggerMechanics {
 		public Collider targetObject;
 		public Renderer targetRenderer;
 		public Vector3 targetPosition;
+		public Levels[] targetLevels;
 
 		public bool allowTriggeringWhileInsideObject = false;
 
@@ -74,6 +78,8 @@ namespace MagicTriggerMechanics {
 					Vector3 realTargetPosition = (useLocalCoordinates) ? triggerTransform.TransformPoint(targetPosition) : targetPosition;
 					Vector3 playerToPositionDirection = (player.transform.position - realTargetPosition).normalized;
 					return Vector3.Dot(realTargetDirection.normalized, playerToPositionDirection);
+				case TriggerConditionType.LevelsAreActive:
+					return targetLevels.Contains(LevelManager.instance.ActiveScene) ? 1 : -1;
 				default:
 					throw new Exception($"TriggerCondition: {triggerCondition} not handled!");
 			}
@@ -110,6 +116,7 @@ namespace MagicTriggerMechanics {
 			SerializedProperty targetObject = property.FindPropertyRelative("targetObject");
 			SerializedProperty targetRenderer = property.FindPropertyRelative("targetRenderer");
 			SerializedProperty targetPosition = property.FindPropertyRelative("targetPosition");
+			SerializedProperty targetLevels = property.FindPropertyRelative("targetLevels");
 
 			EditorGUILayout.PropertyField(triggerCondition);
 			EditorGUILayout.Space();
@@ -121,6 +128,7 @@ namespace MagicTriggerMechanics {
 			GUIContent rendererLabel = new GUIContent("Target Object:");
 			GUIContent positionLabel = new GUIContent("Target Position:");
 			GUIContent thresholdLabel = new GUIContent("Trigger Threshold:");
+			GUIContent targetLevelsLabel = new GUIContent("Target level(s):");
 			GUIContent allowTriggeringInsideObjectLabel = new GUIContent("Allow triggering while inside of target object?");
 			GUIContent useLocalCoordinatesLabel = new GUIContent("Use local coordinates?");
 
@@ -162,6 +170,9 @@ namespace MagicTriggerMechanics {
 					EditorGUILayout.PropertyField(useLocalCoordinates, useLocalCoordinatesLabel);
 					EditorGUILayout.PropertyField(targetPosition, positionLabel);
 					EditorGUILayout.PropertyField(targetDirection, directionLabel);
+					break;
+				case TriggerConditionType.LevelsAreActive:
+					EditorGUILayout.PropertyField(targetLevels, targetLevelsLabel);
 					break;
 			}
 

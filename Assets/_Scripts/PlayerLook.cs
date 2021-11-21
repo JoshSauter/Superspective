@@ -46,6 +46,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     public float timeSinceStateChange;
     float viewLockTime;
     float viewUnlockTime;
+    bool cursorIsStationary;
 
     public State state {
         get => _state;
@@ -126,7 +127,14 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     void UpdateLockedView() {
         Vector2 moveDirection =
             Vector2.Scale(PlayerButtonInput.instance.RightStick, new Vector2(sensitivityX, sensitivityY)) * (generalSensitivity * lookAmountMultiplier);
-        MoveCursor(moveDirection);
+        if (cursorIsStationary) {
+            if (moveDirection.magnitude > 0.5f) {
+                UnlockView();
+            }
+        }
+        else {
+            MoveCursor(moveDirection);
+        }
     }
 
     void InitializeUnlockingView() {
@@ -136,6 +144,8 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
         startPos = cameraContainerTransform.position;
         startRot = cameraContainerTransform.rotation;
+
+        cursorIsStationary = false;
 
         reticleStartPos = Reticle.instance.thisTransformPos;
         reticleEndPos = Vector2.one / 2f;
@@ -193,6 +203,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
         viewLockTime = lockObject.viewLockTime;
         viewUnlockTime = lockObject.viewUnlockTime;
+        cursorIsStationary = lockObject.cursorIsStationaryOnLock;
 
         PlayerMovement.instance.thisRigidbody.isKinematic = true;
     }
@@ -211,8 +222,10 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
             Interact.instance.enabled = true;
             //Going directly from Locked to Confined does not work
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.lockState = CursorLockMode.Confined;
+            if (!cursorIsStationary) {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.lockState = CursorLockMode.Confined;
+            }
 
             // Debug line to look at differences for teleport pictures
             //yield return new WaitForSeconds(3f);

@@ -434,7 +434,7 @@ namespace Saving {
                 .ToList();
 
             if (matches.Count == 0) {
-                Debug.LogError($"No saveableObject found anywhere with id {id}");
+                Debug.LogError($"No saveableObject with id {id} found anywhere in scene {sceneName}");
                 return null;
             }
 

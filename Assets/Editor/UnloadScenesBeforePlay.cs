@@ -28,12 +28,12 @@ class UnloadScenesBeforePlay {
         switch (state) {
             case PlayModeStateChange.EnteredEditMode:
                 // Reload all scenes except manager scene after returning to edit mode
-                ReloadAllScenesExcept("_ManagerScene");
+                ReloadAllScenesExcept(LevelManager.ManagerScene);
                 break;
             case PlayModeStateChange.ExitingEditMode:
                 // Unload all scenes except manager scene before entering play mode
                 PlayerPrefs.SetString(playerPrefsKey, "");
-                UnloadAllScenesExcept("_ManagerScene");
+                UnloadAllScenesExcept(LevelManager.ManagerScene);
                 break;
             case PlayModeStateChange.EnteredPlayMode:
                 break;

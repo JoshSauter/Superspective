@@ -146,8 +146,9 @@ namespace SuperspectiveUtils {
             if (o == null) {
                 return "(null)";
             }
-            string path = "";
             Transform curNode = o.transform;
+            string path = curNode.name;
+            curNode = curNode.parent;
             while (curNode != null) {
                 path = String.Concat($"{curNode.name}.", path);
                 curNode = curNode.parent;
@@ -217,15 +218,25 @@ namespace SuperspectiveUtils {
         }
 
         // Recursively search up the transform tree through parents to find a DimensionObject
-        public static T FindDimensionObjectRecursively<T>(this Transform go) where T : DimensionObject {
-            T dimensionObj = go.GetComponent<T>();
-            Transform parent = go.parent;
-            if (dimensionObj != null)
-                return dimensionObj;
-            if (parent != null)
-                return FindDimensionObjectRecursively<T>(parent);
+        public static T FindInParentsRecursively<T>(this Transform child) where T : Component {
+            T component = child.GetComponent<T>();
+            Transform parent = child.parent;
+            if (component != null) {
+                return component;
+            }
+
+            if (parent != null) {
+                return FindInParentsRecursively<T>(parent);
+            }
+
             return null;
         }
+
+        public static T FindInParentsRecursively<T>(this GameObject child) where T : Component =>
+            FindInParentsRecursively<T>(child.transform);
+        
+        public static T FindDimensionObjectRecursively<T>(this Transform go) where T : DimensionObject =>
+            FindInParentsRecursively<T>(go);
 
         public static T FindDimensionObjectRecursively<T>(this Component c) where T : DimensionObject =>
             FindDimensionObjectRecursively<T>(c.transform);

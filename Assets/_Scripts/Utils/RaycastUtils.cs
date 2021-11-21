@@ -15,7 +15,14 @@ namespace SuperspectiveUtils {
             Ray currentRay = ray;
             float distanceRemaining = maxDistance;
             int raycastsMade = 0;
+            Portal lastPortalHit = null;
             while (distanceRemaining > 0 && raycastsMade < MAX_RAYCASTS) {
+                int lastPortalHitLayer = -1;
+                // Temporarily ignore the out portal of the last portal hit
+                if (lastPortalHit != null && lastPortalHit.otherPortal != null) {
+                    lastPortalHitLayer = lastPortalHit.otherPortal.gameObject.layer;
+                    lastPortalHit.otherPortal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+                }
                 RaycastHit[] hits = Physics.RaycastAll(
                     currentRay.origin,
                     currentRay.direction,
@@ -24,11 +31,15 @@ namespace SuperspectiveUtils {
                     QueryTriggerInteraction.Collide
                 );
                 raycastsMade++;
+                if (lastPortalHitLayer > 0 && lastPortalHit.otherPortal != null) {
+                    lastPortalHit.otherPortal.gameObject.layer = lastPortalHitLayer;
+                }
 
                 SuperspectiveRaycastPart part = new SuperspectiveRaycastPart(currentRay, distanceRemaining, hits);
                 distanceRemaining -= part.distance;
                 if (part.hitPortal && distanceRemaining > 0) {
                     currentRay = part.NextRay();
+                    lastPortalHit = part.portalHit;
                 }
 
                 result.AddPart(part);
@@ -197,10 +208,15 @@ namespace SuperspectiveUtils {
 
         public Ray NextRay() {
             if (portalHit) {
-                Vector3 newOrigin = portalHit.TransformPoint(rawHitInfos[portalHitIndex].point);
-                Vector3 newDirection = portalHit.TransformDirection(ray.direction);
+                try {
+                    Vector3 newOrigin = portalHit.TransformPoint(rawHitInfos[portalHitIndex].point);
+                    Vector3 newDirection = portalHit.TransformDirection(ray.direction);
 
-                return new Ray(newOrigin, newDirection);
+                    return new Ray(newOrigin, newDirection);
+                }
+                catch {
+                    return new Ray();
+                }
             }
             else {
                 return new Ray();

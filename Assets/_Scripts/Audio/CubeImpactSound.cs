@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Saving;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace Audio {
@@ -32,10 +33,19 @@ namespace Audio {
 				audio.basePitch = Mathf.Lerp(minPitch, maxPitch, impactLerpSpeed);
 			}
 
-			debug.LogWarning($"{gameObject.name} collided with {collision.collider.gameObject.name} at speed {impactSpeed:F1}");
+			PrintDebugCollisionInfo(collision, impactSpeed);
 			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, this, shouldPlay, AudioSettingsOverride);
 			timeSinceLastSound = 0f;
 			curVolume = nextVolume;
+		}
+
+		void PrintDebugCollisionInfo(Collision collision, float impactSpeed) {
+			string gameObjectName = gameObject.FullPath();
+			string gameObjectLayer = LayerMask.LayerToName(gameObject.layer);
+			string otherObjectName = collision.collider.gameObject.FullPath();
+			string otherObjectLayer = LayerMask.LayerToName(collision.collider.gameObject.layer);
+			string speed = $"{impactSpeed:F1}";
+			debug.LogWarning($"({gameObjectName}, {gameObjectLayer}) collided with ({otherObjectName}, {otherObjectLayer}) at speed {impactSpeed}");
 		}
 
 		void Update() {

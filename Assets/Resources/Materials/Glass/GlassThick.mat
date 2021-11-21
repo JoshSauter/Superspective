@@ -93,6 +93,7 @@ Material:
     - _EmissionEnabled: 0
     - _FlatShading: 0
     - _FlatShadingWire: 0
+    - _FudgeDistance: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.437
     - _GlossyReflections: 1

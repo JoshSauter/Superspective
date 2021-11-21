@@ -53,6 +53,7 @@ namespace PictureTeleportMechanics {
             base.Start();
             ssao = SuperspectiveScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
             startSsaoIntensity = ssao.m_OcclusionIntensity;
+            viewLockObject.cursorIsStationaryOnLock = true;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;
         }

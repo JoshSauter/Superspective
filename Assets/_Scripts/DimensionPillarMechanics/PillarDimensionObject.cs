@@ -12,7 +12,7 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
-	public static HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
+	public static readonly HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
 	public UniqueId uniqueId => id;
 	
 	[SerializeField]
@@ -56,6 +56,7 @@ public class PillarDimensionObject : DimensionObject {
 
 	Vector3 minAngleVector, maxAngleVector;
 
+	public bool collideWithPlayerWhileInvisible = false;
 	public bool thisObjectMoves = false;
 	public Rigidbody thisRigidbody;
 	public Collider colliderBoundsOverride;
@@ -109,7 +110,8 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	public override bool ShouldCollideWithPlayer() {
-		VisibilityState effectiveVisibilityState = reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+		if (collideWithPlayerWhileInvisible) return true;
+		
 		return effectiveVisibilityState != VisibilityState.invisible;
 	}
 

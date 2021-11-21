@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
@@ -6,6 +7,7 @@ using UnityEngine;
 using SuperspectiveUtils;
 
 public class DimensionObjectCollisions : MonoBehaviour {
+
 	public DimensionObject dimensionObject;
 
 	HashSet<DimensionObject> dimensionObjectsIgnored = new HashSet<DimensionObject>();
@@ -23,7 +25,8 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		Debug.Log($"Colliders Ignored:\n{string.Join("\n", collidersIgnored)}");
 	}
 
-	void Start() {
+	IEnumerator Start() {
+		yield return new WaitWhile(() => GameManager.instance.IsCurrentlyLoading);
 		dimensionObject.OnStateChangeSimple += OnThisDimensionObjectVisibilityStateChange;
 	}
 
@@ -58,7 +61,6 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		}
 	}
 
-	// Second parameter is unused but matches the event shape so we don't subscribe with an anonymous delegate
 	void DetermineCollisionWithDimensionObject(DimensionObject otherDimensionObj) {
 		// Make sure channels are different or we are in a different visibility state
 		if (otherDimensionObj.isBeingDestroyed) {
@@ -87,7 +89,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		}
 		
 		foreach (var thisCollider in dimensionObject.colliders) {
-			Physics.IgnoreCollision(thisCollider, other, true);
+			SuperspectivePhysics.IgnoreCollision(thisCollider, other);
 		}
 		collidersIgnored.Add(other, partOfDimensionObject);
 	}
@@ -113,7 +115,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		// Sometimes the object we were ignoring collisions with gets destroyed and thus we need a null check
 		if (other != null) {
 			foreach (var thisCollider in dimensionObject.colliders) {
-				Physics.IgnoreCollision(thisCollider, other, false);
+				SuperspectivePhysics.RestoreCollision(thisCollider, other);
 			}
 		}
 		
@@ -122,28 +124,27 @@ public class DimensionObjectCollisions : MonoBehaviour {
 
 	void RestoreCollisionWithDimensionObject(DimensionObject other) {
 		if (dimensionObjectsIgnored.Contains(other)) {
-			if (dimensionObject != null) {
+			if (dimensionObject != null && other != null) {
 				dimensionObject.debug.Log($"{dimensionObject.name} restoring collision with {other.name}");
-			}
 
-			foreach (var otherCollider in other.colliders) {
-				RestoreCollisionWithCollider(otherCollider);
-			}
+				foreach (var otherCollider in other.colliders) {
+					RestoreCollisionWithCollider(otherCollider);
+				}
 
-			other.OnStateChange -= DetermineCollisionWithDimensionObject;
+				other.OnStateChange -= DetermineCollisionWithDimensionObject;
+			}
 			dimensionObjectsIgnored.Remove(other);
 		}
 	}
 
 	void OnDisable() {
-		RestoreAllCollisions();
-
 		if (dimensionObject != null) {
 			dimensionObject.OnStateChangeSimple -= OnThisDimensionObjectVisibilityStateChange;
 		}
 	}
 
-	void RestoreAllCollisions() {
+	[ContextMenu("Restore All Collisions")]
+	public void RestoreAllCollisions() {
 		List<DimensionObject> copyListOfDimensionObjectsIgnored = new List<DimensionObject>(dimensionObjectsIgnored);
 		foreach (var otherDimensionObject in copyListOfDimensionObjectsIgnored) {
 			RestoreCollisionWithDimensionObject(otherDimensionObject);
@@ -151,9 +152,13 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	void OnTriggerStay(Collider other) {
+		if (GameManager.instance.IsCurrentlyLoading) return;
 		if (dimensionObject == null || collidersIgnored.ContainsKey(other)) return;
 		DimensionObject otherDimensionObj = other.FindDimensionObjectRecursively<DimensionObject>();
 		if (otherDimensionObj != null) {
+			// Hack to prevent new CubeSpawners from ignoring collision with the MultiDimensionCubes they're spawning
+			if (otherDimensionObj.FullPath().Contains("CubeDimensionObjectParent") && otherDimensionObj is PillarDimensionObject) return;
+			
 			DetermineCollisionWithDimensionObject(otherDimensionObj);
 		}
 		else {

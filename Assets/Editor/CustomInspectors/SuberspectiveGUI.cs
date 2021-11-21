@@ -114,8 +114,10 @@ namespace UnityEditor {
         // PortalCopy
         private MaterialProperty portalPos;
         private MaterialProperty portalNormal;
+        private MaterialProperty fudgeDistance;
         private const string portalPosText = "Portal Position";
         private const string portalNormalText = "Portal Normal";
+        private const string fudgeDistanceText = "Fudge position";
 
         protected MaterialEditor editor;
 
@@ -154,6 +156,7 @@ namespace UnityEditor {
 
             portalPos = FindProperty("_PortalPos", props, false);
             portalNormal = FindProperty("_PortalNormal", props, false);
+            fudgeDistance = FindProperty("_FudgeDistance", props, false);
         }
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props) {
@@ -501,6 +504,7 @@ namespace UnityEditor {
             if (portalCopyPropertyIsEnabled) {
                 PortalPosProperty();
                 PortalNormalProperty();
+                PortalFudgeDistanceProperty();
             }
             EditorGUI.indentLevel -= 1;
         }
@@ -511,6 +515,10 @@ namespace UnityEditor {
 
         void PortalNormalProperty() {
             editor.ShaderProperty(portalNormal, portalNormalText);
+        }
+
+        void PortalFudgeDistanceProperty() {
+            editor.ShaderProperty(fudgeDistance, fudgeDistanceText);
         }
         #endregion
         #endregion

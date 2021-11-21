@@ -5,6 +5,7 @@ using System.Linq;
 using NaughtyAttributes;
 using Saving;
 using System;
+using UnityEngine.PlayerLoop;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -37,6 +38,10 @@ namespace MagicTriggerMechanics {
 
 		protected override void Awake() {
 			base.Awake();
+			UpdateLayers();
+		}
+
+		protected virtual void UpdateLayers() {
 			if (gameObject.layer != LayerMask.NameToLayer("Portal")) {
 				gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 			}

@@ -75,6 +75,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public const int COLLISION_MATRIX_ROWS = 4;
 	// First 4 columns are VisibilityStates, 5 is Player and 6 is Other Non-DimensionObjects
 	public const int COLLISION_MATRIX_COLS = 6;
+	public DimensionObjectCollisions collisionLogic;
 
 	public bool isBeingDestroyed = false;
 
@@ -184,14 +185,14 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			layer = LayerMask.NameToLayer("Ignore Raycast")
 		};
 		triggerGO.transform.SetParent(transform, false);
-		DimensionObjectCollisions collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
+		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
 		collisionLogic.dimensionObject = this;
 		SphereCollider trigger = triggerGO.AddComponent<SphereCollider>();
 		trigger.radius = Mathf.Max(size.x, size.y, size.z);
 		trigger.center = transform.InverseTransformPoint(center);
 		trigger.isTrigger = true;
 	}
-	
+
 	public bool IsVisibleFromMask(int maskValue) {
 		bool ChannelOverlap() {
 			if (useAdvancedChannelLogic) {
@@ -231,17 +232,13 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			bool ChannelIsOnForMask(int channel, float[] maskSolution) {
 				return maskSolution[channel] > 0;
 			}
-			
-			switch (a.useAdvancedChannelLogic) {
-				case true when b.useAdvancedChannelLogic:
-					return MasksHaveOverlap(a.maskRenderSolution, b.maskRenderSolution);
-				case true when !b.useAdvancedChannelLogic:
-					return ChannelIsOnForMask(b.channel, a.maskRenderSolution);
-				case false when b.useAdvancedChannelLogic:
-					return ChannelIsOnForMask(a.channel, b.maskRenderSolution);
-				default:
-					return a.channel == b.channel;
-			}
+
+			return a.useAdvancedChannelLogic switch {
+				true when b.useAdvancedChannelLogic => MasksHaveOverlap(a.maskRenderSolution, b.maskRenderSolution),
+				true when !b.useAdvancedChannelLogic => ChannelIsOnForMask(b.channel, a.maskRenderSolution),
+				false when b.useAdvancedChannelLogic => ChannelIsOnForMask(a.channel, b.maskRenderSolution),
+				_ => a.channel == b.channel
+			};
 		}
 		
 		return HaveChannelOverlap() && ShouldCollideInSameChannel(a, b);

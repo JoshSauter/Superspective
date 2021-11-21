@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
+// TODO: Make saveable
 public class CubeSpawnerNew : MonoBehaviour {
     public DimensionObject backWall;
     public Button button;
@@ -40,7 +41,7 @@ public class CubeSpawnerNew : MonoBehaviour {
     [SerializeField]
     State _state = State.NoCubeSpawned;
     State state {
-        get { return _state; }
+        get => _state;
         set {
             if (value != _state) {
                 _state = value;
@@ -79,16 +80,17 @@ public class CubeSpawnerNew : MonoBehaviour {
             case State.NoCubeSpawned:
                 break;
             case State.CubeSpawnedButNotTaken:
-                // Restore collision for the cube halfway through its fall
-                if (timeSinceStateChanged > timeToFallHalfway) {
-                    foreach (var newCubeColliders in cubeSpawned.GetComponentInParent<DimensionObject>().colliders) {
-                        newCubeColliders.enabled = true;
+                DimensionObject parentDimensionObj = cubeSpawned.GetComponentInParent<DimensionObject>();
+                // Disable new cube's colliders for the first half of the fall
+                if (timeSinceStateChanged <= timeToFallHalfway) {
+                    foreach (var newCubeColliders in parentDimensionObj.colliders) {
+                        newCubeColliders.enabled = false;
                     }
                 }
                 else {
-                    // Disable new cube's colliders for the first half of the fall
-                    foreach (var newCubeColliders in cubeSpawned.GetComponentInParent<DimensionObject>().colliders) {
-                        newCubeColliders.enabled = false;
+                    // Restore collision for the cube halfway through its fall
+                    foreach (var newCubeColliders in parentDimensionObj.colliders) {
+                        newCubeColliders.enabled = true;
                     }
                 }
 
@@ -121,7 +123,9 @@ public class CubeSpawnerNew : MonoBehaviour {
     void SpawnNewCube() {
         if (state != State.NoCubeSpawned) return;
 
-        PickupObject newCube = Instantiate(cubePrefab, transform).GetComponent<PickupObject>();
+        DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
+        newCubeDynamicObj.isGlobal = false; // Not global until retrieved from cube spawner
+        PickupObject newCube = newCubeDynamicObj.GetComponent<PickupObject>();
         newCube.transform.SetParent(null);
         newCube.transform.localScale = cubePrefab.transform.localScale;
         newCube.transform.position = transform.position + transform.up * spawnOffset;
@@ -132,7 +136,8 @@ public class CubeSpawnerNew : MonoBehaviour {
         // Create a parent object to place the DimensionObject script on that the cube will be a child of
         GameObject cubeParent = new GameObject("CubeDimensionObjectParent");
         DimensionObject parentDimensionObj = cubeParent.AddComponent<DimensionObject>();
-        //parentDimensionObj.DEBUG = true;
+        //parentDimensionObj.colliders = new Collider[] {cubeParent.AddComponent<BoxCollider>()};
+        //parentDimensionObj.DEBUG = DEBUG;
         parentDimensionObj.startingVisibilityState = VisibilityState.partiallyVisible;
         parentDimensionObj.treatChildrenAsOneObjectRecursively = true;
         parentDimensionObj.ignoreChildrenWithDimensionObject = false;
@@ -147,7 +152,7 @@ public class CubeSpawnerNew : MonoBehaviour {
         parentDimensionObj.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
         parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyVisible, true);
         
-        Physics.IgnoreCollision(roofCollider, newCube.GetComponent<Collider>(), true);
+        SuperspectivePhysics.IgnoreCollision(roofCollider, newCube.GetComponent<Collider>());
         
         PillarDimensionObject[] dimensionObjs =
             newCube.transform.GetComponentsInChildrenRecursively<PillarDimensionObject>();
@@ -210,7 +215,8 @@ public class CubeSpawnerNew : MonoBehaviour {
             state = State.CubeTaken;
             
             // Restore collision with the roof of the Cube Spawner when the cube is taken from the spawner
-            Physics.IgnoreCollision(roofCollider, cube.GetComponent<Collider>(), false);
+            SuperspectivePhysics.RestoreCollision(roofCollider, cube.GetComponent<Collider>());
+            cube.GetComponent<DynamicObject>().isGlobal = true; // Restore isGlobal behavior when retrieved from spawner
 
             // When the cube is removed from the spawner, reset its DimensionObject channel to their default
             DimensionObject originalDimensionObj = cubePrefab.GetComponentInChildren<DimensionObject>();
@@ -223,7 +229,7 @@ public class CubeSpawnerNew : MonoBehaviour {
             }
             
             // Also remove the dimension parent object
-            DimensionObject dimensionParent = cube.transform.parent.GetComponent<DimensionObject>();
+            DimensionObject dimensionParent = cube.transform.parent?.GetComponent<DimensionObject>();
             dimensionParent.SwitchVisibilityState(VisibilityState.visible, true);
             dimensionParent.Unregister();
             Transform parent = cube.transform.parent;

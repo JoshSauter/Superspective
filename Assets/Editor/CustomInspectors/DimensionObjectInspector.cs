@@ -158,6 +158,15 @@ public class DimensionObjectInspector : UnityEditor.Editor {
         visibilityStateShown = EditorGUILayout.Foldout(visibilityStateShown, "Visibility State:");
         if (visibilityStateShown) {
             EditorGUI.indentLevel++;
+            
+            EditorGUI.BeginDisabledGroup(true);
+            VisibilityState effectiveVisibilityState = (VisibilityState) visibilityState.enumValueIndex;
+            effectiveVisibilityState = reverseVisibilityStates.boolValue
+                ? effectiveVisibilityState.Opposite()
+                : effectiveVisibilityState;
+            EditorGUILayout.EnumPopup("Effective Visibility:", effectiveVisibilityState);
+            EditorGUI.EndDisabledGroup();
+            
             EditorGUILayout.PropertyField(startingVisibilityState);
             EditorGUILayout.PropertyField(visibilityState);
             if ((VisibilityState) visibilityState.enumValueIndex != cachedVisibilityState) {

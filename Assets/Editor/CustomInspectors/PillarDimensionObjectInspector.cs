@@ -14,6 +14,7 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
     SerializedProperty minAngle;
     SerializedProperty maxAngle;
     SerializedProperty pillars;
+    SerializedProperty collideWithPlayerWhileInvisible;
     SerializedProperty thisObjectMoves;
     SerializedProperty thisRigidbody;
     SerializedProperty colliderBoundsOverride;
@@ -27,6 +28,7 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
         minAngle = serializedObject.FindProperty("minAngle");
         maxAngle = serializedObject.FindProperty("maxAngle");
         pillars = serializedObject.FindProperty("pillars");
+        collideWithPlayerWhileInvisible = serializedObject.FindProperty("collideWithPlayerWhileInvisible");
         thisObjectMoves = serializedObject.FindProperty("thisObjectMoves");
         thisRigidbody = serializedObject.FindProperty("thisRigidbody");
         colliderBoundsOverride = serializedObject.FindProperty("colliderBoundsOverride");
@@ -49,6 +51,9 @@ public class PillarDimensionObjectInspector : DimensionObjectInspector {
             GUIContent dimensionLabel = new GUIContent("Dimension: ");
             EditorGUILayout.PropertyField(dimension, dimensionLabel);
 
+            GUIContent collideWithPlayerWhileInvisibleLabel = new GUIContent("Collide with Player while invisible: ");
+            EditorGUILayout.PropertyField(collideWithPlayerWhileInvisible, collideWithPlayerWhileInvisibleLabel);
+            
             GUIContent thisObjectMovesLabel = new GUIContent("This object moves: ");
             EditorGUILayout.PropertyField(thisObjectMoves, thisObjectMovesLabel);
 

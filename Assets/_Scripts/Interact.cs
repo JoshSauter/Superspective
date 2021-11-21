@@ -42,7 +42,6 @@ public class Interact : Singleton<Interact> {
         reticleOutsideUnselectColor = reticleOutside.color;
     }
 
-
     // Update is called once per frame
     void Update() {
         InteractableObject newObjectHovered = FindInteractableObjectHovered();
@@ -116,17 +115,17 @@ public class Interact : Singleton<Interact> {
     InteractableObject FindInteractableObjectHovered() {
         SuperspectiveRaycast raycastResult = GetRaycastHits();
 
+        InteractableObject interactable = null;
         if (raycastResult.hitObject) {
             nameOfFirstObjectHit = raycastResult.firstObjectHit.collider.name;
-            if (raycastResult.firstObjectHit.collider.gameObject.TryGetComponent(out InteractableObject interactable)) {
-                return interactable;
-            }
+            GameObject firstObjHit = raycastResult.firstObjectHit.collider.gameObject;
+            interactable = firstObjHit.FindInParentsRecursively<InteractableObject>();
         }
         else {
             nameOfFirstObjectHit = "";
         }
 
-        return null;
+        return interactable;
     }
 
     void OnGUI() {

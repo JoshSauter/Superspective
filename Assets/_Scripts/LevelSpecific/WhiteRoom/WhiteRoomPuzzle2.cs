@@ -31,9 +31,7 @@ namespace LevelSpecific.WhiteRoom {
         int actualValue = 0;
         float _displayedValue = 0f;
         float displayedValue {
-            get {
-                return _displayedValue;
-            }
+            get => _displayedValue;
             set {
                 value = Mathf.Clamp(value, -80f, 80f);
                 _displayedValue = value;
@@ -69,9 +67,10 @@ namespace LevelSpecific.WhiteRoom {
         float currentValueNegativeSymbolAlpha = 0f;
 
         public Material whiteToBlack, blackToWhite;
+        public DimensionObject[] whiteCubeSpawnerDimensionObjects;
         public Color white, black;
-        const string colorProp = "_Color";
-        const string colorProp2 = "_Color2";
+        const string colorProp = "_AngleFadeColor";
+        const string colorProp2 = "_AngleFadeColor2";
 
         // Hexes react to the player looking at them by looking back
         public enum HexState {
@@ -140,8 +139,8 @@ namespace LevelSpecific.WhiteRoom {
             };
             obeliskLight.material = obeliskLightMaterial;
             
-            white = Resources.Load<Material>("Materials/Unlit/Unlit").GetColor(colorProp);
-            black = Resources.Load<Material>("Materials/Unlit/UnlitBlack").GetColor(colorProp);
+            white = Resources.Load<Material>("Materials/Unlit/Unlit").GetColor("_Color");
+            black = Resources.Load<Material>("Materials/Unlit/UnlitBlack").GetColor("_Color");
         }
 
         protected override void Start() {
@@ -170,8 +169,8 @@ namespace LevelSpecific.WhiteRoom {
         void ResetWhiteBlackFadeMaterials() {
             whiteToBlack.SetColor(colorProp, white);
             whiteToBlack.SetColor(colorProp2, black);
-            blackToWhite.SetColor(colorProp, black);
-            blackToWhite.SetColor(colorProp2, white);
+            blackToWhite.SetColor(colorProp, white);
+            blackToWhite.SetColor(colorProp2, black);
         }
 
         void Update() {
@@ -182,6 +181,9 @@ namespace LevelSpecific.WhiteRoom {
             }
             else if (Input.GetKey("0")) {
                 actualValue = Mathf.Clamp(actualValue - 1, -80, 80);
+            }
+            else if (Input.GetKeyDown("-")) {
+                actualValue = target;
             }
 
             foreach (var powerReceptacle in powerReceptacles) {
@@ -218,11 +220,16 @@ namespace LevelSpecific.WhiteRoom {
             float rotationLerpSpeed = 0.2f;
             if (hexState != HexState.ValueOutOfRange) {
                 float t = timeSinceHexStateChanged;
-
-                Color whiteToBlackColor = whiteToBlack.GetColor(colorProp);
-                Color blackToWhiteColor = blackToWhite.GetColor(colorProp2);
-                whiteToBlack.SetColor(colorProp, Color.Lerp(whiteToBlackColor, white, t));
-                blackToWhite.SetColor(colorProp2, Color.Lerp(blackToWhiteColor, white, t));
+                
+                Color color1 = whiteToBlack.GetColor(colorProp);
+                Color nextColor = Color.Lerp(color1, white, t);
+                whiteToBlack.SetColor(colorProp, nextColor);
+                blackToWhite.SetColor(colorProp, nextColor);
+                foreach (DimensionObject dimensionObj in whiteCubeSpawnerDimensionObjects) {
+                    foreach (SuperspectiveRenderer renderer in dimensionObj.renderers) {
+                        renderer.SetColor(colorProp, nextColor);
+                    }
+                }
             }
 
             // Make sure we aren't running laser-to-receiver particle systems if correct value hasn't been found
@@ -277,8 +284,14 @@ namespace LevelSpecific.WhiteRoom {
                     // After some time, fade the room and then pop cubes out
                     if (timeSinceHexStateChanged > 3f) {
                         float t = Mathf.InverseLerp(3f, 6f, timeSinceHexStateChanged);
-                        whiteToBlack.SetColor(colorProp, Color.Lerp(white, black, t));
-                        blackToWhite.SetColor(colorProp2, Color.Lerp(white, black, t));
+                        Color nextColor = Color.Lerp(white, black, t);
+                        whiteToBlack.SetColor(colorProp, nextColor);
+                        blackToWhite.SetColor(colorProp, nextColor);
+                        foreach (DimensionObject dimensionObj in whiteCubeSpawnerDimensionObjects) {
+                            foreach (SuperspectiveRenderer renderer in dimensionObj.renderers) {
+                                renderer.SetColor(colorProp, nextColor);
+                            }
+                        }
                     }
                     if (timeSinceHexStateChanged > 8f) {
                         PopCubesOut();

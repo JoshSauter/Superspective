@@ -28,7 +28,7 @@ namespace Editor {
         public void SelectAllChildrenRecusivelyWithMaterial(GameObject curNode, ref List<GameObject> selectionSoFar) {
             bool containsMaterial = false;
             if (curNode.TryGetComponent(out Renderer renderer)) {
-                containsMaterial = renderer.sharedMaterials.ToList().Contains(material);
+                containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m.name.Contains(material.name));
             }
             
             if (containsMaterial) selectionSoFar.Add(curNode);

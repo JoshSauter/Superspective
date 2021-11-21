@@ -3,7 +3,7 @@
 #pragma shader_feature POWER_TRAIL_OBJECT
 #pragma shader_feature SHUTTERED_OBJECT
 #pragma shader_feature PORTAL_COPY_OBJECT
-	
+
 #include "UnityCG.cginc"
 
 #ifdef DIMENSION_OBJECT

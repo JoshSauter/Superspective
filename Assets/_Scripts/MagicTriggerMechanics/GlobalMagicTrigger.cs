@@ -20,6 +20,8 @@ namespace MagicTriggerMechanics {
 			return isActive;
 		}
 
+		protected override void UpdateLayers() { /* No need to change layers for global triggers */ }
+
         void Update() {
             if (!IsActive()) return;
 			GameObject player = Player.instance.gameObject;

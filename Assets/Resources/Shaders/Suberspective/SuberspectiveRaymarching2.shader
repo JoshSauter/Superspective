@@ -36,6 +36,7 @@ Shader "Suberspective/SuberspectiveRaymarching2" {
         // PortalCopy
 		_PortalPos("Portal Position", Vector) = (0, 0, 0)
 		_PortalNormal("Portal Normal", Vector) = (0, 0, 1)
+		_FudgeDistance("Fudge Position", Float) = 0.0
     }
     SubShader {
 		Tags { "RenderType"="Transparent" }

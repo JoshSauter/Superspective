@@ -295,7 +295,7 @@ namespace LevelManagement {
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build
 		Dictionary<string, Level> levels;
 		internal static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
-			{ Levels.ManagerScene, "_ManagerScene" },
+			{ Levels.ManagerScene, ManagerScene },
 			{ Levels.TestScene, "_TestScene" },
 			{ Levels.EmptyRoom, "_EmptyRoom" },
 			{ Levels.HexPillarRoom, "_HexPillarRoom" },
@@ -395,7 +395,7 @@ namespace LevelManagement {
 		public event SceneLoadUnload AfterSceneRestoreState;
 		public event SceneLoadUnload BeforeSceneSerializeState;
 
-		public const string ManagerScene = "_ManagerScene";
+		public const string ManagerScene = "__ManagerScene";
 
 		protected override void Awake() {
 			base.Awake();

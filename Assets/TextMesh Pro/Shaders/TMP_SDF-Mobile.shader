@@ -176,7 +176,8 @@ SubShader {
 			
 			output.worldPos = mul(unity_ObjectToWorld, input.vertex).xyz;
 #ifdef DISSOLVE_OBJECT
-			output.uv_DissolveTex = TRANSFORM_TEX(input.texcoord, _DissolveTex);
+			// This is probably not the right texcoord, fix if this causes issues:
+			output.uv_DissolveTex = TRANSFORM_TEX(input.texcoord0, _DissolveTex);
 #endif
 			
 			return output;

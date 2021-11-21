@@ -71,13 +71,10 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
         if (thisGravity == null) thisGravity = GetComponent<GravityObject>();
 
-        interactableObject = thisRigidbody.GetComponent<InteractableObject>();
-        if (interactableObject == null)
-            interactableObject = thisRigidbody.gameObject.AddComponent<InteractableObject>();
+        interactableObject = thisRigidbody.GetOrAddComponent<InteractableObject>();
         interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 
-        interactableGlow = interactableObject.GetComponent<InteractableGlow>();
-        if (interactableGlow == null) interactableGlow = interactableObject.gameObject.AddComponent<InteractableGlow>();
+        interactableGlow = interactableObject.GetOrAddComponent<InteractableGlow>();
 
         if (portalableObject == null) portalableObject = GetComponent<PortalableObject>();
     }

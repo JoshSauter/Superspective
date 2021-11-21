@@ -36,6 +36,7 @@
         // PortalCopy
 		_PortalPos("Portal Position", Vector) = (0, 0, 0)
 		_PortalNormal("Portal Normal", Vector) = (0, 0, 1)
+		_FudgeDistance("Fudge Position", Float) = 0.0
     }
     SubShader {
 	    Tags { "RenderType"="Suberspective" }
@@ -174,9 +175,6 @@
                 return 1-fixed4(0,0,0,0);
             }
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			float _ResolutionX;
-			float _ResolutionY;
 
 			float2 rotate(in float2 v, in float a) {
 				return float2(cos(a)*v.x + sin(a)*v.y, -sin(a)*v.x + cos(a)*v.y);

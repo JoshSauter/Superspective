@@ -51,6 +51,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -59,7 +60,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ee7b5e41d02f16a499d28c3de11c6cee, type: 2}
+  - {fileID: 2100000, guid: 280cbb843f04b334d9740dd7a7aa65f8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -141,6 +142,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -248,6 +250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   thisRigidbody: {fileID: 0}
   useGravity: 1
   gravityDirection: {x: 0, y: -1, z: 0}
@@ -264,6 +267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
 --- !u!114 &-1455407386897224382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,5 +293,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DEBUG: 0
   prefabPath: Prefabs/PickUpCubes/PickUpCube
   isGlobal: 1

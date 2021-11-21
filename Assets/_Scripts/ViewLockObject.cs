@@ -15,6 +15,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public delegate void ViewLockEvent();
 
     public ViewLockInfo[] viewLockOptions;
+    public bool cursorIsStationaryOnLock = false;
     public float viewLockTime = 0.75f;
     public float viewUnlockTime = 0.25f;
 
