@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
+using System.Reflection;
 using SuperspectiveUtils;
 using LevelManagement;
 using NaughtyAttributes;
@@ -7,7 +9,8 @@ using UnityEngine;
 
 namespace Saving {
     public abstract class SaveableObject : MonoBehaviour, ISaveableObject {
-        UniqueId _id;
+        [SerializeField]
+        protected UniqueId _id;
         protected UniqueId id {
             get {
                 if (_id == null) {
@@ -167,6 +170,18 @@ namespace Saving {
     public abstract class SaveableObject<T, S> : SaveableObject
         where T : SaveableObject
         where S : SerializableSaveObject<T> {
+
+        private void OnValidate() {
+            if (id == null) {
+                var requireUniqueIdAttribute = typeof(T).GetCustomAttributes(typeof(RequireComponent), true).Select(att => att as RequireComponent);
+                var uniqueIdType = typeof(UniqueId);
+                bool requiresUniqueId = requireUniqueIdAttribute.Any(att => att?.m_Type0 == uniqueIdType || att?.m_Type1 == uniqueIdType || att?.m_Type2 == uniqueIdType);
+                if (requiresUniqueId) {
+                    _id = gameObject.GetOrAddComponent<UniqueId>();
+                }
+            }
+        }
+        
         // GetSaveObject and LoadFromSavedObject are virtual so they can be overridden to target inherited save objects instead of base save objects
         public override SerializableSaveObject GetSaveObject() {
             return (S)Activator.CreateInstance(typeof(S), new object[] { this });

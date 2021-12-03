@@ -32,15 +32,15 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	}
 
     void Update() {
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G)) {
+        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.G)) {
 			ToggleNoClip();
 		}
 
 		if (noClipOn) {
-			if (Input.GetKeyDown(KeyCode.LeftShift)) {
+			if (DebugInput.GetKeyDown(KeyCode.LeftShift)) {
 				desiredSpeed = (desiredSpeed == sprintSpeed) ? moveSpeed : sprintSpeed;
 			}
-			else if (Input.GetKeyDown(KeyCode.LeftControl)) {
+			else if (DebugInput.GetKeyDown(KeyCode.LeftControl)) {
 				desiredSpeed = (desiredSpeed == slowMoveSpeed) ? moveSpeed : slowMoveSpeed;
 			}
 			

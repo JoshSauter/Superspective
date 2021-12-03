@@ -1,16 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Audio;
+using LevelSpecific.Fork;
 using NaughtyAttributes;
 using Saving;
+using SerializableClasses;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
-// TODO: Make saveable
-public class CubeSpawnerNew : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.CubeSpawnerNewSave> {
     public DimensionObject backWall;
     public Button button;
     const float spawnOffset = 12;
@@ -50,13 +53,15 @@ public class CubeSpawnerNew : MonoBehaviour {
         }
     }
 
-    PickupObject cubeShrinking;
-    float timeSinceCubeShrink = 0f;
-    const float shrinkTime = 0.4f;
-    Vector3 shrinkStartSize = Vector3.one;
-    public AnimationCurve cubeShrinkCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    PickupObject cubeDespawning;
+    float timeSinceCubeDespawnStart = 0f;
+    const float despawnTime = 4f;
+    Vector3 despawnStartSize = Vector3.one;
+    private const float despawnEndSizeMultiplier = 4;
+    AnimationCurve cubeDespawnSizeCurve = AnimationCurve.EaseInOut(0,0,1,1);
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         button.OnButtonPressBegin += (_) => SpawnNewCube();
         button.OnButtonUnpressBegin += (_) => DestroyCubeAlreadyGrabbedFromSpawner();
 
@@ -64,20 +69,33 @@ public class CubeSpawnerNew : MonoBehaviour {
     }
 
     bool ReferenceIsReplaceable(PickupObjectReference obj) {
-        return obj.Reference.Match(
+        return obj?.Reference?.Match(
             pickupObject => pickupObject.isReplaceable,
             saveObject => saveObject.isReplaceable
-        );
+        ) ?? false;
+    }
+
+    void UpdateButtonInteractability() {
+        if (state == State.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
+            button.interactableObject.SetAsDisabled();
+        }
+        else if (state == State.CubeSpawnedButNotTaken) {
+            button.interactableObject.SetAsHidden();
+        }
+        else {
+            button.interactableObject.SetAsInteractable();
+        }
     }
 
     void Update() {
         timeSinceStateChanged += Time.deltaTime;
 
         // Make it so the button is only clickable when it will do something (spawn a cube or destroy a spawned cube)
-        button.interactableObject.interactable = state != State.CubeSpawnedButNotTaken;
+        UpdateButtonInteractability();
         
         switch (state) {
             case State.NoCubeSpawned:
+                glass.localPosition = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
                 break;
             case State.CubeSpawnedButNotTaken:
                 DimensionObject parentDimensionObj = cubeSpawned.GetComponentInParent<DimensionObject>();
@@ -102,6 +120,9 @@ public class CubeSpawnerNew : MonoBehaviour {
                     Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
                     glass.localPosition = Vector3.Lerp(startPos, endPos, t*t);
                 }
+                else if (timeSinceStateChanged >= glassMoveTime + glassLowerDelay) {
+                    glass.localPosition = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
+                }
                 break;
             case State.CubeTaken:
                 if (timeSinceStateChanged > glassRaiseDelay && timeSinceStateChanged < glassMoveTime + glassRaiseDelay) {
@@ -117,7 +138,7 @@ public class CubeSpawnerNew : MonoBehaviour {
                 throw new ArgumentOutOfRangeException();
         }
         
-        UpdateShrinkAndDestroyCube(cubeShrinking);
+        UpdateDematerializeCube(cubeDespawning);
     }
 
     void SpawnNewCube() {
@@ -133,6 +154,20 @@ public class CubeSpawnerNew : MonoBehaviour {
         newCube.thisGravity.gravityDirection = -transform.up;
         SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
+        AffixSpawnedCubeWithParentDimensionObject(newCube);
+        
+        PillarDimensionObject[] dimensionObjs =
+            newCube.transform.GetComponentsInChildrenRecursively<PillarDimensionObject>();
+        foreach (PillarDimensionObject newCubeDimensionObj in dimensionObjs) {
+            newCubeDimensionObj.channel = backWall.channel;
+        }
+
+        cubeSpawned = newCube;
+        AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerSpawn, ID, button.transform.position);
+        state = State.CubeSpawnedButNotTaken;
+    }
+
+    void AffixSpawnedCubeWithParentDimensionObject(PickupObject newCube) {
         // Create a parent object to place the DimensionObject script on that the cube will be a child of
         GameObject cubeParent = new GameObject("CubeDimensionObjectParent");
         DimensionObject parentDimensionObj = cubeParent.AddComponent<DimensionObject>();
@@ -142,6 +177,8 @@ public class CubeSpawnerNew : MonoBehaviour {
         parentDimensionObj.treatChildrenAsOneObjectRecursively = true;
         parentDimensionObj.ignoreChildrenWithDimensionObject = false;
         parentDimensionObj.channel = backWall.channel;
+        // Don't save the specifics of the DimensionObject to the scene, we'll recreate it upon loading
+        parentDimensionObj.SkipSave = true;
         cubeParent.name = "CubeDimensionObjectParent";
         cubeParent.transform.position = newCube.transform.position;
         cubeParent.transform.rotation = newCube.transform.rotation;
@@ -153,15 +190,6 @@ public class CubeSpawnerNew : MonoBehaviour {
         parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyVisible, true);
         
         SuperspectivePhysics.IgnoreCollision(roofCollider, newCube.GetComponent<Collider>());
-        
-        PillarDimensionObject[] dimensionObjs =
-            newCube.transform.GetComponentsInChildrenRecursively<PillarDimensionObject>();
-        foreach (PillarDimensionObject newCubeDimensionObj in dimensionObjs) {
-            newCubeDimensionObj.channel = backWall.channel;
-        }
-
-        cubeSpawned = newCube;
-        state = State.CubeSpawnedButNotTaken;
     }
     
     void DestroyCubeAlreadyGrabbedFromSpawner() {
@@ -169,10 +197,21 @@ public class CubeSpawnerNew : MonoBehaviour {
             cubeGrabbedFromSpawner.Reference.MatchAction(
                 // If the object is loaded, play the shrink animation for this cube
                 pickupObject => {
-                    cubeShrinking = pickupObject;
-                    
-                    shrinkStartSize = cubeShrinking.transform.localScale;
-                    timeSinceCubeShrink = 0f;
+                    AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, button.transform.position);
+                    AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, pickupObject.transform.position);
+                    cubeDespawning = pickupObject;
+
+                    // Setup initial dissolve properties
+                    foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
+                        cubeRenderer.material.EnableKeyword("DISSOLVE_OBJECT");
+                        cubeRenderer.material.SetFloat("_DissolveBurnSize", .1f);
+                        if (cubeRenderer.gameObject == cubeDespawning.gameObject) {
+                            cubeRenderer.material.SetTextureScale("_DissolveTex", Vector2.one * 0.02f);
+                        }
+                    }
+
+                    despawnStartSize = cubeDespawning.transform.localScale;
+                    timeSinceCubeDespawnStart = 0f;
                 },
                 // If the object is not loaded, just destroy it directly
                 saveObject => saveObject.Destroy()
@@ -182,29 +221,41 @@ public class CubeSpawnerNew : MonoBehaviour {
             state = State.NoCubeSpawned;
         }
     }
-    
-    void UpdateShrinkAndDestroyCube(PickupObject cube) {
+
+    void UpdateDematerializeCube(PickupObject cube) {
         if (cube != null) {
             // Don't allow shrinking cubes to be picked up
             cube.interactable = false;
             // Trick to get the cube to not interact with the player anymore but still collide with ground
             cube.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
-            cube.thisRigidbody.useGravity = false;
+            cube.thisRigidbody.isKinematic = true;
+            foreach (Collider collider in cube.GetComponentsInChildren<Collider>()) {
+                if (collider.isTrigger) collider.enabled = false;
+                else collider.isTrigger = true;
+            }
 
-            if (timeSinceCubeShrink < shrinkTime) {
-                timeSinceCubeShrink += Time.deltaTime;
-                float t = Mathf.Clamp01(timeSinceCubeShrink / shrinkTime);
+            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+            if (timeSinceCubeDespawnStart < despawnTime) {
+                timeSinceCubeDespawnStart += Time.deltaTime;
+                float t = Mathf.Clamp01(timeSinceCubeDespawnStart / despawnTime);
 
                 cube.transform.localScale = Vector3.LerpUnclamped(
-                    shrinkStartSize,
-                    Vector3.zero,
-                    cubeShrinkCurve.Evaluate(t)
+                    despawnStartSize,
+                    despawnStartSize*despawnEndSizeMultiplier,
+                    cubeDespawnSizeCurve.Evaluate(t)
                 );
+                propBlock.SetFloat("_DissolveValue", t);
+                foreach (var cubeRenderer in cube.GetComponentsInChildren<Renderer>()) {
+                    cubeRenderer.SetPropertyBlock(propBlock);
+                }
             }
             else {
-                cube.transform.localScale = Vector3.zero;
+                propBlock.SetFloat("_DissolveValue", 1);
+                foreach (var cubeRenderer in cube.GetComponentsInChildren<Renderer>()) {
+                    cubeRenderer.SetPropertyBlock(propBlock);
+                }
                 cube.GetComponent<DynamicObject>().Destroy();
-                cubeShrinking = null;
+                cubeDespawning = null;
             }
         }
     }
@@ -213,6 +264,7 @@ public class CubeSpawnerNew : MonoBehaviour {
         PickupObject cube = other.GetComponent<PickupObject>();
         if (cube != null && cube == cubeSpawned) {
             state = State.CubeTaken;
+            AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerClose, ID, glass.transform.position);
             
             // Restore collision with the roof of the Cube Spawner when the cube is taken from the spawner
             SuperspectivePhysics.RestoreCollision(roofCollider, cube.GetComponent<Collider>());
@@ -240,4 +292,43 @@ public class CubeSpawnerNew : MonoBehaviour {
             cubeGrabbedFromSpawner = cube;
         }
     }
+    
+    #region Saving
+
+    [Serializable]
+    public class CubeSpawnerNewSave : SerializableSaveObject<CubeSpawnerNew> {
+        PickupObjectReference cubeSpawned;
+        PickupObjectReference cubeGrabbedFromSpawner;
+        float timeSinceStateChanged = 0f;
+        State state;
+
+        PickupObjectReference cubeDespawning;
+        float timeSinceCubeDespawnStart;
+        SerializableVector3 shrinkStartSize;
+        SerializableAnimationCurve cubeDespawnSizeCurve;
+
+        public CubeSpawnerNewSave(CubeSpawnerNew spawner) : base(spawner) {
+            this.cubeSpawned = spawner.cubeSpawned;
+            this.cubeGrabbedFromSpawner = spawner.cubeGrabbedFromSpawner;
+            this.timeSinceStateChanged = spawner.timeSinceStateChanged;
+            this.state = spawner.state;
+            this.cubeDespawning = spawner.cubeDespawning;
+            this.timeSinceCubeDespawnStart = spawner.timeSinceCubeDespawnStart;
+            this.cubeDespawnSizeCurve = spawner.cubeDespawnSizeCurve;
+        }
+
+        public override void LoadSave(CubeSpawnerNew spawner) {
+            spawner.cubeSpawned = this.cubeSpawned?.GetOrNull();
+            if (spawner.cubeSpawned != null) {
+                spawner.AffixSpawnedCubeWithParentDimensionObject(spawner.cubeSpawned);
+            }
+            spawner.cubeGrabbedFromSpawner = this.cubeGrabbedFromSpawner;
+            spawner.timeSinceStateChanged = this.timeSinceStateChanged;
+            spawner._state = this.state;
+            spawner.cubeDespawning = this.cubeDespawning?.GetOrNull();
+            spawner.timeSinceCubeDespawnStart = this.timeSinceCubeDespawnStart;
+            spawner.cubeDespawnSizeCurve = this.cubeDespawnSizeCurve;
+        }
+    }
+    #endregion
 }

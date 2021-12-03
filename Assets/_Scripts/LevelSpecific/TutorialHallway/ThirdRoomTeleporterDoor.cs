@@ -21,7 +21,7 @@ namespace LevelSpecific.TutorialHallway {
 		// Update is called once per frame
 		void Update() {
 			// DEBUG
-			if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown("o")) {
+			if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown("o")) {
 				StartCoroutine(DoorOpen());
 			}
 		}

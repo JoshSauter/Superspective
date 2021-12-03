@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Audio;
 using NaughtyAttributes;
+using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace LevelSpecific.Fork {
 	[RequireComponent(typeof(UniqueId))]
 	public class ForkElevator : SaveableObject<ForkElevator, ForkElevator.ForkElevatorSave>, AudioJobOnGameObject {
 		public enum State {
+			NotPowered,
 			Idle,
 			DoorsClosing,
 			ElevatorMoving,
@@ -18,7 +20,7 @@ namespace LevelSpecific.Fork {
 
 		[SerializeField]
 		[ReadOnly]
-		State _state = State.Idle;
+		State _state = State.NotPowered;
 		public State state {
 			get { return _state; }
 			set {
@@ -26,9 +28,11 @@ namespace LevelSpecific.Fork {
 				_state = value;
 			}
 		}
+
 		public bool goingDown = true;
 		float timeElapsedSinceStateChange = 0f;
 
+		public PowerTrail initialPowerTrail;
 		public AnimationCurve lockBarAnimation;
 		public Transform[] lockBars;
 		public Transform elevator;
@@ -59,12 +63,37 @@ namespace LevelSpecific.Fork {
 
 			elevatorButton.OnButtonPressBegin += (ctx) => RaiseLowerElevator(true);
 			elevatorButton.OnButtonUnpressBegin += (ctx) => RaiseLowerElevator(false);
+
+			initialPowerTrail.OnPowerFinish += () => {
+				if (state == State.NotPowered) state = State.DoorsOpening;
+			};
+			initialPowerTrail.OnDepowerBegin += () => {
+				if (state == State.Idle) state = State.DoorsClosing;
+			};
+		}
+
+		void UpdateButtonInteractibility() {
+			if (!playerStandingInElevator) {
+				elevatorButton.interactableObject.SetAsHidden();
+			}
+			else if (!initialPowerTrail.powerIsOn || state != State.Idle) {
+				elevatorButton.interactableObject.SetAsDisabled();
+			}
+			else {
+				elevatorButton.interactableObject.SetAsInteractable();
+			}
 		}
 
 		void FixedUpdate() {
-			elevatorButton.interactableObject.interactable = playerStandingInElevator && state == State.Idle;
+			UpdateButtonInteractibility();
 
 			switch (state) {
+				case State.NotPowered:
+					foreach (var lockBar in lockBars) {
+						lockBar.localScale = Vector3.one;
+					}
+					lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, 1f);
+					break;
 				case State.Idle:
 					foreach (var lockBar in lockBars) {
 						lockBar.localScale = new Vector3(1, 0, 1);
@@ -113,10 +142,12 @@ namespace LevelSpecific.Fork {
 
 				// Transition state to ElevatorMoving after waiting .1 additional seconds
 				if (timeElapsedSinceStateChange >= totalAnimationTime + 0.1f) {
-					CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
-					AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, this, true);
+					if (initialPowerTrail.powerIsOn) {
+						CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
+						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, this, true);
+					}
 
-					state = State.ElevatorMoving;
+					state = initialPowerTrail.powerIsOn ? State.ElevatorMoving : State.NotPowered;
 				}
 			}
 		}
@@ -178,7 +209,7 @@ namespace LevelSpecific.Fork {
 				// Reverse direction for next execution
 				goingDown = !goingDown;
 
-				state = State.DoorsOpening;
+				state = initialPowerTrail.powerIsOn ? State.DoorsOpening : State.NotPowered;
 			}
 		}
 

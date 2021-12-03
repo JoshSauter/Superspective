@@ -89,7 +89,7 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
         }
 
         void Update() {
-            if (Input.GetKeyDown("m")) {
+            if (DebugInput.GetKeyDown("m")) {
                 NextShutterState();
             }
             

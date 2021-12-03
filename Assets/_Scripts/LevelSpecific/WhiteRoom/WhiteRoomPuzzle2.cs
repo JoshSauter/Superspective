@@ -176,13 +176,13 @@ namespace LevelSpecific.WhiteRoom {
         void Update() {
             if (!hasInitialized) return;
             
-            if (Input.GetKey("9")) {
+            if (DebugInput.GetKey("9")) {
                 actualValue = Mathf.Clamp(actualValue + 1, -80, 80);
             }
-            else if (Input.GetKey("0")) {
+            else if (DebugInput.GetKey("0")) {
                 actualValue = Mathf.Clamp(actualValue - 1, -80, 80);
             }
-            else if (Input.GetKeyDown("-")) {
+            else if (DebugInput.GetKeyDown("-")) {
                 actualValue = target;
             }
 

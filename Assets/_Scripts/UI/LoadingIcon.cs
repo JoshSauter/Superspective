@@ -53,7 +53,7 @@ public class LoadingIcon : Singleton<LoadingIcon> {
             state = GameManager.instance.IsCurrentlyLoading ? State.Loading : State.Idle;
         }
 
-        if (DEBUG && Input.GetKeyDown("x")) {
+        if (DEBUG && DebugInput.GetKeyDown("x")) {
             state = state == State.Idle ? State.Loading : State.Idle;
         }
 

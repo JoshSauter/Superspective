@@ -51,11 +51,16 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     readonly float rotateToRightAngleTime = 0.35f;
 
     public Transform GetObjectToPlayAudioOn(AudioJob _) => transform;
-
+    
     public bool interactable {
         get => _interactable;
         set {
-            interactableObject.interactable = value;
+            if (value) {
+                interactableObject.SetAsInteractable();
+            }
+            else {
+                interactableObject.SetAsHidden();
+            }
             _interactable = value;
         }
     }

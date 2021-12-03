@@ -35,6 +35,8 @@ public static class VisibilityStateExt {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+	public override string ID => $"{gameObject.name}_{base.ID}";
+
 	public static HashSet<DimensionObject> allDimensionObjects = new HashSet<DimensionObject>();
 	public const int NUM_CHANNELS = 8;
 	public bool treatChildrenAsOneObjectRecursively = false;

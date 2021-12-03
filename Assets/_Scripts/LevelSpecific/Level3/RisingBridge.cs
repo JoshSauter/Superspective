@@ -44,11 +44,11 @@ namespace LevelSpecific.Level3 {
 		void Update() {
 			if (!DEBUG) return;
 
-			if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && !inBridgeRiseCoroutine) {
+			if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.R) && !inBridgeRiseCoroutine) {
 				ResetBridgePiecePositions();
 			}
 
-			else if (Input.GetKeyDown(KeyCode.R) && !inBridgeRiseCoroutine) {
+			else if (DebugInput.GetKeyDown(KeyCode.R) && !inBridgeRiseCoroutine) {
 				StartCoroutine(BridgeRise());
 			}
 		}

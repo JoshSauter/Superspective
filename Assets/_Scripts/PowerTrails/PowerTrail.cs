@@ -61,8 +61,7 @@ namespace PowerTrailMechanics {
 		[HideIf(EConditionOperator.Or, "useDurationInsteadOfSpeed", "useSameSpeedsForPowerOnOff")]
 		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
-
-		//public SoundEffectAtLocation sound;
+		public bool skipStartupShutdownSounds = false;
 
 		#region events
 		public delegate void PowerTrailAction();
@@ -79,13 +78,32 @@ namespace PowerTrailMechanics {
 		public float durationOff { get { return useSeparateSpeedsForPowerOnOff ? maxDistance / speedPowerOff : duration; } }
 		public float distance = 0f;
 		public float maxDistance = 0f;
-		public bool powerIsOn = false;
+		[SerializeField]
+		private bool _powerIsOn = false;
+
+		public bool powerIsOn {
+			get => _powerIsOn;
+			set {
+				if (value != _powerIsOn) {
+					if (!skipStartupShutdownSounds) {
+						if (value) {
+							AudioManager.instance.Play(AudioName.PowerTrailBootup, ID, true);
+						}
+						else {
+							AudioManager.instance.Play(AudioName.PowerTrailShutdown, ID, true);
+						}
+					}
+				}
+
+				_powerIsOn = value;
+			}
+		}
 		public bool fullyPowered => distance >= maxDistance;
 		[SerializeField]
 		PowerTrailState _state = PowerTrailState.depowered;
 		public PowerTrailState state {
-			get { return _state; }
-			set {
+			get => _state;
+			private set {
 				if (_state == PowerTrailState.depowered && value == PowerTrailState.partiallyPowered) {
 					OnPowerBegin?.Invoke();
 				}
@@ -108,6 +126,8 @@ namespace PowerTrailMechanics {
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
+
+			_powerIsOn = (_state == PowerTrailState.partiallyPowered || _state == PowerTrailState.powered);
 			gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
 		}
 
@@ -144,7 +164,7 @@ namespace PowerTrailMechanics {
 		}
 
 		void Update() {
-			if (DEBUG && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown("t")) {
+			if (DEBUG && DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown("t")) {
 				powerIsOn = !powerIsOn;
 			}
 
@@ -333,8 +353,9 @@ namespace PowerTrailMechanics {
 			if (minDistance < maxSoundDistance) {
 				//debug.Log($"PLAYER IS {minDistance} FROM {gameObject.name}");
 				audioJob.audio.transform.position = closestPoint;
+				
 				audioJob.audio.volume = distance / maxDistance;
-				audioJob.basePitch = 0.5f * (distance / maxDistance);
+				audioJob.basePitch = 0.25f + 0.25f * (distance / maxDistance);
 			}
 			else {
 				audioJob.audio.volume = 0f;
@@ -404,7 +425,7 @@ namespace PowerTrailMechanics {
 				else if (powerTrail.distance == 0) {
 					powerTrail.distance += 0.00001f;
 				}
-				powerTrail.powerIsOn = this.powerIsOn;
+				powerTrail._powerIsOn = this.powerIsOn;
 				powerTrail._state = (PowerTrailState)this.state;
 			}
 		}

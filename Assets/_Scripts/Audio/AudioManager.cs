@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
 using System.Linq;
+using LevelManagement;
 using Saving;
 using SerializableClasses;
 using Random = UnityEngine.Random;
@@ -379,6 +380,17 @@ namespace Audio {
 		// There's only one AudioManager so we don't need a UniqueId here
 		public override string ID => "AudioManager";
 
+		void LoadSaveDelayed(AudioManagerSave save) {
+			StartCoroutine(LoadSaveDelayedCoroutine(save));
+		}
+		
+		IEnumerator LoadSaveDelayedCoroutine(AudioManagerSave save) {
+			// Wait until objects are recreated in the scenes (ManagerScene is loaded before dynamic objects are created)
+			yield return new WaitWhile(() => SaveManager.isCurrentlyLoadingSave);
+			
+			save.LoadSaveDelayed(this);
+		}
+
 		[Serializable]
 		public class AudioManagerSave : SerializableSaveObject<AudioManager> {
 			SerializableDictionary<string, AudioJob.AudioJobSave> audioJobSaves;
@@ -391,7 +403,7 @@ namespace Audio {
 				this.audioJobOnGameObjects = audioManager.serializableUpdateAudioOnGameObject;
 			}
 
-			public override void LoadSave(AudioManager audioManager) {
+			public void LoadSaveDelayed(AudioManager audioManager) {
 				audioManager.audioJobs.Clear();
 				audioManager.updateAudioJobs.Clear();
 				
@@ -438,6 +450,10 @@ namespace Audio {
 						serializableSaveObject => audioManager.audioJobs[id].Stop()
 					);
 				}
+			}
+
+			public override void LoadSave(AudioManager audioManager) {
+				audioManager.LoadSaveDelayed(this);
 			}
 		}
 #endregion

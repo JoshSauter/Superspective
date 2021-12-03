@@ -4,6 +4,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using SuperspectiveUtils;
 using System;
+using LevelManagement;
 using Saving;
 using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
@@ -13,7 +14,6 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
 	public static readonly HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
-	public UniqueId uniqueId => id;
 	
 	[SerializeField]
 	[Range(0, 7)]
@@ -140,6 +140,7 @@ public class PillarDimensionObject : DimensionObject {
 
 	void Update() {
 		if (!hasInitialized) return;
+		if (LevelManager.instance.IsCurrentlyLoadingScenes) return;
 		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
 		
 		DimensionPillar DetermineActivePillar() {

@@ -12,12 +12,13 @@ namespace Saving {
     // Dynamic objects are objects that may be created or destroyed at runtime
     // They must provide what type of object they are so they can be instantiated from a prefab if it does not exist
 	// They are loaded before SaveableObjects so that the instance exists for other Component loads
-    public class DynamicObject : MonoBehaviour, ISaveableObject {        
+    public class DynamicObject : MonoBehaviour, ISaveableObject {
 	    [SerializeField]
 	    protected bool DEBUG = false;
-		DebugLogger debug;
-	    
-		UniqueId _id;
+	    private DebugLogger _debug;
+	    DebugLogger debug => _debug ??= new DebugLogger(gameObject, () => DEBUG);
+
+	    UniqueId _id;
 		public UniqueId id {
 			get {
 				if (_id == null) {
@@ -53,7 +54,6 @@ namespace Saving {
 		}
 		
 		void Awake() {
-			debug = new DebugLogger(gameObject, () => true);
 			if (prefabPath == "") {
 				debug.LogError($"{gameObject.name}: No prefab for this DynamicObject");
 			}

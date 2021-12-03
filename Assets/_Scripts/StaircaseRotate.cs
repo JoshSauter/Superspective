@@ -38,10 +38,13 @@ public class StaircaseRotate : MonoBehaviour {
     [ShowNativeProperty]
     public Vector3 currentGravity => Physics.gravity;
 
+    private float baseGravMagnitude;
+
     public Vector3 pivotPoint => transform.parent.position;
 
     void Start() {
         playerMovement = PlayerMovement.instance;
+        baseGravMagnitude = Physics.gravity.magnitude;
 
         if (startGravityDirection == Vector3.zero) startGravityDirection = -transform.parent.up;
         if (endGravityDirection == Vector3.zero) endGravityDirection = transform.parent.forward;
@@ -82,7 +85,7 @@ public class StaircaseRotate : MonoBehaviour {
 
         GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         if (other.TaggedAsPlayer()) {
-            Physics.gravity = Physics.gravity.magnitude * exitGravity;
+            Physics.gravity = baseGravMagnitude * exitGravity;
 
             float angleBetween = Vector3.Angle(playerMovement.transform.up, -Physics.gravity.normalized);
             if (treatedAsADownStairForPlayer) angleBetween = -angleBetween;
@@ -121,8 +124,6 @@ public class StaircaseRotate : MonoBehaviour {
                 );
             }
 
-            // TODO: Maybe store this information when player first enters zone
-            float baseGravMagnitude = 32f;
             Physics.gravity = baseGravMagnitude * gravAmplificationFactor *
                               Vector3.Lerp(startGravityDirection, endGravityDirection, t).normalized;
 

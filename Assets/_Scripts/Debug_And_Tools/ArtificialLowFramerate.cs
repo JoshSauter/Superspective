@@ -13,7 +13,7 @@ public class ArtificialLowFramerate : MonoBehaviour {
 	bool limitFramerate = false;
 
     void Update() {
-		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F5)) {
+		if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.F5)) {
 			limitFramerate = !limitFramerate;
 		}
 

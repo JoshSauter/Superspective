@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17128bce5ada30849bc3db494a064870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
   DEBUG: 0
   pickupCube: {fileID: 1544007497055716616}
   thisCollider: {fileID: 0}
@@ -171,6 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c585d99796d38d4a8097086e2c1ddcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
   DEBUG: 0
   isReplaceable: 1
   isHeld: 0
@@ -205,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
   DEBUG: 0
   thisRigidbody: {fileID: 0}
   useGravity: 1
@@ -222,6 +225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
 --- !u!1 &1544007497585443698
 GameObject:
@@ -338,6 +342,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -395,30 +400,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 1
-  ignoreMaterialChanges: 0
+  ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
   startingVisibilityState: 2
   visibilityState: 2
-  collisionMatrix: 0100000000000100000000000100010000000100
+  collisionMatrix: 010000000000000100000000000001000101000000010101
+  collisionLogic: {fileID: 0}
   isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
   _dimension: 0
-  playerQuadrant: 0
+  camQuadrant: 0
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  activePillar: {fileID: 0}
   pillars: []
+  collideWithPlayerWhileInvisible: 0
   thisObjectMoves: 1
   thisRigidbody: {fileID: 1544007497055716628}
   colliderBoundsOverride: {fileID: 0}
+  camSetUpFor: {fileID: 0}
 --- !u!114 &3596818825556985124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -484,6 +494,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -585,6 +596,7 @@ MeshRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -627,7 +639,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8233d90336aea43098adf6dbabd606a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MeshFormatVersion: 1
+  m_MeshFormatVersion: 2
   m_Faces:
   - m_Indexes: 000000000100000002000000
     m_SmoothingGroup: 0
@@ -4452,6 +4464,8 @@ MonoBehaviour:
     m_AreaError: 15
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4481,31 +4495,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   channel: 0
   reverseVisibilityStates: 0
-  ignoreMaterialChanges: 0
+  ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
   renderers: []
   colliders:
   - {fileID: 1544007497055716627}
   startingVisibilityState: 2
   visibilityState: 2
-  collisionMatrix: 0100000000000100000000000100010000000100
+  collisionMatrix: 010000000000000100000000000001000101000000010101
+  collisionLogic: {fileID: 0}
   isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
   _dimension: 0
-  playerQuadrant: 0
+  camQuadrant: 0
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  activePillar: {fileID: 0}
   pillars: []
+  collideWithPlayerWhileInvisible: 0
   thisObjectMoves: 1
   thisRigidbody: {fileID: 1544007497055716628}
   colliderBoundsOverride: {fileID: 0}
+  camSetUpFor: {fileID: 0}
 --- !u!114 &2236468050090428861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4573,6 +4592,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1

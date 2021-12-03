@@ -35,7 +35,21 @@ namespace PictureTeleportMechanics {
         public float targetLookY = 90f;
 
         // Change the SSAO to blend the teleport
-        ScreenSpaceAmbientOcclusion ssao;
+        private ScreenSpaceAmbientOcclusion _ssao;
+
+        ScreenSpaceAmbientOcclusion ssao {
+            get {
+                if (_ssao == null) {
+                    _ssao = SuperspectiveScreen
+                        .instance
+                        .playerCamera
+                        .GetComponent<ScreenSpaceAmbientOcclusion>();
+                }
+
+                return _ssao;
+            }
+        }
+        
         float startSsaoIntensity;
         const float ssaoMultiplier = .75f;
         public float ssaoBlendTimeRemaining = 0f;
@@ -47,12 +61,11 @@ namespace PictureTeleportMechanics {
         new void Awake() {
             base.Awake();
             viewLockObject = GetComponent<ViewLockObject>();
+            startSsaoIntensity = ssao.m_OcclusionIntensity;
         }
 
         protected override void Start() {
             base.Start();
-            ssao = SuperspectiveScreen.instance.playerCamera.GetComponent<ScreenSpaceAmbientOcclusion>();
-            startSsaoIntensity = ssao.m_OcclusionIntensity;
             viewLockObject.cursorIsStationaryOnLock = true;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;

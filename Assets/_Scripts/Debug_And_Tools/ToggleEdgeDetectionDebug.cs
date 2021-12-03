@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class ToggleEdgeDetectionDebug : Singleton<ToggleEdgeDetectionDebug> {
 	void Update() {
-		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) {
+		if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.B)) {
 			ToggleDebugMode();
 		}
-		if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) {
+		if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.V)) {
 			ToggleDoubleSidedEdges();
 		}
 	}

@@ -21,7 +21,17 @@ namespace LevelSpecific.Fork {
 
             realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
             fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);
+        }
 
+        protected override void Init() {
+            base.Init();
+
+            StartCoroutine(WaitForOtherPortalToBeAvailable());
+        }
+
+        IEnumerator WaitForOtherPortalToBeAvailable() {
+            yield return new WaitWhile(() => fakeBlackRoomPortal.otherPortal == null);
+            
             fakeBlackRoomPortal.OnPortalTeleportSimple += _ => {
                 playerIsInFakeBlackRoom = true;
                 AudioManager.instance.PlayWithUpdate(AudioName.EmptyVoid_8152358, ID, this, true);

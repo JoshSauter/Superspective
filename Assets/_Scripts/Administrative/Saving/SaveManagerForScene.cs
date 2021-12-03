@@ -314,7 +314,12 @@ namespace Saving {
                             continue;
                         }
 
-                        saveableObject.RestoreStateFromSave(currentSaveFile.serializedSaveObjects[id]);
+                        try {
+                            saveableObject.RestoreStateFromSave(currentSaveFile.serializedSaveObjects[id]);
+                        }
+                        catch (Exception e) {
+                            Debug.LogError(e);
+                        }
                     }
                 }
                 else {
@@ -340,6 +345,8 @@ namespace Saving {
             foreach (var saveableObjectKV in saveableObjects) {
                 string id = saveableObjectKV.Key;
                 SaveableObject saveableObject = saveableObjectKV.Value;
+                if (saveableObject.SkipSave) continue;
+                
                 try {
                     serializedSaveObjects[id] = saveableObject.GetSaveObject();
                 }
@@ -417,7 +424,7 @@ namespace Saving {
         // (for example, if they start deactivated), and we need to find them by ID.
         // This is inefficient and should be avoided when possible.
         SaveableObject LookForMissingSaveableObject(string id) {
-            Debug.LogWarning($"Having to search for a missing id {id} in scene {sceneName}");
+            // Debug.LogWarning($"Having to search for a missing id {id} in scene {sceneName}");
             bool HasValidId(ISaveableObject obj) {
                 try {
                     string s = obj.ID;

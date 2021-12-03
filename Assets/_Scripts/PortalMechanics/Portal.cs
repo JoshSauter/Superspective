@@ -34,6 +34,8 @@ namespace PortalMechanics {
 		public void Release() {
 			mainTexture.Release();
 			depthNormalsTexture.Release();
+			GameObject.Destroy(mainTexture);
+			GameObject.Destroy(depthNormalsTexture);
 		}
 	}
 	
@@ -63,7 +65,7 @@ namespace PortalMechanics {
 		public bool doubleSidedPortals = false;
 
 		GameObject volumetricPortalPrefab;
-		Renderer[] volumetricPortals;
+		SuperspectiveRenderer[] volumetricPortals;
 		private const float volumetricPortalEnableDistance = 5f;
 
 		private bool volumetricPortalsShouldBeEnabled {
@@ -98,7 +100,7 @@ namespace PortalMechanics {
 		Material portalMaterial;
 		
 		public Material fallbackMaterial;
-		public Renderer[] renderers;
+		public SuperspectiveRenderer[] renderers;
 		public Collider[] colliders;
 		Transform playerCamera;
 		CameraFollow playerCameraFollow;
@@ -165,6 +167,10 @@ namespace PortalMechanics {
 			CreateCompositeTrigger();
 		}
 
+		private void OnDestroy() {
+			internalRenderTexturesCopy?.Release();
+		}
+
 		protected override void Awake() {
 			base.Awake();
 			
@@ -177,15 +183,16 @@ namespace PortalMechanics {
 
 			if (renderers == null || renderers.Length == 0) {
 				if (compositePortal) {
-					renderers = GetComponentsInChildren<Renderer>();
+					renderers = GetComponentsInChildren<Renderer>()
+						.Select(r => r.GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
 				}
 				else {
-					renderers = new Renderer[] { GetComponent<Renderer>() };
+					renderers = new SuperspectiveRenderer[] { GetComponents<Renderer>().Select(r => r.GetOrAddComponent<SuperspectiveRenderer>()).FirstOrDefault() };
 				}
 			}
 			foreach (var r in renderers) {
 				r.gameObject.layer = LayerMask.NameToLayer("Portal");
-				r.material = pauseRenderingAndLogic ? fallbackMaterial : portalMaterial;
+				r.SetMaterial(pauseRenderingAndLogic ? fallbackMaterial : portalMaterial);
 			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
@@ -218,9 +225,9 @@ namespace PortalMechanics {
 			}
 
 			volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
-			volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetComponent<Renderer>()).ToArray();
+			volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
 			for (int i = 0; i < volumetricPortals.Length; i++) {
-				Renderer vp = volumetricPortals[i];
+				SuperspectiveRenderer vp = volumetricPortals[i];
 				Collider collider = colliders[i];
 				Vector3 vpScale = Vector3.one;
 				if (collider is BoxCollider boxCollider) {
@@ -280,15 +287,18 @@ namespace PortalMechanics {
 				return;
 			}
 			debug.Log($"Creating render textures for new resolution {width}x{height}");
+			if (internalRenderTexturesCopy != null && (internalRenderTexturesCopy.mainTexture != null || internalRenderTexturesCopy.depthNormalsTexture != null)) {
+				internalRenderTexturesCopy.Release();
+			}
 			internalRenderTexturesCopy = RecursiveTextures.CreateTextures(ID);
 			SetTexturesOnMaterial();
 		}
 
 		public void SetTexturesOnMaterial() {
-			void SetTexturesForRenderers(Renderer[] portalRenderers) {
+			void SetTexturesForRenderers(SuperspectiveRenderer[] portalRenderers) {
 				foreach (var r in portalRenderers) {
-					r.material.mainTexture = internalRenderTexturesCopy.mainTexture;
-					r.material.SetTexture("_DepthNormals", internalRenderTexturesCopy.depthNormalsTexture);
+					r.SetTexture("_MainTex", internalRenderTexturesCopy.mainTexture);
+					r.SetTexture("_DepthNormals", internalRenderTexturesCopy.depthNormalsTexture);
 				}
 			}
 
@@ -316,10 +326,10 @@ namespace PortalMechanics {
 			}
 			else {
 				foreach (var r in renderers) {
-					r.material = portalMaterial;
+					r.SetMaterial(portalMaterial);
 				}
 				foreach (var vp in volumetricPortals) {
-					vp.material = portalMaterial;
+					vp.SetMaterial(portalMaterial);
 				}
 			}
 		}
@@ -439,13 +449,13 @@ namespace PortalMechanics {
 				return;
 			}
 
-			if (!renderers[0].material.name.Contains(portalMaterial.name)) {
+			if (!renderers[0].r.sharedMaterial.name.Contains(portalMaterial.name)) {
 				foreach (var r in renderers) {
-					r.material = portalMaterial;
+					r.SetMaterial(portalMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.material = portalMaterial;
+					vp.SetMaterial(portalMaterial);
 				}
 			}
 
@@ -459,13 +469,13 @@ namespace PortalMechanics {
 				return;
 			}
 
-			if (!renderers[0].material.name.Contains(portalMaterial.name)) {
+			if (!renderers[0].r.sharedMaterial.name.Contains(portalMaterial.name)) {
 				foreach (var r in renderers) {
-					r.material = portalMaterial;
+					r.SetMaterial(portalMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.material = portalMaterial;
+					vp.SetMaterial(portalMaterial);
 				}
 			}
 
@@ -474,19 +484,19 @@ namespace PortalMechanics {
 		}
 
 		public void DefaultMaterial() {
-			if (!renderers[0].material.name.Contains(fallbackMaterial.name)) {
+			if (!renderers[0].r.sharedMaterial.name.Contains(fallbackMaterial.name)) {
 				foreach (var r in renderers) {
-					r.material = fallbackMaterial;
+					r.SetMaterial(fallbackMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.material = fallbackMaterial;
+					vp.SetMaterial(fallbackMaterial);
 				}
 			}
 		}
 
 		public bool IsVisibleFrom(Camera cam) {
-			return renderers.Any(r => r.IsVisibleFrom(cam)) || volumetricPortals.Any(vp => vp.IsVisibleFrom(cam));
+			return renderers.Any(r => r.r.IsVisibleFrom(cam)) || volumetricPortals.Any(vp => vp.r.IsVisibleFrom(cam));
 		}
 
 		public Vector3 PortalNormal() {
@@ -524,8 +534,8 @@ namespace PortalMechanics {
 		public Rect[] GetScreenRects(Camera cam) {
 			List<Rect> allRects = new List<Rect>();
 			foreach (var r in renderers) {
-				Vector3 cen = r.bounds.center;
-				Vector3 ext = r.bounds.extents;
+				Vector3 cen = r.r.bounds.center;
+				Vector3 ext = r.r.bounds.extents;
 
 				Vector2 min = cam.WorldToViewportPoint(new Vector3(cen.x - ext.x, cen.y - ext.y, cen.z - ext.z));
 				Vector2 max = min;
@@ -697,7 +707,7 @@ namespace PortalMechanics {
 					if (pauseRenderingAndLogic) continue;
 					else if (pauseRenderingOnly) vp.enabled = true;
 					else {
-						vp.material = portalMaterial;
+						vp.SetMaterial(portalMaterial);
 						vp.enabled = true;
 					}
 				}

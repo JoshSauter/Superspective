@@ -12100,6 +12100,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6899307211661190661}
+  - {fileID: 3971461024439322762}
   m_Father: {fileID: 6899307212175458754}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: -39}
@@ -14056,6 +14057,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 6899307210222546103}
   DEBUG: 0
   timeSinceStateChange: 0
   oneTimeButton: 0
@@ -14124,6 +14126,7 @@ GameObject:
   - component: {fileID: 6899307210226382583}
   - component: {fileID: 6899307210226382585}
   - component: {fileID: 6899307210226382584}
+  - component: {fileID: 8760053856444244426}
   m_Layer: 2
   m_Name: CubeSpawner120
   m_TagString: Untagged
@@ -14157,6 +14160,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 8760053856444244426}
+  DEBUG: 0
   backWall: {fileID: 6899307210810111356}
   button: {fileID: 6899307210222546105}
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
@@ -14168,48 +14173,6 @@ MonoBehaviour:
   roofCollider: {fileID: 6899307210183736217}
   glass: {fileID: 6899307211002359311}
   _state: 0
-  cubeShrinkCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.24008314
-      value: -0.17309143
-      inSlope: 0.5882601
-      outSlope: 0.5882601
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.66533005
-      value: 0.80654895
-      inSlope: 1.2906691
-      outSlope: 1.2906691
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.5222008
-      outWeight: 0.83745843
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0.18130933
-      outSlope: 0.18130933
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!65 &6899307210226382584
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14223,6 +14186,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 2, z: 2}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &8760053856444244426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899307210226382586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
 --- !u!1 &6899307210242647578
 GameObject:
   m_ObjectHideFlags: 0
@@ -18241,6 +18217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -20249,6 +20226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 6899307210428385158}
   DEBUG: 0
   timeSinceStateChange: 0
   oneTimeButton: 0
@@ -21498,6 +21476,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -22487,6 +22466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -27956,6 +27936,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -28345,6 +28326,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -28706,6 +28688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -28733,6 +28716,7 @@ GameObject:
   - component: {fileID: 6899307211020026254}
   - component: {fileID: 6899307211020026256}
   - component: {fileID: 6899307211020026255}
+  - component: {fileID: 1989525965540561720}
   m_Layer: 2
   m_Name: CubeSpawner240
   m_TagString: Untagged
@@ -28766,6 +28750,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 1989525965540561720}
+  DEBUG: 0
   backWall: {fileID: 6899307210366647645}
   button: {fileID: 6899307212050057702}
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
@@ -28777,48 +28763,6 @@ MonoBehaviour:
   roofCollider: {fileID: 6899307210183736217}
   glass: {fileID: 6899307212034772115}
   _state: 0
-  cubeShrinkCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.24008314
-      value: -0.17309143
-      inSlope: 0.5882601
-      outSlope: 0.5882601
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.66533005
-      value: 0.80654895
-      inSlope: 1.2906691
-      outSlope: 1.2906691
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.5222008
-      outWeight: 0.83745843
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0.18130933
-      outSlope: 0.18130933
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!65 &6899307211020026255
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -28832,6 +28776,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 2, z: 2}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &1989525965540561720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899307211020026257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
 --- !u!1 &6899307211031385282
 GameObject:
   m_ObjectHideFlags: 0
@@ -32741,6 +32698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -33010,6 +32968,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -33220,6 +33179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -35554,6 +35514,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -35764,6 +35725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -37772,6 +37734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 6899307212050057700}
   DEBUG: 0
   timeSinceStateChange: 0
   oneTimeButton: 0
@@ -37896,6 +37859,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -41010,6 +40974,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 0}
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
@@ -41594,6 +41559,7 @@ GameObject:
   - component: {fileID: 6899307212255632183}
   - component: {fileID: 6899307212255632185}
   - component: {fileID: 6899307212255632184}
+  - component: {fileID: 2966899596252696897}
   m_Layer: 2
   m_Name: CubeSpawner0
   m_TagString: Untagged
@@ -41627,6 +41593,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: {fileID: 2966899596252696897}
+  DEBUG: 0
   backWall: {fileID: 6899307212194736769}
   button: {fileID: 6899307210428385160}
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
@@ -41638,48 +41606,6 @@ MonoBehaviour:
   roofCollider: {fileID: 6899307210183736217}
   glass: {fileID: 6899307211623009016}
   _state: 0
-  cubeShrinkCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.24008314
-      value: -0.17309143
-      inSlope: 0.5882601
-      outSlope: 0.5882601
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.66533005
-      value: 0.80654895
-      inSlope: 1.2906691
-      outSlope: 1.2906691
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.5222008
-      outWeight: 0.83745843
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0.18130933
-      outSlope: 0.18130933
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!65 &6899307212255632184
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -41693,6 +41619,63 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 2, z: 2}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &2966899596252696897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899307212255632186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
+--- !u!1 &6951131950592710302
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3971461024439322762}
+  - component: {fileID: 5342026813744564329}
+  m_Layer: 0
+  m_Name: Selectbox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3971461024439322762
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6951131950592710302}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6899307210222546098}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &5342026813744564329
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6951131950592710302}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.25
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8093789513994972533
 GameObject:
   m_ObjectHideFlags: 0

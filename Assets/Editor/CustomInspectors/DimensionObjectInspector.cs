@@ -23,7 +23,8 @@ public class DimensionObjectInspector : UnityEditor.Editor {
         { 5, "Other" }
     };
     VisibilityState cachedVisibilityState;
-    
+
+    SerializedProperty id;
     SerializedProperty DEBUG;
     SerializedProperty channel;
     SerializedProperty useAdvancedChannelLogic;
@@ -42,6 +43,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
     SerializedProperty visibilityState;
     
     protected virtual void OnEnable() {
+        id = serializedObject.FindProperty("_id");
         DEBUG = serializedObject.FindProperty("DEBUG");
         channel = serializedObject.FindProperty("channel");
         useAdvancedChannelLogic = serializedObject.FindProperty("useAdvancedChannelLogic");
@@ -64,7 +66,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
     public override void OnInspectorGUI() {
         DimensionObject dimensionObject = (DimensionObject) target;
         serializedObject.Update();
-
+        
         DebugField();
 
         channelSettingsShown = EditorGUILayout.Foldout(channelSettingsShown, "Channel settings:");
@@ -184,6 +186,8 @@ public class DimensionObjectInspector : UnityEditor.Editor {
     }
 
     protected void DebugField() {
+        EditorGUILayout.PropertyField(id, new GUIContent("UniqueId"));
+        
         if (!DEBUGShown) {
             EditorGUILayout.PropertyField(DEBUG, new GUIContent("Debug?"));
 

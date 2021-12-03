@@ -5,6 +5,7 @@ using System.Linq;
 using NaughtyAttributes;
 using Saving;
 using System;
+using System.Collections;
 using UnityEngine.PlayerLoop;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -45,6 +46,16 @@ namespace MagicTriggerMechanics {
 			if (gameObject.layer != LayerMask.NameToLayer("Portal")) {
 				gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 			}
+		}
+
+		public void ResetHasTriggeredOnStayState() {
+			StartCoroutine(ResetHasTriggeredOnStayStateAtEndOfPhysicsFrame());
+		}
+
+		IEnumerator ResetHasTriggeredOnStayStateAtEndOfPhysicsFrame() {
+			yield return new WaitForFixedUpdate();
+			hasTriggeredOnStay = false;
+			hasNegativeTriggeredOnStay = false;
 		}
 
 		void OnDisable() {

@@ -84,27 +84,13 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		defaultPhysicsMaterial = thisCollider.material;
 		kinematicCollider = invertedCube.Find("KinematicCollider").GetComponent<BoxCollider>();
 		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
-
-		DynamicObjectManager.OnDynamicObjectCreated += SetUniqueIdsUponCreation;
-		corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
-		invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
 	}
 
 	protected override void OnDestroy() {
 		base.OnDestroy();
-		DynamicObjectManager.OnDynamicObjectCreated -= SetUniqueIdsUponCreation;
-	}
-
-	void SetUniqueIdsUponCreation(string id) {
-		if (id == this.id.uniqueId) {
-			corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
-			invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
-		}
 	}
 
 	protected override void Start() {
-		corporealCubeDimensionObj.uniqueId.uniqueId = $"CorporealCube_{ID}";
-		invertedCubeDimensionObj.uniqueId.uniqueId = $"InvertedCube_{ID}";
 		base.Start();
 		
 		pickupCube.OnPickupSimple += OnPickup;

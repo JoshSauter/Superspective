@@ -69,15 +69,15 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
     void Update() {
         if (!DEBUG) return;
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R) && state != DoorState.Opening &&
+        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.R) && state != DoorState.Opening &&
             state != DoorState.Closing)
             ResetDoorPieceScales();
 
-        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.O) && state != DoorState.Opening &&
+        else if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.O) && state != DoorState.Opening &&
                  state != DoorState.Closing)
             state = DoorState.Closing;
 
-        else if (Input.GetKeyDown(KeyCode.O) && state != DoorState.Opening && state != DoorState.Closing)
+        else if (DebugInput.GetKeyDown(KeyCode.O) && state != DoorState.Opening && state != DoorState.Closing)
             state = DoorState.Opening;
     }
 

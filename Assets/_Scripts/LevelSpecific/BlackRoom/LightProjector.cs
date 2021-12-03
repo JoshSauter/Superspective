@@ -51,22 +51,22 @@ namespace LevelSpecific.BlackRoom {
 		void Update() {
 			// Debug controls
 			if (DEBUG) {
-				if (Input.GetKey("f")) {
-					if (Input.GetKey(KeyCode.LeftShift)) {
+				if (DebugInput.GetKey("f")) {
+					if (DebugInput.GetKey(KeyCode.LeftShift)) {
 						DecreaseFrustumSize();
 					}
 					else {
 						IncreaseFrustumSize();
 					}
 				}
-				if (Input.GetKey("g")) {
-					ChangeAngle(Input.GetKey(KeyCode.LeftShift) ? -rotationSpeed : rotationSpeed);
+				if (DebugInput.GetKey("g")) {
+					ChangeAngle(DebugInput.GetKey(KeyCode.LeftShift) ? -rotationSpeed : rotationSpeed);
 				}
-				if (Input.GetKey("h")) {
-					RotateAroundCircumference(Input.GetKey(KeyCode.LeftShift) ? -1 : 1);
+				if (DebugInput.GetKey("h")) {
+					RotateAroundCircumference(DebugInput.GetKey(KeyCode.LeftShift) ? -1 : 1);
 				}
-				if (Input.GetKey("j")) {
-					MoveProjectorVertical(Input.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
+				if (DebugInput.GetKey("j")) {
+					MoveProjectorVertical(DebugInput.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
 				}
 			}
 

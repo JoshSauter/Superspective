@@ -155,7 +155,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         }
 
         if (oneTimeButton) {
-            interactableObject.interactable = false;
+            interactableObject.SetAsHidden();
         }
     }
 

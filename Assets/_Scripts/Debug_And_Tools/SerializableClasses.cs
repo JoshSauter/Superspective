@@ -335,7 +335,7 @@ namespace SerializableClasses {
 		public new Either<T, S> Reference {
 			get {
 				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
-				return saveManagerForScene?.GetSaveableObject(referencedObjId).Match(
+				return saveManagerForScene?.GetSaveableObject(referencedObjId)?.Match(
 					// Map the results to the appropriate types
 					saveableObject => new Either<T, S>(saveableObject as T),
 					serializedSaveObject => new Either<T, S>(serializedSaveObject as S)
@@ -362,7 +362,7 @@ namespace SerializableClasses {
 		}
 
 		public T GetOrNull() {
-			return Reference.Match(
+			return Reference?.Match(
 				saveableObject => saveableObject,
 				other => null
 			);

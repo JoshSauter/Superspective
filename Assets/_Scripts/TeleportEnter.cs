@@ -61,6 +61,8 @@ public class TeleportEnter : MonoBehaviour {
         }
 
         TriggerEventsAfterTeleport(player);
+        // Sometimes teleporting leaves the hasTriggeredOnStay state as true so we explicitly reset state here
+        trigger.ResetHasTriggeredOnStayState();
     }
 
     float GetRotationAngleBetweenTeleporters() {

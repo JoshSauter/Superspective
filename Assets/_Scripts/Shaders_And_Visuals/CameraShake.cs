@@ -35,7 +35,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 		if (Time.timeScale == 0) return;
 
 #if UNITY_EDITOR
-		if (DEBUG && Input.GetKeyDown("c")) {
+		if (DEBUG && DebugInput.GetKeyDown("c")) {
 			if (!isShaking) {
 				Shake(2, 1, 0);
 			}

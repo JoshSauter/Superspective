@@ -27,6 +27,7 @@ public class SimpleFPS : MonoBehaviour {
 	}
 
 	void OnGUI() {
+		if (!Debug.isDebugBuild) return;
 		GUI.Label(new Rect(5, 40, 100, 25), label, style);
 	}
 }

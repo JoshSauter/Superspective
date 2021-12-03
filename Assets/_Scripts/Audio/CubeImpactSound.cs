@@ -7,6 +7,7 @@ using UnityEngine;
 namespace Audio {
 	[RequireComponent(typeof(Rigidbody))]
     public class CubeImpactSound : SaveableObject, AudioJobOnGameObject {
+	    
 		float minSpeed = 5f;
 		float maxSpeed = 25f;
 

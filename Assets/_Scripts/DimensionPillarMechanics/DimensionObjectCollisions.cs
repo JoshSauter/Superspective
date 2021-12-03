@@ -49,6 +49,12 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	void DetermineCollisionWithNonDimensionObject(Collider other) {
+		// Clean up nulls from the set (they can show up due to loading a save file)
+		if (other == null) {
+			collidersIgnored.Remove(other);
+			return;
+		}
+		
 		bool shouldCollide = other.TaggedAsPlayer()
 			? dimensionObject.ShouldCollideWithPlayer()
 			: dimensionObject.ShouldCollideWithNonDimensionObject();
@@ -62,6 +68,12 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	void DetermineCollisionWithDimensionObject(DimensionObject otherDimensionObj) {
+		// Clean up nulls from the set (they can show up due to loading a save file)
+		if (otherDimensionObj == null) {
+			dimensionObjectsIgnored.Remove(otherDimensionObj);
+			return;
+		}
+		
 		// Make sure channels are different or we are in a different visibility state
 		if (otherDimensionObj.isBeingDestroyed) {
 			// If the other DimensionObject is being destroyed, treat it as a non DimensionObject

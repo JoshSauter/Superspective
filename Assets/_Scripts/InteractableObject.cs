@@ -6,7 +6,18 @@ public class InteractableObject : MonoBehaviour {
     public InteractableGlow glow;
     public delegate void InteractAction();
 
-    public bool interactable = true;
+    public enum InteractableState {
+        Interactable,
+        Disabled,
+        Hidden
+    }
+
+    [ShowNativeProperty]
+    public InteractableState state {
+        get;
+        private set;
+    }
+    
     public bool useLargerPrepassMaterial;
     public bool overrideGlowColor;
 
@@ -36,5 +47,17 @@ public class InteractableObject : MonoBehaviour {
             glow.glowColor = glowColor;
             glow.interactableObject = this;
         }
+    }
+
+    public void SetAsInteractable() {
+        state = InteractableState.Interactable;
+    }
+
+    public void SetAsDisabled() {
+        state = InteractableState.Disabled;
+    }
+
+    public void SetAsHidden() {
+        state = InteractableState.Hidden;
     }
 }

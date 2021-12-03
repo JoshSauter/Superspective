@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using Audio;
 using SuperspectiveUtils;
 using TMPro;
 using UnityEngine;
@@ -25,6 +26,7 @@ public class Interact : Singleton<Interact> {
     readonly Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
     Color reticleOutsideUnselectColor;
     readonly Color reticleSelectColor = new Color(0.15f, 1, 0.15f, 0.9f);
+    private readonly Color reticleSelectDisabledColor = new Color(.8f, 0.15f, 0.15f, .9f);
 
     Color reticleUnselectColor;
 
@@ -44,8 +46,15 @@ public class Interact : Singleton<Interact> {
 
     // Update is called once per frame
     void Update() {
+        if (Input.GetMouseButtonDown(0)) {
+            MaskBufferRenderTextures.instance.RequestVisibilityMask();
+        }
+        
         InteractableObject newObjectHovered = FindInteractableObjectHovered();
-        if (newObjectHovered != null && !newObjectHovered.interactable) newObjectHovered = null;
+
+        if (newObjectHovered != null && newObjectHovered.state == InteractableObject.InteractableState.Hidden) {
+            newObjectHovered = null;
+        }
 
         // If we were previously hovering over a different object, send a MouseHoverExit event to that object
         if (interactableObjectHovered != null && newObjectHovered != interactableObjectHovered) {
@@ -64,6 +73,18 @@ public class Interact : Singleton<Interact> {
         interactableObjectHovered?.OnMouseHover?.Invoke();
 
         if (interactableObjectHovered != null) {
+            bool disabled = interactableObjectHovered.state == InteractableObject.InteractableState.Disabled;
+            if (disabled) {
+                reticle.color = reticleSelectDisabledColor;
+                reticleOutside.color = reticleSelectDisabledColor;
+
+                if (Input.GetMouseButtonDown(0)) {
+                    // Play disabled sound
+                    AudioManager.instance.Play(AudioName.DisabledSound, "DisabledInteraction");
+                }
+                return;
+            }
+            
             reticle.color = reticleSelectColor;
             reticleOutside.color = reticleOutsideSelectColor;
             // If the left mouse button is being held down, interact with the object selected

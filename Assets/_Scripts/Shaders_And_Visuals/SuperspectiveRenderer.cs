@@ -11,7 +11,8 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		Int,
 		Vector,
 		FloatArray,
-		ColorOnMaterial
+		ColorOnMaterial,
+		Texture
 	}
 	[Button("Print Property Block Value")]
 	void PrintLookupValueCallback() {
@@ -104,6 +105,11 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		return propBlock.GetFloatArray(propName);
 	}
 
+	public Texture GetTexture(string propName) {
+		r.GetPropertyBlock(propBlock);
+		return propBlock.GetTexture(propName);
+	}
+
 	#endregion
 
 	/////////////
@@ -135,6 +141,12 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	public void SetFloatArray(string propName, float[] value) {
 		r.GetPropertyBlock(propBlock);
 		propBlock.SetFloatArray(propName, value);
+		r.SetPropertyBlock(propBlock);
+	}
+
+	public void SetTexture(string propName, Texture value) {
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetTexture(propName, value);
 		r.SetPropertyBlock(propBlock);
 	}
 

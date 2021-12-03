@@ -39,7 +39,7 @@ namespace LevelSpecific.BlackRoom {
                 miniSpotlight.TurnOff();
             }
 
-            puzzleIsSolvedButton.interactableObject.interactable = false;
+            puzzleIsSolvedButton.interactableObject.SetAsDisabled();
             puzzleIsSolvedButton.OnButtonPressBegin += (_) => {
                 if (colorPuzzleManager.activePuzzle == colorPuzzleManager.numPuzzles - 1) return;
 
@@ -86,7 +86,7 @@ namespace LevelSpecific.BlackRoom {
                 state.Set(State.Powering);
             }
             
-            if (Input.GetKeyDown(KeyCode.Alpha0)) {
+            if (DebugInput.GetKeyDown(KeyCode.Alpha0)) {
                 state.Set((State) (2 - (int) state.state));
             }
 
@@ -233,7 +233,7 @@ namespace LevelSpecific.BlackRoom {
         private const float timeAfterPoweredBeforeLaser = 0.5f;
 
         void AddPuzzleSelectCoverEvents() {
-            state.AddTrigger(State.Powered, timeAfterPoweredBeforeLaser, () => puzzleIsSolvedButton.interactableObject.interactable = true);
+            state.AddTrigger(State.Powered, timeAfterPoweredBeforeLaser, () => puzzleIsSolvedButton.interactableObject.SetAsInteractable());
         }
             
         void UpdateDissolveLaser() {

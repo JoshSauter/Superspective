@@ -38,7 +38,7 @@ public class CameraDebugOverlay : MonoBehaviour {
 	}
 
 	void Update() {
-		if (Input.GetKeyDown(modeSwitchKey)) {
+		if (DebugInput.GetKeyDown(modeSwitchKey)) {
 			debugMode = (DebugMode)(((int)debugMode + 1) % NUM_MODES);
 		}
 	}

@@ -21,28 +21,33 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 
 		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
         
-		StartCoroutine(RequestVisibilityMask());
+		StartCoroutine(ContinuouslyRequestVisibilityMask());
 	}
 
-	IEnumerator RequestVisibilityMask() {
+	IEnumerator ContinuouslyRequestVisibilityMask() {
 		while (true) {
 			yield return new WaitForSeconds(0.25f);
             
-			Vector2 pixelPositionOfReticle = Interact.instance.PixelPositionOfReticle();
-			AsyncGPUReadback.Request(
-				visibilityMaskTexture,
-				0,
-				(int)pixelPositionOfReticle.x,
-				1,
-				(int)pixelPositionOfReticle.y,
-				1,
-				0,
-				1,
-				visibilityMaskTexture.graphicsFormat,
-				OnCompleteReadback
-			);
+			RequestVisibilityMask();
 		}
 	}
+
+	public void RequestVisibilityMask() {
+		Vector2 pixelPositionOfReticle = Interact.instance.PixelPositionOfReticle();
+		AsyncGPUReadback.Request(
+			visibilityMaskTexture,
+			0,
+			(int)pixelPositionOfReticle.x,
+			1,
+			(int)pixelPositionOfReticle.y,
+			1,
+			0,
+			1,
+			visibilityMaskTexture.graphicsFormat,
+			OnCompleteReadback
+		);
+	}
+	
 	void OnCompleteReadback(AsyncGPUReadbackRequest request) {
 		if (request.hasError) {
 			Debug.LogError("GPU readback error detected");

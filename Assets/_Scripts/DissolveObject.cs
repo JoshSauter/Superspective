@@ -108,7 +108,7 @@ public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.Diss
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Alpha0)) {
+        if (DebugInput.GetKeyDown(KeyCode.Alpha0)) {
             state = (state == State.Materialized || state == State.Materializing)
                 ? State.Dematerializing
                 : State.Materializing;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using LevelManagement;
 using UnityEngine;
 using Saving;
+using Tayx.Graphy;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -24,10 +25,6 @@ public class GameManager : Singleton<GameManager> {
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
-    }
-
-    void Update() {
-        
     }
 
 	public void QuitGame() {
