@@ -6,23 +6,29 @@ using UnityEngine;
 
 namespace SuperspectiveUtils {
     public static class RaycastUtils {
-        const int MAX_RAYCASTS = 8;
+        public const int MAX_RAYCASTS = 8;
 
         public static SuperspectiveRaycast Raycast(Ray ray, float maxDistance, int layerMask) {
-            SuperspectiveRaycast result = new SuperspectiveRaycast();
-            result.distance = maxDistance;
+            SuperspectiveRaycast result = new SuperspectiveRaycast {
+                distance = maxDistance
+            };
 
             Ray currentRay = ray;
             float distanceRemaining = maxDistance;
             int raycastsMade = 0;
             Portal lastPortalHit = null;
             while (distanceRemaining > 0 && raycastsMade < MAX_RAYCASTS) {
-                int lastPortalHitLayer = -1;
                 // Temporarily ignore the out portal of the last portal hit
                 if (lastPortalHit != null && lastPortalHit.otherPortal != null) {
-                    lastPortalHitLayer = lastPortalHit.otherPortal.gameObject.layer;
-                    lastPortalHit.otherPortal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+                    foreach (Collider otherPortalCollider in lastPortalHit.otherPortal.colliders) {
+                        otherPortalCollider.enabled = false;
+                    }
                 }
+
+                if (Interact.instance.DEBUG) {
+                    Debug.DrawRay(currentRay.origin, currentRay.direction * distanceRemaining, Color.Lerp(Color.green, Color.red, (float)raycastsMade / MAX_RAYCASTS));
+                }
+
                 RaycastHit[] hits = Physics.RaycastAll(
                     currentRay.origin,
                     currentRay.direction,
@@ -31,8 +37,10 @@ namespace SuperspectiveUtils {
                     QueryTriggerInteraction.Collide
                 );
                 raycastsMade++;
-                if (lastPortalHitLayer > 0 && lastPortalHit.otherPortal != null) {
-                    lastPortalHit.otherPortal.gameObject.layer = lastPortalHitLayer;
+                if (lastPortalHit != null && lastPortalHit.otherPortal != null) {
+                    foreach (Collider otherPortalCollider in lastPortalHit.otherPortal.colliders) {
+                        otherPortalCollider.enabled = true;
+                    }
                 }
 
                 SuperspectiveRaycastPart part = new SuperspectiveRaycastPart(currentRay, distanceRemaining, hits);

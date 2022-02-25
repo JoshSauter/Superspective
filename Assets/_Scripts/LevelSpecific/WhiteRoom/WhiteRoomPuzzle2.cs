@@ -341,22 +341,26 @@ namespace LevelSpecific.WhiteRoom {
             innerHex.localRotation = Quaternion.Slerp(innerHex.localRotation, Quaternion.Euler(desiredInnerHexRotation), trackSpeed * Time.deltaTime);
         }
 
-        void UpdateParticleSystems() {
+        Tuple<Color, Color> GetCurrentGradientColors() {
             if (solved) {
-                ParticleSystem.MainModule outerParticlesMain = outerParticles.main;
-                outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(Color.green * 0.6f, Color.green);
-
-                ParticleSystem.MainModule innerParticlesMain = innerParticles.main;
-                innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(Color.green * 0.6f, Color.green);
+                return new Tuple<Color, Color>(Color.green * 0.6f, Color.green);
             }
             else {
                 float t = Mathf.InverseLerp(-80f, 80f, displayedValue);
-                ParticleSystem.MainModule outerParticlesMain = outerParticles.main;
-                outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
-
-                ParticleSystem.MainModule innerParticlesMain = innerParticles.main;
-                innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
+                return new Tuple<Color, Color>(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
             }
+        }
+
+        void UpdateParticleSystems() {
+            Tuple<Color, Color> minMaxGradientColors = GetCurrentGradientColors();
+            Color minColor = minMaxGradientColors.Item1;
+            Color maxColor = minMaxGradientColors.Item2;
+            
+            ParticleSystem.MainModule outerParticlesMain = outerParticles.main;
+            outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
+            
+            ParticleSystem.MainModule innerParticlesMain = innerParticles.main;
+            innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
         }
 
         #region ObeliskLight
@@ -436,7 +440,7 @@ namespace LevelSpecific.WhiteRoom {
         void UpdateValueLine(float t) {
             valueLine.localPosition = Vector3.Lerp(valueLIneBot, valueLineTop, t);
             valueLine.localScale = Vector3.Lerp(valueLineScaleMax, valueLineScaleMin, t);
-		}
+        }
 		#endregion
         
 #region Saving

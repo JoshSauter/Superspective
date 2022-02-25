@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using Audio;
+using PortalMechanics;
 using SuperspectiveUtils;
 using TMPro;
 using UnityEngine;
@@ -29,6 +30,22 @@ public class Interact : Singleton<Interact> {
     private readonly Color reticleSelectDisabledColor = new Color(.8f, 0.15f, 0.15f, .9f);
 
     Color reticleUnselectColor;
+
+    private SuperspectiveRaycast debugRaycast;
+
+    private void OnDrawGizmos() {
+        if (!DEBUG || debugRaycast == null || !Debug.isDebugBuild) return;
+
+        Color defaultColor = Gizmos.color;
+        for (int i = 0; i < debugRaycast.raycastParts.Count; i++) {
+            var part = debugRaycast.raycastParts[i];
+            Gizmos.color = Color.Lerp(Color.green, Color.red, (float)i / RaycastUtils.MAX_RAYCASTS);
+            Gizmos.DrawSphere(part.ray.origin, 0.05f);
+            Gizmos.DrawSphere(part.ray.origin + part.ray.direction * part.distance, 0.025f);
+        }
+
+        Gizmos.color = defaultColor;
+    }
 
     // Use this for initialization
     void Start() {
@@ -116,21 +133,31 @@ public class Interact : Singleton<Interact> {
     }
 
     public SuperspectiveRaycast GetRaycastHits() {
-        Vector2 screenPos = PixelPositionOfReticle();
+        // Vector2 screenPos = PixelPositionOfReticle();
 
-        Ray ray = cam.ScreenPointToRay(screenPos);
+        Ray ray = AdjustedRay(Reticle.instance.thisTransformPos);
+        if (DEBUG) {
+            debugRaycast = RaycastUtils.Raycast(ray.origin, ray.direction, interactionDistance, layerMask);
+            return debugRaycast;
+        }
         return RaycastUtils.Raycast(ray.origin, ray.direction, interactionDistance, layerMask);
     }
 
     public SuperspectiveRaycast GetAnyDistanceRaycastHits() {
         Vector2 reticlePos = Reticle.instance.thisTransformPos;
-        Vector2 screenPos = Vector2.Scale(
-            reticlePos,
-            new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
-        );
+        // Vector2 screenPos = Vector2.Scale(
+        //     reticlePos,
+        //     new Vector2(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight)
+        // );
 
-        Ray ray = cam.ScreenPointToRay(screenPos);
+        Ray ray = AdjustedRay(reticlePos);
         return RaycastUtils.Raycast(ray.origin, ray.direction, float.MaxValue, layerMask);
+    }
+
+    Ray AdjustedRay(Vector2 viewportPos) {
+        Ray ray = cam.ViewportPointToRay(viewportPos);
+        ray.origin -= ray.direction.normalized * 0.55f;
+        return ray;
     }
 
     InteractableObject FindInteractableObjectHovered() {
@@ -150,23 +177,23 @@ public class Interact : Singleton<Interact> {
     }
 
     void OnGUI() {
-        if (DEBUG) {
-            GUI.depth = 2;
-            style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;
-            GUI.Label(new Rect(5, 80, 200, 25), $"Object Hovered: {nameOfFirstObjectHit}", style);
+        if (!DEBUG || !Debug.isDebugBuild) return;
+        
+        GUI.depth = 2;
+        style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;
+        GUI.Label(new Rect(5, 80, 200, 25), $"Object Hovered: {nameOfFirstObjectHit}", style);
 
-            String binaryMask = Convert.ToString(MaskBufferRenderTextures.instance.visibilityMaskValue, 2);
-            String maskPrintStatement = "";
-            for (int i = 0; i < binaryMask.Length; i++) {
-                char digit = binaryMask[binaryMask.Length - 1 - i];
-                maskPrintStatement += $"\n{i}:\t{digit}";
-            }
-            style.normal.textColor = Color.blue;
-            GUI.Label(
-                new Rect(5, 105, 200, 25),
-                $"Mask Values: {maskPrintStatement}",
-                style
-            );
+        String binaryMask = Convert.ToString(MaskBufferRenderTextures.instance.visibilityMaskValue, 2);
+        String maskPrintStatement = "";
+        for (int i = 0; i < binaryMask.Length; i++) {
+            char digit = binaryMask[binaryMask.Length - 1 - i];
+            maskPrintStatement += $"\n{i}:\t{digit}";
         }
+        style.normal.textColor = Color.blue;
+        GUI.Label(
+            new Rect(5, 105, 200, 25),
+            $"Mask Values: {maskPrintStatement}",
+            style
+        );
     }
 }

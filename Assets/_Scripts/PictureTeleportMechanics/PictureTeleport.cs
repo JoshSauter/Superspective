@@ -7,7 +7,6 @@ using System;
 using LevelManagement;
 using SerializableClasses;
 
-// TODO: Change this to work with local position offset from bigFrame position instead of just a world position
 namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
@@ -40,10 +39,7 @@ namespace PictureTeleportMechanics {
         ScreenSpaceAmbientOcclusion ssao {
             get {
                 if (_ssao == null) {
-                    _ssao = SuperspectiveScreen
-                        .instance
-                        .playerCamera
-                        .GetComponent<ScreenSpaceAmbientOcclusion>();
+                    _ssao = SuperspectiveScreen.instance?.playerCamera?.GetComponent<ScreenSpaceAmbientOcclusion>();
                 }
 
                 return _ssao;
@@ -61,7 +57,9 @@ namespace PictureTeleportMechanics {
         new void Awake() {
             base.Awake();
             viewLockObject = GetComponent<ViewLockObject>();
-            startSsaoIntensity = ssao.m_OcclusionIntensity;
+            if (ssao != null) {
+                startSsaoIntensity = ssao.m_OcclusionIntensity;
+            }
         }
 
         protected override void Start() {

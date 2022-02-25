@@ -60,7 +60,7 @@ EditorBuildSettings:
     path: Assets/__Scenes/_TutorialRoom.unity
     guid: 92a782b16196bbd4abebbc33358f460d
   - enabled: 1
-    path: Assets/__Scenes/_Fork_WhiteRoom2.unity
+    path: Assets/__Scenes/_Fork_Cathedral.unity
     guid: ee0eefa70af100f498feb6b01474c914
   - enabled: 1
     path: Assets/__Scenes/_WhiteRoom_BlackHallway.unity
@@ -83,4 +83,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_BehindForkTransition.unity
     guid: feff6b605c099dd40954722c6fa67843
+  - enabled: 1
+    path: Assets/__Scenes/_Fork_Cathedral_Tutorial.unity
+    guid: c71c7f54e8aca7b4eb1647b2068c2a77
   m_configObjects: {}

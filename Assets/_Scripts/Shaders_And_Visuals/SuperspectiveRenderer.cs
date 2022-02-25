@@ -40,6 +40,12 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		}
 	}
 
+	// SuperspectiveRenderer.enabled = false will disable the underlying renderer
+	public new bool enabled {
+		get => r.enabled;
+		set => r.enabled = value;
+	}
+
 	// Use this for initialization
 	void Awake () {
 		List<string> propertiesToCheckForOnAwake = new List<string>() { mainColor, emissionColor };

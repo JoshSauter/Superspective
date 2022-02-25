@@ -25,6 +25,8 @@ public class GameManager : Singleton<GameManager> {
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
+
+        Application.targetFrameRate = 60;
     }
 
 	public void QuitGame() {

@@ -45,6 +45,22 @@ inline void SuberspectiveClipOnly(SuberspectiveV2F i) {
 	SuberspectiveClipOnly(uv_DimensionMask, uv_DissolveTex, i.worldPos);
 }
 
+sampler2D_float _CameraDepthNormalsTexture;
+
+inline float4 DepthColor(float2 screenPos) {
+	float depthValue;
+	float3 normalValues;
+	DecodeDepthNormal(tex2D(_CameraDepthNormalsTexture, screenPos), depthValue, normalValues);
+	half4 overlayColor;
+
+	overlayColor.r = depthValue;
+	overlayColor.g = depthValue;
+	overlayColor.b = depthValue;
+
+	overlayColor.a = 1;
+	return overlayColor;
+}
+
 inline void SuberspectiveRender(SuberspectiveV2F i, inout float4 color, inout half emissionEnabled) {
 	float2 uv_DimensionMask = float2(0,0);
 	float2 uv_DissolveTex = float2(0,0);
@@ -56,6 +72,7 @@ inline void SuberspectiveRender(SuberspectiveV2F i, inout float4 color, inout ha
 	#endif
 
 	SuberspectiveRender(uv_DimensionMask, uv_DissolveTex, i.worldPos, color, emissionEnabled);
+	//color = DepthColor(i.screenPos.xy / i.screenPos.w);
 }
 
 #endif

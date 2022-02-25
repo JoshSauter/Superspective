@@ -11,7 +11,6 @@ using LevelManagement;
 using MagicTriggerMechanics;
 using Saving;
 using SerializableClasses;
-using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	[Serializable]
@@ -20,11 +19,12 @@ namespace PortalMechanics {
 		public RenderTexture depthNormalsTexture;
 
 		public static RecursiveTextures CreateTextures(string name) {
-			int width = SuperspectiveScreen.currentWidth;
-			int height = SuperspectiveScreen.currentHeight;
+			int width = SuperspectiveScreen.instance.currentPortalWidth;
+			int height = SuperspectiveScreen.instance.currentPortalHeight;
+			
 			RecursiveTextures recursiveTextures = new RecursiveTextures {
 				mainTexture = new RenderTexture(width, height, 24, RenderTextureFormat.DefaultHDR),
-				depthNormalsTexture = new RenderTexture(width, height, 24, Portal.DepthNormalsTextureFormat)
+				depthNormalsTexture = new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat, RenderTextureReadWrite.Linear)
 			};
 			recursiveTextures.mainTexture.name = $"{name}_MainTex";
 			recursiveTextures.depthNormalsTexture.name = $"{name}_DepthNormals";
@@ -41,7 +41,7 @@ namespace PortalMechanics {
 	
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
-		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGBFloat;
+		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGB32;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
 		public string channel = "<Not set>";
@@ -120,7 +120,7 @@ namespace PortalMechanics {
 		public bool portalIsEnabled => otherPortal != null && !pauseRenderingAndLogic && gameObject.activeSelf;
 
 		[ShowNativeProperty]
-		bool playerRemainsInPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
+		public bool playerRemainsInPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
 
 		// May or may not exist on a Portal, affects what the PortalMaterial is
 		public DimensionObject dimensionObject;
@@ -132,10 +132,14 @@ namespace PortalMechanics {
 		public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
 		public delegate void SimplePortalTeleportAction(Collider objectTeleported);
 
+		public delegate void SimplePortalTeleportPlayerAction();
 		public event PortalTeleportAction BeforePortalTeleport;
 		public event PortalTeleportAction OnPortalTeleport;
 		public event SimplePortalTeleportAction BeforePortalTeleportSimple;
 		public event SimplePortalTeleportAction OnPortalTeleportSimple;
+		
+		public event SimplePortalTeleportPlayerAction BeforePortalTeleportPlayerSimple;
+		public event SimplePortalTeleportPlayerAction OnPortalTeleportPlayerSimple;
 
 		public static event PortalTeleportAction BeforeAnyPortalTeleport;
 		public static event PortalTeleportAction OnAnyPortalTeleport;
@@ -167,7 +171,8 @@ namespace PortalMechanics {
 			CreateCompositeTrigger();
 		}
 
-		private void OnDestroy() {
+		protected override void OnDestroy() {
+			base.OnDestroy();
 			internalRenderTexturesCopy?.Release();
 		}
 
@@ -291,10 +296,10 @@ namespace PortalMechanics {
 				internalRenderTexturesCopy.Release();
 			}
 			internalRenderTexturesCopy = RecursiveTextures.CreateTextures(ID);
-			SetTexturesOnMaterial();
+			SetPropertiesOnMaterial();
 		}
 
-		public void SetTexturesOnMaterial() {
+		public void SetPropertiesOnMaterial() {
 			void SetTexturesForRenderers(SuperspectiveRenderer[] portalRenderers) {
 				foreach (var r in portalRenderers) {
 					r.SetTexture("_MainTex", internalRenderTexturesCopy.mainTexture);
@@ -311,7 +316,7 @@ namespace PortalMechanics {
 
 			if (dimensionObject != null) {
 				dimensionObject.SetStartingLayersFromCurrentLayers();
-				dimensionObject.OnStateChangeSimple += SetTexturesOnMaterial;
+				dimensionObject.OnStateChangeSimple += SetPropertiesOnMaterial;
 				dimensionObject.ignorePartiallyVisibleLayerChanges = true;
 			}
 			
@@ -325,19 +330,14 @@ namespace PortalMechanics {
 				DefaultMaterial();
 			}
 			else {
-				foreach (var r in renderers) {
-					r.SetMaterial(portalMaterial);
-				}
-				foreach (var vp in volumetricPortals) {
-					vp.SetMaterial(portalMaterial);
-				}
+				PortalMaterial();
 			}
 		}
 
 		protected override void Init() {
 			base.Init();
 			
-			SetTexturesOnMaterial();
+			SetPropertiesOnMaterial();
 		}
 
 		bool test = false;
@@ -389,23 +389,32 @@ namespace PortalMechanics {
 			if (other.TaggedAsPlayer()) return;
 			
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
-			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
-				objectsInPortal.Remove(portalableObj);
-				portalableObj.sittingInPortal = null;
+			if (portalableObj != null) {
+				if (objectsInPortal.Contains(portalableObj)) {
+					objectsInPortal.Remove(portalableObj);
+					portalableObj.sittingInPortal = null;
+				}
 			}
 		}
 
 		public void OnTriggerStay(Collider other) {
-			if (!portalIsEnabled) return;
+			if (!portalIsEnabled || other.isTrigger) return;
 
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
 			if (!other.TaggedAsPlayer()) {
-				Vector3 closestPoint = ClosestPoint(other.transform.position, true);
+				Vector3 closestPoint = ClosestPoint(other.transform.position, true, true);
 				bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
-				if (!objectShouldBeTeleported) return;
-				
 				PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+
+				if (!objectShouldBeTeleported) {
+					if (portalableObj != null) {
+						portalableObj.sittingInPortal = this;
+					}
+
+					return;
+				}
+				
 				if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
 					TeleportObject(portalableObj);
 
@@ -419,9 +428,25 @@ namespace PortalMechanics {
 
 		// Called before render process begins, either enable or disable the volumetric portals for this frame
 		void LateUpdate() {
+			SetEdgeDetectionColorProperties();
 			//debug.Log(volumetricPortalsShouldBeEnabled);
 			if (volumetricPortalsShouldBeEnabled) {
 				EnableVolumetricPortal();
+				
+				// Experimental code for moving around a smaller volumetric portal that tracks the player:
+				// for (int i = 0; i < volumetricPortals.Length; i++) {
+				// 	var volumetricPortal = volumetricPortals[i];
+				// 	var portal = colliders[i];
+				// 	Transform vpTransform = volumetricPortal.transform;
+				// 	Vector3 camPos = playerCamera.position;
+				//
+				// 	Vector3 vpSize = new Vector3(.5f, .5f, .5f);
+				// 	Bounds portalBounds = portal.bounds;
+				// 	portalBounds.size -= vpSize;
+				//
+				// 	Vector3 targetPos = portalBounds.ClosestPoint(camPos);
+				// 	vpTransform.position = targetPos;
+				// }
 			}
 			else {
 				DisableVolumetricPortal();
@@ -449,18 +474,10 @@ namespace PortalMechanics {
 				return;
 			}
 
-			if (!renderers[0].r.sharedMaterial.name.Contains(portalMaterial.name)) {
-				foreach (var r in renderers) {
-					r.SetMaterial(portalMaterial);
-				}
-
-				foreach (var vp in volumetricPortals) {
-					vp.SetMaterial(portalMaterial);
-				}
-			}
+			PortalMaterial();
 
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.mainTexture);
-			SetTexturesOnMaterial();
+			SetPropertiesOnMaterial();
 		}
 
 		public void SetDepthNormalsTexture(RenderTexture tex) {
@@ -469,6 +486,13 @@ namespace PortalMechanics {
 				return;
 			}
 
+			PortalMaterial();
+
+			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
+			SetPropertiesOnMaterial();
+		}
+
+		public void PortalMaterial() {
 			if (!renderers[0].r.sharedMaterial.name.Contains(portalMaterial.name)) {
 				foreach (var r in renderers) {
 					r.SetMaterial(portalMaterial);
@@ -478,9 +502,6 @@ namespace PortalMechanics {
 					vp.SetMaterial(portalMaterial);
 				}
 			}
-
-			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
-			SetTexturesOnMaterial();
 		}
 
 		public void DefaultMaterial() {
@@ -508,7 +529,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false) {
+		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false, bool useInfinitelyThinBounds = false) {
 			float minDistance = float.MaxValue;
 			Vector3 closestPoint = point + Vector3.up * minDistance;
 			foreach (var c in colliders) {
@@ -519,7 +540,22 @@ namespace PortalMechanics {
 				// Closest point does not work with disabled colliders, so we temporarily turn it on for the calculation
 				c.enabled = true;
 
-				Vector3 thisClosestPoint = c.ClosestPoint(point);
+				Vector3 thisClosestPoint;
+				if (useInfinitelyThinBounds) {
+					// Treat the collider bounds as being infinitely thin in the Z direction (portal normal direction)
+					Bounds b = c.bounds;
+					Vector3 effectiveNormal = PortalNormal();
+					effectiveNormal.x = Mathf.Abs(effectiveNormal.x);
+					effectiveNormal.y = Mathf.Abs(effectiveNormal.y);
+					effectiveNormal.z = Mathf.Abs(effectiveNormal.z);
+					Vector3Int scaleFactor = Vector3Int.RoundToInt(Vector3.one - effectiveNormal);
+					b.size = Vector3.Scale(b.size, scaleFactor);
+					thisClosestPoint = b.ClosestPoint(point);
+				}
+				else {
+					thisClosestPoint = c.ClosestPoint(point);
+				}
+				
 				float thisDistance = Vector3.Distance(thisClosestPoint, point);
 				if (thisDistance < minDistance) {
 					minDistance = thisDistance;
@@ -603,14 +639,18 @@ namespace PortalMechanics {
 		/// <param name="objToTransform"></param>
 		/// <param name="transformVelocity"></param>
 		public void TransformObject(Transform objToTransform, bool transformVelocity = true) {
-			// Position
-			objToTransform.position = TransformPoint(objToTransform.position);
-
-			// Rotation
-			objToTransform.rotation = TransformRotation(objToTransform.rotation);
+			Rigidbody objRigidbody = objToTransform.GetComponent<Rigidbody>();
+			// Position & Rotation
+			if (objRigidbody == null) {
+				objRigidbody.MovePosition(TransformPoint(objToTransform.position));
+				objRigidbody.MoveRotation(TransformRotation(objToTransform.rotation));
+			}
+			else {
+				objToTransform.position = TransformPoint(objToTransform.position);
+				objToTransform.rotation = TransformRotation(objToTransform.rotation);
+			}
 
 			// Velocity?
-			Rigidbody objRigidbody = objToTransform.GetComponent<Rigidbody>();
 			if (transformVelocity && objRigidbody != null) {
 				objRigidbody.velocity = TransformDirection(objRigidbody.velocity);
 			}
@@ -678,7 +718,11 @@ namespace PortalMechanics {
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
 			DisableVolumetricPortal();
 			otherPortal.EnableVolumetricPortal();
+			otherPortal.pauseRenderingOnly = false;
 			yield return null;
+			// Sometimes teleporting leaves the hasTriggeredOnStay state as true so we explicitly reset state here
+			trigger.ResetHasTriggeredOnStayState();
+			
 			teleportingPlayer = false;
 		}
 
@@ -687,6 +731,10 @@ namespace PortalMechanics {
 			BeforeAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 			BeforePortalTeleportSimple?.Invoke(objBeingTeleported);
 			BeforeAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
+
+			if (objBeingTeleported.TaggedAsPlayer()) {
+				BeforePortalTeleportPlayerSimple?.Invoke();
+			}
 		}
 
 		void TriggerEventsAfterTeleport(Collider objBeingTeleported) {
@@ -694,6 +742,10 @@ namespace PortalMechanics {
 			OnAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 			OnPortalTeleportSimple?.Invoke(objBeingTeleported);
 			OnAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
+			
+			if (objBeingTeleported.TaggedAsPlayer()) {
+				OnPortalTeleportPlayerSimple?.Invoke();
+			}
 		}
 		#endregion
 
@@ -702,7 +754,7 @@ namespace PortalMechanics {
 		void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
 			if (anyVolumetricPortalIsDisabled) {
-				//debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
+				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
 				foreach (var vp in volumetricPortals) {
 					if (pauseRenderingAndLogic) continue;
 					else if (pauseRenderingOnly) vp.enabled = true;
@@ -717,7 +769,7 @@ namespace PortalMechanics {
 		void DisableVolumetricPortal() {
 			bool anyVolumetricPortalIsEnabled = volumetricPortals.Any(vp => vp.enabled);
 			if (anyVolumetricPortalIsEnabled) {
-				//debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
+				debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
 
 				foreach (var vp in volumetricPortals) {
 					vp.enabled = false;
@@ -740,6 +792,81 @@ namespace PortalMechanics {
 			}
 
 			PortalManager.instance.AddPortal(channel, this);
+		}
+
+		// Allocate once to save GC every frame
+		readonly float[] floatGradientBuffer = new float[BladeEdgeDetection.GradientArraySize];
+		readonly Color[] colorGradientBuffer = new Color[BladeEdgeDetection.GradientArraySize];
+
+		private BladeEdgeDetection edgeDetection => MaskBufferRenderTextures.instance.edgeDetection;
+		BladeEdgeDetection.EdgeColorMode EdgeColorMode => changeCameraEdgeDetection ? edgeColorMode : edgeDetection.edgeColorMode;
+		Color EdgeColor => changeCameraEdgeDetection ? edgeColor : edgeDetection.edgeColor;
+		Gradient EdgeColorGradient => changeCameraEdgeDetection ? edgeColorGradient : edgeDetection.edgeColorGradient;
+		
+		void SetEdgeDetectionColorProperties() {
+			portalMaterial.SetInt(BladeEdgeDetection.ColorModeID, (int)EdgeColorMode);
+			switch (EdgeColorMode) {
+				case BladeEdgeDetection.EdgeColorMode.SimpleColor:
+					portalMaterial.SetColor(BladeEdgeDetection.EdgeColorID, EdgeColor);
+					break;
+				case BladeEdgeDetection.EdgeColorMode.Gradient:
+					SetEdgeColorGradient();
+					break;
+				case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
+					portalMaterial.SetTexture(BladeEdgeDetection.GradientTextureID, edgeColorGradientTexture);
+					break;
+			}
+		}
+		
+		/// <summary>
+		/// Sets the _GradientKeyTimes and _EdgeColorGradient float and Color arrays, respectively, in the BladeEdgeDetectionShader
+		/// Populates _GradientKeyTimes with the times of each colorKey in edgeColorGradient (as well as a 0 as the first key and a series of 1s to fill out the array at the end)
+		/// Populates _EdgeColorGradient with the colors of each colorKey in edgeColorGradient (as well as values for the times filled in as described above)
+		/// </summary>
+		void SetEdgeColorGradient() {
+			Color startColor = EdgeColorGradient.Evaluate(0);
+			Color endColor = EdgeColorGradient.Evaluate(1);
+			float startAlpha = startColor.a;
+			float endAlpha = endColor.a;
+	
+			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.colorKeys.Select(x => x.time), 1f));
+			portalMaterial.SetColorArray(BladeEdgeDetection.EdgeColorGradientID, GetGradientColorValues(startColor, EdgeColorGradient.colorKeys.Select(x => x.color), endColor));
+			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientAlphaKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.alphaKeys.Select(x => x.time), 1f));
+			portalMaterial.SetFloatArray(BladeEdgeDetection.AlphaGradientID, GetGradientFloatValues(startAlpha, EdgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
+	
+			portalMaterial.SetInt(BladeEdgeDetection.GradientModeID, EdgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
+	
+			SetFrustumCornersVector();
+		}
+	
+		void SetFrustumCornersVector() {
+			portalMaterial.SetVectorArray(BladeEdgeDetection.FrustumCorners, edgeDetection.frustumCornersOrdered);
+		}
+	
+		// Actually just populates the float buffer with the values provided, then returns a reference to the float buffer
+		float[] GetGradientFloatValues(float startValue, IEnumerable<float> middleValues, float endValue) {
+			float[] middleValuesArray = middleValues.ToArray();
+			floatGradientBuffer[0] = startValue;
+			for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+				floatGradientBuffer[i] = middleValuesArray[i - 1];
+			}
+			for (int j = middleValuesArray.Length + 1; j < BladeEdgeDetection.GradientArraySize; j++) {
+				floatGradientBuffer[j] = endValue;
+			}
+			return floatGradientBuffer;
+		}
+	
+		// Actually just populates the color buffer with the values provided, then returns a reference to the color buffer
+		Color[] GetGradientColorValues(Color startValue, IEnumerable<Color> middleValues, Color endValue) {
+			Color[] middleValuesArray = middleValues.ToArray();
+			colorGradientBuffer[0] = startValue;
+			for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+				colorGradientBuffer[i] = middleValuesArray[i - 1];
+			}
+			for (int j = middleValuesArray.Length + 1; j < BladeEdgeDetection.GradientArraySize; j++) {
+				colorGradientBuffer[j] = endValue;
+			}
+			return colorGradientBuffer;
 		}
 
 		void SwapEdgeDetectionColors() {

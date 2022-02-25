@@ -47,7 +47,7 @@ class UnloadScenesBeforePlay {
     static void UnloadAllScenesExcept(string sceneName) {
         List<String> scenesThatShouldRemainLoaded = LevelManager.instance.allLevels
             .Find(lvl => lvl.level == LevelManager.instance.startingScene).connectedLevels
-            .ComposableAdd(LevelManager.instance.startingScene)
+            .Append(LevelManager.instance.startingScene)
             .Select(lvl => lvl.ToName())
             .ToList();
 

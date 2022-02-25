@@ -328,6 +328,22 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
+	public class SerializableReference<T> : SerializableReference where T : MonoBehaviour, ISaveableObject {
+		public T GetOrNull() {
+			SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
+			return saveManagerForScene?.GetSaveableObject(referencedObjId).LeftOrDefault() as T;
+		}
+
+		// Implicit SerializableReference creation from SaveableObject
+		public static implicit operator SerializableReference<T>(T obj) {
+			return obj != null ? new SerializableReference<T> {
+				referencedSceneName = obj.gameObject.scene.name,
+				referencedObjId = obj.ID
+			} : null;
+		}
+	}
+
+	[Serializable]
 	public class SerializableReference<T, S> : SerializableReference
 		where T : MonoBehaviour, ISaveableObject
 		where S : SerializableSaveObject<T> {

@@ -49,6 +49,10 @@ namespace StateUtils {
                 InitIdempotent();
                 return _timeSinceStateChanged;
             }
+            set {
+                InitIdempotent();
+                _timeSinceStateChanged = value;
+            }
         }
 
         public static implicit operator T(StateMachine<T> stateMachine) => stateMachine.state;

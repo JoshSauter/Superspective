@@ -83,6 +83,7 @@ Material:
     - _DissolveValue: 0
     - _DstBlend: 0
     - _EmissionEnabled: 1
+    - _FudgeDistance: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1

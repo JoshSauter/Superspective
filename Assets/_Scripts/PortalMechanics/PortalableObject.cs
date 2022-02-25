@@ -7,6 +7,8 @@ using NaughtyAttributes;
 using Saving;
 using System;
 using SerializableClasses;
+using StateUtils;
+using UnityEngine.Rendering;
 
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
@@ -14,10 +16,15 @@ namespace PortalMechanics {
 		Portal _sittingInPortal;
 		Portal _hoveredThroughPortal;
 		Portal _grabbedThroughPortal;
+		private bool resetSittingInPortal = false;
 		public Portal sittingInPortal {
 			get => _sittingInPortal;
 			set {
 				_sittingInPortal = value;
+				if (value != null) {
+					resetSittingInPortal = false;
+				}
+				
 				if (copyShouldBeEnabled && portalInteractingWith != null) {
 					if (fakeCopyInstance == null) {
 						CreateFakeCopyInstance();
@@ -53,6 +60,14 @@ namespace PortalMechanics {
 				}
 			}
 		}
+
+		// This state machine only tracks when the player should be forced to drop the cube because it's being moved
+		// on the other side of a portal without a portal between the player and cube
+		public enum HoldState {
+			NoPortalBetweenCubeAndPlayer,
+			PortalBetweenCubeAndPlayer
+		}
+		private StateMachine<HoldState> holdState = new StateMachine<HoldState>(HoldState.NoPortalBetweenCubeAndPlayer);
 
 		InteractableObject interact;
 		PickupObject pickupObject;
@@ -112,12 +127,24 @@ namespace PortalMechanics {
 			base.Start();
 			OnObjectTeleported += UpdateGrabbedThroughPortalAfterObjectTeleports;
 			Portal.BeforeAnyPortalTeleport += (Portal inPortal, Collider objBeingTeleported) => UpdateGrabbedThroughPortalAfterPlayerTeleports(inPortal);
+			InitializeHoldStateMachine();
+		}
+
+		private void FixedUpdate() {
+			if (resetSittingInPortal) {
+				_sittingInPortal = null;
+			}
+			else {
+				resetSittingInPortal = true;
+			}
 		}
 
 		void Update() {
+
 			thisFrameRaycastHits = Interact.instance.GetRaycastHits();
 
 			RecalculateHoveredThroughPortal();
+			PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal();
 
 			if (copyShouldBeEnabled && fakeCopyInstance == null) {
 				CreateFakeCopyInstance();
@@ -196,6 +223,18 @@ namespace PortalMechanics {
 			hoveredThroughPortal = (hoveredOnPickupObj || hoveredOnPortalCopy) ? InteractedThroughPortal() : null;
 		}
 
+		// Being held illegally means the cube is being carried on the other side of the portal without the last frame raycast hitting that portal
+		// (or the player standing inside of that portal)
+		void PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal() {
+			// The actual dropping happens through a StateMachine trigger, we just reset the timer here if the cube is being held legally
+			if (hoveredThroughPortal != null &&
+			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.playerRemainsInPortal)) {
+				
+				holdState.Set(HoldState.PortalBetweenCubeAndPlayer);
+				holdState.timeSinceStateChanged = 0f;
+			}
+		}
+
 		void HandleDrop() {
 			grabbedThroughPortal = null;
 		}
@@ -226,7 +265,18 @@ namespace PortalMechanics {
 			SetMaterialsForRenderers(renderers, usePortalCopyMaterials);
 			if (usePortalCopyMaterials) {
 				SetMaterialsForRenderers(fakeCopyInstance.renderers, usePortalCopyMaterials);
+				SetRenderQueueToJustAfterGeometry(fakeCopyInstance.renderers);
 				UpdateMaterialProperties(portalInteractingWith);
+			}
+		}
+
+		void SetRenderQueueToJustAfterGeometry(Renderer[] renderersToChangeMaterialsOf) {
+			foreach (Renderer renderer in renderersToChangeMaterialsOf) {
+				bool isTransparent = renderer.material.GetInt("__SuberspectiveBlendMode") ==
+				                     (int)ShaderUtils.SuberspectiveBlendMode.Transparent;
+				if (isTransparent) {
+					renderer.material.renderQueue = (int)RenderQueue.Geometry + 1;
+				}
 			}
 		}
 
@@ -248,6 +298,15 @@ namespace PortalMechanics {
 			}
 		}
 
+		void InitializeHoldStateMachine() {
+			const float timeBeforeForcedToDropCube = 0.15f;
+			holdState.AddStateTransition(HoldState.PortalBetweenCubeAndPlayer, HoldState.NoPortalBetweenCubeAndPlayer, timeBeforeForcedToDropCube);
+			holdState.AddTrigger(HoldState.NoPortalBetweenCubeAndPlayer, 0f, () => {
+				if (pickupObject != null && hoveredThroughPortal != null) {
+					pickupObject.Drop();
+				}
+			});
+		}
 
 		#region Saving
 
@@ -256,6 +315,7 @@ namespace PortalMechanics {
 			SerializableReference<Portal, Portal.PortalSave> sittingInPortal;
 			SerializableReference<Portal, Portal.PortalSave> hoveredThroughPortal;
 			SerializableReference<Portal, Portal.PortalSave> grabbedThroughPortal;
+			StateMachine<HoldState> holdState;
 
 			public PortalableObjectSave(PortalableObject obj) : base(obj) {
 				sittingInPortal = null;
@@ -270,6 +330,8 @@ namespace PortalMechanics {
 				if (obj.grabbedThroughPortal != null) {
 					this.grabbedThroughPortal = obj.grabbedThroughPortal;
 				}
+
+				holdState = obj.holdState;
 			}
 
 			public override void LoadSave(PortalableObject obj) {
@@ -283,6 +345,8 @@ namespace PortalMechanics {
 				if (this.grabbedThroughPortal != null) {
 					obj.grabbedThroughPortal = this.grabbedThroughPortal.GetOrNull();
 				}
+
+				obj.holdState = this.holdState;
 			}
 		}
 		#endregion

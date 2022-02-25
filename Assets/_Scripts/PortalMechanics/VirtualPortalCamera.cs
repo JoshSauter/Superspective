@@ -47,8 +47,8 @@ namespace PortalMechanics {
 			public Vector3 camPosition;
 			public Quaternion camRotation;
 			public Matrix4x4 camProjectionMatrix;
-			[HideInInspector]
-			public EDColors edgeColors;
+			// [HideInInspector]
+			// public EDColors edgeColors;
 		}
 
 		public bool DEBUG = false;
@@ -122,8 +122,8 @@ namespace PortalMechanics {
 			CameraSettings mainCamSettings = new CameraSettings {
 				camPosition = mainCamera.transform.position,
 				camRotation = mainCamera.transform.rotation,
-				camProjectionMatrix = mainCamera.projectionMatrix,
-				edgeColors = new EDColors(mainCameraEdgeDetection)
+				camProjectionMatrix = mainCamera.projectionMatrix
+				// edgeColors = new EDColors(mainCameraEdgeDetection)
 			};
 			SetCameraSettings(portalCamera, mainCamSettings);
 			SetCameraSettings(SuperspectiveScreen.instance.portalMaskCamera, mainCamSettings);
@@ -184,8 +184,8 @@ namespace PortalMechanics {
 			CameraSettings modifiedCamSettings = new CameraSettings {
 				camPosition = portalCamera.transform.position,
 				camRotation = portalCamera.transform.rotation,
-				camProjectionMatrix = portalCamera.projectionMatrix,
-				edgeColors = new EDColors(portalCameraEdgeDetection)
+				camProjectionMatrix = portalCamera.projectionMatrix
+				// edgeColors = new EDColors(portalCameraEdgeDetection)
 			};
 
 			// Key == Visible Portal, Value == visible portal screen bounds
@@ -383,15 +383,15 @@ namespace PortalMechanics {
 		}
 
 		void SetCameraSettings(Camera cam, CameraSettings settings) {
-			SetCameraSettings(cam, settings.camPosition, settings.camRotation, settings.camProjectionMatrix, settings.edgeColors);
+			SetCameraSettings(cam, settings.camPosition, settings.camRotation, settings.camProjectionMatrix);
 		}
 
-		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix, EDColors edgeColors) {
+		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix) {
 			cam.transform.position = position;
 			cam.transform.rotation = rotation;
 			cam.projectionMatrix = projectionMatrix;
 
-			CopyEdgeColors(portalCameraEdgeDetection, edgeColors);
+			// CopyEdgeColors(portalCameraEdgeDetection, edgeColors);
 		}
 
 		Rect[] IntersectionOfBounds(Rect[] boundsA, Rect[] boundsB) {
@@ -422,9 +422,10 @@ namespace PortalMechanics {
 
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
-			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(mainCamera.transform.position, inPortal.ClosestPoint(mainCamera.transform.position)) < 2*clearSpaceBehindPortal;
+			Vector3 position = mainCamera.transform.position;
+			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) < 2*clearSpaceBehindPortal;
 			if (!shouldUseDefaultProjectionMatrix) {
-				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position);
+				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position, useInfinitelyThinBounds: true);
 
 				Plane p = new Plane(-outPortal.PortalNormal(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.PortalNormal());
 				Vector4 clipPlane = new Vector4(p.normal.x, p.normal.y, p.normal.z, p.distance);
@@ -440,7 +441,7 @@ namespace PortalMechanics {
 
 			// Modify the camera's edge detection if necessary
 			if (inPortal != null && inPortal.changeCameraEdgeDetection) {
-				CopyEdgeColors(portalCameraEdgeDetection, inPortal.edgeColorMode, inPortal.edgeColor, inPortal.edgeColorGradient, inPortal.edgeColorGradientTexture);
+				// CopyEdgeColors(portalCameraEdgeDetection, inPortal.edgeColorMode, inPortal.edgeColor, inPortal.edgeColorGradient, inPortal.edgeColorGradientTexture);
 			}
 		}
 

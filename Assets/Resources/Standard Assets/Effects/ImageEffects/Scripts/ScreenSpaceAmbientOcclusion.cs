@@ -1,4 +1,5 @@
 using System;
+using Saving;
 using UnityEngine;
 
 namespace UnityStandardAssets.ImageEffects
@@ -6,9 +7,12 @@ namespace UnityStandardAssets.ImageEffects
     [ExecuteInEditMode]
     [RequireComponent (typeof(Camera))]
     [AddComponentMenu("Image Effects/Rendering/Screen Space Ambient Occlusion")]
-    public class ScreenSpaceAmbientOcclusion : MonoBehaviour
-    {
-        public enum SSAOSamples
+    // Extending SaveableObject to allow for cross-scene references (e.g. for PictureTeleport)
+    public class ScreenSpaceAmbientOcclusion : SaveableObject {
+	    public const string SaveID = "ScreenSpaceAmbientOcclusion";
+	    public override string ID => SaveID;
+
+	    public enum SSAOSamples
 		{
             Low = 0,
             Medium = 1,

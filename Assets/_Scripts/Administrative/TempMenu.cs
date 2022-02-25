@@ -10,6 +10,7 @@ public class TempMenu : Singleton<TempMenu> {
 	public Slider xSensitivitySlider;
 	public Slider ySensitivitySlider;
 	public Slider headbobSlider;
+	public Slider portalDownsampleSlider;
 
 	public CursorLockMode cachedLockMode;
 
@@ -25,6 +26,9 @@ public class TempMenu : Singleton<TempMenu> {
 		});
 		headbobSlider.onValueChanged.AddListener(delegate {
 			Player.instance.headbob.headbobAmount = headbobSlider.value;
+		});
+		portalDownsampleSlider.onValueChanged.AddListener(delegate {
+			SuperspectiveScreen.instance.portalDownsampleAmount = Mathf.RoundToInt(portalDownsampleSlider.value);
 		});
     }
 

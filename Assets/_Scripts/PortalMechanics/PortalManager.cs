@@ -113,11 +113,11 @@ namespace PortalMechanics {
 			// Order of components here matters; it affects the rendering order of the postprocess effects
 			//portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
 			ColorfulFog fog = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ColorfulFog>());                            // Copy Fog
-			BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
+			//BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 			//edgeDetection.enabled = false;
 			//edgeDetection.checkPortalDepth = false;
 			virtualPortalCam.postProcessEffects.Add(fog);
-			virtualPortalCam.postProcessEffects.Add(edgeDetection);
+			//virtualPortalCam.postProcessEffects.Add(edgeDetection);
 
 			portalCamera.gameObject.name = "VirtualPortalCamera";
 		}

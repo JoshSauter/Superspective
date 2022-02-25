@@ -48,42 +48,48 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	Camera thisCamera;
 
 	const float DepthSensitivityMultiplier = 40;	// Keeps depth-sensitivity values close to normal-sensitivity values in the inspector
-	const int GradientArraySize = 10;
+	public const int GradientArraySize = 10;
 
 	// Allocate once to save GC every frame
 	readonly float[] floatGradientBuffer = new float[GradientArraySize];
 	readonly Color[] colorGradientBuffer = new Color[GradientArraySize];
 
 	[NonSerialized]
-	Vector3[] frustumCorners;
+	public Vector3[] frustumCorners;
 	[NonSerialized]
-	Vector4[] frustumCornersOrdered;
+	public Vector4[] frustumCornersOrdered;
+
+	public delegate void EdgeDetectRenderAction();
+
+	public event EdgeDetectRenderAction BeforeRenderEdgeDetection;
 
 	static readonly int DepthSensitivityID = Shader.PropertyToID("_DepthSensitivity");
 	static readonly int NormalSensitivityID = Shader.PropertyToID("_NormalSensitivity");
 	static readonly int SampleDistanceID = Shader.PropertyToID("_SampleDistance");
-	static readonly int ColorModeID = Shader.PropertyToID("_ColorMode");
-	static readonly int EdgeColorID = Shader.PropertyToID("_EdgeColor");
+	public static readonly int ColorModeID = Shader.PropertyToID("_ColorMode");
+	public static readonly int EdgeColorID = Shader.PropertyToID("_EdgeColor");
 	static readonly int DebugModeID = Shader.PropertyToID("_DebugMode");
-	static readonly int GradientTextureID = Shader.PropertyToID("_GradientTexture");
+	public static readonly int GradientTextureID = Shader.PropertyToID("_GradientTexture");
 	static readonly int WeightedEdgeModeID = Shader.PropertyToID("_WeightedEdgeMode");
 	static readonly int DepthWeightEffectID = Shader.PropertyToID("_DepthWeightEffect");
 	static readonly int NormalWeightEffectID = Shader.PropertyToID("_NormalWeightEffect");
 	static readonly int DepthWeightMinID = Shader.PropertyToID("_DepthWeightMin");
 	static readonly int NormalWeightMinID = Shader.PropertyToID("_NormalWeightMin");
 	
-	static readonly int GradientKeyTimesID = Shader.PropertyToID("_GradientKeyTimes");
-	static readonly int EdgeColorGradientID = Shader.PropertyToID("_EdgeColorGradient");
-	static readonly int GradientAlphaKeyTimesID = Shader.PropertyToID("_GradientAlphaKeyTimes");
-	static readonly int AlphaGradientID = Shader.PropertyToID("_AlphaGradient");
-	static readonly int GradientModeID = Shader.PropertyToID("_GradientMode");
-	static readonly int FrustumCorners = Shader.PropertyToID("_FrustumCorners");
+	public static readonly int GradientKeyTimesID = Shader.PropertyToID("_GradientKeyTimes");
+	public static readonly int EdgeColorGradientID = Shader.PropertyToID("_EdgeColorGradient");
+	public static readonly int GradientAlphaKeyTimesID = Shader.PropertyToID("_GradientAlphaKeyTimes");
+	public static readonly int AlphaGradientID = Shader.PropertyToID("_AlphaGradient");
+	public static readonly int GradientModeID = Shader.PropertyToID("_GradientMode");
+	public static readonly int FrustumCorners = Shader.PropertyToID("_FrustumCorners");
 
 	void OnEnable () {
 		SetDepthNormalTextureFlag();
 		frustumCorners = new Vector3[4];
 		frustumCornersOrdered = new Vector4[4];
 	}
+
+	public Texture cameraDepthNormalsTexture;
 	
 	[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
@@ -92,6 +98,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 			Graphics.Blit(source, destination);
 			this.enabled = false;
 		}
+
+		BeforeRenderEdgeDetection?.Invoke();
 
 		shaderMaterial.SetFloat(DebugModeID, debugMode ? 1 : 0);
 

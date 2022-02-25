@@ -54,6 +54,10 @@ namespace MagicTriggerMechanics {
 
 		IEnumerator ResetHasTriggeredOnStayStateAtEndOfPhysicsFrame() {
 			yield return new WaitForFixedUpdate();
+			if (hasTriggeredOnStay || hasNegativeTriggeredOnStay) {
+				debug.LogWarning("Resetting has triggered on stay state");
+			}
+
 			hasTriggeredOnStay = false;
 			hasNegativeTriggeredOnStay = false;
 		}
@@ -76,7 +80,7 @@ namespace MagicTriggerMechanics {
 				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
 				// Magic Events triggered
 				if (allConditionsSatisfied) {
-					debug.Log($"Triggering MagicTrigger for {gameObject.name}!");
+					debug.Log($"Triggering MagicTrigger for {gameObject.name}!\nFirst trigger? {!hasTriggeredOnStay}");
 
 					ExecuteActionsForTiming(ActionTiming.EveryFrameOnStay);
 					OnMagicTriggerStay?.Invoke();
@@ -85,12 +89,13 @@ namespace MagicTriggerMechanics {
 						hasNegativeTriggeredOnStay = false;
 
 						ExecuteActionsForTiming(ActionTiming.OnceWhileOnStay);
+						debug.Log($"Triggering MagicTriggerStayOneTime for {gameObject.name}!");
 						OnMagicTriggerStayOneTime?.Invoke();
 					}
 				}
 				// Negative Magic Events triggered (negative triggers cannot turn self off)
 				else if (allConditionsNegativelySatisfied) {
-					debug.Log("Triggering NegativeMagicTrigger!");
+					debug.Log($"Triggering Negative MagicTrigger for {gameObject.name}!");
 					ExecuteNegativeActionsForTiming(ActionTiming.EveryFrameOnStay);
 					OnNegativeMagicTriggerStay?.Invoke();
 
@@ -99,6 +104,7 @@ namespace MagicTriggerMechanics {
 						hasTriggeredOnStay = false;
 
 						ExecuteNegativeActionsForTiming(ActionTiming.OnceWhileOnStay);
+						debug.Log($"Triggering Negative MagicTriggerStayOneTime for {gameObject.name}!");
 						OnNegativeMagicTriggerStayOneTime?.Invoke();
 					}
 				}

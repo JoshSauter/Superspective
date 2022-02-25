@@ -17,6 +17,10 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         bool exitsAreConnected = false;
         bool playerIsInInfiniteHallway = false;
 
+        private void Awake() {
+            lowerPlatformPortal.pauseRenderingAndLogic = !exitsAreConnected;
+        }
+
         void Start() {
             SubscribeToEvents();
         }
@@ -52,9 +56,15 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
                 exitsAreConnected = false;
             }
 
-            foreach (var portalRenderer in lowerPlatformPortal.renderers) {
-                portalRenderer.enabled = exitsAreConnected;
+            if (lowerPlatformPortal.pauseRenderingOnly && exitsAreConnected) {
+                lowerPlatformPortal.pauseRenderingAndLogic = false;
+                lowerPlatformPortal.PortalMaterial();
             }
+            else if (!lowerPlatformPortal.pauseRenderingOnly && !exitsAreConnected) {
+                lowerPlatformPortal.pauseRenderingAndLogic = true;
+                lowerPlatformPortal.DefaultMaterial();
+            }
+            lowerPlatformPortal.pauseRenderingAndLogic = !exitsAreConnected;
 
             teleportFacingBackward.teleportEnter.enabled = !exitsAreConnected;
             teleportFacingForward.teleportEnter.enabled = !exitsAreConnected;

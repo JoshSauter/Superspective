@@ -80,7 +80,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public void OnLeftMouseButtonDown() {
         if (PlayerLook.instance.state == PlayerLook.State.ViewUnlocked) {
             hitbox.enabled = false;
-            AudioManager.instance.PlayOnGameObject(AudioName.ViewLockObject, ID, this, true);
+            AudioManager.instance.Play(AudioName.ViewLockObject, ID, this);
             PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
             state = PlayerLook.State.ViewLocking;
         }

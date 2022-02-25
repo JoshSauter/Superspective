@@ -33,6 +33,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
+	// Next level: 27
 	[Serializable]
 	public enum Levels {
 		ManagerScene = 0,
@@ -41,7 +42,6 @@ namespace LevelManagement {
 		HexPillarRoom = 3,
 		Library = 4,
 		Level3 = 5,
-		// Level4 = 6,			// TODO Replace Level4 with next level you add, it's gone
 		TutorialHallway = 7,
 		TutorialRoom = 8,
 		Transition23 = 9,
@@ -53,7 +53,7 @@ namespace LevelManagement {
 		InvisFloor = 15,
 		MetaEdgeDetection = 16,
 		PortalTestScene = 17,
-		ForkWhiteRoom2 = 18,
+		ForkCathedral = 18,
 		ForkWhiteRoomBlackHallway = 19,
 		ForkWhiteRoom3 = 20,
 		TransitionWhiteRoomFork = 21,
@@ -61,7 +61,8 @@ namespace LevelManagement {
 		ForkBlackRoom2 = 23,
 		WhiteRoom1BackRoom = 24,
 		BehindForkTransition = 25,
-		ForkBlackRoom3 = 26
+		ForkBlackRoom3 = 26,
+		ForkCathedralTutorial = 6
 	}
 
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
@@ -308,7 +309,7 @@ namespace LevelManagement {
 			{ Levels.WhiteRoom1BackRoom, "_WhiteRoom1_BackRoom" },
 			{ Levels.TransitionWhiteRoomFork, "_TransitionWhiteRoom_Fork" },
 			{ Levels.ForkWhiteRoom3, "_Fork_WhiteRoom3" },
-			{ Levels.ForkWhiteRoom2, "_Fork_WhiteRoom2" },
+			{ Levels.ForkCathedral, "_Fork_Cathedral" },
 			{ Levels.ForkWhiteRoomBlackHallway, "_WhiteRoom_BlackHallway" },
 			{ Levels.BehindForkTransition, "_BehindForkTransition" },
 			{ Levels.ForkBlackRoom, "_Fork_BlackRoom" },
@@ -320,7 +321,8 @@ namespace LevelManagement {
 			{ Levels.Transition34, "_Transition3_4" },
 			{ Levels.MetaEdgeDetection, "_Meta_EdgeDetection" },
 			{ Levels.PortalTestScene, "PortalTestScene" },
-			{ Levels.ForkBlackRoom3, "_Fork_BlackRoom3" }
+			{ Levels.ForkBlackRoom3, "_Fork_BlackRoom3" },
+			{ Levels.ForkCathedralTutorial, "_Fork_Cathedral_Tutorial" }
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();

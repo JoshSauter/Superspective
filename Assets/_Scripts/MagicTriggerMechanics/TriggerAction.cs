@@ -2,6 +2,7 @@
 using LevelManagement;
 using UnityEngine;
 using NaughtyAttributes;
+using PortalMechanics;
 using PowerTrailMechanics;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -18,7 +19,8 @@ namespace MagicTriggerMechanics {
 		ChangeLevel = 6,
 		PowerOrDepowerPowerTrail = 8,
 		ChangeVisibilityState = 9,
-		PlayCameraFlythrough = 10
+		PlayCameraFlythrough = 10,
+		EnablePortalRendering = 11		// Enables Portal rendering when triggered forward, disable when triggered negatively
 	}
 
 	[Flags]
@@ -56,6 +58,8 @@ namespace MagicTriggerMechanics {
 		public DimensionObject[] dimensionObjects;
 		public VisibilityState visibilityState;
 		public Levels flythroughCameraLevel;
+		public Portal[] portalsToEnable;
+		public Portal[] portalsToDisable;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -101,6 +105,14 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.PlayCameraFlythrough:
 					CameraFlythrough.instance.PlayForLevel(flythroughCameraLevel);
 					break;
+				case TriggerActionType.EnablePortalRendering:
+					foreach (var portal in portalsToEnable) {
+						portal.pauseRenderingOnly = false;
+					}
+					foreach (var portal in portalsToDisable) {
+						portal.pauseRenderingOnly = true;
+					}
+					break;
 				default:
 					return;
 			}
@@ -142,6 +154,14 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.ChangeVisibilityState:
 					foreach (var dimensionObject in dimensionObjects) {
 						dimensionObject.SwitchVisibilityState(dimensionObject.startingVisibilityState);
+					}
+					break;
+				case TriggerActionType.EnablePortalRendering:
+					foreach (var portal in portalsToEnable) {
+						portal.pauseRenderingOnly = true;
+					}
+					foreach (var portal in portalsToDisable) {
+						portal.pauseRenderingOnly = false;
 					}
 					break;
 				default:
@@ -200,6 +220,9 @@ namespace MagicTriggerMechanics {
 
 			SerializedProperty flythroughCameraLevel = property.FindPropertyRelative("flythroughCameraLevel");
 
+			SerializedProperty portalsToEnable = property.FindPropertyRelative("portalsToEnable");
+			SerializedProperty portalsToDisable = property.FindPropertyRelative("portalsToDisable");
+
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
@@ -217,6 +240,8 @@ namespace MagicTriggerMechanics {
 			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
 			GUIContent visibilityStateLabel = new GUIContent("Visibility State:");
 			GUIContent flythroughCameraLabel = new GUIContent("Flythrough Camera Level:");
+			GUIContent portalsToEnableLabel = new GUIContent("Portals to Enable Rendering:");
+			GUIContent portalsToDisableLabel = new GUIContent("Portals to Disable Rendering:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -254,6 +279,10 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerActionType.PlayCameraFlythrough:
 					EditorGUILayout.PropertyField(flythroughCameraLevel, flythroughCameraLabel);
+					break;
+				case TriggerActionType.EnablePortalRendering:
+					EditorGUILayout.PropertyField(portalsToEnable, portalsToEnableLabel);
+					EditorGUILayout.PropertyField(portalsToDisable, portalsToDisableLabel);
 					break;
 				default:
 					break;

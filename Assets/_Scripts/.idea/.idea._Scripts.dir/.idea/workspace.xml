@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="7fc9b065-5143-47e1-a868-3a8a53dbebba" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../BladeEdgeDetection/BladeEdgeDetection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BladeEdgeDetection/BladeEdgeDetection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BladeEdgeDetection/Resources/Shaders/BladeEdgeDetection.shader" beforeDir="false" afterPath="$PROJECT_DIR$/../BladeEdgeDetection/Resources/Shaders/BladeEdgeDetection.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Editor/CustomInspectors/SuberspectiveGUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Editor/CustomInspectors/SuberspectiveGUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Editor/UnloadScenesBeforePlay.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Editor/UnloadScenesBeforePlay.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Plugins/Colorful Fog/ColorfulFog_SM2.shader" beforeDir="false" afterPath="$PROJECT_DIR$/../Plugins/Colorful Fog/ColorfulFog_SM2.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PrototypeAndTesting/PortalTestScene/PortalTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../PrototypeAndTesting/PortalTestScene/PortalTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_BlackGlass.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_BlackGlass.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_BlueGlass.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_BlueGlass.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_GreenGlass.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_GreenGlass.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_RedGlass.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/Glass/Unlit_RedGlass.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/Overlay/SketchEffectMaterial.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/Overlay/SketchEffectMaterial.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Materials/test.mat" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Materials/test.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Prefabs/LevelSpecific/WhiteRoom/PortalStructureBrace.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Prefabs/LevelSpecific/WhiteRoom/PortalStructureBrace.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Shaders/CustomDepthNormalsTexture.shader" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Shaders/CustomDepthNormalsTexture.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Shaders/ScreenCutout.shader" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Shaders/ScreenCutout.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Shaders/Suberspective/SuberspectivePortal.shader" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Shaders/Suberspective/SuberspectivePortal.shader" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Resources/Standard Assets/Effects/ImageEffects/Scripts/ScreenSpaceAmbientOcclusion.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Resources/Standard Assets/Effects/ImageEffects/Scripts/ScreenSpaceAmbientOcclusion.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Administrative/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Administrative/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Administrative/Levels/LevelManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Administrative/Levels/LevelManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Administrative/SuperspectiveScreen.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Administrative/SuperspectiveScreen.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Administrative/TempMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Administrative/TempMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Debug_And_Tools/SerializableClasses.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Debug_And_Tools/SerializableClasses.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Debug_And_Tools/SimpleFPS.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Debug_And_Tools/SimpleFPS.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DimensionPillarMechanics/MaskBufferRenderTextures.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DimensionPillarMechanics/MaskBufferRenderTextures.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Interact.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Interact.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LevelSpecific/TransitionWhiteRoom_Fork/InfiniteHallwayRightPortal.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LevelSpecific/TransitionWhiteRoom_Fork/InfiniteHallwayRightPortal.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LevelSpecific/WhiteRoom/WhiteRoomPuzzle2.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LevelSpecific/WhiteRoom/WhiteRoomPuzzle2.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MagicTriggerMechanics/MagicTrigger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MagicTriggerMechanics/MagicTrigger.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PictureTeleportMechanics/PictureTeleport.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PictureTeleportMechanics/PictureTeleport.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlayerMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlayerMovement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortalMechanics/Portal.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PortalMechanics/Portal.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortalMechanics/PortalManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PortalMechanics/PortalManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortalMechanics/PortalableObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PortalMechanics/PortalableObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortalMechanics/VirtualPortalCamera.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PortalMechanics/VirtualPortalCamera.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Shaders_And_Visuals/SuperspectiveRenderer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Shaders_And_Visuals/SuperspectiveRenderer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils/RaycastUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utils/RaycastUtils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utils/Utils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_Fork.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/_Fork.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_ForkOctagon.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/_ForkOctagon.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_Fork_BlackRoom.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/_Fork_BlackRoom.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_Fork_WhiteRoom2.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_Fork_WhiteRoom2.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_Fork_WhiteRoom3.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/_Fork_WhiteRoom3.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/_TransitionWhiteRoom_Fork.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/_TransitionWhiteRoom_Fork.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../__Scenes/__ManagerScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/../__Scenes/__ManagerScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Logs/AssetImportWorker0.log" beforeDir="false" afterPath="$PROJECT_DIR$/../../Logs/AssetImportWorker0.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ProjectSettings/DynamicsManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../ProjectSettings/DynamicsManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ProjectSettings/GraphicsSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../../ProjectSettings/GraphicsSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ProjectSettings/Packages/com.unity.probuilder/Settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../ProjectSettings/Packages/com.unity.probuilder/Settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Superspective.sln.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/../../Superspective.sln.DotSettings" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="229mgKBXHd0XapfTepoiLTsybcX" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7fc9b065-5143-47e1-a868-3a8a53dbebba" name="Changes" comment="" />
+      <created>1639258289803</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1639258289803</updated>
+      <workItem from="1639258292263" duration="3000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="null" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

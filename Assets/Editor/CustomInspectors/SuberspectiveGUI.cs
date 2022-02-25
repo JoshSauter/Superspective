@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SuperspectiveUtils;
+using SuperspectiveUtils.ShaderUtils;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
+using BlendMode = UnityEngine.Rendering.BlendMode;
 using Object = UnityEngine.Object;
 
 namespace UnityEditor {
@@ -25,18 +27,21 @@ namespace UnityEditor {
         }
 
         public virtual PassType[] GetPassTypes() => new[] { PassType.Normal };
-        
-        public enum SuberspectiveBlendMode {
-            Opaque,
-            Transparent,
-            CullEverything,
-            InvertColors
-        }
 
         // We use MaterialProperty here instead of enum to make use of hasMixedValue property on MaterialProperty
-        MaterialProperty blendMode;
+        private MaterialProperty blendMode;
         private const string blendModeText = "Blend Mode";
-        public static readonly string[] blendNames = Enum.GetNames(typeof(SuberspectiveBlendMode));
+        private static readonly string[] blendNames = Enum.GetNames(typeof(ShaderUtils.SuberspectiveBlendMode));
+
+        private MaterialProperty blendOp;
+        private const string blendOpText = "Blend Op";
+        private static readonly string[] blendOpNames = Enum.GetNames(typeof(BlendOp));
+
+        private MaterialProperty srcBlend;
+        private MaterialProperty dstBlend;
+        private const string srcBlendText = "From Shader";
+        private const string dstBlendText = "From Screen";
+        private static readonly string[] blendModeNames = Enum.GetNames(typeof(BlendMode));
 
         private MaterialProperty cullMode;
         private const string cullModeText = "Cull Mode";
@@ -128,6 +133,9 @@ namespace UnityEditor {
             }
             
             blendMode = FindProperty("__SuberspectiveBlendMode", props);
+            blendOp = FindProperty("__BlendOp", props);
+            srcBlend = FindProperty("__SrcBlend", props);
+            dstBlend = FindProperty("__DstBlend", props);
             cullMode = FindProperty("__CullMode", props);
 
             mainTex = FindProperty("_MainTex", props);
@@ -194,6 +202,12 @@ namespace UnityEditor {
                 SuberspectiveCullModePopup(material);
 
                 AddSeparator();
+
+                SuberspectiveCustomBlendOpPopup(material);
+                SuberspectiveCustomSrcBlendModes(material);
+                SuberspectiveCustomDstBlendModes(material);
+                
+                AddSeparator();
                 
                 ColorProperty();
 
@@ -224,15 +238,15 @@ namespace UnityEditor {
 
         void SuberspectiveBlendModePopup(Material material) {
             EditorGUI.showMixedValue = blendMode.hasMixedValue;
-            SuberspectiveBlendMode mode = (SuberspectiveBlendMode) blendMode.floatValue;
+            ShaderUtils.SuberspectiveBlendMode mode = (ShaderUtils.SuberspectiveBlendMode) blendMode.floatValue;
 
             EditorGUI.BeginChangeCheck();
-            mode = (SuberspectiveBlendMode) EditorGUILayout.Popup(blendModeText, (int) mode, blendNames);
+            mode = (ShaderUtils.SuberspectiveBlendMode) EditorGUILayout.Popup(blendModeText, (int) mode, blendNames);
             if (EditorGUI.EndChangeCheck()) {
                 editor.RegisterPropertyChangeUndo(blendModeText);
                 blendMode.floatValue = (float) mode;
+                SetupMaterialWithBlendMode(material, mode);
             }
-            SetupMaterialWithBlendMode(material, mode);
 
             EditorGUI.showMixedValue = false;
         }
@@ -246,8 +260,50 @@ namespace UnityEditor {
             if (EditorGUI.EndChangeCheck()) {
                 editor.RegisterPropertyChangeUndo(cullModeText);
                 cullMode.floatValue = (float) mode;
+                SetupMaterialWithCullMode(material, mode);
             }
-            SetupMaterialWithCullMode(material, mode);
+
+            EditorGUI.showMixedValue = false;
+        }
+
+        void SuberspectiveCustomBlendOpPopup(Material material) {
+            EditorGUI.showMixedValue = blendOp.hasMixedValue;
+            BlendOp mode = (BlendOp) blendOp.floatValue;
+            
+            EditorGUI.BeginChangeCheck();
+            mode = (BlendOp) EditorGUILayout.Popup(blendOpText, (int) mode, blendOpNames);
+            if (EditorGUI.EndChangeCheck()) {
+                editor.RegisterPropertyChangeUndo(blendOpText);
+                blendOp.floatValue = (float) mode;
+            }
+
+            EditorGUI.showMixedValue = false;
+        }
+
+        void SuberspectiveCustomSrcBlendModes(Material material) {
+            EditorGUI.showMixedValue = srcBlend.hasMixedValue;
+            BlendMode mode = (BlendMode)srcBlend.floatValue;
+            
+            EditorGUI.BeginChangeCheck();
+            mode = (BlendMode)EditorGUILayout.Popup(srcBlendText, (int)mode, blendModeNames);
+            if (EditorGUI.EndChangeCheck()) {
+                editor.RegisterPropertyChangeUndo(srcBlendText);
+                srcBlend.floatValue = (float)mode;
+            }
+
+            EditorGUI.showMixedValue = false;
+        }
+        
+        void SuberspectiveCustomDstBlendModes(Material material) {
+            EditorGUI.showMixedValue = dstBlend.hasMixedValue;
+            BlendMode mode = (BlendMode)dstBlend.floatValue;
+            
+            EditorGUI.BeginChangeCheck();
+            mode = (BlendMode)EditorGUILayout.Popup(dstBlendText, (int)mode, blendModeNames);
+            if (EditorGUI.EndChangeCheck()) {
+                editor.RegisterPropertyChangeUndo(dstBlendText);
+                dstBlend.floatValue = (float)mode;
+            }
 
             EditorGUI.showMixedValue = false;
         }
@@ -523,7 +579,7 @@ namespace UnityEditor {
         #endregion
         #endregion
 
-        static void SetupMaterialWithBlendMode(Material material, SuberspectiveBlendMode blendMode) {
+        static void SetupMaterialWithBlendMode(Material material, ShaderUtils.SuberspectiveBlendMode blendMode) {
             void SetMaterialSettings(
                 string renderType,
                 string portalTag,
@@ -548,25 +604,25 @@ namespace UnityEditor {
             }
 
             switch (blendMode) {
-                case SuberspectiveBlendMode.Opaque:
+                case ShaderUtils.SuberspectiveBlendMode.Opaque:
                     SetMaterialSettings("", "",
                         BlendOp.Add, BlendMode.One, BlendMode.Zero,
                         true, false, true,
                         -1);
                     break;
-                case SuberspectiveBlendMode.Transparent:
+                case ShaderUtils.SuberspectiveBlendMode.Transparent:
                     SetMaterialSettings("Transparent", "",
                         BlendOp.Multiply, BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha,
                         false, true, false,
                         (int)RenderQueue.Transparent);
                     break;
-                case SuberspectiveBlendMode.CullEverything:
+                case ShaderUtils.SuberspectiveBlendMode.CullEverything:
                     SetMaterialSettings("CullEverything", "CullEverything",
                         BlendOp.Add, BlendMode.One, BlendMode.Zero,
                         true, false, true,
                         (int)RenderQueue.Geometry + 1);
                     break;
-                case SuberspectiveBlendMode.InvertColors:
+                case ShaderUtils.SuberspectiveBlendMode.InvertColors:
                     SetMaterialSettings("Transparent", "",
                         BlendOp.Subtract, BlendMode.One, BlendMode.One,
                         false, false, false,

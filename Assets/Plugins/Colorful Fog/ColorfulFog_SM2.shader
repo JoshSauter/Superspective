@@ -9,6 +9,8 @@ Shader "Hidden/JG/ColorfulFog"
 
 		CGINCLUDE
 
+	#define HIDE_FOG_BEHIND_PORTALS
+		
 	#include "UnityCG.cginc"
 	#include "../../Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
 	#pragma target 2.0
@@ -178,6 +180,9 @@ Shader "Hidden/JG/ColorfulFog"
 			//dpth = Linear01Depth(rawDepth);
 		}
 		//return dpth;
+
+		// TODO: Define this as a shader variant if I need to toggle it in the future
+#ifdef HIDE_FOG_BEHIND_PORTALS
 		float portalMaskSample = tex2D(_PortalMask, i.uv_depth);
 		float portalDepthValue;
 		float3 portalNormalValue;
@@ -187,6 +192,7 @@ Shader "Hidden/JG/ColorfulFog"
 		if (sampleIsBehindPortal && portalDepthValue != .998) {
 			return sceneColor;
 		}
+#endif
 
 		float4 wsDir = dpth * i.interpolatedRay;
 		float4 wsPos = _CameraWS + wsDir;

@@ -42,8 +42,8 @@ Shader "Custom/ScreenCutout"
 			
 			sampler2D _MainTex;
 
-			float _ResolutionX;
-			float _ResolutionY;
+			float _PortalResolutionX;
+			float _PortalResolutionY;
 			sampler2D _CameraDepthNormalsTexture;
 			uniform float4 _CameraDepthNormalsTexture_TexelSize;
 			half4 _CameraDepthNormalsTexture_ST;
@@ -85,10 +85,10 @@ Shader "Custom/ScreenCutout"
 				float4 sample = tex2D(_CameraDepthNormalsTexture, float2(i.screenPos.r, i.screenPos.g));
 				DecodeDepthNormal(sample, depthValue, normalValue);
 				depthValues[0] = depthValue;
-				sample = tex2D(_CameraDepthNormalsTexture, float2(i.screenPos.r, i.screenPos.g + (1 / _ResolutionY)));
+				sample = tex2D(_CameraDepthNormalsTexture, float2(i.screenPos.r, i.screenPos.g + (1 / _PortalResolutionY)));
 				DecodeDepthNormal(sample, depthValue, normalValue);
 				depthValues[1] = depthValue;
-				sample = tex2D(_CameraDepthNormalsTexture, float2(i.screenPos.r - (1 / _ResolutionX), i.screenPos.g));
+				sample = tex2D(_CameraDepthNormalsTexture, float2(i.screenPos.r - (1 / _PortalResolutionX), i.screenPos.g));
 				DecodeDepthNormal(sample, depthValue, normalValue);
 				depthValues[2] = depthValue;
 				

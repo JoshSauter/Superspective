@@ -16,7 +16,7 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 
 	public new Collider collider;
 	public new Renderer renderer;
-	public Vector3 playerSize { get { return renderer.bounds.size; } }
+	public Vector3 playerSize => renderer.bounds.size;
 
 	protected override void Awake() {
 		base.Awake();

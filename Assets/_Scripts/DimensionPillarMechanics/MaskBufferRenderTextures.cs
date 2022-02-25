@@ -6,13 +6,22 @@ using UnityEngine.Rendering;
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
+	public BladeEdgeDetection edgeDetection;
 	public RenderTexture visibilityMaskTexture;
 	public RenderTexture portalMaskTexture;
+	public RenderTexture edgeDetectionColorsThroughPortals;
 	public int visibilityMaskValue; // The value of the visibility masks at the reticle
 	static readonly int ResolutionX = Shader.PropertyToID("_ResolutionX");
 	static readonly int ResolutionY = Shader.PropertyToID("_ResolutionY");
+	static readonly int PortalResolutionX = Shader.PropertyToID("_PortalResolutionX");
+	static readonly int PortalResolutionY = Shader.PropertyToID("_PortalResolutionY");
+	
 	public static readonly int DimensionMask = Shader.PropertyToID("_DimensionMask");
 	public static readonly int PortalMask = Shader.PropertyToID("_PortalMask");
+	public static readonly int EdgeColorsThroughPortalsMask = Shader.PropertyToID("_EdgeColorsThroughPortalsMask");
+
+	[SerializeField]
+	private Shader edgeDetectionColorsThroughPortalShader;
 
 	// Use this for initialization
 	void Awake () {
@@ -20,8 +29,19 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
 		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
-        
+
+		edgeDetection.BeforeRenderEdgeDetection += RenderEdgeColorsThroughPortalTexture;
+
 		StartCoroutine(ContinuouslyRequestVisibilityMask());
+	}
+
+	private void RenderEdgeColorsThroughPortalTexture() {
+		Camera portalMaskCam = SuperspectiveScreen.instance.portalMaskCamera;
+		RenderTexture prevTargetTexture = portalMaskCam.targetTexture;
+		portalMaskCam.targetTexture = edgeDetectionColorsThroughPortals;
+		portalMaskCam.RenderWithShader(edgeDetectionColorsThroughPortalShader, "PortalTag");
+		Shader.SetGlobalTexture(EdgeColorsThroughPortalsMask, edgeDetectionColorsThroughPortals);
+		portalMaskCam.targetTexture = prevTargetTexture;
 	}
 
 	IEnumerator ContinuouslyRequestVisibilityMask() {
@@ -82,6 +102,12 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	void HandleScreenResolutionChanged(int newWidth, int newHeight) {
 		ReleaseAllTextures();
 		CreateAllRenderTextures(newWidth, newHeight);
+		UpdatePortalResolutions();
+	}
+
+	private void UpdatePortalResolutions() {
+		Shader.SetGlobalFloat(PortalResolutionX, SuperspectiveScreen.instance.currentPortalWidth);
+		Shader.SetGlobalFloat(PortalResolutionY, SuperspectiveScreen.instance.currentPortalHeight);
 	}
 
 	// Update is called once per frame
@@ -96,6 +122,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	void ReleaseAllTextures() {
 		visibilityMaskTexture.Release();
 		portalMaskTexture.Release();
+		edgeDetectionColorsThroughPortals.Release();
 	}
 
 	void CreateAllRenderTextures(int currentWidth, int currentHeight) {
@@ -112,6 +139,13 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 			out portalMaskTexture,
 			SuperspectiveScreen.instance.portalMaskCamera
 		).name = "PortalMask";
+		
+		CreateRenderTexture(
+			currentWidth,
+			currentHeight,
+			out edgeDetectionColorsThroughPortals,
+			null
+		).name = "EdgeDetectionColorsThroughPortals";
 	}
 
 	RenderTexture CreateRenderTexture(int currentWidth, int currentHeight, out RenderTexture rt, Camera targetCamera) {
@@ -122,7 +156,9 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		Shader.SetGlobalFloat(ResolutionX, currentWidth);
 		Shader.SetGlobalFloat(ResolutionY, currentHeight);
 
-		targetCamera.targetTexture = rt;
+		if (targetCamera != null) {
+			targetCamera.targetTexture = rt;
+		}
 
 		return rt;
 	}

@@ -58,8 +58,10 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
     public Vector3 curVelocity => thisRigidbody.velocity;
 
-    public float walkSpeed => _walkSpeed * scale;
-    public float runSpeed => _runSpeed * scale;
+    public float movespeedMultiplier = 1;
+    
+    public float walkSpeed => _walkSpeed * scale * movespeedMultiplier;
+    public float runSpeed => _runSpeed * scale * movespeedMultiplier;
     public float jumpForce => _jumpForce * scale;
     float maxStepHeight => _maxStepHeight * scale;
     float stepOverbiteMagnitude => _stepOverbiteMagnitude * scale;
@@ -96,7 +98,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     }
 
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Tilde)) autoRun = !autoRun;
+        if (Input.GetKeyDown(KeyCode.BackQuote)) autoRun = !autoRun;
 
         if (input.ShiftHeld || autoRun)
             movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
@@ -176,7 +178,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         Vector3 forward = Vector3.Cross(Vector3.Cross(up, transform.forward), up);
 
         Vector3 moveDirection = forward * input.LeftStick.y + right * input.LeftStick.x;
-        if (autoRun) moveDirection = forward;
+        if (autoRun) moveDirection = forward + right * input.LeftStick.x;
 
         // DEBUG:
         if (DEBUG) {
@@ -505,6 +507,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
         int jumpState;
         float movespeed;
+        float movespeedMultiplier;
 
         SerializableVector3 playerGravityDirection;
 
@@ -523,6 +526,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             jumpCooldownRemaining = playerMovement.jumpCooldownRemaining;
             underMinJumpTime = playerMovement.underMinJumpTime;
             movespeed = playerMovement.movespeed;
+            movespeedMultiplier = playerMovement.movespeedMultiplier;
 
             playerGravityDirection = Physics.gravity.normalized;
             thisRigidbodyVelocity = playerMovement.thisRigidbody.velocity;
@@ -539,6 +543,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             playerMovement.jumpCooldownRemaining = jumpCooldownRemaining;
             playerMovement.underMinJumpTime = underMinJumpTime;
             playerMovement.movespeed = movespeed;
+            playerMovement.movespeedMultiplier = movespeedMultiplier;
 
             // Don't know a better place to restore gravity direction
             Physics.gravity = Physics.gravity.magnitude * (Vector3) playerGravityDirection;

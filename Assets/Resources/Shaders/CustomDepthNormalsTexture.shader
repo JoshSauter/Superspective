@@ -54,8 +54,8 @@ inline void SuberspectiveClipOnly(SuberspectiveDepthNormalsV2F i) {
 #endif
 }
 
-fixed4 SuberspectiveDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
-	if (i.nz.w > 1) i.nz.w = 1;
+float4 SuberspectiveDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
+	if (i.nz.w > 1) i.nz.w = .999999;
     SuberspectiveClipOnly(i);
 
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
@@ -108,13 +108,13 @@ CGPROGRAM
 #pragma vertex SuberspectiveDepthNormalsVert
 #pragma fragment SuberspectivePortalDepthNormalsFrag
 
-uniform sampler2D _DepthNormals;
+uniform sampler2D_float _DepthNormals;
 
-fixed4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
+float4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
 	float2 uv = i.screenPos.xy / i.screenPos.w;
     SuberspectiveClipOnly(i);
 
-	fixed4 col = tex2D(_DepthNormals, uv);
+	float4 col = tex2D(_DepthNormals, uv);
     if (length(col) == 0) {
      clip(-1);
 	}
@@ -151,7 +151,7 @@ v2f vert( appdata_base v ) {
     return o;
 }
 
-fixed4 frag(v2f i) : SV_Target {
+float4 frag(v2f i) : SV_Target {
 	i.nz.w = clamp(i.nz.w, 0, .999);
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
@@ -183,9 +183,9 @@ v2f vert( appdata_base v ) {
     return o;
 }
 uniform fixed _Cutoff;
-uniform fixed4 _Color;
-fixed4 frag(v2f i) : SV_Target {
-    fixed4 texcol = tex2D( _MainTex, i.uv );
+uniform float4 _Color;
+float4 frag(v2f i) : SV_Target {
+    float4 texcol = tex2D( _MainTex, i.uv );
     clip( texcol.a*_Color.a - _Cutoff );
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
@@ -219,8 +219,8 @@ v2f vert(appdata_base v) {
 	return o;
 }
 uniform fixed _Cutoff;
-uniform fixed4 _Color;
-fixed4 frag(v2f i) : SV_Target {
+uniform float4 _Color;
+float4 frag(v2f i) : SV_Target {
 	float3 worldScale = float3(
         length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x)), // scale x axis
         length(float3(unity_ObjectToWorld[0].y, unity_ObjectToWorld[1].y, unity_ObjectToWorld[2].y)), // scale y axis
@@ -266,7 +266,7 @@ v2f vert( appdata_full v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-fixed4 frag( v2f i ) : SV_Target {
+float4 frag( v2f i ) : SV_Target {
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG
@@ -301,7 +301,7 @@ v2f vert( appdata_full v ) {
     return o;
 }
 uniform fixed _Cutoff;
-fixed4 frag( v2f i ) : SV_Target {
+float4 frag( v2f i ) : SV_Target {
     half alpha = tex2D(_MainTex, i.uv).a;
 
     clip (alpha - _Cutoff);
@@ -327,7 +327,7 @@ struct v2f {
 struct appdata {
     float4 vertex : POSITION;
     float3 normal : NORMAL;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 v2f vert( appdata v ) {
@@ -340,7 +340,7 @@ v2f vert( appdata v ) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-fixed4 frag(v2f i) : SV_Target {
+float4 frag(v2f i) : SV_Target {
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 ENDCG
@@ -366,7 +366,7 @@ struct v2f {
 struct appdata {
     float4 vertex : POSITION;
     float3 normal : NORMAL;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
     float4 texcoord : TEXCOORD0;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -382,7 +382,7 @@ v2f vert( appdata v ) {
     return o;
 }
 uniform fixed _Cutoff;
-fixed4 frag(v2f i) : SV_Target {
+float4 frag(v2f i) : SV_Target {
     half alpha = tex2D(_MainTex, i.uv).a;
 
     clip (alpha - _Cutoff);
@@ -407,7 +407,7 @@ struct v2f {
 struct appdata {
     float4 vertex : POSITION;
     float3 normal : NORMAL;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
     float4 texcoord : TEXCOORD0;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -423,8 +423,8 @@ v2f vert( appdata v ) {
     return o;
 }
 uniform fixed _Cutoff;
-fixed4 frag(v2f i) : SV_Target {
-    fixed4 texcol = tex2D( _MainTex, i.uv );
+float4 frag(v2f i) : SV_Target {
+    float4 texcol = tex2D( _MainTex, i.uv );
     clip( texcol.a - _Cutoff );
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
@@ -460,8 +460,8 @@ v2f vert (appdata_tree_billboard v) {
     o.nz.w = COMPUTE_DEPTH_01;
     return o;
 }
-fixed4 frag(v2f i) : SV_Target {
-    fixed4 texcol = tex2D( _MainTex, i.uv );
+float4 frag(v2f i) : SV_Target {
+    float4 texcol = tex2D( _MainTex, i.uv );
     clip( texcol.a - 0.001 );
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
@@ -481,7 +481,7 @@ CGPROGRAM
 
 struct v2f {
     float4 pos : SV_POSITION;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
     float2 uv : TEXCOORD0;
     float4 nz : TEXCOORD1;
     UNITY_VERTEX_OUTPUT_STEREO
@@ -500,8 +500,8 @@ v2f vert (appdata_full v) {
     return o;
 }
 uniform fixed _Cutoff;
-fixed4 frag(v2f i) : SV_Target {
-    fixed4 texcol = tex2D( _MainTex, i.uv );
+float4 frag(v2f i) : SV_Target {
+    float4 texcol = tex2D( _MainTex, i.uv );
     fixed alpha = texcol.a * i.color.a;
     clip( alpha - _Cutoff );
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
@@ -521,7 +521,7 @@ CGPROGRAM
 #include "TerrainEngine.cginc"
 struct v2f {
     float4 pos : SV_POSITION;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
     float2 uv : TEXCOORD0;
     float4 nz : TEXCOORD1;
     UNITY_VERTEX_OUTPUT_STEREO
@@ -540,8 +540,8 @@ v2f vert (appdata_full v) {
     return o;
 }
 uniform fixed _Cutoff;
-fixed4 frag(v2f i) : SV_Target {
-    fixed4 texcol = tex2D( _MainTex, i.uv );
+float4 frag(v2f i) : SV_Target {
+    float4 texcol = tex2D( _MainTex, i.uv );
     fixed alpha = texcol.a * i.color.a;
     clip( alpha - _Cutoff );
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);

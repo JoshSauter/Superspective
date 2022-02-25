@@ -51,10 +51,28 @@
 				#pragma fragment frag
 
 				#include "SuberspectiveHelpers.cginc"
+			
+				#define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
 
-				uniform sampler2D _DepthNormals;
+				uniform sampler2D_float _DepthNormals;
 
-				fixed4 frag(SuberspectiveV2F i) : SV_Target {
+				// These are all defined so that they can be used in the EdgeDetectionColorsThroughPortal replacement shader
+				//sampler2D _CameraDepthNormalsTexture;
+            
+            	// Edge Colors
+				int _ColorMode;				// 0 == Simple color, 1 == Gradient from inspector, 2 == Color ramp (gradient) texture
+				fixed4 _EdgeColor;
+				// Edge gradient
+				float3 _FrustumCorners[4];	// Used to convert depth-based gradient to distance-based gradient which doesn't change as camera looks around
+				int _GradientMode;			// 0 == Blend, 1 == Fixed
+				float _GradientAlphaKeyTimes[GRADIENT_RESOLUTION];
+				float _AlphaGradient[GRADIENT_RESOLUTION];
+				float _GradientKeyTimes[GRADIENT_RESOLUTION];
+				fixed4 _EdgeColorGradient[GRADIENT_RESOLUTION];
+				// Edge gradient from texture
+				sampler2D _GradientTexture;
+
+				float4 frag(SuberspectiveV2F i) : SV_Target {
 					float2 uv = i.screenPos.xy / i.screenPos.w;
 					
 		            #ifdef DISSOLVE_OBJECT
@@ -63,11 +81,11 @@
 		            SuberspectiveClipOnly(i);
 		            #endif
 
-					fixed4 col = tex2D(_MainTex, uv);
+					float4 col = tex2D(_MainTex, uv);
 					return col;
 				}
 			ENDCG
         }
     }
-	CustomEditor "SuberspectiveGUI"
+	//CustomEditor "SuberspectiveGUI"
 }

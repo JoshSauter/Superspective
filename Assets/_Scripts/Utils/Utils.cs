@@ -1030,6 +1030,13 @@ namespace SuperspectiveUtils {
         }
 
         public static class ShaderUtils {
+            public enum SuberspectiveBlendMode {
+                Opaque,
+                Transparent,
+                CullEverything,
+                InvertColors
+            }
+            
             public enum ShaderPropertyType {
                 Color,
                 Vector,

@@ -75,14 +75,14 @@ Shader "Hidden/FastBloom" {
         	#if UNITY_UV_STARTS_AT_TOP
 			
 			fixed4 color = tex2D(_MainTex, i.uv2);
-			return color + tex2D(_Bloom, i.uv);
 			
 			#else
 
 			fixed4 color = tex2D(_MainTex, i.uv);
-			return color + tex2D(_Bloom, i.uv);
 						
 			#endif
+			
+			return (color + tex2D(_Bloom, i.uv));
 		} 
 		
 		fixed4 fragDownsample ( v2f_tap i ) : SV_Target
