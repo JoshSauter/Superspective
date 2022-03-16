@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Linq;
 using Audio;
-using PortalMechanics;
+using StateUtils;
 using SuperspectiveUtils;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
+// Only handles the system governing interactable objects, all the juice for this is in InteractJuice.cs
 public class Interact : Singleton<Interact> {
     public const float defaultInteractionDistance = 6.5f;
     public bool DEBUG;
@@ -24,12 +20,6 @@ public class Interact : Singleton<Interact> {
     public InteractableObject interactableObjectHovered;
     Camera cam;
     DebugLogger debug;
-    readonly Color reticleOutsideSelectColor = new Color(0.1f, 0.75f, 0.075f, 0.75f);
-    Color reticleOutsideUnselectColor;
-    readonly Color reticleSelectColor = new Color(0.15f, 1, 0.15f, 0.9f);
-    private readonly Color reticleSelectDisabledColor = new Color(.8f, 0.15f, 0.15f, .9f);
-
-    Color reticleUnselectColor;
 
     private SuperspectiveRaycast debugRaycast;
 
@@ -39,7 +29,7 @@ public class Interact : Singleton<Interact> {
         Color defaultColor = Gizmos.color;
         for (int i = 0; i < debugRaycast.raycastParts.Count; i++) {
             var part = debugRaycast.raycastParts[i];
-            Gizmos.color = Color.Lerp(Color.green, Color.red, (float)i / RaycastUtils.MAX_RAYCASTS);
+            Gizmos.color = Color.Lerp(Color.yellow, Color.red, (float)i / RaycastUtils.MAX_RAYCASTS);
             Gizmos.DrawSphere(part.ray.origin, 0.05f);
             Gizmos.DrawSphere(part.ray.origin + part.ray.direction * part.distance, 0.025f);
         }
@@ -57,8 +47,6 @@ public class Interact : Singleton<Interact> {
         }
 
         cam = SuperspectiveScreen.instance.playerCamera;
-        reticleUnselectColor = reticle.color;
-        reticleOutsideUnselectColor = reticleOutside.color;
     }
 
     // Update is called once per frame
@@ -79,31 +67,19 @@ public class Interact : Singleton<Interact> {
             interactableObjectHovered.OnMouseHoverExit?.Invoke();
         }
 
-        // If we are hovering a new object that's not already hovered, send a MouseHover event to that object
-        if (newObjectHovered != null && newObjectHovered != interactableObjectHovered) {
-            //Debug.LogWarning(newObjectHovered.name + ".OnMouseHover()");
-            newObjectHovered.OnMouseHoverEnter?.Invoke();
-        }
-
-        // Update which object is now selected
-        interactableObjectHovered = newObjectHovered;
-        interactableObjectHovered?.OnMouseHover?.Invoke();
+        HandleMouseHoverNewObject(newObjectHovered);
 
         if (interactableObjectHovered != null) {
             bool disabled = interactableObjectHovered.state == InteractableObject.InteractableState.Disabled;
             if (disabled) {
-                reticle.color = reticleSelectDisabledColor;
-                reticleOutside.color = reticleSelectDisabledColor;
 
                 if (Input.GetMouseButtonDown(0)) {
                     // Play disabled sound
-                    AudioManager.instance.Play(AudioName.DisabledSound, "DisabledInteraction");
+                    AudioManager.instance.Play(AudioName.DisabledSound, "DisabledInteraction", true);
                 }
                 return;
             }
             
-            reticle.color = reticleSelectColor;
-            reticleOutside.color = reticleOutsideSelectColor;
             // If the left mouse button is being held down, interact with the object selected
             if (Input.GetMouseButton(0)) {
                 // If left mouse button was clicked this frame, call OnLeftMouseButtonDown
@@ -113,10 +89,19 @@ public class Interact : Singleton<Interact> {
             // If we released the left mouse button this frame, call OnLeftMouseButtonUp
             else if (Input.GetMouseButtonUp(0)) interactableObjectHovered.OnLeftMouseButtonUp?.Invoke();
         }
-        else {
-            reticle.color = reticleUnselectColor;
-            reticleOutside.color = reticleOutsideUnselectColor;
+    }
+
+    void HandleMouseHoverNewObject(InteractableObject newObjectHovered) {
+        // If we are hovering a new object that's not already hovered, send a MouseHover event to that object
+        if (newObjectHovered != null && !newObjectHovered.IsSameAs(interactableObjectHovered)) {
+
+            //Debug.LogWarning(newObjectHovered.name + ".OnMouseHover()");
+            newObjectHovered.OnMouseHoverEnter?.Invoke();
         }
+
+        // Update which object is now selected
+        interactableObjectHovered = newObjectHovered;
+        interactableObjectHovered?.OnMouseHover?.Invoke();
     }
 
     public Vector2 PixelPositionOfReticle() {
@@ -132,11 +117,11 @@ public class Interact : Singleton<Interact> {
         );
     }
 
-    public SuperspectiveRaycast GetRaycastHits() {
+    public SuperspectiveRaycast GetRaycastHits(bool disableDebug = true) {
         // Vector2 screenPos = PixelPositionOfReticle();
 
         Ray ray = AdjustedRay(Reticle.instance.thisTransformPos);
-        if (DEBUG) {
+        if (!disableDebug && DEBUG) {
             debugRaycast = RaycastUtils.Raycast(ray.origin, ray.direction, interactionDistance, layerMask);
             return debugRaycast;
         }
@@ -156,12 +141,14 @@ public class Interact : Singleton<Interact> {
 
     Ray AdjustedRay(Vector2 viewportPos) {
         Ray ray = cam.ViewportPointToRay(viewportPos);
-        ray.origin -= ray.direction.normalized * 0.55f;
+        // The following line was causing a bug WRT interacting with objects through portals
+        // Not sure what its purpose was but keeping it here in case it needs to be restored
+        //ray.origin -= ray.direction.normalized * 0.55f;
         return ray;
     }
 
     InteractableObject FindInteractableObjectHovered() {
-        SuperspectiveRaycast raycastResult = GetRaycastHits();
+        SuperspectiveRaycast raycastResult = GetRaycastHits(false);
 
         InteractableObject interactable = null;
         if (raycastResult.hitObject) {

@@ -2,6 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
+// TODO: Write a way to mark a series of consecutive nodes as a staircase to simplify audio position calculations by
+// TODO: counting the staircase as a single straight-line segment. Mark start of staircase, end of staircase.
 [CustomEditor(typeof(NodeSystem))]
 public class NodeEditor : UnityEditor.Editor {
     Camera sceneViewCam;

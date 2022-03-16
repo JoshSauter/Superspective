@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Audio {
-	// next 36
+	// next 37
 	public enum AudioName {
 		CubeDrop = 0,
 		CubePickup = 1,
@@ -40,6 +40,7 @@ namespace Audio {
 		CubeSpawnerDespawn = 33,
 		DisabledSound = 29,
 		FallingWind = 31,
-		FallingWindLow = 32
+		FallingWindLow = 32,
+		InteractableHover = 36
 	}
 }

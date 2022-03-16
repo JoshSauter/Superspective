@@ -1,5 +1,7 @@
-﻿using SuperspectiveUtils;
+﻿using System.ComponentModel.Design.Serialization;
+using SuperspectiveUtils;
 using NaughtyAttributes;
+using PortalMechanics;
 using UnityEngine;
 
 public class InteractableObject : MonoBehaviour {
@@ -32,6 +34,10 @@ public class InteractableObject : MonoBehaviour {
     public InteractAction OnMouseHover;
     public InteractAction OnMouseHoverEnter;
     public InteractAction OnMouseHoverExit;
+    
+    // Used to determine whether two interactable objects should be treated as the same (a portal copy for instance)
+    PortalableObject portalableObject;
+    PortalCopy portalCopy;
 
     public void Start() {
         if (thisRendererParent == null) {
@@ -47,6 +53,9 @@ public class InteractableObject : MonoBehaviour {
             glow.glowColor = glowColor;
             glow.interactableObject = this;
         }
+
+        portalableObject = transform.GetComponentInChildren<PortalableObject>();
+        portalCopy = transform.GetComponentInChildren<PortalCopy>();
     }
 
     public void SetAsInteractable() {
@@ -59,5 +68,18 @@ public class InteractableObject : MonoBehaviour {
 
     public void SetAsHidden() {
         state = InteractableState.Hidden;
+    }
+
+    public bool IsSameAs(InteractableObject other) {
+        if (other == null) return false;
+
+        if (portalableObject != null && other.portalCopy != null) {
+            return portalableObject == other.portalCopy.originalPortalableObj;
+        }
+        else if (portalCopy != null && other.portalableObject != null) {
+            return portalCopy.originalPortalableObj == other.portalableObject;
+        }
+
+        return this == other;
     }
 }

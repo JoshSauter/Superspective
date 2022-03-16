@@ -57,8 +57,11 @@ namespace StateUtils {
 
         public static implicit operator T(StateMachine<T> stateMachine) => stateMachine.state;
 
-        public void Set(T newState) {
+        public void Set(T newState, bool forceTimeReset = false) {
             state = newState;
+            if (forceTimeReset) {
+                timeSinceStateChanged = 0f;
+            }
         }
 
         public void AddStateTransition(T fromState, T toState, float atTime) {

@@ -14,7 +14,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         private void Update() {
-            float desiredAlpha = FloorManager.instance.floor == floor ? 0 : 1;
+            float desiredAlpha = FloorManager.instance.floor == floor ? 1 : 0;
             foreach (var icon in icons) {
                 Color curColor = icon.color;
                 curColor.a = Mathf.Lerp(curColor.a, desiredAlpha, colorLerpSpeed * Time.deltaTime);

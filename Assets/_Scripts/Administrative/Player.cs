@@ -12,7 +12,7 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public Camera playerCam => SuperspectiveScreen.instance.playerCamera;
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
-	public bool isHoldingSomething { get { return heldObject != null; } }
+	public bool isHoldingSomething => heldObject != null;
 
 	public new Collider collider;
 	public new Renderer renderer;
