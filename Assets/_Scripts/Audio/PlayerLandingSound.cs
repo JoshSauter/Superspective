@@ -10,8 +10,8 @@ using static Audio.AudioManager;
 public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 	//public SoundEffectOld shoeSound;
 	//public SoundEffectOld thumpSound;
-	AudioJob ruffleSound;
-	AudioJob thumpSound;
+	AudioJob ruffleSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
+	AudioJob thumpSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
 
 	PlayerMovement playerMovement;
 	bool wasGrounded = true;
@@ -33,8 +33,8 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 		base.Start();
 		playerMovement = GetComponent<PlayerMovement>();
 		
-		ruffleSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
-		thumpSound = AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
+		AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
+		AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
 
 		ruffleStartVolume = ruffleSound.audio.volume;
 		thumpStartVolume = thumpSound.audio.volume;

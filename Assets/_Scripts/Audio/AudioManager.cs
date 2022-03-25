@@ -404,6 +404,10 @@ namespace Audio {
 			}
 
 			public void LoadSaveDelayed(AudioManager audioManager) {
+				foreach (var audioJob in audioManager.audioJobs) {
+					GameObject.Destroy(audioJob.Value.audio.gameObject);
+				}
+				
 				audioManager.audioJobs.Clear();
 				audioManager.updateAudioJobs.Clear();
 				

@@ -130,7 +130,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	}
 
     void Update() {
-		fakePortalTargetPos = powerTrail.state == PowerTrail.PowerTrailState.powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
+		fakePortalTargetPos = powerTrail.state == PowerTrail.PowerTrailState.Powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
 		bool fakePortalActive = !(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f);
 		if (fakePortal.activeSelf != fakePortalActive) {
 			fakePortal.SetActive(fakePortalActive);
@@ -140,12 +140,12 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 		switch (state) {
 			case State.Unsolved:
-				if (powerTrail.state == PowerTrail.PowerTrailState.powered) {
+				if (powerTrail.state == PowerTrail.PowerTrailState.Powered) {
 					state = State.FakePortalPowered;
 				}
 				break;
 			case State.FakePortalPowered:
-				if (powerTrail.state != PowerTrail.PowerTrailState.powered) {
+				if (powerTrail.state != PowerTrail.PowerTrailState.Powered) {
 					state = State.Unsolved;
 				}
 				break;

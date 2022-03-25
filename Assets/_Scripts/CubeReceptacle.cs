@@ -124,6 +124,10 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     state = State.CubeExiting;
                     state = State.Empty;
                 }
+                else {
+                    endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
+                    cubeInReceptacle.transform.position = endPos;
+                }
 
                 break;
             case State.CubeEnterRotate:

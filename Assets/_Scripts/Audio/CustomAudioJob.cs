@@ -1,5 +1,6 @@
 using System;
 using Audio;
+using UnityEngine;
 
 public interface CustomAudioJob {
     void UpdateAudioJob(AudioManager.AudioJob job);
@@ -10,7 +11,8 @@ public static class CustomAudioJobExt {
         try {
             customAudioJob.UpdateAudioJob(audioJob);
         }
-        catch (Exception) {
+        catch (Exception e) {
+            Debug.LogError($"Error during custom Audio Update: {e}");
             audioJob.Stop();
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using NaughtyAttributes;
 using UnityEditor;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace StateUtils {
         [SerializeField, Label("Time since state changed")]
         private float _timeSinceStateChanged;
 
+        [NonSerialized]
         private bool hasSubscribedToUpdate = false;
 
         public delegate void OnStateChangeEvent(T prevState);
@@ -80,12 +82,23 @@ namespace StateUtils {
         
         #region Custom Events
 
+        [Serializable]
         class TimedEventTrigger {
             public T forState;
             public float atTime;
         }
 
-        private Dictionary<TimedEventTrigger, Action> timedEvents = new Dictionary<TimedEventTrigger, Action>();
+        [NonSerialized] private Dictionary<TimedEventTrigger, Action> _timedEvents;
+
+        private Dictionary<TimedEventTrigger, Action> timedEvents {
+            get {
+                if (_timedEvents == null) {
+                    _timedEvents = new Dictionary<TimedEventTrigger, Action>();
+                }
+
+                return _timedEvents;
+            }
+        }
 
         private void TriggerEvents(float prevTime) {
             // Don't trigger events while Time.deltaTime is 0

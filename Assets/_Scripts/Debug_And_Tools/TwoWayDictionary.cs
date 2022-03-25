@@ -111,6 +111,10 @@ namespace SuperspectiveUtils {
             return _firstToSecond.ContainsKey(key);
         }
 
+        public bool ContainsValue(TSecond value) {
+            return _secondToFirst.ContainsKey(value);
+        }
+
         public bool Contains(KeyValuePair<TFirst, TSecond> item) {
             return _firstToSecond.Contains(item);
         }
@@ -124,6 +128,17 @@ namespace SuperspectiveUtils {
             if (_firstToSecond.TryGetValue(key, out value)) {
                 _firstToSecond.Remove(key);
                 _secondToFirst.Remove(value);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool Remove(TSecond value) {
+            TFirst key;
+            if (_secondToFirst.TryGetValue(value, out key)) {
+                _secondToFirst.Remove(value);
+                _firstToSecond.Remove(key);
                 return true;
             }
 

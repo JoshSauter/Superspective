@@ -42,7 +42,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public PickupObjectSimpleAction OnDropSimple;
     public PickupObjectAction OnPickup;
     public PickupObjectSimpleAction OnPickupSimple;
-    AudioJob pickupSound;
+    AudioJob pickupSound => AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
     Transform player;
     Transform playerCam;
 
@@ -99,7 +99,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
         TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
 
-        pickupSound = AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
+        AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
     }
 
     void Update() {

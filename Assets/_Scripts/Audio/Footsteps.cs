@@ -5,7 +5,8 @@ using Audio;
 using static Audio.AudioManager;
 
 public class Footsteps : MonoBehaviour {
-	AudioJob audioJobLeft, audioJobRight;
+	private AudioJob audioJobLeft => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left");
+	private AudioJob audioJobRight => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right");
 	Headbob bob;
 	PlayerMovement playerMovement;
 	float defaultVolume;
@@ -28,8 +29,8 @@ public class Footsteps : MonoBehaviour {
 		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
 
 		bob = GetComponent<Headbob>();
-		audioJobLeft = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left", SetPanForAudio);
-		audioJobRight = AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right", SetPanForAudio);
+		AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left", SetPanForAudio);
+		AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right", SetPanForAudio);
 		defaultVolume = audioJobLeft.audio.volume;
 
 		if (bob == null) {

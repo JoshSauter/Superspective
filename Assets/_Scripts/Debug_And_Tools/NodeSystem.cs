@@ -16,6 +16,7 @@ public struct SerializableNode {
 	public int childCount;
 	public int indexOfFirstChild;
 	public bool zeroDistanceToChildren;
+	public bool staircaseSegment;
 }
 public class Node {
 	const float distanceToSpawnNewNodeAt = 0.5f;
@@ -23,11 +24,13 @@ public class Node {
 	public List<Node> children = new List<Node>();
 	public Vector3 pos;
 	public bool zeroDistanceToChildren = false;
+	public bool staircaseSegment = false;
 
-	public Node(Vector3 pos, bool zeroDistanceToChildren) {
+	public Node(Vector3 pos, bool zeroDistanceToChildren, bool staircaseSegment) {
 		this.children = new List<Node>();
 		this.pos = pos;
 		this.zeroDistanceToChildren = zeroDistanceToChildren;
+		this.staircaseSegment = staircaseSegment;
 	}
 
 	public Node AddNewChild(bool buildAsStaircase) {
@@ -38,15 +41,15 @@ public class Node {
 		if (buildAsStaircase) {
 			grandparentToParent = Vector3.zero;
 		}
-		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt, false);
+		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt, false, false);
 		newNode.parent = this;
 		this.children.Add(newNode);
 
 		return newNode;
 	}
 
-	public bool isRootNode { get { return parent == null; } }
-	public bool isLeafNode { get { return children.Count == 0; } }
+	public bool isRootNode => parent == null;
+	public bool isLeafNode => children.Count == 0;
 }
 
 [ExecuteInEditMode]
@@ -59,13 +62,14 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	[HideInInspector]
 	public Node rootNode;
 	public int selectedNodeIndex = -1;
+	public int startOfStaircaseIndex = -1;
 	public List<SerializableNode> serializedNodes;
 
 	public void OnBeforeSerialize() {
 		// Unity is about to read the serializedNodes field's contents.
 		// The correct data must now be written into that field "just in time".
 		if (serializedNodes == null) serializedNodes = new List<SerializableNode>();
-		if (rootNode == null) rootNode = new Node(Vector3.forward, false);
+		if (rootNode == null) rootNode = new Node(Vector3.forward, false, false);
 		serializedNodes.Clear();
 		AddNodeToSerializedNodesRecursively(rootNode, -1);
 		// Now Unity is free to serialize this field, and we should get back the expected 
@@ -80,7 +84,8 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			pos = pos,
 			childCount = n.children.Count,
 			indexOfFirstChild = serializedNodes.Count + 1,
-			zeroDistanceToChildren = n.zeroDistanceToChildren
+			zeroDistanceToChildren = n.zeroDistanceToChildren,
+			staircaseSegment = n.staircaseSegment
 		};
 		serializedNodes.Add(serializedNode);
 		if (serializedNode.pos == selectedNode?.pos) {
@@ -98,14 +103,14 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			ReadNodeFromSerializedNodesRecursively(0, out rootNode);
 		}
 		else {
-			rootNode = new Node(Vector3.forward, false);
+			rootNode = new Node(Vector3.forward, false, false);
 		}
 	}
 
 	int ReadNodeFromSerializedNodesRecursively(int index, out Node node) {
 		var serializedNode = serializedNodes[index];
 		// Transfer the deserialized data into the internal Node class
-		Node newNode = new Node(serializedNode.pos, serializedNode.zeroDistanceToChildren);
+		Node newNode = new Node(serializedNode.pos, serializedNode.zeroDistanceToChildren, serializedNode.staircaseSegment);
 
 		// The tree needs to be read in depth-first, since that's how we wrote it out.
 		for (int i = 0; i != serializedNode.childCount; i++) {
@@ -132,7 +137,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	}
 
 	[ShowNativeProperty]
-	public int Count => allNodes.Count;
+	public int Count => allNodes?.Count ?? 0;
 
 	void OnEnable() {
 		Initialize();
@@ -148,7 +153,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}
 		if (rootNode == null) {
 			// Spawn at not-the-origin so it can be selected with the handle
-			rootNode = new Node(Vector3.forward, false);
+			rootNode = new Node(Vector3.forward, false, false);
 			allNodes.Add(rootNode);
 			selectedNode = rootNode;
 		}
@@ -206,6 +211,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	Color unselectedColor = new Color(.15f, .85f, .25f);
 	Color selectedColor = new Color(.95f, .95f, .15f);
 	Color unselectedZeroDistanceToChildrenColor = new Color(.15f, .25f, .85f);
+	Color unselectedStaircaseSegmentColor = new Color(.65f, .05f, .75f);
 	void DrawGizmosRecursively(Node curNode) {
 		if (!showNodes) return;
 		if (curNode == selectedNode) {
@@ -215,6 +221,9 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			if (curNode.zeroDistanceToChildren) {
 				Gizmos.color = unselectedZeroDistanceToChildrenColor;
 			}
+			else if (curNode.staircaseSegment) {
+				Gizmos.color = unselectedStaircaseSegmentColor;
+			}
 			else {
 				Gizmos.color = unselectedColor;
 			}
@@ -223,9 +232,31 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 
 		foreach (Node child in curNode.children) {
 			if (child != null) {
+				if (!curNode.staircaseSegment && child.staircaseSegment) {
+					DrawStaircaseSegment(child);
+				}
 				DrawGizmosRecursively(child);
 			}
 		}
+	}
+
+	private void DrawStaircaseSegment(Node start) {
+		Vector3 startPos = transform.TransformPoint(start.pos);
+		Node end = start;
+		while (end.staircaseSegment) {
+			if (end.children.Count == 0) break;
+				
+			// Axiom: Staircase segments only have one child
+			end = end.children[0];
+		}
+		end = end.parent;
+
+		Vector3 endPos = transform.TransformPoint(end.pos);
+
+		Color prevColor = Gizmos.color;
+		Gizmos.color = unselectedStaircaseSegmentColor;
+		Gizmos.DrawLine(startPos, endPos);
+		Gizmos.color = prevColor;
 	}
 
 #if UNITY_EDITOR
@@ -339,6 +370,40 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 				ns.RemoveSelected();
 			}
 		}
+	}
+
+	// Call once to mark start of staircase, again to mark end of staircase
+	[MenuItem("Custom/Power Trails/Mark Staircase _F4")]
+	public static void MarkStaircase() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem ns = selected.GetComponent<NodeSystem>();
+			if (ns != null && ns.selectedNode != null) {
+				if (ns.startOfStaircaseIndex >= 0) {
+					MarkStaircase(ns, ns.selectedNodeIndex, ns.startOfStaircaseIndex);
+					ns.startOfStaircaseIndex = -1;
+				}
+				else {
+					ns.startOfStaircaseIndex = ns.selectedNodeIndex;
+				}
+			}
+		}
+	}
+
+	// Works its way from end to start index by navigating through parents, marking each node as part of staircase
+	private static void MarkStaircase(NodeSystem ns, int curIndex, int startIndex) {
+		if (curIndex == -1) {
+			return;
+		}
+
+		SerializableNode node = ns.serializedNodes[curIndex];
+		// Allows for toggling back and forth
+		bool staircaseSegment = !node.staircaseSegment;
+		node.staircaseSegment = staircaseSegment;
+		ns.allNodes[curIndex].staircaseSegment = staircaseSegment;
+		ns.serializedNodes[curIndex] = node;
+
+		if (curIndex == startIndex) return;
+		MarkStaircase(ns, node.indexOfParent, startIndex);
 	}
 #endif
 }
