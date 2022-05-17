@@ -1,4 +1,5 @@
 ﻿using System;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -8,13 +9,15 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         public SpriteRenderer[] icons;
 
         private float colorLerpSpeed = 4.5f;
+        private float revealDelay = 1.25f;
 
         private void OnValidate() {
             icons = transform.GetComponentsInChildrenRecursively<SpriteRenderer>();
         }
 
         private void Update() {
-            float desiredAlpha = FloorManager.instance.floor == floor ? 1 : 0;
+            StateMachine<FloorManager.Floor> currentFloorState = FloorManager.instance.floor;
+            float desiredAlpha = currentFloorState == floor && currentFloorState.timeSinceStateChanged > revealDelay ? 1 : 0;
             foreach (var icon in icons) {
                 Color curColor = icon.color;
                 curColor.a = Mathf.Lerp(curColor.a, desiredAlpha, colorLerpSpeed * Time.deltaTime);

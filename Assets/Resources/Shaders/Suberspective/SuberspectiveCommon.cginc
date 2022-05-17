@@ -3,6 +3,7 @@
 #pragma shader_feature POWER_TRAIL_OBJECT
 #pragma shader_feature SHUTTERED_OBJECT
 #pragma shader_feature PORTAL_COPY_OBJECT
+#pragma shader_feature RENDER_IN_ZONE_OBJECT
 
 #include "UnityCG.cginc"
 
@@ -26,6 +27,10 @@
 #include "../PortalCopy/PortalCopyHelpers.cginc"
 #endif
 
+#ifdef RENDER_IN_ZONE_OBJECT
+#include "../RenderInZone/RenderInZoneHelpers.cginc"
+#endif
+
 // Some shaders only need to know which pixels are being rendered or not, this skips the color calculations
 inline void SuberspectiveClipOnly(float2 uv_DimensionMask, float2 uv_DissolveTex, float3 worldPos) {
 	#ifdef DIMENSION_OBJECT
@@ -39,6 +44,9 @@ inline void SuberspectiveClipOnly(float2 uv_DimensionMask, float2 uv_DissolveTex
 	#endif
 	#ifdef PORTAL_COPY_OBJECT
 	ClipPortalCopy(worldPos);
+	#endif
+	#ifdef RENDER_IN_ZONE_OBJECT
+	ClipRenderZone(worldPos);
 	#endif
 }
 
@@ -57,5 +65,8 @@ inline void SuberspectiveRender(float2 uv_DimensionMask, float2 uv_DissolveTex, 
 	#endif
 	#ifdef PORTAL_COPY_OBJECT
 	ClipPortalCopy(worldPos);
+	#endif
+	#ifdef RENDER_IN_ZONE_OBJECT
+	ClipRenderZone(worldPos);
 	#endif
 }

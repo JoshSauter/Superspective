@@ -93,6 +93,7 @@ Material:
     - _EmissionEnabled: 0
     - _FlatShading: 0
     - _FlatShadingWire: 0
+    - _FudgeDistance: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.466
     - _GlossyReflections: 1
@@ -125,16 +126,18 @@ Material:
     - __SuberspectiveBlendMode: 1
     - __ZWrite: 0
     m_Colors:
-    - _Color: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 0.22745098}
+    - _Color: {r: 0.18867919, g: 0.18867919, b: 0.18867919, a: 0.27450982}
     - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
     - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 0.2352941, g: 0.2352941, b: 0.2352941, a: 1}
     - _EndColor: {r: 1, g: 1, b: 1, a: 1}
     - _FillColor: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 0.23137255}
+    - _MaxRenderZone: {r: 0, g: 0, b: 0, a: 1}
+    - _MinRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
     - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
-    - _SpecColor: {r: 0.20754719, g: 0.20754719, b: 0.20754719, a: 1}
+    - _SpecColor: {r: 0.21, g: 0.21, b: 0.21, a: 1}
     - _TintColor: {r: 0.003921569, g: 0, b: 0, a: 0.5}
     - _WireColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

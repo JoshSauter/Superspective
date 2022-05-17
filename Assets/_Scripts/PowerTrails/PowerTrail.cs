@@ -70,6 +70,7 @@ namespace PowerTrailMechanics {
 		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
 		public bool skipStartupShutdownSounds = false;
+		public bool objectMoves = false;
 
 		#region events
 		public delegate void PowerTrailAction();
@@ -163,9 +164,6 @@ namespace PowerTrailMechanics {
 		}
 
 		void InitializeAudioSegments() {
-			// TODO: REMOVE THIS WHEN DONE WITH TESTING
-			//if (!DEBUG) return;
-			
 			for (int i = 0; i < numAudioSources; i++) {
 				// Axiom: Audio job's uniqueIdentifier ends with "_<0 to numAudioSources>"
 				string audioId = $"{ID}_{i}";
@@ -188,6 +186,10 @@ namespace PowerTrailMechanics {
 				powerIsOn = !powerIsOn;
 			}
 
+			if (objectMoves) {
+				PopulateNodePositions();
+			}
+			
 			float prevDistance = distance;
 			float nextDistance = NextDistance();
 			if (nextDistance == prevDistance && isInitialized) return;
@@ -201,7 +203,6 @@ namespace PowerTrailMechanics {
 				PopulateStaticGPUInfo();
 			}
 			
-
 			UpdateInterpolationValues(nextDistance);
 
 			UpdateState(prevDistance, nextDistance);
@@ -209,18 +210,11 @@ namespace PowerTrailMechanics {
 		}
 
 		void PopulateStaticGPUInfo() {
-			nodePositions = new Vector4[MAX_NODES];
 			interpolationValues = new float[MAX_NODES];
 			startNodeIndex = new int[MAX_NODES];
 			endNodeIndex = new int[MAX_NODES];
 
-			for (int i = 0; i < MAX_NODES && i < powerNodes.Count; i++) {
-				Node nodeAtIndex = powerNodes.allNodes[i];
-				nodePositions[i] = transform.TransformPoint(nodeAtIndex.pos);
-			}
-			foreach (var material in materials) {
-				material.SetVectorArray(nodePositionsKey, nodePositions);
-			}
+			PopulateNodePositions();
 
 			for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
 				NodeTrailInfo trailInfoAtIndex = trailInfo[i];
@@ -233,6 +227,18 @@ namespace PowerTrailMechanics {
 				material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
 				material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
 				material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
+			}
+		}
+
+		void PopulateNodePositions() {
+			nodePositions = new Vector4[MAX_NODES];
+
+			for (int i = 0; i < MAX_NODES && i < powerNodes.Count; i++) {
+				Node nodeAtIndex = powerNodes.allNodes[i];
+				nodePositions[i] = transform.TransformPoint(nodeAtIndex.pos);
+			}
+			foreach (var material in materials) {
+				material.SetVectorArray(nodePositionsKey, nodePositions);
 			}
 		}
 
@@ -463,42 +469,6 @@ namespace PowerTrailMechanics {
 
 				return new Tuple<NodeTrailInfo, Vector3, float>(segment, closestPoint, distanceToCam);
 			}
-			// Vector3 closestPoint = Vector3.zero;
-			// float minDistance = maxSoundDistance + 1f;
-			// // If the player is within maxSoundDistance from any collider of this PowerTrail
-			// if (Physics.OverlapSphere(Player.instance.transform.position, maxSoundDistance, 1 << gameObject.layer).Any(c => colliders.Contains(c))) {
-			// 	//Debug.Log($"PLAYER CLOSE TO {gameObject.name}");
-			// 	for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
-			// 		if (interpolationValues[i] == 0) continue;
-			//
-			// 		int startIndex = startNodeIndex[i];
-			// 		int endIndex = endNodeIndex[i];
-			// 		Vector3 startPoint = nodePositions[startIndex];
-			// 		Vector3 endPoint = nodePositions[endIndex];
-			// 		if (interpolationValues[i] < 1) {
-			// 			endPoint = Vector3.Lerp(startPoint, endPoint, interpolationValues[i]);
-			// 		}
-			//
-			// 		Vector3 nearestPointOnLine = FindNearestPointOnLine(startPoint, endPoint, SuperspectiveScreen.instance.playerCamera.transform.position);
-			// 		float distanceToNearestPointOnLine = (SuperspectiveScreen.instance.playerCamera.transform.position - nearestPointOnLine).magnitude;
-			//
-			// 		if (distanceToNearestPointOnLine < minDistance) {
-			// 			minDistance = distanceToNearestPointOnLine;
-			// 			closestPoint = nearestPointOnLine;
-			// 		}
-			// 	}
-			// }
-			//
-			// if (minDistance < maxSoundDistance) {
-			// 	//debug.Log($"PLAYER IS {minDistance} FROM {gameObject.name}");
-			// 	audioJob.audio.transform.position = closestPoint;
-			// 	
-			// 	audioJob.audio.volume = distance / maxDistance;
-			// 	audioJob.basePitch = 0.25f + 0.25f * (distance / maxDistance);
-			// }
-			// else {
-			// 	audioJob.audio.volume = 0f;
-			// }
 		}
 
 		Vector3 FindNearestPointOnLine(Vector3 start, Vector3 end, Vector3 point) {
@@ -604,7 +574,7 @@ namespace PowerTrailMechanics {
 
 			foreach (Node child in curNode.children) {
 				if (child != null) {
-					DrawWireBox(curNode.pos, child.pos);
+					DrawWireBox(transform.TransformPoint(curNode.pos), transform.TransformPoint(child.pos));
 				}
 			}
 			foreach (Node child in curNode.children) {

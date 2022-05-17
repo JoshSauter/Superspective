@@ -24,6 +24,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         // Start is called before the first frame update
         void Start() {
+            children = transform.GetComponentsInChildren<ObjectHover>();
             foreach (var childHover in children) {
                 childHover.period = Random.Range(minPeriod, maxPeriod);
                 childHover.periodOffset = Random.Range(minOffset, maxOffset);

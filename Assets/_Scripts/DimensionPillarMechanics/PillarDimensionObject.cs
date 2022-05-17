@@ -155,7 +155,6 @@ public class PillarDimensionObject : DimensionObject {
 						// Only consider pillars which are loaded and enabled
 						.Where(pillarRef => pillarRef.GetOrNull()?.enabled ?? false)
 						.Select(pillarRef => pillarRef.GetOrNull())
-						.Where(pillar => pillar.IsInActiveScene())
 						// Find the closest pillar
 						.OrderBy(pillar => Vector3.Distance(pillar.transform.position, transform.position))
 						.FirstOrDefault();

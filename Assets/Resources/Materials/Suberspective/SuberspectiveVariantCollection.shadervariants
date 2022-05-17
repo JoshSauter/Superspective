@@ -25,6 +25,8 @@ ShaderVariantCollection:
         passType: 0
       - keywords: SHUTTERED_OBJECT
         passType: 0
+      - keywords: RENDER_IN_ZONE_OBJECT
+        passType: 0
   - first: {fileID: 4800000, guid: 969f124acd8c4ec4785076ab7b60e002, type: 3}
     second:
       variants:

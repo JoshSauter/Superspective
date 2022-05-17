@@ -4,14 +4,20 @@ using UnityEngine;
 public class ButtonColorChange : MonoBehaviour {
     public bool useMaterialAsStartColor = false;
     public bool useMaterialAsEndColor = false;
+    public bool ignoreEmission = false;
+    public bool overrideColorProperty = false;
+    
+    [HideIf("useMaterialAsStartColor")]
     public Color startColor;
-
-    [ColorUsage(true, true)]
+    [ColorUsage(true, true), HideIf(EConditionOperator.Or, "ignoreEmission", "useMaterialAsStartColor")]
     public Color startEmission = Color.black;
 
-    public Color pressColor = Color.white;
+    [ShowIf("overrideColorProperty")]
+    public string colorPropertyOverride = "";
 
-    [ColorUsage(true, true)]
+    [HideIf("useMaterialAsEndColor")]
+    public Color pressColor = Color.white;
+    [ColorUsage(true, true), HideIf(EConditionOperator.Or, "ignoreEmission", "useMaterialAsEndColor")]
     public Color pressEmission = Color.black;
 
     public Button buttonToReactTo;
@@ -30,17 +36,18 @@ public class ButtonColorChange : MonoBehaviour {
         if (r == null) r = gameObject.AddComponent<SuperspectiveRenderer>();
 
         if (useMaterialAsEndColor) {
-            pressColor = r.GetMainColor();
+            pressColor = overrideColorProperty ? r.GetColor(colorPropertyOverride) : r.GetMainColor();
+
             pressEmission = r.GetColor("_EmissionColor");
         }
         
         if (useMaterialAsStartColor) {
-            startColor = r.GetMainColor();
+            startColor = overrideColorProperty ? r.GetColor(colorPropertyOverride) : r.GetMainColor();
             startEmission = r.GetColor("_EmissionColor");
         }
         else {
-            r.SetMainColor(startColor);
-            r.SetColor("_EmissionColor", startEmission);
+            SetColor(startColor);
+            SetEmission(startEmission);
         }
 
         buttonToReactTo.OnButtonPressFinish += ButtonPressFinish;
@@ -69,31 +76,43 @@ public class ButtonColorChange : MonoBehaviour {
             case Button.State.ButtonPressing:
                 t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToPressButton;
 
-                r.SetMainColor(Color.Lerp(startColor, pressColor, buttonToReactTo.buttonPressCurve.Evaluate(t)));
-                r.SetColor(
-                    "_EmissionColor",
-                    Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t))
-                );
+                SetColor(Color.Lerp(startColor, pressColor, buttonToReactTo.buttonPressCurve.Evaluate(t)));
+                SetEmission(Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t)));
+
                 break;
             case Button.State.ButtonUnpressing:
                 t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToUnpressButton;
 
-                r.SetMainColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
-                r.SetColor(
-                    "_EmissionColor",
-                    Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t))
-                );
+                SetColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
+                SetEmission(Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
+
                 break;
         }
     }
 
     void ButtonPressFinish(Button b) {
-        r.SetMainColor(pressColor);
-        r.SetColor("_EmissionColor", pressEmission);
+        SetColor(pressColor);
+        SetEmission(pressEmission);
     }
 
     void ButtonUnpressFinish(Button b) {
-        r.SetMainColor(startColor);
-        r.SetColor("_EmissionColor", startEmission);
+        SetColor(startColor);
+        SetEmission(startEmission);
+    }
+
+    void SetColor(Color color) {
+        if (overrideColorProperty) {
+            r.SetColor(colorPropertyOverride, color);
+        }
+        else {
+            r.SetMainColor(color);
+        }
+
+    }
+
+    void SetEmission(Color color) {
+        if (!ignoreEmission) {
+            r.SetColor("_EmissionColor", color);
+        }
     }
 }

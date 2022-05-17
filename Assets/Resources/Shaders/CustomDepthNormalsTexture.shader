@@ -52,6 +52,9 @@ inline void SuberspectiveClipOnly(SuberspectiveDepthNormalsV2F i) {
 #ifdef PORTAL_COPY_OBJECT
 	ClipPortalCopy(i.worldPos);
 #endif
+#ifdef RENDER_IN_ZONE_OBJECT
+	ClipRenderZone(i.worldPos);
+#endif  
 }
 
 float4 SuberspectiveDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {

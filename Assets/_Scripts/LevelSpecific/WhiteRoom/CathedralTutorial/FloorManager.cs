@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PortalMechanics;
 using SerializableClasses;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             Pos4
         }
 
-        public Floor floor;
+        public StateMachine<Floor> floor;
 
         [Serializable]
         struct PortalsOnAFloor {
@@ -39,6 +40,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         public void Start() {
+            if (portalFloors != null && floors == null || floors.Count == 0) {
+                floors = portalFloors.ToDictionary(pf => pf.floor, pf => pf);
+            }
             RegisterTriggers();
         }
 
@@ -157,7 +161,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         void SetFloor(Floor floorToSet) {
-            this.floor = floorToSet;
+            this.floor.Set(floorToSet);
         }
     }
 }

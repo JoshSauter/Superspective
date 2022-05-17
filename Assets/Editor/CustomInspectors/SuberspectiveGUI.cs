@@ -57,6 +57,8 @@ namespace UnityEditor {
         private const string shutteredPropertyText = "Shuttered Object (BlackRoom3)";
         private const string portalCopyKeyword = "PORTAL_COPY_OBJECT";
         private const string portalCopyText = "Portal Copy Object";
+        private const string renderInZoneKeyword = "RENDER_IN_ZONE_OBJECT";
+        private const string renderInZoneText = "Render In Zone Object";
 
         private MaterialProperty mainTex;
         private const string mainTexText = "Main Texture";
@@ -109,7 +111,8 @@ namespace UnityEditor {
         private const string otherEffectsEnabledText = "Other effects";
         private static readonly HashSet<string> otherEffectsKeywords = new HashSet<string>() {
             shutteredObjectKeyword,
-            portalCopyKeyword
+            portalCopyKeyword,
+            renderInZoneKeyword
         };
         // AffectedByShutters
         private MaterialProperty shutterNoise;
@@ -123,6 +126,11 @@ namespace UnityEditor {
         private const string portalPosText = "Portal Position";
         private const string portalNormalText = "Portal Normal";
         private const string fudgeDistanceText = "Fudge position";
+        // RenderInZone
+        private MaterialProperty minRenderZone;
+        private MaterialProperty maxRenderZone;
+        private const string minRenderZoneText = "Min Render Zone";
+        private const string maxRenderZoneText = "Max Render Zone";
 
         protected MaterialEditor editor;
 
@@ -165,6 +173,9 @@ namespace UnityEditor {
             portalPos = FindProperty("_PortalPos", props, false);
             portalNormal = FindProperty("_PortalNormal", props, false);
             fudgeDistance = FindProperty("_FudgeDistance", props, false);
+            
+            minRenderZone = FindProperty("_MinRenderZone", props, false);
+            maxRenderZone = FindProperty("_MaxRenderZone", props, false);
         }
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props) {
@@ -515,6 +526,7 @@ namespace UnityEditor {
             if (otherEffectsEnabled) {
                 ShuttersProperties(material);
                 PortalCopyProperties(material);
+                RenderInZoneProperties(material);
             }
             EditorGUI.indentLevel--;
         }
@@ -576,6 +588,21 @@ namespace UnityEditor {
         void PortalFudgeDistanceProperty() {
             editor.ShaderProperty(fudgeDistance, fudgeDistanceText);
         }
+        #endregion
+
+        #region Render In Zone Properties
+
+        void RenderInZoneProperties(Material material) {
+            bool renderZonePropertyIsEnabled = SuberspectiveKeywordProperties(material, renderInZoneKeyword, renderInZoneText);
+
+            EditorGUI.indentLevel += 1;
+            if (renderZonePropertyIsEnabled) {
+                editor.ShaderProperty(minRenderZone, minRenderZoneText);
+                editor.ShaderProperty(maxRenderZone, maxRenderZoneText);
+            }
+            EditorGUI.indentLevel -= 1;
+        }
+
         #endregion
         #endregion
 

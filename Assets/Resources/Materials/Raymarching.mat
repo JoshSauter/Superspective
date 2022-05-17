@@ -47,6 +47,7 @@ Material:
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
     - _EmissionEnabled: 1
+    - _FudgeDistance: 0
     - _Inverse: 0
     - _ReverseVisibility: 0
     - _ShutterInverse: 0
@@ -62,6 +63,8 @@ Material:
     - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _MaxRenderZone: {r: 0, g: 0, b: 0, a: 1}
+    - _MinRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
     - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

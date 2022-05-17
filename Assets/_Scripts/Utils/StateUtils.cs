@@ -35,13 +35,17 @@ namespace StateUtils {
                     return;
                 }
 
-                _timeSinceStateChanged = 0f;
-                _prevState = _state;
-                _state = value;
-                
-                OnStateChange?.Invoke(prevState);
-                OnStateChangeSimple?.Invoke();
+                ForceSetState(value);
             }
+        }
+
+        private void ForceSetState(T newState) {
+            _timeSinceStateChanged = 0f;
+            _prevState = _state;
+            _state = newState;
+                
+            OnStateChange?.Invoke(prevState);
+            OnStateChangeSimple?.Invoke();
         }
 
         public T prevState => _prevState;

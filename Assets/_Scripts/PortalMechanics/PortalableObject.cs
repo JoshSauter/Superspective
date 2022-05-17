@@ -315,7 +315,8 @@ namespace PortalMechanics {
 			SerializableReference<Portal, Portal.PortalSave> sittingInPortal;
 			SerializableReference<Portal, Portal.PortalSave> hoveredThroughPortal;
 			SerializableReference<Portal, Portal.PortalSave> grabbedThroughPortal;
-			StateMachine<HoldState> holdState;
+			HoldState holdState;
+			float timeSinceStateChanged;
 
 			public PortalableObjectSave(PortalableObject obj) : base(obj) {
 				sittingInPortal = null;
@@ -332,6 +333,7 @@ namespace PortalMechanics {
 				}
 
 				holdState = obj.holdState;
+				timeSinceStateChanged = obj.holdState.timeSinceStateChanged;
 			}
 
 			public override void LoadSave(PortalableObject obj) {
@@ -346,7 +348,8 @@ namespace PortalMechanics {
 					obj.grabbedThroughPortal = this.grabbedThroughPortal.GetOrNull();
 				}
 
-				obj.holdState = this.holdState;
+				obj.holdState.state = this.holdState;
+				obj.holdState.timeSinceStateChanged = this.timeSinceStateChanged;
 			}
 		}
 		#endregion
