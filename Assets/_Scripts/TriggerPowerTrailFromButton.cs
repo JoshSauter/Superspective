@@ -1,23 +1,57 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PowerTrailMechanics {
     public class TriggerPowerTrailFromButton : MonoBehaviour {
         public enum PowerControl {
-            powerOnAndOff,
-            powerOnOnly,
-            powerOffOnly
+            PowerOnAndOff,
+            PowerOnOnly,
+            PowerOffOnly
         }
 
-        public Button button;
+        public PowerButton button;
         public PowerControl whatToControl;
         PowerTrail thisPowerTrail;
 
         void Start() {
             thisPowerTrail = GetComponent<PowerTrail>();
-            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOnOnly)
-                button.OnButtonPressBegin += b => thisPowerTrail.powerIsOn = true;
-            if (whatToControl == PowerControl.powerOnAndOff || whatToControl == PowerControl.powerOffOnly)
-                button.OnButtonUnpressFinish += b => thisPowerTrail.powerIsOn = false;
+        }
+
+        private void OnEnable() {
+            thisPowerTrail = GetComponent<PowerTrail>();
+            InitEvents();
+        }
+
+        private void OnDisable() {
+            TeardownEvents();
+        }
+
+        void InitEvents() {
+            if (whatToControl == PowerControl.PowerOnAndOff || whatToControl == PowerControl.PowerOnOnly) {
+                button.OnPowerFinish += TurnPowerOn;
+            }
+
+            if (whatToControl == PowerControl.PowerOnAndOff || whatToControl == PowerControl.PowerOffOnly) {
+                button.OnDepowerStart += TurnPowerOff;
+            }
+        }
+
+        void TeardownEvents() {
+            if (whatToControl == PowerControl.PowerOnAndOff || whatToControl == PowerControl.PowerOnOnly) {
+                button.OnPowerFinish -= TurnPowerOn;
+            }
+
+            if (whatToControl == PowerControl.PowerOnAndOff || whatToControl == PowerControl.PowerOffOnly) {
+                button.OnDepowerStart -= TurnPowerOff;
+            }
+        }
+
+        void TurnPowerOn() {
+            thisPowerTrail.powerIsOn = true;
+        }
+
+        void TurnPowerOff() {
+            thisPowerTrail.powerIsOn = false;
         }
     }
 }

@@ -11,10 +11,10 @@ labels:
 - Shader
 - ImageEffect
 - ColoredFog
-timeCreated: 1439772539
-licenseType: Store
 ShaderImporter:
+  externalObjects: {}
   defaultTextures: []
+  nonModifiableTextures: []
   userData: 
   assetBundleName: 
   assetBundleVariant: 

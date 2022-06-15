@@ -119,17 +119,14 @@ namespace LevelSpecific.WhiteRoom {
 
     [Serializable]
     public class RaiseLowerCubeReceptacleSave : SerializableSaveObject<RaiseLowerCubeReceptacle> {
-        private RaiseLowerCubeReceptacle.State state;
-        private float timeSinceStateChanged;
+        private StateMachine<RaiseLowerCubeReceptacle.State>.StateMachineSave stateSave;
 
         public RaiseLowerCubeReceptacleSave(RaiseLowerCubeReceptacle script) : base(script) {
-            state = script.state;
-            timeSinceStateChanged = script.state.timeSinceStateChanged;
+            stateSave = script.state.ToSave();
         }
 
         public override void LoadSave(RaiseLowerCubeReceptacle script) {
-            script.state.state = state;
-            script.state.timeSinceStateChanged = timeSinceStateChanged;
+            script.state.FromSave(stateSave);
         }
     }
     #endregion

@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using LevelSpecific.WhiteRoom.CathedralTutorial;
 using SuperspectiveUtils;
 using UnityEngine;
 
 public class RotateAroundPillar : MonoBehaviour {
+    public FloorManager.Floor floor;
+    public Transform portalCube;
     private Camera playerCam;
 
     public float followLerpSpeed = 10f;
     // effectivePlayerCamPos will never go within this distance of the pivot point (stops very fast rotations from happening)
-    private float minDistance = 6;
+    private float minDistance = 12;
 
     private Vector3 effectivePlayerCamPos;
     
@@ -19,7 +22,12 @@ public class RotateAroundPillar : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, playerCam.transform.position, followLerpSpeed * Time.deltaTime);
+        if (FloorManager.instance.floor == floor) {
+            effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, playerCam.transform.position, followLerpSpeed * Time.deltaTime);
+        }
+        else {
+            effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, portalCube.position, followLerpSpeed * Time.deltaTime);
+        }
         UpdateWallRotation(effectivePlayerCamPos);
     }
 

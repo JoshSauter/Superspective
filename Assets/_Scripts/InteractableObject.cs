@@ -14,10 +14,11 @@ public class InteractableObject : MonoBehaviour {
         Hidden
     }
 
-    [ShowNativeProperty]
+    [SerializeField]
+    private InteractableState _state;
     public InteractableState state {
-        get;
-        private set;
+        get => _state;
+        private set => _state = value;
     }
     
     public bool useLargerPrepassMaterial;

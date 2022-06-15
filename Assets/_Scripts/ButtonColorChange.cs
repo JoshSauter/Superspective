@@ -1,4 +1,5 @@
-﻿using NaughtyAttributes;
+﻿using System;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class ButtonColorChange : MonoBehaviour {
@@ -22,6 +23,8 @@ public class ButtonColorChange : MonoBehaviour {
 
     public Button buttonToReactTo;
     SuperspectiveRenderer r;
+
+    private const float lerpSpeed = 2f;
 
     // Use this for initialization
     void Start() {
@@ -87,6 +90,16 @@ public class ButtonColorChange : MonoBehaviour {
                 SetEmission(Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
 
                 break;
+            case Button.State.ButtonUnpressed:
+                SetColor(Color.Lerp(GetCurrentColor(), startColor, Time.deltaTime*lerpSpeed));
+                SetEmission(Color.Lerp(GetCurrentEmission(), startEmission, Time.deltaTime*lerpSpeed));
+                break;
+            case Button.State.ButtonPressed:
+                SetColor(Color.Lerp(GetCurrentColor(), pressColor, Time.deltaTime*lerpSpeed));
+                SetEmission(Color.Lerp(GetCurrentEmission(), pressEmission, Time.deltaTime*lerpSpeed));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -98,6 +111,14 @@ public class ButtonColorChange : MonoBehaviour {
     void ButtonUnpressFinish(Button b) {
         SetColor(startColor);
         SetEmission(startEmission);
+    }
+
+    Color GetCurrentColor() {
+        return overrideColorProperty ? r.GetColor(colorPropertyOverride) : r.GetMainColor();
+    }
+
+    Color GetCurrentEmission() {
+        return r.GetColor("_EmissionColor");
     }
 
     void SetColor(Color color) {

@@ -19,52 +19,11 @@ namespace LevelSpecific.WhiteRoom {
             public PowerTrail powerTrail;
         }
 
-        Sprite[] base9Symbols;
+        public CurrentValueDisplay currentValueDisplay;
         public SpriteRenderer currentValueBackground;
-        public SpriteRenderer currentValueDisplayHi;
-        public SpriteRenderer currentValueDisplayLo;
-        public SpriteRenderer currentValueNegativeSymbol;
         public PowerReceptacle[] powerReceptacles;
 
         const int target = 47;
-
-        int actualValue = 0;
-        float _displayedValue = 0f;
-        float displayedValue {
-            get => _displayedValue;
-            set {
-                value = Mathf.Clamp(value, -80f, 80f);
-                _displayedValue = value;
-
-                int smallerValue = Mathf.FloorToInt(Mathf.Abs(value));
-                int largerValue = Mathf.CeilToInt(Mathf.Abs(value));
-                float t = Mathf.Abs(value) - smallerValue;
-
-                //int roundedValue = Mathf.RoundToInt(value);
-                bool isNegative = value < 0;
-                currentValueDisplayLo.sprite = base9Symbols[smallerValue];
-                currentValueDisplayLoAlpha = 1f - t;
-                currentValueDisplayHi.sprite = base9Symbols[largerValue];
-                currentValueDisplayHiAlpha = t;
-
-                currentValueNegativeSymbol.enabled = isNegative;
-                if (isNegative) {
-                    if (smallerValue == 0) {
-                        currentValueNegativeSymbolAlpha = t;
-                    }
-                    else {
-                        currentValueNegativeSymbolAlpha = 1f;
-
-                    }
-                }
-                else {
-                    currentValueNegativeSymbolAlpha = 0f;
-				}
-            }
-        }
-        float currentValueDisplayLoAlpha = 1f;
-        float currentValueDisplayHiAlpha = 0f;
-        float currentValueNegativeSymbolAlpha = 0f;
 
         public Material whiteToBlack, blackToWhite;
         public DimensionObject[] whiteCubeSpawnerDimensionObjects;
@@ -146,14 +105,12 @@ namespace LevelSpecific.WhiteRoom {
         protected override void Start() {
             base.Start();
             playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
-
-            base9Symbols = Resources.LoadAll<Sprite>("Images/Base9/").OrderBy(s => int.Parse(s.name)).ToArray();
         }
 
         protected override void Init() {
             foreach (var powerReceptacle in powerReceptacles) {
-                powerReceptacle.powerTrail.OnPowerFinish += () => actualValue += powerReceptacle.powerGenerated;
-                powerReceptacle.powerTrail.OnDepowerBegin += () => actualValue -= powerReceptacle.powerGenerated;
+                powerReceptacle.powerTrail.OnPowerFinish += () => currentValueDisplay.actualValue += powerReceptacle.powerGenerated;
+                powerReceptacle.powerTrail.OnDepowerBegin += () => currentValueDisplay.actualValue -= powerReceptacle.powerGenerated;
             }
         }
 
@@ -177,26 +134,24 @@ namespace LevelSpecific.WhiteRoom {
             if (!hasInitialized) return;
             
             if (DebugInput.GetKey("9")) {
-                actualValue = Mathf.Clamp(actualValue + 1, -80, 80);
+                currentValueDisplay.actualValue = Mathf.Clamp(currentValueDisplay.actualValue + 1, -80, 80);
             }
             else if (DebugInput.GetKey("0")) {
-                actualValue = Mathf.Clamp(actualValue - 1, -80, 80);
+                currentValueDisplay.actualValue = Mathf.Clamp(currentValueDisplay.actualValue - 1, -80, 80);
             }
             else if (DebugInput.GetKeyDown("-")) {
-                actualValue = target;
+                currentValueDisplay.actualValue = target;
             }
 
             foreach (var powerReceptacle in powerReceptacles) {
                 powerReceptacle.powerTrail.powerIsOn = powerReceptacle.cubeReceptacle.isCubeInReceptacle;
 			}
 
-            displayedValue = Mathf.Lerp(displayedValue, actualValue, Time.deltaTime * 4f);
-
             float amountPlayerIsLookingAtHexes = Vector3.Dot(playerCamera.forward, (transform.position - playerCamera.position).normalized);
-            bool valueInRange = (80 - Mathf.Abs(displayedValue) > 0);
+            bool valueInRange = (80 - Mathf.Abs(currentValueDisplay.displayedValue) > 0);
             UpdateHexesState(amountPlayerIsLookingAtHexes, valueInRange);
 
-            float t = Mathf.InverseLerp(-80f, 80f, displayedValue);
+            float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.displayedValue);
             UpdateObeliskLight(t);
             UpdateValueLine(t);
 
@@ -207,7 +162,7 @@ namespace LevelSpecific.WhiteRoom {
             if (!valueInRange) {
                 hexState = HexState.ValueOutOfRange;
             }
-            else if (actualValue == target) {
+            else if (currentValueDisplay.actualValue == target) {
                 hexState = HexState.CorrectValue;
 			}
             else if (amountPlayerIsLookingAtHexes > isLookingAtThreshold) {
@@ -246,11 +201,11 @@ namespace LevelSpecific.WhiteRoom {
                     outerHexRotate.rotationsPerSecondY = Mathf.Lerp(outerHexRotate.rotationsPerSecondY, outerHexRotateObjectSpeed, rotationLerpSpeed * Time.deltaTime);
                     innerHexRotate.rotationsPerSecondZ = Mathf.Lerp(innerHexRotate.rotationsPerSecondZ, innerHexRotateObjectSpeed, rotationLerpSpeed * Time.deltaTime);
 
-                    Color curColor = currentValueDisplayHi.color;
+                    Color curColor = currentValueDisplay.currentValueDisplayHi.color;
                     curColor.a = 0;
-                    currentValueDisplayLo.color = curColor;
-                    currentValueDisplayHi.color = curColor;
-                    currentValueNegativeSymbol.color = curColor;
+                    currentValueDisplay.currentValueDisplayLo.color = curColor;
+                    currentValueDisplay.currentValueDisplayHi.color = curColor;
+                    currentValueDisplay.currentValueNegativeSymbol.color = curColor;
                     currentValueBackground.color = Color.clear;
                     break;
                 case HexState.LookingAtPlayer:
@@ -261,17 +216,17 @@ namespace LevelSpecific.WhiteRoom {
                     float lookingAtLerpValue = Mathf.InverseLerp(isLookingAtThreshold, 0.975f, Mathf.Abs(amountPlayerIsLookingAtHexes));
 
                     // Update the high value's alpha
-                    curColor = currentValueDisplayHi.color;
-                    curColor.a = currentValueDisplayHiAlpha * lookingAtLerpValue;
-                    currentValueDisplayHi.color = curColor;
+                    curColor = currentValueDisplay.currentValueDisplayHi.color;
+                    curColor.a = currentValueDisplay.currentValueDisplayHiAlpha * lookingAtLerpValue;
+                    currentValueDisplay.currentValueDisplayHi.color = curColor;
 
                     // Update the low value's alpha
-                    curColor = currentValueDisplayLo.color;
-                    curColor.a = currentValueDisplayLoAlpha * lookingAtLerpValue;
-                    currentValueDisplayLo.color = curColor;
+                    curColor = currentValueDisplay.currentValueDisplayLo.color;
+                    curColor.a = currentValueDisplay.currentValueDisplayLoAlpha * lookingAtLerpValue;
+                    currentValueDisplay.currentValueDisplayLo.color = curColor;
 
                     // Update the negative symbol's alpha
-                    currentValueNegativeSymbol.color = new Color(1, 1, 1, currentValueNegativeSymbolAlpha * lookingAtLerpValue);
+                    currentValueDisplay.currentValueNegativeSymbol.color = new Color(1, 1, 1, currentValueDisplay.currentValueNegativeSymbolAlpha * lookingAtLerpValue);
                     currentValueBackground.color = new Color(0, 0, 0, lookingAtLerpValue);
                     break;
                 case HexState.ValueOutOfRange:
@@ -346,7 +301,7 @@ namespace LevelSpecific.WhiteRoom {
                 return new Tuple<Color, Color>(Color.green * 0.6f, Color.green);
             }
             else {
-                float t = Mathf.InverseLerp(-80f, 80f, displayedValue);
+                float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.displayedValue);
                 return new Tuple<Color, Color>(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
             }
         }
@@ -448,16 +403,12 @@ namespace LevelSpecific.WhiteRoom {
 
         [Serializable]
         public class WhiteRoomPuzzle2Save : SerializableSaveObject<WhiteRoomPuzzle2> {
-            int actualValue;
-            float displayedValue;
             HexState hexState;
             float timeSinceHexStateChanged;
             float[] floatGradientBuffer;
             SerializableColor[] colorGradientBuffer;
             
             public WhiteRoomPuzzle2Save(WhiteRoomPuzzle2 script) : base(script) {
-                this.actualValue = script.actualValue;
-                this.displayedValue = script.displayedValue;
                 this.hexState = script.hexState;
                 this.timeSinceHexStateChanged = script.timeSinceHexStateChanged;
                 this.floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
@@ -469,8 +420,6 @@ namespace LevelSpecific.WhiteRoom {
             }
 
             public override void LoadSave(WhiteRoomPuzzle2 script) {
-                script.actualValue = this.actualValue;
-                script.displayedValue = this.displayedValue;
                 script._hexState = this.hexState;
                 script.timeSinceHexStateChanged = this.timeSinceHexStateChanged;
                 for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {

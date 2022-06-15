@@ -33,11 +33,13 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 27
+	// Next level: 28
 	[Serializable]
 	public enum Levels {
 		ManagerScene = 0,
 		TestScene = 1,
+		PortalTestScene = 17,
+		PowerTrailTestScene = 27,
 		EmptyRoom = 2,
 		HexPillarRoom = 3,
 		Library = 4,
@@ -52,7 +54,6 @@ namespace LevelManagement {
 		ForkBlackRoom = 14,
 		InvisFloor = 15,
 		MetaEdgeDetection = 16,
-		PortalTestScene = 17,
 		ForkCathedral = 18,
 		ForkWhiteRoomBlackHallway = 19,
 		ForkWhiteRoom3 = 20,
@@ -298,6 +299,8 @@ namespace LevelManagement {
 		internal static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
 			{ Levels.ManagerScene, ManagerScene },
 			{ Levels.TestScene, "_TestScene" },
+			{ Levels.PortalTestScene, "PortalTestScene" },
+			{ Levels.PowerTrailTestScene, "PowerTrailTestScene" },
 			{ Levels.EmptyRoom, "_EmptyRoom" },
 			{ Levels.HexPillarRoom, "_HexPillarRoom" },
 			{ Levels.Library, "_Library" },
@@ -320,7 +323,6 @@ namespace LevelManagement {
 			{ Levels.Transition23, "_Transition2_3" },
 			{ Levels.Transition34, "_Transition3_4" },
 			{ Levels.MetaEdgeDetection, "_Meta_EdgeDetection" },
-			{ Levels.PortalTestScene, "PortalTestScene" },
 			{ Levels.ForkBlackRoom3, "_Fork_BlackRoom3" },
 			{ Levels.ForkCathedralTutorial, "_Fork_Cathedral_Tutorial" }
 		};

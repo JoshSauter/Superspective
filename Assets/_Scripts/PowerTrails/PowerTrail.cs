@@ -10,6 +10,7 @@ using NaughtyAttributes;
 using Audio;
 using Saving;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine.Events;
 using static Audio.AudioManager;
 
 namespace PowerTrailMechanics {
@@ -22,13 +23,6 @@ namespace PowerTrailMechanics {
 
 	[RequireComponent(typeof(UniqueId))]
 	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
-		
-		public enum PowerTrailState {
-			Depowered,
-			PartiallyPowered,
-			Powered
-		}
-
 		public Renderer[] renderers;
 		Collider[] colliders;
 		Material[] materials;
@@ -40,7 +34,7 @@ namespace PowerTrailMechanics {
 
 		public int numAudioSources = 4; // Max one per simplePath segment
 		// trail segment -> audioJob.uniqueIdentifier
-		private TwoWayDictionary<NodeTrailInfo, string> audioSegments = new TwoWayDictionary<NodeTrailInfo, string>();
+		private readonly TwoWayDictionary<NodeTrailInfo, string> audioSegments = new TwoWayDictionary<NodeTrailInfo, string>();
 
 		// Data to be sent to the GPU. Positions are not repeated. Index order matches node ID
 		const int MAX_NODES = 512;
@@ -71,13 +65,28 @@ namespace PowerTrailMechanics {
 		public float powerTrailRadius = 0.15f;
 		public bool skipStartupShutdownSounds = false;
 		public bool objectMoves = false;
+		
+		[Header("Parent PowerTrails")]
+		public MultiMode parentMultiMode = MultiMode.Single;
+		[HideIf("IsMulti")]
+		public PowerTrail source;
+		[ShowIf("IsMulti")]
+		public PowerTrail[] sources;
 
 		#region events
 		public delegate void PowerTrailAction();
+
+		public delegate void PowerTrailActionWithRef(PowerTrail powerTrail);
 		public event PowerTrailAction OnPowerBegin;
 		public event PowerTrailAction OnPowerFinish;
 		public event PowerTrailAction OnDepowerBegin;
 		public event PowerTrailAction OnDepowerFinish;
+		public event PowerTrailActionWithRef OnPowerBeginRef;
+		public event PowerTrailActionWithRef OnPowerFinishRef;
+		public event PowerTrailActionWithRef OnDepowerBeginRef;
+		public event PowerTrailActionWithRef OnDepowerFinishRef;
+
+		public UnityEvent onPowerFinish;
 		#endregion
 
 		///////////
@@ -85,6 +94,7 @@ namespace PowerTrailMechanics {
 		///////////
 		public float duration => maxDistance / speed;
 		public float durationOff => useSeparateSpeedsForPowerOnOff ? maxDistance / speedPowerOff : duration;
+		[Header("Current State")]
 		public float distance = 0f;
 		public float maxDistance = 0f;
 		[SerializeField]
@@ -115,15 +125,20 @@ namespace PowerTrailMechanics {
 			private set {
 				if (_state == PowerTrailState.Depowered && value == PowerTrailState.PartiallyPowered) {
 					OnPowerBegin?.Invoke();
+					OnPowerBeginRef?.Invoke(this);
 				}
 				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Powered) {
 					OnPowerFinish?.Invoke();
+					onPowerFinish?.Invoke();
+					OnPowerFinishRef?.Invoke(this);
 				}
 				else if (_state == PowerTrailState.Powered && value == PowerTrailState.PartiallyPowered) {
 					OnDepowerBegin?.Invoke();
+					OnDepowerBeginRef?.Invoke(this);
 				}
 				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Depowered) {
 					OnDepowerFinish?.Invoke();
+					OnDepowerFinishRef?.Invoke(this);
 				}
 				_state = value;
 			}
@@ -160,7 +175,12 @@ namespace PowerTrailMechanics {
 			InitializeAudioSegments();
 
 			PopulateStaticGPUInfo();
+			InitDaisyChainEvents();
 			SetStartState();
+		}
+
+		private void OnDisable() {
+			TeardownDaisyChainEvents();
 		}
 
 		void InitializeAudioSegments() {
@@ -205,8 +225,8 @@ namespace PowerTrailMechanics {
 			
 			UpdateInterpolationValues(nextDistance);
 
-			UpdateState(prevDistance, nextDistance);
 			distance = nextDistance;
+			UpdateState(prevDistance, nextDistance);
 		}
 
 		void PopulateStaticGPUInfo() {
@@ -484,6 +504,76 @@ namespace PowerTrailMechanics {
 			return start + heading * dotP;
 		}
 #endregion
+
+#region Parent PowerTrails
+		bool IsMulti() {
+			return parentMultiMode != MultiMode.Single;
+		}
+				
+		bool ParentsFullyPowered {
+			get {
+				switch (parentMultiMode) {
+					case MultiMode.Single:
+						return source.powerIsOn;
+					case MultiMode.Any:
+						return sources.ToList().Exists(s => s.fullyPowered);
+					case MultiMode.All:
+						return sources.ToList().TrueForAll(s => s.fullyPowered);
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
+
+		void PowerFromParents() {
+			powerIsOn = ParentsFullyPowered;
+		}
+
+		void InitDaisyChainEvents() {
+			switch (parentMultiMode) {
+				case MultiMode.Single:
+					if (source == null) return;
+					skipStartupShutdownSounds = true;
+					source.OnPowerFinish += PowerFromParents;
+					source.OnDepowerBegin += PowerFromParents;
+					break;
+				case MultiMode.Any:
+				case MultiMode.All:
+					if (sources == null || sources.Length == 0) return;
+					skipStartupShutdownSounds = true;
+					foreach (var parent in sources) {
+						parent.OnPowerFinish += PowerFromParents;
+						parent.OnDepowerBegin += PowerFromParents;
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		void TeardownDaisyChainEvents() {
+			switch (parentMultiMode) {
+				case MultiMode.Single:
+					if (source == null) return;
+					skipStartupShutdownSounds = true;
+					source.OnPowerFinish -= PowerFromParents;
+					source.OnDepowerBegin -= PowerFromParents;
+					break;
+				case MultiMode.Any:
+				case MultiMode.All:
+					if (sources == null || sources.Length == 0) return;
+					skipStartupShutdownSounds = true;
+					foreach (var parent in sources) {
+						parent.OnPowerFinish -= PowerFromParents;
+						parent.OnDepowerBegin -= PowerFromParents;
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+#endregion
 #region Saving
 		
 		[Serializable]
@@ -541,7 +631,6 @@ namespace PowerTrailMechanics {
 #endregion
 #region EditorGizmos
 		bool editorGizmosEnabled => DEBUG;
-		public static float gizmoSphereSize = 0.15f;
 
 		void OnDrawGizmos() {
 			if (powerNodes == null) {

@@ -11,6 +11,7 @@ using LevelManagement;
 using MagicTriggerMechanics;
 using Saving;
 using SerializableClasses;
+using UnityEngine.Events;
 
 namespace PortalMechanics {
 	[Serializable]
@@ -145,6 +146,7 @@ namespace PortalMechanics {
 		public static event PortalTeleportAction OnAnyPortalTeleport;
 		public static event SimplePortalTeleportAction BeforeAnyPortalTeleportSimple;
 		public static event SimplePortalTeleportAction OnAnyPortalTeleportSimple;
+		public UnityEvent onPortalTeleport;
 		#endregion
 
 #if UNITY_EDITOR
@@ -742,6 +744,7 @@ namespace PortalMechanics {
 			OnAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 			OnPortalTeleportSimple?.Invoke(objBeingTeleported);
 			OnAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
+			onPortalTeleport?.Invoke();
 			
 			if (objBeingTeleported.TaggedAsPlayer()) {
 				OnPortalTeleportPlayerSimple?.Invoke();

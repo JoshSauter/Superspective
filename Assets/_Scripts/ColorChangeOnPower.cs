@@ -4,9 +4,18 @@ using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using System.Linq;
+
+
+public enum MultiMode {
+    Single,
+    Any,
+    All
+}
 
 [RequireComponent(typeof(UniqueId))]
 public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChangeOnPower.ColorChangeOnPowerSave> {
+    
     public enum ActivationTiming {
         OnPowerBegin,
         OnPowerFinish,
@@ -29,9 +38,18 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
 
     public AnimationCurve colorChangeAnimationCurve;
     public float timeToChangeColor = 0.25f;
+    [Space]
+    public MultiMode mode = MultiMode.Single;
+    [HideIf("IsMulti")]
     public PowerTrail powerTrailToReactTo;
+    [ShowIf("IsMulti")]
+    public PowerTrail[] powerTrailsToReactTo;
     public SuperspectiveRenderer[] renderers;
     float timeElapsedSinceStateChange;
+
+    bool IsMulti() {
+        return mode != MultiMode.Single;
+    }
 
     bool reverseColors =>
         timing == ActivationTiming.OnDepowerBegin || timing == ActivationTiming.OnDepowerFinish;
@@ -40,7 +58,7 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     protected override void Awake() {
         base.Awake();
         if (powerTrailToReactTo == null) powerTrailToReactTo = GetComponent<PowerTrail>();
-        if (powerTrailToReactTo == null) {
+        if (powerTrailToReactTo == null && !IsMulti()) {
             Debug.LogWarning("No Power Trail to react to, disabling color change script", gameObject);
             enabled = false;
             return;
@@ -68,23 +86,56 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
             }
         }
 
-        switch (timing) {
-            case ActivationTiming.OnPowerBegin:
-                powerTrailToReactTo.OnPowerBegin += PowerOn;
-                powerTrailToReactTo.OnDepowerFinish += PowerOff;
-                break;
-            case ActivationTiming.OnPowerFinish:
-                powerTrailToReactTo.OnPowerFinish += PowerOn;
-                powerTrailToReactTo.OnDepowerBegin += PowerOff;
-                break;
-            case ActivationTiming.OnDepowerBegin:
-                powerTrailToReactTo.OnDepowerBegin += PowerOn;
-                powerTrailToReactTo.OnPowerFinish += PowerOff;
-                break;
-            case ActivationTiming.OnDepowerFinish:
-                powerTrailToReactTo.OnDepowerFinish += PowerOn;
-                powerTrailToReactTo.OnPowerBegin += PowerOff;
-                break;
+        if (!IsMulti()) {
+            switch (timing) {
+                case ActivationTiming.OnPowerBegin:
+                    powerTrailToReactTo.OnPowerBegin += PowerOn;
+                    powerTrailToReactTo.OnDepowerFinish += PowerOff;
+                    break;
+                case ActivationTiming.OnPowerFinish:
+                    powerTrailToReactTo.OnPowerFinish += PowerOn;
+                    powerTrailToReactTo.OnDepowerBegin += PowerOff;
+                    break;
+                case ActivationTiming.OnDepowerBegin:
+                    powerTrailToReactTo.OnDepowerBegin += PowerOn;
+                    powerTrailToReactTo.OnPowerFinish += PowerOff;
+                    break;
+                case ActivationTiming.OnDepowerFinish:
+                    powerTrailToReactTo.OnDepowerFinish += PowerOn;
+                    powerTrailToReactTo.OnPowerBegin += PowerOff;
+                    break;
+            }
+        }
+        else {
+            switch (timing) {
+                case ActivationTiming.OnPowerBegin:
+                    foreach (var pt in powerTrailsToReactTo) {
+                        pt.OnPowerBegin += PowerOn;
+                        pt.OnDepowerFinish += PowerOff;
+                    }
+                    break;
+                case ActivationTiming.OnPowerFinish:
+                    foreach (var pt in powerTrailsToReactTo) {
+                        pt.OnPowerFinish += PowerOn;
+                        pt.OnDepowerBegin += PowerOff;
+                    }
+
+                    break;
+                case ActivationTiming.OnDepowerBegin:
+                    foreach (var pt in powerTrailsToReactTo) {
+                        pt.OnDepowerBegin += PowerOn;
+                        pt.OnPowerFinish += PowerOff;
+                    }
+
+                    break;
+                case ActivationTiming.OnDepowerFinish:
+                    foreach (var pt in powerTrailsToReactTo) {
+                        pt.OnDepowerFinish += PowerOn;
+                        pt.OnPowerBegin += PowerOff;
+                    }
+
+                    break;
+            }
         }
     }
 
@@ -92,10 +143,25 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         if (timeElapsedSinceStateChange < timeToChangeColor) timeElapsedSinceStateChange += Time.deltaTime;
 
         float t = timeElapsedSinceStateChange / timeToChangeColor;
-        Color startColor = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredColor : poweredColor;
-        Color startEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? depoweredEmission : poweredEmission;
-        Color endColor = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredColor : depoweredColor;
-        Color endEmission = powerTrailToReactTo.powerIsOn && !reverseColors ? poweredEmission : depoweredEmission;
+        bool PowerIsOn() {
+            switch (mode) {
+                case MultiMode.Single:
+                    return powerTrailToReactTo.powerIsOn;
+                case MultiMode.Any:
+                    return powerTrailsToReactTo.ToList().Exists(pt => pt.powerIsOn);
+                case MultiMode.All:
+                    return powerTrailsToReactTo.ToList().TrueForAll(pt => pt.powerIsOn);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        bool powerIsOn = PowerIsOn();
+
+        Color startColor = powerIsOn && !reverseColors ? depoweredColor : poweredColor;
+        Color startEmission = powerIsOn && !reverseColors ? depoweredEmission : poweredEmission;
+        Color endColor = powerIsOn && !reverseColors ? poweredColor : depoweredColor;
+        Color endEmission = powerIsOn && !reverseColors ? poweredEmission : depoweredEmission;
         if (t > 1) {
             timeElapsedSinceStateChange = timeToChangeColor;
             SetColor(endColor, endEmission);

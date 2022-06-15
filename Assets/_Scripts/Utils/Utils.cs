@@ -9,6 +9,7 @@ using Saving;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
+using Random = System.Random;
 
 namespace SuperspectiveUtils {
     [Serializable]
@@ -72,6 +73,15 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class ICollectionExt {
+        public static T RandomElementFrom<T>(this ICollection<T> collection) {
+            int count = collection.Count;
+            T[] array = new T[count];
+            collection.CopyTo(array, 0);
+            return array[UnityEngine.Random.Range(0, count)];
+        }
+    }
+
     public static class DictionaryExt {
         public static Dictionary<K, V2> MapValues<K, V1, V2>(this Dictionary<K, V1> source, Func<V1, V2> transform) {
             Dictionary<K, V2> target = new Dictionary<K, V2>();
@@ -80,6 +90,16 @@ namespace SuperspectiveUtils {
             }
 
             return target;
+        }
+    }
+
+    public static class ColorExt {
+        public static Color WithAlphaFrom(this Color self, Color from) {
+            return new Color(self.r, self.g, self.b, from.a);
+        }
+
+        public static Color WithAlpha(this Color self, float alpha) {
+            return new Color(self.r, self.g, self.b, alpha);
         }
     }
 

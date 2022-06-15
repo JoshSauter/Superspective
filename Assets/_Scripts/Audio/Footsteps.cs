@@ -5,8 +5,12 @@ using Audio;
 using static Audio.AudioManager;
 
 public class Footsteps : MonoBehaviour {
-	private AudioJob audioJobLeft => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left");
-	private AudioJob audioJobRight => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right");
+	private AudioJob audioJobLeft => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left", SetPanForAudio);
+	private AudioJob audioJobRight => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right", SetPanForAudio);
+	
+	private AudioJob audioJobLeftGlass => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left_Glass", SetPanForAudio);
+	private AudioJob audioJobRightGlass => AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Right_Glass", SetPanForAudio);
+	
 	Headbob bob;
 	PlayerMovement playerMovement;
 	float defaultVolume;
@@ -14,6 +18,18 @@ public class Footsteps : MonoBehaviour {
 	bool playerWasHeadingDownLastFrame = false;
 	float minTimeBetweenHits = 0.175f;
 	float timeSinceLastHit = 0f;
+
+	private const float glassMinVolume = 0.025f;
+	private const float glassMaxVolume = 0.15f;
+	private float lastGlassVolume = glassMinVolume;
+
+	private float randomGlassVolume {
+		get {
+			float nextGlassVolume = Mathf.Lerp(lastGlassVolume, Random.Range(glassMinVolume, glassMaxVolume), 0.5f);
+			lastGlassVolume = nextGlassVolume;
+			return lastGlassVolume;
+		}
+	} 
 
 	// Alternates between true and false so we only play a sound every other step
 	bool shouldForceStepSound = true;
@@ -91,6 +107,32 @@ public class Footsteps : MonoBehaviour {
 		timeSinceLastHit = 0f;
 		string audioJobId = leftFootActive ? audioJobLeft.uniqueIdentifier : audioJobRight.uniqueIdentifier;
 		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay);
+		if (WalkingOnGlass()) {
+			string glassAudioJobId = leftFootActive ? audioJobLeftGlass.uniqueIdentifier : audioJobRightGlass.uniqueIdentifier;
+			AudioManager.instance.Play(AudioName.PlayerFootstepGlass, glassAudioJobId, shouldForcePlay, SetGlassVolume);
+		}
+
 		leftFootActive = !leftFootActive;
+	}
+
+	bool WalkingOnGlass() {
+		if (playerMovement == null || playerMovement.grounded.isGrounded == false) {
+			return false;
+		}
+		
+		bool onGlass = playerMovement
+			.grounded
+			.ground
+			.GetComponent<Renderer>()
+			.sharedMaterial
+			.name
+			.ToLower()
+			.Contains("glass");
+
+		return onGlass;
+	}
+
+	void SetGlassVolume(AudioJob audioJob) {
+		audioJob.audio.volume = randomGlassVolume;
 	}
 }

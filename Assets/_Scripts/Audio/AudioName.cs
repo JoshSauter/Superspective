@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace Audio {
-	// next 37
+	// next 40
 	public enum AudioName {
 		CubeDrop = 0,
 		CubePickup = 1,
@@ -19,6 +21,7 @@ namespace Audio {
 		PowerTrailShutdown = 35,
 		ViewLockObject = 10,
 		PlayerFootstep = 11,
+		PlayerFootstepGlass = 39,
 		PlayerJumpLandingRuffle = 12,
 		PlayerJumpLandingThump = 13,
 		PlayerJump = 14,
@@ -41,6 +44,31 @@ namespace Audio {
 		DisabledSound = 29,
 		FallingWind = 31,
 		FallingWindLow = 32,
-		InteractableHover = 36
+		InteractableHover = 36,
+		ButtonPress = 37,
+		ButtonUnpress = 38
+	}
+
+	public static class AudioNameExt {
+		private static AudioClip[] _glassFootstepClips;
+
+		public static AudioClip[] glassFootstepClips {
+			get {
+				if (_glassFootstepClips == null || _glassFootstepClips.Length == 0) {
+					_glassFootstepClips = Resources.LoadAll<AudioClip>("Audio/Sounds/PlayerSounds/Scale/");
+				}
+
+				return _glassFootstepClips;
+			}
+		}
+		
+		public static AudioClip GetAudioClip(this AudioName audioType, AudioSource source) {
+			switch (audioType) {
+				case AudioName.PlayerFootstepGlass:
+					return glassFootstepClips.RandomElementFrom();
+				default:
+					return source.clip;
+			}
+		}
 	}
 }

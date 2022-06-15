@@ -34,6 +34,7 @@ namespace Audio {
 			}
 
 			public void Play() {
+				audio.clip = audioType.GetAudioClip(audio);
 				randomizedPitch = Random.Range(-pitchRandomness, pitchRandomness);
 				audio.pitch = basePitch + randomizedPitch;
 				audio.time = 0f;

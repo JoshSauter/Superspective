@@ -253,8 +253,8 @@ namespace PortalMechanics {
 			}
 			
 			// RENDER
-			RenderDepthNormalsToPortal(portal, index);
 			RenderVisibilityMaskTexture(portal, modifiedCamSettings);
+			RenderDepthNormalsToPortal(portal, index);
 			RenderPortalMaskTexture(modifiedCamSettings);
 			if (DEBUG) {
 				while (portalMaskTextures.Count <= index) {

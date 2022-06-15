@@ -58,28 +58,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         // Update is called once per frame
         void Update() {
             if (DebugInput.GetKeyDown("o")) {
-                switch (state.state) {
-                    case DoorState.Closed:
-                        state.Set(DoorState.Opening, true);
-                        break;
-                    case DoorState.Opening: {
-                        float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
-                        state.Set(DoorState.Closing);
-                        state.timeSinceStateChanged = timeSinceStateChanged;
-                        break;
-                    }
-                    case DoorState.Open:
-                        state.Set(DoorState.Closing, true);
-                        break;
-                    case DoorState.Closing: {
-                        float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
-                        state.Set(DoorState.Opening);
-                        state.timeSinceStateChanged = timeSinceStateChanged;
-                        break;
-                    }
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                TriggerDoors();
             }
             
             switch (state.state) {
@@ -92,6 +71,31 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                 case DoorState.Closing:
                     SetDoors(1 - (state.timeSinceStateChanged / timeToOpen));
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public void TriggerDoors() {
+            switch (state.state) {
+                case DoorState.Closed:
+                    state.Set(DoorState.Opening, true);
+                    break;
+                case DoorState.Opening: {
+                    float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
+                    state.Set(DoorState.Closing);
+                    state.timeSinceStateChanged = timeSinceStateChanged;
+                    break;
+                }
+                case DoorState.Open:
+                    state.Set(DoorState.Closing, true);
+                    break;
+                case DoorState.Closing: {
+                    float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
+                    state.Set(DoorState.Opening);
+                    state.timeSinceStateChanged = timeSinceStateChanged;
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -117,17 +121,14 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 		
 		[Serializable]
 		public class PortalDoorSave : SerializableSaveObject<PortalDoor> {
-            private PortalDoor.DoorState state;
-            private float timeSinceStateChanged;
+            private StateMachine<PortalDoor.DoorState>.StateMachineSave stateSave;
 
 			public PortalDoorSave(PortalDoor portalDoor) : base(portalDoor) {
-                this.state = portalDoor.state;
-                this.timeSinceStateChanged = portalDoor.state.timeSinceStateChanged;
+                this.stateSave = portalDoor.state.ToSave();
             }
 
 			public override void LoadSave(PortalDoor portalDoor) {
-                portalDoor.state.state = this.state;
-                portalDoor.state.timeSinceStateChanged = timeSinceStateChanged;
+                portalDoor.state.FromSave(stateSave);
             }
 		}
 #endregion

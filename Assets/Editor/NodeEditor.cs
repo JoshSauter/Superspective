@@ -62,7 +62,8 @@ public class NodeEditor : UnityEditor.Editor {
         Ray ray = HandleUtility.GUIPointToWorldRay(guiPosition);
 
         foreach (Node node in t.GetAllNodes()) {
-            if (HitGizmoSphere(t.transform.TransformPoint(node.pos), ray)) return node;
+            if (t.selectedNode == node) continue;
+            if (HitGizmoSphere( t.transform.TransformPoint(node.pos), ray)) return node;
         }
 
         return null;
@@ -72,7 +73,7 @@ public class NodeEditor : UnityEditor.Editor {
         Vector3 oc = ray.origin - center;
         float a = Vector3.Dot(ray.direction, ray.direction);
         float b = 2.0f * Vector3.Dot(oc, ray.direction);
-        float c = Vector3.Dot(oc, oc) - PowerTrail.gizmoSphereSize * PowerTrail.gizmoSphereSize;
+        float c = Vector3.Dot(oc, oc) - NodeSystem.gizmoSphereSize * NodeSystem.gizmoSphereSize;
         float discriminant = b * b - 4 * a * c;
         return discriminant > 0;
     }

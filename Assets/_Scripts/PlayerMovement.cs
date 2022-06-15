@@ -150,7 +150,9 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
         thisRigidbody.useGravity = !grounded.isGrounded;
 
-        thisRigidbody.velocity = desiredVelocity;
+        if (!thisRigidbody.isKinematic) {
+            thisRigidbody.velocity = desiredVelocity;
+        }
 
         // Apply wind resistance
         Vector3 projectedVertVelocity = ProjectedVerticalVelocity();

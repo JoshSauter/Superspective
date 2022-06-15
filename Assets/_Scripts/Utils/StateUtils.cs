@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using NaughtyAttributes;
 using UnityEditor;
 using UnityEngine;
+// ReSharper disable All
 
 namespace StateUtils {
     [Serializable]
@@ -70,6 +71,16 @@ namespace StateUtils {
             }
         }
 
+        // If we want to determine the toState at runtime, we can pass a method to provide it
+        public void AddStateTransition(T fromState, Func<T> toStateDef, float atTime) {
+            TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
+                forState = fromState,
+                atTime = atTime
+            };
+            
+            timedEvents.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
+        }
+
         public void AddStateTransition(T fromState, T toState, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
@@ -77,6 +88,22 @@ namespace StateUtils {
             };
             
             timedEvents.Add(stateTransitionTrigger, () => state = toState);
+        }
+
+        public void AddTrigger(Func<T, bool> forStates, float atTime, Action whatToDo) {
+            foreach (T enumValue in Enum.GetValues(typeof(T))) {
+                if (forStates.Invoke(enumValue)) {
+                    AddTrigger(enumValue, atTime, whatToDo);
+                }
+            }
+        }
+        
+        public void AddTrigger(Func<T, bool> forStates, float atTime, Action<T> whatToDo) {
+            foreach (T enumValue in Enum.GetValues(typeof(T))) {
+                if (forStates.Invoke(enumValue)) {
+                    AddTrigger(enumValue, atTime, () => whatToDo.Invoke(enumValue));
+                }
+            }
         }
         
         public void AddTrigger(T forState, float atTime, Action whatToDo) {
@@ -131,12 +158,15 @@ namespace StateUtils {
 
         ~StateMachine() {
             if (hasSubscribedToUpdate) {
-                GlobalUpdate.instance.UpdateGlobal -= Update;
+                try {
+                    GlobalUpdate.instance.UpdateGlobal -= Update;
+                }
+                catch { }
             }
         }
 
         private void InitIdempotent() {
-            if (hasSubscribedToUpdate) return;
+            if (hasSubscribedToUpdate || GlobalUpdate.instance == null) return;
             
             GlobalUpdate.instance.UpdateGlobal += Update;
             hasSubscribedToUpdate = true;
@@ -146,6 +176,25 @@ namespace StateUtils {
             float prevTime = _timeSinceStateChanged;
             _timeSinceStateChanged += Time.deltaTime;
             TriggerEvents(prevTime);
+        }
+
+        public StateMachineSave ToSave() {
+            StateMachineSave save = new StateMachineSave {
+                timeSinceStateChanged = timeSinceStateChanged,
+                state = state
+            };
+            return save;
+        }
+
+        public void FromSave(StateMachineSave save) {
+            this.state = save.state;
+            this.timeSinceStateChanged = save.timeSinceStateChanged;
+        }
+        
+        [Serializable]
+        public class StateMachineSave {
+            public float timeSinceStateChanged;
+            public T state;
         }
     }
 }

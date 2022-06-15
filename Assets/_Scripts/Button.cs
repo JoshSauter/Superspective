@@ -1,7 +1,9 @@
 ﻿using System;
+using Audio;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
@@ -30,7 +32,11 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     [FormerlySerializedAs("depressAfterPress")]
     public bool unpressAfterPress;
     public float timeBetweenPressEndDepressStart = 0.5f;
+    [SerializeField]
     State _state = State.ButtonUnpressed;
+
+    public UnityEvent onButtonPressFinish;
+    public UnityEvent onButtonUnpressBegin;
     
 #region events
     public delegate void ButtonAction(Button button);
@@ -50,13 +56,17 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
                     OnButtonUnpressFinish?.Invoke(this);
                     break;
                 case State.ButtonPressing:
+                    AudioManager.instance.PlayAtLocation(AudioName.ButtonPress, ID, transform.position, true);
                     OnButtonPressBegin?.Invoke(this);
                     break;
                 case State.ButtonPressed:
                     OnButtonPressFinish?.Invoke(this);
+                    onButtonPressFinish?.Invoke();
                     break;
                 case State.ButtonUnpressing:
+                    AudioManager.instance.PlayAtLocation(AudioName.ButtonUnpress, ID, transform.position, true);
                     OnButtonUnpressBegin?.Invoke(this);
+                    onButtonUnpressBegin?.Invoke();
                     break;
             }
 
@@ -115,7 +125,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     }
 
     protected virtual void UpdateButtonPosition() {
-        if (pressDistance <= 0) return;
+        // if (pressDistance <= 0) return;
         float t = timeSinceStateChange / timeToPressButton;
         switch (state) {
             case State.ButtonUnpressed:

@@ -7,7 +7,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
 
 	public static T instance {
 		get {
-			// If the singleton reference doens't yet exist
+			// If the singleton reference doesn't yet exist
 			if (_instance == null) {
 				// Search for a matching singleton that exists
 				var matches = FindObjectsOfType<T>();
