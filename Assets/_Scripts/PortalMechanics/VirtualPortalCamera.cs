@@ -51,6 +51,12 @@ namespace PortalMechanics {
 			// public EDColors edgeColors;
 		}
 
+		[Serializable]
+		public struct VisiblePortalInfo {
+			public Rect[] screenBounds;
+			public bool portalIsRendered;
+		}
+
 		public bool DEBUG = false;
 		DebugLogger debug;
 		public Camera portalCamera;
@@ -136,17 +142,17 @@ namespace PortalMechanics {
 
 			renderSteps = 0;
 			foreach (var p in allActivePortals) {
+				p.SetMaterialsToEffectiveMaterial();
 				// Ignore disabled portals
-				if (!p.portalIsEnabled) continue;
+				if (!p.portalRenderingIsEnabled) continue;
 
 				float portalSurfaceArea = GetPortalSurfaceArea(p);
 				float distanceFromPortalToCam = Vector3.Distance(mainCamera.transform.position, p.ClosestPoint(mainCamera.transform.position));
 				// Assumes an 8x8 portal is average size
 				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds * portalSurfaceArea/64f) ? p.GetScreenRects(mainCamera) : fullScreenRect;
 
-				bool portalRenderingIsPaused = p.pauseRenderingAndLogic || p.pauseRenderingOnly;
 				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
-				if ((PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) && !portalRenderingIsPaused) {
+				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
 					SetCameraSettings(portalCamera, mainCamSettings);
 
 					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.name);
@@ -189,7 +195,7 @@ namespace PortalMechanics {
 			};
 
 			// Key == Visible Portal, Value == visible portal screen bounds
-			Dictionary<Portal, Rect[]> visiblePortals = GetVisiblePortalsAndTheirScreenBounds(portal, portalScreenBounds);
+			Dictionary<Portal, VisiblePortalInfo> visiblePortals = GetVisiblePortalsInfo(portal, portalScreenBounds, depth);
 			// Key == Visible Portal, Value == RecursiveTextures
 			Dictionary<Portal, RecursiveTextures> visiblePortalTextures = new Dictionary<Portal, RecursiveTextures>();
 
@@ -197,17 +203,14 @@ namespace PortalMechanics {
 
 			foreach (var visiblePortalTuple in visiblePortals) {
 				Portal visiblePortal = visiblePortalTuple.Key;
+				VisiblePortalInfo visiblePortalInfo = visiblePortalTuple.Value;
 
-				if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
+				if (visiblePortalInfo.portalIsRendered) {
 					string nextTree = tree + ", " + visiblePortal.name;
-					Rect[] visiblePortalRects = visiblePortalTuple.Value;
-					Rect[] nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalRects);
+					Rect[] nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalInfo.screenBounds);
 
 					// Remember state
 					visiblePortalTextures[visiblePortal] = RenderPortalDepth(depth + 1, visiblePortal, nextPortalBounds, nextTree);
-				}
-				else {
-					visiblePortal.DefaultMaterial();
 				}
 
 				// RESTORE STATE
@@ -217,15 +220,19 @@ namespace PortalMechanics {
 			// RESTORE STATE
 			foreach (var visiblePortalKeyVal in visiblePortals) {
 				Portal visiblePortal = visiblePortalKeyVal.Key;
+				VisiblePortalInfo visiblePortalInfo = visiblePortalKeyVal.Value;
 
-				if (ShouldRenderRecursively(depth, portal, visiblePortal)) {
+				if (visiblePortalInfo.portalIsRendered) {
 					RecursiveTextures textures = visiblePortalTextures[visiblePortal];
 					// Restore the RenderTextures that were in use at this stage
 					visiblePortal.SetTexture(textures.mainTexture);
 					visiblePortal.SetDepthNormalsTexture(textures.depthNormalsTexture);
 				}
 				else {
-					visiblePortal.DefaultMaterial();
+					bool wasPausedState = visiblePortal.pauseRendering;
+					visiblePortal.pauseRendering = true;
+					visiblePortal.SetMaterialsToEffectiveMaterial();
+					visiblePortal.pauseRendering = wasPausedState;
 				}
 			}
 			SetCameraSettings(portalCamera, modifiedCamSettings);
@@ -338,7 +345,7 @@ namespace PortalMechanics {
 			if (parentPortal != null) {
 				parentRendersRecursively = parentPortal.renderRecursivePortals;
 			}
-			bool pausedRendering = visiblePortal.pauseRenderingAndLogic || visiblePortal.pauseRenderingOnly;
+			bool pausedRendering = !visiblePortal.portalRenderingIsEnabled;
 			return parentDepth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && parentRendersRecursively && !pausedRendering && !IsInvisible();
 		}
 
@@ -351,20 +358,22 @@ namespace PortalMechanics {
 		/// </summary>
 		/// <param name="portal">The "in" portal</param>
 		/// <param name="portalScreenBounds">The screen bounds of the "in" portal, [0-1]</param>
+		/// <param name="parentDepth">Depth of the "in" portal</param>
 		/// <returns>A dictionary where each key is a visible portal and each value is the screen bounds of that portal</returns>
-		Dictionary<Portal, Rect[]> GetVisiblePortalsAndTheirScreenBounds(Portal portal, Rect[] portalScreenBounds) {
-			Dictionary<Portal, Rect[]> visiblePortals = new Dictionary<Portal, Rect[]>();
+		Dictionary<Portal, VisiblePortalInfo> GetVisiblePortalsInfo(Portal portal, Rect[] portalScreenBounds, int parentDepth) {
+			Dictionary<Portal, VisiblePortalInfo> visiblePortals = new Dictionary<Portal, VisiblePortalInfo>();
 			foreach (var p in PortalManager.instance.activePortals) {
 				// Ignore the portal we're looking through
 				if (p == portal.otherPortal) continue;
 				// Ignore disabled portals
-				if (!p.portalIsEnabled) continue;
-				// Don't render through paused rendering portals
-				if (p.pauseRenderingOnly) continue;
+				if (!p.portalRenderingIsEnabled) continue;
 
-				Rect[] testPortalBounds = p.GetScreenRects(portalCamera);
-				if (PortalIsSeenByCamera(p, portalCamera, portalScreenBounds, testPortalBounds)) {
-					visiblePortals.Add(p, testPortalBounds);
+				VisiblePortalInfo info = new VisiblePortalInfo() {
+					screenBounds = p.GetScreenRects(portalCamera),
+					portalIsRendered = ShouldRenderRecursively(parentDepth, portal, p)
+				};
+				if (PortalIsSeenByCamera(p, portalCamera, portalScreenBounds, info.screenBounds)) {
+					visiblePortals.Add(p, info);
 				}
 			}
 
@@ -413,6 +422,20 @@ namespace PortalMechanics {
 			return intersection;
 		}
 
+		private Transform _debugSphere;
+
+		private Transform debugSphere {
+			get {
+				if (_debugSphere == null) {
+					_debugSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
+					Destroy(_debugSphere.GetComponent<Collider>());
+					_debugSphere.localScale = Vector3.one * .25f;
+				}
+
+				return _debugSphere;
+			}
+		}
+
 		void SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
 			// Position the camera behind the other portal.
 			portalCamera.transform.position = inPortal.TransformPoint(portalCamera.transform.position);
@@ -424,6 +447,9 @@ namespace PortalMechanics {
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
 			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) < 2*clearSpaceBehindPortal;
+			if (DEBUG) {
+				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
+			}
 			if (!shouldUseDefaultProjectionMatrix) {
 				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position, useInfinitelyThinBounds: true);
 
@@ -436,6 +462,7 @@ namespace PortalMechanics {
 				portalCamera.projectionMatrix = newMatrix;
 			}
 			else {
+				debug.LogWarning("Too close to use oblique projection matrix, using default instead");
 				portalCamera.projectionMatrix = mainCamera.projectionMatrix;
 			}
 

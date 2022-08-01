@@ -4,6 +4,7 @@ using SuperspectiveUtils;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(UniqueId))]
 public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave>, AudioJobOnGameObject {
@@ -26,10 +27,13 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     public float timeSinceStateChange;
 
     public bool makesCubeIrreplaceable = true;
+    public bool lockCubeInPlace = false;
+    public DissolveObject lockDissolve;
     public float receptacleSize = 1f;
     public float receptableDepth = 0.5f;
     public PickupObject cubeInReceptacle;
     public bool playSound = true;
+    public bool playPuzzleCompleteSound = false;
     State _state = State.Empty;
 
     ColorCoded colorCoded;
@@ -55,6 +59,10 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                 case State.CubeInReceptacle:
                     OnCubeHoldEnd?.Invoke(this, cubeInReceptacle);
                     OnCubeHoldEndSimple?.Invoke();
+                    onCubeHoldEnd?.Invoke();
+                    if (playPuzzleCompleteSound) {
+                        AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
+                    }
                     break;
                 case State.CubeExiting:
                     OnCubeReleaseStart?.Invoke(this, cubeInReceptacle);
@@ -63,6 +71,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                 case State.Empty:
                     OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
                     OnCubeReleaseEndSimple?.Invoke();
+                    if (lockCubeInPlace) {
+                        lockDissolve.Dematerialize();
+                    }
                     break;
             }
 
@@ -99,6 +110,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     public event CubeReceptacleActionSimple OnCubeHoldEndSimple;
     public event CubeReceptacleActionSimple OnCubeReleaseStartSimple;
     public event CubeReceptacleActionSimple OnCubeReleaseEndSimple;
+    public UnityEvent onCubeHoldEnd;
 
     void AddTriggerZone() {
         //GameObject triggerZoneGO = new GameObject("TriggerZone");
@@ -127,6 +139,11 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                 else {
                     endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
                     cubeInReceptacle.transform.position = endPos;
+
+                    if (lockCubeInPlace) {
+                        lockDissolve.Materialize();
+                        cubeInReceptacle.interactable = false; // TODO: Fix NPE here
+                    }
                 }
 
                 break;
@@ -220,6 +237,10 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
 
         if (playSound) {
             AudioManager.instance.PlayOnGameObject(AudioName.ReceptacleEnter, ID, this);
+        }
+
+        if (cube.TryGetComponent(out DynamicObject dynamicObject)) {
+            dynamicObject.ChangeScene(gameObject.scene);
         }
 
         state = State.CubeEnterRotate;

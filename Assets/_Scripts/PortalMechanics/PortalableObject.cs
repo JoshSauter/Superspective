@@ -155,7 +155,7 @@ namespace PortalMechanics {
 			}
 			if (sittingInPortal != null) {
 				foreach (var r in renderers) {
-					r.enabled = sittingInPortal.portalIsEnabled;
+					r.enabled = sittingInPortal.portalRenderingIsEnabled;
 				}
 			}
 			else {

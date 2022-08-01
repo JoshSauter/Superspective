@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
@@ -40,17 +41,7 @@ namespace LevelSpecific.Fork {
         }
 
         void Update() {
-            switch (edgeDetection.edgeColorMode) {
-                case BladeEdgeDetection.EdgeColorMode.SimpleColor:
-                    edgesAreBlack = edgeDetection.edgeColor.grayscale == 0;
-                    break;
-                case BladeEdgeDetection.EdgeColorMode.Gradient:
-                    edgesAreBlack = edgeDetection.edgeColorGradient.Evaluate(0.5f).grayscale == 0;
-                    break;
-                case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
-                    edgesAreBlack = false;
-                    break;
-            }
+            edgesAreBlack = edgeDetection.EdgesAreBlack();
             realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
             fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using StateUtils;
 using SuperspectiveUtils;
 using TMPro;
@@ -8,19 +9,25 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TimedMessage : MonoBehaviour {
-    public TextMeshProUGUI text;
-    public Image background;
+    public TextMeshProUGUI[] text;
+    public Image[] backgrounds;
 
+    public bool displayForever = false;
+    [HideIf("displayForever")]
     public float timeToDisplay = 3f;
 
     public float fadeInTime = 1f;
     public float fadeOutTime = 3f;
 
     private float alpha {
-        get => text.color.a;
+        get => text[0].color.a;
         set {
-            text.color = new Color(text.color.r, text.color.g, text.color.b, value);
-            background.color = new Color(background.color.r, background.color.g, background.color.b, value*0.95f);
+            foreach (var txt in text) {
+                txt.color = txt.color.WithAlpha(value);
+            }
+            foreach (var background in backgrounds) {
+                background.color = background.color.WithAlpha(value);
+            }
         }
     }
 
@@ -43,8 +50,10 @@ public class TimedMessage : MonoBehaviour {
     // Start is called before the first frame update
     void Start() {
         state.AddStateTransition(State.FadingIn, State.Displayed, fadeInTime);
-        state.AddStateTransition(State.Displayed, State.FadingOut, timeToDisplay);
-        state.AddStateTransition(State.FadingOut, State.Off, fadeOutTime);
+        if (!displayForever) {
+            state.AddStateTransition(State.Displayed, State.FadingOut, timeToDisplay);
+            state.AddStateTransition(State.FadingOut, State.Off, fadeOutTime);
+        }
 
         state.AddTrigger(State.Off, 0f, () => alpha = 0);
         state.AddTrigger(State.Displayed, 0f, () => alpha = 1);

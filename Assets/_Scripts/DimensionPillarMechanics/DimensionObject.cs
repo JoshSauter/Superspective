@@ -92,7 +92,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public event DimensionObjectStateChangeActionSimple OnStateChangeSimple;
 	#endregion
 
-	void OnValidate() {
+	protected override void OnValidate() {
+		base.OnValidate();
 		if (collisionMatrix == null || collisionMatrix.Length < COLLISION_MATRIX_ROWS * COLLISION_MATRIX_COLS) {
 			collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
 				true, false, false, false, false, false,
@@ -601,7 +602,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	void ApplyBooleanExpression(List<string> postfixExpression) {
 		maskRenderSolution = SolutionArrayFromPostfixExpression(postfixExpression);
 		string solutionLog = string.Join("\n", maskRenderSolution.Select((value, index) => $"{index}\t| {value}"));
-		Debug.Log($"Boolean channel expression applied to {gameObject.name}.\n{solutionLog}");
+		//Debug.Log($"Boolean channel expression applied to {gameObject.name}.\n{solutionLog}");
 	}
 
 	public static List<string> InfixToPostfix(List<string> infix) {

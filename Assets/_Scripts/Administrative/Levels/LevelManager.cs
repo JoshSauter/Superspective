@@ -275,9 +275,10 @@ namespace LevelManagement {
 		// Hijacking this to display level banner on load, even when it's already the active scene
 		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
 #if UNITY_EDITOR
+		void LoadSceneInEditor(string sceneName) {
 			try {
 				Scene scene = EditorSceneManager.GetSceneByName(sceneName);
-				if (!EditorSceneManager.GetSceneByName(sceneName).IsValid()) {
+				if (!scene.IsValid()) {
 					string path = $"Assets/{(sceneName != enumToSceneName[Levels.TestScene] ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
 					scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
 				}
@@ -286,6 +287,35 @@ namespace LevelManagement {
 			catch (Exception e) {
 				Debug.LogError(e);
 			}
+		}
+
+		void UnloadUnrelatedScenes(string sceneName) {
+			HashSet<Levels> connectedLevels = allLevels.Find(l => l.level == startingScene).connectedLevels.ToHashSet();
+			foreach (var level in allLevels) {
+				if (level.level == Levels.ManagerScene || level.level == sceneName.ToLevel()) continue;
+
+				try {
+					if (!connectedLevels.Contains(level.level)) {
+						Scene scene = EditorSceneManager.GetSceneByName(level.level.ToName());
+						if (scene.IsValid()) {
+							EditorSceneManager.CloseScene(scene, true);
+						}
+					}
+				}
+				catch (Exception e) {
+					Debug.LogError(e);
+				}
+			}
+		}
+
+		if (!Application.isPlaying) {
+			UnloadUnrelatedScenes(sceneName);
+			foreach (var connectedLevel in allLevels.Find(l => l.level == startingScene).connectedLevels) {
+				LoadSceneInEditor(connectedLevel.ToName());
+			}
+			LoadSceneInEditor(sceneName);
+		}
+
 
 		if (EditorApplication.isPlaying)
 #endif

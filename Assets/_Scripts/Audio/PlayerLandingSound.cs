@@ -76,6 +76,10 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 						thumpSound.audio.volume = thumpVolume;
 
 						AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingThump, ID, this);
+
+						if (playerMovement.WalkingOnGlass()) {
+							AudioManager.instance.PlayOnGameObject(AudioName.PlayerFootstepGlass, ID, this, false, (audioJob) => audioJob.audio.volume = thumpVolume/2f);
+						}
 					}
 
 				}

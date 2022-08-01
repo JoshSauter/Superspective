@@ -19,6 +19,11 @@ namespace Saving {
         public static bool isCurrentlyLoadingSave = false;
         public static readonly Dictionary<string, SaveManagerForScene> saveManagers = new Dictionary<string, SaveManagerForScene>();
 
+        public delegate void SaveAction();
+
+        public static event SaveAction BeforeSave;
+        public static event SaveAction BeforeLoad;
+
         public static SaveManagerForScene GetOrCreateSaveManagerForScene(string sceneName) {
             if (string.IsNullOrEmpty(sceneName)) {
                 return null;
@@ -37,6 +42,7 @@ namespace Saving {
 
         public static void Save(string saveName) {
             Debug.Log($"--- Saving Save File: {saveName} ---");
+            BeforeSave?.Invoke();
             SaveFile.CreateSaveFileFromCurrentState(saveName).WriteToDisk();
         }
 
@@ -50,6 +56,7 @@ namespace Saving {
                 await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes && !LevelManager.instance.isCurrentlySwitchingScenes);
             }
 
+            BeforeLoad?.Invoke();
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
             Time.timeScale = 0f;
 
@@ -58,6 +65,13 @@ namespace Saving {
             
             // Get the save file from disk
             SaveFile save = SaveFile.RetrieveSaveFileFromDisk(saveName);
+            
+            // Clear state of levels that don't exist in the save file
+            List<string> levelsNotInSaveFile = saveManagers.Keys.Where(level => !save.scenes.ContainsKey(level)).ToList();
+            foreach (var levelNotInSaveFile in levelsNotInSaveFile) {
+                saveManagers[levelNotInSaveFile].ClearAllState();
+                saveManagers.Remove(levelNotInSaveFile);
+            }
             
             // Create a SaveManager for ManagerScene and restore its state
             SaveManagerForScene saveManagerForManagerScene = GetOrCreateSaveManagerForScene(LevelManager.ManagerScene);
@@ -84,6 +98,9 @@ namespace Saving {
             Dictionary<string, SaveFileForScene> unloadedScenes = save.scenes
                 .Except(loadedScenes)
                 .ToDictionary();
+            
+            Debug.Log($"Loaded scenes: {string.Join(", ", loadedScenes.Keys)}");
+            Debug.Log($"Unloaded scenes: {string.Join(", ", unloadedScenes.Keys)}");
             
             // Restore state for all unloaded scenes from the save file
             foreach (var kv in unloadedScenes) {

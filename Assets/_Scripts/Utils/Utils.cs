@@ -82,6 +82,29 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class BladeEdgeDetectionExt {
+        private static bool EdgesSatisfyPredicate(this BladeEdgeDetection edgeDetection, Func<Color, bool> predicate) {
+            switch (edgeDetection.edgeColorMode) {
+                case BladeEdgeDetection.EdgeColorMode.SimpleColor:
+                    return predicate.Invoke(edgeDetection.edgeColor);
+                case BladeEdgeDetection.EdgeColorMode.Gradient:
+                    return predicate.Invoke(edgeDetection.edgeColorGradient.Evaluate(0));
+                case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+        
+        public static bool EdgesAreWhite(this BladeEdgeDetection edgeDetection) {
+            return edgeDetection.EdgesSatisfyPredicate((c) => c.grayscale > .5f);
+        }
+        
+        public static bool EdgesAreBlack(this BladeEdgeDetection edgeDetection) {
+            return edgeDetection.EdgesSatisfyPredicate((c) => c.grayscale < .5f);
+        }
+    }
+
     public static class DictionaryExt {
         public static Dictionary<K, V2> MapValues<K, V1, V2>(this Dictionary<K, V1> source, Func<V1, V2> transform) {
             Dictionary<K, V2> target = new Dictionary<K, V2>();
@@ -90,6 +113,28 @@ namespace SuperspectiveUtils {
             }
 
             return target;
+        }
+    }
+
+    public static class Vector3Ext {
+        // Scale method that returns itself so that it is composable
+        public static Vector3 ScaledWith(this Vector3 v, Vector3 scale) {
+            v.Scale(scale);
+            return v;
+        }
+        
+        public static Vector3 ScaledBy(this Vector3 v, float x, float y, float z) {
+            return v.ScaledWith(new Vector3(x, y, z));
+        }
+        
+        public static Vector3 WithX(this Vector3 v, float x) {
+            return new Vector3(x, v.y, v.z);
+        }
+        public static Vector3 WithY(this Vector3 v, float y) {
+            return new Vector3(v.x, y, v.z);
+        }
+        public static Vector3 WithZ(this Vector3 v, float z) {
+            return new Vector3(v.x, v.y, z);
         }
     }
 
@@ -174,6 +219,10 @@ namespace SuperspectiveUtils {
                 curNode = curNode.parent;
             }
 
+            if (o.scene.IsValid()) {
+                path = String.Concat($"{o.scene.name}.", path);
+            }
+
             return path;
         }
 
@@ -196,6 +245,10 @@ namespace SuperspectiveUtils {
 
         public static T GetOrAddComponent<T>(this Component component) where T : Component {
             return GetOrAddComponent<T>(component.gameObject);
+        }
+        
+        public static T[] GetComponentsInChildrenRecursively<T>(this GameObject parent) where T : Component {
+            return parent.transform.GetComponentsInChildrenRecursively<T>();
         }
         
         public static T[] GetComponentsInChildrenRecursively<T>(this Transform parent) where T : Component {
@@ -273,10 +326,29 @@ namespace SuperspectiveUtils {
             return GeometryUtility.TestPlanesAABB(planes, r.bounds);
         }
 
-        public static void SetColorForRenderer(Renderer r, Color color, string colorPropertyName = "_Color") {
+        public static Color GetColorFromRenderer(this Renderer r, string colorPropertyName = "_Color") {
+            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+            r.GetPropertyBlock(propBlock);
+            return propBlock.GetColor(colorPropertyName);
+        }
+        
+        public static Color GetHDRColorFromRenderer(this Renderer r, string colorPropertyName = "_Color") {
+            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+            r.GetPropertyBlock(propBlock);
+            return (Color)propBlock.GetVector(colorPropertyName);
+        }
+
+        public static void SetColorForRenderer(this Renderer r, Color color, string colorPropertyName = "_Color") {
             MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
             r.GetPropertyBlock(propBlock);
             propBlock.SetColor(colorPropertyName, color);
+            r.SetPropertyBlock(propBlock);
+        }
+        
+        public static void SetHDRColorForRenderer(this Renderer r, Color hdrColor, string colorPropertyName = "_Color") {
+            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+            r.GetPropertyBlock(propBlock);
+            propBlock.SetVector(colorPropertyName, (Vector4)hdrColor);
             r.SetPropertyBlock(propBlock);
         }
 
@@ -299,7 +371,7 @@ namespace SuperspectiveUtils {
 
             return (xy + xz + yz + yx + zx + zy) / 6f;
         }
-
+        
         // Subvectors of Vector3
         public static Vector2 xy(this Vector3 v3) {
             return new Vector2(v3.x, v3.y);

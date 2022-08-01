@@ -85,16 +85,12 @@ namespace UnityEditor {
         private const string dimensionInverseText = "Invert";
         private const string dimensionChannelText = "Channel";
         // DissolveObject
-        private MaterialProperty dissolveColorAt0;
-        private MaterialProperty dissolveColorAt1;
         private MaterialProperty dissolveTex;
         private MaterialProperty dissolveValue;
         private MaterialProperty dissolveBurnColor;
         private MaterialProperty dissolveBurnSize;
         private MaterialProperty dissolveBurnRamp;
         private MaterialProperty dissolveEmissionAmount;
-        private const string dissolveColorAt0Text = "Color at 0";
-        private const string dissolveColorAt1Text = "Color at 1";
         private const string dissolveTexText = "Dissolve Tex";
         private const string dissolveValueText = "Dissolve Value";
         private const string dissolveBurnColorText = "Burn Color";
@@ -155,8 +151,6 @@ namespace UnityEditor {
             dimensionInverse = FindProperty("_Inverse", props, false);
             dimensionChannel = FindProperty("_Channel", props, false);
             
-            dissolveColorAt0 = FindProperty("_DissolveColorAt0", props, false);
-            dissolveColorAt1 = FindProperty("_DissolveColorAt1", props, false);
             dissolveTex = FindProperty("_DissolveTex", props, false);
             dissolveValue = FindProperty("_DissolveValue", props, false);
             dissolveBurnSize = FindProperty("_DissolveBurnSize", props, false);
@@ -418,9 +412,6 @@ namespace UnityEditor {
 
             EditorGUILayout.Space();
             if (dissolvePropertyIsEnabled) {
-                DissolveColorsProperties();
-
-                EditorGUILayout.Space();
                 DissolveTextureProperty();
                 DissolveValueProperty();
                 EditorGUILayout.Space();
@@ -431,16 +422,6 @@ namespace UnityEditor {
             }
 
             EditorGUI.showMixedValue = false;
-        }
-        
-        void DissolveColorsProperties() {
-            Color colorAt0 = dissolveColorAt0.colorValue;
-            if (colorAt0 == Color.clear && color.colorValue != Color.clear) {
-                colorAt0 = color.colorValue;
-            }
-
-            dissolveColorAt0.colorValue = colorAt0;
-            editor.ShaderProperty(dissolveColorAt1,dissolveColorAt1Text,MaterialEditor.kMiniTextureFieldLabelIndentLevel);
         }
 
         void DissolveTextureProperty() {

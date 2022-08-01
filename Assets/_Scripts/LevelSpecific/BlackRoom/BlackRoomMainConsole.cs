@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using Audio;
 using PowerTrailMechanics;
+using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
-    public class BlackRoomMainConsole : MonoBehaviour {
+    public class BlackRoomMainConsole : SingletonSaveableObject<BlackRoomMainConsole, BlackRoomMainConsole.BlackRoomMainConsoleSave> {
         public enum State {
             Depowered,
             Powering,
@@ -18,7 +19,7 @@ namespace LevelSpecific.BlackRoom {
         public PowerTrail mainPower;
         
         // Mini Spotlights
-        public MiniSpotlight[] miniSpotlights;
+        public BlackRoomMiniSpotlight[] miniSpotlights;
         private const float timeBetweenMiniSpotlights = 2f;
         
         // Puzzle is solved indicator
@@ -30,38 +31,26 @@ namespace LevelSpecific.BlackRoom {
         
         // Puzzle select buttons
         public ColorPuzzleManager colorPuzzleManager;
-        public Button[] puzzleSelectButtons;
+        public ColorPuzzleButton[] puzzleSelectButtons;
         
         // Start is called before the first frame update
-        void Start() {
+        protected override void Start() {
+            base.Start();
             state.Set(State.Depowered);
-            foreach (MiniSpotlight miniSpotlight in miniSpotlights) {
-                miniSpotlight.TurnOff();
+            foreach (BlackRoomMiniSpotlight miniSpotlight in miniSpotlights) {
+                miniSpotlight.TurnOff(true);
             }
 
-            puzzleIsSolvedButton.interactableObject.SetAsDisabled();
-            puzzleIsSolvedButton.OnButtonPressBegin += (_) => {
-                if (colorPuzzleManager.activePuzzle == colorPuzzleManager.numPuzzles - 1) return;
-
-                if (colorPuzzleManager.CheckSolution(true)) {
-                    dissolveLaser.FireAt(puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1]);
-                }
-                else {
-                    colorPuzzleManager.FlashIncorrect();
-                }
-            };
-            
             for (var i = 0; i < puzzleSelectButtons.Length; i++) {
                 int index = i;
-                puzzleSelectButtons[i].OnButtonPressFinish += (buttonPressed) => {
-                    colorPuzzleManager.activePuzzle = index;
+                puzzleSelectButtons[i].state.OnStateChangeSimple += () => {
+                    if (puzzleSelectButtons[index].state == ColorPuzzleButton.State.On) {
+                        colorPuzzleManager.activePuzzle = index;
+                        for (int j = 0; j < puzzleSelectButtons.Length; j++) {
+                            if (index == j) continue;
 
-                    foreach (var buttonToTurnOff in puzzleSelectButtons) {
-                        if (buttonToTurnOff == buttonPressed ||
-                            buttonToTurnOff.state == Button.State.ButtonUnpressed ||
-                            buttonToTurnOff.state == Button.State.ButtonUnpressing) continue;
-
-                        buttonToTurnOff.state = Button.State.ButtonUnpressing;
+                            puzzleSelectButtons[j].state.Set(ColorPuzzleButton.State.Off);
+                        }
                     }
                 };
             }
@@ -122,41 +111,6 @@ namespace LevelSpecific.BlackRoom {
 
         float totalTimeToTurnOnSpotlights => miniSpotlights.Length * timeBetweenMiniSpotlights;
         
-        void AddMiniSpotlightEvents() {
-            // Gradually turn on the spotlights
-            for (int i = 0; i < miniSpotlights.Length; i++) {
-                int index = i;
-                state.AddTrigger(State.Powering, i * timeBetweenMiniSpotlights, () => miniSpotlights[index].TurnOn());
-            }
-            
-            state.AddStateTransition(State.Powering, State.Powered, totalTimeToTurnOnSpotlights);
-        }
-        
-        [Serializable]
-        public class MiniSpotlight {
-            public Renderer lightSource;
-            public Renderer lightBeam;
-            
-            public bool isOn = true;
-
-            public void TurnOff() {
-                if (isOn) {
-                    lightSource.GetOrAddComponent<SuperspectiveRenderer>().SetInt("_EmissionEnabled", 0);
-                    lightBeam.enabled = false;
-                    isOn = false;
-                }
-            }
-
-            public void TurnOn() {
-                if (!isOn) {
-                    lightSource.GetOrAddComponent<SuperspectiveRenderer>().SetInt("_EmissionEnabled", 1);
-                    lightBeam.enabled = true;
-                    isOn = true;
-                    AudioManager.instance.PlayAtLocation(AudioName.LightSwitch, "BlackRoom_MainConsole", lightSource.transform.position);
-                }
-            }
-        }
-        
         void UpdateMiniSpotlights() {
             switch (state.state) {
                 case State.Depowered:
@@ -169,15 +123,25 @@ namespace LevelSpecific.BlackRoom {
                     break;
             }
         }
+        
+        void AddMiniSpotlightEvents() {
+            // Gradually turn on the spotlights
+            for (int i = 0; i < miniSpotlights.Length; i++) {
+                int index = i;
+                state.AddTrigger(State.Powering, i * timeBetweenMiniSpotlights, () => miniSpotlights[index].TurnOn());
+            }
+            
+            state.AddStateTransition(State.Powering, State.Powered, totalTimeToTurnOnSpotlights);
+        }
 
         void TurnLightsOff() {
-            foreach (MiniSpotlight miniSpotlight in miniSpotlights) {
+            foreach (BlackRoomMiniSpotlight miniSpotlight in miniSpotlights) {
                 miniSpotlight.TurnOff();
             }
         }
         
         void TurnLightsOn() {
-            foreach (MiniSpotlight miniSpotlight in miniSpotlights) {
+            foreach (BlackRoomMiniSpotlight miniSpotlight in miniSpotlights) {
                 miniSpotlight.TurnOn();
             }
         }
@@ -217,6 +181,16 @@ namespace LevelSpecific.BlackRoom {
                     break;
                 }
                 case State.Powered: {
+                    if (dissolveLaser.state == BlackRoomDissolveCoverLaser.LaserState.Idle) {
+                        if (colorPuzzleManager.activePuzzle >= 0) {
+                            ColorPuzzle curPuzzle = colorPuzzleManager.puzzles[colorPuzzleManager.activePuzzle];
+                            float t = (float)curPuzzle.numSolved / curPuzzle.numPuzzles;
+                            Color curEmission = puzzleIsSolvedIndicator.material.GetColor(BlackRoomDissolveCoverLaser.EmissionProperty);
+                            Color emission = Color.Lerp(curEmission, t * dissolveLaser.startingEmission, Time.deltaTime * lerpSpeed);
+                            puzzleIsSolvedIndicator.material.SetColor(BlackRoomDissolveCoverLaser.EmissionProperty, emission);
+                            puzzleIsSolvedIndicator.material.color = Color.Lerp(puzzleIsSolvedIndicator.material.color, puzzleIsSolvedIndicator.material.color.WithAlpha(0.25f + 0.75f*t), Time.deltaTime * lerpSpeed);
+                        }
+                    }
                     break;
                 }
                 default:
@@ -233,7 +207,7 @@ namespace LevelSpecific.BlackRoom {
         private const float timeAfterPoweredBeforeLaser = 0.5f;
 
         void AddPuzzleSelectCoverEvents() {
-            state.AddTrigger(State.Powered, timeAfterPoweredBeforeLaser, () => puzzleIsSolvedButton.interactableObject.SetAsInteractable());
+            state.AddTrigger(State.Powered, () => dissolveLaser.FireAt(puzzleSelectCovers[0]));
         }
             
         void UpdateDissolveLaser() {
@@ -250,5 +224,20 @@ namespace LevelSpecific.BlackRoom {
         }
 
         #endregion
+
+        public override string ID => "BlackRoomMainConsole";
+
+        [Serializable]
+        public class BlackRoomMainConsoleSave : SerializableSaveObject<BlackRoomMainConsole> {
+            private StateMachine<State>.StateMachineSave stateSave;
+
+            public BlackRoomMainConsoleSave(BlackRoomMainConsole script) : base(script) {
+                stateSave = script.state.ToSave();
+            }
+            
+            public override void LoadSave(BlackRoomMainConsole script) {
+                script.state.FromSave(stateSave);
+            }
+        }
     }
 }

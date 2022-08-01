@@ -107,29 +107,12 @@ public class Footsteps : MonoBehaviour {
 		timeSinceLastHit = 0f;
 		string audioJobId = leftFootActive ? audioJobLeft.uniqueIdentifier : audioJobRight.uniqueIdentifier;
 		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay);
-		if (WalkingOnGlass()) {
+		if (playerMovement.WalkingOnGlass()) {
 			string glassAudioJobId = leftFootActive ? audioJobLeftGlass.uniqueIdentifier : audioJobRightGlass.uniqueIdentifier;
 			AudioManager.instance.Play(AudioName.PlayerFootstepGlass, glassAudioJobId, shouldForcePlay, SetGlassVolume);
 		}
 
 		leftFootActive = !leftFootActive;
-	}
-
-	bool WalkingOnGlass() {
-		if (playerMovement == null || playerMovement.grounded.isGrounded == false) {
-			return false;
-		}
-		
-		bool onGlass = playerMovement
-			.grounded
-			.ground
-			.GetComponent<Renderer>()
-			.sharedMaterial
-			.name
-			.ToLower()
-			.Contains("glass");
-
-		return onGlass;
 	}
 
 	void SetGlassVolume(AudioJob audioJob) {

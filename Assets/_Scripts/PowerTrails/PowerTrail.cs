@@ -48,7 +48,9 @@ namespace PowerTrailMechanics {
 		const string endPositionIDsKey = "_EndPositionIDs";
 		const string interpolationValuesKey = "_InterpolationValues";
 		const string sdfCapsuleRadiusKey = "_CapsuleRadius";
+		const string hiddenPowerTrailKey = "_HiddenPowerTrail";
 		const string reverseVisibilityKey = "_ReverseVisibility";
+		const string powerTrailKeyword = "POWER_TRAIL_OBJECT";
 
 		public bool useDurationInsteadOfSpeed = false;
 		public bool useSeparateSpeedsForPowerOnOff = false;
@@ -65,6 +67,9 @@ namespace PowerTrailMechanics {
 		public float powerTrailRadius = 0.15f;
 		public bool skipStartupShutdownSounds = false;
 		public bool objectMoves = false;
+		public bool hiddenPowerTrail = false;
+		[ShowIf("hiddenPowerTrail")]
+		public bool revealAfterPowering = false;
 		
 		[Header("Parent PowerTrails")]
 		public MultiMode parentMultiMode = MultiMode.Single;
@@ -86,6 +91,7 @@ namespace PowerTrailMechanics {
 		public event PowerTrailActionWithRef OnDepowerBeginRef;
 		public event PowerTrailActionWithRef OnDepowerFinishRef;
 
+		public UnityEvent onPowerBegin;
 		public UnityEvent onPowerFinish;
 		#endregion
 
@@ -118,6 +124,7 @@ namespace PowerTrailMechanics {
 			}
 		}
 		public bool fullyPowered => distance >= maxDistance;
+		public bool fullyDepowered => distance <= 0;
 		[SerializeField]
 		PowerTrailState _state = PowerTrailState.Depowered;
 		public PowerTrailState state {
@@ -125,6 +132,7 @@ namespace PowerTrailMechanics {
 			private set {
 				if (_state == PowerTrailState.Depowered && value == PowerTrailState.PartiallyPowered) {
 					OnPowerBegin?.Invoke();
+					onPowerBegin?.Invoke();
 					OnPowerBeginRef?.Invoke(this);
 				}
 				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Powered) {
@@ -152,7 +160,10 @@ namespace PowerTrailMechanics {
 			}
 
 			_powerIsOn = (_state == PowerTrailState.PartiallyPowered || _state == PowerTrailState.Powered);
-			gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+			foreach (var renderer in renderers) {
+				// UI only layer that doesn't collide w/ anything right now
+				renderer.gameObject.layer = LayerMask.NameToLayer(hiddenPowerTrail ? "UI" : "VisibleButNoPlayerCollision");
+			}
 		}
 
 		protected override void Start() {
@@ -215,6 +226,19 @@ namespace PowerTrailMechanics {
 			if (nextDistance == prevDistance && isInitialized) return;
 			isInitialized = true;
 
+			if (hiddenPowerTrail && powerIsOn && gameObject.layer != LayerMask.NameToLayer("VisibleButNoPlayerCollision")) {
+				foreach (var renderer in renderers) {
+					renderer.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+				}
+			}
+
+			if (hiddenPowerTrail && revealAfterPowering && fullyPowered) {
+				hiddenPowerTrail = false;
+				foreach (var material in materials) {
+					material.SetInt(hiddenPowerTrailKey, 0);
+				}
+			}
+
 			// DEBUG: Remove this from Update after debugging
 			//PopulateStaticGPUInfo();
 			Material[] nowMaterials = renderers.Select(r => r.material).ToArray();
@@ -223,10 +247,10 @@ namespace PowerTrailMechanics {
 				PopulateStaticGPUInfo();
 			}
 			
-			UpdateInterpolationValues(nextDistance);
-
 			distance = nextDistance;
 			UpdateState(prevDistance, nextDistance);
+			
+			UpdateInterpolationValues(nextDistance);
 		}
 
 		void PopulateStaticGPUInfo() {
@@ -247,6 +271,7 @@ namespace PowerTrailMechanics {
 				material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
 				material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
 				material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
+				material.SetInt(hiddenPowerTrailKey, hiddenPowerTrail ? 1 : 0);
 			}
 		}
 
@@ -279,13 +304,29 @@ namespace PowerTrailMechanics {
 				};
 				trailInfo.Add(info);
 
+				// Create the simple path as we traverse the nodes
 				if (!parentNode.zeroDistanceToChildren) {
-					// Create the simple path as we traverse the nodes
-					switch ((parentNode.staircaseSegment, curNode.staircaseSegment)) {
-						case (true, true):
-							// Don't add anything to line segment
-							break;
-						case (true, false): {
+					if (parentNode.staircaseSegment) {
+						if (curNode.isLeafNode) {
+							// End of staircase segment, find start and add segment
+							Node end = curNode;
+							Node start = parentNode;
+							float startDistance = curDistance;
+							while (start.parent?.staircaseSegment ?? false) {
+								startDistance -= (start.pos - start.parent.pos).magnitude;
+								start = start.parent;
+							}
+							
+							// Add just the staircase segment
+							NodeTrailInfo staircaseSegment = new NodeTrailInfo {
+								parent = start,
+								thisNode = end,
+								startDistance = startDistance,
+								endDistance = curDistance
+							};
+							simplePath.Add(staircaseSegment);
+						}
+						else if (!curNode.staircaseSegment) {
 							// End of staircase segment, find start and add segment
 							Node end = parentNode;
 							Node start = parentNode;
@@ -312,20 +353,18 @@ namespace PowerTrailMechanics {
 								endDistance = endDistance
 							};
 							simplePath.Add(segment);
-							break;
 						}
-						case (false, true):
-						case (false, false): {
-							// Add line segment as normal
-							NodeTrailInfo segment = new NodeTrailInfo {
-								parent = parentNode,
-								thisNode = curNode,
-								startDistance = curDistance,
-								endDistance = endDistance
-							};
-							simplePath.Add(segment);
-							break;
-						}
+					}
+					// parent is not a staircase segment
+					else {
+						// Add line segment as normal
+						NodeTrailInfo segment = new NodeTrailInfo {
+							parent = parentNode,
+							thisNode = curNode,
+							startDistance = curDistance,
+							endDistance = endDistance
+						};
+						simplePath.Add(segment);
 					}
 				}
 
@@ -360,6 +399,12 @@ namespace PowerTrailMechanics {
 			foreach (var material in materials) {
 				material.SetInt(reverseVisibilityKey, reverseVisibility ? 1 : 0);
 				material.SetFloatArray(interpolationValuesKey, interpolationValues);
+				if (!material.IsKeywordEnabled(powerTrailKeyword) && !fullyPowered) {
+					material.EnableKeyword(powerTrailKeyword);
+				}
+				else if (material.IsKeywordEnabled(powerTrailKeyword) && fullyPowered) {
+					material.DisableKeyword(powerTrailKeyword);
+				}
 			}
 		}
 
@@ -431,6 +476,10 @@ namespace PowerTrailMechanics {
 					tuple.Item1 == audioSegments[audioJob.uniqueIdentifier]);
 				// If that segment is one of the closest segments, keep it along the same segment
 				if (audioSegment != null) {
+					if (!audioJob.audio.isPlaying) {
+						audioJob.Play();
+					}
+					
 					Vector3 audioPos = audioSegment.Item2;
 					float distanceToCam = audioSegment.Item3;
 					audioJob.audio.transform.position = audioPos;

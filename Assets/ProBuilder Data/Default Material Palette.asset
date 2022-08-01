@@ -9,19 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f1ca63a91b17724bbd99c8fa67e0180, type: 3}
+  m_Script: {fileID: 0}
   m_Name: Default Material Palette
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Unity.ProBuilder.Editor:UnityEditor.ProBuilder:MaterialPalette
   array:
-  - {fileID: 2100000, guid: 56c70cf427122e746965d83a7a935cce, type: 2}
-  - {fileID: 2100000, guid: edb2d4fbb2a0ffe42ba5c56bfadef8a6, type: 2}
-  - {fileID: 2100000, guid: 1a9f7a7502b547a41b4a4b183628de33, type: 2}
-  - {fileID: 2100000, guid: a7ae12dac65b8c4488a5ba512ad1a2c9, type: 2}
-  - {fileID: 2100000, guid: 74b9cafcd4457fe41a5bc257ee4d7ec5, type: 2}
-  - {fileID: 2100000, guid: 44ebf5695e0abaf42a65414521313108, type: 2}
   - {fileID: 2100000, guid: f057afc5b122c9340b31d988129d1191, type: 2}
-  - {fileID: 2100000, guid: 40dda2f2bbf1b164daed042993abd74e, type: 2}
-  - {fileID: 2100000, guid: 67007f3384660e54c9d171a8e5355b2f, type: 2}
-  - {fileID: 2100000, guid: b86ff621f675d654fa81f3df9b5d449b, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

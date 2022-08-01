@@ -31,13 +31,13 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void ResumePortalRendering() {
-			portal.pauseRenderingAndLogic = false;
-			portal.otherPortal.pauseRenderingAndLogic = false;
+			portal.pauseRendering = false;
+			portal.otherPortal.pauseRendering = false;
 		}
 
 		void PausePortalRendering() {
-			portal.pauseRenderingAndLogic = true;
-			portal.otherPortal.pauseRenderingAndLogic = true;
+			portal.pauseRendering = true;
+			portal.otherPortal.pauseRendering = true;
 		}
 
 		#region Saving

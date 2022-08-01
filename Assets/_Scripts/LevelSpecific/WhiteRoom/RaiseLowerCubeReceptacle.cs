@@ -83,7 +83,10 @@ namespace LevelSpecific.WhiteRoom {
         void Update() {
             switch (state.state) {
                 case State.Lowered:
+                    SetHeight(minHeight);
+                    break;
                 case State.Raised:
+                    SetHeight(maxHeight);
                     break;
                 case State.Raising: {
                     float t = state.timeSinceStateChanged / timeToMove;

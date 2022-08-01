@@ -6,20 +6,20 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzleManager : SaveableObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
+	public class ColorPuzzleManager : SingletonSaveableObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
 		public FlashingColor smallGridOverlayFlash;
 		public FlashingColor smallGridOutlineFlash;
 
 		int _activePuzzle;
 		public int activePuzzle {
-			get { return _activePuzzle; }
+			get => _activePuzzle;
 			set {
 				if (value == -1) {
 					_activePuzzle = value;
 					return;
 				}
-				if (value == puzzles.Length) {
-					Debug.LogError("All puzzles solved!");
+				if (value >= puzzles.Length) {
+					// Debug.LogError("All puzzles solved!");
 					return;
 				}
 
@@ -34,7 +34,10 @@ namespace LevelSpecific.BlackRoom {
 				_activePuzzle = value;
 			}
 		}
-		ColorPuzzle[] puzzles;
+
+		public bool isFirstPuzzle => activePuzzle == 0;
+		public bool isLastPuzzle => activePuzzle == puzzles.Length - 1;
+		public ColorPuzzle[] puzzles;
 		public int numPuzzles => puzzles.Length;
 
 		protected override void Awake() {
@@ -60,7 +63,7 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		#region Saving
-		// There's only one player so we don't need a UniqueId here
+		// There's only one of these so we don't need a UniqueId here
 		public override string ID => "ColorPuzzleManager";
 
 		[Serializable]

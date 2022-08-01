@@ -34,6 +34,7 @@ namespace MagicTriggerMechanics {
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
+		public bool playerIsInTriggerZone = false;
 		protected bool hasTriggeredOnStay = false;
 		protected bool hasNegativeTriggeredOnStay = false;
 
@@ -58,11 +59,13 @@ namespace MagicTriggerMechanics {
 				debug.LogWarning("Resetting has triggered on stay state");
 			}
 
+			playerIsInTriggerZone = false;
 			hasTriggeredOnStay = false;
 			hasNegativeTriggeredOnStay = false;
 		}
 
 		void OnDisable() {
+			playerIsInTriggerZone = false;
 			hasTriggeredOnStay = false;
 			hasNegativeTriggeredOnStay = false;
 		}
@@ -115,6 +118,7 @@ namespace MagicTriggerMechanics {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
+				playerIsInTriggerZone = true;
 				GameObject player = other.gameObject;
 				if (DEBUG) {
 					PrintDebugInfo(player);
@@ -137,6 +141,7 @@ namespace MagicTriggerMechanics {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
+				playerIsInTriggerZone = false;
 				GameObject player = other.gameObject;
 				ExecuteActionsForTiming(ActionTiming.OnExit);
 				ExecuteNegativeActionsForTiming(ActionTiming.OnExit);

@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.Design.Serialization;
+﻿using System;
+using System.ComponentModel.Design.Serialization;
 using SuperspectiveUtils;
 using NaughtyAttributes;
 using PortalMechanics;
+using Saving;
 using UnityEngine;
 
-public class InteractableObject : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class InteractableObject : SaveableObject<InteractableObject, InteractableObject.InteractableObjectSave> {
+
     public InteractableGlow glow;
     public delegate void InteractAction();
 
@@ -40,7 +44,8 @@ public class InteractableObject : MonoBehaviour {
     PortalableObject portalableObject;
     PortalCopy portalCopy;
 
-    public void Start() {
+    protected override void Start() {
+        base.Start();
         if (thisRendererParent == null) {
             Renderer[] childRenderers = transform.GetComponentsInChildrenRecursively<Renderer>();
             if (childRenderers.Length > 0) thisRendererParent = childRenderers[0].gameObject;
@@ -82,5 +87,17 @@ public class InteractableObject : MonoBehaviour {
         }
 
         return this == other;
+    }
+
+    [Serializable]
+    public class InteractableObjectSave : SerializableSaveObject<InteractableObject> {
+        private InteractableState state;
+        
+        public InteractableObjectSave(InteractableObject script) : base(script) {
+            this.state = script.state;
+        }
+        public override void LoadSave(InteractableObject script) {
+            script.state = this.state;
+        }
     }
 }

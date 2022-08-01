@@ -60,6 +60,7 @@ namespace Saving {
 			DynamicObject InstantiateInScene(DynamicObject dynamicObjectPrefab, string sceneName) {
 				List<GameObject> gameObjects = new List<GameObject>();
 				SceneManager.GetSceneByName(dynamicObjSave.scene).GetRootGameObjects(gameObjects);
+				gameObjects = gameObjects.Where(go => go.activeSelf).ToList();
 				DynamicObject newDynamicObject = Object.Instantiate(dynamicObjectPrefab, gameObjects[0].transform);
 				//newDynamicObject.transform.SetParent(null);
 

@@ -14,7 +14,7 @@ namespace Saving {
 	// They are loaded before SaveableObjects so that the instance exists for other Component loads
     public class DynamicObject : MonoBehaviour, ISaveableObject {
 	    [SerializeField]
-	    protected bool DEBUG = false;
+	    protected bool DEBUG => ID.StartsWith("6ef");
 	    private DebugLogger _debug;
 	    DebugLogger debug => _debug ??= new DebugLogger(gameObject, () => DEBUG);
 
@@ -165,7 +165,7 @@ namespace Saving {
 			}
 		}
 
-		void ChangeScene(Scene newScene) {
+		public void ChangeScene(Scene newScene) {
 			if (isGlobal && gameObject.scene != newScene) {
 				// Deregister the DynamicObject in the old SaveManagerForScene
 				SaveForScene.UnregisterDynamicObject(ID);

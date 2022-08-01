@@ -19,8 +19,6 @@ Shader "Suberspective/SuberspectiveRaymarching2" {
     	// Hardcoded 8 here because no way to read NUM_CHANNELS from DimensionShaderHelpers.cginc
     	_Channel("Channel", Range(0, 8)) = 0
     	// DissolveObject
-        [HideInInspector] _DissolveColorAt0("Color at 0", Color) = (0,0,0,0)
-        _DissolveColorAt1("Color at 1", Color) = (1,1,1,0)
         _DissolveTex("Dissolve Texture", 2D) = "white" {}
         _DissolveValue("Dissolve Amount", Range(0.0, 1.0)) = 0
         _DissolveBurnSize("Burn Size", Range(0.0, 1.0)) = 0.15

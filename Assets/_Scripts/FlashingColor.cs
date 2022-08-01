@@ -47,7 +47,7 @@ public class FlashingColor : MonoBehaviour {
     [ColorUsage(true, true)]
     public Color startEmission;
 
-    public SuperspectiveRenderer renderer;
+    public new SuperspectiveRenderer renderer;
 
     public void Awake() {
         if (renderer == null) {

@@ -39,6 +39,9 @@ inline void SuberspectiveClipOnly(float2 uv_DimensionMask, float2 uv_DissolveTex
 	#ifdef DISSOLVE_OBJECT
 	ClipDissolve(uv_DissolveTex);
 	#endif
+	#ifdef POWER_TRAIL_OBJECT
+	clip(EmissionEnabled(worldPos)-_HiddenPowerTrail);
+	#endif
 	#ifdef SHUTTERED_OBJECT
 	ClipShutteredAreas(worldPos, float4(1,1,1,1));
 	#endif
@@ -55,10 +58,11 @@ inline void SuberspectiveRender(float2 uv_DimensionMask, float2 uv_DissolveTex, 
 	ClipDimensionObject(uv_DimensionMask);
 	#endif
 	#ifdef DISSOLVE_OBJECT
-	color *= Dissolve(uv_DissolveTex, color);
+	color = Dissolve(uv_DissolveTex, color);
 	#endif
 	#ifdef POWER_TRAIL_OBJECT
 	emissionEnabled = EmissionEnabled(worldPos);
+	clip(emissionEnabled-_HiddenPowerTrail);
 	#endif
 	#ifdef SHUTTERED_OBJECT
 	color = ClipShutteredAreas(worldPos, color);

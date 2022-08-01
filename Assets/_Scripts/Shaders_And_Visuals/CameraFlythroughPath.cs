@@ -66,7 +66,7 @@ public class CameraFlythroughPath : MonoBehaviour {
             return;
         }
         
-        if (nodes == null) {
+        if (nodes == null || nodes.Count == 0) {
             Init();
         }
         

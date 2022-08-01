@@ -4,6 +4,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using PortalMechanics;
 using PowerTrailMechanics;
+using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -20,7 +21,8 @@ namespace MagicTriggerMechanics {
 		PowerOrDepowerPowerTrail = 8,
 		ChangeVisibilityState = 9,
 		PlayCameraFlythrough = 10,
-		EnablePortalRendering = 11		// Enables Portal rendering when triggered forward, disable when triggered negatively
+		EnablePortalRendering = 11,		// Enables Portal rendering when triggered forward, disable when triggered negatively
+		UnityEvent = 12
 	}
 
 	[Flags]
@@ -45,14 +47,6 @@ namespace MagicTriggerMechanics {
 		public Levels levelBackward;
 		public bool forwardSameScenePillar = true;
 		public bool backwardSameScenePillar = true;
-		// Setting up references for pillars in same scene can be done directly
-		public DimensionPillar forwardPillar;
-		public DimensionPillar backwardPillar;
-		// Setting up references for pillars in different scenes has to be done through scene + gameObject names
-		public Levels forwardPillarLevel;
-		public string forwardPillarName;
-		public Levels backwardPillarLevel;
-		public string backwardPillarName;
 		public PowerTrail powerTrail;
 		public bool setPowerIsOn = true;
 		public DimensionObject[] dimensionObjects;
@@ -60,6 +54,7 @@ namespace MagicTriggerMechanics {
 		public Levels flythroughCameraLevel;
 		public Portal[] portalsToEnable;
 		public Portal[] portalsToDisable;
+		public UnityEvent unityEvent;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -107,11 +102,14 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerActionType.EnablePortalRendering:
 					foreach (var portal in portalsToEnable) {
-						portal.pauseRenderingOnly = false;
+						portal.pauseRendering = false;
 					}
 					foreach (var portal in portalsToDisable) {
-						portal.pauseRenderingOnly = true;
+						portal.pauseRendering = true;
 					}
+					break;
+				case TriggerActionType.UnityEvent:
+					unityEvent?.Invoke();
 					break;
 				default:
 					return;
@@ -147,6 +145,7 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.EnableDisableScripts:
 				case TriggerActionType.EnableDisableGameObjects:
 				case TriggerActionType.PlayCameraFlythrough:
+				case TriggerActionType.UnityEvent:
 					return;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					powerTrail.powerIsOn = !setPowerIsOn;
@@ -158,10 +157,10 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerActionType.EnablePortalRendering:
 					foreach (var portal in portalsToEnable) {
-						portal.pauseRenderingOnly = true;
+						portal.pauseRendering = true;
 					}
 					foreach (var portal in portalsToDisable) {
-						portal.pauseRenderingOnly = false;
+						portal.pauseRendering = false;
 					}
 					break;
 				default:
@@ -203,15 +202,6 @@ namespace MagicTriggerMechanics {
 			SerializedProperty levelForward = property.FindPropertyRelative("levelForward");
 			SerializedProperty levelBackward = property.FindPropertyRelative("levelBackward");
 
-			SerializedProperty forwardSameScenePillar = property.FindPropertyRelative("forwardSameScenePillar");
-			SerializedProperty backwardSameScenePillar = property.FindPropertyRelative("backwardSameScenePillar");
-			SerializedProperty forwardPillar = property.FindPropertyRelative("forwardPillar");
-			SerializedProperty backwardPillar = property.FindPropertyRelative("backwardPillar");
-			SerializedProperty forwardPillarLevel = property.FindPropertyRelative("forwardPillarLevel");
-			SerializedProperty forwardPillarName = property.FindPropertyRelative("forwardPillarName");
-			SerializedProperty backwardPillarLevel = property.FindPropertyRelative("backwardPillarLevel");
-			SerializedProperty backwardPillarName = property.FindPropertyRelative("backwardPillarName");
-
 			SerializedProperty powerTrail = property.FindPropertyRelative("powerTrail");
 			SerializedProperty setPowerIsOn = property.FindPropertyRelative("setPowerIsOn");
 
@@ -223,18 +213,14 @@ namespace MagicTriggerMechanics {
 			SerializedProperty portalsToEnable = property.FindPropertyRelative("portalsToEnable");
 			SerializedProperty portalsToDisable = property.FindPropertyRelative("portalsToDisable");
 
+			SerializedProperty unityEvent = property.FindPropertyRelative("unityEvent");
+
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
 			GUIContent objectsToDisableLabel = new GUIContent("Objects to Disable:");
 			GUIContent forwardLevelLabel = new GUIContent("Forward Level:");
 			GUIContent backwardLevelLabel = new GUIContent("Backward Level:");
-			GUIContent forwardSameScenePillarLabel = new GUIContent("Forward Pillar is in same scene?");
-			GUIContent backwardSameScenePillarLabel = new GUIContent("Backward Pillar is in same scene?");
-			GUIContent forwardPillarLabel = new GUIContent("Forward Pillar:");
-			GUIContent backwardPillarLabel = new GUIContent("Backward Pillar:");
-			GUIContent levelOfPillarLabel = new GUIContent("Level of Pillar:");
-			GUIContent nameOfPillarLabel = new GUIContent("Name of Pillar:");
 			GUIContent powerTrailLabel = new GUIContent("Power trail:");
 			GUIContent setPowerIsOnLabel = new GUIContent("Power On/Off:");
 			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
@@ -242,6 +228,7 @@ namespace MagicTriggerMechanics {
 			GUIContent flythroughCameraLabel = new GUIContent("Flythrough Camera Level:");
 			GUIContent portalsToEnableLabel = new GUIContent("Portals to Enable Rendering:");
 			GUIContent portalsToDisableLabel = new GUIContent("Portals to Disable Rendering:");
+			GUIContent unityEventLabel = new GUIContent("Unity events:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -283,6 +270,9 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.EnablePortalRendering:
 					EditorGUILayout.PropertyField(portalsToEnable, portalsToEnableLabel);
 					EditorGUILayout.PropertyField(portalsToDisable, portalsToDisableLabel);
+					break;
+				case TriggerActionType.UnityEvent:
+					EditorGUILayout.PropertyField(unityEvent, unityEventLabel);
 					break;
 				default:
 					break;

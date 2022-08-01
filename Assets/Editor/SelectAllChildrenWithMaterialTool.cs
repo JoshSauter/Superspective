@@ -28,13 +28,24 @@ namespace Editor {
         public void SelectAllChildrenRecusivelyWithMaterial(GameObject curNode, ref List<GameObject> selectionSoFar) {
             bool containsMaterial = false;
             if (curNode.TryGetComponent(out Renderer renderer)) {
-                containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m.name.Contains(material.name));
+                containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m.name.StripSuffix(" (Instance)") == material.name);
             }
             
             if (containsMaterial) selectionSoFar.Add(curNode);
 
             foreach (Transform child in curNode.transform.GetComponentsInChildren<Transform>(selectInactive)) {
                 if (child.gameObject != curNode) SelectAllChildrenRecusivelyWithMaterial(child.gameObject, ref selectionSoFar);
+            }
+        }
+    }
+
+    public static class StringExt {
+        public static string StripSuffix(this string s, string suffix) {
+            if (s.EndsWith(suffix)) {
+                return s.Substring(0, s.Length - suffix.Length);
+            }
+            else {
+                return s;
             }
         }
     }

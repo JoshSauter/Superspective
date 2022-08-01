@@ -6,6 +6,8 @@ using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSave> {
+    public bool importantToSave = false;
+    
     const float hoveringPauseLerp = 0.1f;
     public bool useLocalCoordinates = true;
     [FormerlySerializedAs("maxDisplacementUp")]
@@ -77,6 +79,9 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
     }
 
 #region Saving
+
+    // Many usages of RotateObject have no gameplay impact and do not need to be saved. Mark importantToSave as true if you want to save it
+    public override bool SkipSave => !importantToSave;
 
     [Serializable]
     public class ObjectHoverSave : SerializableSaveObject<ObjectHover> {

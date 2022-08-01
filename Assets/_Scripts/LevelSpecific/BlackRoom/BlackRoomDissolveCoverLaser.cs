@@ -3,38 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using Audio;
 using PowerTrailMechanics;
+using Saving;
+using SerializableClasses;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
-    public class BlackRoomDissolveCoverLaser : MonoBehaviour {
+    public class BlackRoomDissolveCoverLaser : SaveableObject<BlackRoomDissolveCoverLaser, BlackRoomDissolveCoverLaser.BlackRoomDissolveCoverLaserSave> {
         
-        // TODO: Set this up as the SaveableObject ID instead
-        const string ID = "BlackRoomDissolveCoverLaser";
-        
-        enum LaserState {
+        public enum LaserState {
             Idle,
             FiringAtCover
         }
 
-        private StateMachine<LaserState> state;
+        public StateMachine<LaserState> state;
         
-        const float verticalOffsetFromCover = 0.15f;
+        private const float verticalOffsetFromCover = 0.15f;
         private const float timeBeforeDissolveBegin = 1f;
         private const float timeBeforeLaserParticlesStart = 0.15f;
         public ParticleSystem laser;
         private DissolveObject coverFiringAt;
-        private Color startingEmission = Color.black;
+        [ColorUsage(false, true)]
+        public Color startingEmission = Color.black;
 
+        public BlackRoomMainConsole mainConsole;
+        public ColorPuzzleManager colorPuzzleManager;
         public Renderer puzzleIsSolvedIndicator;
-        private static readonly int EmissionProperty = Shader.PropertyToID("_EmissionColor");
+        public static readonly int EmissionProperty = Shader.PropertyToID("_EmissionColor");
 
         private Vector3 targetParticleEndPosition => (coverFiringAt == null)
             ? Vector3.zero
             : coverFiringAt.transform.position + coverFiringAt.transform.up * verticalOffsetFromCover;
 
-        private void Start() {
+        protected override void Start() {
+            base.Start();
             state = new StateMachine<LaserState>(LaserState.Idle);
             
             state.AddStateTransition(LaserState.FiringAtCover, LaserState.Idle, laser.main.duration);
@@ -45,6 +48,20 @@ namespace LevelSpecific.BlackRoom {
                 LaserState.FiringAtCover, 
                 timeBeforeLaserParticlesStart + laser.main.startLifetime.constant, 
                 () => AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, coverFiringAt.transform.position));
+            state.AddTrigger(LaserState.Idle, 0f, () => {
+                if (state.prevState == LaserState.FiringAtCover) {
+                    // Turn the next puzzle on and last puzzle off automatically
+                    if (!colorPuzzleManager.isLastPuzzle) {
+                        mainConsole.puzzleSelectButtons[colorPuzzleManager.activePuzzle+1].state.Set(ColorPuzzleButton.State.On);
+                    }
+                    else if (!colorPuzzleManager.isFirstPuzzle) {
+                        mainConsole.puzzleSelectButtons[colorPuzzleManager.activePuzzle].state.Set(ColorPuzzleButton.State.Off);
+                    }
+                }
+            });
+
+            // Getting the sharedMaterial value because the actual Material may have been dimmed by now
+            startingEmission = puzzleIsSolvedIndicator.sharedMaterial.GetColor(EmissionProperty);
         }
 
         public void FireAt(DissolveObject cover) {
@@ -56,8 +73,6 @@ namespace LevelSpecific.BlackRoom {
             state.Set(LaserState.FiringAtCover);
 
             AudioManager.instance.PlayAtLocation(AudioName.LaserBeamShort, ID, laser.transform.position);
-            
-            startingEmission = puzzleIsSolvedIndicator.material.GetColor(EmissionProperty);
         }
 
         public void Stop() {
@@ -99,7 +114,7 @@ namespace LevelSpecific.BlackRoom {
             float t = state.timeSinceStateChanged / main.duration;
             ParticleSystem.MinMaxGradient startGradient = main.startColor;
             Color startColor = startGradient.color;
-            startColor.a = 1-t;
+            startColor.a = 1-(t*t);
             startGradient.color = startColor;
             main.startColor = startGradient;
         }
@@ -112,6 +127,25 @@ namespace LevelSpecific.BlackRoom {
             if (coverFiringAt == null) return;
 
             coverFiringAt.Dematerialize();
+        }
+
+        [Serializable]
+        public class BlackRoomDissolveCoverLaserSave : SerializableSaveObject<BlackRoomDissolveCoverLaser> {
+            private StateMachine<LaserState>.StateMachineSave stateSave;
+            SerializableReference<DissolveObject, DissolveObject.DissolveObjectSave> coverFiringAt;
+            SerializableParticleSystem laser;
+
+            public BlackRoomDissolveCoverLaserSave(BlackRoomDissolveCoverLaser script) : base(script) {
+                stateSave = script.state.ToSave();
+                coverFiringAt = script.coverFiringAt;
+                laser = script.laser;
+            }
+            
+            public override void LoadSave(BlackRoomDissolveCoverLaser script) {
+                script.state.FromSave(this.stateSave);
+                script.coverFiringAt = this.coverFiringAt?.GetOrNull();
+                this.laser.ApplyToParticleSystem(script.laser);
+            }
         }
     }
 }

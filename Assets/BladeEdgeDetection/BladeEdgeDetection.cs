@@ -228,7 +228,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		}
 	}
 
-	void OnValidate() {
+	protected override void OnValidate() {
+		base.OnValidate();
 		depthSensitivity = Mathf.Max(0.0f, depthSensitivity);
 		normalSensitivity = Mathf.Max(0.0f, normalSensitivity);
 	}

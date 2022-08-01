@@ -14,6 +14,7 @@ namespace Saving {
         protected UniqueId id {
             get {
                 if (_id == null) {
+                    // Debug.Log($"About to get UniqueId for {gameObject.FullPath()}");
                     _id = GetComponent<UniqueId>();
                 }
                 return _id;
@@ -37,7 +38,7 @@ namespace Saving {
         // Anything that doesn't specify types for associated SerializableSaveObject shouldn't have anything to actually save to disk
         // Parameterized version SaveableObject<T, S> overrides this to be false
         public virtual bool SkipSave {
-            get { return true; }
+            get => true;
             set { }
         }
         /// <summary>
@@ -171,7 +172,7 @@ namespace Saving {
         where T : SaveableObject
         where S : SerializableSaveObject<T> {
 
-        private void OnValidate() {
+        protected virtual void OnValidate() {
             if (id == null) {
                 var requireUniqueIdAttribute = typeof(T).GetCustomAttributes(typeof(RequireComponent), true).Select(att => att as RequireComponent);
                 var uniqueIdType = typeof(UniqueId);

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class RotateAroundPillar : MonoBehaviour {
     public FloorManager.Floor floor;
-    public Transform portalCube;
+    public Transform entranceDoor => FloorManager.instance.floors[floor].entranceDoor.transform;
     private Camera playerCam;
 
     public float followLerpSpeed = 10f;
@@ -14,6 +14,7 @@ public class RotateAroundPillar : MonoBehaviour {
     private float minDistance = 12;
 
     private Vector3 effectivePlayerCamPos;
+    private bool sameFloor => FloorManager.instance.floor == floor;
     
     // Start is called before the first frame update
     void Start() {
@@ -22,11 +23,11 @@ public class RotateAroundPillar : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (FloorManager.instance.floor == floor) {
+        if (sameFloor) {
             effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, playerCam.transform.position, followLerpSpeed * Time.deltaTime);
         }
         else {
-            effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, portalCube.position, followLerpSpeed * Time.deltaTime);
+            effectivePlayerCamPos = Vector3.Lerp(effectivePlayerCamPos, entranceDoor.position, followLerpSpeed * Time.deltaTime);
         }
         UpdateWallRotation(effectivePlayerCamPos);
     }
@@ -38,10 +39,10 @@ public class RotateAroundPillar : MonoBehaviour {
             pillarToPoint = pillarToPoint.normalized * minDistance;
         }
         PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
-        return Angle.D180 - polar.angle;
+        return (Angle.D180 - polar.angle);
     }
 
     void UpdateWallRotation(Vector3 camPos) {
-        transform.localEulerAngles = new Vector3(0, AngleOfCamera(camPos).degrees, 0);
+        transform.localEulerAngles = new Vector3(0, AngleOfCamera(camPos).degrees + 120 * ((int)floor-1), 0);
     }
 }

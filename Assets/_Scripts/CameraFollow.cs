@@ -10,11 +10,11 @@ using UnityEngine;
 public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFollowSave> {
     public delegate void CameraFollowUpdate(Vector3 offset, Vector3 positionDiffFromLastFrame);
 
-    public const float desiredLerpSpeed = 30f; // currentLerpSpeed will approach this value after not being changed for a while
+    public const float desiredLerpSpeed = 20f; // currentLerpSpeed will approach this value after not being changed for a while
 
     [SerializeField]
     [ReadOnly]
-    float currentLerpSpeed = 450f; // Can be set by external scripts to slow the camera's lerp speed for a short time
+    float currentLerpSpeed = 15f; // Can be set by external scripts to slow the camera's lerp speed for a short time
 
     public Vector3 relativeStartPosition;
     public Vector3 relativePositionLastFrame; // Used in restoring position of camera after jump-cut movement of player
@@ -23,7 +23,7 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
     Headbob headbob;
 
     bool shouldFollow =>
-        Player.instance.look.state == PlayerLook.State.ViewUnlocked && !CameraFlythrough.instance.isPlayingFlythrough;
+        Player.instance.look.state == PlayerLook.ViewLockState.ViewUnlocked && !CameraFlythrough.instance.isPlayingFlythrough;
 
     float timeSinceCurrentLerpSpeedWasModified;
 

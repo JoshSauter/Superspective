@@ -27,7 +27,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         public FloorPuzzle floorPuzzle;
         
         public StateMachine<PuzzleState> state = new StateMachine<PuzzleState>(PuzzleState.Off);
-        public SpriteRenderer valueIcon;
+        public ValueDisplay valueIcon;
         public PowerButton powerButton;
         public PowerTrail powerTrailFromPrevPuzzle;
         public PowerTrail powerTrail;
@@ -35,17 +35,20 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         public List<PowerButton> powerButtonsToDisable;
         
         [ShowNativeProperty]
-        public int value => int.Parse(valueIcon.sprite.name);
+        public int value => valueIcon.actualValue;
         
         // Animation tweaking
         private const float correctToDepowerDelay = 1.5f;
-        private const int incorrectFlashTimes = 4;
-        private const float incorrectFlashDuration = 2f;
+        public const int incorrectFlashTimes = 4;
+        public const float incorrectFlashDuration = 2f;
         private const float valueIconAlphaLerpSpeed = 1f;
-        private const float currentValueAlphaLerpSpeed = 3f;
-        private readonly Color correctColor = new Color(.2f, .8f, .3f);
-        private readonly Color incorrectColor = new Color(.8f, .2f, .3f);
+        public const float currentValueAlphaLerpSpeed = 3f;
+        public static readonly Color correctColor = new Color(.2f, .8f, .3f);
+        public static readonly Color incorrectColor = new Color(.8f, .2f, .3f);
         private readonly Color disabledPowerSourceButtonColor = new Color(0.04f, 0.04f, 0.04f);
+
+        private bool isFirstPuzzle => powerTrailFromPrevPuzzle == null;
+        private bool isLastPuzzle;
         
         // Start is called before the first frame update
         protected override void Start() {
@@ -56,6 +59,8 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                     if (state == PuzzleState.Off) state.Set(PuzzleState.Idle);
                 };
             }
+            
+            isLastPuzzle = powerTrailToNextPuzzle.name.Contains("PowerTrailToPortalDoor");
 
             Invoke(nameof(InitStateMachine), 0.1f);
         }
@@ -69,7 +74,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             // Incorrect SFX
             for (int i = 0; i < incorrectFlashTimes; i++) {
                 state.AddTrigger(PuzzleState.Incorrect, (incorrectFlashDuration/incorrectFlashTimes) * i, () =>
-                    AudioManager.instance.PlayOnGameObject(AudioName.DisabledSound, "WrongAnswer", this, settingsOverride: AudioJobSettings));
+                    AudioManager.instance.PlayOnGameObject(AudioName.IncorrectAnswer, "IncorrectAnswer", this));
             }
 
             // Depowering power trails
@@ -78,22 +83,28 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                 floorPuzzle.powerTrailBottomMiddle.powerIsOn = false;
             });
             // Powering next puzzle panel
-            state.AddTrigger(stateToCheck => stateToCheck != PuzzleState.Correct, 0f, () => powerTrailToNextPuzzle.powerIsOn = false);
-            state.AddTrigger(PuzzleState.CorrectIdle, 0f, () => powerTrailToNextPuzzle.powerIsOn = true);
+            state.AddTrigger(stateToCheck => stateToCheck is not (PuzzleState.Correct or PuzzleState.CorrectIdle), 0f, () => powerTrailToNextPuzzle.powerIsOn = false);
+            state.AddTrigger(PuzzleState.CorrectIdle, 0f, () => {
+                if (isLastPuzzle) {
+                    floorPuzzle.currentValueShutter.isSetToOpen = true;
+                    floorPuzzle.currentValueShutter.state.Set(CurrentValueShutter.State.Moving);
+                }
+                powerTrailToNextPuzzle.powerIsOn = true;
+            });
             
             // Reset state for new puzzle panel
             state.AddTrigger(PuzzleState.CorrectIdle, 0f, () => {
-                foreach (var powerSource in floorPuzzle.powerSources) {
-                    powerSource.powerTrail.powerIsOn = false;
-                    if (powerSource.powerButton.powerIsOn) {
-                        powerSource.powerButton.button.PressButton();
-                    }
-                }
+                FloorManager.instance.TurnOffAllPowerSources();
                 floorPuzzle.powerTrailBottomMiddle.powerIsOn = false;
             });
             
             // Turning off PowerButtons that are disabled for this puzzle
             state.AddTrigger(PuzzleState.Idle, 0f, () => {
+                if (state.prevState == PuzzleState.Off) {
+                    valueIcon.spriteAlpha = 1f;
+                    valueIcon.desiredColor = Color.white;
+                }
+                
                 foreach (var button in powerButtonsToDisable) {
                     DisablePowerButton(button);
                 }
@@ -102,28 +113,60 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                     EnablePowerButton(button);
                 }
             });
+
+            // Colors of value display
+            state.AddTrigger(PuzzleState.Correct, 0f, () => {
+                AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer");
+                valueIcon.desiredColor = correctColor;
+                floorPuzzle.currentValue.desiredColor = correctColor;
+            });
+            if (isLastPuzzle) {
+                powerTrailToNextPuzzle.OnPowerFinish += () => floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
+            }
+            state.AddTrigger(PuzzleState.Idle, floorPuzzle.powerTrailTopMiddle.duration + .125f, () => {
+                if (floorPuzzle.currentValue.actualValue == 0) {
+                    floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
+                }
+            });
+            
+            // Floor 2 has opening and closing shutters
+            if (floorPuzzle.floor == FloorManager.Floor.Floor2) {
+                powerTrail.OnPowerBegin += OpenShutters;
+                powerTrail.OnDepowerBegin += CloseShutters;
+            }
+        }
+
+        void OpenShutters() {
+            floorPuzzle.currentValueShutter.isSetToOpen = true;
+            floorPuzzle.currentValueShutter.state.Set(CurrentValueShutter.State.Moving);
+        }
+
+        void CloseShutters() {
+            if ((isLastPuzzle && (state == PuzzleState.Correct || state == PuzzleState.CorrectIdle)) || (isFirstPuzzle && state == PuzzleState.Depowering)) return;
+            
+            floorPuzzle.currentValueShutter.isSetToOpen = false;
+            floorPuzzle.currentValueShutter.state.Set(CurrentValueShutter.State.Moving);
         }
 
         void DisablePowerButton(PowerButton powerButton) {
+            if (powerButton == null || powerButton.button == null || powerButton.button.interactableObject == null) return;
+            
             powerButton.button.interactableObject.SetAsDisabled();
-            AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, powerButton.ID, powerButton.transform.position, settingsOverride: AudioJobSettings);
+            AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, powerButton.ID, powerButton.transform.position);
             powerButton.GetComponent<ButtonColorChange>().startColor = disabledPowerSourceButtonColor;
-            foreach (SpriteRenderer sprite in powerButton.GetComponentsInChildren<SpriteRenderer>()) {
-                sprite.color = sprite.color.WithAlpha(0f);
+            foreach (ValueDisplay vd in powerButton.GetComponentsInChildren<ValueDisplay>()) {
+                vd.spriteAlpha = 0;
             }
         }
 
         void EnablePowerButton(PowerButton powerButton) {
+            if (powerButton == null || powerButton.button == null || powerButton.button.interactableObject == null) return;
+
             powerButton.button.interactableObject.SetAsInteractable();
             powerButton.GetComponent<ButtonColorChange>().startColor = Color.white;
-            foreach (SpriteRenderer sprite in powerButton.GetComponentsInChildren<SpriteRenderer>()) {
-                sprite.color = sprite.color.WithAlpha(1f);
+            foreach (ValueDisplay vd in powerButton.GetComponentsInChildren<ValueDisplay>()) {
+                vd.spriteAlpha = 1;
             }
-        }
-
-        void AudioJobSettings(AudioManager.AudioJob audioJob) {
-            audioJob.pitchRandomness = 0f;
-            audioJob.basePitch = 0.75f;
         }
 
         PuzzleState NextState() {
@@ -132,36 +175,40 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         // Update is called once per frame
         void Update() {
-            if (DebugInput.GetKeyDown("l")) {
-                if (state == PuzzleState.Idle) {
+            if (this.InstaSolvePuzzle()) {
+                if (state == PuzzleState.Idle && FloorManager.instance.floor == floorPuzzle.floor) {
                     state.Set(PuzzleState.Correct);
                 }
             }
             
             float targetAlpha = state == PuzzleState.Off ? 0f : 1f;
-            Color targetColor = Color.white;
-            
+            valueIcon.spriteAlpha = targetAlpha;
             switch (state.state) {
                 case PuzzleState.Off:
-                    targetColor = Color.black;
+                    valueIcon.SetColorImmediately(Color.black);
                     break;
                 case PuzzleState.Idle:
                     if (powerTrail.powerIsOn) {
                         state.Set(PuzzleState.PoweringUp);
+                        return;
                     }
                     break;
                 case PuzzleState.PoweringUp:
                     break;
                 case PuzzleState.Incorrect:
+                    if (Evaluate()) {
+                        AudioManager.instance.GetAudioJob(AudioName.IncorrectAnswer, "IncorrectAnswer").Stop();
+                        state.Set(PuzzleState.Correct);
+                        break;
+                    }
+                    
                     float t = 0.5f + 0.5f*Mathf.Cos(state.timeSinceStateChanged * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
-                    targetColor = Color.Lerp(targetColor, incorrectColor, t);
-                    floorPuzzle.currentValue.color = Color.Lerp(Color.black, incorrectColor, t);
+                    floorPuzzle.currentValue.SetColorImmediately(Color.Lerp(floorPuzzle.currentValue.defaultColor, incorrectColor, t));
+                    valueIcon.SetColorImmediately(Color.Lerp(valueIcon.defaultColor, incorrectColor, t).WithAlpha(targetAlpha));
                     break;
                 case PuzzleState.Depowering:
-                    break;
                 case PuzzleState.Correct:
                 case PuzzleState.CorrectIdle:
-                    targetColor = correctColor;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -175,23 +222,6 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
             else {
                 powerButton.button.interactableObject.SetAsHidden();
-            }
-            
-            // Value icon color
-            if (state == PuzzleState.Incorrect) {
-                valueIcon.color = targetColor.WithAlpha(targetAlpha);
-            }
-            else {
-                valueIcon.color = Color.Lerp(valueIcon.color, targetColor.WithAlpha(targetAlpha), Time.deltaTime * valueIconAlphaLerpSpeed);
-            }
-            
-            // CurrentValue color
-            if (state == PuzzleState.Correct) {
-                floorPuzzle.currentValue.color = Color.Lerp(floorPuzzle.currentValue.color, targetColor, Time.deltaTime * currentValueAlphaLerpSpeed);
-            }
-            // Resetting color when we switch to new puzzle
-            else if (state == PuzzleState.Idle && floorPuzzle.currentValue.actualValue == 0) {
-                floorPuzzle.currentValue.color = Color.black;
             }
         }
         

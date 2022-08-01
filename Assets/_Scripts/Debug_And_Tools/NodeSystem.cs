@@ -20,7 +20,6 @@ public struct SerializableNode {
 	public bool staircaseSegment;
 }
 public class Node {
-	const float distanceToSpawnNewNodeAt = 0.5f;
 	public Node parent;
 	public List<Node> children = new List<Node>();
 	public Vector3 pos;
@@ -34,15 +33,8 @@ public class Node {
 		this.staircaseSegment = staircaseSegment;
 	}
 
-	public Node AddNewChild(bool buildAsStaircase) {
-		Vector3 grandparentToParent = Vector3.forward;
-		if (parent != null) {
-			grandparentToParent = (pos - parent.pos).normalized;
-		}
-		if (buildAsStaircase) {
-			grandparentToParent = Vector3.zero;
-		}
-		Node newNode = new Node(pos + grandparentToParent * distanceToSpawnNewNodeAt, false, false);
+	public Node AddNewChild(Vector3 offset) {
+		Node newNode = new Node(pos + offset, false, false);
 		newNode.parent = this;
 		this.children.Add(newNode);
 
@@ -55,6 +47,7 @@ public class Node {
 
 [ExecuteInEditMode]
 public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
+	const float distanceToSpawnNewNodeAt = 0.25f;
 	// Used for special logic around repositioning nodes/placing new nodes
 	public bool buildAsStaircase = true;
 	public Vector3 staircaseDirection1 = Vector3.right, staircaseDirection2 = Vector3.up;
@@ -65,6 +58,9 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	public int selectedNodeIndex = -1;
 	public int startOfStaircaseIndex = -1;
 	public List<SerializableNode> serializedNodes;
+
+	[ShowNativeProperty]
+	private bool nodeSelected => selectedNodeIndex >= 0;
 
 	public void OnBeforeSerialize() {
 		// Unity is about to read the serializedNodes field's contents.
@@ -132,9 +128,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			}
 			return _selectedNode;
 		}
-		set {
-			_selectedNode = value;
-		}
+		set => _selectedNode = value;
 	}
 
 	[ShowNativeProperty]
@@ -163,7 +157,19 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	public Node AddNewChildToSelected() {
 		Node newNode = null;
 		if (selectedNode != null) {
-			newNode = selectedNode.AddNewChild(buildAsStaircase);
+			
+			Vector3 grandparentToParent = Vector3.forward;
+			
+			if (buildAsStaircase) {
+				grandparentToParent = Vector3.zero;
+			}
+			else if (selectedNode.parent != null) {
+				grandparentToParent = (selectedNode.pos - selectedNode.parent.pos).normalized;
+			}
+
+			Vector3 offset = grandparentToParent * distanceToSpawnNewNodeAt;
+			
+			newNode = selectedNode.AddNewChild(offset);
 			allNodes.Add(newNode);
 
 			selectedNode = newNode;
@@ -172,9 +178,45 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		return newNode;
 	}
 
+	// Similar to Add but creates a new Node which is a child of the selected Node and a parent of the selected Node's
+	// children, then removes the selected Node's children
+	public Node InsertNewChildAfterSelected() {
+		Node newNode = null;
+		if (selectedNode != null) {
+			// When the selected Node has no children, functions same as AddNewChildToSelected
+			if (selectedNode.children == null || selectedNode.children.Count == 0) {
+				return AddNewChildToSelected();
+			}
+			else {
+				Node parent = selectedNode;
+				List<Node> children = parent.children;
+
+				Vector3 avgChildPosition = children
+					.Select(node => node.pos)
+					.Aggregate(Vector3.zero, (acc, pos) => acc + pos) / children.Count;
+
+				Vector3 newNodePos = Vector3.Lerp(parent.pos, avgChildPosition, 0.5f);
+
+				parent.children = new List<Node>();
+				newNode = parent.AddNewChild(newNodePos - parent.pos);
+				newNode.children = children;
+				foreach (var child in children) {
+					child.parent = newNode;
+				}
+				allNodes.Add(newNode);
+
+				selectedNode = newNode;
+			}
+		}
+
+		return newNode;
+	}
+
 	public void RemoveSelected() {
 		if (selectedNode != null) {
+			Node nextNodeToSelect = selectedNode.parent;
 			RemoveNodeRecursively(selectedNode);
+			selectedNode = nextNodeToSelect;
 		}
 	}
 
@@ -215,15 +257,17 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	Color unselectedStaircaseSegmentColor = new Color(.65f, .05f, .75f);
 	void DrawGizmosRecursively(Node curNode) {
 		if (!showNodes) return;
-		if (curNode == selectedNode) {
-			Gizmos.color = selectedColor;
+		bool selected = curNode == selectedNode;
+		float selectedT = selected ? (0.5f + 0.5f * Mathf.Sin(8*Time.realtimeSinceStartup)) : 0f;
+		if (curNode.zeroDistanceToChildren) {
+			Gizmos.color = Color.Lerp(unselectedZeroDistanceToChildrenColor, selectedColor, selectedT);
+		}
+		else if (curNode.staircaseSegment) {
+			Gizmos.color = Color.Lerp(unselectedStaircaseSegmentColor, selectedColor, selectedT);
 		}
 		else {
-			if (curNode.zeroDistanceToChildren) {
-				Gizmos.color = unselectedZeroDistanceToChildrenColor;
-			}
-			else if (curNode.staircaseSegment) {
-				Gizmos.color = unselectedStaircaseSegmentColor;
+			if (selected) {
+				Gizmos.color = selectedColor;
 			}
 			else {
 				Gizmos.color = unselectedColor;
@@ -244,13 +288,17 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	private void DrawStaircaseSegment(Node start) {
 		Vector3 startPos = transform.TransformPoint(start.pos);
 		Node end = start;
+		bool endsOnLeaf = false;
 		while (end.staircaseSegment) {
-			if (end.children.Count == 0) break;
+			if (end.isLeafNode) {
+				endsOnLeaf = true;
+				break;
+			}
 				
 			// Axiom: Staircase segments only have one child
 			end = end.children[0];
 		}
-		end = end.parent;
+		end = endsOnLeaf ? end : end.parent;
 
 		Vector3 endPos = transform.TransformPoint(end.pos);
 
@@ -372,10 +420,20 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			}
 		}
 	}
+	
+	[MenuItem("Custom/Power Trails/Insert Child _F4")]
+	public static void InsertChild() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem ns = selected.GetComponent<NodeSystem>();
+			if (ns != null && ns.selectedNode != null) {
+				Node newNode = ns.InsertNewChildAfterSelected();
+			}
+		}
+	}
 
 	// Call once to mark start of staircase, again to mark end of staircase
-	[MenuItem("Custom/Power Trails/Mark Staircase _F4")]
-	public static void MarkStaircase() {
+	[MenuItem("Custom/Power Trails/Mark Staircase Segment _F5")]
+	public static void MarkStaircaseSegment() {
 		foreach (var selected in Selection.gameObjects) {
 			NodeSystem ns = selected.GetComponent<NodeSystem>();
 			if (ns != null && ns.selectedNode != null) {
@@ -386,6 +444,17 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 				else {
 					ns.startOfStaircaseIndex = ns.selectedNodeIndex;
 				}
+			}
+		}
+	}
+	
+	// Call to mark selected node as part of staircase
+	[MenuItem("Custom/Power Trails/Mark Staircase _F6")]
+	public static void MarkStaircase() {
+		foreach (var selected in Selection.gameObjects) {
+			NodeSystem ns = selected.GetComponent<NodeSystem>();
+			if (ns != null && ns.selectedNode != null) {
+				ns.selectedNode.staircaseSegment = !ns.selectedNode.staircaseSegment;
 			}
 		}
 	}

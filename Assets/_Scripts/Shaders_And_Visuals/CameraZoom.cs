@@ -37,7 +37,7 @@ public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> 
     }
 
     void Update() {
-        zoomed = input.Action2Held && playerLook.state == PlayerLook.State.ViewUnlocked;
+        zoomed = input.Action2Held && playerLook.state == PlayerLook.ViewLockState.ViewUnlocked;
 
         mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, zoomed ? zoomFOV : defaultFOV, Time.deltaTime * zoomLerpSpeed * (zoomed ? 1f : 2f));
         foreach (var cam in otherCameras) {

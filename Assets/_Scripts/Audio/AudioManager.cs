@@ -175,6 +175,7 @@ namespace Audio {
 		}
 
 		Transform soundsRoot;
+		private float timeElapsedBeforeAudioAllowedToPlay = 1f;
 
         public Dictionary<AudioName, AudioSettings> defaultSettings = new Dictionary<AudioName, AudioSettings>();
 
@@ -205,15 +206,17 @@ namespace Audio {
 				AudioJob job = audioJobs[updateJob.Key];
 				Action<AudioJob> update = updateJob.Value;
 
-				try {
-					float targetPitch = (job.basePitch + job.randomizedPitch) * Time.timeScale;
-					Log(job.id, $"Setting {job.id} base pitch to {targetPitch}");
-					job.audio.pitch = targetPitch;
-					update.Invoke(job);
-				}
-				catch (Exception e) {
-					debug.LogError($"Error occurred while updating audio job {job.id}: {e}");
-					job.Stop();
+				if (!job.stopSound) {
+					try {
+						float targetPitch = (job.basePitch + job.randomizedPitch) * Time.timeScale;
+						Log(job.id, $"Setting {job.id} base pitch to {targetPitch}");
+						job.audio.pitch = targetPitch;
+						update.Invoke(job);
+					}
+					catch (Exception e) {
+						debug.LogError($"Error occurred while updating audio job {job.id}: {e}");
+						job.Stop();
+					}
 				}
 			}
 
@@ -322,6 +325,8 @@ namespace Audio {
 		}
 
 		private void Play(AudioJob job) {
+			if (Time.time < timeElapsedBeforeAudioAllowedToPlay) return;
+			
 			Log(job.id, $"Playing audio job {job.id}");
 			job.Play();
 		}
@@ -371,7 +376,7 @@ namespace Audio {
 			return audioJob;
 		}
 
-		private void Log(string audioJobId, string msg) {
+		public void Log(string audioJobId, string msg) {
 			if (audioJobsToDebug == null || audioJobsToDebug.Count == 0 || audioJobsToDebug.Exists(audioJobId.Contains)) {
 				debug.Log(msg);
 			}

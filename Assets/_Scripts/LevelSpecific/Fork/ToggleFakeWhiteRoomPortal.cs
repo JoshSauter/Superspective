@@ -3,6 +3,7 @@ using Saving;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
@@ -22,17 +23,7 @@ namespace LevelSpecific.Fork {
         }
 
         void Update() {
-            switch (edgeDetection.edgeColorMode) {
-                case BladeEdgeDetection.EdgeColorMode.SimpleColor:
-                    edgesAreWhite = edgeDetection.edgeColor.grayscale > .5f;
-                    break;
-                case BladeEdgeDetection.EdgeColorMode.Gradient:
-                    edgesAreWhite = edgeDetection.edgeColorGradient.Evaluate(0).grayscale > .5f;
-                    break;
-                case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
-                    edgesAreWhite = false;
-                    break;
-            }
+            edgesAreWhite = edgeDetection.EdgesAreWhite();
             realWhiteRoomPortal.gameObject.SetActive(!edgesAreWhite);
             fakeWhiteRoomPortal.gameObject.SetActive(edgesAreWhite);
         }

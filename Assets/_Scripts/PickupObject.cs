@@ -77,6 +77,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (thisGravity == null) thisGravity = GetComponent<GravityObject>();
 
         interactableObject = thisRigidbody.GetOrAddComponent<InteractableObject>();
+        interactableObject.SkipSave = true;
         interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 
         interactableGlow = interactableObject.GetOrAddComponent<InteractableGlow>();
@@ -234,7 +235,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (portalableObject.copyIsEnabled) portalableObject.fakeCopyInstance.gameObject.layer = tempLayerPortalCopy;
 
         bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null &&
-                                          portalableObject.grabbedThroughPortal.portalIsEnabled &&
+                                          portalableObject.grabbedThroughPortal.portalRenderingIsEnabled &&
                                           !raycastHits.hitPortal;
         bool throughInPortalToOutPortal =
             portalableObject.grabbedThroughPortal == null && raycastHits.hitPortal;

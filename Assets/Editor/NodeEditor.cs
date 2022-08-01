@@ -1,11 +1,14 @@
 ﻿using PowerTrailMechanics;
+using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine;
 
-// TODO: Write a way to mark a series of consecutive nodes as a staircase to simplify audio position calculations by
-// TODO: counting the staircase as a single straight-line segment. Mark start of staircase, end of staircase.
 [CustomEditor(typeof(NodeSystem))]
 public class NodeEditor : UnityEditor.Editor {
+    private float timeSinceLastNodeSelected => Time.realtimeSinceStartup - timeWhenLastNodeSelected;
+    private float timeWhenLastNodeSelected;
+    private const float doubleClickTime = .25f;
+    
     Camera sceneViewCam;
     SceneView sv;
 
@@ -25,8 +28,21 @@ public class NodeEditor : UnityEditor.Editor {
         Node nodeToSelect = NodeToSelect(t);
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0) {
             if (nodeToSelect != null) {
-                t.selectedNode = nodeToSelect;
-                Event.current.Use();
+                // Same Node selected, either ignore or double-click to open modal
+                if (t.selectedNode == nodeToSelect) {
+                    if (timeSinceLastNodeSelected < doubleClickTime) {
+                        NodeEditorWindow.ShowNodeEditorWindow();
+                    }
+                    else {
+                        timeWhenLastNodeSelected = Time.realtimeSinceStartup;
+                    }
+                }
+                // Different Node selected, select it
+                else {
+                    t.selectedNode = nodeToSelect;
+                    timeWhenLastNodeSelected = Time.realtimeSinceStartup;
+                    Event.current.Use();
+                }
             }
         }
 
@@ -37,11 +53,26 @@ public class NodeEditor : UnityEditor.Editor {
         DrawLinesRecursively(t, t.rootNode);
         EditorGUI.BeginChangeCheck();
         Vector3 newPosition = t.transform.TransformPoint(t.selectedNode.pos);
-        if (t.selectedNode != null)
-            newPosition = Handles.PositionHandle(t.transform.TransformPoint(t.selectedNode.pos), t.transform.rotation);
+        if (t.selectedNode != null) {
+            Quaternion rotation = Tools.pivotRotation == PivotRotation.Global || t.selectedNode.isRootNode ?
+                t.transform.rotation :
+                Quaternion.LookRotation(t.selectedNode.parent.pos-t.selectedNode.pos);
+            newPosition = Handles.PositionHandle(t.transform.TransformPoint(t.selectedNode.pos), rotation);
+        }
         if (EditorGUI.EndChangeCheck()) {
             Undo.RecordObject(t, "Change node position");
             t.selectedNode.pos = t.transform.InverseTransformPoint(newPosition);
+        }
+        
+        Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Quaternion rotation) {
+            //Get a direction from the pivot to the point
+            Vector3 dir = point - pivot;
+            //Rotate vector around pivot
+            dir = rotation * dir; 
+            //Calc the rotated vector
+            point = dir + pivot; 
+            //Return calculated vector
+            return point; 
         }
     }
 
@@ -62,7 +93,6 @@ public class NodeEditor : UnityEditor.Editor {
         Ray ray = HandleUtility.GUIPointToWorldRay(guiPosition);
 
         foreach (Node node in t.GetAllNodes()) {
-            if (t.selectedNode == node) continue;
             if (HitGizmoSphere( t.transform.TransformPoint(node.pos), ray)) return node;
         }
 

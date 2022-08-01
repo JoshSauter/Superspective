@@ -17,8 +17,9 @@ namespace LevelSpecific.WhiteRoom {
         public GameObject barRoot;
 
         public int numSolved = 0;
+        private bool cheatSolved = false;
         bool wasSolvedLastFrame = false;
-        bool solved => numSolved == powerTrails.Length;
+        bool solved => numSolved == powerTrails.Length || cheatSolved;
 
         protected override void Start() {
             base.Start();
@@ -31,7 +32,12 @@ namespace LevelSpecific.WhiteRoom {
         public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => barRoot.transform;
 
         void Update() {
+            if (this.InstaSolvePuzzle()) {
+                cheatSolved = !cheatSolved;
+            }
+            
             if (solved && !wasSolvedLastFrame) {
+                AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
                 AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
             }
 

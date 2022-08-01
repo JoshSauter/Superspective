@@ -25,14 +25,14 @@ namespace Saving {
     [Serializable]
     public abstract class SerializableSaveObject<T> : SerializableSaveObject where T : MonoBehaviour, ISaveableObject {
         // Must be overridden by inheriting classes
-        protected SerializableSaveObject(T saveableScript) {
-            this.ID = saveableScript.ID;
-            string lastPart = saveableScript.ID.Split('_').Last();
+        protected SerializableSaveObject(T script) {
+            this.ID = script.ID;
+            string lastPart = script.ID.Split('_').Last();
             this.associationID = lastPart.IsGuid() ? lastPart : this.ID;
-            this.sceneName = saveableScript.gameObject.scene.name;
+            this.sceneName = script.gameObject.scene.name;
         }
         
-        public abstract void LoadSave(T saveableScript);
+        public abstract void LoadSave(T script);
 
         /// <summary>
         /// Unregisters this save object and any associated save object while in an unloaded scene

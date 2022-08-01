@@ -46,6 +46,9 @@ inline void SuberspectiveClipOnly(SuberspectiveDepthNormalsV2F i) {
 #ifdef DISSOLVE_OBJECT
 	ClipDissolve(i.dissolveUV);
 #endif
+#ifdef POWER_TRAIL_OBJECT
+    ClipPowerTrail(i.worldPos);
+#endif
 #ifdef SHUTTERED_OBJECT
 	ClipShutteredAreas(i.worldPos, float4(1,1,1,1));
 #endif
@@ -54,13 +57,12 @@ inline void SuberspectiveClipOnly(SuberspectiveDepthNormalsV2F i) {
 #endif
 #ifdef RENDER_IN_ZONE_OBJECT
 	ClipRenderZone(i.worldPos);
-#endif  
+#endif
 }
 
 float4 SuberspectiveDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
 	if (i.nz.w > 1) i.nz.w = .999999;
     SuberspectiveClipOnly(i);
-
     return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 }
 

@@ -5,6 +5,7 @@ uniform int _EndPositionIDs[MAX_NODES];
 uniform float _InterpolationValues[MAX_NODES];
 uniform float _CapsuleRadius;
 uniform int _ReverseVisibility;
+uniform int _HiddenPowerTrail;
 
 // p is the test position, pointA is the center of the sphere at one end of the capsule, pointB is the center of the sphere at the other end
 float SdfCapsule(float3 p, float3 pointA, float3 pointB, float radius) {
@@ -36,5 +37,10 @@ bool EmissionEnabled(float3 worldPos) {
     if (_ReverseVisibility > 0) {
         emissionEnabled = 1 - emissionEnabled;     
     }
+    
     return emissionEnabled;
+}
+
+void ClipPowerTrail(float3 worldPos) {
+    clip(EmissionEnabled(worldPos) - _HiddenPowerTrail);
 }

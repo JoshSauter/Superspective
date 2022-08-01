@@ -3,20 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PortalMechanics;
+using Saving;
 using SerializableClasses;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
-    public class FloorManager : Singleton<FloorManager> {
+    public class FloorManager : SingletonSaveableObject<FloorManager, FloorManager.FloorManagerSave> {
+
         public enum Floor {
+            None,
             Floor1,
             Floor2,
-            Floor3
+            Floor3,
+            Center
         }
 
-        public StateMachine<Floor> floor = new StateMachine<Floor>(Floor.Floor1);
+        public StateMachine<Floor> floor = new StateMachine<Floor>(Floor.None);
 
         [Serializable]
         struct PortalsOnAFloor {
@@ -25,21 +29,43 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         [SerializeField]
-        PortalsOnAFloor[] portalFloors;
-        private Dictionary<Floor, PortalsOnAFloor> floors;
+        FloorPuzzle[] puzzleFloors;
+        public Dictionary<Floor, FloorPuzzle> floors;
+        private int _currentValue = 0;
 
-        private void OnValidate() {
-            if (portalFloors != null) {
-                floors = portalFloors.ToDictionary(pf => pf.floor, pf => pf);
+        public int currentValue {
+            get => _currentValue;
+            set {
+                if (value != _currentValue) {
+                    foreach (var pf in puzzleFloors) {
+                        if (pf.floor == Floor.Center) continue;
+
+                        pf.currentValue.actualValue = value;
+                    }
+
+                    _currentValue = value;
+                }
             }
         }
 
-        public void Start() {
-            if (portalFloors != null && floors == null || floors.Count == 0) {
-                floors = portalFloors.ToDictionary(pf => pf.floor, pf => pf);
+        private void OnValidate() {
+            if (puzzleFloors != null) {
+                floors = puzzleFloors.ToDictionary(pf => pf.floor, pf => pf);
+            }
+        }
+
+        protected override void Start() {
+            base.Start();
+            
+            if (puzzleFloors != null && (floors == null || floors.Count == 0)) {
+                floors = puzzleFloors.ToDictionary(pf => pf.floor, pf => pf);
             }
             
-            floor.AddTrigger((enumValue) => true, 0f, (enumValue) => {
+            if (floor == Floor.None) {
+                TurnOffAllPortals();
+            }
+            
+            floor.AddTrigger((enumValue) => enumValue != Floor.None, 0f, (enumValue) => {
                 TurnOffAllPortals();
                 TurnOnPortalsForFloor(enumValue);
             });
@@ -47,15 +73,31 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         void TurnOffAllPortals() {
             foreach (var floor in floors.Values) {
-                foreach (Portal floorPortal in floor.portals) {
-                    floorPortal.pauseRenderingOnly = true;
+                foreach (Portal floorPortal in floor.floorPortals) {
+                    floorPortal.pauseRendering = true;
                 }
             }
         }
 
         void TurnOnPortalsForFloor(Floor floor) {
-            foreach (Portal portal in floors[floor].portals) {
-                portal.pauseRenderingOnly = false;
+            foreach (Portal portal in floors[floor].floorPortals) {
+                portal.pauseRendering = false;
+            }
+        }
+
+        public void TurnOffAllPowerSources() {
+            foreach (var kv in floors) {
+                Floor floor = kv.Key;
+                FloorPuzzle puzzle = kv.Value;
+                
+                if (floor == Floor.Center || floor == Floor.None) continue;
+                
+                foreach (var powerSource in puzzle.powerSources) {
+                    powerSource.powerTrail.powerIsOn = false;
+                    if (powerSource.powerButton.powerIsOn) {
+                        powerSource.powerButton.button.PressButton();
+                    }
+                }
             }
         }
 
@@ -70,6 +112,19 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         private void SetFloor(Floor floorToSet) {
             this.floor.Set(floorToSet);
+        }
+
+        public override string ID => "CathedralTutorialFloorManager";
+
+        [Serializable]
+        public class FloorManagerSave : SerializableSaveObject<FloorManager> {
+            private int currentValue;
+            public FloorManagerSave(FloorManager script) : base(script) {
+                this.currentValue = script.currentValue;
+            }
+            public override void LoadSave(FloorManager script) {
+                script.currentValue = this.currentValue;
+            }
         }
     }
 }

@@ -34,6 +34,4 @@ public class ArtificialLowFramerate : MonoBehaviour {
 			Debug.Log("Ignore this, just here so sum variable is used");
 		}
 	}
-
-
 }

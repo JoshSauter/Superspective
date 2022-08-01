@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerLookSave> {
     public delegate void ViewLockAction();
 
-    public enum State {
+    public enum ViewLockState {
         ViewUnlocked,
         ViewLocking,
         ViewLocked,
@@ -34,7 +34,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     public float yClamp = 85;
 
     public float outsideMultiplier = 1f;
-    State _state;
+    ViewLockState _state;
 
     Vector3 endPos;
     Quaternion endRot;
@@ -48,7 +48,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     float viewUnlockTime;
     bool cursorIsStationary;
 
-    public State state {
+    public ViewLockState state {
         get => _state;
         set {
             timeSinceStateChange = 0f;
@@ -56,7 +56,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         }
     }
 
-    public bool frozen => MainCanvas.instance.tempMenu.menuIsOpen;
+    public bool frozen => MainCanvas.instance.tempMenu.menuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
 
     /// <summary>
     ///     Returns the rotationY normalized to the range (-1, 1)
@@ -82,24 +82,26 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     void Update() {
         if (frozen || !GameManager.instance.gameHasLoaded) return;
 
+        if (state == ViewLockState.ViewLocked && GameManager.instance.IsCurrentlyLoading) return;
+
         timeSinceStateChange += Time.deltaTime;
 
         switch (state) {
-            case State.ViewUnlocked:
+            case ViewLockState.ViewUnlocked:
                 UpdateUnlockedView();
                 break;
-            case State.ViewLocked:
+            case ViewLockState.ViewLocked:
                 UpdateLockedView();
                 break;
-            case State.ViewUnlocking:
+            case ViewLockState.ViewUnlocking:
                 UpdateUnlockingView();
                 break;
-            case State.ViewLocking:
+            case ViewLockState.ViewLocking:
                 UpdateLockingView();
                 break;
         }
 
-        if (state == State.ViewLocked && PlayerButtonInput.instance.LeftStickHeld) UnlockView();
+        if (state == ViewLockState.ViewLocked && PlayerButtonInput.instance.LeftStickHeld) UnlockView();
     }
 
     void OnApplicationFocus(bool focus) {
@@ -182,7 +184,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
                 debug.Log("Finished unlocking view");
 
-                state = State.ViewUnlocked;
+                state = ViewLockState.ViewUnlocked;
             }
         }
     }
@@ -233,7 +235,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             OnViewLockEnterFinish?.Invoke();
             debug.Log("Finished locking view");
 
-            state = State.ViewLocked;
+            state = ViewLockState.ViewLocked;
         }
     }
 
@@ -274,15 +276,15 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     }
 
     public void SetViewLock(ViewLockObject lockObject, ViewLockInfo lockInfo) {
-        if (state == State.ViewUnlocked) {
-            state = State.ViewLocking;
+        if (state == ViewLockState.ViewUnlocked) {
+            state = ViewLockState.ViewLocking;
             InitializeLockingView(lockObject, lockInfo);
         }
     }
 
     public void UnlockView() {
-        if (state == State.ViewLocked) {
-            state = State.ViewUnlocking;
+        if (state == ViewLockState.ViewLocked) {
+            state = ViewLockState.ViewUnlocking;
             InitializeUnlockingView();
         }
     }
@@ -359,7 +361,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             playerLook.cameraContainerTransform.localPosition = cameraLocalPosition;
             playerLook.cameraContainerTransform.localRotation = cameraLocalRotation;
 
-            playerLook.state = (State) state;
+            playerLook.state = (ViewLockState) state;
             playerLook.timeSinceStateChange = timeSinceStateChange;
             playerLook.rotationBeforeViewLock = rotationBeforeViewLock;
             playerLook.startPos = startPos;

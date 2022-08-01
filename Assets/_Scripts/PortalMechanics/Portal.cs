@@ -7,6 +7,7 @@ using SuperspectiveUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using LevelManagement;
 using MagicTriggerMechanics;
 using Saving;
@@ -33,10 +34,15 @@ namespace PortalMechanics {
 		}
 
 		public void Release() {
-			mainTexture.Release();
-			depthNormalsTexture.Release();
-			GameObject.Destroy(mainTexture);
-			GameObject.Destroy(depthNormalsTexture);
+			if (mainTexture != null) {
+				mainTexture.Release();
+				GameObject.Destroy(mainTexture);
+			}
+
+			if (depthNormalsTexture != null) {
+				depthNormalsTexture.Release();
+				GameObject.Destroy(depthNormalsTexture);
+			}
 		}
 	}
 	
@@ -71,7 +77,7 @@ namespace PortalMechanics {
 
 		private bool volumetricPortalsShouldBeEnabled {
 			get {
-				if (!hasInitialized || !portalIsEnabled || !playerCamIsCloseEnoughToInFrontOfPortal || dimensionObject || IsInvisible) return false;
+				if (!hasInitialized || !portalRenderingIsEnabled || !playerCamIsCloseEnoughToInFrontOfPortal || dimensionObject || IsInvisible) return false;
 				Vector3 playerCamPos = playerCamera.position;
 				float playerCamToPortal = Vector3.Distance(playerCamPos, ClosestPoint(playerCamPos, true));
 				float playerCamToOtherPortal = Vector3.Distance(playerCamPos, otherPortal.ClosestPoint(playerCamPos, true));
@@ -116,9 +122,11 @@ namespace PortalMechanics {
 		[ShowIf("DEBUG")]
 		RecursiveTextures internalRenderTexturesCopy;
 
-		public bool pauseRenderingOnly = false;
-		public bool pauseRenderingAndLogic = false;
-		public bool portalIsEnabled => otherPortal != null && !pauseRenderingAndLogic && gameObject.activeSelf;
+		public bool pauseRendering = false;
+		public bool pauseLogic = false;
+		private Material effectiveMaterial => portalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
+		public bool portalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf;
+		public bool portalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
 
 		[ShowNativeProperty]
 		public bool playerRemainsInPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
@@ -199,7 +207,7 @@ namespace PortalMechanics {
 			}
 			foreach (var r in renderers) {
 				r.gameObject.layer = LayerMask.NameToLayer("Portal");
-				r.SetMaterial(pauseRenderingAndLogic ? fallbackMaterial : portalMaterial);
+				r.SetMaterial(portalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
 			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
@@ -302,6 +310,8 @@ namespace PortalMechanics {
 		}
 
 		public void SetPropertiesOnMaterial() {
+			if (!portalRenderingIsEnabled) return;
+			
 			void SetTexturesForRenderers(SuperspectiveRenderer[] portalRenderers) {
 				foreach (var r in portalRenderers) {
 					r.SetTexture("_MainTex", internalRenderTexturesCopy.mainTexture);
@@ -328,12 +338,7 @@ namespace PortalMechanics {
 			CreateRenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 			SuperspectiveScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
 
-			if (pauseRenderingOnly || pauseRenderingAndLogic) {
-				DefaultMaterial();
-			}
-			else {
-				PortalMaterial();
-			}
+			SetMaterialsToEffectiveMaterial();
 		}
 
 		protected override void Init() {
@@ -354,7 +359,7 @@ namespace PortalMechanics {
 			}
 
 			// If the player moves to the backside of a double-sided portal, rotate the portals to match
-			if (doubleSidedPortals && portalIsEnabled && !playerRemainsInPortal && !otherPortal.playerRemainsInPortal) {
+			if (doubleSidedPortals && portalLogicIsEnabled && !playerRemainsInPortal && !otherPortal.playerRemainsInPortal) {
 				Vector3 portalToPlayer = playerCamera.position - transform.position;
 				Vector3 otherPortalToPlayer = playerCamera.position - otherPortal.transform.position;
 				if (portalToPlayer.magnitude < otherPortalToPlayer.magnitude) {
@@ -400,7 +405,7 @@ namespace PortalMechanics {
 		}
 
 		public void OnTriggerStay(Collider other) {
-			if (!portalIsEnabled || other.isTrigger) return;
+			if (!portalLogicIsEnabled || other.isTrigger) return;
 
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
@@ -471,49 +476,47 @@ namespace PortalMechanics {
 		}
 
 		public void SetTexture(RenderTexture tex) {
-			if (pauseRenderingOnly || pauseRenderingAndLogic) {
-				debug.LogWarning($"Attempting to set MainTexture for disabled portal: {gameObject.name}");
+			if (!portalRenderingIsEnabled) {
+				debug.LogWarning($"Attempting to set MainTexture for disabled portal: {gameObject.FullPath()}");
+				return;
+			}
+			
+			if (internalRenderTexturesCopy.mainTexture == null) { 
+				Debug.LogWarning($"Attempting to set MainTexture for portal w/ null mainTexture: {gameObject.FullPath()}");
 				return;
 			}
 
-			PortalMaterial();
+			SetMaterialsToEffectiveMaterial();
 
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.mainTexture);
 			SetPropertiesOnMaterial();
 		}
 
 		public void SetDepthNormalsTexture(RenderTexture tex) {
-			if (pauseRenderingOnly || pauseRenderingAndLogic) {
-				debug.LogWarning($"Attempting to set DepthNormalsTexture for disabled portal: {gameObject.name}");
+			if (!portalRenderingIsEnabled) {
+				debug.LogWarning($"Attempting to set DepthNormalsTexture for disabled portal: {gameObject.FullPath()}");
 				return;
 			}
 
-			PortalMaterial();
+			if (internalRenderTexturesCopy.depthNormalsTexture == null) { 
+				Debug.LogWarning($"Attempting to set DepthNormalsTexture for portal w/ null depthNormalsTexture: {gameObject.FullPath()}");
+				return;
+			}
 
+			SetMaterialsToEffectiveMaterial();
+			
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
 			SetPropertiesOnMaterial();
 		}
 
-		public void PortalMaterial() {
-			if (!renderers[0].r.sharedMaterial.name.Contains(portalMaterial.name)) {
+		public void SetMaterialsToEffectiveMaterial() {
+			if (!renderers[0].r.sharedMaterial.name.Contains(effectiveMaterial.name)) {
 				foreach (var r in renderers) {
-					r.SetMaterial(portalMaterial);
+					r.SetMaterial(effectiveMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.SetMaterial(portalMaterial);
-				}
-			}
-		}
-
-		public void DefaultMaterial() {
-			if (!renderers[0].r.sharedMaterial.name.Contains(fallbackMaterial.name)) {
-				foreach (var r in renderers) {
-					r.SetMaterial(fallbackMaterial);
-				}
-
-				foreach (var vp in volumetricPortals) {
-					vp.SetMaterial(fallbackMaterial);
+					vp.SetMaterial(effectiveMaterial);
 				}
 			}
 		}
@@ -534,6 +537,8 @@ namespace PortalMechanics {
 		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false, bool useInfinitelyThinBounds = false) {
 			float minDistance = float.MaxValue;
 			Vector3 closestPoint = point + Vector3.up * minDistance;
+
+			Plane portalPlane = new Plane(PortalNormal(), transform.position);
 			foreach (var c in colliders) {
 				bool colliderActive = c.gameObject.activeSelf;
 				bool colliderEnabled = c.enabled;
@@ -545,14 +550,15 @@ namespace PortalMechanics {
 				Vector3 thisClosestPoint;
 				if (useInfinitelyThinBounds) {
 					// Treat the collider bounds as being infinitely thin in the Z direction (portal normal direction)
-					Bounds b = c.bounds;
-					Vector3 effectiveNormal = PortalNormal();
-					effectiveNormal.x = Mathf.Abs(effectiveNormal.x);
-					effectiveNormal.y = Mathf.Abs(effectiveNormal.y);
-					effectiveNormal.z = Mathf.Abs(effectiveNormal.z);
-					Vector3Int scaleFactor = Vector3Int.RoundToInt(Vector3.one - effectiveNormal);
-					b.size = Vector3.Scale(b.size, scaleFactor);
-					thisClosestPoint = b.ClosestPoint(point);
+					// Bounds b = c.bounds;
+					// Vector3 effectiveNormal = PortalNormal();
+					// effectiveNormal.x = Mathf.Abs(effectiveNormal.x);
+					// effectiveNormal.y = Mathf.Abs(effectiveNormal.y);
+					// effectiveNormal.z = Mathf.Abs(effectiveNormal.z);
+					// Vector3Int scaleFactor = Vector3Int.RoundToInt(Vector3.one - effectiveNormal);
+					// b.size = Vector3.Scale(b.size, scaleFactor);
+					// thisClosestPoint = b.ClosestPoint(point);
+					thisClosestPoint = portalPlane.ClosestPointOnPlane(c.ClosestPoint(point));
 				}
 				else {
 					thisClosestPoint = c.ClosestPoint(point);
@@ -720,7 +726,7 @@ namespace PortalMechanics {
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
 			DisableVolumetricPortal();
 			otherPortal.EnableVolumetricPortal();
-			otherPortal.pauseRenderingOnly = false;
+			otherPortal.pauseRendering = false;
 			yield return null;
 			// Sometimes teleporting leaves the hasTriggeredOnStay state as true so we explicitly reset state here
 			trigger.ResetHasTriggeredOnStayState();
@@ -759,12 +765,10 @@ namespace PortalMechanics {
 			if (anyVolumetricPortalIsDisabled) {
 				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
 				foreach (var vp in volumetricPortals) {
-					if (pauseRenderingAndLogic) continue;
-					else if (pauseRenderingOnly) vp.enabled = true;
-					else {
-						vp.SetMaterial(portalMaterial);
-						vp.enabled = true;
-					}
+					if (!portalRenderingIsEnabled) continue;
+					
+					vp.SetMaterial(portalMaterial);
+					vp.enabled = true;
 				}
 			}
 		}
@@ -967,8 +971,8 @@ namespace PortalMechanics {
 			bool compositePortal;
 			bool teleportingPlayer = false;
 
-			bool pauseRenderingOnly = false;
-			bool pauseRenderingAndLogic = false;
+			bool pauseRendering = false;
+			bool pauseLogic = false;
 
 			public PortalSave(Portal portal) : base(portal) {
 				this.channel = portal.channel;
@@ -980,8 +984,8 @@ namespace PortalMechanics {
 				this.renderRecursivePortals = portal.renderRecursivePortals;
 				this.compositePortal = portal.compositePortal;
 				this.teleportingPlayer = portal.teleportingPlayer;
-				this.pauseRenderingOnly = portal.pauseRenderingOnly;
-				this.pauseRenderingAndLogic = portal.pauseRenderingAndLogic;
+				this.pauseRendering = portal.pauseRendering;
+				this.pauseLogic = portal.pauseLogic;
 			}
 
 			public override void LoadSave(Portal portal) {
@@ -994,8 +998,8 @@ namespace PortalMechanics {
 				portal.renderRecursivePortals = this.renderRecursivePortals;
 				portal.compositePortal = this.compositePortal;
 				portal.teleportingPlayer = this.teleportingPlayer;
-				portal.pauseRenderingOnly = this.pauseRenderingOnly;
-				portal.pauseRenderingAndLogic = this.pauseRenderingAndLogic;
+				portal.pauseRendering = this.pauseRendering;
+				portal.pauseLogic = this.pauseLogic;
 			}
 		}
 		#endregion

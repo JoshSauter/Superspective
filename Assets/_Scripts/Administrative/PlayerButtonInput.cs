@@ -75,6 +75,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 #endregion
 	
 	public void Update() {
+		if (TempMenu.instance.menuIsOpen) return;
+		
 		// Left stick
 		if (LeftStickHeld) {
 			if (!inLeftStickHeldCoroutine) {

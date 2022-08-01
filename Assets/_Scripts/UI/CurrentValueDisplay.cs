@@ -6,28 +6,24 @@ using NaughtyAttributes;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
-public class CurrentValueDisplay : SaveableObject<CurrentValueDisplay, CurrentValueDisplay.CurrentValueDisplaySave> {
-    private const int MIN = -80;
-    private const int MAX = 80;
-
-    public int actualValue = 0;
-    public float lerpSpeed = 4f;
-    
-    Sprite[] base9Symbols;
-    public SpriteRenderer currentValueDisplayHi;
+public class CurrentValueDisplay : ValueDisplay {
     public SpriteRenderer currentValueDisplayLo;
-    public SpriteRenderer currentValueNegativeSymbol;
     
-    public float currentValueDisplayLoAlpha = 1f;
-    public float currentValueDisplayHiAlpha = 0f;
-    public float currentValueNegativeSymbolAlpha = 0f;
+    private float currentValueDisplayLoAlpha = 1f;
+    private float currentValueDisplayHiAlpha = 1f;
+    private float currentValueNegativeSymbolAlpha = 0f;
     
-    float _displayedValue = 0f;
-    public float displayedValue {
+    public new float spriteAlpha {
+        get => _spriteAlpha;
+        set => _spriteAlpha = value;
+    }
+    
+    public new float displayedValue {
         get => _displayedValue;
-        set {
+        private set {
             value = Mathf.Clamp(value, MIN, MAX);
             _displayedValue = value;
 
@@ -38,9 +34,9 @@ public class CurrentValueDisplay : SaveableObject<CurrentValueDisplay, CurrentVa
             //int roundedValue = Mathf.RoundToInt(value);
             bool isNegative = value < 0;
             currentValueDisplayLo.sprite = base9Symbols[smallerValue];
-            currentValueDisplayLoAlpha = Mathf.Sqrt(1 - t);
-            currentValueDisplayHi.sprite = base9Symbols[largerValue];
-            currentValueDisplayHiAlpha = Mathf.Sqrt(t);
+            float finalLoAlpha = currentValueDisplayLoAlpha * spriteAlpha * Mathf.Sqrt(1 - t);
+            currentValueDisplay.sprite = base9Symbols[largerValue];
+            float finalHiAlpha = currentValueDisplayHiAlpha * spriteAlpha * Mathf.Sqrt(t);
 
             currentValueNegativeSymbol.enabled = isNegative;
             if (isNegative) {
@@ -48,7 +44,7 @@ public class CurrentValueDisplay : SaveableObject<CurrentValueDisplay, CurrentVa
                     currentValueNegativeSymbolAlpha = t;
                 }
                 else {
-                    currentValueNegativeSymbolAlpha = 1f;
+                    currentValueNegativeSymbolAlpha = spriteAlpha;
 
                 }
             }
@@ -56,47 +52,21 @@ public class CurrentValueDisplay : SaveableObject<CurrentValueDisplay, CurrentVa
                 currentValueNegativeSymbolAlpha = 0f;
             }
 
-            Color curColor = currentValueDisplayHi.color;
-            curColor.a = currentValueDisplayHiAlpha;
-            currentValueDisplayHi.color = curColor;
-
-            curColor = currentValueDisplayLo.color;
-            curColor.a = currentValueDisplayLoAlpha;
-            currentValueDisplayLo.color = curColor;
-
-            curColor = currentValueNegativeSymbol.color;
-            curColor.a = currentValueNegativeSymbolAlpha;
-            currentValueNegativeSymbol.color = curColor;
-        }
-    }
-    
-    private Color _color;
-    [ShowNativeProperty]
-    public Color color {
-        get => _color;
-        set {
-            currentValueDisplayHi.color = value.WithAlphaFrom(currentValueDisplayHi.color);
-            currentValueDisplayLo.color = value.WithAlphaFrom(currentValueDisplayLo.color);
-            currentValueNegativeSymbol.color = value.WithAlphaFrom(currentValueNegativeSymbol.color);
-            _color = value;
+            currentValueDisplay.color = currentValueDisplay.color.WithAlpha(finalHiAlpha);
+            currentValueDisplayLo.color = currentValueDisplayLo.color.WithAlpha(finalLoAlpha);
+            currentValueNegativeSymbol.color = currentValueNegativeSymbol.color.WithAlpha(currentValueNegativeSymbolAlpha);
         }
     }
 
-    // Start is called before the first frame update
-    protected override void Start() {
-        base.Start();
-        base9Symbols = Resources.LoadAll<Sprite>("Images/Base9/").OrderBy(s => int.Parse(s.name)).ToArray();
+    protected override void ApplyColors(Color to) {
+        currentValueDisplay.color = to.WithAlphaFrom(currentValueDisplay.color);
+        currentValueDisplayLo.color = to.WithAlphaFrom(currentValueDisplayLo.color);
+        currentValueNegativeSymbol.color = to.WithAlphaFrom(currentValueNegativeSymbol.color);
     }
 
-    // Update is called once per frame
-    void Update() {
-        if (DebugInput.GetKey("9")) {
-            actualValue = Mathf.Clamp(actualValue + 1, MIN, MAX);
-        }
-        else if (DebugInput.GetKey("0")) {
-            actualValue = Mathf.Clamp(actualValue - 1, MIN, MAX);
-        }
-        
+    protected override void Update() {
+        base.Update();
+
         displayedValue = Mathf.Lerp(displayedValue, actualValue, Time.deltaTime * lerpSpeed);
     }
 
@@ -111,18 +81,10 @@ public class CurrentValueDisplay : SaveableObject<CurrentValueDisplay, CurrentVa
         private float currentValueNegativeSymbolAlpha;
         
         public CurrentValueDisplaySave(CurrentValueDisplay script) : base(script) {
-            this.actualValue = script.actualValue;
-            this.displayedValue = script.displayedValue;
-            this.currentValueDisplayLoAlpha = script.currentValueDisplayLoAlpha;
-            this.currentValueDisplayHiAlpha = script.currentValueDisplayHiAlpha;
-            this.currentValueNegativeSymbolAlpha = script.currentValueNegativeSymbolAlpha;
+            throw new NotImplementedException("CurrentValueDisplaySave");
         }
         public override void LoadSave(CurrentValueDisplay script) {
-            script.actualValue = this.actualValue;
-            script.displayedValue = this.displayedValue;
-            script.currentValueDisplayLoAlpha = this.currentValueDisplayLoAlpha;
-            script.currentValueDisplayHiAlpha = this.currentValueDisplayHiAlpha;
-            script.currentValueNegativeSymbolAlpha = this.currentValueNegativeSymbolAlpha;
+            throw new NotImplementedException("CurrentValueDisplaySave");
         }
     }
 

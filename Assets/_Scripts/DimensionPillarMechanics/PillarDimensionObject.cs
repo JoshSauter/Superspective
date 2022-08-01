@@ -140,7 +140,7 @@ public class PillarDimensionObject : DimensionObject {
 
 	void Update() {
 		if (!hasInitialized) return;
-		if (LevelManager.instance.IsCurrentlyLoadingScenes) return;
+		if (GameManager.instance.IsCurrentlyLoading) return;
 		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
 		
 		DimensionPillar DetermineActivePillar() {

@@ -209,16 +209,6 @@ namespace Saving {
         }
         
         /// <summary>
-        /// Used before loading a different save file to clean state
-        /// </summary>
-        public void DeleteAllDynamicObjectsInScene() {
-            foreach (var dynamicObj in dynamicObjects.Values) {
-                Object.Destroy(dynamicObj.gameObject);
-            }
-            dynamicObjects.Clear();
-        }
-        
-        /// <summary>
         /// Creates a SaveFile for this scene and returns it
         /// </summary>
         /// <returns>SaveFileForScene for this scene</returns>
@@ -419,6 +409,32 @@ namespace Saving {
                     .ToDictionary(s => s.ID);
             }
         }
+
+        /// <summary>
+        /// Clears saveableObjects and dynamicObjects if the scene is loaded,
+        /// or serializedSaveObjects and serializedDynamicObjects if the scene is unloaded.
+        /// Used before loading a save file if this level was never loaded in that save file (missing in the save file)
+        /// </summary>
+        public void ClearAllState() {
+            if (sceneIsLoaded) {
+                saveableObjects.Clear();
+                dynamicObjects.Clear(); // Should already be clear from calling DeleteAllDynamicObjectsInScene earlier
+            }
+            else {
+                serializedSaveObjects.Clear();
+                serializedDynamicObjects.Clear();
+            }
+        }
+        
+        /// <summary>
+        /// Used before loading a different save file to clean state
+        /// </summary>
+        public void DeleteAllDynamicObjectsInScene() {
+            foreach (var dynamicObj in dynamicObjects.Values) {
+                Object.Destroy(dynamicObj.gameObject);
+            }
+            dynamicObjects.Clear();
+        }
         
         // Sometimes SaveableObjects don't register themselves by the time they are referenced by something else
         // (for example, if they start deactivated), and we need to find them by ID.
@@ -479,7 +495,7 @@ namespace Saving {
         
         // Helper method for when we know the scene is already in loaded state
         SaveableObject GetSaveableObjectOrNull(string id) {
-            return GetSaveableObject(id).Match(
+            return GetSaveableObject(id)?.Match(
                 result => result,
                 other => null
             );

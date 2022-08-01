@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using NaughtyAttributes;
+using SerializableClasses;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
+
 // ReSharper disable All
 
 namespace StateUtils {
     [Serializable]
-    public class StateMachine<T> where T : Enum {
+    public class StateMachine<T> where T : Enum, IConvertible {
         [SerializeField, Label("State")]
         private T _state;
         [SerializeField, Label("Previous State"), ReadOnly]
@@ -20,10 +23,19 @@ namespace StateUtils {
         [NonSerialized]
         private bool hasSubscribedToUpdate = false;
 
-        public delegate void OnStateChangeEvent(T prevState);
+        public delegate void OnStateChangeEvent(T prevState, float prevTimeSinceStateChanged);
         public delegate void OnStateChangeEventSimple();
         public event OnStateChangeEvent OnStateChange;
         public event OnStateChangeEventSimple OnStateChangeSimple;
+        public Dictionary<T, UnityEvent> onStateChangeDict;
+
+        [Serializable]
+        public struct StateMachineUnityEvent {
+            public T state;
+            public UnityEvent onStateChange;
+        }
+
+        public List<StateMachineUnityEvent> onStateChange;
 
         public T state {
             get {
@@ -41,11 +53,15 @@ namespace StateUtils {
         }
 
         private void ForceSetState(T newState) {
+            float prevTimeSinceStateChanged = _timeSinceStateChanged;
             _timeSinceStateChanged = 0f;
             _prevState = _state;
             _state = newState;
                 
-            OnStateChange?.Invoke(prevState);
+            OnStateChange?.Invoke(prevState, prevTimeSinceStateChanged);
+            if (onStateChangeDict.ContainsKey(newState)) {
+                onStateChangeDict[newState]?.Invoke();
+            }
             OnStateChangeSimple?.Invoke();
         }
 
@@ -63,6 +79,8 @@ namespace StateUtils {
         }
 
         public static implicit operator T(StateMachine<T> stateMachine) => stateMachine.state;
+        public static implicit operator StateMachine<T>(T enumValue) => new StateMachine<T>(enumValue);
+        public static implicit operator int(StateMachine<T> stateMachine) => (int)(object)stateMachine.state;
 
         public void Set(T newState, bool forceTimeReset = false) {
             state = newState;
@@ -80,6 +98,15 @@ namespace StateUtils {
             
             timedEvents.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
         }
+        
+        public void AddStateTransition(T fromState, Func<T> toStateDef, Func<bool> triggerWhen) {
+            CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
+                forState = fromState,
+                triggerWhen = triggerWhen
+            };
+            
+            customEvents.Add(customEventTrigger, () => state = toStateDef.Invoke());
+        }
 
         public void AddStateTransition(T fromState, T toState, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
@@ -90,12 +117,29 @@ namespace StateUtils {
             timedEvents.Add(stateTransitionTrigger, () => state = toState);
         }
 
+        public void AddStateTransition(T fromState, T toState, Func<bool> triggerWhen) {
+            CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
+                forState = fromState,
+                triggerWhen = triggerWhen
+            };
+            
+            customEvents.Add(customEventTrigger, () => state = toState);
+        }
+
+        public void AddTrigger(Func<T, bool> forStates, Action whatToDo) {
+            AddTrigger(forStates, 0f, whatToDo);
+        }
+
         public void AddTrigger(Func<T, bool> forStates, float atTime, Action whatToDo) {
             foreach (T enumValue in Enum.GetValues(typeof(T))) {
                 if (forStates.Invoke(enumValue)) {
                     AddTrigger(enumValue, atTime, whatToDo);
                 }
             }
+        }
+        
+        public void AddTrigger(Func<T, bool> forStates, Action<T> whatToDo) {
+            AddTrigger(forStates, 0f, whatToDo);
         }
         
         public void AddTrigger(Func<T, bool> forStates, float atTime, Action<T> whatToDo) {
@@ -105,6 +149,10 @@ namespace StateUtils {
                 }
             }
         }
+
+        public void AddTrigger(T forState, Action whatToDo) {
+            AddTrigger(forState, 0f, whatToDo);
+        }
         
         public void AddTrigger(T forState, float atTime, Action whatToDo) {
             TimedEventTrigger timedEventTrigger = new TimedEventTrigger { forState = forState, atTime = atTime };
@@ -113,7 +161,23 @@ namespace StateUtils {
         
         #region Custom Events
 
-        [Serializable]
+        class CustomEventTrigger {
+            public T forState;
+            public Func<bool> triggerWhen;
+        }
+
+        [NonSerialized] private Dictionary<CustomEventTrigger, Action> _customEvents;
+
+        private Dictionary<CustomEventTrigger, Action> customEvents {
+            get {
+                if (_customEvents == null) {
+                    _customEvents = new Dictionary<CustomEventTrigger, Action>();
+                }
+
+                return _customEvents;
+            }
+        }
+
         class TimedEventTrigger {
             public T forState;
             public float atTime;
@@ -135,14 +199,23 @@ namespace StateUtils {
             // Don't trigger events while Time.deltaTime is 0
             if (Math.Abs(prevTime - _timeSinceStateChanged) < float.Epsilon) return;
             
-            var eventsToTrigger = timedEvents.Where(triggerAndAction => {
+            var timedEventsToTrigger = timedEvents.Where(triggerAndAction => {
                 TimedEventTrigger trigger = triggerAndAction.Key;
                 return trigger.forState.Equals(_state) &&
                        trigger.atTime >= prevTime &&
                        trigger.atTime < _timeSinceStateChanged;
             }).Select(triggerAndAction => triggerAndAction.Value);
 
-            foreach (Action action in eventsToTrigger) {
+            foreach (Action action in timedEventsToTrigger) {
+                action.Invoke();
+            }
+
+            var customEventsToTrigger = customEvents.Where(triggerAndAction => {
+                CustomEventTrigger trigger = triggerAndAction.Key;
+                return trigger.forState.Equals(_state) && trigger.triggerWhen.Invoke();
+            }).Select(triggerAndAction => triggerAndAction.Value);
+
+            foreach (var action in customEventsToTrigger) {
                 action.Invoke();
             }
         }
@@ -167,10 +240,12 @@ namespace StateUtils {
 
         private void InitIdempotent() {
             if (hasSubscribedToUpdate || GlobalUpdate.instance == null) return;
+
+            onStateChangeDict = onStateChange?.ToDictionary(unityEvent => unityEvent.state, unityEvent => unityEvent.onStateChange) ?? new Dictionary<T, UnityEvent>();
             
             GlobalUpdate.instance.UpdateGlobal += Update;
             hasSubscribedToUpdate = true;
-        } 
+        }
 
         private void Update() {
             float prevTime = _timeSinceStateChanged;

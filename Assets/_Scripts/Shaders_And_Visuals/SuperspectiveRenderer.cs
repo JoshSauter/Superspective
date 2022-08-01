@@ -51,7 +51,7 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		List<string> propertiesToCheckForOnAwake = new List<string>() { mainColor, emissionColor };
 		foreach (string prop in propertiesToCheckForOnAwake) {
 			if (GetMaterial().HasProperty(prop)) {
-				//SetColor(prop, r.material.GetColor(prop));
+				SetColor(prop, r.material.GetColor(prop));
 			}
 		}
 	}

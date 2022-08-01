@@ -7,6 +7,7 @@ using System;
 using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
+	[RequireComponent(typeof(UniqueId))]
 	public class ValveControl : SaveableObject<ValveControl, ValveControl.ValveControlSave> {
 		const float lookSpeedMultiplier = 0.5f;
 		InteractableObject interactableObject;

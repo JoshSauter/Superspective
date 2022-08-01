@@ -18,7 +18,8 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         bool playerIsInInfiniteHallway = false;
 
         private void Awake() {
-            lowerPlatformPortal.pauseRenderingAndLogic = !exitsAreConnected;
+            lowerPlatformPortal.pauseRendering = !exitsAreConnected;
+            lowerPlatformPortal.pauseLogic = !exitsAreConnected;
         }
 
         void Start() {
@@ -56,15 +57,17 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
                 exitsAreConnected = false;
             }
 
-            if (lowerPlatformPortal.pauseRenderingOnly && exitsAreConnected) {
-                lowerPlatformPortal.pauseRenderingAndLogic = false;
-                lowerPlatformPortal.PortalMaterial();
+            if (lowerPlatformPortal.pauseRendering && exitsAreConnected) {
+                lowerPlatformPortal.pauseRendering = false;
+                lowerPlatformPortal.pauseLogic = false;
             }
-            else if (!lowerPlatformPortal.pauseRenderingOnly && !exitsAreConnected) {
-                lowerPlatformPortal.pauseRenderingAndLogic = true;
-                lowerPlatformPortal.DefaultMaterial();
+            else if (!lowerPlatformPortal.pauseRendering && !exitsAreConnected) {
+                lowerPlatformPortal.pauseRendering = true;
+                lowerPlatformPortal.pauseLogic = true;
             }
-            lowerPlatformPortal.pauseRenderingAndLogic = !exitsAreConnected;
+            lowerPlatformPortal.SetMaterialsToEffectiveMaterial();
+            lowerPlatformPortal.pauseRendering = !exitsAreConnected;
+            lowerPlatformPortal.pauseLogic = !exitsAreConnected;
 
             teleportFacingBackward.teleportEnter.enabled = !exitsAreConnected;
             teleportFacingForward.teleportEnter.enabled = !exitsAreConnected;

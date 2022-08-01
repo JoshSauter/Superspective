@@ -1,25 +1,31 @@
 ﻿using System;
 using Audio;
 using LevelSpecific.BlackRoom.BlackRoom3;
+using NaughtyAttributes;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
 
 public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
-    float maxShakeDistance = 32f;
-    float minShakeDistance = 8f;
+    public AudioName audioToPlay = AudioName.LoopingMachinery;
+    public float maxShakeDistance = 32f;
+    public float minShakeDistance = 8f;
     float shakeIntensity = 0.4f;
-    float shakeDuration = 0.75f;
-    float shakePeriod = 4f;
+    public float shakeDuration = 0.75f;
+    public float shakePeriod = 4f;
     
-    float loopingMachinerySoundMaxVolume = .65f;
+    public float loopingMachinerySoundMaxVolume = .65f;
 
     public override string ID => $"{gameObject.scene.name}_{gameObject.FullPath()}";
 
     protected override void Init() {
-        AudioManager.instance.PlayWithUpdate(AudioName.LoopingMachinery, ID, this, true, UpdateAudioJob);
+        AudioManager.instance.PlayWithUpdate(audioToPlay, ID, this, true, UpdateAudioJob);
     }
-    
+
+    private void OnDisable() {
+        AudioManager.instance.GetAudioJob(audioToPlay, ID).Stop();
+    }
+
     public void UpdateAudioJob(AudioManager.AudioJob job) {
         job.audio.volume = loopingMachinerySoundMaxVolume;
             

@@ -32,10 +32,11 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	// We trade out the ToCathedral DimensionObject for ToCathedral PillarDimensionObject after player walks through fake portal
 	// These are SerializableReferences because they come from another scene (WhiteRoomBackRoom)
 	public DimensionObjectReference archToNextRoomReference;
-	MaybeDimensionObject archToNextRoom => archToNextRoomReference.Reference;
-	
+
+	MaybeDimensionObject archToNextRoom => gameObject.IsInActiveScene() ? archToNextRoomReference.Reference : null;
+
 	public DimensionObjectReference holeCoverReference;
-	MaybeDimensionObject holeCover => holeCoverReference.Reference;
+	MaybeDimensionObject holeCover => gameObject.IsInActiveScene() ? holeCoverReference.Reference : null;
 	
 	public enum State {
         Unsolved,
@@ -140,7 +141,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 		switch (state) {
 			case State.Unsolved:
-				if (powerTrail.state == PowerTrailState.Powered) {
+				if (powerTrail.state == PowerTrailState.Powered || this.InstaSolvePuzzle()) {
 					state = State.FakePortalPowered;
 				}
 				break;

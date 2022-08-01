@@ -88,6 +88,8 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
     }
 
     void Update() {
+        if (GameManager.instance.IsCurrentlyLoading) return;
+        
         timeSinceStateChanged += Time.deltaTime;
 
         // Make it so the button is only clickable when it will do something (spawn a cube or destroy a spawned cube)
@@ -290,6 +292,7 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
 
             cubeSpawned = null;
             cubeGrabbedFromSpawner = cube;
+            cube.gameObject.layer = LayerMask.NameToLayer("Default");
         }
     }
     

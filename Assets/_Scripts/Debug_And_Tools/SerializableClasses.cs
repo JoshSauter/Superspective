@@ -420,4 +420,24 @@ namespace SerializableClasses {
 			return new SerializableDictionary<K, V>() { Dictionary = dict };
 		}
 	}
+
+	[Serializable]
+	public class SerializableParticleSystem {
+		private uint randomSeed;
+		private float time;
+		
+		public void ApplyToParticleSystem(ParticleSystem ps) {
+			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+			ps.randomSeed = this.randomSeed;
+			ps.Simulate(this.time);
+			ps.Play();
+		}
+
+		public static implicit operator SerializableParticleSystem(ParticleSystem ps) {
+			return new SerializableParticleSystem {
+				randomSeed = ps.randomSeed,
+				time = ps.time
+			};
+		}
+	}
 }

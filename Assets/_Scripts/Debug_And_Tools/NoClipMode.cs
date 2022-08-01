@@ -5,13 +5,14 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
-public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
+public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	Transform playerCamera;
 	PlayerMovement playerMovement;
 	Rigidbody playerRigidbody;
 	Collider playerCollider;
 	PlayerButtonInput input;
 
+	private bool allowGodModeInNonDevBuild = true;
 	public bool noClipOn = false;
 	float desiredSpeed;
 	float speed;
@@ -32,15 +33,16 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	}
 
     void Update() {
-        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.G)) {
+        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.G) ||
+            (allowGodModeInNonDevBuild && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G))) {
 			ToggleNoClip();
 		}
 
 		if (noClipOn) {
-			if (DebugInput.GetKeyDown(KeyCode.LeftShift)) {
+			if (DebugInput.GetKeyDown(KeyCode.LeftShift) || (allowGodModeInNonDevBuild && Input.GetKeyDown(KeyCode.LeftShift))) {
 				desiredSpeed = (desiredSpeed == sprintSpeed) ? moveSpeed : sprintSpeed;
 			}
-			else if (DebugInput.GetKeyDown(KeyCode.LeftControl)) {
+			else if (DebugInput.GetKeyDown(KeyCode.LeftControl) || (allowGodModeInNonDevBuild && Input.GetKeyDown(KeyCode.LeftControl))) {
 				desiredSpeed = (desiredSpeed == slowMoveSpeed) ? moveSpeed : slowMoveSpeed;
 			}
 			
@@ -59,7 +61,7 @@ public class NoClipMode : SaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	void ToggleNoClip() {
 		desiredSpeed = moveSpeed;
 		noClipOn = !noClipOn;
-		Debug.Log(noClipOn ? "Enabling noclip" : "Disabling noclip");
+		debug.Log(noClipOn ? "Enabling noclip" : "Disabling noclip");
 		playerMovement.enabled = !noClipOn;
 		playerRigidbody.isKinematic = noClipOn;
 		playerCollider.isTrigger = noClipOn;

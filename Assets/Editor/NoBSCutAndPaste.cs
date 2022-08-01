@@ -39,7 +39,7 @@ using Object = UnityEngine.Object;
 
 public class NoBSCutAndPaste {
     static bool _cut;
-    static GameObject[] _tempObjs;
+    static GameObject[] objsToBePasted;
 
     [MenuItem("GameObject/Cut without changing shit (Shift-Ctrl-X) %#x", false, 0)]
     static void CutWithoutChangingShit() {
@@ -58,11 +58,11 @@ public class NoBSCutAndPaste {
                 "Don't use the 3D window, click on the gameobject in the hierarchy tree instead before doing cut/paste.",
                 "Ok"
             );
-            _tempObjs = null;
+            objsToBePasted = null;
             return;
         }
 
-        _tempObjs = go;
+        objsToBePasted = go;
         _cut = true;
 
         //Debug.Log("Cutting" + string.Join<GameObject>(", ", _tempObjs) + ", now choose Paste without changing shit");
@@ -70,9 +70,9 @@ public class NoBSCutAndPaste {
 
     [MenuItem("GameObject/Copy without changing shit (Shift-Ctrl-C) %#x", false, 0)]
     static void CopyWithoutChangingShit() {
-        GameObject[] go = Selection.gameObjects;
+        GameObject[] gameObjectsSelected = Selection.gameObjects;
 
-        if (go == null) {
+        if (gameObjectsSelected == null) {
             EditorUtility.DisplayDialog("Woah!", "First click on a gameobject in the hierarchy!", "Ok");
             return;
         }
@@ -85,11 +85,11 @@ public class NoBSCutAndPaste {
                 "Don't use the 3D window, click on the gameobject in the hierarchy tree instead before doing cut/paste.",
                 "Ok"
             );
-            _tempObjs = null;
+            objsToBePasted = null;
             return;
         }
 
-        _tempObjs = go;
+        objsToBePasted = gameObjectsSelected;
         _cut = false;
 
         //Debug.Log("Copying" + string.Join<GameObject>(", ", _tempObjs) + ", now choose Paste without changing shit");
@@ -107,7 +107,9 @@ public class NoBSCutAndPaste {
 
     [MenuItem("GameObject/Paste without changing shit (Shift-Ctrl-V) %#v", false, 0)]
     static void PasteWithoutChangingShit() {
-        if (_tempObjs == null) {
+        if (Selection.objects.Length <= 0) return;
+        
+        if (objsToBePasted == null) {
             EditorUtility.DisplayDialog(
                 "Woah!",
                 "Nothing to paste.  Highlight an object, right click, and choose 'Paste without changing shit' first.",
@@ -122,57 +124,48 @@ public class NoBSCutAndPaste {
                 "Don't use the 3D window, click on objects in the hierarchy tree instead before doing cut/paste.",
                 "Ok"
             );
-            _tempObjs = null;
+            objsToBePasted = null;
             return;
         }
 
-        Transform go = Selection.activeTransform;
-        if (go == null || go.gameObject == null) {
-            Debug.Log(
-                "Pasting " + string.Join<GameObject>(", ", _tempObjs) +
-                " without changing its local transform stuff.  (Pasted to root as a gameobject wasn't highlighted to parent it to)"
-            );
+        foreach (Transform go in Selection.transforms) {
+            if (go == null || go.gameObject == null) {
+                Debug.Log(
+                    "Pasting " + string.Join<GameObject>(", ", objsToBePasted) +
+                    " without changing its local transform stuff.  (Pasted to root as a gameobject wasn't highlighted to parent it to)"
+                );
 
-            if (_cut) {
-                //Move the object to the root
-                foreach (GameObject _tempObj in _tempObjs) {
-                    _tempObj.transform.SetParent(null, false);
+                foreach (GameObject objToBePasted in objsToBePasted) {
+                    Transform newObj = DuplicateObject(objToBePasted);
+                    newObj.transform.SetParent(null, false);
+                }
+            }
+            else {
+                Debug.Log(
+                    "Pasting " + string.Join<GameObject>(", ", objsToBePasted) + " under " + go.gameObject.name +
+                    " without changing its local transform stuff."
+                );
+                foreach (GameObject _tempObj in objsToBePasted) {
+                    Transform newObj = DuplicateObject(_tempObj);
+                    newObj.transform.SetParent(go.transform, false);
+                    newObj.transform.SetAsFirstSibling();
+                    newObj.name = _tempObj.name;
                 }
 
-                _tempObjs = null;
-                return;
+                SetExpandedRecursive(go.gameObject, true);
             }
-
-            foreach (GameObject _tempObj in _tempObjs) {
-                Transform newObj = DuplicateObject(_tempObj);
-                newObj.transform.SetParent(null, false);
-            }
-
-            return;
         }
 
-        Debug.Log(
-            "Pasting " + string.Join<GameObject>(", ", _tempObjs) + " under " + go.gameObject.name +
-            " without changing its local transform stuff."
-        );
         if (_cut) {
-            foreach (GameObject _tempObj in _tempObjs) {
-                _tempObj.transform.SetParent(go.transform, false);
-                _tempObj.transform.SetAsFirstSibling();
+            foreach (var objPasted in objsToBePasted) {
+                Object.DestroyImmediate(objPasted);
             }
 
-            _tempObjs = null;
-        }
-        else {
-            foreach (GameObject _tempObj in _tempObjs) {
-                Transform newObj = DuplicateObject(_tempObj);
-                newObj.transform.SetParent(go.transform, false);
-                newObj.transform.SetAsFirstSibling();
-                newObj.name = _tempObj.name;
-            }
+            objsToBePasted = null;
         }
 
-        SetExpandedRecursive(go.gameObject, true);
+        // Only execute once per selection of gameobjects
+        Selection.objects = null;
     }
 
     public static Transform DuplicateObject(GameObject obj) {

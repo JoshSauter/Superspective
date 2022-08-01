@@ -8,7 +8,7 @@ namespace LevelSpecific.BehindForkTransition {
         public ViewLockObject painting;
 
         void Update() {
-            if (painting.state == PlayerLook.State.ViewLocking) {
+            if (painting.state == PlayerLook.ViewLockState.ViewLocking) {
                 float timeSinceViewLockingStart = PlayerLook.instance.timeSinceStateChange;
 
                 float t = Mathf.Clamp01(timeSinceViewLockingStart / (painting.viewLockTime / 2f));

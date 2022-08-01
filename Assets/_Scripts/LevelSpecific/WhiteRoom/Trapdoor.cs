@@ -75,7 +75,7 @@ namespace LevelSpecific.WhiteRoom {
         void UpdateState() {
             switch (state) {
                 case State.Closed:
-                    if (powerTrailToReactTo.fullyPowered) {
+                    if (powerTrailToReactTo.fullyPowered || this.InstaSolvePuzzle()) {
                         state = State.Opening;
                     }
                     break;

@@ -21,7 +21,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
 
     public Collider hitbox;
 
-    PlayerLook.State _state;
+    PlayerLook.ViewLockState _state;
     InteractableObject interactableObject;
     public ViewLockEvent OnViewLockEnterBegin;
     public ViewLockEvent OnViewLockEnterFinish;
@@ -29,23 +29,23 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public ViewLockEvent OnViewLockExitFinish;
     Transform playerCamera;
 
-    public PlayerLook.State state {
+    public PlayerLook.ViewLockState state {
         get => _state;
         set {
             if (state == value) return;
 
             _state = value;
             switch (value) {
-                case PlayerLook.State.ViewLocking:
+                case PlayerLook.ViewLockState.ViewLocking:
                     OnViewLockEnterBegin?.Invoke();
                     break;
-                case PlayerLook.State.ViewLocked:
+                case PlayerLook.ViewLockState.ViewLocked:
                     OnViewLockEnterFinish?.Invoke();
                     break;
-                case PlayerLook.State.ViewUnlocking:
+                case PlayerLook.ViewLockState.ViewUnlocking:
                     OnViewLockExitBegin?.Invoke();
                     break;
-                case PlayerLook.State.ViewUnlocked:
+                case PlayerLook.ViewLockState.ViewUnlocked:
                     OnViewLockExitFinish?.Invoke();
 
                     hitbox.enabled = true;
@@ -56,7 +56,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
-    bool isLockedOnThisObject => state != PlayerLook.State.ViewUnlocked;
+    bool isLockedOnThisObject => state != PlayerLook.ViewLockState.ViewUnlocked;
 
     protected override void Awake() {
         base.Awake();
@@ -78,11 +78,11 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     }
 
     public void OnLeftMouseButtonDown() {
-        if (PlayerLook.instance.state == PlayerLook.State.ViewUnlocked) {
+        if (PlayerLook.instance.state == PlayerLook.ViewLockState.ViewUnlocked) {
             hitbox.enabled = false;
             AudioManager.instance.Play(AudioName.ViewLockObject, ID, this);
             PlayerLook.instance.SetViewLock(this, ClosestViewLock(playerCamera.position, playerCamera.rotation));
-            state = PlayerLook.State.ViewLocking;
+            state = PlayerLook.ViewLockState.ViewLocking;
         }
     }
 
@@ -125,7 +125,7 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         }
 
         public override void LoadSave(ViewLockObject viewLockObject) {
-            viewLockObject._state = (PlayerLook.State) state;
+            viewLockObject._state = (PlayerLook.ViewLockState) state;
             viewLockObject.hitbox.enabled = colliderEnabled;
         }
     }

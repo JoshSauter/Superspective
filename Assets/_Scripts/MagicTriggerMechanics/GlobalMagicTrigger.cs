@@ -61,7 +61,8 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-        void OnValidate() {
+        protected override void OnValidate() {
+	        base.OnValidate();
 			foreach (var action in actionsToTrigger) {
 				if (action.actionTiming.HasFlag(ActionTiming.OnEnter) || action.actionTiming.HasFlag(ActionTiming.OnExit)) {
 					Debug.LogError("OnEnter and OnExit trigger action timings will not work for GlobalMagicTriggers");

@@ -12,6 +12,8 @@ namespace LevelSpecific.BlackRoom {
 		public bool solved = false;
 		public bool isActive = false;
 		ColorPuzzleNode[] solutionNodes;
+		public int numSolved => solutionNodes.Count(cpn => cpn.isSolved);
+		public int numPuzzles => solutionNodes.Length;
 		LightBlocker[] lightBlockers;
 		Transform smallPuzzle;
 
