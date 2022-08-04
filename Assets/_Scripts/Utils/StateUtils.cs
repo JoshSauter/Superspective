@@ -23,6 +23,9 @@ namespace StateUtils {
         [NonSerialized]
         private bool hasSubscribedToUpdate = false;
 
+        [NonSerialized]
+        private bool useFixedUpdateInstead = false;
+
         public delegate void OnStateChangeEvent(T prevState, float prevTimeSinceStateChanged);
         public delegate void OnStateChangeEventSimple();
         public event OnStateChangeEvent OnStateChange;
@@ -222,9 +225,16 @@ namespace StateUtils {
         #endregion
         
         public StateMachine(T startingState) {
-            _state = startingState;
-            _prevState = _state;
-            _timeSinceStateChanged = 0f;
+            this._state = startingState;
+            this._prevState = _state;
+            this._timeSinceStateChanged = 0f;
+        }
+        
+        public StateMachine(T startingState, bool useFixedUpdateInstead = false) {
+            this._state = startingState;
+            this._prevState = _state;
+            this._timeSinceStateChanged = 0f;
+            this.useFixedUpdateInstead = useFixedUpdateInstead;
         }
 
         private StateMachine() { }
@@ -242,14 +252,20 @@ namespace StateUtils {
             if (hasSubscribedToUpdate || GlobalUpdate.instance == null) return;
 
             onStateChangeDict = onStateChange?.ToDictionary(unityEvent => unityEvent.state, unityEvent => unityEvent.onStateChange) ?? new Dictionary<T, UnityEvent>();
-            
-            GlobalUpdate.instance.UpdateGlobal += Update;
+
+            if (useFixedUpdateInstead) {
+                GlobalUpdate.instance.FixedUpdateGlobal += Update;
+            }
+            else {
+                GlobalUpdate.instance.UpdateGlobal += Update;
+            }
             hasSubscribedToUpdate = true;
         }
 
+        // Does either Update or FixedUpdate based on config
         private void Update() {
             float prevTime = _timeSinceStateChanged;
-            _timeSinceStateChanged += Time.deltaTime;
+            _timeSinceStateChanged += useFixedUpdateInstead ? Time.fixedDeltaTime : Time.deltaTime;
             TriggerEvents(prevTime);
         }
 

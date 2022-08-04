@@ -8,6 +8,7 @@ public class GlobalUpdate : Singleton<GlobalUpdate> {
     public delegate void GlobalUpdateEvent();
     public event GlobalUpdateEvent UpdateGlobal;
     public event GlobalUpdateEvent LateUpdateGlobal;
+    public event GlobalUpdateEvent FixedUpdateGlobal;
     
     // Update is called once per frame
     void Update() {
@@ -16,5 +17,9 @@ public class GlobalUpdate : Singleton<GlobalUpdate> {
 
     private void LateUpdate() {
         LateUpdateGlobal?.Invoke();
+    }
+
+    private void FixedUpdate() {
+        FixedUpdateGlobal?.Invoke();
     }
 }

@@ -9,16 +9,22 @@ using NaughtyAttributes;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
+using StateUtils;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
+#region JumpConfig
     // Jump Settings
     public enum JumpState {
         JumpReady,
         Jumping,
         JumpOnCooldown
     }
+    const float _jumpForce = 936;
+    const float jumpCooldown = 0.2f; // Time after landing before jumping is available again
+    const float minJumpTime = 0.5f; // as long as underMinJumpTime
+#endregion
 
     // For Debugging:
     void SetTimeScale() {
@@ -34,17 +40,56 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     const float _walkSpeed = 9f;
     const float _runSpeed = 14f;
     const float desiredMovespeedLerpSpeed = 10;
-    const float _jumpForce = 936;
     public const float windResistanceMultiplier = 0.4f;
-    const float jumpCooldown = 0.2f; // Time after landing before jumping is available again
-    const float minJumpTime = 0.5f; // as long as underMinJumpTime
+    
+#region StaircaseConfig
+    public class StepFound {
+        public ContactPoint contact;
+        public readonly Vector3 contactNormal;
+        public readonly Vector3 stepOffset;
 
+        private Transform player => PlayerMovement.instance.transform;
+        public Vector3 stepOffsetVertical => Vector3.Dot(stepOffset, player.up) * player.up;
+        public Vector3 stepOffsetHorizontal => Vector3.Dot(stepOffset, -contactNormal) * -contactNormal;
+
+        public StepFound(ContactPoint contact, Vector3 contactNormal, Vector3 stepOffset) {
+            this.contact = contact;
+            this.contactNormal = contactNormal;
+            this.stepOffset = stepOffset;
+        }
+    }
+    
     // Staircase handling characteristics
-    const float _maxStepHeight = 0.6f;
+    private const float _maxStepHeight = 0.6f;
     private const int framesAfterStepToKeepVelocityZero = 5;
+    private const float _stepSpeed = 6f;
+    private float stepSpeed => movespeed * 1.5f;// _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
+    [ShowNonSerializedField]
+    private float distanceMovedForStaircaseOffset = 0;
+
+    public enum StepState {
+        StepReady,
+        SteppingDiagonal
+    }
+    public StateMachine<StepState> stepState = new StateMachine<StepState>(StepState.StepReady, true);
+    public StepFound currentStep;
+
+    [ShowNativeProperty]
+    public Vector3 currentStepDiagonal => (currentStepUp + currentStepForward);
+    
+    [ShowNativeProperty]
+    public Vector3 currentStepUp => currentStep?.stepOffsetVertical + (transform.up * 0.01f) ?? Vector3.zero;
+    [ShowNativeProperty]
+    // Move in the direction of player desired movement, with the distance == the radius of the player
+    public Vector3 currentStepForward => ProjectHorizontalVelocity(lastGroundVelocity.normalized) * (thisCollider == null ? 0 : thisCollider.radius);
+
+    public Vector3 lastGroundVelocity;
 
     // How far do we move into the step before raycasting down?
-    float _stepOverbiteMagnitude => movespeed * Time.deltaTime;
+    float stepOverbiteMagnitude => movespeed * Time.fixedDeltaTime * scale;
+    float maxStepHeight => _maxStepHeight * scale;
+#endregion
+
     public bool autoRun;
     public Rigidbody thisRigidbody;
 
@@ -54,10 +99,11 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     float jumpCooldownRemaining; // Prevents player from jumping again while > 0
     JumpState jumpState = JumpState.JumpReady;
 
-    float movespeed;
 
-    bool stopped =>
-        PlayerLook.instance.state != PlayerLook.ViewLockState.ViewUnlocked || CameraFlythrough.instance.isPlayingFlythrough || !GameManager.instance.gameHasLoaded;
+    private bool stopped =>
+        PlayerLook.instance.state != PlayerLook.ViewLockState.ViewUnlocked ||
+        CameraFlythrough.instance.isPlayingFlythrough ||
+        !GameManager.instance.gameHasLoaded;
 
     CapsuleCollider thisCollider;
     MeshRenderer thisRenderer;
@@ -71,11 +117,10 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
     public float movespeedMultiplier = 1;
     
+    float movespeed;
     public float walkSpeed => _walkSpeed * scale * movespeedMultiplier;
     public float runSpeed => _runSpeed * scale * movespeedMultiplier;
     public float jumpForce => _jumpForce * scale;
-    float maxStepHeight => _maxStepHeight * scale;
-    float stepOverbiteMagnitude => _stepOverbiteMagnitude * scale;
     public Vector3 bottomOfPlayer => transform.position - transform.up * 2.5f;
 
     public struct TimeSlice {
@@ -141,6 +186,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
             TransformTimeSlicesUponTeleport(inPortal.transform, inPortal.otherPortal.transform);
         };
+
+        InitStaircaseStateMachine();
     }
 
     void TransformTimeSlicesUponTeleport(Transform teleportIn, Transform teleportOut) {
@@ -158,16 +205,19 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         // Might make this non-debug-only in the future again
         if (DebugInput.GetKeyDown(KeyCode.BackQuote)) autoRun = !autoRun;
 
-        if (input.ShiftHeld || autoRun)
+        bool recentlySteppedUp = stepState.prevState == StepState.SteppingDiagonal && stepState.timeSinceStateChanged < 0.25f;
+        if ((input.ShiftHeld || autoRun) && !recentlySteppedUp) {
             movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
-        else
+        }
+        else {
             movespeed = Mathf.Lerp(movespeed, walkSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
+        }
     }
 
     void FixedUpdate() {
         UpdateGroundedState();
 
-        thisRigidbody.isKinematic = stopped;
+        thisRigidbody.isKinematic = stopped || stepState != StepState.StepReady;
 
         if (timeSlices.Count >= 10) {
             timeSlices.RemoveAt(0);
@@ -182,14 +232,17 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         UpdateJumping();
 
         Vector3 desiredVelocity = thisRigidbody.velocity;
-        if (grounded.isGrounded)
-            desiredVelocity = CalculateGroundMovement(grounded.contact);
-        else
-            desiredVelocity = CalculateAirMovement();
-
+        desiredVelocity = grounded.isGrounded ? CalculateGroundMovement(grounded.contact) : CalculateAirMovement();
+        if (grounded.isGrounded && stepState == StepState.StepReady) {
+            lastGroundVelocity = desiredVelocity;
+        }
+        
         // Prevent player from floating around on cubes they're holding...
         if (grounded.standingOnHeldObject) desiredVelocity += 5 * Physics.gravity * Time.fixedDeltaTime;
 
+        UpdateStaircase(desiredVelocity);
+
+        // TODO: Check if all this is bugged in warped gravity
         float movingBackward = Vector2.Dot(
             new Vector2(desiredVelocity.x, desiredVelocity.z),
             new Vector2(transform.forward.x, transform.forward.z)
@@ -206,22 +259,9 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         else
             thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 
-        StepFound stepFound = DetectStep(desiredVelocity, grounded.contact, grounded.isGrounded);
-        if (stepFound != null) {
-            Vector3 prevBottomOfPlayer = bottomOfPlayer;
-            transform.Translate(stepFound.stepOffset, Space.World);
-            
-            if (DEBUG) {
-                Debug.DrawRay(prevBottomOfPlayer, bottomOfPlayer-prevBottomOfPlayer, Color.blue, 10);
-            }
-            KeepVerticalVelocityZeroAfterStaircaseStep(); // Hack to try to keep player from ramping off of staircase steps
-            Player.instance.cameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
-            if (Vector3.Dot(transform.up, stepFound.stepOffset) > 0) OnStaircaseStepUp?.Invoke();
-        }
-
         thisRigidbody.useGravity = !grounded.isGrounded;
 
-        if (!thisRigidbody.isKinematic) {
+        if (!thisRigidbody.isKinematic && stepState == StepState.StepReady) {
             thisRigidbody.velocity = desiredVelocity;
         }
 
@@ -233,27 +273,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             );
 
         allContactThisFrame.Clear();
-    }
-
-
-    private bool keepingVerticalVelocityZeroAfterStaircaseStep = false;
-    void KeepVerticalVelocityZeroAfterStaircaseStep() {
-        if (keepingVerticalVelocityZeroAfterStaircaseStep) return;
-
-        StartCoroutine(IKeepVerticalVelocityZeroAfterStaircaseStep());
-    }
-
-    IEnumerator IKeepVerticalVelocityZeroAfterStaircaseStep() {
-        keepingVerticalVelocityZeroAfterStaircaseStep = true;
-
-        for (int i = 0; i < framesAfterStepToKeepVelocityZero; i++) {
-            if (jumpState == JumpState.Jumping) break;
-            
-            thisRigidbody.velocity -= transform.up * 2 * Vector3.Dot(thisRigidbody.velocity, transform.up);
-            yield return new WaitForFixedUpdate();
-        }
-        
-        keepingVerticalVelocityZeroAfterStaircaseStep = false;
     }
 
     void OnCollisionStay(Collision collision) {
@@ -345,10 +364,12 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         float rayDistance = movespeed * Time.fixedDeltaTime + thisCollider.radius;
         RaycastHit obstacle = new RaycastHit();
         Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
-
+        
         if (obstacle.collider == null || obstacle.collider.isTrigger ||
-            (obstacle.collider.gameObject.GetComponent<PickupObject>()?.isHeld ?? false))
+            (obstacle.collider.gameObject.GetComponent<PickupObject>()?.isHeld ?? false)) {
             return movementVector;
+        }
+
         Vector3 newMovementVector = Vector3.ProjectOnPlane(movementVector, obstacle.normal);
         if (Vector3.Dot(ProjectedVerticalVelocity(), newMovementVector) > 0)
             debug.LogWarning("movementVector:" + movementVector + "\nnewMovementVector:" + newMovementVector);
@@ -380,6 +401,11 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         grounded.isGrounded = false;
 
         Vector3 jumpVector = -Physics.gravity.normalized * jumpForce;
+        
+        if (stepState != StepState.StepReady) {
+            stepState.Set(StepState.StepReady);
+            thisRigidbody.isKinematic = false;
+        }
         thisRigidbody.velocity = thisRigidbody.velocity.WithY(0);
         thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
         StartCoroutine(PrintMaxHeight(transform.position));
@@ -421,7 +447,67 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     public Vector3 ProjectedVerticalVelocity() {
         return thisRigidbody.velocity - ProjectedHorizontalVelocity();
     }
+    
+#region Staircase Handling
+    void InitStaircaseStateMachine() {
+        // // Transition from moving vertically to moving horizontally once we've moved far enough vertically
+        // stepState.AddStateTransition(StepState.SteppingVertical, StepState.SteppingHorizontal, () =>
+        //     distanceMovedForStaircaseOffset >= currentStepUp.magnitude
+        // );
+        // // Transition from moving horizontally to being ready to find a new step once we've moved far enough horizontally
+        // stepState.AddStateTransition(StepState.SteppingHorizontal, StepState.StepReady, () =>
+        //     distanceMovedForStaircaseOffset >= currentStepForward.magnitude
+        // );
+        // Transition from moving diagonally to being ready to find a new step once we've moved far enough
+        stepState.AddStateTransition(StepState.SteppingDiagonal, StepState.StepReady, () =>
+            distanceMovedForStaircaseOffset >= currentStepDiagonal.magnitude
+        );
+        
+        stepState.AddTrigger(StepState.SteppingDiagonal, () => Debug.DrawRay(bottomOfPlayer, currentStepDiagonal, Color.yellow, 10));
+        
+        // Reset distance moved whenever we change state
+        stepState.OnStateChangeSimple += () => distanceMovedForStaircaseOffset = 0f;
+    }
 
+    void UpdateStaircase(Vector3 desiredVelocity) {
+        void MoveAlongStep(Vector3 moveDirection) {
+            // How much distance do we actually have left to go
+            float distanceRemaining = moveDirection.magnitude - distanceMovedForStaircaseOffset;
+            // Either set the distance to move to full speed or whatever's left to move
+            float distanceToMove = Mathf.Min(stepSpeed * Time.fixedDeltaTime, distanceRemaining);
+            Vector3 diff = moveDirection.normalized * distanceToMove;
+            
+            debug.LogWarning($"Offset this frame: {diff:F3}");
+            // Move the player up, record the distance moved
+            transform.Translate(diff, Space.World);
+            distanceMovedForStaircaseOffset += distanceToMove;
+        }
+        
+        switch (stepState.state) {
+            case StepState.StepReady:
+                currentStep = DetectStep(desiredVelocity, grounded.contact, grounded.isGrounded);
+                if (currentStep != null) {
+                    //stepState.Set(StepState.SteppingVertical);
+                    stepState.Set(StepState.SteppingDiagonal);
+                    Player.instance.cameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
+                    if (Vector3.Dot(transform.up, currentStep.stepOffset) > 0) OnStaircaseStepUp?.Invoke();
+                }
+                break;
+            case StepState.SteppingDiagonal:
+                MoveAlongStep(currentStepDiagonal);
+                break;
+            // case StepState.SteppingVertical:
+            //     MoveAlongStep(currentStepUp);
+            //     break;
+            // case StepState.SteppingHorizontal:
+            //     MoveAlongStep(currentStepForward);
+            //     break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+    
+#endregion
     StepFound DetectStep(Vector3 desiredVelocity, ContactPoint ground, bool isGrounded) {
         // If player is not moving, don't do any raycasts, just return
         if (desiredVelocity.magnitude < 0.1f) return null;
@@ -460,13 +546,13 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
             StepFound step;
             if (isBelowMaxStepHeight && isWallNormal && isInDirectionOfMovement &&
-                GetStepInfo(out step, contact, ground, isGrounded)) return step;
+                GetStepInfo(out step, contact, hitInfo.normal, ground, isGrounded)) return step;
         }
 
         return null;
     }
 
-    bool GetStepInfo(out StepFound step, ContactPoint contact, ContactPoint ground, bool isGrounded) {
+    bool GetStepInfo(out StepFound step, ContactPoint contact, Vector3 contactNormal, ContactPoint ground, bool isGrounded) {
         step = null;
         RaycastHit stepTest;
 
@@ -501,8 +587,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             float stepHeight = Vector3.Dot(transform.up, stepTest.point - bottomOfPlayer);
 
             Vector3 stepOffset = stepOverbite + transform.up * stepHeight;
-            Debug.DrawRay(smarterRaycastStartPos, stepOffset, Color.black, 10);
-            step = new StepFound(contact, stepOffset);
+            //Debug.DrawRay(smarterRaycastStartPos, stepOffset, Color.yellow, 10);
+            step = new StepFound(contact, contactNormal, stepOffset);
             debug.Log($"Step: {contact}\n{stepOffset:F3}\nstepHeight:{stepHeight}");
         }
 
@@ -565,16 +651,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             .Exists(r => r.sharedMaterial.name.ToLower().Contains("glass"));
 
         return onGlass;
-    }
-
-    class StepFound {
-        public ContactPoint contact;
-        public readonly Vector3 stepOffset;
-
-        public StepFound(ContactPoint contact, Vector3 stepOffset) {
-            this.contact = contact;
-            this.stepOffset = stepOffset;
-        }
     }
 
 #region IsGrounded characteristics

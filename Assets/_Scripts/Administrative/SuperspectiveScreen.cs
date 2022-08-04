@@ -61,8 +61,11 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 			Vector2Int depthNormalsSize = new Vector2Int(depthNormals.width, depthNormals.height);
 			// Vector2Int screenSize = new Vector2Int(Screen.width, Screen.height);
 			// Debug.Log($"DepthNormals size: {depthNormalsSize}\nScreen size: {screenSize}");
+			// Don't run this code in the editor because it will take the depthNormals created for the scene view camera
+#if !UNITY_EDITOR
 			targetWidth = depthNormalsSize.x;
 			targetHeight = depthNormalsSize.y;
+#endif
 		}
 
 		// Update the resolution if necessary

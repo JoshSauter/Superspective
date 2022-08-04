@@ -56,6 +56,7 @@ public class PortalCopy : MonoBehaviour {
 
         if (maybeInteract != null) {
             InteractableObject interact = gameObject.AddComponent<InteractableObject>();
+            interact.SkipSave = true; // PortalCopies aren't saved
             interact.glowColor = maybeInteract.glowColor;
             interact.overrideGlowColor = maybeInteract.overrideGlowColor;
 

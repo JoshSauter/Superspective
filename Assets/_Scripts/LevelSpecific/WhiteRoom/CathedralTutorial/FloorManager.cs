@@ -118,12 +118,15 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         [Serializable]
         public class FloorManagerSave : SerializableSaveObject<FloorManager> {
+            private StateMachine<Floor>.StateMachineSave stateSave;
             private int currentValue;
             public FloorManagerSave(FloorManager script) : base(script) {
                 this.currentValue = script.currentValue;
+                this.stateSave = script.floor.ToSave();
             }
             public override void LoadSave(FloorManager script) {
                 script.currentValue = this.currentValue;
+                script.floor.FromSave(this.stateSave);
             }
         }
     }
