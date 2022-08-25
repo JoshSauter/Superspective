@@ -21,14 +21,11 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     public Transform cameraContainerTransform;
     public Vector3 cameraInitialLocalPos;
 
-    [Range(0.01f, 1)]
-    public float generalSensitivity = 0.3f;
+    public float generalSensitivity => 1.5f * Settings.Gameplay.GeneralSensitivity / 100f;
 
-    [Range(0.01f, 1)]
-    public float sensitivityX = 0.5f;
+    public float sensitivityX => 2f * Settings.Gameplay.XSensitivity / 100f;
 
-    [Range(0.01f, 1)]
-    public float sensitivityY = 0.5f;
+    public float sensitivityY => 2f * Settings.Gameplay.YSensitivity / 100f;
 
     public float rotationY;
     public float yClamp = 85;
@@ -56,7 +53,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         }
     }
 
-    public bool frozen => MainCanvas.instance.tempMenu.menuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
+    public bool frozen => NovaPauseMenu.instance.PauseMenuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
 
     /// <summary>
     ///     Returns the rotationY normalized to the range (-1, 1)
@@ -105,9 +102,14 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     }
 
     void OnApplicationFocus(bool focus) {
+        SetCursorLockState(focus);
+    }
+
+    void SetCursorLockState(bool focus) {
 #if !UNITY_EDITOR
-		Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
-		Cursor.visible = !focus;
+        CursorLockMode lockedState = NovaPauseMenu.instance.PauseMenuIsOpen ? CursorLockMode.Confined : CursorLockMode.Locked;
+		Cursor.lockState = focus ? lockedState : CursorLockMode.None;
+		Cursor.visible = !focus || NovaPauseMenu.instance.PauseMenuIsOpen;
 #endif
     }
 
@@ -302,8 +304,6 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         SerializableVector3 endPos;
         SerializableQuaternion endRot;
 
-        float generalSensitivity;
-
         int lockState;
         float outsideMultiplier;
         SerializableVector2 reticleEndPos;
@@ -313,8 +313,6 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         // Previously Coroutine local variables
         SerializableQuaternion rotationBeforeViewLock;
         float rotationY;
-        float sensitivityX;
-        float sensitivityY;
         SerializableVector3 startPos;
         SerializableQuaternion startRot;
 
@@ -340,15 +338,12 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             viewLockTime = playerLook.viewLockTime;
             viewUnlockTime = playerLook.viewUnlockTime;
 
-            generalSensitivity = playerLook.generalSensitivity;
-            sensitivityX = playerLook.sensitivityX;
-            sensitivityY = playerLook.sensitivityY;
             rotationY = playerLook.rotationY;
             yClamp = playerLook.yClamp;
             outsideMultiplier = playerLook.outsideMultiplier;
 
-            if (TempMenu.instance.menuIsOpen) {
-                lockState = (int) TempMenu.instance.cachedLockMode;
+            if (NovaPauseMenu.instance.PauseMenuIsOpen) {
+                lockState = (int) NovaPauseMenu.instance.cachedLockMode;
                 cursorVisible = false;
             }
             else {
@@ -373,9 +368,6 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             playerLook.viewLockTime = viewLockTime;
             playerLook.viewUnlockTime = viewUnlockTime;
 
-            playerLook.generalSensitivity = generalSensitivity;
-            playerLook.sensitivityX = sensitivityX;
-            playerLook.sensitivityY = sensitivityY;
             playerLook.rotationY = rotationY;
             playerLook.yClamp = yClamp;
             playerLook.outsideMultiplier = outsideMultiplier;

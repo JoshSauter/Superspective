@@ -75,7 +75,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 #endregion
 	
 	public void Update() {
-		if (TempMenu.instance.menuIsOpen) return;
+		if (NovaPauseMenu.instance.PauseMenuIsOpen) return;
 		
 		// Left stick
 		if (LeftStickHeld) {

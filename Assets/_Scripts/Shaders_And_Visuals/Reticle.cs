@@ -5,22 +5,20 @@ using UnityEngine;
 public class Reticle : Singleton<Reticle> {
 	RectTransform thisTransform;
 	RectTransform centerTransform;
-	Vector2 thisTransformSize {
-		get { return thisTransform.anchorMax - thisTransform.anchorMin; }
-	}
-	Vector2 centerTransformSize {
-		get { return centerTransform.anchorMax - centerTransform.anchorMin; }
-	}
+	Vector2 thisTransformSize => thisTransform.anchorMax - thisTransform.anchorMin;
+
+	Vector2 centerTransformSize => centerTransform.anchorMax - centerTransform.anchorMin;
+
 	public Vector2 thisTransformPos {
-		get { return (thisTransform.anchorMax + thisTransform.anchorMin) / 2f; }
-		set {
+		get => (thisTransform.anchorMax + thisTransform.anchorMin) / 2f;
+		private set {
 			Vector2 size = thisTransformSize;
 			thisTransform.anchorMax = value + size / 2f;
 			thisTransform.anchorMin = value - size / 2f;
 		}
 	}
 	Vector2 centerTransformPos {
-		get { return (centerTransform.anchorMax + centerTransform.anchorMin) / 2f; }
+		get => (centerTransform.anchorMax + centerTransform.anchorMin) / 2f;
 		set {
 			Vector2 size = centerTransformSize;
 			centerTransform.anchorMax = value + size / 2f;

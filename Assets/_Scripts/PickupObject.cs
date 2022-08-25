@@ -107,7 +107,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (currentCooldown > 0) currentCooldown -= Time.deltaTime;
 
         // Don't allow clicks in the menu to propagate to picking up/dropping the cube
-        if (MainCanvas.instance.tempMenu.menuIsOpen) currentCooldown = pickupDropCooldown;
+        if (NovaPauseMenu.instance.PauseMenuIsOpen) currentCooldown = pickupDropCooldown;
 
         if (isHeld) {
             interactableGlow.TurnOnGlow();

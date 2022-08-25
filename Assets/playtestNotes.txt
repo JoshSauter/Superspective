@@ -1,0 +1,8 @@
+﻿8/6/2022 SFSBen
+- Video resolution settings are a must
+- Cathedral Tutorial Elevator is a little bumpy on low FPS
+- Had trouble getting started in CathedralTutorial (didn't know you could press screens)
+- Keep the numbers that allow multiple solutions
+- Too long, too difficult
+- Cathedral: current value not immediately clear vs target value
+- Black room: don't let the projector controls 

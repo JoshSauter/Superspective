@@ -138,6 +138,19 @@ namespace Saving {
 
             return allUnregistrationSuccessful;
         }
+
+        public bool HasSaveableObject(string id) {
+            if (saveableObjects.ContainsKey(id)) {
+                if (saveableObjects[id] == null) {
+                    saveableObjects.Remove(id);
+                    return false;
+                }
+                
+                return true;
+            }
+
+            return false;
+        }
         
         /// <summary>
         /// Will return a SaveableObject reference if this scene is active, or a SerializableSaveObject if the scene is inactive
@@ -212,7 +225,7 @@ namespace Saving {
         /// Creates a SaveFile for this scene and returns it
         /// </summary>
         /// <returns>SaveFileForScene for this scene</returns>
-        public SaveFileForScene GetSaveFileForScene() {
+        public SaveDataForScene GetSaveFileForScene() {
             static SerializableSaveObject GetSaveObject(ISaveableObject saveableObject) {
                 try {
                     return saveableObject.GetSaveObject();
@@ -242,7 +255,7 @@ namespace Saving {
                 dynamicObjectsToSave = serializedDynamicObjects;
             }
 
-            return new SaveFileForScene(sceneName, objectsToSave, dynamicObjectsToSave);
+            return new SaveDataForScene(sceneName, objectsToSave, dynamicObjectsToSave);
         }
         
         /// <summary>
@@ -250,14 +263,14 @@ namespace Saving {
         /// </summary>
         /// <param name="saveFileName">Name of the save file to read from</param>
         /// <returns>A SaveFileForScene read from disk for this scene if one exists, null otherwise</returns>
-        public SaveFileForScene GetSaveFromDisk(string saveFileName) {
+        public SaveDataForScene GetSaveFromDisk(string saveFileName) {
             string directoryPath = $"{Application.persistentDataPath}/Saves/{saveFileName}";
             string saveFile = $"{directoryPath}/{sceneName}.save";
 
             if (Directory.Exists(directoryPath) && File.Exists(saveFile)) {
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.Open(saveFile, FileMode.Open);
-                SaveFileForScene save = (SaveFileForScene)bf.Deserialize(file);
+                SaveDataForScene save = (SaveDataForScene)bf.Deserialize(file);
                 file.Close();
 
                 return save;
@@ -271,19 +284,19 @@ namespace Saving {
         /// currentSaveFile.serializedDynamicObjects and then load their state from the save file for a loaded scene,
         /// or, will copy the serializedDynamicObjects dictionary to this SaveManager for an unloaded scene.
         /// </summary>
-        /// <param name="currentSaveFile">Save file to load state from</param>
-        public void LoadDynamicObjectsStateFromSaveFile(SaveFileForScene currentSaveFile) {
-            if (currentSaveFile?.serializedDynamicObjects != null) {
+        /// <param name="currentSaveData">Save file to load state from</param>
+        public void LoadDynamicObjectsStateFromSaveFile(SaveDataForScene currentSaveData) {
+            if (currentSaveData?.serializedDynamicObjects != null) {
                 if (sceneIsLoaded) {
-                    foreach (var id in currentSaveFile.serializedDynamicObjects.Keys) {
-                        DynamicObjectSave dynamicObjectSave = currentSaveFile.serializedDynamicObjects[id];
+                    foreach (var id in currentSaveData.serializedDynamicObjects.Keys) {
+                        DynamicObjectSave dynamicObjectSave = currentSaveData.serializedDynamicObjects[id];
                         DynamicObject dynamicObject = GetOrCreateDynamicObject(id, dynamicObjectSave);
 
                         dynamicObjectSave.LoadSave(dynamicObject);
                     }
                 }
                 else {
-                    serializedDynamicObjects = currentSaveFile.serializedDynamicObjects;
+                    serializedDynamicObjects = currentSaveData.serializedDynamicObjects;
                 }
             }
         }
@@ -293,11 +306,11 @@ namespace Saving {
         /// currentSaveFile.serializedSaveObjects and then load their state from the save file for a loaded scene,
         /// or, will copy the serializedSaveObjects dictionary to this SaveManager for an unloaded scene.
         /// </summary>
-        /// <param name="currentSaveFile">Save file to load state from</param>
-        public void LoadSaveableObjectsStateFromSaveFile(SaveFileForScene currentSaveFile) {
-            if (currentSaveFile?.serializedSaveObjects != null) {
+        /// <param name="currentSaveData">Save file to load state from</param>
+        public void LoadSaveableObjectsStateFromSaveFile(SaveDataForScene currentSaveData) {
+            if (currentSaveData?.serializedSaveObjects != null) {
                 if (sceneIsLoaded) {
-                    foreach (var id in currentSaveFile.serializedSaveObjects.Keys) {
+                    foreach (var id in currentSaveData.serializedSaveObjects.Keys) {
                         SaveableObject saveableObject = GetSaveableObjectOrNull(id);
                         if (saveableObject == null) {
                             Debug.LogWarning($"{id} not found in scene {sceneName}");
@@ -305,7 +318,7 @@ namespace Saving {
                         }
 
                         try {
-                            saveableObject.RestoreStateFromSave(currentSaveFile.serializedSaveObjects[id]);
+                            saveableObject.RestoreStateFromSave(currentSaveData.serializedSaveObjects[id]);
                         }
                         catch (Exception e) {
                             Debug.LogError(e);
@@ -313,7 +326,7 @@ namespace Saving {
                     }
                 }
                 else {
-                    serializedSaveObjects = currentSaveFile.serializedSaveObjects;
+                    serializedSaveObjects = currentSaveData.serializedSaveObjects;
                 }
 
                 Debug.Log($"Loaded {sceneName} from save");

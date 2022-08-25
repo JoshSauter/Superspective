@@ -12,6 +12,7 @@ public static class DebugInput {
     // Ctrl+Shift+W for global "win-the-puzzle" cheatcode (Up to individual puzzles to implement)
     public static bool InstaSolvePuzzle(this Component c) {
         return Debug.isDebugBuild &&
+               !NovaPauseMenu.instance.PauseMenuIsOpen &&
                LevelManager.enumToSceneName[c.gameObject.scene.name] == LevelManager.instance.ActiveScene &&
                Input.GetKey(KeyCode.LeftControl) &&
                Input.GetKey(KeyCode.LeftShift) &&

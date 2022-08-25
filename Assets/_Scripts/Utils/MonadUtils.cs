@@ -30,7 +30,15 @@ namespace SuperspectiveUtils {
             }
         }
         public Option<T> OrElse(Option<T> alternative) => IsEmpty() ? alternative : this;
-        
+
+        public override string ToString() {
+            if (IsEmpty()) {
+                return $"None<{typeof(T).Name}>";
+            }
+            else {
+                return $"Some<{typeof(T).Name}>({Get().ToString()})";
+            }
+        }
     }
 
     public class None<T> : Option<T> {

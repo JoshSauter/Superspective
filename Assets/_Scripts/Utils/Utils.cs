@@ -116,6 +116,12 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class FloatExt {
+        public static bool IsApproximately(this float f, float other) {
+            return Math.Abs(f - other) < float.Epsilon;
+        }
+    }
+
     public static class Vector3Ext {
         // Scale method that returns itself so that it is composable
         public static Vector3 ScaledWith(this Vector3 v, Vector3 scale) {

@@ -117,3 +117,13 @@ The following packages were updated:
   com.unity.ide.rider from version 3.0.14 to 3.0.15
   com.unity.ide.visualstudio from version 2.0.15 to 2.0.16
   com.unity.purchasing from version 4.1.5 to 4.2.1
+
+=== Wed Aug  3 20:33:28 2022
+
+Packages were changed.
+Update Mode: mergeDefaultDependencies
+
+The following packages were added:
+  com.unity.burst@1.7.2
+  com.unity.collections@1.2.3
+  com.unity.mathematics@1.2.6

@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainCanvas : Singleton<MainCanvas> {
-	public TempMenu tempMenu;
 	public Image blackOverlay;
 	public enum BlackOverlayState {
 		Off,

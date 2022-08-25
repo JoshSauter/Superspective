@@ -40,10 +40,10 @@ namespace Saving {
             return $"{Application.persistentDataPath}/Saves/{saveFileName}";
         }
 
-        public static void Save(string saveName) {
-            Debug.Log($"--- Saving Save File: {saveName} ---");
+        public static void Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
+            Debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
             BeforeSave?.Invoke();
-            SaveFile.CreateSaveFileFromCurrentState(saveName).WriteToDisk();
+            SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
         }
 
         public static async void Load(string saveName) {
@@ -64,7 +64,7 @@ namespace Saving {
             DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
             
             // Get the save file from disk
-            SaveFile save = SaveFile.RetrieveSaveFileFromDisk(saveName);
+            SaveData save = SaveData.RetrieveSaveDataFromDisk(saveName);
             
             // Clear state of levels that don't exist in the save file
             List<string> levelsNotInSaveFile = saveManagers.Keys.Where(level => !save.scenes.ContainsKey(level)).ToList();
@@ -87,15 +87,15 @@ namespace Saving {
             // Load all DynamicObjects for each scene
             foreach (var kv in save.scenes) {
                 string sceneName = kv.Key;
-                SaveFileForScene saveFileForScene = kv.Value;
+                SaveDataForScene saveDataForScene = kv.Value;
                 SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadDynamicObjectsStateFromSaveFile(saveFileForScene);
+                saveManager.LoadDynamicObjectsStateFromSaveFile(saveDataForScene);
             }
             
-            Dictionary<string, SaveFileForScene> loadedScenes = save.scenes
+            Dictionary<string, SaveDataForScene> loadedScenes = save.scenes
                 .Where(kv => LevelManager.instance.loadedSceneNames.Contains(kv.Key))
                 .ToDictionary();
-            Dictionary<string, SaveFileForScene> unloadedScenes = save.scenes
+            Dictionary<string, SaveDataForScene> unloadedScenes = save.scenes
                 .Except(loadedScenes)
                 .ToDictionary();
             
@@ -105,18 +105,18 @@ namespace Saving {
             // Restore state for all unloaded scenes from the save file
             foreach (var kv in unloadedScenes) {
                 string sceneName = kv.Key;
-                SaveFileForScene saveFileForScene = kv.Value;
+                SaveDataForScene saveDataForScene = kv.Value;
                 SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadSaveableObjectsStateFromSaveFile(saveFileForScene);
+                saveManager.LoadSaveableObjectsStateFromSaveFile(saveDataForScene);
             }
 
             // Load data for every object in each loaded scene (starting with the ManagerScene)
             saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
             foreach (var kv in loadedScenes) {
                 string sceneName = kv.Key;
-                SaveFileForScene saveFileForScene = kv.Value;
+                SaveDataForScene saveDataForScene = kv.Value;
                 SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadSaveableObjectsStateFromSaveFile(saveFileForScene);
+                saveManager.LoadSaveableObjectsStateFromSaveFile(saveDataForScene);
             }
 
             // Play the level change banner and remove the black overlay

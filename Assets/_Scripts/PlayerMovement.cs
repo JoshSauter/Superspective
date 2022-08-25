@@ -62,8 +62,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     // Staircase handling characteristics
     private const float _maxStepHeight = 0.6f;
     private const int framesAfterStepToKeepVelocityZero = 5;
-    private const float _stepSpeed = 6f;
-    private float stepSpeed => movespeed * 1.5f;// _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
+    private const float stepSpeedMultiplier = 2.5f;
+    private float stepSpeed => movespeed * stepSpeedMultiplier;// _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
     [ShowNonSerializedField]
     private float distanceMovedForStaircaseOffset = 0;
 

@@ -13,6 +13,9 @@ using UnityEngine.Events;
 namespace StateUtils {
     [Serializable]
     public class StateMachine<T> where T : Enum, IConvertible {
+        // Used to execute State Transitions only after other events have fired
+        private const int stateTransitionPriority = 10;
+        
         [SerializeField, Label("State")]
         private T _state;
         [SerializeField, Label("Previous State"), ReadOnly]
@@ -25,6 +28,10 @@ namespace StateUtils {
 
         [NonSerialized]
         private bool useFixedUpdateInstead = false;
+
+        [NonSerialized]
+        // If set to true, will use value not scaled by Time.timeScale
+        private bool useRealTime = false;
 
         public delegate void OnStateChangeEvent(T prevState, float prevTimeSinceStateChanged);
         public delegate void OnStateChangeEventSimple();
@@ -96,7 +103,8 @@ namespace StateUtils {
         public void AddStateTransition(T fromState, Func<T> toStateDef, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
-                atTime = atTime
+                atTime = atTime,
+                priority = stateTransitionPriority
             };
             
             timedEvents.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
@@ -105,7 +113,8 @@ namespace StateUtils {
         public void AddStateTransition(T fromState, Func<T> toStateDef, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
-                triggerWhen = triggerWhen
+                triggerWhen = triggerWhen,
+                priority = stateTransitionPriority
             };
             
             customEvents.Add(customEventTrigger, () => state = toStateDef.Invoke());
@@ -114,7 +123,8 @@ namespace StateUtils {
         public void AddStateTransition(T fromState, T toState, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
-                atTime = atTime
+                atTime = atTime,
+                priority = stateTransitionPriority
             };
             
             timedEvents.Add(stateTransitionTrigger, () => state = toState);
@@ -123,7 +133,8 @@ namespace StateUtils {
         public void AddStateTransition(T fromState, T toState, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
-                triggerWhen = triggerWhen
+                triggerWhen = triggerWhen,
+                priority = stateTransitionPriority
             };
             
             customEvents.Add(customEventTrigger, () => state = toState);
@@ -167,6 +178,7 @@ namespace StateUtils {
         class CustomEventTrigger {
             public T forState;
             public Func<bool> triggerWhen;
+            public int priority = 0;
         }
 
         [NonSerialized] private Dictionary<CustomEventTrigger, Action> _customEvents;
@@ -184,6 +196,7 @@ namespace StateUtils {
         class TimedEventTrigger {
             public T forState;
             public float atTime;
+            public int priority = 0; // Lower value == executed first
         }
 
         [NonSerialized] private Dictionary<TimedEventTrigger, Action> _timedEvents;
@@ -207,7 +220,8 @@ namespace StateUtils {
                 return trigger.forState.Equals(_state) &&
                        trigger.atTime >= prevTime &&
                        trigger.atTime < _timeSinceStateChanged;
-            }).Select(triggerAndAction => triggerAndAction.Value);
+            }).OrderBy(triggerAndAction => triggerAndAction.Key.priority)
+                .Select(triggerAndAction => triggerAndAction.Value);
 
             foreach (Action action in timedEventsToTrigger) {
                 action.Invoke();
@@ -216,7 +230,8 @@ namespace StateUtils {
             var customEventsToTrigger = customEvents.Where(triggerAndAction => {
                 CustomEventTrigger trigger = triggerAndAction.Key;
                 return trigger.forState.Equals(_state) && trigger.triggerWhen.Invoke();
-            }).Select(triggerAndAction => triggerAndAction.Value);
+            }).OrderBy(triggerAndAction => triggerAndAction.Key.priority)
+                .Select(triggerAndAction => triggerAndAction.Value);
 
             foreach (var action in customEventsToTrigger) {
                 action.Invoke();
@@ -230,11 +245,12 @@ namespace StateUtils {
             this._timeSinceStateChanged = 0f;
         }
         
-        public StateMachine(T startingState, bool useFixedUpdateInstead = false) {
+        public StateMachine(T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
             this._state = startingState;
             this._prevState = _state;
             this._timeSinceStateChanged = 0f;
             this.useFixedUpdateInstead = useFixedUpdateInstead;
+            this.useRealTime = useRealTime;
         }
 
         private StateMachine() { }
@@ -265,7 +281,27 @@ namespace StateUtils {
         // Does either Update or FixedUpdate based on config
         private void Update() {
             float prevTime = _timeSinceStateChanged;
-            _timeSinceStateChanged += useFixedUpdateInstead ? Time.fixedDeltaTime : Time.deltaTime;
+
+            float GetDeltaTime() {
+                if (useFixedUpdateInstead) {
+                    if (useRealTime) {
+                        return Time.fixedUnscaledDeltaTime;
+                    }
+                    else {
+                        return Time.fixedDeltaTime;
+                    }
+                }
+                else {
+                    if (useRealTime) {
+                        return Time.unscaledDeltaTime;
+                    }
+                    else {
+                        return Time.deltaTime;
+                    }
+                }
+            }
+            
+            _timeSinceStateChanged += GetDeltaTime();
             TriggerEvents(prevTime);
         }
 

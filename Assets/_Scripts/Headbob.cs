@@ -16,7 +16,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     // Time in the animation curve
     public float t;
     public float curPeriod = 1f;
-    public float headbobAmount = .5f;
+    public float headbobAmount => 2 * Settings.Gameplay.Headbob.Value / 100f;
     float curAmplitude = 1f;
     PlayerMovement playerMovement;
 
@@ -59,7 +59,6 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
         float curAmplitude;
         float curBobAmount;
         float curPeriod;
-        float headbobAmount;
 
         float t;
 
@@ -67,7 +66,6 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
             curBobAmount = headbob.curBobAmount;
             t = headbob.t;
             curPeriod = headbob.curPeriod;
-            headbobAmount = headbob.headbobAmount;
             curAmplitude = headbob.curAmplitude;
         }
 
@@ -75,7 +73,6 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
             headbob.curBobAmount = curBobAmount;
             headbob.t = t;
             headbob.curPeriod = curPeriod;
-            headbob.headbobAmount = headbobAmount;
             headbob.curAmplitude = curAmplitude;
         }
     }

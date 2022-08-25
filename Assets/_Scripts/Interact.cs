@@ -51,8 +51,16 @@ public class Interact : Singleton<Interact> {
 
     // Update is called once per frame
     void Update() {
-        if (TempMenu.instance.menuIsOpen) return;
-        
+        if (NovaPauseMenu.instance.PauseMenuIsOpen) {
+            reticle.enabled = false;
+            reticleOutside.enabled = false;
+            return;
+        }
+        else {
+            reticle.enabled = true;
+            reticleOutside.enabled = true;
+        }
+
         if (Input.GetMouseButtonDown(0)) {
             MaskBufferRenderTextures.instance.RequestVisibilityMask();
         }

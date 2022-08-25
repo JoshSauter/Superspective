@@ -16,19 +16,10 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 	public int maxPortalWidth => currentWidth / (1 << portalDownsampleAmount);
 	public int maxPortalHeight => currentHeight / (1 << portalDownsampleAmount);
 
-	private int _portalDownsampleAmount = 0;
+	private int prevPortalDownsampleAmount = 0;
 	private static readonly int CameraDepthNormalsTexture = Shader.PropertyToID("_CameraDepthNormalsTexture");
 
-	public int portalDownsampleAmount {
-		get => _portalDownsampleAmount;
-		set {
-			if (value != _portalDownsampleAmount) {
-				_portalDownsampleAmount = value;
-				// Hack to refresh portal RenderTextures
-				OnScreenResolutionChanged?.Invoke(currentWidth, currentHeight);
-			}
-		}
-	}
+	public int portalDownsampleAmount => Mathf.RoundToInt(Settings.Video.PortalDownsampleAmount);
 
 	public delegate void ScreenResolutionChangedAction(int newWidth, int newHeight);
 	public event ScreenResolutionChangedAction OnScreenResolutionChanged;
@@ -51,6 +42,12 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 
 	// Update is called once per frame
 	void Update() {
+		if (prevPortalDownsampleAmount != portalDownsampleAmount) {
+			// Hack to refresh portal RenderTextures
+			OnScreenResolutionChanged?.Invoke(currentWidth, currentHeight);
+			prevPortalDownsampleAmount = portalDownsampleAmount;
+		}
+		
 		int targetWidth = Screen.width;
 		int targetHeight = Screen.height;
 		

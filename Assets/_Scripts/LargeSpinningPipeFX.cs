@@ -23,6 +23,8 @@ public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
     }
 
     private void OnDisable() {
+        if (GameManager.instance.IsApplicationQuitting) return;
+        
         AudioManager.instance.GetAudioJob(audioToPlay, ID).Stop();
     }
 

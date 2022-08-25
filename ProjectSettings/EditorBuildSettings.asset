@@ -8,12 +8,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/PrototypeAndTesting/WaterTest.unity
     guid: c89be43f322dbfd4d87aa85eb1945a90
+  - enabled: 0
+    path: Assets/PrototypeAndTesting/PortalTestScene/PortalTestScene.unity
+    guid: c7bf95f83a6530d4d850792fd3e62f03
+  - enabled: 0
+    path: Assets/PrototypeAndTesting/_TestScene.unity
+    guid: 332e1962a8c708447a42a2b310b15c5e
+  - enabled: 0
+    path: Assets/Nova/Sample/NovaDemo.unity
+    guid: bd52df759c57d5f42b33493ced1c38a7
   - enabled: 1
     path: Assets/__Scenes/__ManagerScene.unity
     guid: 3fcf0f08a36318544bf0e8c697f9b3b7
-  - enabled: 1
-    path: Assets/PrototypeAndTesting/_TestScene.unity
-    guid: 332e1962a8c708447a42a2b310b15c5e
   - enabled: 1
     path: Assets/__Scenes/_EmptyRoom.unity
     guid: a47f678a069cb5e459c4212b545eecbc
@@ -53,9 +59,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_Meta_EdgeDetection.unity
     guid: ec213527003ee5342932eb31bf5c7304
-  - enabled: 1
-    path: Assets/PrototypeAndTesting/PortalTestScene/PortalTestScene.unity
-    guid: c7bf95f83a6530d4d850792fd3e62f03
   - enabled: 1
     path: Assets/__Scenes/_TutorialRoom.unity
     guid: 92a782b16196bbd4abebbc33358f460d

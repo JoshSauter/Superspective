@@ -66,6 +66,12 @@ namespace LevelManagement {
 		ForkCathedralTutorial = 6
 	}
 
+	public static class LevelsExt {
+		public static string ToDisplayName(this Levels enumValue) {
+			return LevelManager.instance.levels[enumValue.ToName()].displayName;
+		}
+	}
+
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
 		[OnValueChanged("LoadDefaultPlayerPosition")]
 		public Levels startingScene;
@@ -325,7 +331,7 @@ namespace LevelManagement {
 		[SerializeField]
 		public List<Level> allLevels;
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build
-		Dictionary<string, Level> levels;
+		public Dictionary<string, Level> levels;
 		internal static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
 			{ Levels.ManagerScene, ManagerScene },
 			{ Levels.TestScene, "_TestScene" },

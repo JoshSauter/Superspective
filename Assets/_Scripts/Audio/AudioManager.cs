@@ -261,7 +261,7 @@ namespace Audio {
 		// Public Interface //
 		//////////////////////
 		// Plays an AudioClip, should only be used for global (non-3D) sounds
-		public void Play(AudioName audioType, string uniqueIdentifier, bool shouldForcePlay = false, Action<AudioJob> settingsOverride = null) {
+		public void Play(AudioName audioType, string uniqueIdentifier = "", bool shouldForcePlay = false, Action<AudioJob> settingsOverride = null) {
 			AudioJob audioJob = GetOrCreateJob(audioType, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {

@@ -126,7 +126,7 @@ public class ScreenshotCompanion : MonoBehaviour
         }
         else
         { // path to Unity project main folder
-            return Directory.GetCurrentDirectory() + "/" + pickDirectory + "/";
+            return Directory.GetCurrentDirectory() + "/Assets/" + pickDirectory + "/";
         }
     }
 

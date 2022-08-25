@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using LevelManagement;
 using UnityEngine;
@@ -9,6 +10,9 @@ using UnityEditor;
 #endif
 
 public class GameManager : Singleton<GameManager> {
+    private bool _isApplicationQuitting = false;
+    public bool IsApplicationQuitting => _isApplicationQuitting;
+    
     // There are lots of ways the game can be in a loading state, this aggregates all of them into one
     public bool IsCurrentlyLoading =>
         !gameHasLoaded ||
@@ -37,6 +41,10 @@ public class GameManager : Singleton<GameManager> {
 #endif
     }
 
+    private void OnApplicationQuit() {
+        _isApplicationQuitting = true;
+    }
+
     public void UseQWERTYLayout() {
         KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.QWERTY);
 	}
@@ -44,10 +52,6 @@ public class GameManager : Singleton<GameManager> {
     public void UseAZERTYLayout() {
         KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.AZERTY);
     }
-
-    public void SaveGame() {
-        SaveManager.Save("Save1");
-	}
 
     public void LoadGame() {
         SaveManager.Load("Save1");

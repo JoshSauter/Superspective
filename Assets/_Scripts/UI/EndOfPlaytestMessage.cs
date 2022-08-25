@@ -55,12 +55,6 @@ public class EndOfPlaytestMessage : Singleton<EndOfPlaytestMessage> {
     }
 
     void Update() {
-	    if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown("y")) {
-		    if (state == State.Off) {
-			    state.Set(State.BackgroundFadingIn);
-		    }
-	    }
-	    
 	    float t = 0f;
 	    switch (state.state) {
 		    case State.Off:
