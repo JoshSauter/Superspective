@@ -101,30 +101,35 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
                 for (int InternalVar_7 = 0; InternalVar_7 < InternalVar_1.Length; ++InternalVar_7)
                 {
                     InternalType_131 InternalVar_8 = InternalVar_1[InternalVar_7];
-                    UIBlock InternalVar_9 = InternalType_253.InternalProperty_190.InternalField_413[InternalVar_8] as UIBlock;
+                    
+                    InternalType_5 InternalVar_9 = InternalType_253.InternalProperty_190.InternalField_413[InternalVar_8] as InternalType_5;
 
-                    if (!SceneViewUtils.IsInCurrentPrefabStage(InternalVar_9.gameObject))
+                    UnityEngine.GameObject InternalVar_10 = InternalVar_9.InternalProperty_202.gameObject;
+
+                    if (!SceneViewUtils.IsInCurrentPrefabStage(InternalVar_10))
                     {
                         continue;
                     }
 
-                    InternalType_99 InternalVar_10 = new InternalType_99((InternalType_83)(int)InternalVar_9.AutoSize.X, (InternalType_83)(int)InternalVar_9.AutoSize.Y, (InternalType_83)(int)InternalVar_9.AutoSize.Z);
-                    InternalType_53 InternalVar_11 = InternalVar_9.Size.InternalMethod_3();
+                    ref InternalType_69 InternalVar_11 = ref InternalVar_9.InternalProperty_142;
 
-                    InternalVar_9.PreviewSize = InternalVar_9.SizeMinMax.Clamp(math.select(InternalVar_11.InternalProperty_116, InternalVar_9.PreviewSize, InternalVar_11.InternalProperty_118));
-                    InternalType_478 InternalVar_12 = new InternalType_478() { InternalField_2145 = InternalVar_9.PreviewSize, InternalField_2146 = SceneViewUtils.IsInCurrentStage(InternalVar_9.gameObject) };
+                    InternalType_99 InternalVar_12 = InternalVar_11.InternalField_222;
+                    InternalType_53 InternalVar_13 = InternalVar_11.InternalField_213;
 
-                    if (!InternalVar_2.TryGetValue(InternalVar_8, out InternalType_478 InternalVar_13))
+                    InternalVar_9.InternalProperty_87 = InternalVar_11.InternalField_217.InternalMethod_398(math.select(InternalVar_13.InternalProperty_116, InternalVar_9.InternalProperty_87, InternalVar_13.InternalProperty_118));
+                    InternalType_478 InternalVar_14 = new InternalType_478() { InternalField_2145 = InternalVar_9.InternalProperty_87, InternalField_2146 = SceneViewUtils.IsInCurrentStage(InternalVar_10) };
+
+                    if (!InternalVar_2.TryGetValue(InternalVar_8, out InternalType_478 InternalVar_15))
                     {
-                        InternalVar_13 = default;
+                        InternalVar_15 = default;
                     }
 
-                    InternalVar_12.InternalMethod_1902(ref InternalVar_13);
+                    InternalVar_14.InternalMethod_1902(ref InternalVar_15);
 
-                    InternalField_212 |= InternalVar_12.InternalField_2147;
+                    InternalField_212 |= InternalVar_14.InternalField_2147;
                     InternalVar_6++;
 
-                    InternalField_1895.Add(InternalVar_8, InternalVar_12);
+                    InternalField_1895.Add(InternalVar_8, InternalVar_14);
                 }
 
                 InternalType_158<InternalType_131, InternalType_478>.InternalMethod_741(InternalVar_2);

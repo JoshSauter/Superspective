@@ -12,8 +12,6 @@ using UnityEngine;
 
 namespace Nova
 {
-    internal interface InternalType_6 : InternalType_256<InternalNamespace_0.InternalType_79> { }
-
     /// <summary>
     /// A <see cref="UIBlock"/> for rendering text
     /// </summary>
@@ -156,7 +154,7 @@ namespace Nova
         }
 
         
-        internal void InternalMethod_2724(ref InternalType_670 InternalParameter_3091)
+        void InternalType_6.InternalMethod_2724(ref InternalType_670 InternalParameter_3091)
         {
             InternalProperty_764 = true;
 
@@ -242,7 +240,12 @@ namespace Nova
                     InternalType_274.InternalProperty_190.InternalField_875[InternalVar_11] = InternalParameter_80.meshInfo[InternalVar_9].material;
                 }
 
-                InternalVar_10.InternalMethod_553(InternalParameter_80.meshInfo[InternalVar_9]);
+                TMP_MeshInfo InternalVar_12 = InternalParameter_80.meshInfo[InternalVar_9];
+                InternalVar_10.InternalMethod_553(InternalVar_12);
+                unsafe
+                {
+                    TMPUtils.CopyUV0(InternalVar_10.InternalField_357.InternalProperty_232, ref InternalVar_12);
+                }
             }
 
             InternalType_457.InternalProperty_190.InternalMethod_1846(this, InternalVar_1.InternalField_262.InternalMethod_1363().xy);

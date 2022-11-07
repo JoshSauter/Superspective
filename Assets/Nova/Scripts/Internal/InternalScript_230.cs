@@ -299,7 +299,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalVar_2.InternalField_907 = InternalField_1477[InternalParameter_1634];
             InternalVar_2.InternalField_900 = InternalParameter_1633;
 
-            if (NovaSettings.InternalProperty_87.InternalField_373)
+            if (InternalType_24.InternalProperty_945.InternalField_373)
             {
                 InternalVar_2.InternalField_903 |= InternalType_322.InternalField_1089;
             }

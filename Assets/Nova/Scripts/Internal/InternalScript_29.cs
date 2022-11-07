@@ -7,10 +7,10 @@ using Unity.Jobs;
 namespace Nova.InternalNamespace_0.InternalNamespace_2
 {
     
-    internal abstract class InternalType_126<T> : InternalType_127 where T : InternalType_126<T>
+    internal abstract class InternalType_126<T90> : InternalType_127 where T90 : InternalType_126<T90>
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public static T InternalField_406 = null;
+        public static T90 InternalField_406 = null;
     }
 
     internal struct InternalType_128 : InternalType_147

@@ -380,11 +380,34 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
         public static class InternalType_565
         {
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            private const string InternalField_1436 = "Render Queue";
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            private const string InternalField_1431 = "Render Over Opaque Geometry";
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            private const string InternalField_1430 = "This value is inherited from the Screen Space root.";
+
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public static readonly GUIContent InternalField_2512 = EditorGUIUtility.TrTextContent("Sorting Order", "The sorting order of this hierarchy relative to other coplanar Nova content. Higher values render on top.");
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public static readonly GUIContent InternalField_2513 = EditorGUIUtility.TrTextContent("Render Queue", "The value that will be assigned to the material's render queue for the hierarchy.");
+            public static readonly GUIContent InternalField_2513 = EditorGUIUtility.TrTextContent(InternalField_1436, "The value that will be assigned to the material's render queue for the hierarchy.");
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public static readonly GUIContent InternalField_207 = EditorGUIUtility.TrTextContent("Render Over Opaque Geometry", "Whether or not the content in the sort group should render over geometry rendered in the opaque render queue. This is useful for rendering in screen space.");
+            public static readonly GUIContent InternalField_1429 = EditorGUIUtility.TrTextContent(InternalField_1436, InternalField_1430);
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_207 = EditorGUIUtility.TrTextContent(InternalField_1431, "Whether or not the content in the sort group should render over geometry rendered in the opaque render queue. This is useful for rendering in screen space.");
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_1428 = EditorGUIUtility.TrTextContent(InternalField_1431, InternalField_1430);
+        }
+
+        public static class InternalType_65
+        {
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_1433 = EditorGUIUtility.TrTextContent("Target Camera", "The target camera used to render the Nova content.");
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_1432 = EditorGUIUtility.TrTextContent("Fill Mode", $"The mode used to render the content:\n-{nameof(Nova.ScreenSpace.FillMode.FixedWidth)}: Maintains the {nameof(Nova.ScreenSpace.ReferenceResolution)} width on the root UIBlock, adjusting the height to match the camera's aspect ratio.\n-{nameof(Nova.ScreenSpace.FillMode.FixedHeight)}: Maintains the {nameof(Nova.ScreenSpace.ReferenceResolution)} height on the root UIBlock, adjusting the width to match the camera's aspect ratio.\n-{nameof(Nova.ScreenSpace.FillMode.MatchCameraResolution)}: Sets the root UIBlock's size to match the pixel-dimensions of the camera.\n-{nameof(Nova.ScreenSpace.FillMode.Manual)}: Does not modify the size or scale of the UIBlock. Useful if a custom resize behavior is desired.");
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_143 = EditorGUIUtility.TrTextContent("Reference Resolution", "The resolution to use as a reference when resizing the root UIBlock to match the camera's aspect ratio.");
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public static readonly GUIContent InternalField_448 = EditorGUIUtility.TrTextContent("Plane Distance", "The distance in front of the camera at which to render the Nova content.");
         }
 
         public static class InternalType_566

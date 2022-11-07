@@ -50,7 +50,7 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
     }
 
     public void UpdateAudioJob(AudioManager.AudioJob job) {
-        if (job.audioType == AudioName.FallingWind) {
+        if (job.audioName == AudioName.FallingWind) {
             float t = Mathf.InverseLerp(windSpeedThreshold, terminalVelocity, curFallingSpeed);
             targetHighWindVolume = highWindMaxVolume * t;
             job.audio.volume = Mathf.Lerp(job.audio.volume, targetHighWindVolume, targetHighWindVolumeLerpSpeed);

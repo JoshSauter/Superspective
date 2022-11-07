@@ -108,13 +108,16 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeHashMap<InternalType_131, InternalType_358> InternalField_814;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private NativeHashMap<InternalType_131, InternalType_408> InternalField_815;
+        public NativeHashMap<InternalType_131, InternalType_408> InternalField_3378;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeList<InternalType_131> InternalField_816;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeHashMap<InternalType_643, byte> InternalField_2827;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeList<InternalType_131> InternalField_817;
+        
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+                private NativeHashMap<InternalType_131, InternalType_101> InternalField_3379;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private static readonly ProfilerMarker InternalField_819 = new ProfilerMarker("TMP Mesh Building");
@@ -132,7 +135,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_847 = InternalProperty_288,
             InternalField_846 = InternalField_807.InternalField_880,
             InternalField_848 = InternalProperty_289.InternalField_863.InternalField_1233,
-            InternalField_849 = InternalProperty_289.InternalField_869.InternalField_1188,
+            InternalField_849 = InternalField_3379,
         };
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -261,7 +264,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 for (int InternalVar_7 = 0; InternalVar_7 < InternalVar_6; ++InternalVar_7)
                 {
                     ref InternalType_172<InternalType_131, InternalType_670> InternalVar_8 = ref InternalVar_5.ElementAt(InternalVar_7);
-                    TextBlock InternalVar_9 = InternalProperty_289.InternalField_413[InternalVar_8.InternalField_462] as TextBlock;
+                    InternalType_6 InternalVar_9 = InternalProperty_289.InternalField_413[InternalVar_8.InternalField_462] as InternalType_6;
                     InternalVar_9.InternalMethod_2724(ref InternalVar_8.InternalField_463);
                 }
             }
@@ -320,7 +323,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             if (InternalType_479.InternalField_406.InternalProperty_410)
             {
-                InternalField_830.InternalMethod_989(engineUpdateInfo.InternalField_410).Complete();
+                InternalField_830.InternalMethod_1982(engineUpdateInfo.InternalField_410).Complete();
             }
         }
 
@@ -353,38 +356,35 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_827.InternalField_1524 = InternalField_812.AsParallelWriter();
 
 
-            JobHandle InternalVar_1 = InternalField_821.InternalMethod_989(engineUpdateInfo.InternalField_410);
+            JobHandle InternalVar_1 = InternalField_821.InternalMethod_1982(engineUpdateInfo.InternalField_410);
 
-            JobHandle InternalVar_2 = InternalField_827.InternalMethod_991(InternalProperty_285.Length, 64, InternalVar_1);
-            JobHandle InternalVar_3 = InternalField_835.InternalMethod_989(InternalVar_2);
+            JobHandle InternalVar_2 = InternalField_827.InternalMethod_1984(InternalProperty_285.Length, 64, InternalVar_1);
+            JobHandle InternalVar_3 = InternalField_835.InternalMethod_1982(InternalVar_2);
 
-            JobHandle InternalVar_4 = InternalField_823.InternalMethod_991(InternalProperty_285.Length, 32, InternalVar_2);
-            JobHandle InternalVar_5 = InternalField_822.InternalMethod_991(InternalProperty_285.Length, 32, InternalVar_2);
+            JobHandle InternalVar_4 = InternalField_823.InternalMethod_1984(InternalProperty_285.Length, 32, InternalVar_2);
+            JobHandle InternalVar_5 = InternalField_822.InternalMethod_1984(InternalProperty_285.Length, 32, InternalVar_2);
 
             JobHandle InternalVar_6 = InternalField_825.InternalMethod_3334(InternalField_810, 1, InternalVar_3);
-            JobHandle InternalVar_7 = InternalField_826.InternalMethod_989(InternalVar_6);
+            JobHandle InternalVar_7 = InternalField_826.InternalMethod_1982(InternalVar_6);
 
-            InternalField_837.InternalField_1428 = InternalType_325.InternalProperty_314;
-            InternalField_837.InternalField_1429 = InternalType_325.InternalProperty_315;
-            JobHandle InternalVar_8 = InternalField_837.InternalMethod_989(InternalVar_6);
+            JobHandle InternalVar_8 = InternalField_831.InternalMethod_3333(&InternalField_797->InternalField_1128, 64, InternalVar_7);
+            JobHandle InternalVar_9 = InternalField_832.InternalMethod_3333(&InternalField_797->InternalField_1127, 1, InternalVar_8);
+            JobHandle InternalVar_10 = InternalField_833.InternalMethod_3333(&InternalField_797->InternalField_1128, 32, InternalVar_9);
 
-            JobHandle InternalVar_9 = InternalField_831.InternalMethod_3333(&InternalField_797->InternalField_1128, 64, InternalVar_7);
-            JobHandle InternalVar_10 = InternalField_832.InternalMethod_3333(&InternalField_797->InternalField_1127, 1, InternalVar_9);
-            JobHandle InternalVar_11 = InternalField_833.InternalMethod_3333(&InternalField_797->InternalField_1128, 32, InternalVar_10);
+            JobHandle InternalVar_11 = InternalField_824.InternalMethod_3333(&InternalField_797->InternalField_1126, 32, JobHandle.CombineDependencies(InternalVar_4, InternalVar_7));
+            JobHandle InternalVar_12 = InternalField_828.InternalMethod_3333(&InternalField_797->InternalField_1126, 32, InternalVar_11);
+            JobHandle InternalVar_13 = InternalField_829.InternalMethod_3334(InternalField_810, 1, InternalVar_12);
 
-            JobHandle InternalVar_12 = InternalField_824.InternalMethod_3333(&InternalField_797->InternalField_1126, 32, JobHandle.CombineDependencies(InternalVar_4, InternalVar_7));
-            JobHandle InternalVar_13 = InternalField_828.InternalMethod_3333(&InternalField_797->InternalField_1126, 32, InternalVar_12);
-            JobHandle InternalVar_14 = InternalField_829.InternalMethod_3334(InternalField_810, 1, InternalVar_13);
+            JobHandle InternalVar_14 = InternalField_834.InternalMethod_3334(InternalField_810, 1, JobHandle.CombineDependencies(InternalVar_13, InternalVar_10));
 
-            JobHandle InternalVar_15 = InternalField_834.InternalMethod_3334(InternalField_810, 1, JobHandle.CombineDependencies(InternalVar_14, InternalVar_11));
+            InternalField_2600.InternalField_3382 = InternalType_325.InternalProperty_314;
+            InternalField_2600.InternalField_3383 = InternalType_325.InternalProperty_315;
+            JobHandle InternalVar_15 = InternalField_2600.InternalMethod_1982(InternalVar_6);
 
-            JobHandle InternalVar_16 = InternalField_2600.InternalMethod_989(InternalVar_6);
-
-            JobHandle InternalVar_17 = JobHandle.CombineDependencies(InternalVar_15, InternalVar_5, InternalVar_16);
-            InternalVar_17.InternalMethod_993(InternalVar_8);
+            JobHandle InternalVar_16 = JobHandle.CombineDependencies(InternalVar_14, InternalVar_5, InternalVar_15);
 
             InternalProperty_289.InternalField_876.InternalMethod_1397();
-            InternalVar_17.Complete();
+            InternalVar_16.Complete();
         }
 
         private void InternalMethod_1221(ref NativeList<InternalType_131> InternalParameter_1296)
@@ -431,7 +431,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
             try
             {
-                if (NovaApplication.IsEditor)
+#pragma warning disable CS0162 
+                if (NovaApplication.ConstIsEditor)
                 {
                     switch (InternalParameter_1299.cameraType)
                     {
@@ -443,37 +444,25 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                             return;
                     }
                 }
+#pragma warning restore CS0162 
 
-                bool InternalVar_1 = false;
-                switch (InternalParameter_1299.transparencySortMode)
-                {
-                    case TransparencySortMode.Default:
-                        InternalVar_1 = InternalParameter_1299.orthographic;
-                        break;
-                    case TransparencySortMode.Orthographic:
-                        InternalVar_1 = false;
-                        break;
-                }
-                InternalField_801.InternalField_1132 =
-                    InternalVar_1 ?
-                    InternalType_362.InternalType_341.InternalMethod_1326(InternalParameter_1299.transform.worldToLocalMatrix) :
-                    InternalType_362.InternalType_341.InternalMethod_1327(InternalParameter_1299.transform.worldToLocalMatrix);
+                InternalField_801.InternalField_1132 = new InternalType_362.InternalType_341(InternalParameter_1299);
 
-                InternalField_801.InternalField_968 = InternalMethod_1224(InternalParameter_1299);
+                InternalField_801.InternalField_3376 = InternalMethod_1224(InternalParameter_1299);
 
                 unsafe
                 {
                     InternalField_802.InternalField_3352.Invoke(UnsafeUtility.AddressOf(ref InternalField_801));
                 }
 
-                for (int InternalVar_2 = 0; InternalVar_2 < InternalField_801.InternalField_968.Length; ++InternalVar_2)
+                for (int InternalVar_1 = 0; InternalVar_1 < InternalField_801.InternalField_968.Length; ++InternalVar_1)
                 {
-                    if (!InternalField_798.TryGetValue(InternalField_801.InternalField_968[InternalVar_2], out InternalType_263 InternalVar_3))
+                    if (!InternalField_798.TryGetValue(InternalField_801.InternalField_968[InternalVar_1], out InternalType_263 InternalVar_2))
                     {
                         continue;
                     }
 
-                    InternalVar_3.InternalMethod_1190(InternalParameter_1299);
+                    InternalVar_2.InternalMethod_1190(InternalParameter_1299);
                 }
             }
             catch (System.Exception e)
@@ -506,15 +495,18 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                     continue;
                 }
 
-                UIBlock InternalVar_4 = InternalType_253.InternalProperty_190.InternalField_413[InternalVar_3] as UIBlock;
-                if (InternalVar_4 == null)
+                InternalType_5 InternalVar_4 = InternalType_253.InternalProperty_190.InternalField_413[InternalVar_3] as InternalType_5;
+                if (InternalVar_4 as MonoBehaviour == null)
                 {
                     continue;
                 }
 
-                bool InternalVar_5 = InternalVar_4.gameObject == InternalVar_1 || InternalVar_4.transform.IsChildOf(InternalVar_1.transform);
-                if ((InternalParameter_1300.cameraType == CameraType.Game && !InternalVar_5) ||
-                    (InternalParameter_1300.cameraType == CameraType.SceneView && InternalVar_5))
+                Transform InternalVar_5 = InternalVar_4.InternalProperty_202;
+
+                bool InternalVar_6 = InternalVar_5.gameObject == InternalVar_1 || InternalVar_5.IsChildOf(InternalVar_1.transform);
+
+                if ((InternalParameter_1300.cameraType == CameraType.Game && !InternalVar_6) ||
+                    (InternalParameter_1300.cameraType == CameraType.SceneView && InternalVar_6))
                 {
                     InternalField_817.Add(InternalVar_3);
                 }
@@ -553,9 +545,10 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_813.InternalMethod_1009();
             InternalField_814.InternalMethod_1009();
 
-            InternalField_815.InternalMethod_1009();
+            InternalField_3378.InternalMethod_1009();
             InternalField_816.InternalMethod_1020();
             InternalField_2827.InternalMethod_1009();
+            InternalField_3379.InternalMethod_1009(InternalType_178.InternalField_3012);
 
             InternalField_809.InternalMethod_1020(JobsUtility.MaxJobThreadCount);
             InternalField_809.Length = JobsUtility.MaxJobThreadCount;
@@ -564,13 +557,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 InternalField_809.ElementAt(InternalVar_1).InternalMethod_702();
             }
 
-            NovaSettings.InternalEvent_0 += InternalMethod_2107;
+            InternalType_24.InternalEvent_10 += InternalMethod_2107;
 
 #pragma warning disable CS0162 
             if (NovaApplication.ConstIsEditor)
             {
                 InternalField_817.InternalMethod_1020();
-                PrefabStageUtils.Init();
             }
 #pragma warning restore CS0162 
 
@@ -581,9 +573,10 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_801.InternalMethod_702();
 
             InternalField_801.InternalField_967 = InternalField_807.InternalField_881;
-            InternalField_801.InternalField_966 = InternalProperty_289.InternalField_869.InternalField_1188;
+            InternalField_801.InternalField_966 = InternalField_3379;
             InternalField_801.InternalField_965 = InternalField_807.InternalField_884;
-            InternalField_801.InternalField_964 = InternalField_815;
+            InternalField_801.InternalField_964 = InternalField_3378;
+            InternalField_801.InternalField_3377 = InternalProperty_289.InternalField_869.InternalField_3381;
 
             InternalField_799 = new InternalType_329()
             {
@@ -609,9 +602,10 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_813.Dispose();
             InternalField_814.Dispose();
 
-            InternalField_815.Dispose();
+            InternalField_3378.Dispose();
             InternalField_2827.Dispose();
             InternalField_816.Dispose();
+            InternalField_3379.Dispose();
 
             InternalField_809.InternalMethod_1022();
 
@@ -631,7 +625,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             RenderPipelineManager.beginCameraRendering -= InternalProperty_282;
             Camera.onPreCull -= InternalProperty_281;
 
-            NovaSettings.InternalEvent_0 -= InternalMethod_2107;
+            InternalType_24.InternalEvent_10 -= InternalMethod_2107;
 
             if (NovaApplication.IsEditor)
             {

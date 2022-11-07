@@ -232,7 +232,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 #pragma warning disable CS0162 
                 if (NovaApplication.ConstIsEditor)
                 {
-                    if (NovaSettings.InternalProperty_87.InternalMethod_554(InternalType_116.InternalField_381) &&
+                    if (InternalType_24.InternalProperty_945.InternalMethod_554(InternalType_116.InternalField_381) &&
                         !InternalType_409.InternalMethod_1925(InternalVar_2.InternalField_1094, InternalVar_2.InternalField_1095))
                     {
                         Debug.LogWarning($"{InternalVar_2.InternalField_1095.InternalMethod_1922()} lighting model being used on {InternalVar_2.InternalField_1094.InternalMethod_1921().InternalMethod_853()}, but it is not marked to be included in builds. If you wish to use this lighting model in builds, you can specify to include it in NovaSettings. {InternalType_178.InternalField_484}");
@@ -299,7 +299,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
         private static void InternalMethod_1462(Material InternalParameter_1552, InternalType_257 InternalParameter_1553)
         {
-            if (!NovaSettings.InternalProperty_87.InternalMethod_554(InternalType_116.InternalField_380) ||
+            if (!InternalType_24.InternalProperty_945.InternalMethod_554(InternalType_116.InternalField_380) ||
                 InternalMethod_1950(InternalParameter_1552.shader))
             {
                 return;

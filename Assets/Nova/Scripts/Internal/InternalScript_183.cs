@@ -41,7 +41,9 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         #endregion
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-                public InternalType_338 InternalField_874 = new InternalType_338();
+                public Dictionary<InternalType_131, Camera> InternalField_3380 = new Dictionary<InternalType_131, Camera>();
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public InternalType_338 InternalField_874 = new InternalType_338();
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Dictionary<InternalType_257, Material> InternalField_875 = new Dictionary<InternalType_257, Material>();
 
@@ -92,6 +94,20 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             }
         }
 
+        public void InternalMethod_3365(InternalType_131 InternalParameter_229, Camera InternalParameter_228)
+        {
+            InternalField_3380[InternalParameter_229] = InternalParameter_228;
+            InternalField_869.InternalField_3381[InternalParameter_229] = InternalParameter_228.GetInstanceID();
+            InternalMethod_3367(InternalParameter_229);
+        }
+
+        public void InternalMethod_3366(InternalType_131 InternalParameter_227)
+        {
+            InternalField_3380.Remove(InternalParameter_227);
+            InternalField_869.InternalField_3381.Remove(InternalParameter_227);
+            InternalMethod_3367(InternalParameter_227);
+        }
+
         public void InternalMethod_1261(InternalType_131 InternalParameter_1323)
         {
             if (!InternalField_869.InternalField_1187.TryGetValue(InternalParameter_1323, out InternalType_344 InternalVar_1) ||
@@ -113,6 +129,19 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             {
                 InternalField_869.InternalMethod_1507(InternalParameter_1323);
             }
+
+            if (InternalField_3380.TryGetValue(InternalParameter_1323, out _))
+            {
+                InternalMethod_3367(InternalParameter_1323);
+            }
+        }
+
+        private void InternalMethod_3367(InternalType_131 InternalParameter_226)
+        {
+            if (InternalType_268.InternalField_406.InternalField_807.InternalField_887.TryGetValue(InternalParameter_226, out var InternalVar_1))
+            {
+                InternalField_862.InternalField_1283.InternalMethod_3375(InternalVar_1);
+            }
         }
 
         public void InternalMethod_1262(InternalType_131 InternalParameter_1324, InternalType_101 InternalParameter_1325)
@@ -124,6 +153,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 InternalField_869.InternalMethod_1509(InternalParameter_1324, ref InternalParameter_1325);
                 InternalField_862.InternalField_1283.InternalMethod_837(InternalParameter_1324);
                 InternalType_253.InternalProperty_190.InternalMethod_1155(InternalParameter_1324);
+
+                if (InternalField_3380.TryGetValue(InternalParameter_1324, out _))
+                {
+                    InternalMethod_3367(InternalParameter_1324);
+                }
+
                 return;
             }
 
@@ -136,6 +171,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
                 InternalField_869.InternalField_1188[InternalParameter_1324] = InternalParameter_1325;
                 InternalField_862.InternalField_1283.InternalMethod_837(InternalParameter_1324);
+
+                if (InternalField_3380.TryGetValue(InternalParameter_1324, out _))
+                {
+                    InternalMethod_3367(InternalParameter_1324);
+                }
+
                 return;
             }
         }

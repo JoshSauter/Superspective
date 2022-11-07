@@ -90,7 +90,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         player = Player.instance.transform;
         playerCam = SuperspectiveScreen.instance.playerCamera.transform;
 
-        PlayerButtonInput.instance.OnAction1Press += Drop;
+        PlayerButtonInput.instance.OnInteractPress += Drop;
 
         PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(transform);
         if (thisDimensionObject != null) thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
@@ -101,6 +101,9 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
 
         AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
+        
+        // TODO: Remove this; temp for testing rolling sphere
+        thisRigidbody.maxAngularVelocity = 120;
     }
 
     void Update() {
@@ -112,7 +115,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (isHeld) {
             interactableGlow.TurnOnGlow();
 
-            if (PlayerButtonInput.instance.Action3Pressed)
+            if (PlayerButtonInput.instance.AlignObjectPressed)
                 StartCoroutine(RotateToRightAngle(RightAngleRotations.GetNearest(transform.rotation)));
         }
     }

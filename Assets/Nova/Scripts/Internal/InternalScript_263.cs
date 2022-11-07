@@ -37,6 +37,18 @@ namespace Nova
         ref InternalNamespace_0.InternalType_70 InternalType_67.InternalProperty_143 => ref UnsafeUtility.As<AutoLayout, InternalNamespace_0.InternalType_70>(ref autoLayout);
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector3 InternalType_67.InternalProperty_87 
+        {
+            get
+            {
+                return Vector3.zero;
+            }
+            set 
+            { 
+            } 
+        }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         ref readonly InternalNamespace_0.InternalType_53.InternalType_55 InternalType_67.InternalProperty_144 => ref InternalType_457.InternalProperty_190.InternalMethod_1857(this).InternalField_1832;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         ref readonly InternalNamespace_0.InternalType_53.InternalType_55 InternalType_67.InternalProperty_145 => ref InternalType_457.InternalProperty_190.InternalMethod_1857(this).InternalField_1833;

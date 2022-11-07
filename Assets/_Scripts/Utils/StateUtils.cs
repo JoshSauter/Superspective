@@ -67,7 +67,7 @@ namespace StateUtils {
             _timeSinceStateChanged = 0f;
             _prevState = _state;
             _state = newState;
-                
+
             OnStateChange?.Invoke(prevState, prevTimeSinceStateChanged);
             if (onStateChangeDict.ContainsKey(newState)) {
                 onStateChangeDict[newState]?.Invoke();

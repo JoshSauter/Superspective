@@ -6,23 +6,33 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 public class DropdownVisuals : ItemVisuals {
+    private const float disabledAlpha = .4f;
     private const int minNumberOfItemsForScrollbar = 8;
     public Dropdown Dropdown;
 
     public void PopulateFrom(DropdownSetting setting) {
+        bool settingWasntSet = Dropdown.setting != setting;
         Dropdown.setting = setting;
 
-        Dropdown.gameObject.name = $"{setting.Name} Dropdown";
-        Dropdown.Name.Text = setting.Name;
+        Dropdown.gameObject.name = $"{setting.name} Dropdown";
+        Dropdown.Name.Text = setting.name;
         Dropdown.SelectionLabel.Text = setting.SelectedValueName;
 
-        Dropdown.Scroller.ScrollbarVisual.Visible = setting.AllDropdownItems.Count > minNumberOfItemsForScrollbar;
+        Dropdown.Scroller.ScrollbarVisual.Visible = setting.dropdownSelection.allItems.Count > minNumberOfItemsForScrollbar;
         
-        Dropdown.DropdownOptionsListView.SetDataSource(setting.AllDropdownItems);
-        Dropdown.DropdownOptionsRadioSelection.Teardown();
-        Dropdown.DropdownOptionsRadioSelection.Init();
+        Dropdown.SetDatasource();
+        if (settingWasntSet) {
+            setting.dropdownSelection.OnSelectionChanged += (prevSelections, newSelections) => {
+                Dropdown.UpdateVisuals(newSelections);
+            };
+        }
+        Dropdown.DropdownOptionsListView.Refresh();
 
-        Dropdown.DropdownOptionsRadioSelection.TryFindIndex(setting.SelectedValue.DisplayName, out int indexOfMatch);
-        Dropdown.DropdownOptionsRadioSelection.SetSelection(indexOfMatch, false);
+        // Dropdown.DropdownOptionsSelection.TryFindIndex(setting.SelectedValue.DisplayName, out int indexOfMatch);
+        // Dropdown.DropdownOptionsSelection.SetSelection(indexOfMatch, false);
+        
+        Dropdown.DisabledOverlay.Color = Dropdown.DisabledOverlay.Color.WithAlpha(setting.isEnabled ? 0f : disabledAlpha);
+        Dropdown.SelectionButton.isEnabled = setting.isEnabled;
+        Dropdown.ResetButton.isEnabled = setting.isEnabled;
     }
 }

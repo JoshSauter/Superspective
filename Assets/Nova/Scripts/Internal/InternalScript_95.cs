@@ -257,11 +257,13 @@ namespace Nova.InternalNamespace_16
 
             UIBlock InternalVar_2 = InternalParameter_2385;
 
+            InternalParameter_2386.ID = InternalType_524.InternalMethod_3250();
+
             do
             {
                 InternalType_522 InternalVar_3 = InternalVar_2.InternalProperty_24;
                 InternalType_524 InternalVar_4 = InternalVar_3.InternalProperty_437;
-                
+
                 bool InternalVar_5 = InternalVar_3.InternalProperty_1034 > 0;
                 bool InternalVar_6 = InternalVar_4 != null && InternalVar_4.InternalMethod_2081<TEvent>(InternalParameter_2387);
 
@@ -269,7 +271,7 @@ namespace Nova.InternalNamespace_16
                 {
                     InternalVar_1.Add(new InternalType_529<TEvent>(ref InternalParameter_2386, InternalVar_3.InternalProperty_438));
                 }
-                
+
                 if (InternalVar_6)
                 {
                     InternalVar_3.InternalMethod_1521();
@@ -279,9 +281,14 @@ namespace Nova.InternalNamespace_16
                         InternalVar_1.Add(new InternalType_529<TEvent>(ref InternalParameter_2386, InternalVar_3.InternalProperty_438));
                     }
 
-                    InternalVar_4.InternalMethod_2084(InternalVar_1);
+                    InternalVar_4.InternalMethod_3257(InternalVar_1, out bool InternalVar_7);
 
                     InternalVar_3.InternalMethod_1496();
+
+                    if (InternalVar_7)
+                    {
+                        break;
+                    }
                 }
 
                 InternalVar_2 = InternalVar_2.Parent;
@@ -290,6 +297,11 @@ namespace Nova.InternalNamespace_16
             } while (InternalVar_2 != null);
 
             InternalType_155<InternalType_529<TEvent>>.InternalMethod_741(InternalVar_1);
+        }
+
+        public static void InternalMethod_2086<TEvent>(ref TEvent InternalParameter_1308) where TEvent : struct, IEvent
+        {
+            InternalType_524.InternalMethod_3262(ref InternalParameter_1308);
         }
 
         public bool InternalMethod_1635(InternalType_273 InternalParameter_437, Type InternalParameter_181, out InternalType_273 InternalParameter_180)
@@ -320,6 +332,5 @@ namespace Nova.InternalNamespace_16
         {
             this.InternalField_2337 = InternalParameter_115;
         }
-
     }
 }

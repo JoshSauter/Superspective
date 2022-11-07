@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Nova.InternalNamespace_17.InternalNamespace_18
 {
-    internal abstract class InternalType_583<T> : PropertyDrawer where T : class, InternalType_645, new()
+    internal abstract class InternalType_583<T87> : PropertyDrawer where T87 : class, InternalType_645, new()
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        protected T InternalField_2604 = new T();
+        protected T87 InternalField_2604 = new T87();
 
         protected abstract void OnGUI(Rect position, GUIContent label);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using LevelManagement;
 using PortalMechanics;
 using Saving;
@@ -151,6 +152,35 @@ namespace SuperspectiveUtils {
 
         public static Color WithAlpha(this Color self, float alpha) {
             return new Color(self.r, self.g, self.b, alpha);
+        }
+    }
+    
+    public static class StringExt {
+        public static string StripSuffix(this string s, string suffix) {
+            if (s.EndsWith(suffix)) {
+                return s.Substring(0, s.Length - suffix.Length);
+            }
+            else {
+                return s;
+            }
+        }
+        
+        public static string StripPrefix(this string s, string prefix) {
+            if (s.StartsWith(prefix)) {
+                return s.Substring(prefix.Length, s.Length - prefix.Length);
+            }
+            else {
+                return s;
+            }
+        }
+        
+        // Shamelessly stolen from: https://stackoverflow.com/questions/5796383/insert-spaces-between-words-on-a-camel-cased-token
+        public static string SplitCamelCase(this string str) {
+            return Regex.Replace( 
+                Regex.Replace(str, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), 
+                @"(\p{Ll})(\P{Ll})", 
+                "$1 $2" 
+            );
         }
     }
 

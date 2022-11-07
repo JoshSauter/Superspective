@@ -6,12 +6,12 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Base class for classes that provide input to <see cref="TextField"/>.
+/// Base class for classes that provide input to <see cref="SuperspectiveTextField"/>.
 /// </summary>
 public abstract class TextFieldInputProvider : MonoBehaviour {
     [Tooltip("The input field to which this class provides input.")]
     [SerializeField]
-    protected TextField inputField = null;
+    protected SuperspectiveTextField inputField = null;
     [Tooltip("The focuser, used to determine when this class should start providing input.")]
     [SerializeField]
     protected TextFieldSelector selector = null;

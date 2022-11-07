@@ -146,7 +146,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
         {
             InternalType_5 InternalVar_1 = InternalParameter_2776.InternalMethod_1034();
             bool InternalVar_2 = InternalVar_1 != null;
-            Vector3 InternalVar_3 = InternalType_65.InternalMethod_3320(InternalParameter_2776);
+            Vector3 InternalVar_3 = InternalType_44.InternalMethod_3206(InternalParameter_2776);
             Vector3 InternalVar_4 = InternalVar_2 ? (Vector3)InternalVar_1.InternalProperty_146.InternalProperty_139 : Vector3.zero;
             Matrix4x4 InternalVar_5 = InternalParameter_2776.InternalMethod_1035();
             Matrix4x4 InternalVar_6 = Unity.Mathematics.math.inverse(InternalVar_5);
@@ -221,7 +221,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
                 if (InternalType_728.InternalMethod_3278(InternalVar_15 == AutoSize.Shrink))
                 {
                     InternalParameter_2776.CalculateLayout();
-                    InternalVar_3 = InternalType_65.InternalMethod_3320(InternalParameter_2776);
+                    InternalVar_3 = InternalType_44.InternalMethod_3206(InternalParameter_2776);
                 }
             }
 

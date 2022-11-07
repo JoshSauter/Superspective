@@ -114,15 +114,15 @@ namespace Nova
 
         #region 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-                private InternalType_12.InternalType_15 InternalField_2415 = null;
+                private InternalType_14.InternalType_12 InternalField_2415 = null;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private protected InternalType_12.InternalType_15 InternalProperty_766
+        private protected InternalType_14.InternalType_12 InternalProperty_766
         {
             get
             {
                 if (InternalField_2415 == null)
                 {
-                    InternalField_2415 = InternalMethod_1993;
+                    InternalField_2415 = InternalMethod_158;
                 }
 
                 return InternalField_2415;
@@ -130,15 +130,15 @@ namespace Nova
         }
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private InternalType_12.InternalType_16 InternalField_2439 = null;
+        private InternalType_14.InternalType_25 InternalField_2439 = null;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private protected InternalType_12.InternalType_16 InternalProperty_770
+        private protected InternalType_14.InternalType_25 InternalProperty_770
         {
             get
             {
                 if (InternalField_2439 == null)
                 {
-                    InternalField_2439 = InternalMethod_982;
+                    InternalField_2439 = InternalMethod_156;
                 }
 
                 return InternalField_2439;
@@ -201,25 +201,25 @@ namespace Nova
                     InternalVar_2 = new InternalNamespace_0.InternalType_78(InternalVar_1);
                 }
 
-                InternalType_12.InternalType_13 InternalVar_3 = InternalType_12.InternalMethod_154(UIBlock, InternalVar_2);
-                InternalMethod_982(ref InternalVar_3);
+                InternalType_14.InternalType_13 InternalVar_3 = InternalType_14.InternalMethod_191(UIBlock, InternalVar_2);
+                InternalMethod_156(ref InternalVar_3);
             }
 
             InternalMethod_2664();
         }
-        private void InternalMethod_1993(ref InternalType_12.InternalType_14<bool> InternalParameter_1795)
+        private void InternalMethod_158(ref InternalType_14.InternalType_16<bool> InternalParameter_100)
         {
             if (!isActiveAndEnabled)
             {
                 return;
             }
 
-            InternalType_76<bool>? InternalVar_1 = InternalParameter_1795.InternalField_70;
+            InternalType_76<bool>? InternalVar_1 = InternalParameter_100.InternalField_67;
             InternalType_76<bool> InternalVar_2 = InternalVar_1.GetValueOrDefault();
-            InternalType_76<bool>? InternalVar_3 = InternalParameter_1795.InternalField_69;
+            InternalType_76<bool>? InternalVar_3 = InternalParameter_100.InternalField_70;
             InternalType_76<bool> InternalVar_4 = InternalVar_3.GetValueOrDefault();
 
-            uint InternalVar_5 = InternalParameter_1795.InternalField_3029.InternalField_257;
+            uint InternalVar_5 = InternalParameter_100.InternalField_3029.InternalField_257;
 
             bool InternalVar_7 = InternalField_2817.TryGetValue(InternalVar_5, out InternalType_492 InternalVar_6);
 
@@ -228,31 +228,31 @@ namespace Nova
 
             if (InternalVar_2.InternalField_246)
             {
-                InternalMethod_1884(InternalVar_2.InternalField_248, ref InternalVar_6, ref InternalParameter_1795.InternalField_3029);
+                InternalMethod_1884(InternalVar_2.InternalField_248, ref InternalVar_6, ref InternalParameter_100.InternalField_3029);
             }
 
             bool InternalVar_10 = InternalVar_4.InternalField_248 != InternalVar_2.InternalField_248;
 
             if (InternalVar_8 && InternalVar_10 && InternalVar_6.InternalField_2810 && (InternalVar_2.InternalField_246 || InternalVar_9))
             {
-                InternalMethod_2737(InternalVar_2.InternalField_248, ref InternalParameter_1795.InternalField_3029);
+                InternalMethod_2737(InternalVar_2.InternalField_248, ref InternalParameter_100.InternalField_3029);
             }
 
             if (InternalVar_6.InternalField_2810 && InternalVar_9)
             {
-                InternalMethod_2656(InternalVar_2.InternalField_248, ref InternalVar_6, ref InternalParameter_1795.InternalField_3029);
+                InternalMethod_2656(InternalVar_2.InternalField_248, ref InternalVar_6, ref InternalParameter_100.InternalField_3029);
             }
 
-            InternalMethod_2620(ref InternalParameter_1795, ref InternalVar_6);
+            InternalMethod_155(ref InternalParameter_100, ref InternalVar_6);
 
             if (InternalVar_6.InternalField_2811 && !InternalVar_9)
             {
-                InternalMethod_2621(ref InternalVar_6, InternalVar_2.InternalField_246, InternalVar_8, ref InternalParameter_1795.InternalField_3029);
+                InternalMethod_2621(ref InternalVar_6, InternalVar_2.InternalField_246, InternalVar_8, ref InternalParameter_100.InternalField_3029);
             }
 
             if (InternalVar_6.InternalField_2810 && !InternalVar_2.InternalField_246 && !InternalVar_9)
             {
-                InternalMethod_470(ref InternalVar_6, ref InternalParameter_1795.InternalField_3029);
+                InternalMethod_470(ref InternalVar_6, ref InternalParameter_100.InternalField_3029);
             }
 
             if (InternalVar_8 && InternalField_2816.Contains(InternalVar_5) == InternalVar_7)
@@ -271,21 +271,21 @@ namespace Nova
             }
         }
 
-        private void InternalMethod_982(ref InternalType_12.InternalType_13 InternalParameter_2152)
+        private void InternalMethod_156(ref InternalType_14.InternalType_13 InternalParameter_99)
         {
-            if (!InternalField_2817.TryGetValue(InternalParameter_2152.InternalField_67.InternalField_257, out InternalType_492 InternalVar_1))
+            if (!InternalField_2817.TryGetValue(InternalParameter_99.InternalField_69.InternalField_257, out InternalType_492 InternalVar_1))
             {
                 return;
             }
 
-            InternalField_2817.Remove(InternalParameter_2152.InternalField_67.InternalField_257);
-            InternalField_2816.Remove(InternalParameter_2152.InternalField_67.InternalField_257);
+            InternalField_2817.Remove(InternalParameter_99.InternalField_69.InternalField_257);
+            InternalField_2816.Remove(InternalParameter_99.InternalField_69.InternalField_257);
 
             if (InternalVar_1.InternalField_2810 || InternalVar_1.InternalField_2811 || InternalVar_1.InternalField_2809 || InternalProperty_937)
             {
-                InternalMethod_2662(ref InternalParameter_2152.InternalField_67);
+                InternalMethod_2662(ref InternalParameter_99.InternalField_69);
 
-                UIBlock.InternalMethod_91(Gesture.InternalMethod_3197(InternalParameter_2152.InternalField_67.InternalMethod_2179(), UIBlock));
+                UIBlock.InternalMethod_91(Gesture.InternalMethod_3197(InternalParameter_99.InternalField_69.InternalMethod_2179(), UIBlock));
             }
         }
 
@@ -351,7 +351,7 @@ namespace Nova
                 InternalMethod_470(ref InternalParameter_22, ref InternalParameter_907);
             }
 
-            bool InternalVar_2 = Time.frameCount - InternalField_2818 >= NovaSettings.InternalProperty_87.InternalField_2768;
+            bool InternalVar_2 = Time.frameCount - InternalField_2818 >= InternalNamespace_0.InternalType_24.InternalProperty_945.InternalField_2768;
 
             InternalField_2818 = int.MaxValue;
 
@@ -366,8 +366,8 @@ namespace Nova
                 }
                 else
                 {
-                    InternalType_12.InternalType_13 InternalVar_3 = InternalType_12.InternalMethod_154(UIBlock, InternalParameter_907);
-                    InternalMethod_982(ref InternalVar_3);
+                    InternalType_14.InternalType_13 InternalVar_3 = InternalType_14.InternalMethod_191(UIBlock, InternalParameter_907);
+                    InternalMethod_156(ref InternalVar_3);
                 }
             }
 
@@ -384,7 +384,7 @@ namespace Nova
             UIBlock.InternalMethod_91(Gesture.InternalMethod_3267(InternalParameter_1289.InternalMethod_2179(), UIBlock, InternalParameter_1326));
         }
 
-        private protected abstract void InternalMethod_2620(ref InternalType_12.InternalType_14<bool> InternalParameter_2086, ref InternalType_492 InternalParameter_2085);
+        private protected abstract void InternalMethod_155(ref InternalType_14.InternalType_16<bool> InternalParameter_98, ref InternalType_492 InternalParameter_97);
 
         private protected abstract void InternalMethod_2750();
         private protected abstract void InternalMethod_2664();
@@ -408,7 +408,7 @@ namespace Nova
     [HelpURL("https://novaui.io/manual/InputOverview.html#interactable--scroller")]
     public sealed class Interactable : GestureRecognizer, InternalType_493
     {
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private ThreeD<bool> draggable = false;
 
@@ -479,25 +479,25 @@ namespace Nova
             UIBlock.InternalProperty_23.InternalEvent_4 -= InternalProperty_770;
         }
 
-        private protected override void InternalMethod_2620(ref InternalType_12.InternalType_14<bool> InternalParameter_2086, ref InternalType_492 InternalParameter_2085)
+        private protected override void InternalMethod_155(ref InternalType_14.InternalType_16<bool> InternalParameter_98, ref InternalType_492 InternalParameter_97)
         {
             if (!isActiveAndEnabled)
             {
                 return;
             }
 
-            InternalType_76<bool>? InternalVar_1 = InternalParameter_2086.InternalField_70;
+            InternalType_76<bool>? InternalVar_1 = InternalParameter_98.InternalField_67;
             InternalType_76<bool> InternalVar_2 = InternalVar_1.GetValueOrDefault();
-            InternalType_76<bool>? InternalVar_3 = InternalParameter_2086.InternalField_69;
+            InternalType_76<bool>? InternalVar_3 = InternalParameter_98.InternalField_70;
             InternalType_76<bool> InternalVar_4 = InternalVar_3.GetValueOrDefault();
 
             bool InternalVar_5 = InternalVar_1.HasValue;
             bool InternalVar_6 = InternalVar_4.InternalField_248 != InternalVar_2.InternalField_248;
 
-            if (InternalVar_5 && InternalVar_6 && InternalParameter_2085.InternalField_2811 && InternalVar_2.InternalProperty_166)
+            if (InternalVar_5 && InternalVar_6 && InternalParameter_97.InternalField_2811 && InternalVar_2.InternalProperty_166)
             {
                 Vector3 InternalVar_7 = InternalVar_3.HasValue ? InternalVar_4.InternalField_248 : InternalVar_2.InternalField_248;
-                InternalMethod_2663(ref InternalParameter_2085, InternalVar_7, InternalVar_2.InternalField_248, ref InternalParameter_2086.InternalField_3029);
+                InternalMethod_2663(ref InternalParameter_97, InternalVar_7, InternalVar_2.InternalField_248, ref InternalParameter_98.InternalField_3029);
             }
         }
 
@@ -556,7 +556,7 @@ namespace Nova
                     InternalVar_6 = Vector3.Cross(InternalVar_4, InternalVar_3);
                 }
 
-                Vector3 InternalVar_7 = InternalParameter_2232.InternalField_248 - InternalVar_5;
+                Vector3 InternalVar_7 = InternalType_187.InternalMethod_881(InternalParameter_2232.InternalField_248 - InternalVar_5);
                 float InternalVar_8 = InternalType_187.InternalMethod_907(InternalVar_4, InternalVar_7, InternalVar_6);
                 InternalVar_8 = Mathf.Min(InternalVar_8, 180 - InternalVar_8);
 

@@ -15,7 +15,7 @@ namespace Nova.InternalNamespace_17
 
         public void OnActiveBuildTargetChanged(BuildTarget previousTarget, BuildTarget newTarget)
         {
-            if (!NovaSettings.InternalProperty_88 || !NovaSettings.PackedImagesEnabled)
+            if (!InternalNamespace_0.InternalType_24.InternalProperty_1040 || !InternalNamespace_0.InternalType_24.InternalProperty_1045)
             {
                 return;
             }

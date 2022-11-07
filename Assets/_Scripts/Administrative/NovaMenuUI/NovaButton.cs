@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Audio;
 using NaughtyAttributes;
 using Nova;
 using StateUtils;
@@ -29,18 +30,32 @@ public class NovaButton : MonoBehaviour {
     [Tooltip("Will be set to the UIBlock2D on this object if not specified in Inspector")]
     public UIBlock2D BackgroundUIBlock;
     public Option<TextBlock> TextBlock;
+    private bool _isEnabled = true;
+
+    public bool isEnabled {
+        get => _isEnabled;
+        set {
+            novaInteractable.enabled = value;
+            _isEnabled = value;
+        }
+    }
     public Interactable novaInteractable;
     public UIBlock[] OtherUIBlocks;
     public Option<string> Text => TextBlock.Map(t => t.Text);
 
-    public const float colorLerpTime = .085f;
+    public const float colorLerpOnTime = .03f;
+    public const float colorLerpOffTime = .375f;
     public bool unclickAfterClick = false;
     [ShowIf("unclickAfterClick")]
-    public float timeToUnclick = .5f;
+    public float timeToUnclick = .06f;
 
+    public delegate void OnClickActionSimple();
     public delegate void OnClickAction(NovaButton thisButton);
     public event OnClickAction OnClickReset; // Triggered when we move back to Idle from Clicked
+    public event OnClickActionSimple OnClickResetSimple; // Triggered when we move back to Idle from Clicked
+    public static event OnClickAction OnAnyNovaButtonClick;
     public event OnClickAction OnClick;
+    public event OnClickActionSimple OnClickSimple;
     
     private List<UIBlock> allComponents {
         get {
@@ -96,6 +111,8 @@ public class NovaButton : MonoBehaviour {
     }
 
     private void Update() {
+        if (!isEnabled) return;
+        
         clipMask.ForEach(mask => {
             // Only enable the buttons once they're mostly visible
             novaInteractable.enabled = mask.Tint.a > clipMaskInteractThreshold;
@@ -107,12 +124,10 @@ public class NovaButton : MonoBehaviour {
             buttonState.AddStateTransition(ButtonState.Clicked, ButtonState.Hovered, timeToUnclick);
         }
         
-        buttonState.AddTrigger(ButtonState.Clicked, () => {
-            OnClick?.Invoke(this);
-        });
         buttonState.AddTrigger(ButtonState.Idle, () => {
             if (buttonState.prevState == ButtonState.Clicked) {
                 OnClickReset?.Invoke(this);
+                OnClickResetSimple?.Invoke();
             }
         });
         
@@ -121,7 +136,7 @@ public class NovaButton : MonoBehaviour {
                 ShadowDirection.In :
                 ShadowDirection.Out;
         });
-        buttonState.OnStateChangeSimple += () => {
+        buttonState.OnStateChange += (prevState, unused) => {
             void RunAnimation(Color endBgColor, Color endComponentColor) {
                 UIBlock[] all = allComponents.ToArray();
                 Color startComponentColor = (all.Length > 0) ? all[0].Color : Color.magenta;
@@ -134,7 +149,8 @@ public class NovaButton : MonoBehaviour {
                     componentsToAnimate = all,
                 };
 
-                buttonColorAnimationHandle = animation.Run(colorLerpTime);
+                bool on = (int)buttonState > (int)prevState;
+                buttonColorAnimationHandle = animation.Run(on ? colorLerpOnTime : colorLerpOffTime);
             }
 
             buttonColorAnimationHandle.Cancel();
@@ -172,7 +188,9 @@ public class NovaButton : MonoBehaviour {
     }
 
     bool ShouldIgnoreInputs() {
-        return DialogWindow.anyDialogueIsOpen && (dialogWindow.ForAll(window => DialogWindow.windowOpen != window));
+        bool someOtherDialogWindowOpen = DialogWindow.anyDialogueIsOpen && (dialogWindow.ForAll(window => DialogWindow.windowsOpen.Peek() != window));
+        bool listeningForKeyRebind = Keybind.isListeningForNewKeybind;
+        return someOtherDialogWindowOpen || listeningForKeyRebind;
     }
     
     private void HandleHoverEvent(Gesture.OnHover evt) {
@@ -180,7 +198,9 @@ public class NovaButton : MonoBehaviour {
         
         if (buttonState != ButtonState.Clicked) {
             debug.Log($"Hovered on {gameObject}");
+            AudioManager.instance.Play(AudioName.UI_HoverBlip, shouldForcePlay: true);
             buttonState.Set(ButtonState.Hovered);
+            evt.Consume();
         }
     }
 
@@ -190,6 +210,7 @@ public class NovaButton : MonoBehaviour {
         debug.Log($"Unhovered on {gameObject.name}!");
         if (buttonState != ButtonState.Clicked) {
             buttonState.Set(ButtonState.Idle);
+            evt.Consume();
         }
     }
 
@@ -198,6 +219,7 @@ public class NovaButton : MonoBehaviour {
 
         debug.Log($"Click down on {gameObject.name}!");
         buttonState.Set(ButtonState.ClickHeld);
+        evt.Consume();
     }
 
     private void HandleReleaseEvent(Gesture.OnRelease evt) {
@@ -206,6 +228,10 @@ public class NovaButton : MonoBehaviour {
         debug.Log($"Released on {gameObject.name}!");
         if (evt.Hovering) {
             buttonState.Set(ButtonState.Clicked);
+            
+            OnAnyNovaButtonClick?.Invoke(this);
+            OnClick?.Invoke(this);
+            OnClickSimple?.Invoke();
         }
         else if (buttonState.prevState == ButtonState.Clicked) {
             buttonState.Set(ButtonState.Clicked);
@@ -213,6 +239,7 @@ public class NovaButton : MonoBehaviour {
         else {
             buttonState.Set(ButtonState.Idle);
         }
+        evt.Consume();
     }
 
     void SubscribeToMouseEvents() {

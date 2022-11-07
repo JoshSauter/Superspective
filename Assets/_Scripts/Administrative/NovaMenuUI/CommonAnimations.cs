@@ -17,7 +17,7 @@ struct MenuFadeAnimation : IAnimation {
             menuToAnimate.transform.localPosition = menuToAnimate.transform.localPosition.WithZ(targetZ);
         }
         else if (percentDone >= 1 && targetAlpha <= 0f) {
-            menuToAnimate.transform.localPosition = menuToAnimate.transform.localPosition.WithZ(1);
+            menuToAnimate.transform.localPosition = menuToAnimate.transform.localPosition.WithZ(10);
         }
     }
 }

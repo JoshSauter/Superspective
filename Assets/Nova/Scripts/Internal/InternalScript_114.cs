@@ -39,7 +39,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_11
     internal struct InternalType_427
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public UIBlock InternalField_1638;
+        public InternalType_5 InternalField_1638;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Bounds InternalField_1639;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -53,10 +53,10 @@ namespace Nova.InternalNamespace_0.InternalNamespace_11
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public const int InternalField_1645 = InternalType_178.InternalField_469;
 
-        public struct InternalType_430<T> : InternalType_147 where T : unmanaged, IComparer<T>
+        public struct InternalType_430<T100> : InternalType_147 where T100 : unmanaged, IComparer<T100>
         {
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public NativeList<T> InternalField_1656;
+            public NativeList<T100> InternalField_1656;
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public NativeList<InternalType_133> InternalField_1657;
 
@@ -68,7 +68,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_11
 
             public void InternalMethod_702()
             {
-                InternalField_1656 = new NativeList<T>(InternalType_178.InternalField_3012, Allocator.Persistent);
+                InternalField_1656 = new NativeList<T100>(InternalType_178.InternalField_3012, Allocator.Persistent);
                 InternalField_1657 = new NativeList<InternalType_133>(InternalType_178.InternalField_3013, Allocator.Persistent);
             }
         }

@@ -91,13 +91,13 @@ public class Interact : Singleton<Interact> {
             }
             
             // If the left mouse button is being held down, interact with the object selected
-            if (Input.GetMouseButton(0)) {
+            if (PlayerButtonInput.instance.InteractHeld) {
                 // If left mouse button was clicked this frame, call OnLeftMouseButtonDown
-                if (Input.GetMouseButtonDown(0)) interactableObjectHovered.OnLeftMouseButtonDown?.Invoke();
+                if (PlayerButtonInput.instance.InteractPressed) interactableObjectHovered.OnLeftMouseButtonDown?.Invoke();
                 interactableObjectHovered.OnLeftMouseButton?.Invoke();
             }
             // If we released the left mouse button this frame, call OnLeftMouseButtonUp
-            else if (Input.GetMouseButtonUp(0)) interactableObjectHovered.OnLeftMouseButtonUp?.Invoke();
+            else if (PlayerButtonInput.instance.InteractReleased) interactableObjectHovered.OnLeftMouseButtonUp?.Invoke();
         }
     }
 

@@ -233,7 +233,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
         {
             InternalType_5 InternalVar_1 = InternalProperty_974.InternalMethod_1034();
             bool InternalVar_2 = InternalVar_1 != null;
-            Vector3 InternalVar_3 = InternalType_65.InternalMethod_3320(InternalProperty_974);
+            Vector3 InternalVar_3 = InternalType_44.InternalMethod_3206(InternalProperty_974);
             Vector3 InternalVar_4 = InternalVar_2 ? (Vector3)InternalVar_1.InternalProperty_146.InternalProperty_139 : Vector3.zero;
 
             EditorGUI.BeginChangeCheck();

@@ -43,6 +43,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         public int InternalField_1008;
     }
 
+    
     internal struct InternalType_302 : InternalType_147, InternalType_150
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]

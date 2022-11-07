@@ -11,12 +11,12 @@ using UnityEngine;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_10
 {
-    internal struct InternalType_272<V>
-        where V : unmanaged
+    internal struct InternalType_272<T97>
+        where T97 : unmanaged
     {
         [NativeDisableParallelForRestriction]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private InternalType_161<InternalType_259, V> InternalField_856;
+        private InternalType_161<InternalType_259, T97> InternalField_856;
         [NativeDisableParallelForRestriction]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeReference<int> InternalField_857;
@@ -31,32 +31,32 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref V InternalMethod_1253(InternalType_259 InternalParameter_2219)
+        public ref T97 InternalMethod_1253(InternalType_259 InternalParameter_2219)
         {
             InternalMethod_1251();
             return ref InternalField_856.InternalMethod_748(InternalParameter_2219);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool InternalMethod_1252(InternalType_259 InternalParameter_1304, out V* InternalParameter_1311)
+        public unsafe bool InternalMethod_1252(InternalType_259 InternalParameter_1304, out T97* InternalParameter_1311)
         {
             InternalMethod_1251();
             return InternalField_856.InternalMethod_747(InternalParameter_1304, out InternalParameter_1311);
         }
 
-        public InternalType_272(ref InternalType_161<InternalType_259, V> InternalParameter_1316, ref NativeReference<int> InternalParameter_1317)
+        public InternalType_272(ref InternalType_161<InternalType_259, T97> InternalParameter_1316, ref NativeReference<int> InternalParameter_1317)
         {
             this.InternalField_856 = InternalParameter_1316;
             this.InternalField_857 = InternalParameter_1317;
         }
     }
 
-    internal struct InternalType_186<TCPU,TGPU> : InternalType_148
-        where TCPU : unmanaged
-        where TGPU : unmanaged
+    internal struct InternalType_186<T82,T83> : InternalType_148
+        where T82 : unmanaged
+        where T83 : unmanaged
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private InternalType_161<InternalType_259, TCPU> InternalField_850;
+        private InternalType_161<InternalType_259, T82> InternalField_850;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public NativeList<InternalType_259> InternalField_851;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -83,7 +83,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TCPU InternalMethod_1242(InternalType_259 InternalParameter_2191)
+        public ref T82 InternalMethod_1242(InternalType_259 InternalParameter_2191)
         {
             InternalMethod_1243();
             return ref InternalField_850.InternalMethod_748(InternalParameter_2191);
@@ -100,8 +100,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             bool InternalVar_1 = false;
             ComputeBuffer InternalVar_2 = InternalProperty_292;
 
-            NativeArray<TCPU> InternalVar_3 = (NativeArray<TCPU>)InternalField_850.InternalProperty_228;
-            NativeArray<TGPU> InternalVar_4 = InternalVar_3.Reinterpret<TGPU>(sizeof(TCPU));
+            NativeArray<T82> InternalVar_3 = (NativeArray<T82>)InternalField_850.InternalProperty_228;
+            NativeArray<T83> InternalVar_4 = InternalVar_3.Reinterpret<T83>(sizeof(T82));
             if (InternalVar_2 == null || InternalVar_2.count < InternalVar_4.Length)
             {
                 if (InternalVar_2 != null)
@@ -109,7 +109,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                     InternalVar_1 = true;
                     InternalVar_2.Dispose();
                 }
-                InternalVar_2 = new ComputeBuffer(Mathf.Max(InternalVar_4.Length, InternalType_178.InternalField_3013), sizeof(TGPU), ComputeBufferType.Structured);
+                InternalVar_2 = new ComputeBuffer(Mathf.Max(InternalVar_4.Length, InternalType_178.InternalField_3013), sizeof(T83), ComputeBufferType.Structured);
                 InternalField_853[InternalField_852] = InternalVar_2;
             }
 
@@ -160,9 +160,9 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_851.AddRange(InternalParameter_2196.InternalProperty_232 + InternalParameter_2197, InternalParameter_2198);
         }
 
-        public InternalType_272<TCPU> InternalMethod_1248()
+        public InternalType_272<T82> InternalMethod_1248()
         {
-            return new InternalType_272<TCPU>(ref InternalField_850, ref InternalField_854);
+            return new InternalType_272<T82>(ref InternalField_850, ref InternalField_854);
         }
 
         public void Dispose()
@@ -182,7 +182,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
         }
 
-        public static implicit operator ComputeBuffer(InternalType_186<TCPU, TGPU> InternalParameter_2217) => InternalParameter_2217.InternalProperty_292;
+        public static implicit operator ComputeBuffer(InternalType_186<T82, T83> InternalParameter_2217) => InternalParameter_2217.InternalProperty_292;
 
         #region 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]

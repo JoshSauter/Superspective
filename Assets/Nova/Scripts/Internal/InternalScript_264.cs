@@ -27,6 +27,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_5
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public const int InternalField_473 = (int)RenderQueue.Geometry;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public const int InternalField_3392 = (int)RenderQueue.Overlay;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public const int InternalField_474 = 5000;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]

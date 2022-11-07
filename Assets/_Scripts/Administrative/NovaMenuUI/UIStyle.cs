@@ -4,6 +4,18 @@ using UnityEngine;
 
 // Consistent coloring for UI components, in the future could have multiple themes to swap colors all together
 public static class UIStyle {
+    public static HeaderSettingsItem NewHeader(string text) {
+        return HeaderSettingsItem.Of(text);
+    }
+    
+    public static SeparatorSettingItem NewSeparator() {
+        return new SeparatorSettingItem();
+    }
+    
+    public static SpacerSettingItem NewSpacer() {
+        return new SpacerSettingItem();
+    }
+    
     private static Color Grayscale(float outOf255, float alpha) {
         return new Color(outOf255 / 255f, outOf255 / 255f, outOf255 / 255f, alpha);
     }
@@ -54,6 +66,10 @@ public static class UIStyle {
     }
 
     public static class Settings {
+        public static class SmallIntSlider {
+            public static Color fillColor = Grayscale(89f, 1f);
+            public static Color unfilledColor = Color.white;
+        }
         public static class Dropdown {
             public static Color UnselectedColor = new Color(657f / 1020f, 624f / 1020f, 633f / 1020f, .3f);
             public static Color HoverBgColor = new Color(219f/1020f, 208f/1020f, 211f/1020f, 0.45f);

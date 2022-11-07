@@ -268,7 +268,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalVar_3.InternalField_781.SetMatrix(InternalType_331.InternalField_2221, InternalField_777);
             InternalVar_3.InternalField_781.SetMatrix(InternalType_331.InternalField_2210, InternalField_778);
             InternalVar_3.InternalField_781.SetBuffer(InternalType_331.InternalField_1912, InternalProperty_275.InternalField_863.InternalField_1240);
-            InternalVar_3.InternalField_781.SetFloat(InternalType_331.InternalField_1198, NovaSettings.EdgeSoftenWidth);
+            InternalVar_3.InternalField_781.SetFloat(InternalType_331.InternalField_1198, InternalType_24.InternalProperty_1042);
 
             InternalMethod_1196(InternalVar_3, ref InternalVar_2);
 
@@ -331,7 +331,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalParameter_1285.InternalField_781.SetBuffer(InternalType_331.InternalField_1575, InternalProperty_275.InternalField_864.InternalField_1214);
             InternalParameter_1285.InternalField_781.SetBuffer(InternalType_331.InternalField_1163, InternalProperty_275.InternalField_864.InternalField_1213);
-            InternalParameter_1285.InternalField_781.SetFloat(InternalType_331.InternalField_1198, NovaSettings.EdgeSoftenWidth);
+            InternalParameter_1285.InternalField_781.SetFloat(InternalType_331.InternalField_1198, InternalType_24.InternalProperty_1042);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -339,7 +339,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalParameter_1286.InternalField_781.SetBuffer(InternalType_331.InternalField_1478, InternalField_774);
             InternalParameter_1286.InternalField_781.SetBuffer(InternalType_331.InternalField_1575, InternalProperty_275.InternalField_864.InternalField_1211);
-            InternalParameter_1286.InternalField_781.SetFloat(InternalType_331.InternalField_1198, NovaSettings.EdgeSoftenWidth);
+            InternalParameter_1286.InternalField_781.SetFloat(InternalType_331.InternalField_1198, InternalType_24.InternalProperty_1042);
 
             if ((InternalParameter_1287.InternalField_903 & InternalType_322.InternalField_1087) != 0)
             {

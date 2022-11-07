@@ -21,9 +21,15 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 public int InternalField_1556;
     }
 
+    
     [BurstCompile]
     internal struct InternalType_628 : InternalType_192
     {
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int InternalField_3382;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int InternalField_3383;
+
         [ReadOnly]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public NativeList<InternalType_131> InternalField_1145;
@@ -57,6 +63,18 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         [ReadOnly]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public InternalType_161<InternalType_348, InternalType_80> InternalField_1135;
+        [ReadOnly]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_131, InternalType_101> InternalField_3384;
+        [ReadOnly]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_324, InternalType_326> InternalField_3385;
+        [ReadOnly]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_323, InternalType_327> InternalField_3386;
+        [ReadOnly]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_131, int> InternalField_3387;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public NativeHashMap<InternalType_131, InternalType_408> InternalField_858;
@@ -66,11 +84,151 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         public InternalType_161<InternalType_643, InternalType_337> InternalField_771;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public NativeHashMap<InternalType_643, byte> InternalField_763;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_131, InternalType_162<InternalType_301, InternalType_326>> InternalField_3388;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeList<InternalType_172<InternalType_327, InternalType_324>> InternalField_3389;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeList<InternalType_323> InternalField_3390;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_131, InternalType_101> InternalField_3391;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private InternalType_326 InternalProperty_1054
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => InternalField_3382 + InternalField_3389.Length;
+        }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private InternalType_327 InternalProperty_1055
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => InternalField_3383 + InternalField_3390.Length;
+        }
 
         public void Execute()
         {
             InternalMethod_2242();
             InternalMethod_2251();
+            InternalMethod_3370();
+        }
+
+        private void InternalMethod_3370()
+        {
+            for (int InternalVar_1 = 0; InternalVar_1 < InternalField_1144.Length; InternalVar_1++)
+            {
+                InternalMethod_3371(InternalField_1144[InternalVar_1]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void InternalMethod_3371(InternalType_131 InternalParameter_225)
+        {
+            InternalType_302 InternalVar_1 = InternalField_1142[InternalParameter_225];
+            InternalType_162<InternalType_301, InternalType_326> InternalVar_2 = InternalField_3388.InternalMethod_1006(InternalParameter_225);
+
+            for (int InternalVar_3 = 0; InternalVar_3 < InternalVar_1.InternalField_991.InternalProperty_216; InternalVar_3++)
+            {
+                InternalVar_2.InternalMethod_761(InternalMethod_3372(InternalParameter_225, ref InternalVar_1.InternalField_991.InternalMethod_758(InternalVar_3)));
+            }
+
+            InternalField_3388[InternalParameter_225] = InternalVar_2;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private InternalType_326 InternalMethod_3372(InternalType_131 InternalParameter_224, ref InternalType_276 InternalParameter_2114)
+        {
+            InternalType_324 InternalVar_1 = new InternalType_324()
+            {
+                InternalField_1100 = InternalParameter_2114.InternalField_903,
+                InternalField_2244 = new InternalType_323()
+                {
+                    InternalField_1095 = InternalParameter_2114.InternalField_907.InternalField_909,
+                    InternalField_1096 = InternalParameter_2114.InternalProperty_293,
+                    InternalField_1094 = InternalParameter_2114.InternalField_902,
+                },
+            };
+
+            bool InternalVar_3 = InternalField_3391.TryGetValue(InternalParameter_224, out InternalType_101 InternalVar_2);
+
+            if (InternalVar_3 && InternalVar_2.InternalField_491)
+            {
+                InternalVar_1.InternalField_583 = true;
+            }
+
+            if (InternalParameter_2114.InternalProperty_293 == InternalType_281.InternalField_921)
+            {
+                InternalVar_1.InternalField_1101 = InternalVar_3 ? InternalVar_2.InternalField_317 : InternalType_178.InternalField_472;
+            }
+            else
+            {
+                InternalVar_1.InternalField_1101 = InternalType_178.InternalField_473;
+            }
+
+            if (InternalParameter_2114.InternalProperty_294)
+            {
+                InternalVar_1.InternalField_1100 |= InternalField_1141[InternalParameter_2114.InternalField_900].InternalProperty_763;
+            }
+
+            if (InternalVar_1.InternalField_2244.InternalProperty_731)
+            {
+                InternalVar_1.InternalField_1102 = InternalParameter_2114.InternalField_906.InternalField_918;
+            }
+            else
+            {
+                InternalVar_1.InternalField_1102 = 0;
+            }
+
+            if (InternalField_3385.TryGetValue(InternalVar_1, out InternalType_326 InternalVar_4))
+            {
+                return InternalVar_4;
+            }
+
+            if (InternalMethod_3373(ref InternalVar_1, out int InternalVar_5))
+            {
+                return InternalField_3382 + InternalVar_5;
+            }
+
+            InternalVar_4 = InternalProperty_1054;
+            InternalField_3389.Add(new InternalType_172<InternalType_327, InternalType_324>(InternalMethod_3374(ref InternalVar_1), InternalVar_1));
+            return InternalVar_4;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool InternalMethod_3373(ref InternalType_324 InternalParameter_2115, out int InternalParameter_2230)
+        {
+            for (int InternalVar_1 = 0; InternalVar_1 < InternalField_3389.Length; InternalVar_1++)
+            {
+                if (!InternalField_3389[InternalVar_1].InternalField_463.Equals(InternalParameter_2115))
+                {
+                    continue;
+                }
+
+                InternalParameter_2230 = InternalVar_1;
+                return true;
+            }
+
+            InternalParameter_2230 = -1;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private InternalType_327 InternalMethod_3374(ref InternalType_324 InternalParameter_2162)
+        {
+            if (InternalField_3386.TryGetValue(InternalParameter_2162.InternalField_2244, out InternalType_327 InternalVar_1))
+            {
+                return InternalVar_1;
+            }
+
+            if (InternalField_3390.InternalMethod_1011(InternalParameter_2162.InternalField_2244, out int InternalVar_2))
+            {
+                return InternalField_3383 + InternalVar_2;
+            }
+
+            InternalVar_1 = InternalProperty_1055;
+            InternalField_3390.Add(InternalParameter_2162.InternalField_2244);
+            return InternalVar_1;
         }
 
         private void InternalMethod_2251()
@@ -152,6 +310,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalField_836.Clear();
             InternalField_836.Add(InternalParameter_2206);
+            InternalField_3391.Clear();
 
             int InternalVar_1 = 0;
             while (InternalField_836.InternalMethod_1012(out InternalType_131 InternalVar_2))
@@ -164,6 +323,20 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
                 InternalType_164<InternalType_131> InternalVar_3 = InternalField_1143[InternalVar_2];
                 InternalField_836.InternalMethod_1014(ref InternalVar_3);
+
+                if (!InternalField_3384.TryGetValue(InternalVar_2, out InternalType_101 InternalVar_4))
+                {
+                    continue;
+                }
+
+                if (InternalField_3387.ContainsKey(InternalParameter_2206) &&
+                    InternalField_3384.TryGetValue(InternalParameter_2206, out InternalType_101 InternalVar_5))
+                {
+                    InternalVar_4.InternalField_317 = InternalVar_5.InternalField_317;
+                    InternalVar_4.InternalField_491 = InternalVar_5.InternalField_491;
+                }
+
+                InternalField_3391[InternalVar_2] = InternalVar_4;
             }
         }
     }

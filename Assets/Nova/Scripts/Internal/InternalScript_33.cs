@@ -142,11 +142,11 @@ namespace Nova.InternalNamespace_0.InternalNamespace_8
     }
 
     
-    internal interface InternalType_517<TKey>
+    internal interface InternalType_517<T101>
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int InternalProperty_430 { get; }
-        Type InternalMethod_2036(TKey InternalParameter_2360);
-        bool InternalMethod_2035<TData>(TKey InternalParameter_2359, out TData InternalParameter_2358);
+        Type InternalMethod_2036(T101 InternalParameter_2360);
+        bool InternalMethod_2035<TData>(T101 InternalParameter_2359, out TData InternalParameter_2358);
     }
 }

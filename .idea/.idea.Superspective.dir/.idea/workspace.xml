@@ -1,7 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f8d58ce0-93ef-4041-85b2-e65d38473028" name="Changes" comment="" />
+    <list default="true" id="f8d58ce0-93ef-4041-85b2-e65d38473028" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Audio/Sounds/UI/HoverUIBlip.ogg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Audio/Sounds/UI/HoverUIBlip.ogg.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/Cursor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/Cursor.png.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/CursorEmpty.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/CursorEmpty.png.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/CursorFull.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/CursorFull.png.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/Icons/BugIcon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Images/UI/Icons/BugIcon.png.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/BackButton.prefab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/BackButton.prefab.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/SmallIntSlider.prefab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/SmallIntSlider.prefab.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/SmallIntSliderPip.prefab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/SmallIntSliderPip.prefab.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/CustomCursor.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/CustomCursor.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaMenu.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaMenu.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/NovaSubMenu.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/NovaSubMenu.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SettingsMenu.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SettingsMenu.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SmallIntSlider.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SmallIntSlider.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SmallIntSliderVisuals.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SmallIntSliderVisuals.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SmallIntSetting.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SmallIntSetting.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Superspective.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Superspective.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Colorful Fog/Sample Scene/Materials/ground.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Colorful Fog/Sample Scene/Materials/ground.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Colorful Fog/Sample Scene/Materials/stone.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Colorful Fog/Sample Scene/Materials/stone.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Materials/Overlay/SketchEffectMaterial.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Materials/Overlay/SketchEffectMaterial.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Materials/Projectors/SpotlightBlue.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Materials/Projectors/SpotlightBlue.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Dropdown.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Dropdown.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/DropdownOption.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/DropdownOption.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Slider.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Slider.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Slider.prefab.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/NovaUI/Slider.prefab.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Fonts/CaviarDreams SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Fonts/CaviarDreams SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaButton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaPauseMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/NovaPauseMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SaveMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SaveMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/Dropdown.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/Dropdown.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/DropdownSetting.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/DropdownSetting.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/DropdownVisuals.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Dropdown/DropdownVisuals.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/FloatSetting.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/FloatSetting.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Setting.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Setting.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SettingsList.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SettingsList.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/Slider.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/Slider.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SliderVisual.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SliderVisual.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/SliderVisual.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/SettingsMenu/Slider/SliderVisual.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/UIStyle.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/NovaMenuUI/UIStyle.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Administrative/Settings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Administrative/Settings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Audio/AudioManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Audio/AudioManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Audio/AudioName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Audio/AudioName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Audio/PlayerFallingSound.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Audio/PlayerFallingSound.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/PickupObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/PickupObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Scripts/Shaders_And_Visuals/CameraShake.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Scripts/Shaders_And_Visuals/CameraShake.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes/_ForkOctagon.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes/_ForkOctagon.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes/_Fork_BlackRoom.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes/_Fork_BlackRoom.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes/_Fork_WhiteRoom.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes/_Fork_WhiteRoom.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes/_TransitionWhiteRoom_Fork.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes/_TransitionWhiteRoom_Fork.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/__Scenes/__ManagerScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/__Scenes/__ManagerScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/CurrentMaximizeLayout.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/CurrentMaximizeLayout.dwlt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-2022.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-2022.dwlt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -9,6 +82,18 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/_Scripts/Debug_And_Tools/Singleton.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/_Scripts/Audio/AudioManager.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="21FZyVbGECwQoleIklJDAPZuO5O" />
   <component name="ProjectViewState">
@@ -19,6 +104,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -32,6 +118,7 @@
       <updated>1637539050684</updated>
       <workItem from="1637539052406" duration="376000" />
       <workItem from="1637539528024" duration="128000" />
+      <workItem from="1663035038118" duration="1387000" />
     </task>
     <servers />
   </component>

@@ -393,7 +393,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_9
             InternalField_627.InternalField_722 = InternalParameter_1119;
             InternalField_627.InternalField_723 = InternalParameter_1120;
 
-            return InternalField_627.InternalMethod_989(InternalParameter_1121);
+            return InternalField_627.InternalMethod_1982(InternalParameter_1121);
         }
 
         
@@ -456,7 +456,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_9
 
             InternalField_623.InternalField_726 = InternalParameter_1127.InternalField_409;
             InternalField_623.InternalField_725 = InternalParameter_1127.InternalField_408;
-            return InternalField_623.InternalMethod_989(InternalParameter_1128);
+            return InternalField_623.InternalMethod_1982(InternalParameter_1128);
         }
 
         public void InternalMethod_702()

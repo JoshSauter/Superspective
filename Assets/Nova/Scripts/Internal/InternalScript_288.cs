@@ -513,7 +513,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_5
         {
 
             float3x3 InternalVar_1 = InternalField_500;
-            InternalVar_1[1][InternalParameter_831] = 0;
+            InternalVar_1[1][InternalParameter_831] = float.Epsilon;
             InternalVar_1[2][InternalParameter_831] = 0.5f;
 
             float3x3 InternalVar_2 = (InternalVar_1 * InternalParameter_830) + InternalParameter_829;

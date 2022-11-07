@@ -3,13 +3,13 @@ using Unity.Burst;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_9
 {
-    internal interface InternalType_219<T> where T : InternalType_219<T>
+    internal interface InternalType_219<T99> where T99 : InternalType_219<T99>
     {
         
-        InternalType_220 InternalMethod_1046(ref T InternalParameter_1061);
+        InternalType_220 InternalMethod_1046(ref T99 InternalParameter_1061);
 
         
-        InternalType_220 InternalMethod_1047(ref T InternalParameter_1062);
+        InternalType_220 InternalMethod_1047(ref T99 InternalParameter_1062);
     }
 
     [BurstCompile]

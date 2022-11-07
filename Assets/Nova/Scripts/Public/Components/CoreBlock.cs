@@ -3,6 +3,7 @@ using Nova.InternalNamespace_0;
 using Nova.InternalNamespace_0.InternalNamespace_4;
 using Nova.InternalNamespace_0.InternalNamespace_2;
 using Nova.InternalNamespace_0.InternalNamespace_9;
+using Nova.InternalNamespace_0.InternalNamespace_5;
 using Nova.InternalNamespace_0.InternalNamespace_5.InternalNamespace_6;
 using System;
 using System.Collections.Generic;
@@ -143,7 +144,7 @@ namespace Nova
         [NonSerialized, HideInInspector]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private InternalType_131 InternalField_41 = InternalType_131.InternalField_415;
-        [SerializeField, HideInInspector, NotKeyableAttribute]
+        [SerializeField, HideInInspector, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private InternalType_131 sourceID = InternalType_131.InternalField_415;
 

@@ -1,4 +1,4 @@
-using Nova.Compat;
+using Nova.InternalNamespace_0.InternalNamespace_5;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -99,7 +99,7 @@ namespace Nova
         public bool RotateSize;
 
         [SerializeField, HideInInspector]
-        [NotKeyableAttribute]
+        [InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal Vector3 AspectRatio;
 

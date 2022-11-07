@@ -3,7 +3,7 @@ using Nova.InternalNamespace_0;
 using Nova.InternalNamespace_0.InternalNamespace_4;
 using Nova.InternalNamespace_0.InternalNamespace_2;
 using Nova.InternalNamespace_0.InternalNamespace_9;
-using Nova.InternalNamespace_0.InternalNamespace_5.InternalNamespace_6;
+using Nova.InternalNamespace_0.InternalNamespace_5;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -224,11 +224,11 @@ namespace Nova
         #endregion
 
         #region Internal
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [Tooltip("The non-scrolling axis to position elements in the grid.\n\nE.g.\nIf the Primary Axis is set to Y, the Cross Axis is commonly set to X.")]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Axis crossAxis = Axis.X;
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [Tooltip("The number of elements to position along the Cross Axis.\n\nE.g.\nIf the Cross Axis is set to X, this is the number of columns in the grid.")]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private int crossAxisItemCount = 1;

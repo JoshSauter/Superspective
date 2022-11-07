@@ -131,7 +131,7 @@ namespace Nova.InternalNamespace_17
             {
                 case GameObject gameObject:
                     {
-                        if (!InternalType_65.InternalMethod_3319(gameObject.transform))
+                        if (!InternalType_44.InternalMethod_3259(gameObject.transform))
                         {
                             break;
                         }
@@ -144,7 +144,7 @@ namespace Nova.InternalNamespace_17
                     }
                 case Transform transform:
                     {
-                        if (!InternalType_65.InternalMethod_3319(transform))
+                        if (!InternalType_44.InternalMethod_3259(transform))
                         {
                             break;
                         }
@@ -158,7 +158,7 @@ namespace Nova.InternalNamespace_17
 
                             if (InternalVar_2.gameObject.activeInHierarchy)
                             {
-                                InternalType_65.InternalMethod_3318(InternalVar_2);
+                                InternalType_44.InternalMethod_3261(InternalVar_2);
                             }
                         }
 
@@ -175,7 +175,7 @@ namespace Nova.InternalNamespace_17
             {
                 case Transform transform:
                     {
-                        if (!InternalType_65.InternalMethod_3319(transform))
+                        if (!InternalType_44.InternalMethod_3259(transform))
                         {
                             break;
                         }

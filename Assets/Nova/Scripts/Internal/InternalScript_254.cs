@@ -26,5 +26,13 @@ namespace Nova
             RenderQueue = InternalType_178.InternalField_472,
             RenderOverOpaqueGeometry = false,
         };
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        internal static readonly InternalType_40 InternalField_815 = new InternalType_40()
+        {
+            SortingOrder = 0,
+            RenderQueue = InternalType_178.InternalField_3392,
+            RenderOverOpaqueGeometry = true,
+        };
     }
 }

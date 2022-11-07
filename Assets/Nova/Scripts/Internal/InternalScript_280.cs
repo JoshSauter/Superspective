@@ -26,11 +26,11 @@ namespace Nova.InternalNamespace_0.InternalNamespace_5.InternalNamespace_6
             JobsUtility.Schedule(ref InternalVar_1);
         }
 
-        public static unsafe JobHandle InternalMethod_989<T>(this ref T InternalParameter_960, JobHandle InternalParameter_961 = default) where T : struct, InternalType_192
+        public static unsafe JobHandle InternalMethod_1982<T>(this ref T InternalParameter_965, JobHandle InternalParameter_964 = default) where T : struct, InternalType_192
         {
             JobsUtility.JobScheduleParameters InternalVar_1 = InternalType_200<T>.InternalField_556;
-            InternalVar_1.JobDataPtr = new IntPtr(UnsafeUtility.AddressOf(ref InternalParameter_960));
-            InternalVar_1.Dependency = InternalParameter_961;
+            InternalVar_1.JobDataPtr = new IntPtr(UnsafeUtility.AddressOf(ref InternalParameter_965));
+            InternalVar_1.Dependency = InternalParameter_964;
 
             return JobsUtility.Schedule(ref InternalVar_1);
         }
@@ -72,13 +72,13 @@ namespace Nova.InternalNamespace_0.InternalNamespace_5.InternalNamespace_6
 
     internal static class InternalType_202
     {
-        public static unsafe JobHandle InternalMethod_991<T>(this ref T InternalParameter_962, int InternalParameter_963, int InternalParameter_964, JobHandle InternalParameter_965 = default) where T : struct, InternalType_193
+        public static unsafe JobHandle InternalMethod_1984<T>(this ref T InternalParameter_963, int InternalParameter_962, int InternalParameter_961, JobHandle InternalParameter_960 = default) where T : struct, InternalType_193
         {
 
             JobsUtility.JobScheduleParameters InternalVar_1 = InternalType_203<T>.InternalField_558;
-            InternalVar_1.JobDataPtr = new IntPtr(UnsafeUtility.AddressOf(ref InternalParameter_962));
-            InternalVar_1.Dependency = InternalParameter_965;
-            return JobsUtility.ScheduleParallelFor(ref InternalVar_1, InternalParameter_963, InternalParameter_964);
+            InternalVar_1.JobDataPtr = new IntPtr(UnsafeUtility.AddressOf(ref InternalParameter_963));
+            InternalVar_1.Dependency = InternalParameter_960;
+            return JobsUtility.ScheduleParallelFor(ref InternalVar_1, InternalParameter_962, InternalParameter_961);
         }
 
         public static unsafe JobHandle InternalMethod_3333<T>(this ref T InternalParameter_15, int* InternalParameter_17, int InternalParameter_16, JobHandle InternalParameter_14 = default) where T : struct, InternalType_193

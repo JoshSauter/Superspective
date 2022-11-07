@@ -123,7 +123,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
 
             for (int InternalVar_3 = 0; InternalVar_3 < InternalField_3202.Count; InternalVar_3++)
             {
-                if (!InternalProperty_983.Contains(InternalField_3202[InternalVar_3].InternalField_1638))
+                if (!InternalProperty_983.Contains(InternalField_3202[InternalVar_3].InternalField_1638 as UIBlock))
                 {
                     InternalVar_2 = InternalVar_3;
                     break;
@@ -221,7 +221,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
             Bounds InternalVar_1 = InternalProperty_991;
             Matrix4x4 InternalVar_2 = InternalProperty_993;
 
-            UIBlock InternalVar_3 = InternalParameter_2800.InternalField_1638;
+            UIBlock InternalVar_3 = InternalParameter_2800.InternalField_1638 as UIBlock;
             Matrix4x4 InternalVar_4 = InternalParameter_2800.InternalField_1641 ? InternalVar_3.InternalMethod_1035() : InternalVar_3.transform.localToWorldMatrix;
             Matrix4x4 InternalVar_5 = InternalVar_4.inverse;
             Bounds InternalVar_6 = InternalParameter_2800.InternalField_1639;
@@ -625,7 +625,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_21
 
                 InternalType_5 InternalVar_5 = InternalVar_4.InternalMethod_1034();
                 bool InternalVar_6 = InternalVar_5 != null;
-                Vector3 InternalVar_7 = InternalType_65.InternalMethod_3320(InternalVar_4);
+                Vector3 InternalVar_7 = InternalType_44.InternalMethod_3206(InternalVar_4);
                 Vector3 InternalVar_8 = InternalVar_6 ? (Vector3)InternalVar_5.InternalProperty_146.InternalProperty_139 : Vector3.zero;
 
                 Matrix4x4 InternalVar_9 = InternalVar_4.InternalMethod_1035();

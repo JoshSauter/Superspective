@@ -34,7 +34,5 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         public InternalType_405 InternalField_835;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public InternalType_628 InternalField_2600;
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public InternalType_399 InternalField_837;
     }
 }

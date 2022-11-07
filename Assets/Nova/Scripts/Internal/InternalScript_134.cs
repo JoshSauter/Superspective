@@ -210,9 +210,9 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
         {
             InternalMethod_1843();
 
-            JobHandle InternalVar_1 = InternalField_1889.InternalMethod_991(InternalField_413.Count, InternalType_127.InternalField_407, InternalParameter_2041);
-            JobHandle InternalVar_2 = InternalField_1890.InternalMethod_989(InternalVar_1);
-            return InternalField_1891.InternalMethod_989(InternalVar_2);
+            JobHandle InternalVar_1 = InternalField_1889.InternalMethod_1984(InternalField_413.Count, InternalType_127.InternalField_407, InternalParameter_2041);
+            JobHandle InternalVar_2 = InternalField_1890.InternalMethod_1982(InternalVar_1);
+            return InternalField_1891.InternalMethod_1982(InternalVar_2);
         }
 
         public void InternalMethod_1843()
@@ -338,9 +338,9 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
             UnsafeUtility.MemCpy(UnsafeUtility.AddressOf(ref InternalParameter_505.InternalProperty_142), InternalVar_2.InternalField_1836, sizeof(InternalType_69));
             UnsafeUtility.MemCpy(UnsafeUtility.AddressOf(ref InternalParameter_505.InternalProperty_143), InternalVar_2.InternalField_1227, sizeof(InternalType_70));
 
-            if (InternalParameter_504 is UIBlock sourceBlock && InternalParameter_505 is UIBlock destBlock)
+            if (InternalParameter_504 as UnityEngine.MonoBehaviour != null && InternalParameter_505 as UnityEngine.MonoBehaviour != null)
             {
-                destBlock.PreviewSize = sourceBlock.PreviewSize;
+                InternalParameter_505.InternalProperty_87 = InternalParameter_504.InternalProperty_87;
             }
         }
 

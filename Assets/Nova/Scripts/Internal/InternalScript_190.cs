@@ -1,6 +1,7 @@
 using Nova.InternalNamespace_0.InternalNamespace_5;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_10
 {
@@ -13,6 +14,10 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public float4x4 InternalField_1254;
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public int InternalField_3374;
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public CameraType InternalField_3375;
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             private bool InternalField_1180;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -20,7 +25,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             {
                 if (InternalField_1180)
                 {
-                    return InternalParameter_1719.InternalField_1176 ? InternalType_187.InternalField_503 : InternalType_187.InternalField_506;
+                    return math.normalize(math.rotate(InternalField_1254, InternalParameter_1719.InternalField_1176 ? InternalType_187.InternalField_503 : InternalType_187.InternalField_506));
                 }
                 else
                 {
@@ -146,21 +151,28 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 return InternalVar_1;
             }
 
-            #region 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static InternalType_341 InternalMethod_1327(float4x4 InternalParameter_1401) => new InternalType_341()
+            public InternalType_341(Camera InternalParameter_230)
             {
-                InternalField_1255 = InternalParameter_1401,
-                InternalField_1180 = false
-            };
+                InternalField_1255 = InternalParameter_230.transform.worldToLocalMatrix;
+                InternalField_1254 = default;
+                InternalField_3374 = InternalParameter_230.GetInstanceID();
+                InternalField_3375 = InternalParameter_230.cameraType;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static InternalType_341 InternalMethod_1326(float4x4 InternalParameter_1392) => new InternalType_341()
-            {
-                InternalField_1255 = InternalParameter_1392,
-                InternalField_1180 = true
-            };
-            #endregion
+                switch (InternalParameter_230.transparencySortMode)
+                {
+                    case TransparencySortMode.Default:
+                        InternalField_1180 = InternalParameter_230.orthographic;
+                        break;
+                    case TransparencySortMode.Orthographic:
+                        InternalField_1180 = true;
+                        break;
+                    case TransparencySortMode.Perspective:
+                    default:
+                        InternalField_1180 = false;
+                        break;
+                }
+            }
         }
     }
 }

@@ -1,17 +1,17 @@
-using Nova.InternalNamespace_0;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Nova
+namespace Nova.InternalNamespace_0.InternalNamespace_5
 {
-    internal static class InternalType_486
+    internal class InternalType_271
     {
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void InternalMethod_26()
+        public abstract class InternalType_354
         {
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public abstract int InternalProperty_1046 { get; }
         }
-            }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public static InternalType_354 InternalField_412 = null;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public static int InternalProperty_747 => InternalField_412 != null ? InternalField_412.InternalProperty_1046 : 0;
+    }
 }

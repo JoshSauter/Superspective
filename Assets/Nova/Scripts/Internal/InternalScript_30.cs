@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_2
 {
-    internal abstract class InternalType_136<T> where T : InternalType_136<T>, new()
+    internal abstract class InternalType_136<T89> where T89 : InternalType_136<T89>, new()
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public static bool InternalProperty_199 { get; private set; } = false;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public static T InternalProperty_200 { get; private set; } = null;
+        public static T89 InternalProperty_200 { get; private set; } = null;
 
         protected InternalType_136()
         {
@@ -27,7 +27,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_2
             }
             catch (Exception e)
             {
-                Debug.LogError($"System {typeof(T)} Init failed with {e}");
+                Debug.LogError($"System {typeof(T89)} Init failed with {e}");
             }
         }
 
@@ -35,7 +35,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_2
         {
             if (InternalProperty_200 == null)
             {
-                InternalProperty_200 = new T();
+                InternalProperty_200 = new T89();
             }
         }
 
@@ -52,7 +52,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_2
             }
             catch (Exception e)
             {
-                Debug.LogError($"System {typeof(T)} Dispose failed with {e}");
+                Debug.LogError($"System {typeof(T89)} Dispose failed with {e}");
             }
 
             InternalProperty_199 = false;

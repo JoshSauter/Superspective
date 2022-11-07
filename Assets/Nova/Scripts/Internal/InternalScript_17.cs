@@ -1,3 +1,4 @@
+using Nova.InternalNamespace_0.InternalNamespace_5;
 using UnityEngine;
 
 namespace Nova.Compat

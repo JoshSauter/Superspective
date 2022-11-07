@@ -130,14 +130,14 @@ namespace Nova
         }
 
         /// <summary>
-        /// Access each <see cref="Length2">Length Pair</see> by <paramref name="axis"/> index.
+        /// Access each <see cref="Length2"/> by <paramref name="axis"/> index.
         /// </summary>
         /// <param name="axis">The axis index to read or write<br/>
         /// <value>0 => <see cref="X"/></value><br/>
         /// <value>1 => <see cref="Y"/></value><br/>
         /// <value>2 => <see cref="Z"/></value><br/>
         /// </param>
-        /// <returns>The <see cref="Length2">Length Pair</see> for the given <paramref name="axis"/>.</returns>
+        /// <returns>The <see cref="Length2"/> for the given <paramref name="axis"/>.</returns>
         /// <exception cref="IndexOutOfRangeException">if <paramref name="axis"/> &lt; 0 || <paramref name="axis"/> &gt; 2</exception>
         public Length2 this[int axis]
         {

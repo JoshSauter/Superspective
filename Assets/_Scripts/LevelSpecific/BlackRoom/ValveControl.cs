@@ -34,7 +34,7 @@ namespace LevelSpecific.BlackRoom {
 
 		void Update() {
 			if (isActive) {
-				if (PlayerButtonInput.instance.Action1Held) {
+				if (PlayerButtonInput.instance.InteractHeld) {
 					Angle nextAngle = GetAngleOfMouse();
 					Angle diff = Angle.WrappedAngleDiff(nextAngle, prevAngle);
 

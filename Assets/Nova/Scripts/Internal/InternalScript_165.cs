@@ -180,7 +180,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
         private bool InternalMethod_1434(ref InternalType_311 InternalParameter_1524)
         {
-            if (InternalParameter_1524.InternalField_1026 == InternalType_695.InternalField_2939 || !NovaSettings.InternalProperty_87.InternalField_3088)
+            if (InternalParameter_1524.InternalField_1026 == InternalType_695.InternalField_2939 || !InternalType_24.InternalProperty_945.InternalField_3088)
             {
                 return false;
             }
@@ -206,7 +206,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 return false;
             }
 
-            if (!InternalVar_2.InternalField_1062 && NovaSettings.InternalProperty_87.InternalMethod_554(InternalType_116.InternalField_2767))
+            if (!InternalVar_2.InternalField_1062 && InternalType_24.InternalProperty_945.InternalMethod_554(InternalType_116.InternalField_2767))
             {
                 Debug.LogWarning($"Platform does not support texture format. {InternalType_178.InternalField_484}");
             }

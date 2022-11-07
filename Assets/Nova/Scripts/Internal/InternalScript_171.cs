@@ -18,6 +18,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         public NativeHashMap<InternalType_131, InternalType_344> InternalField_1187;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public NativeHashMap<InternalType_131, InternalType_101> InternalField_1188;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public NativeHashMap<InternalType_131, int> InternalField_3381;
 
         public void InternalMethod_1507(InternalType_131 InternalParameter_1615)
         {
@@ -45,12 +47,14 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalField_1187.InternalMethod_1009(InternalType_178.InternalField_3012);
             InternalField_1188.InternalMethod_1009(InternalType_178.InternalField_3011);
+            InternalField_3381.InternalMethod_1009(InternalType_178.InternalField_3011);
         }
 
         public void Dispose()
         {
             InternalField_1187.Dispose();
             InternalField_1188.Dispose();
+            InternalField_3381.Dispose();
         }
     }
 }

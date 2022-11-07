@@ -63,7 +63,7 @@ public class SaveSlot : MonoBehaviour {
     public UIBlock2D DeleteSaveCancel;
     
     private DialogWindow dialogWindow; // May or may not exist on some parent object, used to determine when to ignore inputs
-    bool shouldIgnoreInputBehindDialog => DialogWindow.anyDialogueIsOpen && (DialogWindow.windowOpen != dialogWindow);
+    bool shouldIgnoreInputBehindDialog => DialogWindow.anyDialogueIsOpen && DialogWindow.windowsOpen.Peek() != dialogWindow;
 
     private static Sprite[] _deleteIconSprites;
     private static readonly string deleteIconSpritesPath = "Images/UI/Icons/DeleteIcon/";
@@ -453,6 +453,7 @@ public class SaveSlot : MonoBehaviour {
         else {
             debug.Log($"Already Clicked so not setting {LevelName.Text} to Hovered");
         }
+        evt.Consume();
     }
     private void HandleSaveSlotUnhoverEvent(Gesture.OnUnhover evt) {
         if (!EventHappenedOnSaveSlot(evt)) return;
@@ -464,12 +465,14 @@ public class SaveSlot : MonoBehaviour {
         else {
             debug.Log($"Already Clicked so not setting {LevelName.Text} to Idle");
         }
+        evt.Consume();
     }
     private void HandleSaveSlotClickDownEvent(Gesture.OnPress evt) {
         if (!EventHappenedOnSaveSlot(evt)) return;
         
         debug.Log($"Setting {LevelName.Text} to ClickHeld");
         saveSlotButtonState.Set(ButtonState.ClickHeld);
+        evt.Consume();
     }
     private void HandleSaveSlotReleaseEvent(Gesture.OnRelease evt) {
         if (shouldIgnoreInputBehindDialog) return;
@@ -493,10 +496,12 @@ public class SaveSlot : MonoBehaviour {
                     deleteButtonState.Set(DeleteButtonState.Idle);
                 }
             }
+            evt.Consume();
         }
         else if (saveSlotButtonState.prevState == ButtonState.Clicked) {
             debug.Log($"Setting {LevelName.Text} to Clicked (because prevState)");
             saveSlotButtonState.Set(ButtonState.Clicked);
+            evt.Consume();
         }
         else {
             debug.Log($"Setting {LevelName.Text} to Idle");
@@ -541,6 +546,7 @@ public class SaveSlot : MonoBehaviour {
         if (deleteButtonState != DeleteButtonState.DeleteConfirmation) {
             // debug.Log($"Setting {gameObject} to Hovered");
             deleteButtonState.Set(DeleteButtonState.Hovered);
+            evt.Consume();
         }
     }
     private void HandleDeleteButtonUnhoverEvent(Gesture.OnUnhover evt) {
@@ -548,21 +554,25 @@ public class SaveSlot : MonoBehaviour {
         
         if (deleteButtonState != DeleteButtonState.DeleteConfirmation) {
             deleteButtonState.Set(DeleteButtonState.Idle);
+            evt.Consume();
         }
     }
     private void HandleDeleteButtonClickDownEvent(Gesture.OnPress evt) {
         if (!DeleteButtonShouldAcceptEvent(evt)) return;
         
         deleteButtonState.Set(DeleteButtonState.ClickHeld);
+        evt.Consume();
     }
     private void HandleDeleteButtonReleaseEvent(Gesture.OnRelease evt) {
         if (!DeleteButtonShouldAcceptEvent(evt)) return;
         
         if (evt.Hovering) {
             deleteButtonState.Set(DeleteButtonState.DeleteConfirmation);
+            evt.Consume();
         }
         else if (deleteButtonState.prevState == DeleteButtonState.DeleteConfirmation) {
             deleteButtonState.Set(DeleteButtonState.DeleteConfirmation);
+            evt.Consume();
         }
         else {
             deleteButtonState.Set(DeleteButtonState.Idle);
@@ -580,22 +590,26 @@ public class SaveSlot : MonoBehaviour {
         if (!DeleteConfirmShouldAcceptEvent(evt)) return;
         
         deleteConfirmButtonState.Set(ButtonState.Hovered);
+        evt.Consume();
     }
     private void HandleDeleteConfirmUnhoverEvent(Gesture.OnUnhover evt) {
         if (!DeleteConfirmShouldAcceptEvent(evt)) return;
         
         deleteConfirmButtonState.Set(ButtonState.Idle);
+        evt.Consume();
     }
     private void HandleDeleteConfirmClickDownEvent(Gesture.OnPress evt) {
         if (!DeleteConfirmShouldAcceptEvent(evt)) return;
         
         deleteConfirmButtonState.Set(ButtonState.ClickHeld);
+        evt.Consume();
     }
     private void HandleDeleteConfirmReleaseEvent(Gesture.OnRelease evt) {
         if (!DeleteConfirmShouldAcceptEvent(evt)) return;
         
         if (evt.Hovering) {
             deleteConfirmButtonState.Set(ButtonState.Clicked);
+            evt.Consume();
         }
         else {
             deleteConfirmButtonState.Set(ButtonState.Idle);
@@ -613,22 +627,26 @@ public class SaveSlot : MonoBehaviour {
         if (!DeleteCancelShouldAcceptEvent(evt)) return;
         
         deleteCancelButtonState.Set(ButtonState.Hovered);
+        evt.Consume();
     }
     private void HandleDeleteCancelUnhoverEvent(Gesture.OnUnhover evt) {
         if (!DeleteCancelShouldAcceptEvent(evt)) return;
         
         deleteCancelButtonState.Set(ButtonState.Idle);
+        evt.Consume();
     }
     private void HandleDeleteCancelClickDownEvent(Gesture.OnPress evt) {
         if (!DeleteCancelShouldAcceptEvent(evt)) return;
         
         deleteCancelButtonState.Set(ButtonState.ClickHeld);
+        evt.Consume();
     }
     private void HandleDeleteCancelReleaseEvent(Gesture.OnRelease evt) {
         if (!DeleteCancelShouldAcceptEvent(evt)) return;
         
         if (evt.Hovering) {
             deleteCancelButtonState.Set(ButtonState.Clicked);
+            evt.Consume();
         }
         else {
             deleteCancelButtonState.Set(ButtonState.Idle);

@@ -103,7 +103,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 return;
             }
 
-            if (!NovaSettings.InternalProperty_87.InternalField_3088)
+            if (!InternalType_24.InternalProperty_945.InternalField_3088)
             {
                 return;
             }
@@ -147,7 +147,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             int2 InternalVar_1 = InternalParameter_1501.InternalField_1039.InternalField_1061;
             for (int InternalVar_2 = 0; InternalVar_2 < InternalParameter_1502.mipmapCount; ++InternalVar_2)
             {
-                switch (NovaSettings.InternalProperty_87.InternalField_3087)
+                switch (InternalType_24.InternalProperty_945.InternalField_3087)
                 {
                     case InternalType_499.InternalField_2481:
                     {

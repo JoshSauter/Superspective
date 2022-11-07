@@ -105,8 +105,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_839.Clear();
             InternalField_840.Clear();
 
-            InternalField_841 = NovaSettings.UIBlock3DCornerDivisions;
-            InternalField_842 = NovaSettings.UIBlock3DEdgeDivisions;
+            InternalField_841 = InternalType_24.InternalProperty_1043;
+            InternalField_842 = InternalType_24.InternalProperty_1044;
 
             InternalType_424 InternalVar_1 = new InternalType_424()
             {
@@ -128,8 +128,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         #region 
         private void InternalMethod_1235()
         {
-            if (NovaSettings.UIBlock3DCornerDivisions != InternalField_841 ||
-                NovaSettings.UIBlock3DEdgeDivisions != InternalField_842)
+            if (InternalType_24.InternalProperty_1043 != InternalField_841 ||
+                InternalType_24.InternalProperty_1044 != InternalField_842)
             {
                 InternalField_844 = null;
             }
@@ -137,12 +137,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
         public InternalType_269()
         {
-            NovaSettings.InternalEvent_0 += InternalMethod_1235;
+            InternalType_24.InternalEvent_10 += InternalMethod_1235;
         }
 
         public void Dispose()
         {
-            NovaSettings.InternalEvent_0 -= InternalMethod_1235;
+            InternalType_24.InternalEvent_10 -= InternalMethod_1235;
 
             if (InternalField_839.IsCreated)
             {

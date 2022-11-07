@@ -100,6 +100,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// The <see cref="ItemView"/> containing the <see cref="ItemVisuals"/> for the given <see cref="UserData"/>.
             /// </summary>
             public ItemView View;
@@ -141,7 +146,7 @@ namespace Nova
             public override int GetHashCode()
             {
                 int InternalVar_1 = 13;
-                InternalVar_1 = (InternalVar_1 * 7) + this.InternalMethod_194();
+                InternalVar_1 = (InternalVar_1 * 7) + this.InternalMethod_2009();
 
                 if (View != null)
                 {
@@ -203,6 +208,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// The <see cref="ItemView"/> containing the <see cref="ItemVisuals"/> for the given <see cref="UserData"/>.
             /// </summary>
             public ItemView View;
@@ -244,7 +254,7 @@ namespace Nova
             public override int GetHashCode()
             {
                 int InternalVar_1 = 13;
-                InternalVar_1 = (InternalVar_1 * 7) + this.InternalMethod_194();
+                InternalVar_1 = (InternalVar_1 * 7) + this.InternalMethod_2009();
 
                 if (View != null)
                 {
@@ -475,6 +485,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// The intersection point of the <see cref="Interaction"/> and the <see cref="Receiver"/>'s gesture plane in world space.
             /// </summary>
             public Vector3 PointerWorldPosition;
@@ -567,6 +582,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// The intersection point of the <see cref="Interaction"/> and the <see cref="Receiver"/>'s gesture plane in world space.
             /// </summary>
             public Vector3 PointerWorldPosition;
@@ -655,6 +675,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// Equality operator.
             /// </summary>
             /// <param name="lhs">Left hand side.</param>
@@ -736,6 +761,11 @@ namespace Nova
             /// The <see cref="UIBlock"/> from which the event was invoked.
             /// </summary>
             public UIBlock Receiver { get; set; }
+
+            /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
 
             /// <summary>
             /// The intersection point of the <see cref="Interaction"/> and the <see cref="Receiver"/>'s gesture plane in world space.
@@ -824,6 +854,11 @@ namespace Nova
             /// The <see cref="UIBlock"/> from which the event was invoked.
             /// </summary>
             public UIBlock Receiver { get; set; }
+
+            /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
 
             /// <summary>
             /// A flag indicating whether or not the <see cref="Interaction"/> is still currently intersecting with the <see cref="Receiver"/>.
@@ -927,6 +962,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// Equality operator.
             /// </summary>
             /// <param name="lhs">Left hand side.</param>
@@ -1007,6 +1047,11 @@ namespace Nova
             /// The <see cref="UIBlock"/> from which the event was invoked.
             /// </summary>
             public UIBlock Receiver { get; set; }
+
+            /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
 
             /// <summary>
             /// The mechanism responsible for scrolling the content, <see cref="ScrollType.Manual"/> or <see cref="ScrollType.Inertial"/>.
@@ -1109,6 +1154,11 @@ namespace Nova
             /// The <see cref="UIBlock"/> from which the event was invoked.
             /// </summary>
             public UIBlock Receiver { get; set; }
+
+            /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
 
             /// <summary>
             /// The start, previous, and current pointer positions, in world space, of this drag event. 
@@ -1239,6 +1289,11 @@ namespace Nova
             public UIBlock Receiver { get; set; }
 
             /// <summary>
+            /// A unique identifier associated with the event.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>
             /// Equality operator.
             /// </summary>
             /// <param name="lhs">Left hand side.</param>
@@ -1323,128 +1378,6 @@ namespace Nova
         Interaction.Update Interaction { get; set; }
     }
 
-
-    #region 
-    internal static partial class InternalType_12
-    {
-        public delegate void InternalType_15(ref InternalType_14<bool> evt);
-        public delegate void InternalType_17(ref InternalType_14<InternalType_95<Vector3>> evt);
-        public delegate void InternalType_16(ref InternalType_13 evt);
-
-        internal static InternalType_13 InternalMethod_154(UIBlock InternalParameter_95, InternalNamespace_0.InternalType_78 InternalParameter_96) => new InternalType_13() { Target = InternalParameter_95, Receiver = InternalParameter_95, InternalField_67 = InternalParameter_96 };
-        internal static InternalType_14<TInput> InternalMethod_155<TInput>(UIBlock InternalParameter_97, InternalType_76<TInput>? InternalParameter_98, InternalType_76<TInput>? InternalParameter_99, InternalNamespace_0.InternalType_78 InternalParameter_100) where TInput : unmanaged, System.IEquatable<TInput>
-        {
-            return new InternalType_14<TInput>()
-            {
-                Target = InternalParameter_97,
-                Receiver = InternalParameter_97,
-                InternalField_69 = InternalParameter_98,
-                InternalField_70 = InternalParameter_99,
-                InternalField_3029 = InternalParameter_100
-            };
-        }
-
-        public struct InternalType_13 : IEvent
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public InternalNamespace_0.InternalType_78 InternalField_67;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-        }
-
-        public struct InternalType_14<TInput> : IEvent where TInput : unmanaged, System.IEquatable<TInput>
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public InternalNamespace_0.InternalType_78 InternalField_3029;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public InternalType_76<TInput>? InternalField_69;
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public InternalType_76<TInput>? InternalField_70;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-
-            public Vector3 InternalMethod_158()
-            {
-                if (!InternalField_69.HasValue || !InternalField_70.HasValue || Receiver == null)
-                {
-                    return Vector3.zero;
-                }
-
-                Vector3 InternalVar_1 = Receiver.transform.InverseTransformPoint(InternalField_70.Value.InternalField_248) - Receiver.transform.InverseTransformPoint(InternalField_69.Value.InternalField_248);
-
-                return InternalType_187.InternalMethod_881(InternalVar_1);
-            }
-        }
-    }
-
-    internal static partial class InternalType_22
-    {
-        internal static InternalType_23 InternalMethod_185(UIBlock InternalParameter_138) => new InternalType_23() { Target = InternalParameter_138, Receiver = InternalParameter_138 };
-        internal static InternalType_24 InternalMethod_186(UIBlock InternalParameter_139) => new InternalType_24() { Target = InternalParameter_139, Receiver = InternalParameter_139 };
-
-        public struct InternalType_23 : IEvent
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-        }
-
-        public struct InternalType_24 : IEvent
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-        }
-
-        public struct InternalType_25 : IEvent
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock InternalField_88;
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock InternalProperty_46 => Receiver;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-        }
-
-        public struct InternalType_26 : IEvent
-        {
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock InternalProperty_47 => Receiver;
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock InternalField_89;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Target { get; set; }
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public UIBlock Receiver { get; set; }
-        }
-    }
-    #endregion
-
-    internal static class InternalType_27
-    {
-        public static int InternalMethod_193<T>(this T InternalParameter_140) where T : struct, IGestureEvent
-        {
-            int InternalVar_1 = 13;
-            InternalVar_1 = (InternalVar_1 * 7) + InternalType_28.InternalMethod_194(InternalParameter_140);
-            InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_140.Interaction.GetHashCode();
-
-            return InternalVar_1;
-        }
-    }
-
     /// <summary>
     /// A common interface implemented by all UIBlock event structs.
     /// </summary>
@@ -1470,25 +1403,61 @@ namespace Nova
         /// The <see cref="UIBlock"/> from which the event was invoked.
         /// </summary>
         UIBlock Receiver { get; set; }
+
+        /// <summary>
+        /// A unique identifier associated with the event.
+        /// </summary>
+        /// <remarks>Assigned whenever an event is fired.</remarks>
+        int ID { get; set; }
     }
 
-    internal static class InternalType_28
+    public static class IEventExtensions
     {
-        public static int InternalMethod_194<T>(this T InternalParameter_141) where T : struct, IEvent
+        /// <summary>
+        /// Stops the event from propagating further up the <see cref="UIBlock"/> hierarchy.
+        /// </summary>
+        /// <remarks>
+        /// Any remaining event handlers registered at the <b>current</b> propagation level which have yet to be called with the given <paramref name="evt"/> data, will <i>still</i> be called after an event has been consumed.
+        /// </remarks>
+        /// <typeparam name="T">The type of event being consumed.</typeparam>
+        /// <param name="evt">The event instance being consumed, identified by its event <see cref="IEvent.ID">ID</see>.</param>
+        public static void Consume<T>(this T evt) where T : struct, IEvent
+        {
+            InternalNamespace_16.InternalType_522.InternalMethod_2086(ref evt);
+        }
+    }
+
+    #region Internal
+    internal static class InternalType_17
+    {
+        public static int InternalMethod_2009<T>(this T InternalParameter_2149) where T : struct, IEvent
         {
             int InternalVar_1 = 13;
 
-            if (InternalParameter_141.Target != null)
+            if (InternalParameter_2149.Target != null)
             {
-                InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_141.Target.GetHashCode();
+                InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_2149.Target.GetHashCode();
             }
 
-            if (InternalParameter_141.Receiver != null)
+            if (InternalParameter_2149.Receiver != null)
             {
-                InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_141.Receiver.GetHashCode();
+                InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_2149.Receiver.GetHashCode();
             }
 
             return InternalVar_1;
         }
     }
+
+    internal static class InternalType_27
+    {
+        public static int InternalMethod_193<T>(this T InternalParameter_140) where T : struct, IGestureEvent
+        {
+            int InternalVar_1 = 13;
+            InternalVar_1 = (InternalVar_1 * 7) + InternalType_17.InternalMethod_2009(InternalParameter_140);
+            InternalVar_1 = (InternalVar_1 * 7) + InternalParameter_140.Interaction.GetHashCode();
+
+            return InternalVar_1;
+        }
+    }
+    #endregion
 }

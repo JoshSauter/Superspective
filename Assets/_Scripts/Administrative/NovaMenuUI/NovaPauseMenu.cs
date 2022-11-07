@@ -3,28 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Nova;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
-public class NovaPauseMenu : Singleton<NovaPauseMenu> {
+public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
     private List<NovaButton> children;
 
     public enum MenuState {
-        PauseMenu,
-        SettingsMenu,
-        SaveMenu,
+        Off,
+        PauseMenuOpen,
+        SubMenuOpen
     }
+    public StateMachine<MenuState> currentMenuState = new StateMachine<MenuState>(MenuState.Off, false, true);
     
     public bool PauseMenuIsOpen => MenuBackground.Tint.a > 0.05f;
     public CursorLockMode cachedLockMode;
 
-    [Header("Animation Settings")]
-    public float menuFadeTime = 0.5f;
+    public const float menuFadeTime = 0.5f;
     private const float visibleAlphaCutoff = 0.1f;
     private AnimationHandle pauseMenuAnimationHandle;
     private AnimationHandle settingsMenuAnimationHandle;
     private AnimationHandle backgroundAnimationHandle;
-    private AnimationHandle backButtonAnimationHandle;
 
     [Header("Buttons")]
     public NovaButton ResumeButton;
@@ -32,34 +32,21 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
     public NovaButton LoadButton;
     public NovaButton SettingsButton;
     public NovaButton ExitGameButton;
-    public NovaButton BackButton;
-    public UIBlock BackButtonBlock => BackButton.novaInteractable.UIBlock;
 
     [Header("Other Menus")]
+    private readonly List<INovaMenu> allSubMenus = new List<INovaMenu>();
     public ClipMask MenuBackground;
-    public ClipMask SettingsMenu;
-    public NovaRadioSelection SettingsRadioSelection;
     private ClipMask PauseMenu;
     public DialogWindow ExitGameDialogWindow;
-    
-    
-    private Interactable _backgroundInteractable;
-    private Interactable backgroundInteractable {
-        get {
-            if (_backgroundInteractable == null) {
-                _backgroundInteractable = MenuBackground.GetComponent<Interactable>();
-            }
-
-            return _backgroundInteractable;
-        }
-    }
 
     private void Awake() {
         children = GetComponentsInChildren<NovaButton>().ToList();
         PauseMenu = GetComponent<ClipMask>();
+
+        allSubMenus.Add(SettingsMenu.instance);
+        allSubMenus.Add(SaveMenu.instance);
         
         ResetAllButtons();
-        SettingsMenu.Tint = SettingsMenu.Tint.WithAlpha(0f);
 
         InitEvents();
     }
@@ -69,12 +56,20 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
     }
 
     private void Update() {
-        if (PlayerButtonInput.instance.EscapePressed) {
+        // If we were in a submenu and there's none open now, re-open the Pause Menu
+        if (allSubMenus.TrueForAll(menu => !menu.isOpen) && currentMenuState == MenuState.SubMenuOpen) {
+            OpenPauseMenu(true);
+            currentMenuState.Set(MenuState.PauseMenuOpen);
+        }
+        
+        if (PlayerButtonInput.instance.PausePressed) {
             if (PauseMenuIsOpen) {
-                ClosePauseMenu();
+                if (allSubMenus.TrueForAll(subMenu => subMenu.canClose)) {
+                    ClosePauseMenu();
+                }
             }
             else {
-                OpenPauseMenu(false);
+                OpenPauseMenu(currentMenuState != MenuState.Off);
             }
         }
     }
@@ -83,12 +78,11 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
         foreach (var child in children) {
             child.buttonState.Set(NovaButton.ButtonState.Idle);
         }
-        BackButton.buttonState.Set(NovaButton.ButtonState.Idle);
     }
 
     void InitEvents() {
         // Nova events
-        backgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnHover>(HandleBackgroundHoverEvent);
+        NovaUIBackground.instance.BackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnHover>(HandleBackgroundHoverEvent);
         
         // My events
         ResumeButton.OnClick += (_) => ClosePauseMenu();
@@ -96,13 +90,11 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
         LoadButton.OnClick += (_) => OpenLoadMenu();
         SettingsButton.OnClick += (_) => OpenSettingsMenu();
         ExitGameButton.OnClick += (_) => ExitGameDialogWindow.Open();
-        BackButton.OnClick += (_) => OpenPauseMenu(true);
     }
 
     private void HandleBackgroundHoverEvent(Gesture.OnHover evt) {
         // When background is hovered, unhighlight the buttons (unless they're being clicked)
         HashSet<NovaButton> allButtons = children.ToHashSet();
-        allButtons.UnionWith(new List<NovaButton>() { BackButton });
         foreach (var button in allButtons) {
             if (button.buttonState.state is NovaButton.ButtonState.ClickHeld or NovaButton.ButtonState.Clicked) continue;
 
@@ -114,25 +106,17 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
     }
 
     void OpenLoadMenu() {
-        RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
         SaveMenu.instance.saveMenuState.Set(SaveMenu.SaveMenuState.LoadSave);
-        RunAnimation(BackButtonBlock, 1f, ref backButtonAnimationHandle);
+        OpenSubMenu(SaveMenu.instance);
     }
 
     void OpenSaveMenu() {
-        RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
         SaveMenu.instance.saveMenuState.Set(SaveMenu.SaveMenuState.WriteSave);
-        RunAnimation(BackButtonBlock, 1f, ref backButtonAnimationHandle);
+        OpenSubMenu(SaveMenu.instance);
     }
 
     void OpenSettingsMenu() {
-        RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
-        RunAnimation(SettingsMenu, 1f, ref settingsMenuAnimationHandle);
-        RunAnimation(BackButtonBlock, 1f, ref backButtonAnimationHandle);
-
-        if (SettingsRadioSelection.selection == null) {
-            SettingsRadioSelection.SetSelection(0);
-        }
+        OpenSubMenu(SettingsMenu.instance);
     }
 
     public void OpenPauseMenu(bool gameIsAlreadyPaused) {
@@ -143,12 +127,19 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
             Cursor.lockState = CursorLockMode.Confined;
         }
 
-        RunAnimation(SettingsMenu, 0f, ref settingsMenuAnimationHandle);
+        foreach (var subMenu in allSubMenus) {
+            if (subMenu.isOpen) {
+                subMenu.Close();
+            }
+        }
+        
+        currentMenuState.Set(MenuState.PauseMenuOpen);
+
         RunAnimation(PauseMenu, 1f, ref pauseMenuAnimationHandle);
         SaveMenu.instance.saveMenuState.Set(SaveMenu.SaveMenuState.Off);
+        
         // Could be called when no menu is open, so fade in the background too
         RunAnimation(MenuBackground, 1f, ref backgroundAnimationHandle);
-        RunAnimation(BackButtonBlock, 0f, ref backButtonAnimationHandle);
     }
 
     public void ClosePauseMenu(bool restoreTimeScale = true, bool restoreLockState = true) {
@@ -156,18 +147,42 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
         if (restoreTimeScale) {
             Time.timeScale = 1;
         }
+        
+        Debug.Log("ClosePauseMenu called");
 
         if (restoreLockState) {
             Cursor.visible = false;
             Cursor.lockState = cachedLockMode;
         }
 
-        RunAnimation(SettingsMenu, 0f, ref settingsMenuAnimationHandle);
+        foreach (var subMenu in allSubMenus) {
+            if (subMenu.isOpen) {
+                subMenu.Close();
+            }
+        }
+        
+        currentMenuState.Set(MenuState.Off);
+
         RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
         SaveMenu.instance.saveMenuState.Set(SaveMenu.SaveMenuState.Off);
+        SaveMenu.instance.Close();
+        
         // Fade out the background too
         RunAnimation(MenuBackground, 0f, ref backgroundAnimationHandle);
-        RunAnimation(BackButtonBlock, 0f, ref backButtonAnimationHandle);
+    }
+
+    public void OpenSubMenu(INovaMenu subMenuToOpen) {
+        foreach (var subMenu in allSubMenus) {
+            if (subMenu == subMenuToOpen) continue;
+            if (subMenu.isOpen) {
+                subMenu.Close();
+            }
+        }
+        
+        subMenuToOpen.Open();
+        currentMenuState.Set(MenuState.SubMenuOpen);
+        
+        RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
     }
     
     private void RunAnimation(UIBlock target, float targetAlpha, ref AnimationHandle handle) {
@@ -177,17 +192,6 @@ public class NovaPauseMenu : Singleton<NovaPauseMenu> {
             endColor = target.Color.WithAlpha(targetAlpha)
         };
         
-        handle.Cancel();
-        handle = fadeMenuAnimation.Run(menuFadeTime);
-    }
-
-    private void RunAnimation(ClipMask target, float targetAlpha, ref AnimationHandle handle) {
-        MenuFadeAnimation fadeMenuAnimation = new MenuFadeAnimation() {
-            menuToAnimate = target,
-            startAlpha = target.Tint.a,
-            targetAlpha = targetAlpha
-        };
-
         handle.Cancel();
         handle = fadeMenuAnimation.Run(menuFadeTime);
     }

@@ -285,7 +285,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6979413258104622068
 Transform:
   m_ObjectHideFlags: 0
@@ -549,7 +549,6 @@ GameObject:
   - component: {fileID: 5575792139098791267}
   - component: {fileID: 5575792139098791266}
   - component: {fileID: 446668325409718083}
-  - component: {fileID: 5575792139098791265}
   m_Layer: 0
   m_Name: DropdownOption
   m_TagString: Untagged
@@ -828,7 +827,7 @@ MonoBehaviour:
   LowAccuracyDragThreshold: 30
   ClickBehavior: 0
   draggable:
-    X: 0
+    X: 1
     Y: 0
     Z: 0
 --- !u!114 &446668325409718083
@@ -851,30 +850,9 @@ MonoBehaviour:
     - rid: 1093745181358030879
       type: {class: DropdownOptionVisuals, ns: , asm: Assembly-CSharp}
       data:
-        Name: {fileID: 5575792140528386875}
-        Background: {fileID: 318083504218851636}
---- !u!114 &5575792139098791265
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5575792139098791295}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttonState:
-    _state: 0
-    _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
-  BackgroundUIBlock: {fileID: 318083504218851636}
-  novaInteractable: {fileID: 5575792139098791266}
-  OtherUIBlocks: []
-  unclickAfterClick: 0
-  timeToUnclick: 0.15
+        selectOptionButton: {fileID: 0}
+        name: {fileID: 5575792140528386875}
+        background: {fileID: 318083504218851636}
 --- !u!1 &5575792140528386872
 GameObject:
   m_ObjectHideFlags: 0

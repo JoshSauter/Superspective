@@ -606,7 +606,7 @@ namespace Nova
         }
 
         /// <summary>
-        /// Cancel the most recent/current gesture triggered by the input control mapped to <paramref name="update"/>.<see cref="Update.ControlID">SourceID</see>.
+        /// Cancel the most recent/current gesture triggered by the input control mapped to <paramref name="update"/>.<see cref="Update.ControlID">ControlID</see>.
         /// </summary>
         /// <param name="update">The data tied to this interaction update. <see cref="Update.Ray"/> is in world space.</param>
         public static void Cancel(Update update)

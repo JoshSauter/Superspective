@@ -236,7 +236,7 @@ namespace Nova
         /// </remarks>
         /// <param name="index">The index into the data source, set via <see cref="SetDataSource{T}(IList{T})"/>, of the object to bind into view and jump to</param>
         /// <exception cref="IndexOutOfRangeException">if <c><paramref name="index"/> &lt; 0 || <paramref name="index"/> &gt;= <see cref="DataSourceItemCount"/></c></exception>
-        /// <exception cref="InvalidOperationException">if <c><see cref="UIBlock">Root</see>.<see cref="UIBlock.AutoLayout">AutoLayout</see>.<see cref="AutoLayout.Axis">Axis</see> == <see cref="Axis"/>.<see cref="Axis.None">None</see></c></exception>
+        /// <exception cref="InvalidOperationException">if <c><see cref="UIBlock">UIBlock</see>.<see cref="UIBlock.AutoLayout">AutoLayout</see>.<see cref="AutoLayout.Axis">Axis</see> == <see cref="Axis"/>.<see cref="Axis.None">None</see></c></exception>
         /// <seealso cref="JumpToIndexPage(int)"/>
         /// <seealso cref="Scroller.ScrollToIndex(int)"/>
         public void JumpToIndex(int index) => Scroll(JumpToIndexPage(index));
@@ -265,7 +265,7 @@ namespace Nova
         /// the <see cref="ListView"/>, but it might be slightly out of view without a subsequent call to <see cref="Scroll(float)"/>.
         /// </returns>
         /// <exception cref="IndexOutOfRangeException">if <c><paramref name="index"/> &lt; 0 || <paramref name="index"/> &gt;= <see cref="DataSourceItemCount"/></c></exception>
-        /// <exception cref="InvalidOperationException">if <c><see cref="UIBlock">Root</see>.<see cref="UIBlock.AutoLayout">AutoLayout</see>.<see cref="AutoLayout.Axis">Axis</see> == <see cref="Axis"/>.<see cref="Axis.None">None</see></c></exception>
+        /// <exception cref="InvalidOperationException">if <c><see cref="UIBlock">UIBlock</see>.<see cref="UIBlock.AutoLayout">AutoLayout</see>.<see cref="AutoLayout.Axis">Axis</see> == <see cref="Axis"/>.<see cref="Axis.None">None</see></c></exception>
         /// <seealso cref="JumpToIndex(int)"/>
         /// <seealso cref="Scroller.ScrollToIndex(int)"/>
         public float JumpToIndexPage(int index) => InternalMethod_2686(index, InternalParameter_2246: true);
@@ -892,7 +892,7 @@ namespace Nova
             InternalField_98 = 0;
             InternalField_99 = -1;
 
-            if (!InternalField_82 && NovaSettings.InternalProperty_87.InternalMethod_554(InternalNamespace_0.InternalType_116.InternalField_2332) && UIBlock.ChildCount != 0)
+            if (!InternalField_82 && InternalNamespace_0.InternalType_24.InternalProperty_945.InternalMethod_554(InternalNamespace_0.InternalType_116.InternalField_2332) && UIBlock.ChildCount != 0)
             {
                 string InternalVar_2 = name;
                 InternalVar_2 = string.IsNullOrWhiteSpace(InternalVar_2) ? "GameObject" : InternalVar_2;
@@ -1386,7 +1386,7 @@ namespace Nova
             {
                 InternalField_102.InternalMethod_2025(InternalVar_1);
 
-                if (!InternalField_2334 && NovaSettings.InternalProperty_87.InternalMethod_554(InternalNamespace_0.InternalType_116.InternalField_2333))
+                if (!InternalField_2334 && InternalNamespace_0.InternalType_24.InternalProperty_945.InternalMethod_554(InternalNamespace_0.InternalType_116.InternalField_2333))
                 {
                     InternalField_2334 = true;
                     Debug.LogWarning($"ListView item was destroyed without being detached first. This is unsupported and may cause issues. {InternalType_178.InternalField_484}", this);

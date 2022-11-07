@@ -65,7 +65,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalParameter_1689 = InternalType_314.InternalField_1041;
 
-            if (!NovaSettings.InternalProperty_87.InternalField_3088)
+            if (!InternalType_24.InternalProperty_945.InternalField_3088)
             {
                 return false;
             }
@@ -80,7 +80,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         public bool InternalMethod_1559(InternalType_310 InternalParameter_1690, out InternalType_282 InternalParameter_1691)
         {
             InternalParameter_1691 = InternalType_282.InternalField_923;
-            if (!NovaSettings.InternalProperty_87.InternalField_3088)
+            if (!InternalType_24.InternalProperty_945.InternalField_3088)
             {
                 return false;
             }

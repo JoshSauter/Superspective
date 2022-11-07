@@ -137,7 +137,7 @@ namespace Nova
         [SerializeField]
         public bool ReverseOrder;
 
-        [SerializeField, HideInInspector, NotKeyableAttribute]
+        [SerializeField, HideInInspector, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private int alignment;
 

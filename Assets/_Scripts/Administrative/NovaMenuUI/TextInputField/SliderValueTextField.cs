@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SliderValueTextField : TextField {
+public class SliderValueTextField : SuperspectiveTextField {
     public int minValue = 0;
     public int maxValue = 100;
 

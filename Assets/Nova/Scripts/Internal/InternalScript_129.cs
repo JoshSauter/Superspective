@@ -308,11 +308,11 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
 
             InternalVar_1 = InternalMethod_1908(ref InternalField_2148.InternalField_2165, InternalVar_1);
 
-            JobHandle InternalVar_2 = InternalField_2156.InternalMethod_989(InternalVar_1);
+            JobHandle InternalVar_2 = InternalField_2156.InternalMethod_1982(InternalVar_1);
 
             InternalField_2162 = InternalMethod_1913(ref InternalField_2148, InternalVar_2);
 
-            InternalField_2163 = InternalField_2155.InternalMethod_991(InternalField_2148.InternalField_2165.Length, InternalField_407, InternalVar_1);
+            InternalField_2163 = InternalField_2155.InternalMethod_1984(InternalField_2148.InternalField_2165.Length, InternalField_407, InternalVar_1);
 
             InternalField_2161 = InternalMethod_1914(InternalVar_1);
 
@@ -369,7 +369,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
         {
             JobHandle InternalVar_1 = InternalParameter_2129;
 
-            InternalVar_1 = InternalField_2150.InternalMethod_989(InternalVar_1);
+            InternalVar_1 = InternalField_2150.InternalMethod_1982(InternalVar_1);
 
             return InternalVar_1;
         }
@@ -395,7 +395,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
             if (InternalVar_2 > 0)
             {
                 InternalField_2152.InternalField_2127 = InternalParameter_2133.InternalField_2167;
-                InternalVar_1 = InternalField_2152.InternalMethod_991(InternalVar_2, InternalField_407, InternalVar_1);
+                InternalVar_1 = InternalField_2152.InternalMethod_1984(InternalVar_2, InternalField_407, InternalVar_1);
             }
 
             InternalField_2153.InternalField_2129 = InternalParameter_2134.InternalField_408;
@@ -403,7 +403,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
             InternalField_2153.InternalField_2130 = InternalParameter_2133.InternalField_2167;
             InternalField_2153.InternalField_2136 = InternalParameter_2133.InternalField_2168;
 
-            InternalVar_1 = InternalField_2153.InternalMethod_989(InternalVar_1);
+            InternalVar_1 = InternalField_2153.InternalMethod_1982(InternalVar_1);
 
             return InternalVar_1;
         }
@@ -417,12 +417,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
         {
             InternalField_2154.InternalField_2110 = InternalParameter_2138;
 
-            return InternalField_2154.InternalMethod_991(InternalParameter_2138.Length, InternalField_407, InternalParameter_2139);
+            return InternalField_2154.InternalMethod_1984(InternalParameter_2138.Length, InternalField_407, InternalParameter_2139);
         }
 
         private JobHandle InternalMethod_1913(ref InternalType_480 InternalParameter_2140, JobHandle InternalParameter_2141)
         {
-            return InternalField_2157.InternalMethod_991(InternalParameter_2140.InternalField_2165.Length, InternalField_407, InternalParameter_2141);
+            return InternalField_2157.InternalMethod_1984(InternalParameter_2140.InternalField_2165.Length, InternalField_407, InternalParameter_2141);
         }
 
         private JobHandle InternalMethod_1914(JobHandle InternalParameter_2142)
@@ -433,7 +433,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_12
         private JobHandle InternalMethod_1915(ref NativeList<InternalType_133> InternalParameter_2143, JobHandle InternalParameter_2144 = default)
         {
             InternalField_2159.InternalField_2203 = InternalParameter_2143;
-            return InternalField_2159.InternalMethod_989(InternalParameter_2144);
+            return InternalField_2159.InternalMethod_1982(InternalParameter_2144);
         }
         #endregion
     }

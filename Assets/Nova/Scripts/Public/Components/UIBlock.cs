@@ -143,7 +143,7 @@ namespace Nova
         }
 
         /// <summary>
-        /// The <see cref="MinMax3"/> used to clamp <see cref="Size">Size</see> and <see cref="AutoSize">Auto Size</see> when calculating <see cref="CalculatedSize">Calculated Size.</see>.
+        /// The <see cref="MinMax3"/> used to clamp <see cref="Size">Size</see> and <see cref="AutoSize">Auto Size</see> when calculating <see cref="CalculatedSize">CalculatedSize.</see>.
         /// </summary>
         public ref MinMax3 SizeMinMax
         {
@@ -196,7 +196,7 @@ namespace Nova
         }
 
         /// <summary>
-        /// The <see cref="LengthBounds"/> configuration used to calculate <see cref="CalculatedMargin">Calculated Margin</see>. Describes a spatial buffer applied outward from <see cref="CalculatedSize">Calculated Size</see>.
+        /// The <see cref="LengthBounds"/> configuration used to calculate <see cref="CalculatedMargin">CalculatedMargin</see>. Describes a spatial buffer applied outward from <see cref="CalculatedSize">Calculated Size</see>.
         /// </summary>
         /// <remarks>
         /// <c>Margin.<see cref="LengthBounds.Percent">Percent</see></c> is a percentage of the <see cref="Parent">Parent's</see> <see cref="PaddedSize">Padded Size</see>.
@@ -244,7 +244,7 @@ namespace Nova
         }
 
         /// <summary>
-        /// A per-axis alignment for this UIBlock relative to its <see cref="Parent">Parent's</see> bounds (<see cref="PaddedSize"/>). <see cref="CalculatedPosition">Calculated Position</see> is an offset in the <see cref="Alignment"/> coordinate space.
+        /// A per-axis alignment for this UIBlock relative to its <see cref="Parent">Parent's</see> bounds (<see cref="PaddedSize"/>). <see cref="CalculatedPosition">CalculatedPosition</see> is an offset in the <see cref="Alignment"/> coordinate space.
         /// </summary>
         /// <remarks>
         /// <list type="table">
@@ -685,6 +685,9 @@ namespace Nova
         ref InternalNamespace_0.InternalType_70 InternalType_67.InternalProperty_143 => ref UnsafeUtility.As<AutoLayout, InternalNamespace_0.InternalType_70>(ref autoLayout);
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector3 InternalType_67.InternalProperty_87 { get => PreviewSize; set { PreviewSize = value; } }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         ref readonly InternalNamespace_0.InternalType_53.InternalType_55 InternalType_67.InternalProperty_144 => ref InternalType_457.InternalProperty_190.InternalMethod_1857(this).InternalField_1832;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         ref readonly InternalNamespace_0.InternalType_53.InternalType_55 InternalType_67.InternalProperty_145 => ref InternalType_457.InternalProperty_190.InternalMethod_1857(this).InternalField_1833;
@@ -711,7 +714,7 @@ namespace Nova
         }
 
         [SerializeField, HideInInspector]
-        [NotKeyableAttribute]
+        [InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal Vector3 PreviewSize = Vector2.one;
 

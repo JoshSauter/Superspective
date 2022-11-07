@@ -200,7 +200,8 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
                 return;
             }
 
-            if (scrollbarBlock.Parent == null)
+            if (scrollbarBlock.transform.parent == null ||
+                scrollbarBlock.transform.parent.GetComponent<UIBlock>() == null)
             {
                 EditorUtility.DisplayDialog($"Scrollbar must have parent {nameof(UIBlock)}", $"The scrollbar visual is positioned and sized relative to the bounds of its parent {nameof(UIBlock)}.\n\nPlease ensure the scrollbar is a child of a {nameof(UIBlock)}.", "Okay");
                 InternalField_2422.objectReferenceValue = null;

@@ -4,16 +4,6 @@ using System.Collections.Generic;
 
 namespace Nova.InternalNamespace_16
 {
-    internal interface InternalType_273 { }
-
-    internal interface InternalType_523
-    {
-        public bool InternalMethod_1635(InternalType_273 InternalParameter_437, Type InternalParameter_181, out InternalType_273 InternalParameter_180);
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public Type InternalProperty_439 { get; }
-    }
-
     internal struct InternalType_529<T66> where T66 : IEvent
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -131,6 +121,16 @@ namespace Nova.InternalNamespace_16
         private static Dictionary<Type, InternalType_527> InternalField_2342 = new Dictionary<Type, InternalType_527>();
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private static HashSet<int> InternalField_89 = new HashSet<int>();
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private const int InternalField_206 = 0;
+
+        [NonSerialized]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private static int InternalField_208 = 1;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Dictionary<InternalType_152<MulticastDelegate>, InternalType_527> InternalField_2343 = new Dictionary<InternalType_152<MulticastDelegate>, InternalType_527>();
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Dictionary<Type, int> InternalField_2344 = new Dictionary<Type, int>();
@@ -142,6 +142,16 @@ namespace Nova.InternalNamespace_16
         private Dictionary<MulticastDelegate, InternalType_152<MulticastDelegate>> InternalField_2347 = new Dictionary<MulticastDelegate, InternalType_152<MulticastDelegate>>();
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Dictionary<InternalType_152<MulticastDelegate>, MulticastDelegate> InternalField_2348 = new Dictionary<InternalType_152<MulticastDelegate>, MulticastDelegate>();
+
+        public static int InternalMethod_3250()
+        {
+            return InternalField_208++;
+        }
+
+        public static void InternalMethod_3262<TEvent>(ref TEvent InternalParameter_1307) where TEvent : struct, IEvent
+        {
+            InternalField_89.Remove(InternalParameter_1307.ID);
+        }
 
         public bool InternalMethod_2081<TEvent>(Type InternalParameter_2391 = null) where TEvent : struct, IEvent
         {
@@ -261,11 +271,11 @@ namespace Nova.InternalNamespace_16
             }
         }
 
-        public void InternalMethod_2084<TEvent>(InternalType_157<InternalType_529<TEvent>> InternalParameter_2394) where TEvent : struct, IEvent
+        public void InternalMethod_3257<TEvent>(InternalType_157<InternalType_529<TEvent>> InternalParameter_1312, out bool InternalParameter_1303) where TEvent : struct, IEvent
         {
             InternalType_157<InternalType_528<TEvent>> InternalVar_1 = null;
-            InternalMethod_2085(InternalParameter_2394, out InternalVar_1);
-            InternalMethod_2086(InternalVar_1);
+            InternalMethod_2085(InternalParameter_1312, out InternalVar_1);
+            InternalMethod_3258(InternalVar_1, out InternalParameter_1303);
         }
 
         private void InternalMethod_2085<TEvent>(InternalType_157<InternalType_529<TEvent>> InternalParameter_2395, out InternalType_157<InternalType_528<TEvent>> InternalParameter_2396) where TEvent : struct, IEvent
@@ -326,20 +336,34 @@ namespace Nova.InternalNamespace_16
             InternalType_156<InternalType_153<Type>, Type>.InternalMethod_741(InternalVar_1);
         }
 
-        private void InternalMethod_2086<TEvent>(InternalType_157<InternalType_528<TEvent>> InternalParameter_2397) where TEvent : struct, IEvent
+        private void InternalMethod_3258<TEvent>(InternalType_157<InternalType_528<TEvent>> InternalParameter_1315, out bool InternalParameter_1314) where TEvent : struct, IEvent
         {
-            if (InternalParameter_2397 == null)
+            InternalParameter_1314 = false;
+
+            if (InternalParameter_1315 == null)
             {
                 return;
             }
 
-            int InternalVar_1 = InternalParameter_2397.Count;
-            for (int InternalVar_2 = 0; InternalVar_2 < InternalVar_1; ++InternalVar_2)
+            int InternalVar_1 = InternalParameter_1315.Count;
+            int InternalVar_2 = InternalVar_1 > 0 ? InternalParameter_1315[0].InternalField_2352.ID : InternalField_206;
+
+            if (InternalVar_2 != InternalField_206)
             {
-                InternalParameter_2397[InternalVar_2].InternalMethod_2096();
+                InternalField_89.Add(InternalVar_2);
             }
 
-            InternalType_155<InternalType_528<TEvent>>.InternalMethod_741(InternalParameter_2397);
+            for (int InternalVar_3 = 0; InternalVar_3 < InternalVar_1; ++InternalVar_3)
+            {
+                InternalParameter_1315[InternalVar_3].InternalMethod_2096();
+            }
+
+            if (InternalVar_2 != InternalField_206)
+            {
+                InternalParameter_1314 = !InternalField_89.Remove(InternalVar_2);
+            }
+
+            InternalType_155<InternalType_528<TEvent>>.InternalMethod_741(InternalParameter_1315);
         }
 
         private bool InternalMethod_2087<TEvent>(ref InternalType_153<Type> InternalParameter_2398, out List<InternalType_152<MulticastDelegate>> InternalParameter_2399)

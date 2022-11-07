@@ -72,7 +72,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             {
                 if (!InternalField_1055)
                 {
-                    if (!InternalField_1054.Value && NovaSettings.InternalProperty_87.InternalMethod_554(InternalType_116.InternalField_2767))
+                    if (!InternalField_1054.Value && InternalType_24.InternalProperty_945.InternalMethod_554(InternalType_116.InternalField_2767))
                     {
                         Debug.LogWarning($"TextureArrays not supported on platform. Static images will not be able to be batched, falling back to dynamic. {InternalType_178.InternalField_484}");
                         InternalField_1054.Value = true;
@@ -82,7 +82,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
                 if (!InternalField_1056)
                 {
-                    if (!InternalField_1054.Value && NovaSettings.InternalProperty_87.InternalMethod_554(InternalType_116.InternalField_2767))
+                    if (!InternalField_1054.Value && InternalType_24.InternalProperty_945.InternalMethod_554(InternalType_116.InternalField_2767))
                     {
                         Debug.LogWarning($"A bug with Texture2DArrays when the \"Texture Quality\" setting is not full resolution prevents static images from working properly. Falling back to dynamic. {InternalType_178.InternalField_484}");
                         InternalField_1054.Value = true;
@@ -138,7 +138,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalField_1054.InternalMethod_1033(false);
 
             InternalField_1055 = SystemInfo.supports2DArrayTextures;
-            InternalField_1056 = QualitySettings.globalTextureMipmapLimit == 0;
+            InternalField_1056 = InternalType_271.InternalProperty_747 == 0;
 
             InternalField_1057 = new InternalType_359(ref InternalField_1042, ref InternalField_1043);
             InternalField_1058 = new InternalType_360(ref InternalField_1045, ref InternalField_1047, ref InternalField_1046);

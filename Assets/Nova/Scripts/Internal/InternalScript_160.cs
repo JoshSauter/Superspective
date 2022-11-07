@@ -282,23 +282,18 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 InternalField_1135 = InternalProperty_289.InternalField_864.InternalField_1209,
                 InternalField_1141 = InternalProperty_289.InternalField_874.InternalField_1164,
                 InternalField_771 = InternalProperty_289.InternalField_874.InternalField_1166,
+                InternalField_3384 = InternalProperty_289.InternalField_869.InternalField_1188,
+                InternalField_3385 = InternalType_325.InternalField_1117,
+                InternalField_3386 = InternalType_325.InternalField_1118,
+                InternalField_3387 = InternalProperty_289.InternalField_869.InternalField_3381,
 
                 InternalField_836 = InternalField_816,
-                InternalField_858 = InternalField_815,
+                InternalField_858 = InternalField_3378,
                 InternalField_763 = InternalField_2827,
-            };
-
-            InternalField_837 = new InternalType_399()
-            {
-                InternalField_1430 = InternalField_810,
-                InternalField_1431 = InternalField_807.InternalField_881,
-                InternalField_1434 = InternalProperty_289.InternalField_874.InternalField_1164,
-                InternalField_1435 = InternalProperty_289.InternalField_869.InternalField_1188,
-                InternalField_1432 = InternalType_325.InternalField_1117,
-                InternalField_1433 = InternalType_325.InternalField_1118,
-                InternalField_1436 = InternalField_807.InternalField_888,
-                InternalField_1437 = InternalType_325.InternalField_1119,
-                InternalField_1438 = InternalType_325.InternalField_1120,
+                InternalField_3388 = InternalField_807.InternalField_888,
+                InternalField_3389 = InternalType_325.InternalField_1119,
+                InternalField_3390 = InternalType_325.InternalField_1120,
+                InternalField_3391 = InternalField_3379,
             };
         }
     }

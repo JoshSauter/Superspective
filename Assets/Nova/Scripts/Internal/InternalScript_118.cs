@@ -478,12 +478,12 @@ namespace Nova.InternalNamespace_0
 
     internal struct InternalType_94 { }
 
-    internal struct InternalType_76<T> : System.IEquatable<InternalType_76<T>> where T : unmanaged, System.IEquatable<T>
+    internal struct InternalType_76<T4> : System.IEquatable<InternalType_76<T4>> where T4 : unmanaged, System.IEquatable<T4>
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool InternalField_246; 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public T InternalField_247; 
+        public T4 InternalField_247; 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector3 InternalField_248; 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -494,7 +494,7 @@ namespace Nova.InternalNamespace_0
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool InternalProperty_166 => InternalField_249.InternalMethod_492();
 
-        public bool Equals(InternalType_76<T> other)
+        public bool Equals(InternalType_76<T4> other)
         {
             return this == other;
         }
@@ -503,21 +503,21 @@ namespace Nova.InternalNamespace_0
         {
             switch (obj)
             {
-                case InternalType_76<T> input:
+                case InternalType_76<T4> input:
                     return this.Equals(input);
                 default:
                     return false;
             }
         }
 
-        public static bool operator ==(in InternalType_76<T> InternalParameter_331, in InternalType_76<T> InternalParameter_332)
+        public static bool operator ==(in InternalType_76<T4> InternalParameter_331, in InternalType_76<T4> InternalParameter_332)
         {
             return InternalParameter_331.InternalField_247.Equals(InternalParameter_332.InternalField_247) &&
                    InternalParameter_331.InternalField_246 == InternalParameter_332.InternalField_246 &&
                    InternalType_187.InternalMethod_891(InternalParameter_331.InternalField_248, InternalParameter_332.InternalField_248);
         }
 
-        public static bool operator !=(in InternalType_76<T> InternalParameter_333, in InternalType_76<T> InternalParameter_334)
+        public static bool operator !=(in InternalType_76<T4> InternalParameter_333, in InternalType_76<T4> InternalParameter_334)
         {
             return !(InternalParameter_333 == InternalParameter_334);
         }
@@ -540,13 +540,13 @@ namespace Nova.InternalNamespace_0
 
         public unsafe bool InternalMethod_474<U>(out InternalType_76<U>? InternalParameter_335) where U : unmanaged, System.IEquatable<U>
         {
-            if (typeof(U) != typeof(T))
+            if (typeof(U) != typeof(T4))
             {
                 InternalParameter_335 = null;
                 return false;
             }
 
-            InternalParameter_335 = UnsafeUtility.As<InternalType_76<T>, InternalType_76<U>>(ref this);
+            InternalParameter_335 = UnsafeUtility.As<InternalType_76<T4>, InternalType_76<U>>(ref this);
             return true;
         }
     }

@@ -945,6 +945,19 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
             EditorGUI.EndProperty();
         }
 
+        public static void InternalMethod_3004(GUIContent InternalParameter_1749, SerializedProperty InternalParameter_1401, float InternalParameter_1392, float InternalParameter_1068)
+        {
+            Rect InternalVar_1 = InternalType_575.InternalMethod_2302(InternalType_575.InternalProperty_501);
+            GUIContent InternalVar_2 = EditorGUI.BeginProperty(InternalVar_1, InternalParameter_1749, InternalParameter_1401);
+            EditorGUI.BeginChangeCheck();
+            float InternalVar_3 = EditorGUI.FloatField(InternalVar_1, InternalVar_2, InternalParameter_1401.floatValue);
+            if (EditorGUI.EndChangeCheck())
+            {
+                InternalParameter_1401.floatValue = Mathf.Clamp(InternalVar_3, InternalParameter_1392, InternalParameter_1068);
+            }
+            EditorGUI.EndProperty();
+        }
+
         public static void InternalMethod_2238(GUIContent InternalParameter_2549, SerializedProperty InternalParameter_2550, int InternalParameter_2551, int InternalParameter_2552)
         {
             Rect InternalVar_1 = InternalType_575.InternalMethod_2302(InternalType_575.InternalProperty_501);
@@ -1115,7 +1128,7 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
             EditorGUI.BeginChangeCheck();
             Rect InternalVar_1 = InternalType_573.InternalType_575.InternalMethod_2302();
             GUIContent InternalVar_2 = EditorGUI.BeginProperty(InternalVar_1, InternalParameter_2581, InternalParameter_2582);
-            System.Enum InternalVar_3 = EditorGUI.EnumFlagsField(InternalVar_1, InternalVar_2, InternalParameter_2583);
+            System.Enum InternalVar_3 = EditorGUI.EnumPopup(InternalVar_1, InternalVar_2, InternalParameter_2583);
             EditorGUI.EndProperty();
             if (EditorGUI.EndChangeCheck())
             {

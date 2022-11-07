@@ -28,34 +28,34 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public event ButtonPressEvent OnDownPress;
 	public event ButtonPressEvent OnRightPress;
 	public event ButtonPressEvent OnLeftPress;
-	public event ButtonPressEvent OnAction1Press;
-	public event ButtonPressEvent OnAction2Press;
-	public event ButtonPressEvent OnAction3Press;
-	public event ButtonPressEvent OnEscapePress;
-	public event ButtonPressEvent OnSpacePress;
-	public event ButtonPressEvent OnShiftPress;
+	public event ButtonPressEvent OnInteractPress;
+	public event ButtonPressEvent OnZoomPress;
+	public event ButtonPressEvent OnAlignObjectPress;
+	public event ButtonPressEvent OnPausePress;
+	public event ButtonPressEvent OnJumpPress;
+	public event ButtonPressEvent OnSprintPress;
 
 	public event ButtonReleaseEvent OnUpRelease;
 	public event ButtonReleaseEvent OnDownRelease;
 	public event ButtonReleaseEvent OnRightRelease;
 	public event ButtonReleaseEvent OnLeftRelease;
-	public event ButtonReleaseEvent OnAction1Release;
-	public event ButtonReleaseEvent OnAction2Release;
-	public event ButtonReleaseEvent OnAction3Release;
-	public event ButtonReleaseEvent OnEscapeRelease;
-	public event ButtonReleaseEvent OnSpaceRelease;
-	public event ButtonReleaseEvent OnShiftRelease;
+	public event ButtonReleaseEvent OnInteractRelease;
+	public event ButtonReleaseEvent OnZoomRelease;
+	public event ButtonReleaseEvent OnAlignObjectRelease;
+	public event ButtonReleaseEvent OnPauseRelease;
+	public event ButtonReleaseEvent OnJumpRelease;
+	public event ButtonReleaseEvent OnSprintRelease;
 
 	public event ButtonHeldEvent OnUpHeld;
 	public event ButtonHeldEvent OnDownHeld;
 	public event ButtonHeldEvent OnRightHeld;
 	public event ButtonHeldEvent OnLeftHeld;
-	public event ButtonHeldEvent OnAction1Held;
-	public event ButtonHeldEvent OnAction2Held;
-	public event ButtonHeldEvent OnAction3Held;
-	public event ButtonHeldEvent OnEscapeHeld;
-	public event ButtonHeldEvent OnSpaceHeld;
-	public event ButtonHeldEvent OnShiftHeld;
+	public event ButtonHeldEvent OnInteractHeld;
+	public event ButtonHeldEvent OnZoomHeld;
+	public event ButtonHeldEvent OnAlignObjectHeld;
+	public event ButtonHeldEvent OnPauseHeld;
+	public event ButtonHeldEvent OnJumpHeld;
+	public event ButtonHeldEvent OnSprintHeld;
 #endregion
 
 #region Coroutine bools
@@ -66,12 +66,12 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	bool inDownHoldCoroutine = false;
 	bool inRightHoldCoroutine = false;
 	bool inLeftHoldCoroutine = false;
-	bool inAction1HoldCoroutine = false;
-	bool inAction2HoldCoroutine = false;
-	bool inAction3HoldCoroutine = false;
-	bool inEscapeHoldCoroutine = false;
-	bool inSpaceHoldCoroutine = false;
-	bool inShiftHoldCoroutine = false;
+	bool inInteractHoldCoroutine = false;
+	bool inZoomHoldCoroutine = false;
+	bool inAlignObjectHoldCoroutine = false;
+	bool inPauseHoldCoroutine = false;
+	bool inJumpHoldCoroutine = false;
+	bool inSprintHoldCoroutine = false;
 #endregion
 	
 	public void Update() {
@@ -131,137 +131,137 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 			OnLeftRelease();
 		}
 
-		// Action1 button (Also maps to mouse left-click)
-		if (Action1Pressed && OnAction1Press != null) {
-			OnAction1Press();
-			if (!inAction1HoldCoroutine) {
-				StartCoroutine(Action1HoldCoroutine());
+		// Interact button (Also maps to mouse left-click)
+		if (InteractPressed && OnInteractPress != null) {
+			OnInteractPress();
+			if (!inInteractHoldCoroutine) {
+				StartCoroutine(InteractHoldCoroutine());
 			}
 		}
-		else if (Action1Released && OnAction1Release != null) {
-			OnAction1Release();
+		else if (InteractReleased && OnInteractRelease != null) {
+			OnInteractRelease();
 		}
 
-		// Action2 button (Also maps to mouse right-click)
-		if (Action2Pressed && OnAction2Press != null) {
-			OnAction2Press();
-			if (!inAction2HoldCoroutine) {
-				StartCoroutine(Action2HoldCoroutine());
+		// Zoom button (Also maps to mouse right-click)
+		if (ZoomPressed && OnZoomPress != null) {
+			OnZoomPress();
+			if (!inZoomHoldCoroutine) {
+				StartCoroutine(ZoomHoldCoroutine());
 			}
 		}
-		else if (Action2Released && OnAction2Release != null) {
-			OnAction2Release();
+		else if (ZoomReleased && OnZoomRelease != null) {
+			OnZoomRelease();
 		}
 
-		// Action3 button (also maps to mouse middle-click)
-		if (Action3Pressed && OnAction3Press != null) {
-			OnAction3Press();
-			if (!inAction3HoldCoroutine) {
-				StartCoroutine(Action3HoldCoroutine());
+		// AlignObject button (also maps to mouse middle-click)
+		if (AlignObjectPressed && OnAlignObjectPress != null) {
+			OnAlignObjectPress();
+			if (!inAlignObjectHoldCoroutine) {
+				StartCoroutine(AlignObjectHoldCoroutine());
 			}
 		}
-		else if (Action3Released && OnAction3Release != null) {
-			OnAction3Release();
+		else if (AlignObjectReleased && OnAlignObjectRelease != null) {
+			OnAlignObjectRelease();
 		}
 
-		// Escape button
-		if (EscapePressed && OnEscapePress != null) {
-			OnEscapePress();
-			if (!inEscapeHoldCoroutine) {
-				StartCoroutine(EscapeHoldCoroutine());
+		// Pause button
+		if (PausePressed && OnPausePress != null) {
+			OnPausePress();
+			if (!inPauseHoldCoroutine) {
+				StartCoroutine(PauseHoldCoroutine());
 			}
 		}
-		else if (EscapeReleased && OnEscapeRelease != null) {
-			OnEscapeRelease();
+		else if (PauseReleased && OnPauseRelease != null) {
+			OnPauseRelease();
 		}
-		// Space button
-		if (SpacePressed && OnSpacePress != null) {
-			OnSpacePress();
-			if (!inSpaceHoldCoroutine) {
-				StartCoroutine(SpaceHoldCoroutine());
+		// Jump button
+		if (JumpPressed && OnJumpPress != null) {
+			OnJumpPress();
+			if (!inJumpHoldCoroutine) {
+				StartCoroutine(JumpHoldCoroutine());
 			}
 		}
-		else if (SpaceReleased && OnSpaceRelease != null) {
-			OnSpaceRelease();
+		else if (JumpReleased && OnJumpRelease != null) {
+			OnJumpRelease();
 		}
-		// Shift button
-		if (ShiftPressed && OnShiftPress != null) {
-			OnShiftPress();
-			if (!inShiftHoldCoroutine) {
-				StartCoroutine(ShiftHoldCoroutine());
+		// Sprint button
+		if (SprintPressed && OnSprintPress != null) {
+			OnSprintPress();
+			if (!inSprintHoldCoroutine) {
+				StartCoroutine(SprintHoldCoroutine());
 			}
 		}
-		else if (ShiftReleased && OnShiftRelease != null) {
-			OnShiftRelease();
+		else if (SprintReleased && OnSprintRelease != null) {
+			OnSprintRelease();
 		}
 
 	}
 
 #region Combined inputs
 	// On first press
-	public bool UpPressed => KeyboardAndMouseInputs.Up.Pressed;
+	public bool UpPressed => Settings.Keybinds.Forward.Pressed;
 	
-	public bool DownPressed => KeyboardAndMouseInputs.Down.Pressed;
+	public bool DownPressed => Settings.Keybinds.Backward.Pressed;
 	
-	public bool RightPressed => KeyboardAndMouseInputs.Right.Pressed;
+	public bool RightPressed => Settings.Keybinds.Right.Pressed;
 	
-	public bool LeftPressed => KeyboardAndMouseInputs.Left.Pressed;
+	public bool LeftPressed => Settings.Keybinds.Left.Pressed;
 	
-	public bool Action1Pressed => KeyboardAndMouseInputs.Action1.Pressed;
+	public bool InteractPressed => Settings.Keybinds.Interact.Pressed;
 
-	public bool Action2Pressed => KeyboardAndMouseInputs.Action2.Pressed;
+	public bool ZoomPressed => Settings.Keybinds.Zoom.Pressed;
 
-	public bool Action3Pressed => KeyboardAndMouseInputs.Action3.Pressed;
+	public bool AlignObjectPressed => Settings.Keybinds.AlignObject.Pressed;
 	
-	public bool EscapePressed => KeyboardAndMouseInputs.Escape.Pressed;
+	public bool PausePressed => Settings.Keybinds.Pause.Pressed;
 	
-	public bool SpacePressed => KeyboardAndMouseInputs.Space.Pressed;
+	public bool JumpPressed => Settings.Keybinds.Jump.Pressed;
 	
-	public bool ShiftPressed => KeyboardAndMouseInputs.Shift.Pressed;
+	public bool SprintPressed => Settings.Keybinds.Sprint.Pressed;
 	
 
 	// On button release
-	public bool UpReleased => KeyboardAndMouseInputs.Up.Released;
+	public bool UpReleased => Settings.Keybinds.Forward.Released;
 	
-	public bool DownReleased => KeyboardAndMouseInputs.Down.Released;
+	public bool DownReleased => Settings.Keybinds.Backward.Released;
 	
-	public bool RightReleased => KeyboardAndMouseInputs.Right.Released;
+	public bool RightReleased => Settings.Keybinds.Right.Released;
 	
-	public bool LeftReleased => KeyboardAndMouseInputs.Left.Released;
+	public bool LeftReleased => Settings.Keybinds.Left.Released;
 	
-	public bool Action1Released => KeyboardAndMouseInputs.Action1.Released;
+	public bool InteractReleased => Settings.Keybinds.Interact.Released;
 
-	public bool Action2Released => KeyboardAndMouseInputs.Action2.Released;
+	public bool ZoomReleased => Settings.Keybinds.Zoom.Released;
 
-	public bool Action3Released => KeyboardAndMouseInputs.Action3.Released;
+	public bool AlignObjectReleased => Settings.Keybinds.AlignObject.Released;
 
-	public bool EscapeReleased => KeyboardAndMouseInputs.Escape.Released;
+	public bool PauseReleased => Settings.Keybinds.Pause.Released;
 	
-	public bool SpaceReleased => KeyboardAndMouseInputs.Space.Released;
+	public bool JumpReleased => Settings.Keybinds.Jump.Released;
 	
-	public bool ShiftReleased => KeyboardAndMouseInputs.Shift.Released;
+	public bool SprintReleased => Settings.Keybinds.Sprint.Released;
 	
 
 	// While button held
-	public bool UpHeld => KeyboardAndMouseInputs.Up.Held;
+	public bool UpHeld => Settings.Keybinds.Forward.Held;
 	
-	public bool DownHeld => KeyboardAndMouseInputs.Down.Held;
+	public bool DownHeld => Settings.Keybinds.Backward.Held;
 	
-	public bool RightHeld => KeyboardAndMouseInputs.Right.Held;
+	public bool RightHeld => Settings.Keybinds.Right.Held;
 	
-	public bool LeftHeld => KeyboardAndMouseInputs.Left.Held;
+	public bool LeftHeld => Settings.Keybinds.Left.Held;
 	
-	public bool Action1Held => KeyboardAndMouseInputs.Action1.Held;
+	public bool InteractHeld => Settings.Keybinds.Interact.Held;
 	
-	public bool Action2Held => KeyboardAndMouseInputs.Action2.Held;
+	public bool ZoomHeld => Settings.Keybinds.Zoom.Held;
 
-	public bool Action3Held => KeyboardAndMouseInputs.Action3.Held;
+	public bool AlignObjectHeld => Settings.Keybinds.AlignObject.Held;
 	
-	public bool EscapeHeld => KeyboardAndMouseInputs.Escape.Held;
+	public bool PauseHeld => Settings.Keybinds.Pause.Held;
 	
-	public bool SpaceHeld => KeyboardAndMouseInputs.Space.Held;
+	public bool JumpHeld => Settings.Keybinds.Jump.Held;
 	
-	public bool ShiftHeld => KeyboardAndMouseInputs.Shift.Held;
+	public bool SprintHeld => Settings.Keybinds.Sprint.Held;
 	
 
 	// While stick held
@@ -399,95 +399,95 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		inLeftHoldCoroutine = false;
 	}
-	IEnumerator Action1HoldCoroutine() {
-		inAction1HoldCoroutine = true;
+	IEnumerator InteractHoldCoroutine() {
+		inInteractHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (Action1Held) {
-			if (OnAction1Held != null) {
-				OnAction1Held(timeHeld);
+		while (InteractHeld) {
+			if (OnInteractHeld != null) {
+				OnInteractHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inAction1HoldCoroutine = false;
+		inInteractHoldCoroutine = false;
 	}
-	IEnumerator Action2HoldCoroutine() {
-		inAction2HoldCoroutine = true;
+	IEnumerator ZoomHoldCoroutine() {
+		inZoomHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (Action2Held) {
-			if (OnAction2Held != null) {
-				OnAction2Held(timeHeld);
+		while (ZoomHeld) {
+			if (OnZoomHeld != null) {
+				OnZoomHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inAction2HoldCoroutine = false;
+		inZoomHoldCoroutine = false;
 	}
-	IEnumerator Action3HoldCoroutine() {
-		inAction3HoldCoroutine = true;
+	IEnumerator AlignObjectHoldCoroutine() {
+		inAlignObjectHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (Action3Held) {
-			if (OnAction3Held != null) {
-				OnAction3Held(timeHeld);
+		while (AlignObjectHeld) {
+			if (OnAlignObjectHeld != null) {
+				OnAlignObjectHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inAction3HoldCoroutine = false;
+		inAlignObjectHoldCoroutine = false;
 	}
-	IEnumerator EscapeHoldCoroutine() {
-		inEscapeHoldCoroutine = true;
+	IEnumerator PauseHoldCoroutine() {
+		inPauseHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (EscapeHeld) {
-			if (OnEscapeHeld != null) {
-				OnEscapeHeld(timeHeld);
+		while (PauseHeld) {
+			if (OnPauseHeld != null) {
+				OnPauseHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inEscapeHoldCoroutine = false;
+		inPauseHoldCoroutine = false;
 	}
-	IEnumerator SpaceHoldCoroutine() {
-		inSpaceHoldCoroutine = true;
+	IEnumerator JumpHoldCoroutine() {
+		inJumpHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (SpaceHeld) {
-			if (OnSpaceHeld != null) {
-				OnSpaceHeld(timeHeld);
+		while (JumpHeld) {
+			if (OnJumpHeld != null) {
+				OnJumpHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inSpaceHoldCoroutine = false;
+		inJumpHoldCoroutine = false;
 	}
-	IEnumerator ShiftHoldCoroutine() {
-		inShiftHoldCoroutine = true;
+	IEnumerator SprintHoldCoroutine() {
+		inSprintHoldCoroutine = true;
 
 		float timeHeld = 0;
-		while (ShiftHeld) {
-			if (OnShiftHeld != null) {
-				OnShiftHeld(timeHeld);
+		while (SprintHeld) {
+			if (OnSprintHeld != null) {
+				OnSprintHeld(timeHeld);
 			}
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
-		inShiftHoldCoroutine = false;
+		inSprintHoldCoroutine = false;
 	}
 }
 #endregion

@@ -6,7 +6,6 @@ using Nova.InternalNamespace_0.InternalNamespace_9;
 using Nova.InternalNamespace_0.InternalNamespace_12;
 using Nova.InternalNamespace_0.InternalNamespace_5;
 using System.Collections.Generic;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -68,7 +67,7 @@ namespace Nova
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private InternalType_218 InternalField_19;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private unsafe static InternalType_735<InternalType_175> InternalField_20; 
+        private unsafe static InternalType_735<InternalType_175> InternalField_20;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NativeHashMap<InternalType_131, InternalType_217> InternalField_21;
 

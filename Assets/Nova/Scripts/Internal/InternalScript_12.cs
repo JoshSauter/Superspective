@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_4
 {
-    internal struct InternalType_152<T> : IEquatable<InternalType_152<T>>
+    internal struct InternalType_152<T93> : IEquatable<InternalType_152<T93>>
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal static readonly InternalType_152<T> InternalField_441 = default;
+        internal static readonly InternalType_152<T93> InternalField_441 = default;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private static long InternalField_442 = 1;
@@ -18,15 +18,15 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool InternalProperty_220 => InternalField_443 != InternalField_441.InternalField_443;
 
-        public static InternalType_152<T> InternalMethod_716()
+        public static InternalType_152<T93> InternalMethod_716()
         {
-            return new InternalType_152<T>()
+            return new InternalType_152<T93>()
             {
                 InternalField_443 = InternalField_442++
             };
         }
 
-        public bool Equals(InternalType_152<T> other)
+        public bool Equals(InternalType_152<T93> other)
         {
             return InternalField_443 == other.InternalField_443;
         }
@@ -38,7 +38,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
 
         public override string ToString()
         {
-            return $"UID<{typeof(T).Name}>({InternalField_443})";
+            return $"UID<{typeof(T93).Name}>({InternalField_443})";
         }
     }
 

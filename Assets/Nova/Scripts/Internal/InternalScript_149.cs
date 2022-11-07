@@ -4,15 +4,15 @@ using System.Runtime.CompilerServices;
 namespace Nova.InternalNamespace_0.InternalNamespace_4
 {
     
-    internal readonly ref struct InternalType_521<T>
+    internal readonly ref struct InternalType_521<T91>
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public static InternalType_521<T> InternalProperty_435 => default;
+        public static InternalType_521<T91> InternalProperty_435 => default;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IList<T> InternalField_2331;
+        private readonly IList<T91> InternalField_2331;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public readonly IList<T> InternalProperty_434
+        public readonly IList<T91> InternalProperty_434
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => InternalField_2331;
@@ -25,29 +25,29 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
             get => InternalField_2331 == null ? 0 : InternalField_2331.Count;
         }
 
-        public readonly T this[int InternalParameter_2375]
+        public readonly T91 this[int InternalParameter_2375]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => InternalField_2331[InternalParameter_2375];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int InternalMethod_2048(T InternalParameter_2374)
+        public readonly int InternalMethod_2048(T91 InternalParameter_2374)
         {
             return InternalField_2331.IndexOf(InternalParameter_2374);
         }
 
-        public InternalType_521(IList<T> InternalParameter_2373)
+        public InternalType_521(IList<T91> InternalParameter_2373)
         {
             this.InternalField_2331 = InternalParameter_2373;
         }
 
-        public readonly void InternalMethod_2046(T[] InternalParameter_2372, int InternalParameter_2371 = 0)
+        public readonly void InternalMethod_2046(T91[] InternalParameter_2372, int InternalParameter_2371 = 0)
         {
             InternalField_2331.CopyTo(InternalParameter_2372, InternalParameter_2371);
         }
 
-        public readonly void InternalMethod_2045(List<T> InternalParameter_2370, int InternalParameter_2369 = 0)
+        public readonly void InternalMethod_2045(List<T91> InternalParameter_2370, int InternalParameter_2369 = 0)
         {
             InternalParameter_2370.InsertRange(InternalParameter_2369, InternalField_2331);
         }

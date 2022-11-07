@@ -19,6 +19,8 @@ public class GameManager : Singleton<GameManager> {
         LevelManager.instance.IsCurrentlyLoadingScenes ||
         LevelManager.instance.isCurrentlySwitchingScenes ||
         SaveManager.isCurrentlyLoadingSave;
+
+    public bool IsCurrentlyPaused => NovaPauseMenu.instance.PauseMenuIsOpen;
     
     public bool gameHasLoaded = false;
     IEnumerator Start() {
@@ -28,12 +30,13 @@ public class GameManager : Singleton<GameManager> {
         yield return new WaitUntil(() => !LevelManager.instance.isCurrentlySwitchingScenes);
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;
+        // Disable if you add a title screen or something where you don't want the mouse locked for gameplay
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
-
-        Application.targetFrameRate = 60;
     }
 
-	public void QuitGame() {
+    public void QuitGame() {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -43,14 +46,6 @@ public class GameManager : Singleton<GameManager> {
 
     private void OnApplicationQuit() {
         _isApplicationQuitting = true;
-    }
-
-    public void UseQWERTYLayout() {
-        KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.QWERTY);
-	}
-
-    public void UseAZERTYLayout() {
-        KeyboardAndMouseInputs.UseKeyboardLayoutPreset(KeyboardAndMouseInputs.KeyboardLayoutPreset.AZERTY);
     }
 
     public void LoadGame() {

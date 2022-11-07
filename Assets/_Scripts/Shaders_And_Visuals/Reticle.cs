@@ -56,10 +56,10 @@ public class Reticle : Singleton<Reticle> {
 	
 	// Update is called once per frame
 	void Update () {
-		if (input.Action1Pressed) {
+		if (input.InteractPressed) {
 			timeHeld = 0;
 		}
-		if (input.Action1Pressed || timeHeld < minTimeHeld) {
+		if (input.InteractPressed || timeHeld < minTimeHeld) {
 			curRotationSpeed = Mathf.Lerp(curRotationSpeed, maxRotationSpeed, accelerationLerp * Time.deltaTime);
 			thisTransform.Rotate(Vector3.back * curRotationSpeed * Time.deltaTime);
 			timeHeld += Time.deltaTime;

@@ -58,7 +58,7 @@ namespace Nova.InternalNamespace_17
             InternalType_274.InternalProperty_190.InternalField_863.InternalField_3302.Clear();
             if (!SceneVisibilityManager.instance.AreAnyDescendantsHidden(SceneManager.GetActiveScene())
 #if UNITY_EDITOR
-                && (!PrefabStageUtils.TryGetPrefabScene(out Scene prefabScene) || !SceneVisibilityManager.instance.AreAnyDescendantsHidden(prefabScene)))
+                && (!PrefabStageUtilsImpl.TryGetPrefabScene(out Scene prefabScene) || !SceneVisibilityManager.instance.AreAnyDescendantsHidden(prefabScene)))
 #else
 )
 #endif

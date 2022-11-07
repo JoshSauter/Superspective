@@ -1,9 +1,9 @@
 namespace Nova.InternalNamespace_0.InternalNamespace_10
 {
-    internal interface InternalType_256<T> : InternalType_255
+    internal interface InternalType_256<T96> : InternalType_255
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        ref T InternalProperty_270 { get; }
+        ref T96 InternalProperty_270 { get; }
     }
 
     internal interface InternalType_255 : InternalType_66

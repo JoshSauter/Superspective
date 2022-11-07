@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace Nova.InternalNamespace_17.InternalNamespace_18
 {
-    internal abstract class InternalType_539<T> : InternalType_540
+    internal abstract class InternalType_539<T86> : InternalType_540
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        protected List<T> InternalField_2385 = null;
+        protected List<T86> InternalField_2385 = null;
 
         protected virtual void OnEnable()
         {
-            InternalField_2385 = serializedObject.targetObjects.InternalMethod_3256<T>();
+            InternalField_2385 = serializedObject.targetObjects.InternalMethod_3256<T86>();
         }
 
         protected virtual void InternalMethod_2167()

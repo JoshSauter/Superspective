@@ -202,11 +202,10 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     }
 
     void Update() {
-        // Might make this non-debug-only in the future again
-        if (DebugInput.GetKeyDown(KeyCode.BackQuote)) autoRun = !autoRun;
+        if (Settings.Keybinds.AutoRun.Pressed) autoRun = !autoRun;
 
         bool recentlySteppedUp = stepState.prevState == StepState.SteppingDiagonal && stepState.timeSinceStateChanged < 0.25f;
-        if ((input.ShiftHeld || autoRun) && !recentlySteppedUp) {
+        if ((input.SprintHeld || autoRun) && !recentlySteppedUp) {
             movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
         }
         else {
@@ -253,7 +252,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             desiredVelocity.z *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
         }
 
-        if (!input.LeftStickHeld && !input.SpaceHeld && grounded.ground != null &&
+        if (!input.LeftStickHeld && !input.JumpHeld && grounded.ground != null &&
             grounded.ground.CompareTag("Staircase"))
             thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
         else
@@ -416,7 +415,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     void UpdateJumping() {
         switch (jumpState) {
             case JumpState.JumpReady:
-                if (input.SpaceHeld && grounded.isGrounded && !grounded.standingOnHeldObject) Jump();
+                if (input.JumpHeld && grounded.isGrounded && !grounded.standingOnHeldObject) Jump();
                 return;
             case JumpState.Jumping:
                 timeSpentJumping += Time.fixedDeltaTime;

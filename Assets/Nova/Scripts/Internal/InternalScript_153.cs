@@ -13,11 +13,6 @@ using UnityEngine.Experimental.Rendering;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_10
 {
-    internal interface InternalType_265
-    {
-        void InternalMethod_1206(Texture2DArray InternalParameter_1291);
-    }
-
     internal class InternalType_308 : IDisposable
     {
         
@@ -432,16 +427,16 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             if (!InternalField_2223)
             {
                 InternalField_2223 = true;
-                InternalField_2224 = NovaSettings.InternalProperty_87.InternalField_3088;
+                InternalField_2224 = InternalType_24.InternalProperty_945.InternalField_3088;
                 return;
             }
 
-            if (NovaSettings.InternalProperty_87.InternalField_3088 == InternalField_2224)
+            if (InternalType_24.InternalProperty_945.InternalField_3088 == InternalField_2224)
             {
                 return;
             }
 
-            InternalField_2224 = NovaSettings.PackedImagesEnabled;
+            InternalField_2224 = InternalType_24.InternalProperty_1045;
 
             if (InternalField_2224)
             {
@@ -475,12 +470,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             this.InternalField_1014 = InternalParameter_1491;
             InternalField_1015 = new InternalType_318(ref InternalParameter_1491, NovaApplication.IsEditor);
 
-            NovaSettings.InternalEvent_0 += InternalMethod_1398;
+            InternalType_24.InternalEvent_10 += InternalMethod_1398;
 
-            if (NovaSettings.InternalProperty_88)
+            if (InternalType_24.InternalProperty_1040)
             {
                 InternalField_2223 = true;
-                InternalField_2224 = NovaSettings.InternalProperty_87.InternalField_3088;
+                InternalField_2224 = InternalType_24.InternalProperty_945.InternalField_3088;
             }
         }
 
@@ -488,7 +483,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             InternalField_1015.Dispose();
 
-            NovaSettings.InternalEvent_0 -= InternalMethod_1398;
+            InternalType_24.InternalEvent_10 -= InternalMethod_1398;
 
             foreach (var InternalVar_1 in InternalField_1010.Values)
             {

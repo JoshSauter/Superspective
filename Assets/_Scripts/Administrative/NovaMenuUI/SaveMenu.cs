@@ -8,7 +8,7 @@ using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
-public class SaveMenu : Singleton<SaveMenu> {
+public class SaveMenu : NovaSubMenu<SaveMenu> {
     public List<Option<SaveMetadataWithScreenshot>> saveSlots = new List<Option<SaveMetadataWithScreenshot>>();
 
     public CreateNewSaveDialog NewSaveDialog;
@@ -147,10 +147,10 @@ public class SaveMenu : Singleton<SaveMenu> {
     }
 
     private void PopulateSaveSlots() {
-        saveSlots.Clear();
-        
-        // Just clear the list and return if we turned the menu off
+        // Just keep the list as is and return if we turned the menu off
         if (saveMenuState == SaveMenuState.Off) return;
+        
+        saveSlots.Clear();
 
         // If we are writing saves, add a "New Save" box before the existing saves
         if (saveMenuState == SaveMenuState.WriteSave) {

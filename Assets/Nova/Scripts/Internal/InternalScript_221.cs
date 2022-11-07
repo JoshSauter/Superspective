@@ -159,7 +159,6 @@ namespace Nova.InternalNamespace_0
             InternalType_164<Vector3> InternalVar_1 = InternalField_355.InternalMethod_781<float3, Vector3>();
             InternalVar_1.InternalMethod_771(InternalParameter_422.vertices, InternalField_352);
             InternalField_356.InternalMethod_771(InternalParameter_422.colors32, InternalField_352);
-            TMPUtils.CopyUV0(InternalField_357.InternalProperty_232, ref InternalParameter_422);
             InternalField_358.InternalMethod_771(InternalParameter_422.uvs2, InternalField_352);
         }
 

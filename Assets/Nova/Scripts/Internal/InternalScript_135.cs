@@ -1,7 +1,6 @@
 using Nova.InternalNamespace_0.InternalNamespace_2;
 using Nova.InternalNamespace_0.InternalNamespace_9;
 using Nova.InternalNamespace_0.InternalNamespace_5;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -12,23 +11,6 @@ using UnityEngine;
 
 namespace Nova
 {
-    [Obfuscation]
-    [StructLayoutAttribute(LayoutKind.Sequential)]
-    internal struct CalculatedLayout
-    {
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public Length3.Calculated Size;
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public Length3.Calculated Position;
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public LengthBounds.Calculated Padding;
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public LengthBounds.Calculated Margin;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public Vector3 PaddedSize => Size.Value - Padding.Size;
-    }
-
     namespace InternalNamespace_0.InternalNamespace_12
     {
         internal static class InternalType_448

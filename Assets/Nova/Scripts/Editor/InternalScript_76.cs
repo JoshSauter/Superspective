@@ -15,6 +15,33 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
 {
     internal static class InternalType_576
     {
+        private static bool InternalMethod_3002(UIBlock InternalParameter_1067)
+        {
+            if (InternalParameter_1067.TryGetComponent(out ScreenSpace InternalVar_1) &&
+                InternalVar_1.enabled &&
+                InternalVar_1.Mode != ScreenSpace.FillMode.Manual)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static bool InternalMethod_3000(UIBlock InternalParameter_231)
+        {
+            if (InternalParameter_231.TryGetComponent(out ScreenSpace InternalVar_1) &&
+                InternalVar_1.enabled)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static void InternalMethod_2311(InternalType_600 InternalParameter_2682, UIBlock InternalParameter_2683, SerializedProperty InternalParameter_2684)
         {
             using (InternalType_553 foldout = InternalType_573.InternalMethod_2229("Size"))
@@ -26,6 +53,10 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
 
                 using (new EditorGUI.IndentLevelScope(-EditorGUI.indentLevel))
                 {
+                    bool InternalVar_1 = InternalMethod_3002(InternalParameter_2683);
+
+                    EditorGUI.BeginDisabledGroup(InternalVar_1);
+
                     InternalType_573.InternalMethod_2249(InternalParameter_2682, InternalParameter_2683, InternalType_573.InternalMethod_3332(InternalParameter_2683) ? InternalType_554.InternalField_2461 : InternalType_554.InternalField_2462);
 
                     if (InternalParameter_2683.Parent != null && !(InternalParameter_2683.Parent is TextBlock))
@@ -33,57 +64,59 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
                         InternalMethod_2325(InternalParameter_2683.Parent.AutoSize, InternalParameter_2683.AutoSize, InternalParameter_2683.Size.Type);
                     }
 
-                    ThreeD<bool> InternalVar_1 = InternalParameter_2682.InternalProperty_573 == new ThreeD<Axis>(Axis.X, Axis.Y, Axis.Z);
+                    ThreeD<bool> InternalVar_2 = InternalParameter_2682.InternalProperty_573 == new ThreeD<Axis>(Axis.X, Axis.Y, Axis.Z);
 
-                    InternalType_602 InternalVar_2 = new InternalType_602() { InternalProperty_954 = InternalParameter_2682.InternalProperty_568 };
+                    InternalType_602 InternalVar_3 = new InternalType_602() { InternalProperty_954 = InternalParameter_2682.InternalProperty_568 };
                     EditorGUI.BeginChangeCheck();
-                    InternalMethod_2318(InternalVar_2, InternalVar_1, InternalType_573.InternalMethod_3332(InternalParameter_2683));
+                    InternalMethod_2318(InternalVar_3, InternalVar_2, InternalType_573.InternalMethod_3332(InternalParameter_2683));
                     if (EditorGUI.EndChangeCheck())
                     {
-                        ThreeD<AutoSize> InternalVar_3 = new ThreeD<AutoSize>((AutoSize)InternalVar_2.InternalProperty_581, (AutoSize)InternalVar_2.InternalProperty_583, (AutoSize)InternalVar_2.InternalProperty_585);
+                        ThreeD<AutoSize> InternalVar_4 = new ThreeD<AutoSize>((AutoSize)InternalVar_3.InternalProperty_581, (AutoSize)InternalVar_3.InternalProperty_583, (AutoSize)InternalVar_3.InternalProperty_585);
 
 
-                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_510, InternalVar_3.X);
-                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_512, InternalVar_3.Y);
-                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_514, InternalVar_3.Z);
+                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_510, InternalVar_4.X);
+                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_512, InternalVar_4.Y);
+                        InternalMethod_2312(InternalParameter_2682.InternalProperty_550.InternalProperty_514, InternalVar_4.Z);
                     }
 
-                    ThreeD<bool> InternalVar_4 = InternalType_728.InternalMethod_3282(InternalParameter_2683.AutoSize == AutoSize.Expand, InternalParameter_2683.AutoSize == AutoSize.Shrink);
+                    ThreeD<bool> InternalVar_5 = InternalType_728.InternalMethod_3282(InternalParameter_2683.AutoSize == AutoSize.Expand, InternalParameter_2683.AutoSize == AutoSize.Shrink);
 
-                    ThreeD<bool> InternalVar_5 = new ThreeD<bool>(InternalVar_4.X || InternalType_728.InternalMethod_3284(InternalVar_1.YZ),
-                                                                 InternalVar_4.Y || InternalType_728.InternalMethod_3284(InternalVar_1.XZ),
-                                                                 InternalVar_4.Z || InternalType_728.InternalMethod_3284(InternalVar_1.XY));
+                    ThreeD<bool> InternalVar_6 = new ThreeD<bool>(InternalVar_5.X || InternalType_728.InternalMethod_3284(InternalVar_2.YZ),
+                                                                 InternalVar_5.Y || InternalType_728.InternalMethod_3284(InternalVar_2.XZ),
+                                                                 InternalVar_5.Z || InternalType_728.InternalMethod_3284(InternalVar_2.XY));
 
                     EditorGUI.BeginChangeCheck();
-                    ThreeD<LengthType> InternalVar_6 = new ThreeD<LengthType>(InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_508);
+                    ThreeD<LengthType> InternalVar_7 = new ThreeD<LengthType>(InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_508);
 
-                    bool InternalVar_7 = InternalType_573.InternalMethod_2388(InternalType_554.InternalType_561.InternalField_2503, InternalParameter_2682.InternalProperty_550, InternalParameter_2682.InternalProperty_558, InternalParameter_2683.CalculatedSize, InternalVar_5, InternalType_573.InternalMethod_3332(InternalParameter_2683), InternalType_534.InternalProperty_443);
+                    bool InternalVar_8 = InternalType_573.InternalMethod_2388(InternalType_554.InternalType_561.InternalField_2503, InternalParameter_2682.InternalProperty_550, InternalParameter_2682.InternalProperty_558, InternalParameter_2683.CalculatedSize, InternalVar_6, InternalType_573.InternalMethod_3332(InternalParameter_2683), InternalType_534.InternalProperty_443);
+
+                    EditorGUI.EndDisabledGroup();
 
                     if (EditorGUI.EndChangeCheck())
                     {
-                        InternalType_534.InternalProperty_443 = InternalVar_7;
+                        InternalType_534.InternalProperty_443 = InternalVar_8;
 
                         if (InternalParameter_2682.InternalProperty_954.serializedObject.targetObjects.Length == 1)
                         {
                             if (InternalParameter_2683.Parent == null && SceneViewUtils.IsInCurrentPrefabStage(InternalParameter_2683.gameObject))
                             {
-                                ThreeD<LengthType> InternalVar_8 = new ThreeD<LengthType>(InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_508);
+                                ThreeD<LengthType> InternalVar_9 = new ThreeD<LengthType>(InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_508, InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_508);
 
-                                Vector3 InternalVar_9 = InternalParameter_2683.CalculatedSize.Percent;
+                                Vector3 InternalVar_10 = InternalParameter_2683.CalculatedSize.Percent;
 
-                                ThreeD<bool> InternalVar_10 = InternalVar_8 != InternalVar_6;
+                                ThreeD<bool> InternalVar_11 = InternalVar_9 != InternalVar_7;
 
-                                Vector3 InternalVar_11 = new Vector3(InternalVar_9.x == 0 ? 0 : InternalVar_10.X ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_506 / InternalVar_9.x,
-                                                                        InternalVar_9.y == 0 ? 0 : InternalVar_10.Y ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_506 / InternalVar_9.y,
-                                                                        InternalVar_9.z == 0 ? 0 : InternalVar_10.Z ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_506 / InternalVar_9.z);
+                                Vector3 InternalVar_12 = new Vector3(InternalVar_10.x == 0 ? 0 : InternalVar_11.X ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_506 / InternalVar_10.x,
+                                                                        InternalVar_10.y == 0 ? 0 : InternalVar_11.Y ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_506 / InternalVar_10.y,
+                                                                        InternalVar_10.z == 0 ? 0 : InternalVar_11.Z ? 1 : InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_506 / InternalVar_10.z);
 
-                                Vector3 InternalVar_12 = InternalParameter_2684.vector3Value;
+                                Vector3 InternalVar_13 = InternalParameter_2684.vector3Value;
 
-                                Vector3 InternalVar_13 = new Vector3(InternalVar_8.X == LengthType.Value && InternalVar_6.X == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_506 : InternalVar_11.x * InternalVar_12.x,
-                                                              InternalVar_8.Y == LengthType.Value && InternalVar_6.Y == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_506 : InternalVar_11.y * InternalVar_12.y,
-                                                              InternalVar_8.Z == LengthType.Value && InternalVar_6.Z == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_506 : InternalVar_11.z * InternalVar_12.z);
+                                Vector3 InternalVar_14 = new Vector3(InternalVar_9.X == LengthType.Value && InternalVar_7.X == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_510.InternalProperty_506 : InternalVar_12.x * InternalVar_13.x,
+                                                              InternalVar_9.Y == LengthType.Value && InternalVar_7.Y == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_512.InternalProperty_506 : InternalVar_12.y * InternalVar_13.y,
+                                                              InternalVar_9.Z == LengthType.Value && InternalVar_7.Z == LengthType.Value ? InternalParameter_2682.InternalProperty_550.InternalProperty_514.InternalProperty_506 : InternalVar_12.z * InternalVar_13.z);
 
-                                InternalParameter_2684.vector3Value = InternalVar_13;
+                                InternalParameter_2684.vector3Value = InternalVar_14;
                             }
                         }
                     }
@@ -123,6 +156,8 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
                     return;
                 }
 
+                EditorGUI.BeginDisabledGroup(InternalMethod_3000(InternalParameter_2688));
+
                 InternalType_5 InternalVar_1 = InternalParameter_2688.InternalMethod_1034();
 
                 int InternalVar_2 = InternalVar_1 != null && InternalVar_1.InternalProperty_143.InternalProperty_155 ? InternalVar_1.InternalProperty_143.InternalField_225.InternalMethod_508() : -1;
@@ -143,6 +178,8 @@ namespace Nova.InternalNamespace_17.InternalNamespace_18
                         UnityEditor.EditorTools.ToolManager.SetActiveTool<InternalType_713>();
                     }
                 }
+
+                EditorGUI.EndDisabledGroup();
             }
         }
 

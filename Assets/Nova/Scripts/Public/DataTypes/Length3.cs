@@ -181,7 +181,7 @@ namespace Nova
         }
 
         /// <summary>
-        /// Create a new <see cref="LengthType.Value">Percent</see> <see cref="Length3"/> from <paramref name="x"/>, <paramref name="y"/>, and <paramref name="z"/>.
+        /// Create a new <see cref="LengthType.Value">Value</see> <see cref="Length3"/> from <paramref name="x"/>, <paramref name="y"/>, and <paramref name="z"/>.
         /// </summary>
         /// <param name="x">The measurement of the x-axis in units.</param>
         /// <param name="y">The measurement of the y-axis in units.</param>

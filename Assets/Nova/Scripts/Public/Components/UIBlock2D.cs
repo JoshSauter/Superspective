@@ -61,7 +61,7 @@ namespace Nova
         /// </summary>
         /// <remarks>
         /// <see cref="Shadow">Shadow</see>.<see cref="Shadow.Width">Width</see>.<see cref="Length.Percent">Percent</see> and 
-        /// <see cref="Shadow">Shadow</see>.<see cref="Shadow.Blur">Width</see>.<see cref="Length.Percent">Percent</see> are 
+        /// <see cref="Shadow">Shadow</see>.<see cref="Shadow.Blur">Blur</see>.<see cref="Length.Percent">Percent</see> are 
         /// relative to half the minimum dimension (X or Y) of <see cref="UIBlock.CalculatedSize">CalculatedSize</see>. 
         /// Mathematically speaking:<br/>
         /// <c>float calculatedShadowWidth = Shadow.Width.Percent * 0.5f * Mathf.Min(CalculatedSize.X.Value, CalculatedSize.Y.Value) <br/>

@@ -1,4 +1,4 @@
-using Nova.Compat;
+using Nova.InternalNamespace_0.InternalNamespace_5;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -241,15 +241,15 @@ namespace Nova
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct Surface : IEquatable<Surface>
     {
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Color specularColor;
         
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private float param1;
         
-        [SerializeField, NotKeyableAttribute]
+        [SerializeField, InternalType_22]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private float param2;
         /// <summary>

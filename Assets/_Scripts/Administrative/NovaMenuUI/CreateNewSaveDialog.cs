@@ -9,7 +9,7 @@ using StateUtils;
 public class CreateNewSaveDialog : DialogWindow {
     public TextBlock DialogLabel;
     public SaveSlot SaveSlotPreview;
-    public TextField SaveNameTextField;
+    public SuperspectiveTextField SaveNameTextField;
 
     private SaveMetadataWithScreenshot saveMetadata;
 

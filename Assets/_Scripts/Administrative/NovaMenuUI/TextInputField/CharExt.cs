@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Some utility extensions used by <see cref="TextField"/> and friends.
+/// Some utility extensions used by <see cref="SuperspectiveTextField"/> and friends.
 /// </summary>
 public static class CharExtensions {
     public const char EmptyWidthSpace = '\u200B';
@@ -16,7 +16,7 @@ public static class CharExtensions {
 
     /// <summary>
     /// Empty spaces are added after newlines to ensure proper cursor positioning,
-    /// see <see cref="TextField.ToDisplayText(string)"/>
+    /// see <see cref="SuperspectiveTextField.ToDisplayText(string)"/>
     /// </summary>
     public static bool IsEmptySpace(this char c) {
         return c == EmptyWidthSpace;

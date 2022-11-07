@@ -20,15 +20,15 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             InternalType_105 InternalVar_1;
             if ((InternalParameter_498 & InternalField_2242) != 0)
             {
-                InternalVar_1 = NovaSettings.InternalProperty_87.InternalField_2252;
+                InternalVar_1 = InternalType_24.InternalProperty_945.InternalField_2252;
             }
             else if (InternalParameter_498 == InternalType_266.InternalField_787)
             {
-                InternalVar_1 = NovaSettings.InternalProperty_87.InternalField_2250;
+                InternalVar_1 = InternalType_24.InternalProperty_945.InternalField_2250;
             }
             else if ((InternalParameter_498 & InternalType_266.InternalField_791) != 0)
             {
-                InternalVar_1 = NovaSettings.InternalProperty_87.InternalField_2251;
+                InternalVar_1 = InternalType_24.InternalProperty_945.InternalField_2251;
             }
             else
             {

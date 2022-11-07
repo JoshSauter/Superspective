@@ -21,8 +21,12 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
         {
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public InternalType_341 InternalField_1132;
+            
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            public NativeList<InternalType_131> InternalField_968;
+                        public NativeList<InternalType_131> InternalField_3376;
+            
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+                        public NativeList<InternalType_131> InternalField_968;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public NativeHashMap<InternalType_131, InternalType_302> InternalField_967;
@@ -32,6 +36,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             public NativeHashMap<InternalType_131, InternalType_162<InternalType_304, InternalType_356>> InternalField_965;
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             public NativeHashMap<InternalType_131, InternalType_408> InternalField_964;
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            public NativeHashMap<InternalType_131, int> InternalField_3377;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
             private NativeHashMap<InternalType_131, InternalType_162<InternalType_305, InternalType_361>> InternalField_963;
@@ -60,10 +66,19 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
             {
                 InternalField_1132.InternalField_1254 = math.inverse(InternalField_1132.InternalField_1255);
                 InternalField_959.Clear();
+                InternalField_968.Clear();
 
-                for (int InternalVar_1 = 0; InternalVar_1 < InternalField_968.Length; ++InternalVar_1)
+                for (int InternalVar_1 = 0; InternalVar_1 < InternalField_3376.Length; ++InternalVar_1)
                 {
-                    InternalMethod_1311(InternalField_968[InternalVar_1]);
+                    InternalType_131 InternalVar_2 = InternalField_3376[InternalVar_1];
+
+                    if (!InternalMethod_3364(InternalVar_2))
+                    {
+                        continue;
+                    }
+
+                    InternalField_968.Add(InternalVar_2);
+                    InternalMethod_1311(InternalVar_2);
                 }
 
                 InternalMethod_1312();
@@ -73,6 +88,27 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                 InternalMethod_1322();
 
                 InternalMethod_1323();
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private bool InternalMethod_3364(InternalType_131 InternalParameter_232)
+            {
+                if (InternalField_1132.InternalField_3375 == CameraType.SceneView)
+                {
+                    return true;
+                }
+
+                if (!InternalField_964.TryGetValue(InternalParameter_232, out InternalType_408 InternalVar_1))
+                {
+                    return true;
+                }
+
+                if (!InternalField_3377.TryGetValue(InternalVar_1.InternalField_1555, out int InternalVar_2))
+                {
+                    return true;
+                }
+
+                return InternalVar_2 == InternalField_1132.InternalField_3374;
             }
 
             
@@ -245,7 +281,8 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
                             continue;
                         }
 
-                        if (InternalVar_7.InternalField_1179.InternalField_1174 > InternalVar_3.InternalField_1179.InternalField_1173)
+                        if (InternalVar_7.InternalField_1179.InternalField_1174 > InternalVar_3.InternalField_1179.InternalField_1173 &&
+                            !InternalType_187.InternalMethod_922(InternalVar_7.InternalField_1179.InternalField_1174, InternalVar_3.InternalField_1179.InternalField_1173))
                         {
                             break;
                         }
@@ -522,6 +559,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
             public void InternalMethod_702()
             {
+                InternalField_968.InternalMethod_1020();
                 InternalField_963.InternalMethod_1009();
                 InternalField_962.InternalMethod_1009();
 
@@ -539,6 +577,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_10
 
             public void Dispose()
             {
+                InternalField_968.Dispose();
                 InternalField_963.Dispose();
                 InternalField_962.Dispose();
 

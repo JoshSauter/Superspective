@@ -12,7 +12,8 @@ public class FloatSetting : Setting {
 
     public static FloatSetting Copy(FloatSetting from) {
         return new FloatSetting() {
-            Key = from.Key,
+            key = from.key,
+            isEnabled = from.isEnabled,
             Name = from.Name,
             Value = from.Value,
             DefaultValue = from.DefaultValue,
@@ -25,6 +26,7 @@ public class FloatSetting : Setting {
         if (otherSetting is not FloatSetting other) return false;
 
         return Name == other.Name &&
+               isEnabled == other.isEnabled &&
                Value.IsApproximately(other.Value) &&
                DefaultValue.IsApproximately(other.DefaultValue) &&
                MinValue.IsApproximately(other.MinValue) &&
@@ -38,9 +40,14 @@ public class FloatSetting : Setting {
         }
 
         Name = other.Name;
+        isEnabled = other.isEnabled;
         Value = other.Value;
         DefaultValue = other.DefaultValue;
         MinValue = other.MinValue;
         MaxValue = other.MaxValue;
+    }
+
+    public override string PrintValue() {
+        return Value.ToString("F2");
     }
 }

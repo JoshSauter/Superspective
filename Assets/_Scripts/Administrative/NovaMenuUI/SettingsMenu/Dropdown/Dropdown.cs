@@ -1,11 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using NaughtyAttributes;
 using Nova;
 using StateUtils;
+using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Dropdown : UIControl<DropdownVisuals> {
+    private const float dropdownCloseDelay = 0.15f;
+    
     public ItemView ItemView;
 
     public TextBlock Name;
@@ -13,9 +19,9 @@ public class Dropdown : UIControl<DropdownVisuals> {
     public TextBlock SelectionLabel;
     public UIBlock DropdownOptionsArea;
     public ListView DropdownOptionsListView;
-    public NovaRadioSelection DropdownOptionsRadioSelection;
     public NovaButton ResetButton;
     public Scroller Scroller;
+    public UIBlock2D DisabledOverlay;
 
     public enum DropdownState {
         Closed,
@@ -26,78 +32,112 @@ public class Dropdown : UIControl<DropdownVisuals> {
 
     public DropdownSetting setting;
 
+    [ShowNativeProperty]
+    public Selection<string, DropdownOption> selectionForInspector => setting?.dropdownSelection ?? new Selection<string, DropdownOption>();
+
     // Start is called before the first frame update
     void Awake() {
-        DropdownOptionsListView.AddDataBinder<DropdownOption, DropdownOptionVisuals>(BindDropdownDatum);
+        DropdownOptionsListView.AddDataBinder<DropdownOption, DropdownOptionVisuals>(BindDropdownOption);
 
         SelectionButton.OnClick += (_) => {
             state.Set(state == DropdownState.Closed ? DropdownState.Open : DropdownState.Closed);
-            Debug.Log($"Setting Dropdown state to: {state.state}");
         };
-
-        DropdownOptionsRadioSelection.OnRadioSelectionChanged += (indexOfSelection) => {
-            if (indexOfSelection >= 0) {
-                NovaButton selection = DropdownOptionsRadioSelection.children[indexOfSelection];
-                
-                if (selection.GetComponent<ItemView>().TryGetVisuals(out DropdownOptionVisuals optionVisuals)) {
-                    UpdateValue(setting.AllDropdownItems.FindIndex(i => i.DisplayName == optionVisuals.Name.Text));
-                }
-            }
-        };
-
-        ResetButton.OnClick += (_) => UpdateValue(setting.DefaultIndex);
+        DropdownOptionsListView.AddGestureHandler<Gesture.OnClick, DropdownOptionVisuals>(HandleOptionClicked);
+        DropdownOptionsListView.AddGestureHandler<Gesture.OnHover, DropdownOptionVisuals>(HandleOptionHovered);
+        DropdownOptionsListView.AddGestureHandler<Gesture.OnUnhover, DropdownOptionVisuals>(HandleOptionUnhovered);
         
-        NovaUIBackground.instance.BackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnClick>(HandleBGClicked);
+        state.OnStateChangeSimple += () => Debug.Log($"Setting Dropdown state to: {state.state}");
+
+        ResetButton.OnClick += (_) => UpdateVisuals(setting.defaultSelection);
+        
+        //NovaUIBackground.instance.BackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnClick>(HandleBGClicked);
 
         InitStateMachine();
     }
 
-    private void HandleBGClicked(Gesture.OnClick evt) {
-        // TODO: Consume events from NovaButton script when that feature's released
-        if (state == DropdownState.Open) {
+    private void Update() {
+        if (PlayerButtonInput.instance.PausePressed && state == DropdownState.Open) {
+            StartCoroutine(CloseDropdown(state));
+        }
+    }
+
+    public void UpdateVisuals(Dictionary<string, DropdownOption> newSelections) {
+        Debug.Log($"UpdateVisuals: {string.Join(", ", newSelections.Keys)}");
+        SelectionLabel.Text = setting.SelectedValueName;
+        DropdownOptionsListView.Refresh();
+    }
+
+    IEnumerator CloseDropdown(DropdownState stateWhenClicked) {
+        yield return new WaitForSecondsRealtime(dropdownCloseDelay);
+        //Debug.LogError("Dropdown.CloseDropdown: " + state.state);
+        if (stateWhenClicked == DropdownState.Open) {
             state.Set(DropdownState.Closed);
         }
     }
 
-    void UpdateValue(int newSelectedIndex) {
-        Debug.Log($"UpdateValue: {newSelectedIndex}");
-        setting.SelectedIndex = newSelectedIndex;
-        Visuals.PopulateFrom(setting);
-    }
-
     private void InitStateMachine() {
         state.AddTrigger(DropdownState.Closed, () => {
-            DropdownOptionsRadioSelection.Teardown();
             DropdownOptionsArea.gameObject.SetActive(false);
         });
         state.AddTrigger(DropdownState.Open, () => {
             DropdownOptionsArea.gameObject.SetActive(true);
-            DropdownOptionsRadioSelection.Init();
+            DropdownOptionsListView.Refresh();
         });
-    }
-
-    private void Update() {
-        if (!DropdownOptionsArea.gameObject.activeSelf) return;
-        
-        if (DropdownOptionsRadioSelection.TryFindIndex(setting.SelectedValue.DisplayName, out int indexOfMatch)) {
-            DropdownOptionsRadioSelection.SetSelection(indexOfMatch, false);
-        }
     }
 
     private void Start() {
         state.Set(DropdownState.Closed);
     }
 
-    private void BindDropdownDatum(Data.OnBind<DropdownOption> evt, DropdownOptionVisuals target, int index) {
-        target.Name.Text = evt.UserData.DisplayName;
+    private void SetSelectionFromButtonText(NovaButton buttonClicked) {
+        if (state == DropdownState.Closed) return;
+        
+        foreach (DropdownOption dropdownOption in setting.dropdownSelection.allItems.Where(item => item.DisplayName == buttonClicked.Text.Get())) {
+            setting.dropdownSelection.Select(dropdownOption.DisplayName, dropdownOption);
+            if (setting.dropdownSelection.type is SelectionType.ExactlyOne or SelectionType.ZeroOrOne) {
+                state.Set(state == DropdownState.Closed ? DropdownState.Open : DropdownState.Closed);
+            }
+        }
+    }
 
-        if (index == setting.SelectedIndex) {
-            target.Background.Color = UIStyle.NovaButton.ClickedBgColor;
-            target.Name.Color = UIStyle.NovaButton.ClickedComponentColor;
+    private void BindDropdownOption(Data.OnBind<DropdownOption> evt, DropdownOptionVisuals target, int index) {
+        target.name.Text = evt.UserData.DisplayName;
+        target.View.gameObject.name = $"{target.name.Text} Option";
+        Debug.Log($"Bind {target.View.gameObject.name}");
+
+        if (setting.dropdownSelection.allSelections.ContainsKey(evt.UserData.DisplayName)) {
+            target.background.Color = UIStyle.NovaButton.ClickedBgColor;
+            target.name.Color = UIStyle.NovaButton.ClickedComponentColor;
         }
         else {
-            target.Background.Color = UIStyle.NovaButton.DefaultBgColor;
-            target.Name.Color = UIStyle.NovaButton.DefaultComponentColor;
+            target.background.Color = UIStyle.NovaButton.DefaultBgColor;
+            target.name.Color = UIStyle.NovaButton.DefaultComponentColor;
+        }
+    }
+
+    public void SetDatasource() {
+        DropdownOptionsListView.SetDataSource(setting.dropdownSelection.allItems);
+    }
+
+    private void HandleOptionUnhovered(Gesture.OnUnhover evt, DropdownOptionVisuals target, int index) {
+        if (!setting.dropdownSelection.allSelections.ContainsKey(setting.dropdownSelection.allItems[index].DisplayName)) {
+            target.background.Color = UIStyle.NovaButton.DefaultBgColor;
+            target.name.Color = UIStyle.NovaButton.DefaultComponentColor;
+        }
+    }
+
+    private void HandleOptionHovered(Gesture.OnHover evt, DropdownOptionVisuals target, int index) {
+        if (!setting.dropdownSelection.allSelections.ContainsKey(setting.dropdownSelection.allItems[index].DisplayName)) {
+            target.background.Color = UIStyle.NovaButton.HoverBgColor;
+            target.name.Color = UIStyle.NovaButton.DefaultComponentColor;
+        }
+    }
+
+    private void HandleOptionClicked(Gesture.OnClick evt, DropdownOptionVisuals target, int index) {
+        var selection = setting.dropdownSelection.allItems[index];
+        setting.dropdownSelection.Select(selection.DisplayName, selection);
+        if (setting.dropdownSelection.type is SelectionType.ExactlyOne or SelectionType.ZeroOrOne) {
+            StartCoroutine(CloseDropdown(state));
         }
     }
 }

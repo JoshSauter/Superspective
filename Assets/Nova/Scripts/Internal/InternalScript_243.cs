@@ -24,6 +24,9 @@ namespace Nova.InternalNamespace_0
         ref readonly InternalType_56.InternalType_58 InternalProperty_147 { get; }
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector3 InternalProperty_87 { get; set; }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         Vector3 InternalProperty_148 { get; }
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         Vector3 InternalProperty_149 { get; }

@@ -1,7 +1,7 @@
 using Nova.Compat;
+using Nova.InternalNamespace_0;
 using System;
 using System.Runtime.CompilerServices;
-using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
@@ -11,23 +11,37 @@ namespace Nova
     /// Access point for Nova settings.
     /// </summary>
     [ExcludeFromPreset]
-    public sealed class NovaSettings : ScriptableObject
+    public sealed class NovaSettings : ScriptableObject, InternalType_26
     {
         internal static event Action InternalEvent_0;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private static readonly SharedStatic<InternalNamespace_0.InternalType_115> InternalField_138 = SharedStatic<InternalNamespace_0.InternalType_115>.GetOrCreate<NovaSettings>();
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal static ref InternalNamespace_0.InternalType_115 InternalProperty_87
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref InternalField_138.Data;
-        }
 
         [SerializeField]
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private InternalType_41 settings = InternalType_41.InternalField_140;
+
+        #region 
+        event Action InternalType_26.InternalEvent_7
+        {
+            add
+            {
+                InternalEvent_0 += value;
+            }
+            remove
+            {
+                InternalEvent_0 -= value;
+            }
+        }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        float InternalType_26.InternalProperty_226 => EdgeSoftenWidth;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        int InternalType_26.InternalProperty_943 => UIBlock3DEdgeDivisions;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        int InternalType_26.InternalProperty_944 => UIBlock3DCornerDivisions;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        bool InternalType_26.InternalProperty_946 => PackedImagesEnabled;
+        #endregion
 
         #region 
         /// <summary>
@@ -200,7 +214,8 @@ namespace Nova
 
         internal void InternalMethod_1972(bool InternalParameter_1470, bool InternalParameter_1331 = true)
         {
-            InternalField_138.Data = UnsafeUtility.As<InternalType_41, InternalNamespace_0.InternalType_115>(ref InternalField_139.settings);
+            InternalNamespace_0.InternalType_24.InternalProperty_945 = UnsafeUtility.As<InternalType_41, InternalNamespace_0.InternalType_115>(ref InternalField_139.settings);
+
             if (InternalParameter_1470)
             {
                 InternalEvent_0?.Invoke();
@@ -225,7 +240,7 @@ namespace Nova
             {
                 if (InternalField_139 == null && !InternalMethod_315())
                 {
-                    throw new Exception("Failed to load Nova settings. Please ensure Nova was imported correctly");
+                    throw new Exception("Failed to load Nova settings. Please ensure Nova was imported correctly.");
                 }
                 return InternalField_139;
             }

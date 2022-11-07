@@ -19,6 +19,8 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 		}
 	}
 
+	private float settingsIntensityMultiplier => Settings.Gameplay.CameraShake / 100f;
+
 	Vector2 appliedOffset;
 	float duration;
 	float startIntensity;
@@ -62,6 +64,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 				float t = timeShaking / duration;
 
 				intensity = isUsingCurve ? curve.Evaluate(t) * intensityMultiplier : Mathf.Lerp(startIntensity, endIntensity, t);
+				intensity *= settingsIntensityMultiplier;
 				Vector2 random = UnityEngine.Random.insideUnitCircle * intensity / 10f;
 				Vector2 offset = Vector2.Lerp(Vector2.zero, -appliedOffset, t) + random;
 

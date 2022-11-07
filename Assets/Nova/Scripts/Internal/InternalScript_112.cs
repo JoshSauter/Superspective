@@ -22,9 +22,9 @@ namespace Nova
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Dictionary<uint, InternalNamespace_0.InternalType_78> InternalField_3093 = null;
 
-        public event InternalType_12.InternalType_15 InternalEvent_2 = null;
-        public event InternalType_12.InternalType_17 InternalEvent_3 = null;
-        public event InternalType_12.InternalType_16 InternalEvent_4 = null;
+        public event InternalType_14.InternalType_12 InternalEvent_2 = null;
+        public event InternalType_14.InternalType_23 InternalEvent_3 = null;
+        public event InternalType_14.InternalType_25 InternalEvent_4 = null;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         InternalType_521<InternalType_75> InternalType_74.InternalProperty_164 => InternalField_3177 == null ? InternalType_521<InternalType_75>.InternalProperty_435 : InternalField_3177.InternalProperty_221;
@@ -55,7 +55,7 @@ namespace Nova
                 return;
             }
 
-            InternalType_12.InternalType_13 InternalVar_1 = InternalType_12.InternalMethod_154(InternalField_3233, InternalParameter_327);
+            InternalType_14.InternalType_13 InternalVar_1 = InternalType_14.InternalMethod_191(InternalField_3233, InternalParameter_327);
 
             if (!InternalField_3168.TryGetValue(InternalParameter_327.InternalField_257, out InternalType_152<InternalType_94> InternalVar_2) || !InternalVar_2.InternalProperty_220)
             {
@@ -108,8 +108,7 @@ namespace Nova
                 return InternalEvent_3 != null;
             }
 
-            return InternalField_3182.InternalMethod_2069<InternalType_12.InternalType_14<T>>();
-
+            return false;
         }
 
         void InternalType_74.InternalMethod_466<TInput>(InternalNamespace_0.InternalType_78 InternalParameter_325, InternalType_76<TInput>? InternalParameter_326)
@@ -179,8 +178,10 @@ namespace Nova
                     _ = InternalParameter_326.Value.InternalMethod_474(out InternalVar_7);
                 }
 
-                InternalType_12.InternalType_14<bool> InternalVar_8 = InternalType_12.InternalMethod_155(InternalField_3233, InternalVar_6, InternalVar_7, InternalParameter_325);
+                InternalType_14.InternalType_16<bool> InternalVar_8 = InternalType_14.InternalMethod_188(InternalField_3233, InternalVar_6, InternalVar_7, InternalParameter_325);
                 InternalEvent_2?.Invoke(ref InternalVar_8);
+
+                return;
             }
 
             if (InternalVar_5 == typeof(InternalType_95<UnityEngine.Vector3>))
@@ -198,11 +199,11 @@ namespace Nova
                     _ = InternalParameter_326.Value.InternalMethod_474(out InternalVar_7);
                 }
 
-                InternalType_12.InternalType_14<InternalType_95<UnityEngine.Vector3>> InternalVar_8 = InternalType_12.InternalMethod_155(InternalField_3233, InternalVar_6, InternalVar_7, InternalParameter_325);
+                InternalType_14.InternalType_16<InternalType_95<UnityEngine.Vector3>> InternalVar_8 = InternalType_14.InternalMethod_188(InternalField_3233, InternalVar_6, InternalVar_7, InternalParameter_325);
                 InternalEvent_3?.Invoke(ref InternalVar_8);
-            }
 
-            InternalType_522.InternalMethod_2077(InternalField_3233, InternalType_12.InternalMethod_155(InternalField_3233, InternalVar_1, InternalParameter_326, InternalParameter_325));
+                return;
+            }
         }
 
         InternalType_76<T>? InternalType_74.InternalMethod_464<T>(uint contextID)

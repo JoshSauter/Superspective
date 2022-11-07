@@ -11,10 +11,10 @@ using UnityEngine;
 
 namespace Nova.InternalNamespace_0.InternalNamespace_4
 {
-    internal unsafe struct InternalType_164<T> : InternalType_147, InternalType_149 where T : unmanaged
+    internal unsafe struct InternalType_164<T95> : InternalType_147, InternalType_149 where T95 : unmanaged
     {
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public UnsafeList<T> InternalField_452;
+        public UnsafeList<T95> InternalField_452;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int InternalProperty_216
@@ -26,7 +26,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_785(T InternalParameter_633) => InternalField_452.Add(InternalParameter_633);
+        public void InternalMethod_785(T95 InternalParameter_633) => InternalField_452.Add(InternalParameter_633);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void InternalMethod_786(int InternalParameter_634)
@@ -38,7 +38,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_787(ref InternalType_164<T> InternalParameter_635)
+        public void InternalMethod_787(ref InternalType_164<T95> InternalParameter_635)
         {
             if (InternalParameter_635.InternalProperty_216 > 0)
             {
@@ -47,7 +47,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_788(ref NativeList<T> InternalParameter_636)
+        public void InternalMethod_788(ref NativeList<T95> InternalParameter_636)
         {
             if (InternalParameter_636.Length > 0)
             {
@@ -56,7 +56,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_789(T* InternalParameter_637, int InternalParameter_638)
+        public void InternalMethod_789(T95* InternalParameter_637, int InternalParameter_638)
         {
             if (InternalParameter_638 > 0)
             {
@@ -80,7 +80,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool InternalMethod_792(out T InternalParameter_642)
+        public bool InternalMethod_792(out T95 InternalParameter_642)
         {
             if (InternalField_452.Length > 0)
             {
@@ -102,7 +102,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_794(ref InternalType_164<T> InternalParameter_644)
+        public void InternalMethod_794(ref InternalType_164<T95> InternalParameter_644)
         {
             for (int InternalVar_1 = InternalParameter_644.InternalProperty_216 - 1; InternalVar_1 >= 0; --InternalVar_1)
             {
@@ -111,7 +111,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public T* InternalProperty_232
+        public T95* InternalProperty_232
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => InternalField_452.Ptr;
@@ -126,7 +126,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
             set => InternalField_452.Capacity = value;
         }
 
-        public T this[int InternalParameter_645]
+        public T95 this[int InternalParameter_645]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -151,7 +151,7 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T InternalMethod_800(int InternalParameter_646)
+        public ref T95 InternalMethod_800(int InternalParameter_646)
         {
             if (InternalMethod_803(InternalParameter_646))
             {
@@ -164,14 +164,14 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InternalMethod_801(int InternalParameter_647, T InternalParameter_648) => InternalField_452.InternalMethod_1042(InternalParameter_647, InternalParameter_648);
+        public void InternalMethod_801(int InternalParameter_647, T95 InternalParameter_648) => InternalField_452.InternalMethod_1042(InternalParameter_647, InternalParameter_648);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void InternalMethod_705() => InternalField_452.Clear();
 
         public InternalType_164(int InternalParameter_649, Allocator InternalParameter_650, NativeArrayOptions InternalParameter_651 = NativeArrayOptions.UninitializedMemory)
         {
-            InternalField_452 = new UnsafeList<T>(InternalParameter_649 > 0 ? InternalParameter_649 : 1, InternalParameter_650 == Allocator.Persistent ? InternalType_167.InternalField_457 : InternalParameter_650, InternalParameter_651);
+            InternalField_452 = new UnsafeList<T95>(InternalParameter_649 > 0 ? InternalParameter_649 : 1, InternalParameter_650 == Allocator.Persistent ? InternalType_167.InternalField_457 : InternalParameter_650, InternalParameter_651);
         }
 
         public void Dispose()
@@ -193,14 +193,14 @@ namespace Nova.InternalNamespace_0.InternalNamespace_4
             }
         }
 
-        public RawPtrArrayWrapper<T> InternalMethod_804()
+        public RawPtrArrayWrapper<T95> InternalMethod_804()
         {
-            return new RawPtrArrayWrapper<T>(InternalField_452.Ptr, InternalField_452.Length);
+            return new RawPtrArrayWrapper<T95>(InternalField_452.Ptr, InternalField_452.Length);
         }
 
         public void InternalMethod_702()
         {
-            InternalField_452 = new UnsafeList<T>(1, InternalType_167.InternalField_457, NativeArrayOptions.UninitializedMemory);
+            InternalField_452 = new UnsafeList<T95>(1, InternalType_167.InternalField_457, NativeArrayOptions.UninitializedMemory);
         }
     }
 

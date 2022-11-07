@@ -13,6 +13,10 @@ namespace Nova.InternalNamespace_0
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
                 private static InternalType_127[] InternalField_204 = null;
 
+        
+        public static event Action InternalEvent_11 = null;
+
+        
         public static event Action InternalEvent_1 = null;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -42,6 +46,16 @@ namespace Nova.InternalNamespace_0
         
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool InternalProperty_742 { get; private set; } = false;
+
+        public static void InternalMethod_718()
+        {
+            if (InternalProperty_200 == null)
+            {
+                return;
+            }
+
+            InternalProperty_200.InternalProperty_742 = false;
+        }
 
         protected override void InternalMethod_656()
         {
@@ -219,6 +233,11 @@ namespace Nova.InternalNamespace_0
                 return;
             }
 
+            if (NovaApplication.IsEditor)
+            {
+                InternalEvent_11?.Invoke();
+            }
+
             InternalProperty_742 = true;
 
             JobHandle InternalVar_1 = default(JobHandle);
@@ -292,6 +311,11 @@ namespace Nova.InternalNamespace_0
                     Debug.LogError($"NovaEngine CompleteUpdate failed with {e}");
                 }
             }
+            
+            if (NovaApplication.IsEditor)
+            {
+                InternalEvent_1?.Invoke();
+            }
 
             {
                 try
@@ -306,11 +330,6 @@ namespace Nova.InternalNamespace_0
                     InternalField_211 = true;
                     Debug.LogError($"NovaEngine PostUpdate failed with {e}");
                 }
-            }
-
-            if (NovaApplication.IsEditor)
-            {
-                InternalEvent_1?.Invoke();
             }
         }
 
@@ -334,6 +353,7 @@ namespace Nova.InternalNamespace_0
 
             InternalField_204 = null;
             InternalProperty_140 = false;
+            InternalProperty_742 = false;
         }
 
         internal void InternalMethod_432()
