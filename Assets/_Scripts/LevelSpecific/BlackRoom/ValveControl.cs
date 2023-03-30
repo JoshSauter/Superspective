@@ -23,8 +23,8 @@ namespace LevelSpecific.BlackRoom {
 			interactableObject = GetComponent<InteractableObject>();
 			if (interactableObject == null) {
 				interactableObject = gameObject.AddComponent<InteractableObject>();
-				interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 			}
+			interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 		}
 
 		protected override void Start() {

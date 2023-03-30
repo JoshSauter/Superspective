@@ -44,7 +44,7 @@
                 fixed4 col = tex2D(_MainTex, i.uv);
 
 				float maxVal = max(col.r, max(col.g, col.b));
-				float3 color_resolution = float3(8.0, 8.0, 4.0);
+				float3 color_resolution = float3(16.0, 16.0, 8.0);
 				float3 color_bands = floor(col.rgb * color_resolution) / (color_resolution - 1.0);
 				col = fixed4(min(color_bands, 1.0), col.a) * 1.05;
                 return col;

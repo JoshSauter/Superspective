@@ -11,9 +11,9 @@ public abstract class Setting : SettingsItem {
 
     public abstract void CopySettingsFrom(Setting other);
 
-    public virtual string PrintValue() {
-        throw new NotImplementedException();
-    }
+    public abstract string PrintValue();
+
+    public abstract void ParseValue(string value);
 
     public static Setting Copy(Setting other) {
         switch (other) {
@@ -25,6 +25,10 @@ public abstract class Setting : SettingsItem {
                 return DropdownSetting.Copy(dropdownSetting);
             case KeybindSetting keybindSetting:
                 return KeybindSetting.Copy(keybindSetting);
+            case TextAreaSetting textAreaSetting:
+                return TextAreaSetting.Copy(textAreaSetting);
+            case ToggleSetting toggleSetting:
+                return ToggleSetting.Copy(toggleSetting);
             default: throw new ArgumentOutOfRangeException($"{other.GetType()} not handled in switch statement");
         }
     }

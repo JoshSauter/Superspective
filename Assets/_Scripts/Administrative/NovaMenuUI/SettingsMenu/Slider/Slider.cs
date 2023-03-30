@@ -31,34 +31,34 @@ public class Slider : UIControl<SliderVisual> {
         valueInput.GetComponent<TextFieldKeyboardInput>().OnSubmit += ValueSubmit;
         valueInput.OnTextChanged += ValueSubmit;
         resetButton.OnClick += (_) => {
-            UpdateValue(setting.DefaultValue);
+            UpdateValue(setting.defaultValue);
             
             // Remember the value we last clicked at
-            prevValue = setting.Value;
+            prevValue = setting.value;
         };
     }
 
     private void UpdateValue(float newValue, bool playSound = true) {
-        setting.Value = newValue;
+        setting.value = newValue;
         Visuals.PopulateFrom(setting);
 
-        bool differentValue = Mathf.RoundToInt(prevValue) != Mathf.RoundToInt(setting.Value);
+        bool differentValue = Mathf.RoundToInt(prevValue) != Mathf.RoundToInt(setting.value);
         if (playSound && differentValue) {
             AudioManager.instance.Play(AudioName.UI_ShortBlip, shouldForcePlay: true, settingsOverride: job => {
                 float baseline = .12f; // min pitch
-                job.basePitch = baseline + (1-baseline) * Mathf.InverseLerp(setting.MinValue, setting.MaxValue, setting.Value);
+                job.basePitch = baseline + (1-baseline) * Mathf.InverseLerp(setting.minValue, setting.maxValue, setting.value);
             });
         }
     }
 
     private void ValueSubmit() {
         if (string.IsNullOrEmpty(valueTextBlock.Text)) {
-            UpdateValue(setting.MinValue);
+            UpdateValue(setting.minValue);
             return;
         }
         
         if (int.TryParse(valueTextBlock.Text, out int value)) {
-            UpdateValue(Mathf.Clamp(value, setting.MinValue, setting.MaxValue));
+            UpdateValue(Mathf.Clamp(value, setting.minValue, setting.maxValue));
         }
         else {
             Debug.LogError($"Could not parse int from string {valueTextBlock.Text}");
@@ -70,27 +70,33 @@ public class Slider : UIControl<SliderVisual> {
     }
 
     private void HandleFillClick(Gesture.OnPress evt) {
+        Debug.Log($"Fill click on {gameObject.FullPath()}: {evt.Interaction.Ray}");
         Ray ray = evt.Interaction.Ray;
+        Debug.Log($"Updating value to {GetValueFromMouseRay(ray)}...");
         UpdateValue(Mathf.RoundToInt(GetValueFromMouseRay(ray)), false);
 
         handleIsHeld = true;
     }
 
     private void HandleFillDrag(Gesture.OnDrag evt) {
+        Debug.Log($"Fill drag on {gameObject.FullPath()}: {evt.Interaction.Ray}");
         if (!handleIsHeld) return;
         
         Ray ray = evt.Interaction.Ray;
+        Debug.Log($"Updating value to {GetValueFromMouseRay(ray)}...");
         UpdateValue(GetValueFromMouseRay(ray), false);
     }
 
     private void HandleFillRelease(Gesture.OnRelease evt) {
+        Debug.Log($"Fill release on {gameObject.FullPath()}: {evt.Interaction.Ray}");
         if (!handleIsHeld) return;
 
         Ray ray = evt.Interaction.Ray;
+        Debug.Log($"Updating value to {GetValueFromMouseRay(ray)}...");
         UpdateValue(Mathf.RoundToInt(GetValueFromMouseRay(ray)));
         
         // Remember the value we last released at
-        prevValue = setting.Value;
+        prevValue = setting.value;
         
         handleIsHeld = false;
     }
@@ -99,7 +105,7 @@ public class Slider : UIControl<SliderVisual> {
         // Convert the ray to a point in UIBlock slider space
         Plane textBlockPlane = new Plane(-sliderBackground.transform.forward, sliderBackground.transform.position);
         if (!textBlockPlane.Raycast(worldSpaceRay, out float hitDistance)) {
-            return setting.Value;
+            return setting.value;
         }
         Vector3 worldSpacePos = worldSpaceRay.GetPoint(hitDistance);
         Vector3 localSpace = sliderBackground.transform.InverseTransformPoint(worldSpacePos);
@@ -107,6 +113,6 @@ public class Slider : UIControl<SliderVisual> {
         float lengthOfSlider = sliderBackground.CalculatedSize.Value.x;
         float t = Mathf.InverseLerp(0, lengthOfSlider, localSpace.x + (lengthOfSlider / 2f));
         
-        return Mathf.Lerp(setting.MinValue, setting.MaxValue, t);
+        return Mathf.Lerp(setting.minValue, setting.maxValue, t);
     }
 }

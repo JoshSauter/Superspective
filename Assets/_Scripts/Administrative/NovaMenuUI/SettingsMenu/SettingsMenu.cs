@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Nova;
+using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -72,6 +73,12 @@ public class SettingsMenu : NovaSubMenu<SettingsMenu> {
         Debug.Log($"The following settings are dirty: {string.Join(",", dirtiedSettingsByKey.Keys)}");
         
         Settings.UpdateSettings(dirtiedSettingsByKey);
+		
+        SaveManager.SaveSettings();
+    }
+
+    private void RevertSettings() {
+        CopyCurrentSettingsToMenu();
     }
 
     private void CopyCurrentSettingsToMenu() {
@@ -119,7 +126,7 @@ public class SettingsMenu : NovaSubMenu<SettingsMenu> {
 
     void InitEvents() {
         OnMenuOpen += CopyCurrentSettingsToMenu;
-        OnMenuClose += ApplySettings;
+        OnMenuClose += RevertSettings;
 
         ApplyButton.OnClickSimple += ApplySettings;
         ApplyAndResumeButton.OnClickSimple += ApplySettingsAndClose;
@@ -127,7 +134,7 @@ public class SettingsMenu : NovaSubMenu<SettingsMenu> {
 
     void TeardownEvents() {
         OnMenuOpen -= CopyCurrentSettingsToMenu;
-        OnMenuClose -= ApplySettings;
+        OnMenuClose -= RevertSettings;
 
         ApplyButton.OnClickSimple -= ApplySettings;
         ApplyAndResumeButton.OnClickSimple -= ApplySettingsAndClose;

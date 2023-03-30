@@ -9,6 +9,16 @@ public class TextAreaSetting : Setting {
 
         return other.Text == Text && other.PlaceholderText == PlaceholderText;
     }
+    
+    public static TextAreaSetting Copy(TextAreaSetting from) {
+        return new TextAreaSetting() {
+            key = from.key,
+            isEnabled = from.isEnabled,
+            Name = from.Name,
+            Text = from.Text,
+            PlaceholderText = from.PlaceholderText
+        };
+    }
 
     public override void CopySettingsFrom(Setting otherSetting) {
         if (otherSetting is not TextAreaSetting other) return;
@@ -19,5 +29,9 @@ public class TextAreaSetting : Setting {
 
     public override string PrintValue() {
         return Text;
+    }
+
+    public override void ParseValue(string value) {
+        Text = value;
     }
 }

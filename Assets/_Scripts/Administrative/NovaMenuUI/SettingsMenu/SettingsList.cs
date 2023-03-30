@@ -53,6 +53,7 @@ public class SettingsList : MonoBehaviour {
         listView.AddDataBinder<SmallIntSetting, SmallIntSliderVisuals>(BindSmallIntSlider);
         listView.AddDataBinder<DropdownSetting, DropdownVisuals>(BindDropdown);
         listView.AddDataBinder<TextAreaSetting, TextAreaVisuals>(BindTextArea);
+        listView.AddDataBinder<ToggleSetting, ToggleVisuals>(BindToggle);
         listView.AddDataBinder<KeybindSetting, KeybindVisuals>(BindKeybind);
         listView.AddDataBinder<HeaderSettingsItem, HeaderVisuals>(BindHeader);
         listView.AddDataBinder<SeparatorSettingItem, SeparatorVisuals>(BindSeparator);
@@ -122,6 +123,17 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Gameplay.GeneralSensitivity);
                 AddSettingCopy(Settings.Gameplay.XSensitivity);
                 AddSettingCopy(Settings.Gameplay.YSensitivity);
+                AddSettingCopy(Settings.Gameplay.ShowInteractionHelp);
+                AddSettingCopy(Settings.Gameplay.ShowDisabledReason);
+                settingsItems.Add(UIStyle.NewHeader("Autosaves"));
+                AddSettingCopy(Settings.Autosave.AutosaveEnabled);
+                AddSettingCopy(Settings.Autosave.AutosaveOnTimer);
+                AddSettingCopy(Settings.Autosave.AutosaveInterval);
+                AddSettingCopy(Settings.Autosave.AutosaveOnLevelChange);
+                AddSettingCopy(Settings.Autosave.NumAutosaves);
+                settingsItems.Add(UIStyle.NewHeader("Autoload"));
+                AddSettingCopy(Settings.Autoload.AutoloadEnabled);
+                AddSettingCopy(Settings.Autoload.AutoloadThreshold);
                 break;
             case MenuType.Controls:
                 settingsItems.Add(UIStyle.NewHeader("Movement"));
@@ -136,6 +148,7 @@ public class SettingsList : MonoBehaviour {
                 settingsItems.Add(UIStyle.NewHeader("Interaction"));
                 AddSettingCopy(Settings.Keybinds.Interact);
                 AddSettingCopy(Settings.Keybinds.AlignObject);
+                AddSettingCopy(Settings.Keybinds.Zoom);
                 //settingsItems.Add(UIStyle.NewSpacer());
                 //AddSettingCopy(Settings.Keybinds.Pause);
                 break;
@@ -166,14 +179,25 @@ public class SettingsList : MonoBehaviour {
         target.PopulateFrom(setting);
     }
 
+    public static void BindToggle(Data.OnBind<ToggleSetting> evt, ToggleVisuals target, int index) {
+        ToggleSetting setting = evt.UserData;
+        target.PopulateFrom(setting);
+    }
+
     public static void BindKeybind(Data.OnBind<KeybindSetting> evt, KeybindVisuals target, int index) {
         KeybindSetting setting = evt.UserData;
         target.PopulateFrom(setting);
     }
 
     public static void BindHeader(Data.OnBind<HeaderSettingsItem> evt, HeaderVisuals target, int index) {
+        target.View.UIBlock.gameObject.name = $"[Header] {evt.UserData.Name}";
         target.Name.Text = evt.UserData.Name;
     }
-    public static void BindSeparator(Data.OnBind<SeparatorSettingItem> evt, SeparatorVisuals target, int index) {}
-    public static void BindSpacer(Data.OnBind<SpacerSettingItem> evt, SpacerVisuals target, int index) {}
+    public static void BindSeparator(Data.OnBind<SeparatorSettingItem> evt, SeparatorVisuals target, int index) {
+        target.View.UIBlock.gameObject.name = "[Separator]";
+    }
+
+    public static void BindSpacer(Data.OnBind<SpacerSettingItem> evt, SpacerVisuals target, int index) {
+        target.View.UIBlock.gameObject.name = "[Spacer]";
+    }
 }

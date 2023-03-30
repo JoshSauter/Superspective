@@ -2,18 +2,38 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Library.Functional;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 
 public class Keybind : UIControl<KeybindVisuals> {
     // static because there can only be one keybind change at a time
-    public static bool isListeningForNewKeybind = false;
+    public enum ListeningForKeybindState {
+        Idle,
+        ListeningForKeybind
+    }
+    public static StateMachine<ListeningForKeybindState> state = new StateMachine<ListeningForKeybindState>(ListeningForKeybindState.Idle, false, true);
+    // Disable inputs for a short time after state goes back to Idle to prevent input fallthrough
+    public static bool isListeningForNewKeybind => state == ListeningForKeybindState.ListeningForKeybind ||
+                                                   (state.prevState == ListeningForKeybindState.ListeningForKeybind && state.timeSinceStateChanged < 0.05f);
+    public NovaButton ResetButton;
     public KeybindSetting setting;
 
-    // Start is called before the first frame update
-    void Start() {
+    private void OnEnable() {
         Visuals.Primary.OnClick += HandleMappingButtonClicked;
         Visuals.Secondary.OnClick += HandleMappingButtonClicked;
+        ResetButton.OnClickSimple += ResetClicked;
+    }
+
+    private void OnDisable() {
+        Visuals.Primary.OnClick -= HandleMappingButtonClicked;
+        Visuals.Secondary.OnClick -= HandleMappingButtonClicked;
+        ResetButton.OnClickSimple -= ResetClicked;
+    }
+
+    private void ResetClicked() {
+        setting.value = new KeyboardAndMouseInput(setting.defaultValue);
+        Visuals.PopulateFrom(setting);
     }
 
     private void HandleMappingButtonClicked(NovaButton button) {
@@ -23,12 +43,15 @@ public class Keybind : UIControl<KeybindVisuals> {
     }
 
     IEnumerator ListenForNewKeybind(bool primary) {
-        isListeningForNewKeybind = true;
+        state.Set(ListeningForKeybindState.ListeningForKeybind);
 
+        // Wait a frame to avoid using the left mouse click that triggered the rebind listening
+        yield return null;
+        
         Either<int, KeyCode> inputPressed = null;
         while (inputPressed == null) {
             for (int i = 0; i < 7; i++) {
-                if (Input.GetMouseButtonDown(i)) {
+                if (Input.GetMouseButtonUp(i)) {
                     inputPressed = new Either<int, KeyCode>(i);
                     break;
                 }
@@ -37,7 +60,7 @@ public class Keybind : UIControl<KeybindVisuals> {
             if (inputPressed != null) break;
             
             foreach (KeyCode key in Enum.GetValues(typeof(KeyCode))) {
-                if (Input.GetKeyDown(key)) {
+                if (Input.GetKeyUp(key)) {
                     inputPressed = new Either<int, KeyCode>(key);
                     break;
                 }
@@ -48,14 +71,14 @@ public class Keybind : UIControl<KeybindVisuals> {
 
         NovaButton button = primary ? Visuals.Primary : Visuals.Secondary;
         if (primary) {
-            setting.Value.SetPrimaryMapping(inputPressed);
+            setting.value.SetPrimaryMapping(inputPressed);
         }
         else {
-            setting.Value.SetSecondaryMapping(inputPressed);
+            setting.value.SetSecondaryMapping(inputPressed);
         }
         button.buttonState.Set(NovaButton.ButtonState.Idle);
         Visuals.PopulateFrom(setting);
-        
-        isListeningForNewKeybind = false;
+
+        state.Set(ListeningForKeybindState.Idle);
     }
 }

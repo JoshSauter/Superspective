@@ -8,6 +8,7 @@ using static Saving.SaveManagerForScene;
 using System.Reflection;
 using SuperspectiveUtils;
 using LevelManagement;
+using Newtonsoft.Json;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 using UnityEditor;
@@ -24,6 +25,9 @@ namespace Saving {
         public static event SaveAction BeforeSave;
         public static event SaveAction BeforeLoad;
 
+        private static float timeOfLastLoad = 0f;
+        public static float realtimeSinceLastLoad => Time.realtimeSinceStartup - timeOfLastLoad;
+
         public static SaveManagerForScene GetOrCreateSaveManagerForScene(string sceneName) {
             if (string.IsNullOrEmpty(sceneName)) {
                 return null;
@@ -36,9 +40,7 @@ namespace Saving {
             return saveManagers[sceneName];
 		}
 
-		static string SavePath(string saveFileName) {
-            return $"{Application.persistentDataPath}/Saves/{saveFileName}";
-        }
+        private static string SettingsFilePath => $"{Application.persistentDataPath}/settings.ini";
 
         public static void Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
             Debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
@@ -46,9 +48,12 @@ namespace Saving {
             SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
         }
 
-        public static async void Load(string saveName) {
+        public static async void Load(SaveMetadataWithScreenshot saveMetadata) {
+            string saveName = saveMetadata.metadata.saveFilename;
             Debug.Log($"--- Loading Save File: {saveName} ---");
             
+            // Updating this at beginning and end of Load to make sure loading knows that a load just happened as well as mark the finish time
+            timeOfLastLoad = Time.realtimeSinceStartup;
             isCurrentlyLoadingSave = true;
             
             if (LevelManager.instance.IsCurrentlyLoadingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
@@ -118,19 +123,26 @@ namespace Saving {
                 SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
                 saveManager.LoadSaveableObjectsStateFromSaveFile(saveDataForScene);
             }
+            
+            // Update the lastLoadedTime for this save
+            DateTime now = DateTime.Now;
+            saveMetadata.metadata.lastLoadedTimestamp = now.Ticks;
+            SaveFileUtils.WriteMetadataToDisk(saveMetadata);
 
             // Play the level change banner and remove the black overlay
             LevelChangeBanner.instance.PlayBanner(LevelManager.instance.ActiveScene);
             Time.timeScale = 1f;
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
+            timeOfLastLoad = Time.realtimeSinceStartup;
             isCurrentlyLoadingSave = false;
         }
 
-        public static void DeleteSave(string saveName) {
-            string path = SavePath(saveName);
-            if (Directory.Exists(path)) {
-                Directory.Delete(path, true);
-            }
+        public static void SaveSettings() {
+            Settings.instance.WriteSettings(SettingsFilePath);
+        }
+
+        public static void LoadSettings() {
+            Settings.instance.LoadSettings(SettingsFilePath);
         }
 
         static void CopyDirectory(string sourcePath, string targetPath) {

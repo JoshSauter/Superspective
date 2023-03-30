@@ -17,7 +17,8 @@ namespace Saving {
         public static SaveUpdateAction OnSavesChanged;
 
         // saveFilename -> SaveMetadataWithScreenshot, only updated since last ReadAllSavedMetadata call
-        public static Dictionary<string, SaveMetadataWithScreenshot> saveMetadataCache = new Dictionary<string, SaveMetadataWithScreenshot>();
+        public static Dictionary<string, SaveMetadataWithScreenshot> playerSaveMetadataCache = new Dictionary<string, SaveMetadataWithScreenshot>();
+        public static Dictionary<string, SaveMetadataWithScreenshot> allSavesMetadataCache = new Dictionary<string, SaveMetadataWithScreenshot>();
 
         private static string MetadataFilePath(string saveFilename) {
             // If it already ends in .metadata, just return the filename as is
@@ -40,6 +41,15 @@ namespace Saving {
         [Serializable]
         class Header {
             public int jsonMetadataByteSize; // Tells us where to stop reading the SaveFileMetadata JSON bytes and start reading the screenshot bytes
+        }
+        
+        
+        public static string SanitizeString(string input) {
+            return input
+                .Replace("/", "_")
+                .Replace("\\", "_")
+                .Replace(":", "_")
+                .Replace(" ", "_");
         }
 
         // /// <summary>
@@ -80,9 +90,11 @@ namespace Saving {
                 saveFilename = saveFilename,
                 displayName = defaultDisplayName,
                 saveTimestamp = now.Ticks,
+                lastLoadedTimestamp = now.Ticks,
                 saveDate = date,
                 saveTime = time,
                 levelName = LevelManager.instance.activeSceneName.ToLevel().ToDisplayName(),
+                version = Application.version
             };
             
             Texture2D screenshot = ScreenshotOfPlayerCameraView();
@@ -163,8 +175,12 @@ namespace Saving {
             Directory.CreateDirectory(SaveMetadataPath);
             string[] files = Directory.GetFiles(SaveMetadataPath, $"*{MetadataExtension}");
 
-            List<SaveMetadataWithScreenshot> result = files.Select(ReadMetadataFromDisk).ToList();
-            saveMetadataCache = result.ToDictionary(sm => sm.metadata.saveFilename, sm => sm);
+            List<SaveMetadataWithScreenshot> result = files
+                .Select(ReadMetadataFromDisk)
+                // .Where(m => IsCompatibleWith(m.metadata.version, Application.version))
+                .ToList();
+            playerSaveMetadataCache = result.Where(sm => !sm.metadata.saveFilename.StartsWith("Autosave")).ToDictionary(sm => sm.metadata.saveFilename, sm => sm);
+            allSavesMetadataCache = result.ToDictionary(sm => sm.metadata.saveFilename, sm => sm);
 
             return result;
         }
@@ -206,6 +222,12 @@ namespace Saving {
                 metadata = metadata,
                 screenshot = screenshotTexture
             };
+        }
+
+        public static bool IsCompatibleWith(string version1, string version2) {
+            if (version1 == null || version2 == null) return false;
+            
+            return version1.Equals(version2);
         }
     }
 }

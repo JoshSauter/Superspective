@@ -77,13 +77,14 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
 
     void UpdateButtonInteractability() {
         if (state == State.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
-            button.interactableObject.SetAsDisabled();
+            button.interactableObject.SetAsDisabled("(Spawned cube locked in receptacle)");
         }
         else if (state == State.CubeSpawnedButNotTaken) {
             button.interactableObject.SetAsHidden();
         }
         else {
-            button.interactableObject.SetAsInteractable();
+            string msg = state == State.NoCubeSpawned ? "Spawn cube" : "Respawn cube";
+            button.interactableObject.SetAsInteractable(msg);
         }
     }
 
@@ -258,6 +259,10 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
                 }
                 cube.GetComponent<DynamicObject>().Destroy();
                 cubeDespawning = null;
+
+                if (button.state == Button.State.ButtonUnpressed) {
+                    button.PressButton();
+                }
             }
         }
     }

@@ -6,7 +6,33 @@ using UnityEngine;
 
 namespace SuperspectiveUtils {
     public static class RaycastUtils {
+        private static int portalLayer => LayerMask.NameToLayer("Portal");
         public const int MAX_RAYCASTS = 8;
+
+        /// <summary>
+        /// Calculates the minimum Distance between two points, either straight line distance,
+        /// or distance to a nearby in portal plus the distance from the out portal to the target
+        /// </summary>
+        /// <returns></returns>
+        public static float MinDistanceBetweenPoints(Vector3 a, Vector3 b) {
+            float minDistance = Vector3.Distance(a, b);
+            // Look for portals that might shorten the distance nearby
+            var hits = Physics.OverlapSphere(a, minDistance, 1 << portalLayer, QueryTriggerInteraction.Collide);
+            foreach (var portalObj in hits) {
+                if (portalObj.TryGetComponent(out Portal p) && p.otherPortal != null) {
+                    Vector3 closestPointOnInPortal = p.ClosestPoint(a, false, true);
+                    float distanceToInPortal = Vector3.Distance(closestPointOnInPortal, a);
+                    float distanceFromOutPortal = Vector3.Distance(p.TransformPoint(closestPointOnInPortal), b);
+
+                    float totalPortalDistance = distanceToInPortal + distanceFromOutPortal;
+                    if (totalPortalDistance < minDistance) {
+                        minDistance = totalPortalDistance;
+                    }
+                }
+            }
+
+            return minDistance;
+        }
 
         public static SuperspectiveRaycast Raycast(Ray ray, float maxDistance, int layerMask) {
             SuperspectiveRaycast result = new SuperspectiveRaycast {

@@ -462,10 +462,37 @@ namespace LevelManagement {
 			SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
 			SceneManager.sceneUnloaded += FinishUnloadingScene;
 
+#if !UNITY_EDITOR
 			if (!initialized) {
-				SwitchActiveScene(startingScene, true, false, false, false);
-				initialized = true;
+				if (Settings.Autoload.AutoloadEnabled.value) {
+					List<SaveMetadataWithScreenshot> metadata = SaveFileUtils.ReadAllSavedMetadata().ToList();
+					SaveMetadataWithScreenshot mostRecentlyLoadedSave = metadata.Find(m => m.metadata.lastLoadedTimestamp == metadata.Max(m => m.metadata.lastLoadedTimestamp));
+			
+					DateTime now = DateTime.Now;
+					DateTime lastSaveDateTime = new DateTime(mostRecentlyLoadedSave.metadata.saveTimestamp);
+					int autoloadDaysThreshold = (int)Settings.Autoload.AutoloadThreshold.dropdownSelection.selection.Datum;
+					if (autoloadDaysThreshold == -1) autoloadDaysThreshold = int.MaxValue; // -1 is a flag for "infinity"
+					bool lastSaveWasRecent = (now - lastSaveDateTime).Days < autoloadDaysThreshold;
+
+					if (lastSaveWasRecent) {
+						// Don't loop this logic forever just do it once
+						initialized = true;
+						SaveManager.Load(mostRecentlyLoadedSave);
+					}
+					else {
+						SwitchActiveScene(startingScene, true, false, false, false);
+						initialized = true;
+					}
+				}
+				else {
+					SwitchActiveScene(startingScene, true, false, false, false);
+					initialized = true;
+				}
 			}
+#else
+			SwitchActiveScene(startingScene, true, false, false, false);
+			initialized = true;
+#endif
 		}
 
 		void Update() {
@@ -631,6 +658,8 @@ namespace LevelManagement {
 				}
 			}
 			
+			OnActiveSceneChange?.Invoke();
+			
 			isCurrentlySwitchingScenes = false;
 		}
 
@@ -688,7 +717,6 @@ namespace LevelManagement {
 
 			if (loadedScene.name == activeSceneName) {
 				SceneManager.SetActiveScene(loadedScene);
-				OnActiveSceneChange?.Invoke();
 			}
 
 			AfterSceneLoad?.Invoke(loadedScene.name);

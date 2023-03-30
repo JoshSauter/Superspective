@@ -151,7 +151,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         void DisablePowerButton(PowerButton powerButton) {
             if (powerButton == null || powerButton.button == null || powerButton.button.interactableObject == null) return;
             
-            powerButton.button.interactableObject.SetAsDisabled();
+            powerButton.button.interactableObject.SetAsDisabled("(Disabled)");
             AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, powerButton.ID, powerButton.transform.position);
             powerButton.GetComponent<ButtonColorChange>().startColor = disabledPowerSourceButtonColor;
             foreach (ValueDisplay vd in powerButton.GetComponentsInChildren<ValueDisplay>()) {
@@ -215,10 +215,10 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
 
             if (state == PuzzleState.Off) {
-                powerButton.button.interactableObject.SetAsDisabled();
+                powerButton.button.interactableObject.SetAsDisabled("(Missing power)");
             }
             else if (state == PuzzleState.Idle) {
-                powerButton.button.interactableObject.SetAsInteractable();
+                powerButton.button.interactableObject.SetAsInteractable("Check solution");
             }
             else {
                 powerButton.button.interactableObject.SetAsHidden();

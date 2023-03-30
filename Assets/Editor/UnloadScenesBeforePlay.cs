@@ -9,13 +9,6 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 
-static class ComposableListExt {
-    public static List<T> ComposableAdd<T>(this List<T> list, T add) {
-        list.Add(add);
-        return list;
-    }
-}
-
 [InitializeOnLoad]
 class UnloadScenesBeforePlay {
     const string playerPrefsKey = "StoredLevelsFromEditMode";

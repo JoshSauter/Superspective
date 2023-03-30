@@ -49,13 +49,6 @@ public class CreateNewSaveDialog : DialogWindow {
     }
 
     public void OpenAndCreateNewMetadata() {
-        string SanitizeString(string input) {
-            return input
-                .Replace("/", "_")
-                .Replace("\\", "_")
-                .Replace(":", "_")
-                .Replace(" ", "_");
-        }
         
         // Fills in the lowest available # that's not already taken by a save
         string GetNewSaveFileDisplayName() {
@@ -63,11 +56,11 @@ public class CreateNewSaveDialog : DialogWindow {
             string date = now.ToShortDateString();
             string time = now.ToShortTimeString();
             string desiredSaveFileDisplayName = $"Save {date} {time}";
-            string desiredSaveFileName = SanitizeString(desiredSaveFileDisplayName);
+            string desiredSaveFileName = SaveFileUtils.SanitizeString(desiredSaveFileDisplayName);
 
             int incrementor = 1;
             // If there's already a save file name at this date/time, add a number to the end to make it unique
-            while (SaveFileUtils.saveMetadataCache.ContainsKey(desiredSaveFileName)) {
+            while (SaveFileUtils.playerSaveMetadataCache.ContainsKey(desiredSaveFileName)) {
                 desiredSaveFileDisplayName = $"{desiredSaveFileDisplayName}_{incrementor}";
                 desiredSaveFileName = $"{desiredSaveFileName}_{incrementor}";
                 incrementor++;
@@ -77,7 +70,7 @@ public class CreateNewSaveDialog : DialogWindow {
         }
 
         string saveFileDisplayName = GetNewSaveFileDisplayName();
-        string saveFilename = SanitizeString(saveFileDisplayName);
+        string saveFilename = SaveFileUtils.SanitizeString(saveFileDisplayName);
 
         SaveMetadataWithScreenshot saveMetadataWithScreenshot = SaveFileUtils.CreateNewSaveMetadataFromCurrentState(saveFilename, saveFileDisplayName);
         

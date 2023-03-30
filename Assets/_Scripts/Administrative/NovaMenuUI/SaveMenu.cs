@@ -9,11 +9,23 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 public class SaveMenu : NovaSubMenu<SaveMenu> {
-    public List<Option<SaveMetadataWithScreenshot>> saveSlots = new List<Option<SaveMetadataWithScreenshot>>();
+    public List<Option<SaveMetadataWithScreenshot>> playerSaves = new List<Option<SaveMetadataWithScreenshot>>();
+    public List<Option<SaveMetadataWithScreenshot>> allSaves = new List<Option<SaveMetadataWithScreenshot>>();
+    private bool includeAutosaves => includeAutosavesToggle.value;
 
+    public ToggleSetting includeAutosavesToggle = new ToggleSetting() {
+        key = "ShowAutosaves",
+        name = "Show Autosaves",
+        isEnabled = true,
+        value = false,
+        defaultValue = false
+    };
+
+    public ListView includeAutosavesSettingsListView;
+    public bool cachedIncludedAutosavesToggleValue = false;
     public CreateNewSaveDialog NewSaveDialog;
     
-    public ListView ListView;
+    public ListView SavesListView;
     public TextBlock SaveMenuLabel;
     public TextBlock NoSavesLabel;
     public ClipMask SaveMenuClipMask;
@@ -30,20 +42,30 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     public StateMachine<SaveMenuState> saveMenuState = new StateMachine<SaveMenuState>(SaveMenuState.Off, false, true);
 
     // Start is called before the first frame update
-    void Start() {
-        ListView.AddDataBinder<Option<SaveMetadataWithScreenshot>, SaveSlotVisuals>(BindSaveSlot);
+    void Start() {;
+        includeAutosavesSettingsListView.AddDataBinder<ToggleSetting, ToggleVisuals>(SettingsList.BindToggle);
+        includeAutosavesSettingsListView.SetDataSource(new List<Setting>() { includeAutosavesToggle } );
+
+        SavesListView.AddDataBinder<Option<SaveMetadataWithScreenshot>, SaveSlotVisuals>(BindSaveSlot);
 
         PopulateSaveSlots();
         
-        ListView.SetDataSource(saveSlots);
+        SavesListView.SetDataSource(playerSaves);
 
         SaveFileUtils.OnSavesChanged += () => {
-            PopulateSaveSlots();
-            ListView.Refresh();
+            PopulateSaveSlots(true);
         };
 
         InitSaveMenuStateMachine();
         saveMenuState.Set(SaveMenuState.Off, true);
+    }
+
+    private void Update() {
+        if (cachedIncludedAutosavesToggleValue != includeAutosaves) {
+            cachedIncludedAutosavesToggleValue = includeAutosaves;
+            
+            PopulateSaveSlots(true);
+        }
     }
 
     void RunAnimationAndUpdateState() {
@@ -86,7 +108,7 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     void InitSaveMenuStateMachine() {
         saveMenuState.OnStateChangeSimple += () => {
             PopulateSaveSlots();
-            ListView.Refresh();
+            SavesListView.Refresh();
         };
         
         saveMenuState.AddTrigger(enumValue => true, RunAnimationAndUpdateState);
@@ -146,29 +168,51 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         visuals.DeleteSaveArea.Tint = visuals.DeleteSaveArea.Tint.WithAlpha(0f);
     }
 
-    private void PopulateSaveSlots() {
+    private void PopulatePlayerSaves() {
+        playerSaves.Clear();
+        playerSaves.AddRange(SaveFileUtils.playerSaveMetadataCache.Values
+            .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
+            .OrderByDescending(m => m.metadata.saveTimestamp)
+            .Select(Option<SaveMetadataWithScreenshot>.Of));
+    }
+    
+    private void PopulateAllSaves() {
+        allSaves.Clear();
+        allSaves.AddRange(SaveFileUtils.allSavesMetadataCache.Values
+            .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
+            .OrderByDescending(m => m.metadata.saveTimestamp)
+            .Select(Option<SaveMetadataWithScreenshot>.Of));
+    }
+
+    private void PopulateSaveSlots(bool refresh = false) {
         // Just keep the list as is and return if we turned the menu off
         if (saveMenuState == SaveMenuState.Off) return;
         
-        saveSlots.Clear();
+        playerSaves.Clear();
+        allSaves.Clear();
+
+        SaveFileUtils.ReadAllSavedMetadata();
+        PopulatePlayerSaves();
+        PopulateAllSaves();
 
         // If we are writing saves, add a "New Save" box before the existing saves
         if (saveMenuState == SaveMenuState.WriteSave) {
-            saveSlots.Add(new None<SaveMetadataWithScreenshot>());
+            playerSaves.Add(new None<SaveMetadataWithScreenshot>());
         }
-        
-        List<SaveMetadataWithScreenshot> allExistingMetadata = SaveFileUtils.ReadAllSavedMetadata();
-        allExistingMetadata = allExistingMetadata.OrderByDescending(m => m.metadata.saveTimestamp).ToList();
-
-        saveSlots.AddRange(allExistingMetadata.Select(Option<SaveMetadataWithScreenshot>.Of));
 
         NoSavesLabel.gameObject.SetActive(false);
         
         if (saveMenuState == SaveMenuState.LoadSave) {
             // Display a "No saves found" message if there are no saves
-            if (saveSlots.Count == 0) {
+            bool noSaveLabelActive = (includeAutosaves && allSaves.Count == 0) || (!includeAutosaves && playerSaves.Count == 0);
+            if (noSaveLabelActive) {
                 NoSavesLabel.gameObject.SetActive(true);
             }
+        }
+
+        if (refresh) {
+            SavesListView.SetDataSource(includeAutosaves ? allSaves : playerSaves);
+            SavesListView.Refresh();
         }
     }
 }

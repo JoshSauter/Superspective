@@ -6,7 +6,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace Audio {
-	// next 51
+	// next 52
 	public enum AudioName {
 		CubeDrop = 0,
 		CubePickup = 1,
@@ -57,6 +57,7 @@ namespace Audio {
 		AirWhoosh = 45,
 		IncorrectAnswer = 46,
 		CorrectAnswer = 47,
+		WhiteNoiseSpacey = 51,
 		// UI Sounds
 		UI_ShortBlip = 49,
 		UI_HoverBlip = 50,

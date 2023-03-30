@@ -71,7 +71,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 		        EndOfPlaytestMessage.instance.state.Set(EndOfPlaytestMessage.State.BackgroundFadingIn);
 	        }
         });
-        state.AddTrigger(State.On, () => interact.SetAsInteractable());
+        state.AddTrigger(State.On, () => interact.SetAsInteractable("Check solution"));
         state.AddTrigger(State.Incorrect, () => {
 	        interact.SetAsHidden();
 	        colorPuzzleManager.FlashIncorrect();
@@ -102,7 +102,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         
         state.AddTrigger(State.Off, () => {
 	        if (state.prevState == State.Correct) {
-		        interact.SetAsInteractable();
+		        interact.SetAsInteractable("Switch puzzle");
 	        }
         });
     }

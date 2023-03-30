@@ -77,8 +77,21 @@ public class TimedMessage : MonoBehaviour {
     }
 
     public void ShowMessage() {
-        if (state == State.Off) {
+        if (state == State.Off || state == State.FadingOut) {
             state.Set(State.FadingIn);
+        }
+    }
+
+    public void ShowMessage(string msg) {
+        foreach (var txt in text) {
+            txt.text = msg;
+        }
+        ShowMessage();
+    }
+
+    public void HideMessage() {
+        if (state == State.Displayed || state == State.FadingIn) {
+            state.Set(State.FadingOut);
         }
     }
 }

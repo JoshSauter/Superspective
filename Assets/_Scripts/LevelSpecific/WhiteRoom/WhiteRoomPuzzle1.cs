@@ -131,6 +131,8 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	}
 
     void Update() {
+	    if (GameManager.instance.IsCurrentlyLoading) return;
+	    
 		fakePortalTargetPos = powerTrail.state == PowerTrailState.Powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
 		bool fakePortalActive = !(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f);
 		if (fakePortal.activeSelf != fakePortalActive) {

@@ -124,6 +124,17 @@ namespace SuperspectiveUtils {
     }
 
     public static class Vector3Ext {
+        
+
+        // For finite lines:
+        public static Vector3 GetClosestPointOnFiniteLine(this Vector3 point, Vector3 start, Vector3 end) {
+            Vector3 lineDirection = end - start;
+            float lineLength = lineDirection.magnitude;
+            lineDirection.Normalize();
+            float projectedLength = Mathf.Clamp(Vector3.Dot(point - start, lineDirection), 0f, lineLength);
+            return start + lineDirection * projectedLength;
+        }
+        
         // Scale method that returns itself so that it is composable
         public static Vector3 ScaledWith(this Vector3 v, Vector3 scale) {
             v.Scale(scale);
@@ -156,6 +167,12 @@ namespace SuperspectiveUtils {
     }
     
     public static class StringExt {
+        public static string StripWhitespace(this string s) {
+            return new string(s.ToCharArray()
+                .Where(c => !char.IsWhiteSpace(c))
+                .ToArray());
+        }
+        
         public static string StripSuffix(this string s, string suffix) {
             if (s.EndsWith(suffix)) {
                 return s.Substring(0, s.Length - suffix.Length);

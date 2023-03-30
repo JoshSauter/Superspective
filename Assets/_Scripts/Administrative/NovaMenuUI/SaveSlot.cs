@@ -527,7 +527,7 @@ public class SaveSlot : MonoBehaviour {
 
     private void LoadSave() {
         saveMetadata.ForEach(sm => {
-            SaveManager.Load(sm.metadata.saveFilename);
+            SaveManager.Load(sm);
             NovaPauseMenu.instance.ClosePauseMenu();
         });
     }

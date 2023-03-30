@@ -150,6 +150,6 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	}
 
 	Color ColorOfGradient(Gradient gradient) {
-		return gradient.Evaluate(Interact.instance.interactionDistance / thisCamera.farClipPlane);
+		return gradient.Evaluate(Interact.instance.effectiveInteractionDistance / thisCamera.farClipPlane);
 	}
 }

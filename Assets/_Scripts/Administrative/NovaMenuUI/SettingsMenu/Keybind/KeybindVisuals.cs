@@ -7,14 +7,15 @@ public class KeybindVisuals : ItemVisuals {
     public NovaButton Secondary;
 
     public void PopulateFrom(KeybindSetting setting) {
-        Name.Text = setting.Name;
-        Primary.TextBlock.ForEach(tb => tb.Text = setting.Value.displayPrimary);
-        Secondary.TextBlock.ForEach(tb => tb.Text = setting.Value.displaySecondary);
+        keybind.gameObject.name = $"[Keybind] {setting.name}";
+        Name.Text = setting.name;
+        Primary.TextBlock.ForEach(tb => tb.Text = setting.value.displayPrimary);
+        Secondary.TextBlock.ForEach(tb => tb.Text = setting.value.displaySecondary);
 
-        if (setting.Value.displayPrimary == "") {
+        if (setting.value.displayPrimary == "") {
             Primary.TextBlock.ForEach(tb => tb.Text = "-");
         }
-        if (setting.Value.displaySecondary == "") {
+        if (setting.value.displaySecondary == "") {
             Secondary.TextBlock.ForEach(tb => tb.Text = "-");
         }
 

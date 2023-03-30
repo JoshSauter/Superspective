@@ -440,4 +440,149 @@ namespace SerializableClasses {
 			};
 		}
 	}
+
+	public abstract class SerializableSetting {
+		public string key;
+		public string value;
+
+		public abstract void RestoreSettingValue(Setting setting);
+
+		public static SerializableSetting From(Setting setting) {
+			switch (setting) {
+				case SmallIntSetting smallIntSetting:
+					return SerializableFloatSetting.From(smallIntSetting);
+				case FloatSetting floatSetting:
+					return SerializableFloatSetting.From(floatSetting);
+				case DropdownSetting dropdownSetting:
+					return SerializableDropdownSetting.From(dropdownSetting);
+				case KeybindSetting keybindSetting:
+					return SerializableKeybindSetting.From(keybindSetting);
+				case TextAreaSetting textAreaSetting:
+					return SerializableTextAreaSetting.From(textAreaSetting);
+				case ToggleSetting toggleSetting:
+					return SerializableToggleSetting.From(toggleSetting);
+				default: throw new ArgumentOutOfRangeException($"{setting.GetType()} not handled in switch statement");
+			}
+		}
+	}
+
+	[Serializable]
+	public class SerializableFloatSetting : SerializableSetting {
+		public float value;
+
+		public override void RestoreSettingValue(Setting setting) {
+			if (setting is FloatSetting fs) {
+				fs.value = value;
+			}
+		}
+
+		public static SerializableSetting From(FloatSetting setting) {
+			return new SerializableFloatSetting() {
+				key = setting.key,
+				value = setting.value
+			};
+		}
+	}
+
+	[Serializable]
+	public class SerializableDropdownSetting : SerializableSetting {
+		public List<string> selectedKeys;
+
+		public override void RestoreSettingValue(Setting setting) {
+			if (setting is DropdownSetting ds) {
+				ds.dropdownSelection.RestoreSelection(selectedKeys, (key, option) => option.DisplayName == key);
+			}
+		}
+
+		public static SerializableSetting From(DropdownSetting setting) {
+			return new SerializableDropdownSetting() {
+				key = setting.key,
+				selectedKeys = setting.dropdownSelection.allSelections.Keys.ToList()
+			};
+		}
+	}
+
+	[Serializable]
+	public class SerializableKeybindSetting : SerializableSetting {
+		public string primary;
+		public string secondary;
+
+		public override void RestoreSettingValue(Setting setting) {
+			if (setting is not KeybindSetting kbs) return;
+
+			Either<int, KeyCode> FromString(string s) {
+				switch (s) {
+					case "":
+						return null;
+					case "Left Mouse":
+						return new Either<int, KeyCode>(0);
+					case "Right Mouse":
+						return new Either<int, KeyCode>(1);
+					case "Middle Mouse":
+						return new Either<int, KeyCode>(2);
+					default: {
+						if (s.StartsWith("MB") && int.TryParse(s.Substring(2), out int mouseButton)) {
+							// We display the mouse button as 1 higher so subtract 1 (e.g. "MB4" actually has a mouse button value of 3)
+							return new Either<int, KeyCode>(mouseButton - 1);
+						}
+						else if (KeyCode.TryParse(s, out KeyCode key)) {
+							return new Either<int, KeyCode>(key);
+						}
+						else {
+							return null;
+						}
+					}
+				}
+			}
+
+			Either<int, KeyCode> primaryKeybind = FromString(this.primary);
+			Either<int, KeyCode> secondaryKeybind = FromString(this.secondary);
+
+			kbs.value.SetMapping(primaryKeybind, secondaryKeybind);
+		}
+
+		public static SerializableSetting From(KeybindSetting setting) {
+			return new SerializableKeybindSetting() {
+				key = setting.key,
+				primary = setting.value.displayPrimary,
+				secondary = setting.value.displaySecondary
+			};
+		}
+	}
+
+	[Serializable]
+	public class SerializableTextAreaSetting : SerializableSetting {
+		public string text;
+
+		public override void RestoreSettingValue(Setting setting) {
+			if (setting is not TextAreaSetting tas) return;
+			
+			tas.Text = text;
+		}
+
+		public static SerializableSetting From(TextAreaSetting setting) {
+			return new SerializableTextAreaSetting() {
+				key = setting.key,
+				text = setting.Text
+			};
+		}
+	}
+
+	[Serializable]
+	public class SerializableToggleSetting : SerializableSetting {
+		public bool value;
+
+		public override void RestoreSettingValue(Setting setting) {
+			if (setting is not ToggleSetting ts) return;
+			
+			ts.value = value;
+		}
+
+		public static SerializableSetting From(ToggleSetting setting) {
+			return new SerializableToggleSetting() {
+				key = setting.key,
+				value = setting.value
+			};
+		}
+	}
 }

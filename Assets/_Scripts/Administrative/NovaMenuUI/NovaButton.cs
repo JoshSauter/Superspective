@@ -226,19 +226,36 @@ public class NovaButton : MonoBehaviour {
         if (ShouldIgnoreInputs()) return;
 
         debug.Log($"Released on {gameObject.name}!");
+        // Mouse is over button
         if (evt.Hovering) {
-            buttonState.Set(ButtonState.Clicked);
+            // Button was already in ClickHeld state
+            if (buttonState.state == ButtonState.ClickHeld) {
+                // Button used to be Clicked, toggle it to Hovered
+                if (buttonState.prevState == ButtonState.Clicked) {
+                    buttonState.Set(ButtonState.Hovered);
+                
+                    OnClickReset?.Invoke(this);
+                    OnClickResetSimple?.Invoke();
+                }
+                // Button used to be not Clicked, toggle it to Clicked
+                else {
+                    buttonState.Set(ButtonState.Clicked);
             
-            OnAnyNovaButtonClick?.Invoke(this);
-            OnClick?.Invoke(this);
-            OnClickSimple?.Invoke();
+                    OnAnyNovaButtonClick?.Invoke(this);
+                    OnClick?.Invoke(this);
+                    OnClickSimple?.Invoke();
+                }
+            }
+            // Button was not in ClickHeld, set to Hovered
+            else {
+                buttonState.Set(ButtonState.Hovered);
+            }
         }
-        else if (buttonState.prevState == ButtonState.Clicked) {
-            buttonState.Set(ButtonState.Clicked);
-        }
+        // Not hovering button, keep prev value
         else {
-            buttonState.Set(ButtonState.Idle);
+            buttonState.Set(buttonState.prevState);
         }
+
         evt.Consume();
     }
 

@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Audio;
 using UnityEngine;
 using Saving;
+using SerializableClasses;
 using SuperspectiveUtils;
 
-public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave> {
-	public override string ID => "Settings";
+public class Settings : Singleton<Settings> {
 	public static readonly Dictionary<string, Setting> allSettings = new Dictionary<string, Setting>();
 
 	public static Setting GetSetting(string key) {
@@ -16,11 +17,29 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 	}
 
 	public static HashSet<string> SettingsThatShouldBeDisabled(Dictionary<string, Setting> currentSettings) {
+		bool SettingMatchesCriteria(string key, Predicate<Setting> criteria) {
+			return currentSettings.ContainsKey(key) && criteria(currentSettings[key]);
+		}
+		
 		HashSet<string> resultKeys = new HashSet<string>();
-		if (currentSettings.ContainsKey(Video.VSync.key)) {
-			if ((int)((DropdownSetting)currentSettings[Video.VSync.key]).dropdownSelection.selection.Datum != 0) {
-				resultKeys.Add(Video.TargetFramerate.key);
-			}
+		if (SettingMatchesCriteria(Video.VSync.key, (setting) => (int)((DropdownSetting)setting).dropdownSelection.selection.Datum != 0)) {
+			resultKeys.Add(Video.TargetFramerate.key);
+		}
+
+		bool autosaveDisabled = SettingMatchesCriteria(Autosave.AutosaveEnabled.key, (setting) => !((ToggleSetting)setting).value);
+		bool autosaveOnTimerDisabled = autosaveDisabled || SettingMatchesCriteria(Autosave.AutosaveOnTimer.key, (setting) => !((ToggleSetting)setting).value);
+		if (autosaveDisabled) {
+			resultKeys.Add(Autosave.AutosaveOnLevelChange.key);
+			resultKeys.Add(Autosave.AutosaveOnTimer.key);
+			resultKeys.Add(Autosave.NumAutosaves.key);
+		}
+		
+		if (autosaveOnTimerDisabled) {
+			resultKeys.Add(Autosave.AutosaveInterval.key);
+		}
+
+		if (SettingMatchesCriteria(Autoload.AutoloadEnabled.key, (setting) => !((ToggleSetting)setting).value)) {
+			resultKeys.Add(Autoload.AutoloadThreshold.key);
 		}
 
 		return resultKeys;
@@ -50,40 +69,40 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 		
 		// React to volume changed
 		if (Changed(Audio.Volume)) {
-			AudioListener.volume = ((FloatSetting)allSettings[Audio.Volume.key]).Value / 100f;
+			AudioListener.volume = ((FloatSetting)allSettings[Audio.Volume.key]).value / 100f;
 		}
 		if (Changed(Audio.SFXVolume)) {
-			AudioManager.instance.sfxVolume = ((FloatSetting)allSettings[Audio.SFXVolume.key]).Value / 100f;
+			AudioManager.instance.sfxVolume = ((FloatSetting)allSettings[Audio.SFXVolume.key]).value / 100f;
 		}
 		if (Changed(Audio.MusicVolume)) {
-			AudioManager.instance.musicVolume = ((FloatSetting)allSettings[Audio.MusicVolume.key]).Value / 100f;
+			AudioManager.instance.musicVolume = ((FloatSetting)allSettings[Audio.MusicVolume.key]).value / 100f;
 		}
 	}
 
 	public static class Audio {
 		public static readonly FloatSetting Volume = new FloatSetting {
 			key = "Volume",
-			Name = "Volume",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 0,
-			MaxValue = 100
+			name = "Volume",
+			value = 50,
+			defaultValue = 50,
+			minValue = 0,
+			maxValue = 100
 		};
 		public static readonly FloatSetting SFXVolume = new FloatSetting {
 			key = "SFXVolume",
-			Name = "SFX Volume",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 0,
-			MaxValue = 100
+			name = "SFX Volume",
+			value = 50,
+			defaultValue = 50,
+			minValue = 0,
+			maxValue = 100
 		};
 		public static readonly FloatSetting MusicVolume = new FloatSetting {
 			key = "MusicVolume",
-			Name = "Music Volume (what music?)",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 0,
-			MaxValue = 100
+			name = "Music Volume (what music?)",
+			value = 50,
+			defaultValue = 50,
+			minValue = 0,
+			maxValue = 100
 		};
 	}
 
@@ -134,11 +153,11 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 
 		public static readonly SmallIntSetting PortalDownsampleAmount = new SmallIntSetting {
 			key = "PortalDownSample",
-			Name = "Portal Texture Downsampling",
-			Value = 0,
-			DefaultValue = 0,
-			MinValue = 0,
-			MaxValue = 3
+			name = "Portal Texture Downsampling",
+			value = 0,
+			defaultValue = 0,
+			minValue = 0,
+			maxValue = 3
 		};
 
 		public static readonly DropdownSetting VSync = DropdownSetting.Of(
@@ -177,46 +196,137 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 	public static class Gameplay {
 		public static readonly FloatSetting CameraShake = new FloatSetting {
 			key = "CameraShake",
-			Name = "Camera Shake",
-			Value = 100,
-			DefaultValue = 100,
-			MinValue = 0,
-			MaxValue = 100
+			name = "Camera Shake",
+			value = 100,
+			defaultValue = 100,
+			minValue = 0,
+			maxValue = 100
 		};
 			
 		public static readonly FloatSetting Headbob = new FloatSetting {
 			key = "Headbob",
-			Name = "Headbob",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 0,
-			MaxValue = 100
+			name = "Headbob",
+			value = 50,
+			defaultValue = 50,
+			minValue = 0,
+			maxValue = 100
 		};
 
 		public static readonly FloatSetting GeneralSensitivity = new FloatSetting {
 			key = "GeneralSensitivity",
-			Name = "General Sensitivity",
-			Value = 30,
-			DefaultValue = 30,
-			MinValue = 5,
-			MaxValue = 100
+			name = "General Sensitivity",
+			value = 30,
+			defaultValue = 30,
+			minValue = 5,
+			maxValue = 100
 		};
 		public static readonly FloatSetting XSensitivity = new FloatSetting {
 			key = "XSensitivity",
-			Name = "X Sensitivity",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 5,
-			MaxValue = 100
+			name = "X Sensitivity",
+			value = 50,
+			defaultValue = 50,
+			minValue = 5,
+			maxValue = 100
 		};
 		public static readonly FloatSetting YSensitivity = new FloatSetting {
 			key = "YSensitivity",
-			Name = "Y Sensitivity",
-			Value = 50,
-			DefaultValue = 50,
-			MinValue = 5,
-			MaxValue = 100
+			name = "Y Sensitivity",
+			value = 50,
+			defaultValue = 50,
+			minValue = 5,
+			maxValue = 100
 		};
+
+		public static readonly ToggleSetting ShowInteractionHelp = new ToggleSetting() {
+			key = "ShowInteractionHelp",
+			name = "Show interaction help",
+			value = false,
+			defaultValue = false
+		};
+		public static readonly ToggleSetting ShowDisabledReason = new ToggleSetting {
+			key = "ShowDisabledReason",
+			name = "Show reason for disabled actions",
+			value = true,
+			defaultValue = true
+		};
+	}
+
+	public static class Autosave {
+		public static readonly ToggleSetting AutosaveEnabled = new ToggleSetting() {
+			key = "AutosaveEnabled",
+			name = "Autosave Enabled",
+			value = true,
+			defaultValue = true
+		};
+		
+		public static readonly ToggleSetting AutosaveOnLevelChange = new ToggleSetting() {
+			key = "AutosaveOnLevelChange",
+			name = "Autosave On Level Change",
+			value = true,
+			defaultValue = true
+		};
+
+		public static readonly ToggleSetting AutosaveOnTimer = new ToggleSetting() {
+			key = "AutosaveOnTimer",
+			name = "Autosave On Timer",
+			value = true,
+			defaultValue = true
+		};
+		
+		public static readonly DropdownSetting AutosaveInterval = DropdownSetting.Of(
+			key: "AutosaveInterval",
+			name: "Time Between Autosaves",
+			allDropdownItems: new List<DropdownOption>() {
+				DropdownOption.Of("15 seconds", 15),
+				DropdownOption.Of("30 seconds", 30),
+				DropdownOption.Of("1 minute", 60),
+				DropdownOption.Of("5 minutes", 60 * 5),
+				DropdownOption.Of("10 minutes", 60 * 10),
+				DropdownOption.Of("15 minutes", 60 * 15),
+				DropdownOption.Of("30 minutes", 60 * 30),
+				DropdownOption.Of("1 hour", 60 * 60)
+			},
+			defaultIndex: 3,
+			selectedIndex: 3
+		);
+
+		public static readonly FloatSetting NumAutosaves = new FloatSetting {
+			key = "NumAutosaves",
+			name = "# of Autosaves to Keep",
+			value = 20,
+			defaultValue = 20,
+			minValue = 1,
+			maxValue = 100
+		};
+	}
+
+	public static class Autoload {
+		public static readonly ToggleSetting AutoloadEnabled = new ToggleSetting() {
+			key = "AutoloadEnabled",
+			name = "Autoload from last save...",
+			value = true,
+			defaultValue = true
+		};
+
+		public static readonly DropdownSetting AutoloadThreshold = DropdownSetting.Of(
+			key: "AutoloadThreshold",
+			name: "...within last",
+			allDropdownItems: new List<DropdownOption>() {
+				DropdownOption.Of("∞", -1),
+				DropdownOption.Of("1 day", 1),
+				DropdownOption.Of("2 days", 2),
+				DropdownOption.Of("3 days", 3),
+				DropdownOption.Of("1 week", 7),
+				DropdownOption.Of("2 weeks", 14),
+				DropdownOption.Of("1 month", 31),
+				DropdownOption.Of("3 months", 93),
+				DropdownOption.Of("6 months", 186),
+				DropdownOption.Of("1 year", 365),
+				DropdownOption.Of("∞", -1),
+			},
+			defaultIndex: 5,
+			selectedIndex: 5
+		);
 	}
 
 	public static class Keybinds {
@@ -235,9 +345,7 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 		public static readonly KeybindSetting Pause = new KeybindSetting("Pause", new KeyboardAndMouseInput(KeyCode.Escape));
 	}
 
-    protected override void Awake() {
-        base.Awake();
-
+    protected void Awake() {
         InitSettingsDict();
     }
 
@@ -266,6 +374,19 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
 	    AddSetting(Gameplay.GeneralSensitivity);
 	    AddSetting(Gameplay.XSensitivity);
 	    AddSetting(Gameplay.YSensitivity);
+	    AddSetting(Gameplay.ShowDisabledReason);
+	    AddSetting(Gameplay.ShowInteractionHelp);
+	    
+	    // Autosave Settings
+	    AddSetting(Autosave.AutosaveEnabled);
+	    AddSetting(Autosave.AutosaveOnLevelChange);
+	    AddSetting(Autosave.AutosaveOnTimer);
+	    AddSetting(Autosave.AutosaveInterval);
+	    AddSetting(Autosave.NumAutosaves);
+	    
+	    // Autoload Settings
+	    AddSetting(Autoload.AutoloadEnabled);
+	    AddSetting(Autoload.AutoloadThreshold);
 	    
 	    // Keybind Settings
 	    AddSetting(Keybinds.Forward);
@@ -282,17 +403,32 @@ public class Settings : SingletonSaveableObject<Settings, Settings.SettingsSave>
     }
     
 #region Saving
-		[Serializable]
-		public class SettingsSave : SerializableSaveObject<Settings> {
 
-			public SettingsSave(Settings script) : base(script) {
-			    // TODO
-			}
+	public void WriteSettings(string path) {
+		List<string> lines = allSettings.Values.Select(setting => $"{setting.key}={setting.PrintValue()}").ToList();
+		string txt = string.Join("\n", lines);
+		File.WriteAllText(path, txt);
+	}
 
-			public override void LoadSave(Settings script) {
-			    // TODO
+	public void LoadSettings(string path) {
+		if (File.Exists(path)) {
+			string settingsTxt = File.ReadAllText(path);
+			List<string> lines = settingsTxt.Split("\n").ToList();
+			List<string> keysAndValues = lines.SelectMany(l => l.Split("=")).ToList();
+			SettingsMenu.instance.settingsCopy = allSettings.MapValues(Setting.Copy);
+			for (int i = 0; i < keysAndValues.Count; i++) {
+				var keyOrValue = keysAndValues[i];
+				// Look for valid key names and get the value from the next index
+				if (SettingsMenu.instance.settingsCopy.ContainsKey(keyOrValue)) {
+					string key = keyOrValue;
+					string value = keysAndValues[++i];
+					SettingsMenu.instance.settingsCopy[key].ParseValue(value);
+				}
 			}
+			
+			UpdateSettings(SettingsMenu.instance.settingsCopy);
 		}
+	}
 #endregion
 }
 

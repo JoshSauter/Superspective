@@ -380,7 +380,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2322447065223329977}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -13.5, z: -3.5}
+  m_LocalPosition: {x: 0, y: -15, z: -3.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -423,7 +423,7 @@ MonoBehaviour:
         Raw: 0.9
         Type: 1
       Y:
-        Raw: 9
+        Raw: 12
         Type: 0
       Z:
         Raw: 0
@@ -568,7 +568,7 @@ MonoBehaviour:
     LightingModel: 0
     ShadowCastingMode: 2
     ReceiveShadows: 1
-  PreviewSize: {x: 1, y: 9, z: 0}
+  PreviewSize: {x: 1, y: 12, z: 0}
 --- !u!114 &2322447065223330182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -616,7 +616,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2322447065223329981}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 0, z: 0}
+  m_LocalPosition: {x: 2, y: -6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -665,7 +665,7 @@ MonoBehaviour:
         Raw: -3
         Type: 0
       Y:
-        Raw: 0
+        Raw: -6
         Type: 0
       Z:
         Raw: 0
@@ -792,7 +792,7 @@ MonoBehaviour:
   visibility:
     ZIndex: 0
     BlockType: 1
-    Visible: 0
+    Visible: 1
   surface:
     specularColor: {r: 1, g: 1, b: 1, a: 1}
     param1: 0.5
@@ -884,7 +884,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2322447065223329986}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2, y: 0, z: 0}
+  m_LocalPosition: {x: -2, y: -6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -933,7 +933,7 @@ MonoBehaviour:
         Raw: -3
         Type: 0
       Y:
-        Raw: 0
+        Raw: -6
         Type: 0
       Z:
         Raw: 0
@@ -1060,7 +1060,7 @@ MonoBehaviour:
   visibility:
     ZIndex: 0
     BlockType: 1
-    Visible: 0
+    Visible: 1
   surface:
     specularColor: {r: 1, g: 1, b: 1, a: 1}
     param1: 0.5
@@ -1152,7 +1152,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2322447065223329989}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1201,7 +1201,7 @@ MonoBehaviour:
         Raw: 0
         Type: 1
       Y:
-        Raw: 0
+        Raw: -6
         Type: 0
       Z:
         Raw: 0
@@ -1328,7 +1328,7 @@ MonoBehaviour:
   visibility:
     ZIndex: 0
     BlockType: 1
-    Visible: 0
+    Visible: 1
   surface:
     specularColor: {r: 1, g: 1, b: 1, a: 1}
     param1: 0.5

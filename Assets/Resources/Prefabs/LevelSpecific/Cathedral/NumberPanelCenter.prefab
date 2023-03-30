@@ -414,6 +414,9 @@ MonoBehaviour:
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
   _state: 0
+  automaticallySetHelpText: 1
+  buttonOffHelpText: Power on
+  buttonOnHelpText: Power off
   onButtonPressFinish:
     m_PersistentCalls:
       m_Calls: []

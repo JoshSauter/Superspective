@@ -14,11 +14,13 @@ public class DropdownVisuals : ItemVisuals {
         bool settingWasntSet = Dropdown.setting != setting;
         Dropdown.setting = setting;
 
-        Dropdown.gameObject.name = $"{setting.name} Dropdown";
+        Dropdown.gameObject.name = $"[Dropdown] {setting.name}";
         Dropdown.Name.Text = setting.name;
         Dropdown.SelectionLabel.Text = setting.SelectedValueName;
 
         Dropdown.Scroller.ScrollbarVisual.Visible = setting.dropdownSelection.allItems.Count > minNumberOfItemsForScrollbar;
+
+        Debug.Log($"{setting.name} {this.View.UIBlock.CalculatedPosition.Percent:F2}");
         
         Dropdown.SetDatasource();
         if (settingWasntSet) {

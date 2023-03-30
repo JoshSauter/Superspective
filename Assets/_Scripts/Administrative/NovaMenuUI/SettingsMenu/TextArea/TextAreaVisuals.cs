@@ -5,7 +5,7 @@ public class TextAreaVisuals : ItemVisuals {
     public SuperspectiveTextField textField;
 
     public void PopulateFrom(TextAreaSetting setting) {
-        View.UIBlock.gameObject.name = $"{setting.Name} TextArea";
+        View.UIBlock.gameObject.name = $"[TextArea] {setting.Name}";
         Name.Text = setting.Name;
         textField.Text = setting.Text;
         textField.placeHolderMessage = setting.PlaceholderText;

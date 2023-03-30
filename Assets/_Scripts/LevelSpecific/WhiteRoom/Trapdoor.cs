@@ -41,6 +41,8 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         void Update() {
+            if (GameManager.instance.IsCurrentlyLoading) return;
+            
             UpdateState();
             
             timeSinceStateChanged += Time.deltaTime;

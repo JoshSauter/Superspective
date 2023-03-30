@@ -11,12 +11,12 @@ public class SmallIntSliderVisuals : SliderVisual {
     
     public void PopulateFrom(SmallIntSetting setting) {
         smallIntSlider.setting = setting;
-        Slider.gameObject.name = $"{setting.Name} Slider";
-        Name.Text = setting.Name;
+        Slider.gameObject.name = $"[Slider] {setting.name}";
+        Name.Text = setting.name;
         
-        float t = Mathf.InverseLerp(setting.MinValue, setting.MaxValue, setting.Value);
+        float t = Mathf.InverseLerp(setting.minValue, setting.maxValue, setting.value);
         Fill.Size.X.Percent = t;
-        ValueTextBlock.Text = $"{Mathf.RoundToInt(setting.Value)}";
+        ValueTextBlock.Text = $"{Mathf.RoundToInt(setting.value)}";
         
         smallIntSlider.CreatePips();
     }

@@ -72,15 +72,32 @@ namespace LevelSpecific.Fork {
 			};
 		}
 
+		private string DisabledText() {
+			switch (state) {
+				case State.NotPowered:
+					return "(Missing power)";
+				case State.Idle:
+					return "";
+				case State.DoorsClosing:
+					return "(Doors closing)";
+				case State.ElevatorMoving:
+					return "(Already moving)";
+				case State.DoorsOpening:
+					return "(Doors opening)";
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
 		void UpdateButtonInteractibility() {
 			if (!playerStandingInElevator) {
 				elevatorButton.interactableObject.SetAsHidden();
 			}
 			else if (!initialPowerTrail.powerIsOn || state != State.Idle) {
-				elevatorButton.interactableObject.SetAsDisabled();
+				elevatorButton.interactableObject.SetAsDisabled(DisabledText());
 			}
 			else {
-				elevatorButton.interactableObject.SetAsInteractable();
+				elevatorButton.interactableObject.SetAsInteractable("Operate elevator");
 			}
 		}
 

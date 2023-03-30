@@ -13,6 +13,7 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 	AudioJob ruffleSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
 	AudioJob thumpSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
 
+	private float scale => Player.instance.growShrink.currentScale;
 	PlayerMovement playerMovement;
 	bool wasGrounded = true;
 	float ruffleStartVolume;
@@ -63,7 +64,7 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 				if (maxDiff < 0)
 					return;
 
-				float simulatedSpeedOfImpact = Mathf.Sqrt(2 * Physics.gravity.magnitude * maxDiff);
+				float simulatedSpeedOfImpact = Mathf.Sqrt(2 * Physics.gravity.magnitude * maxDiff) / scale;
 
 				// Debug.LogWarning("SimulatedSpeed: " + simulatedSpeedOfImpact);
 				if (simulatedSpeedOfImpact >= minSpeed) {

@@ -365,7 +365,7 @@ GameObject:
   - component: {fileID: 8401306280062011166}
   - component: {fileID: 8401306280062011167}
   m_Layer: 0
-  m_Name: SliderLayout
+  m_Name: KeybindLayout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2165,6 +2165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc9a3fb6858a55d46890921747fac037, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ResetButton: {fileID: 8401306280062011263}
 --- !u!1 &8401306280062010984
 GameObject:
   m_ObjectHideFlags: 0

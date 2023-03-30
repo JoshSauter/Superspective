@@ -30,6 +30,14 @@ namespace LevelSpecific.WhiteRoom {
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
+
+            StartCoroutine(StartCo());
+        }
+
+        IEnumerator StartCo() {
+            yield return new WaitWhile(() => !GameManager.instance.gameHasLoaded);
+            if (gameObject == null) yield break;
+            
             state.AddStateTransition(State.Raising, State.Raised, timeToMove);
             state.AddStateTransition(State.Lowering, State.Lowered, timeToMove);
             state.AddTrigger(State.Raised, 0f, () => SetHeight(maxHeight));

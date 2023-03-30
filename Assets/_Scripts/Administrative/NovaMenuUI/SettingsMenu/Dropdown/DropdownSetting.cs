@@ -85,6 +85,15 @@ public class DropdownSetting : Setting {
     }
     
     public string SelectedValueName {
+        set {
+            var index = dropdownSelection.allItems.FindIndex(option => option.DisplayName == value);
+            if (index < 0) {
+                Debug.LogError($"Setting {value} not found in DropdownOptions");
+                return;
+            }
+            var selection = dropdownSelection.allItems[index];
+            dropdownSelection.Select(selection.DisplayName, selection);
+        }
         get {
             switch (dropdownSelection.type) {
                 case SelectionType.ZeroOrOne:
@@ -207,5 +216,9 @@ public class DropdownSetting : Setting {
 
     public override string PrintValue() {
         return SelectedValueName;
+    }
+
+    public override void ParseValue(string s) {
+        SelectedValueName = s;
     }
 }

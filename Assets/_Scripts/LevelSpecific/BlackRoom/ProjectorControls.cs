@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using PowerTrailMechanics;
 using UnityEngine;
 using SuperspectiveUtils;
 
@@ -21,6 +22,9 @@ namespace LevelSpecific.BlackRoom {
 		// How many rotations of the valve does it take to rotate the light around the circumference once?
 		const float valveToLightRotationRatio = 8;
 
+		public ViewLockObject viewLock;
+		public PowerTrail powerTrail;
+
 		// Use this for initialization
 		void Start() {
 			projectorSizeIncreaseButton.OnButtonHeld += ctx => IncreaseFrustumSize();
@@ -33,6 +37,15 @@ namespace LevelSpecific.BlackRoom {
 
 			projectorRotateAxisDownButton.OnButtonHeld += ctx => RotateProjectorDownOnAxis();
 			projectorRotateAxisUpButton.OnButtonHeld += ctx => RotateProjectorUpOnAxis();
+		}
+
+		void Update() {
+			if (powerTrail.fullyPowered) {
+				viewLock.interactableObject.SetAsInteractable("Operate controls");
+			}
+			else {
+				viewLock.interactableObject.SetAsDisabled("(Missing power)");
+			}
 		}
 
 		void IncreaseFrustumSize() {

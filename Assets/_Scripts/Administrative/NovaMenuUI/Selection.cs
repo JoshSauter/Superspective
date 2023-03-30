@@ -20,7 +20,9 @@ public class Selection<K, T> {
     public T selection => hasSelection ? selectionOpt.Get() : default(T);
 
     public delegate void SelectionChangedAction(Dictionary<K, T> prevSelection, Dictionary<K, T> newSelection);
+    public delegate void SelectionChangedActionSimple();
     public SelectionChangedAction OnSelectionChanged;
+    public SelectionChangedActionSimple OnSelectionChangedSimple;
 
     public void Select(K newSelectionKey, T newSelection, bool triggerEvents = true) {
         switch (type) {
@@ -75,6 +77,14 @@ public class Selection<K, T> {
         allSelections = newSelections;
         if (triggerEvents) {
             OnSelectionChanged?.Invoke(prevSelection, newSelections);
+            OnSelectionChangedSimple?.Invoke();
         }
+    }
+
+    // Only used for restoring a selection that is being read from save data
+    public void RestoreSelection(List<K> selectionKeys, Func<K, T, bool> matchWithValue) {
+        allSelections = selectionKeys
+            .Where(k => allItems.Exists(v => matchWithValue(k, v)))
+            .ToDictionary(k => k, k => allItems.Find(v => matchWithValue(k, v)));
     }
 }

@@ -14799,6 +14799,9 @@ MonoBehaviour:
   unpressAfterPress: 1
   timeBetweenPressEndDepressStart: 0.0625
   _state: 0
+  automaticallySetHelpText: 1
+  buttonOffHelpText: Turn on
+  buttonOnHelpText: Turn off
   onButtonPressFinish:
     m_PersistentCalls:
       m_Calls: []
@@ -14838,6 +14841,8 @@ MonoBehaviour:
   DEBUG: 0
   glow: {fileID: 0}
   _state: 0
+  enabledHelpText: 
+  disabledHelpText: (Missing power)
   useLargerPrepassMaterial: 0
   overrideGlowColor: 0
   glowColor: {r: 0.6, g: 0.35, b: 0.25, a: 1}

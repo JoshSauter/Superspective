@@ -21,12 +21,17 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 	public float sprintSpeed = 125;
 	public float middleMouseVerticalSpeed = 4;
 
-	protected override void Start() {
-		base.Start();
+	protected override void Awake() {
+		base.Awake();
 		
 		playerMovement = GetComponent<PlayerMovement>();
 		playerRigidbody = GetComponent<Rigidbody>();
 		playerCollider = GetComponent<Collider>();
+	}
+	
+	protected override void Start() {
+		base.Start();
+		
 		playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 		input = PlayerButtonInput.instance;
 		speed = moveSpeed;

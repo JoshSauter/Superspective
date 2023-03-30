@@ -220,14 +220,14 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 		    case ButtonState.Idle:
 			    // Disable the button while moving down (or just after)
 			    if (elevatorState == ElevatorState.MovingDown || (elevatorState.prevState == ElevatorState.MovingDown && elevatorState.timeSinceStateChanged < .5f)) {
-				    interactableObject.SetAsDisabled();
+				    interactableObject.SetAsDisabled("(Already moving)");
 			    }
 			    // Hide it when we enter the puzzle room
 			    else if (FloorManager.instance.currentValue == 0 && floorState != FloorState.TopFloor) {
 				    interactableObject.SetAsHidden();
 			    }
 			    else if (floorState.timeSinceStateChanged > 1.25f) {
-				    interactableObject.SetAsInteractable();
+				    interactableObject.SetAsInteractable("Operate elevator");
 			    }
 
 			    buttonValue.desiredColor = buttonValue.defaultColor;

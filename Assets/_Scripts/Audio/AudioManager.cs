@@ -175,8 +175,15 @@ namespace Audio {
 					audioJob.audio.minDistance = this.minDistance;
 					audioJob.audio.maxDistance = this.maxDistance;
 					audioJob.audio.rolloffMode = this.rolloffMode;
-					
-					if (this.isPlaying) audioJob.audio.Play();
+
+					if (this.isPlaying) {
+						try {
+							audioJob.audio.Play();
+						}
+						catch (Exception e) {
+							Debug.LogError($"Error encountered while playing audio: {e}");
+						}
+					}
 
 					return audioJob;
 				}
@@ -443,15 +450,15 @@ namespace Audio {
 
 					customAudioJobReference.Reference.MatchAction(
 						saveableObject => {
-							CustomAudioJob customAudioJob = saveableObject as CustomAudioJob;
-							if (customAudioJob != null) {
+							if (saveableObject is CustomAudioJob customAudioJob) {
 								audioManager.updateAudioJobs[id] = customAudioJob.UpdateAudio;
 							}
 							else {
 								audioManager.debug.LogError($"Failed to cast audioJob {id} as CustomAudioJob");
+								audioManager.audioJobs[id].Stop();
 							}
 						},
-						serializableSaveObject => audioManager.audioJobs[id].Stop()
+						_ => audioManager.audioJobs[id].Stop()
 					);
 				}
 

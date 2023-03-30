@@ -20,8 +20,10 @@ namespace Saving {
         public string saveFilename; // Name of the save file as it appears on disk. Used in reconstructing the file paths to read metadata/data from
         public string displayName; // Name of the save as presented to the user
         public long saveTimestamp; // DateTime the save was made, in DateTime.Ticks, stored as a long and only used for sorting
+        public long lastLoadedTimestamp; // DateTime the save was last loaded, in DateTime.Ticks, stored as a long and only used for autoloading
         public string saveDate; // Date the save was made, stored as simple string, e.g. 11/29/2022
         public string saveTime; // Time the save was made, stored as simple string, e.g. 9:32 PM
         public string levelName; // Display name of the level the player was on when they made the save
+        public string version; // Build version of the game when the save was made
     }
 }
