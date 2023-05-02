@@ -13,6 +13,7 @@ using UnityEngine.Rendering;
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
+		public const string portalCopyKeyword = "PORTAL_COPY_OBJECT";
 		Portal _sittingInPortal;
 		Portal _hoveredThroughPortal;
 		Portal _grabbedThroughPortal;
@@ -144,7 +145,7 @@ namespace PortalMechanics {
 			thisFrameRaycastHits = Interact.instance.GetRaycastHits();
 
 			RecalculateHoveredThroughPortal();
-			PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal();
+			PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal();
 
 			if (copyShouldBeEnabled && fakeCopyInstance == null) {
 				CreateFakeCopyInstance();
@@ -225,7 +226,7 @@ namespace PortalMechanics {
 
 		// Being held illegally means the cube is being carried on the other side of the portal without the last frame raycast hitting that portal
 		// (or the player standing inside of that portal)
-		void PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal() {
+		void PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal() {
 			// The actual dropping happens through a StateMachine trigger, we just reset the timer here if the cube is being held legally
 			if (hoveredThroughPortal != null &&
 			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.playerRemainsInPortal)) {
@@ -281,7 +282,6 @@ namespace PortalMechanics {
 		}
 
 		void SetMaterialsForRenderers(Renderer[] renderersToChangeMaterialsOf, bool usePortalCopyMaterials) {
-			const string portalCopyKeyword = "PORTAL_COPY_OBJECT";
 			for (int i = 0; i < renderers.Length; i++) {
 				Renderer rendererToUseAsKey = renderers[i];
 				Renderer rendererToModify = renderersToChangeMaterialsOf[i];

@@ -7,6 +7,7 @@ using NaughtyAttributes;
 using System;
 using UnityStandardAssets.ImageEffects;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	// Container for memoizing edge detection color state
@@ -51,10 +52,13 @@ namespace PortalMechanics {
 			// public EDColors edgeColors;
 		}
 
+		/// <summary>
+		/// Struct containing the screenBounds defined by an array of Rects, as well as whether or not this Portal should be rendered
+		/// </summary>
 		[Serializable]
 		public struct VisiblePortalInfo {
 			public Rect[] screenBounds;
-			public bool portalIsRendered;
+			public bool portalShouldBeRendered;
 		}
 
 		public bool DEBUG = false;
@@ -70,7 +74,7 @@ namespace PortalMechanics {
 		public int MaxRenderSteps = 12;
 		public float MaxRenderDistance = 400;
 		public float distanceToStartCheckingPortalBounds = 5f;
-		public float clearSpaceBehindPortal = 0.49f;
+		public float clearSpaceBehindPortal => 0.49f * Player.instance.scale;
 
 		int renderSteps;
 		public List<RecursiveTextures> renderStepTextures;
@@ -151,8 +155,8 @@ namespace PortalMechanics {
 				// Assumes an 8x8 portal is average size
 				Rect[] portalScreenBounds = (distanceFromPortalToCam > distanceToStartCheckingPortalBounds * portalSurfaceArea/64f) ? p.GetScreenRects(mainCamera) : fullScreenRect;
 
-				// Always render a portal when its volumetric portal is enabled (PortalIsSeenByCamera may be false when the player is in the portal)
-				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
+				// Always render a portal when the player is in the portal (PortalIsSeenByCamera may be false when the player is in the portal)
+				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.playerRemainsInPortal) {
 					SetCameraSettings(portalCamera, mainCamSettings);
 
 					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.name);
@@ -169,13 +173,29 @@ namespace PortalMechanics {
 				finishedPortalTexture.Key.SetDepthNormalsTexture(finishedPortalTexture.Value.depthNormalsTexture);
 			}
 
-			// Reset mask buffer cams and render once more from the main camera's perspective
+			// Reset mask buffer cams and render the VisibilityMask and PortalMask textures once more from the main camera's perspective
 			RenderVisibilityMaskTexture(null, mainCamSettings);
 			RenderPortalMaskTexture(mainCamSettings);
+
+			foreach (var p in finishedPortalTextures.Keys) {
+				p.ProtectScreenFromClipping(mainCamera);
+			}
 
 			debug.LogError($"End of frame: renderSteps: {renderSteps}");
 		}
 
+		/// <summary>
+		/// For a given Portal, determines the Camera position, rotation, and projection matrix that should be used to render it,
+		/// then checks to see if any Portals are visible from this Camera. For each visible Portal, we recurse with depth + 1
+		/// until there are no other visible Portals, or we are at the max depth or max render steps allowed.
+		///
+		/// Finally, will render the Camera with the settings determined earlier.
+		/// </summary>
+		/// <param name="depth"></param>
+		/// <param name="portal"></param>
+		/// <param name="portalScreenBounds"></param>
+		/// <param name="tree"></param>
+		/// <returns></returns>
 		RecursiveTextures RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, string tree) {
 			if (depth == MaxDepth || renderSteps >= MaxRenderSteps) {
 				Debug.LogError($"At max depth or max render steps:\nDepth: {depth}/{MaxDepth}\nRenderSteps: {renderSteps}/{MaxRenderSteps}");
@@ -185,19 +205,14 @@ namespace PortalMechanics {
 			var index = renderSteps;
 			renderSteps++;
 
-			SetupPortalCameraForPortal(portal, portal.otherPortal, depth);
-
-			CameraSettings modifiedCamSettings = new CameraSettings {
-				camPosition = portalCamera.transform.position,
-				camRotation = portalCamera.transform.rotation,
-				camProjectionMatrix = portalCamera.projectionMatrix
-				// edgeColors = new EDColors(portalCameraEdgeDetection)
-			};
+			CameraSettings modifiedCamSettings = SetupPortalCameraForPortal(portal, portal.otherPortal, depth);
 
 			// Key == Visible Portal, Value == visible portal screen bounds
 			Dictionary<Portal, VisiblePortalInfo> visiblePortals = GetVisiblePortalsInfo(portal, portalScreenBounds, depth);
 			// Key == Visible Portal, Value == RecursiveTextures
 			Dictionary<Portal, RecursiveTextures> visiblePortalTextures = new Dictionary<Portal, RecursiveTextures>();
+			
+			debug.Log("-------------------------------------------------------");
 
 			debug.Log($"Index (Depth): {index} ({depth})\nPortal:{portal.name}\nNumVisible:{visiblePortals.Count}\nPortalCamPos:{portalCamera.transform.position}\nTree:{tree}\nScreenBounds:{string.Join(", ", portalScreenBounds)}");
 
@@ -205,7 +220,7 @@ namespace PortalMechanics {
 				Portal visiblePortal = visiblePortalTuple.Key;
 				VisiblePortalInfo visiblePortalInfo = visiblePortalTuple.Value;
 
-				if (visiblePortalInfo.portalIsRendered) {
+				if (visiblePortalInfo.portalShouldBeRendered) {
 					string nextTree = tree + ", " + visiblePortal.name;
 					Rect[] nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalInfo.screenBounds);
 
@@ -222,7 +237,7 @@ namespace PortalMechanics {
 				Portal visiblePortal = visiblePortalKeyVal.Key;
 				VisiblePortalInfo visiblePortalInfo = visiblePortalKeyVal.Value;
 
-				if (visiblePortalInfo.portalIsRendered) {
+				if (visiblePortalInfo.portalShouldBeRendered) {
 					RecursiveTextures textures = visiblePortalTextures[visiblePortal];
 					// Restore the RenderTextures that were in use at this stage
 					visiblePortal.SetTexture(textures.mainTexture);
@@ -241,25 +256,13 @@ namespace PortalMechanics {
 				renderStepTextures.Add(RecursiveTextures.CreateTextures($"VirtualPortalCamera_{index}"));
 			}
 			
-			List<PillarDimensionObject> allRelevantPillarDimensionObjects = PillarDimensionObject.allPillarDimensionObjects
-				.Where(dimensionObj => dimensionObj.IsVisibleFrom(portalCamera))
-				.ToList();
-			
-			// Portals with PillarDimensionObjects are treated specially in that the effective pillar
-			// dimension is set to the out portal's dimension before rendering
-			PillarDimensionObject portalDimensionObj = (portal?.otherPortal?.dimensionObject is PillarDimensionObject pillarDimensionObject)
-				? pillarDimensionObject
-				: null;
-			DimensionPillar activePillar = portalDimensionObj?.activePillar;
-			if (portalDimensionObj != null && activePillar != null) {
-				activePillar.dimensionWall.UpdateStateForCamera(portalCamera);
-				foreach (PillarDimensionObject dimensionObject in allRelevantPillarDimensionObjects) {
-					if (dimensionObject == portalDimensionObj) continue;
-					dimensionObject.UpdateStateForCamera(portalCamera, portalDimensionObj.Dimension);
-				}
-			}
+			UpdateForPillarDimensionObject(portal);
 			
 			// RENDER
+			// Hide the other portal
+			foreach (Renderer otherPortalPortalScreen in portal.otherPortal.portalScreens) {
+				otherPortalPortalScreen.enabled = false;
+			}
 			RenderVisibilityMaskTexture(portal, modifiedCamSettings);
 			RenderDepthNormalsToPortal(portal, index);
 			RenderPortalMaskTexture(modifiedCamSettings);
@@ -279,12 +282,11 @@ namespace PortalMechanics {
 			portal.SetTexture(renderStepTextures[index].mainTexture);
 			
 			// Restore previous DimensionObject state
-			if (activePillar != null) {
-				activePillar.dimensionWall.UpdateStateForCamera(mainCamera);
-				foreach (PillarDimensionObject dimensionObject in allRelevantPillarDimensionObjects) {
-					if (dimensionObject == portalDimensionObj) continue;
-					dimensionObject.UpdateStateForCamera(mainCamera, activePillar.curDimension);
-				}
+			RestoreForPillarDimensionObject(portal);
+			
+			// Restore the other portal's visibility
+			foreach (Renderer otherPortalPortalScreen in portal.otherPortal.portalScreens) {
+				otherPortalPortalScreen.enabled = true;
 			}
 			
 			return renderStepTextures[index];
@@ -370,7 +372,7 @@ namespace PortalMechanics {
 
 				VisiblePortalInfo info = new VisiblePortalInfo() {
 					screenBounds = p.GetScreenRects(portalCamera),
-					portalIsRendered = ShouldRenderRecursively(parentDepth, portal, p)
+					portalShouldBeRendered = ShouldRenderRecursively(parentDepth, portal, p)
 				};
 				if (PortalIsSeenByCamera(p, portalCamera, portalScreenBounds, info.screenBounds)) {
 					visiblePortals.Add(p, info);
@@ -387,7 +389,7 @@ namespace PortalMechanics {
 			}
 			bool isInCameraFrustum = testPortal.IsVisibleFrom(cam);
 			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
-			bool isFacingCamera = Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
+			bool isFacingCamera = true;//testPortal.playerRemainsInPortal || Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
 			return isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera && !IsInvisibleDimensionObject();
 		}
 
@@ -423,6 +425,8 @@ namespace PortalMechanics {
 		}
 
 		private Transform _debugSphere;
+		const float _clipOffset = 0.15f;
+		private float clipOffset => _clipOffset;
 
 		private Transform debugSphere {
 			get {
@@ -436,7 +440,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		void SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
+		CameraSettings SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
 			// Position the camera behind the other portal.
 			portalCamera.transform.position = inPortal.TransformPoint(portalCamera.transform.position);
 
@@ -445,32 +449,113 @@ namespace PortalMechanics {
 
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
-			Vector3 position = mainCamera.transform.position;
-			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) < 2*clearSpaceBehindPortal;
+			Vector3 camPos = mainCamera.transform.position;
+			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(camPos, inPortal.ClosestPoint(camPos, useInfinitelyThinBounds: true)) < 2*clearSpaceBehindPortal;
 			if (DEBUG) {
-				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
-			}
-			if (!shouldUseDefaultProjectionMatrix) {
-				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position, useInfinitelyThinBounds: true);
-
-				Plane p = new Plane(-outPortal.PortalNormal(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.PortalNormal());
-				Vector4 clipPlane = new Vector4(p.normal.x, p.normal.y, p.normal.z, p.distance);
-				Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlane;
-
-				var newMatrix = mainCamera.CalculateObliqueMatrix(clipPlaneCameraSpace);
-				//Debug.Log("Setting custom matrix: " + newMatrix);
-				portalCamera.projectionMatrix = newMatrix;
-			}
-			else {
-				debug.LogWarning("Too close to use oblique projection matrix, using default instead");
-				portalCamera.projectionMatrix = mainCamera.projectionMatrix;
+				debugSphere.position = inPortal.ClosestPoint(camPos, useInfinitelyThinBounds: true);
 			}
 
-			// Modify the camera's edge detection if necessary
-			if (inPortal != null && inPortal.changeCameraEdgeDetection) {
-				// CopyEdgeColors(portalCameraEdgeDetection, inPortal.edgeColorMode, inPortal.edgeColor, inPortal.edgeColorGradient, inPortal.edgeColorGradientTexture);
+			portalCamera.projectionMatrix = shouldUseDefaultProjectionMatrix ? mainCamera.projectionMatrix : GetProjectionMatrix(inPortal, mainCamera);
+			// TODO: If the above GetProjectionMatrix call gives the desired result you can delete this commented out code:
+			// if (!shouldUseDefaultProjectionMatrix) {
+			// 	Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position, useInfinitelyThinBounds: true);
+			//
+			// 	Plane p = new Plane(-outPortal.PortalNormal(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.PortalNormal());
+			// 	Vector4 clipPlane = new Vector4(p.normal.x, p.normal.y, p.normal.z, p.distance);
+			// 	Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlane;
+			//
+			// 	var newMatrix = mainCamera.CalculateObliqueMatrix(clipPlaneCameraSpace);
+			// 	//Debug.Log("Setting custom matrix: " + newMatrix);
+			// 	portalCamera.projectionMatrix = newMatrix;
+			// }
+			// else {
+			// 	debug.LogWarning("Too close to use oblique projection matrix, using default instead");
+			// 	portalCamera.projectionMatrix = mainCamera.projectionMatrix;
+			// }
+			
+			return new CameraSettings {
+				camPosition = portalCamera.transform.position,
+				camRotation = portalCamera.transform.rotation,
+				camProjectionMatrix = portalCamera.projectionMatrix
+				// edgeColors = new EDColors(portalCameraEdgeDetection)
+			};
+		}
+		
+		// Use custom projection matrix to align portal camera's near clip plane with the surface of the portal
+		Matrix4x4 GetProjectionMatrix(Portal inPortal, Camera cam) {
+			// Learning resource:
+			// http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+	
+			// Get the transform of the clip plane, which is the surface of the portal
+			Transform clipPlane = inPortal.transform;
+
+			// Get the position and normal of the clip plane
+			Vector3 clipPlanePos = clipPlane.position;
+			Vector3 clipPlaneNormal = clipPlane.forward;
+
+			// Determine whether the camera is in front of or behind the clip plane
+			int dot = Math.Sign(Vector3.Dot(clipPlaneNormal, clipPlanePos - cam.transform.position));
+
+			// Transform the clip plane position and normal into camera space
+			Vector3 camSpacePos = cam.worldToCameraMatrix.MultiplyPoint(clipPlanePos);
+			Vector3 camSpaceNormal = cam.worldToCameraMatrix.MultiplyVector(clipPlaneNormal) * dot;
+
+			// Calculate the distance between the clip plane and the camera in camera space
+			float camSpaceDst = -Vector3.Dot(camSpacePos, camSpaceNormal) + clipOffset;
+
+
+			// If the camera is not too close to the portal, use an oblique projection matrix
+			debug.Log($"Using oblique projection matrix for portal {inPortal.FullPath()}");
+
+			// Create a 4D vector representing the clip plane in camera space
+			Vector4 clipPlaneCameraSpace = new Vector4(camSpaceNormal.x, camSpaceNormal.y, camSpaceNormal.z, camSpaceDst * inPortal.scaleFactor);
+
+			// Update the projection matrix based on the new clip plane using the player's camera settings
+			return mainCamera.CalculateObliqueMatrix(clipPlaneCameraSpace);
+		}
+
+
+		/// <summary>
+		/// For Portals with PillarDimensionObject associated with them, change the effective pillar dimension
+		/// to the linked Portal's dimension before rendering
+		/// </summary>
+		/// <param name="portal">The portal being rendered</param>
+		/// <returns>The active DimensionPillar, if any</returns>
+		private void UpdateForPillarDimensionObject(Portal portal) {
+			// Portals with PillarDimensionObjects are treated specially in that the effective pillar
+			// dimension is set to the out portal's dimension before rendering
+			PillarDimensionObject portalDimensionObj = (portal?.otherPortal?.dimensionObject is PillarDimensionObject pillarDimensionObject)
+				? pillarDimensionObject
+				: null;
+			DimensionPillar activePillar = portalDimensionObj?.activePillar;
+			if (portalDimensionObj != null && activePillar != null) {
+				activePillar.dimensionWall.UpdateStateForCamera(portalCamera);
+				foreach (PillarDimensionObject dimensionObject in allRelevantPillarDimensionObjects) {
+					if (dimensionObject == portalDimensionObj) continue;
+					dimensionObject.UpdateStateForCamera(portalCamera, portalDimensionObj.Dimension);
+				}
 			}
 		}
+
+		private void RestoreForPillarDimensionObject(Portal portal) {
+			PillarDimensionObject portalDimensionObj = (portal?.otherPortal?.dimensionObject is PillarDimensionObject pillarDimensionObject)
+				? pillarDimensionObject
+				: null;
+			DimensionPillar activePillar = portalDimensionObj?.activePillar;
+			
+			// Restore previous DimensionObject state
+			if (activePillar != null) {
+				activePillar.dimensionWall.UpdateStateForCamera(mainCamera);
+				foreach (PillarDimensionObject dimensionObject in allRelevantPillarDimensionObjects) {
+					if (dimensionObject == portalDimensionObj) continue;
+					dimensionObject.UpdateStateForCamera(mainCamera, activePillar.curDimension);
+				}
+			}
+		}
+		
+		List<PillarDimensionObject> allRelevantPillarDimensionObjects => PillarDimensionObject.allPillarDimensionObjects
+			.Where(dimensionObj => dimensionObj.IsVisibleFrom(portalCamera))
+			.ToList();
 
 		public void CopyEdgeColors(BladeEdgeDetection dest, BladeEdgeDetection source) {
 			CopyEdgeColors(dest, source.edgeColorMode, source.edgeColor, source.edgeColorGradient, source.edgeColorGradientTexture);
