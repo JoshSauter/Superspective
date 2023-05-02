@@ -30,6 +30,7 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
     public NovaButton ResumeButton;
     public NovaButton SaveButton;
     public NovaButton LoadButton;
+    public NovaButton NewGameButton;
     public NovaButton SettingsButton;
     public NovaButton ExitGameButton;
 
@@ -88,6 +89,7 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         ResumeButton.OnClick += (_) => ClosePauseMenu();
         SaveButton.OnClick += (_) => OpenSaveMenu();
         LoadButton.OnClick += (_) => OpenLoadMenu();
+        NewGameButton.OnClick += (_) => NewGame();
         SettingsButton.OnClick += (_) => OpenSettingsMenu();
         ExitGameButton.OnClick += (_) => ExitGameDialogWindow.Open();
     }
@@ -103,6 +105,10 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
             
             button.buttonState.Set(NovaButton.ButtonState.Idle);
         }
+    }
+
+    void NewGame() {
+        GameManager.instance.RestartGame();
     }
 
     void OpenLoadMenu() {

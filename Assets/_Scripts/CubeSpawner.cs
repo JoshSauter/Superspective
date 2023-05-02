@@ -131,7 +131,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                 movableObject.OnPickupSimple -= DestroyCubeAlreadyGrabbedFromSpawner;
                 SpawnNewCube();
 
-                Physics.IgnoreCollision(waterCollider, movableObject.GetComponent<Collider>(), false);
+                SuperspectivePhysics.RestoreCollision(waterCollider, movableObject.GetComponent<Collider>());
             }
         }
     }
@@ -152,7 +152,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             newCubeDimensionObj.Dimension = baseDimensionForCubes;
         }
 
-        Physics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>(), true);
+        SuperspectivePhysics.IgnoreCollision(waterCollider, newCube.GetComponent<Collider>());
         rigidbodyOfObjectBeingSuspended = newCube.thisRigidbody;
         rigidbodyOfObjectBeingSuspended.useGravity = false;
 

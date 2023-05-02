@@ -79,6 +79,9 @@ public class NovaButton : MonoBehaviour {
             backgroundToAnimate.Color = Color.Lerp(startBgColor, endBgColor, t);
 
             foreach (var uiBlock in componentsToAnimate) {
+                if (uiBlock == null) {
+                    continue;
+                }
                 uiBlock.Color = Color.Lerp(startComponentColor, endComponentColor, t);
             }
         }

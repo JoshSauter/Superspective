@@ -1,4 +1,5 @@
-﻿using SuperspectiveUtils;
+﻿using System;
+using SuperspectiveUtils;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -17,10 +18,12 @@ public class StaircaseRotate : MonoBehaviour {
     [ShowIf("DEBUG")]
     [ReadOnly]
     public Vector3 startPosition;
+    public Vector3 effectiveStartPosition => startPosition + (endPosition - startPosition).normalized * startEndGap * Player.instance.scale;
 
     [ShowIf("DEBUG")]
     [ReadOnly]
     public Vector3 endPosition;
+    public Vector3 effectiveEndPosition => endPosition - (endPosition - startPosition).normalized * startEndGap * Player.instance.scale;
 
     public Vector3 startGravityDirection = Vector3.zero;
     public Vector3 endGravityDirection = Vector3.zero;
@@ -55,17 +58,15 @@ public class StaircaseRotate : MonoBehaviour {
                         endGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, endGravityDirection));
         endPosition = pivotPoint -
                       startGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, startGravityDirection));
-
-        Vector3 stairLine = endPosition - startPosition;
-        startPosition += stairLine.normalized * startEndGap;
-        endPosition -= stairLine.normalized * startEndGap;
     }
 
     void OnTriggerEnter(Collider other) {
         GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         float testLerpValue = 0;
-        if (other.TaggedAsPlayer())
+        if (other.TaggedAsPlayer()) {
+            baseGravMagnitude = currentGravity.magnitude;
             testLerpValue = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
+        }
         else if (gravityObj != null) testLerpValue = GetLerpPositionOfPoint(other.transform.position);
         Vector3 testGravityDirection1 =
             Vector3.Lerp(startGravityDirection, endGravityDirection, testLerpValue).normalized;
@@ -104,7 +105,6 @@ public class StaircaseRotate : MonoBehaviour {
     }
 
     void OnTriggerStay(Collider other) {
-        GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         if (other.TaggedAsPlayer()) {
             t = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
             if (treatedAsADownStairForPlayer) t = 1 - t;
@@ -112,8 +112,8 @@ public class StaircaseRotate : MonoBehaviour {
             float gravAmplificationFactor = 1;
             if (treatedAsADownStairForPlayer) {
                 Vector3 projectedPlayerPos = ClosestPointOnLine(
-                    startPosition,
-                    endPosition,
+                    effectiveStartPosition,
+                    effectiveEndPosition,
                     playerMovement.bottomOfPlayer
                 );
                 float distanceFromPlayerToStairs = Vector3.Distance(playerMovement.bottomOfPlayer, projectedPlayerPos);
@@ -140,15 +140,15 @@ public class StaircaseRotate : MonoBehaviour {
             );
             playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
         }
-        else if (gravityObj != null) {
+        else if (other.gameObject.TryGetComponent(out GravityObject gravityObj)) {
             float objT = GetLerpPositionOfPoint(other.transform.position);
             gravityObj.gravityDirection = Vector3.Lerp(startGravityDirection, endGravityDirection, objT).normalized;
         }
     }
 
     float GetLerpPositionOfPoint(Vector3 point) {
-        Vector3 projectedPlayerPos = ClosestPointOnLine(startPosition, endPosition, point);
-        float t = Utils.Vector3InverseLerp(startPosition, endPosition, projectedPlayerPos);
+        Vector3 projectedPlayerPos = ClosestPointOnLine(effectiveStartPosition, effectiveEndPosition, point);
+        float t = Utils.Vector3InverseLerp(effectiveStartPosition, effectiveEndPosition, projectedPlayerPos);
 
         //debug.Log("StartPos: " + stairStartPos + ", EndPos: " + stairEndPos + ", PlayerPos: " + playerPos + ", t=" + t);
         return t;
@@ -172,5 +172,17 @@ public class StaircaseRotate : MonoBehaviour {
         Vector3 vClosestPoint = vA + vVector3;
 
         return vClosestPoint;
+    }
+
+    private void OnDrawGizmos() {
+        float sphereSize = .25f * Player.instance.scale;
+        Color originalColor = Gizmos.color;
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(effectiveStartPosition, sphereSize);
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(effectiveEndPosition, sphereSize);
+        Gizmos.color = (Color.black * 0.9f).WithAlpha(1f);
+        Gizmos.DrawLine(effectiveStartPosition, effectiveEndPosition);
+        Gizmos.color = originalColor;
     }
 }

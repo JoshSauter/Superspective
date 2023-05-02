@@ -13,14 +13,21 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public Camera playerCam => SuperspectiveScreen.instance.playerCamera;
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
-	public GrowShrinkObject growShrink;
+
+	public float scale => growShrink != null ? growShrink.currentScale : 1f;
+	private GrowShrinkObject growShrink;
 	public bool isHoldingSomething => heldObject != null;
 
 	public new Collider collider;
 	public new Renderer renderer;
+	
 
-	protected override void Awake() {
-		base.Awake();
+	PickupObject.PickupObjectAction onPickup => (objPickedUp) => heldObject = objPickedUp;
+	PickupObject.PickupObjectAction onDrop => (objDropped) => {
+		if (objDropped == heldObject) heldObject = null;
+	};
+
+	protected void OnEnable() {
 		renderer = GetComponentInChildren<Renderer>();
 		collider = GetComponentInChildren<Collider>();
 		look = GetComponent<PlayerLook>();
@@ -28,12 +35,14 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 		headbob = GetComponent<Headbob>();
 		cameraFollow = GetComponentInChildren<CameraFollow>();
 		growShrink = GetComponent<GrowShrinkObject>();
+		
+		PickupObject.OnAnyPickup += onPickup;
+		PickupObject.OnAnyDrop += onDrop;
 	}
 
-	protected override void Start() {
-		base.Start();
-		PickupObject.OnAnyPickup += (PickupObject objPickedUp) => heldObject = objPickedUp;
-		PickupObject.OnAnyDrop += (PickupObject objDropped) => { if (objDropped == heldObject) heldObject = null; };
+	protected void OnDisable() {
+		PickupObject.OnAnyPickup -= onPickup;
+		PickupObject.OnAnyDrop -= onDrop;
 	}
 
 	#region Saving

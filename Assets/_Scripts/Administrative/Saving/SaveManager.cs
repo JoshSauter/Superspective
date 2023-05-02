@@ -137,6 +137,11 @@ namespace Saving {
             isCurrentlyLoadingSave = false;
         }
 
+        public static void ClearAllState() {
+            DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
+            saveManagers.Clear();
+        }
+
         public static void SaveSettings() {
             Settings.instance.WriteSettings(SettingsFilePath);
         }

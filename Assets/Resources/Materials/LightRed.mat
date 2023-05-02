@@ -101,6 +101,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ReverseVisibility: 0
+    - _ScaleFactor: 4
     - _Shininess: 100
     - _ShutterInverse: 0
     - _SmoothnessTextureChannel: 0
@@ -127,9 +128,11 @@ Material:
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 1.39772, g: 0.109768584, b: 0.109768584, a: 1}
     - _EndColor: {r: 1, g: 1, b: 1, a: 1}
+    - _LargeSidePoint: {r: 0, g: 0, b: 0, a: 0}
     - _MaxRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _MinRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
     - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
+    - _SmallSidePoint: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.4528302, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

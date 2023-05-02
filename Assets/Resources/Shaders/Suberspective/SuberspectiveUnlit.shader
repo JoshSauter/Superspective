@@ -79,6 +79,7 @@ Shader "Suberspective/SuberspectiveUnlit" {
             fixed4 frag (SuberspectiveV2F i) : SV_Target {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv_MainTex) * _Color;
+            	
             	// This is possibly set to false by PowerTrail
             	half emissionEnabled = 1;
             	SuberspectiveRender(i, col, emissionEnabled);

@@ -22,6 +22,8 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     [ShowNativeProperty]
     float minDistance {
         get {
+            if (GameManager.instance.IsCurrentlyLoading) return float.MaxValue;
+            
             if (scramblers.Count > 0) {
                 var validScramblersByDistance = scramblers.Values
                     // Only consider scramblers which are loaded and enabled
@@ -59,6 +61,11 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     }
     
     void OnRenderImage(RenderTexture source, RenderTexture destination) {
+        if (GameManager.instance.IsCurrentlyLoading) {
+            Graphics.Blit(source, destination);
+            return;
+        }
+        
         mat.SetFloat("_Intensity", intensity);
         Graphics.Blit(source, destination, mat);
         

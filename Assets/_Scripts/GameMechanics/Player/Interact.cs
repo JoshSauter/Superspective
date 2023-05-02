@@ -16,7 +16,7 @@ public class Interact : Singleton<Interact> {
     public Image reticle;
     public Image reticleOutside;
     public float interactionDistance = defaultInteractionDistance;
-    public float effectiveInteractionDistance => Player.instance.growShrink.currentScale * interactionDistance;
+    public float effectiveInteractionDistance => Player.instance.scale * interactionDistance;
 
     public InteractableObject interactableObjectHovered;
     Camera cam;

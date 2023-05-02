@@ -13,6 +13,7 @@ public class SelectAllChildrenOnLayersRecursivelyTool : ScriptableWizard {
         }
 
         Selection.objects = newSelection.ToArray();
+        Debug.Log($"{Selection.count} objects found on layer mask.");
     }
 
     [MenuItem("My Tools/Select All Children On Layer Recursively")]

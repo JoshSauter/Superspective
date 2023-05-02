@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Audio;
 using MagicTriggerMechanics;
 using PortalMechanics;
 using SuperspectiveUtils;
@@ -16,6 +17,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         public TeleportEnter teleportFacingBackward;
         bool exitsAreConnected = false;
         bool playerIsInInfiniteHallway = false;
+        public bool hasBeenSolved = false;
 
         private void Awake() {
             lowerPlatformPortal.pauseRendering = !exitsAreConnected;
@@ -73,7 +75,15 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
             teleportFacingForward.teleportEnter.enabled = !exitsAreConnected;
         }
 
+        // Called in a UnityEvent from the puzzle solved trigger zones
+        public void MarkAsSolved() {
+            hasBeenSolved = true;
+        }
+
         void ConnectExits() {
+            if (!exitsAreConnected && !hasBeenSolved) {
+                AudioManager.instance.PlayAtLocation(AudioName.WallsShifting, "InfiniteHallwayRight", teleportFacingForward.transform.position);
+            }
             exitsAreConnected = true;
         }
         

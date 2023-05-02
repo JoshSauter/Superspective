@@ -15,8 +15,8 @@ public class PortalCopy : MonoBehaviour {
 
     bool _copyEnabled = false;
     public bool copyEnabled {
-        get { return _copyEnabled; }
-        set {
+        get => _copyEnabled;
+        private set {
             if (_copyEnabled && !value) {
                 OnPortalCopyDisabled?.Invoke();
             }

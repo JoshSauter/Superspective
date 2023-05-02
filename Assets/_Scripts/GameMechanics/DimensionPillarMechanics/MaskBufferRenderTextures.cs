@@ -36,6 +36,11 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	}
 
 	private void RenderEdgeColorsThroughPortalTexture() {
+		if (edgeDetectionColorsThroughPortalShader == null) {
+			Debug.LogError("Edge detection colors through portal shader not set, disabling.");
+			this.enabled = false;
+			return;
+		}
 		Camera portalMaskCam = SuperspectiveScreen.instance.portalMaskCamera;
 		RenderTexture prevTargetTexture = portalMaskCam.targetTexture;
 		portalMaskCam.targetTexture = edgeDetectionColorsThroughPortals;

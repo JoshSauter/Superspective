@@ -13,6 +13,8 @@ using Object = UnityEngine.Object;
 
 namespace Saving {
     public class SaveManagerForScene {
+        private SaveManagerForScene() { }
+
         public SaveManagerForScene(string sceneName) {
             this.sceneName = sceneName;
         }

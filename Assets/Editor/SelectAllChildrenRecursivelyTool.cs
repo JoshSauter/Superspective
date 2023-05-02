@@ -17,7 +17,7 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
         Type type = GetTypeByName(typeName);
         if (type == null) return;
 
-        MethodInfo method = GetType().GetMethod("SelectAllChildrenWithType")
+        MethodInfo method = GetType().GetMethod(nameof(SelectAllChildrenWithType))
             .MakeGenericMethod(type);
         method.Invoke(this, new object[] { });
     }
@@ -35,6 +35,7 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
         }
 
         Selection.objects = newSelection.ToArray();
+        Debug.Log($"{Selection.count} objects found of type {typeName}.");
     }
 
     public void SelectAllChildrenRecursively<T>(GameObject curNode, ref List<GameObject> selectionSoFar)

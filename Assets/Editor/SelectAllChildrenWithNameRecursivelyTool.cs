@@ -13,6 +13,7 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
         }
 
         Selection.objects = newSelection.ToArray();
+        Debug.Log($"{Selection.count} objects found containing {nameToMatch}.");
     }
 
     [MenuItem("My Tools/Select All Children With Name Recursively")]

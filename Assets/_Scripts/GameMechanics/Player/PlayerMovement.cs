@@ -61,9 +61,10 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     
     // Staircase handling characteristics
     private const float _maxStepHeight = 0.6f;
+    private const float _minStepHeight = 0.1f;
     private const int framesAfterStepToKeepVelocityZero = 5;
     private const float stepSpeedMultiplier = 2.5f;
-    private float stepSpeed => movespeed * stepSpeedMultiplier;// _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
+    private float stepSpeed => effectiveMovespeed * stepSpeedMultiplier;// _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
     [ShowNonSerializedField]
     private float distanceMovedForStaircaseOffset = 0;
 
@@ -86,8 +87,9 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     public Vector3 lastGroundVelocity;
 
     // How far do we move into the step before raycasting down?
-    float stepOverbiteMagnitude => movespeed * Time.fixedDeltaTime * scale;
+    float stepOverbiteMagnitude => effectiveMovespeed * Time.fixedDeltaTime * scale;
     float maxStepHeight => _maxStepHeight * scale;
+    float minStepHeight => _minStepHeight * scale;
 #endregion
 
     public bool autoRun;
@@ -110,19 +112,20 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     float timeSpentJumping;
     bool underMinJumpTime; // Used to delay otherwise immediate checks for isGrounded right after jumping
 
-    private float scale => Player.instance.growShrink.currentScale;
+    private float scale => Player.instance.scale;
 
     [ShowNativeProperty]
     public Vector3 curVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
 
     public float movespeedMultiplier = 1;
-    
-    float movespeed;
+
+    private float movespeed;
+    private float effectiveMovespeed => movespeed * scale;
     public float walkSpeed => _walkSpeed * scale * movespeedMultiplier;
     public float runSpeed => _runSpeed * scale * movespeedMultiplier;
     public float jumpForce => CalculatedJumpForce(desiredJumpHeight * scale, thisRigidbody.mass, Physics.gravity.magnitude);
     public const float desiredJumpHeight = 2.672f;
-    public Vector3 bottomOfPlayer => transform.position - transform.up * 2.5f;
+    public Vector3 bottomOfPlayer => transform.position - (transform.up * 2.5f * scale);
     
     public float CalculatedJumpForce(float wantedHeight, float mass, float g){
         return mass * Mathf.Sqrt( 2 * wantedHeight * g);
@@ -212,15 +215,16 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
         bool recentlySteppedUp = stepState.prevState == StepState.SteppingDiagonal && stepState.timeSinceStateChanged < 0.25f;
         if ((input.SprintHeld || autoRun) && !recentlySteppedUp) {
-            movespeed = Mathf.Lerp(movespeed, runSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
+            movespeed = Mathf.Lerp(movespeed, runSpeed / scale, desiredMovespeedLerpSpeed * Time.deltaTime);
         }
         else {
-            movespeed = Mathf.Lerp(movespeed, walkSpeed, desiredMovespeedLerpSpeed * Time.deltaTime);
+            movespeed = Mathf.Lerp(movespeed, walkSpeed / scale, desiredMovespeedLerpSpeed * Time.deltaTime);
         }
     }
 
     void FixedUpdate() {
         UpdateGroundedState();
+        
 
         thisRigidbody.isKinematic = stopped || stepState != StepState.StepReady;
 
@@ -267,6 +271,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         thisRigidbody.useGravity = !grounded.isGrounded;
 
         if (!thisRigidbody.isKinematic && stepState == StepState.StepReady) {
+            debug.Log($"Player velocity: {thisRigidbody.velocity:F2}\nSetting it to: {desiredVelocity}");
             thisRigidbody.velocity = desiredVelocity;
         }
 
@@ -315,7 +320,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             return desiredHorizontalVelocity + (thisRigidbody.velocity - horizontalVelocity);
         }
 
-        float adjustedMovespeed = ground.otherCollider.CompareTag("Staircase") ? walkSpeed : movespeed;
+        float adjustedMovespeed = ground.otherCollider.CompareTag("Staircase") ? walkSpeed : effectiveMovespeed;
+        debug.Log($"Movespeed: {effectiveMovespeed}");
         return Vector3.Lerp(
             thisRigidbody.velocity,
             moveDirection * adjustedMovespeed,
@@ -336,7 +342,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.green, 0.1f);
 
         // Handle mid-air collision with obstacles
-        moveDirection = AirCollisionMovementAdjustment(moveDirection * movespeed);
+        moveDirection = AirCollisionMovementAdjustment(moveDirection * effectiveMovespeed);
 
         // If no keys are pressed, decelerate to a horizontal stop
         if (!input.LeftStickHeld && !autoRun) {
@@ -366,7 +372,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     /// <param name="movementVector"></param>
     /// <returns>True if there is something in the way of the player's desired movement vector, false otherwise.</returns>
     Vector3 AirCollisionMovementAdjustment(Vector3 movementVector) {
-        float rayDistance = movespeed * Time.fixedDeltaTime + thisCollider.radius;
+        float rayDistance = effectiveMovespeed * Time.fixedDeltaTime + thisCollider.radius;
         RaycastHit obstacle = new RaycastHit();
         Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
         
@@ -388,7 +394,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         while (!grounded.isGrounded) {
             float height = Vector3.Dot(transform.up, transform.position - startPosition);
             if (height > maxHeight) maxHeight = height;
-            float adjustedHeight = Vector3.Dot(transform.up, transform.position - startPosition) / Player.instance.growShrink.currentScale;
+            float adjustedHeight = Vector3.Dot(transform.up, transform.position - startPosition) / Player.instance.scale;
             if (adjustedHeight > maxAdjustedHeight) maxAdjustedHeight = adjustedHeight;
             yield return new WaitForFixedUpdate();
         }
@@ -515,7 +521,6 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         }
     }
     
-#endregion
     StepFound DetectStep(Vector3 desiredVelocity, ContactPoint ground, bool isGrounded) {
         // If player is not moving, don't do any raycasts, just return
         if (desiredVelocity.magnitude < 0.1f) return null;
@@ -594,6 +599,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             
             float stepHeight = Vector3.Dot(transform.up, stepTest.point - bottomOfPlayer);
 
+            if (stepHeight < minStepHeight) return false;
+
             Vector3 stepOffset = stepOverbite + transform.up * stepHeight;
             //Debug.DrawRay(smarterRaycastStartPos, stepOffset, Color.yellow, 10);
             step = new StepFound(contact, contactNormal, stepOffset);
@@ -602,6 +609,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
 
         return stepFound;
     }
+#endregion
 
     public void UpdateGroundedState() {
         ContactPoint groundContactPoint = default;
@@ -656,7 +664,7 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         bool onGlass = grounded
             .ground
             .GetMaybeComponent<Renderer>()
-            .Exists(r => r.sharedMaterial.name.ToLower().Contains("glass"));
+            .Exists(r => r.sharedMaterials.Where(m => m != null).ToArray()[0].name.ToLower().Contains("glass"));
 
         return onGlass;
     }

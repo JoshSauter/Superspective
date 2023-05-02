@@ -6,13 +6,15 @@ using NaughtyAttributes;
 using UnityEngine;
 using Saving;
 using Tayx.Graphy;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 public class GameManager : Singleton<GameManager> {
     [SerializeField]
-    private GameObject pauseMenu;
+    private GameObject novaUI;
     private bool _isApplicationQuitting = false;
     public bool IsApplicationQuitting => _isApplicationQuitting;
 
@@ -42,7 +44,7 @@ public class GameManager : Singleton<GameManager> {
 
     private void Awake() {
         // Hack so that I don't always have to have NovaUI enabled before pressing Play
-        pauseMenu.SetActive(true);
+        novaUI.SetActive(true);
     }
 
     public bool gameHasLoaded = false;
@@ -61,6 +63,13 @@ public class GameManager : Singleton<GameManager> {
         if (MainCanvas.instance.blackOverlayState == MainCanvas.BlackOverlayState.On) {
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
         }
+    }
+
+    public void RestartGame() {
+        Time.timeScale = 1f;
+        SuperspectivePhysics.ClearAllState();
+        SaveManager.ClearAllState();
+        SceneManager.LoadScene(this.gameObject.scene.buildIndex);
     }
 
     public void QuitGame() {

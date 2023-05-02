@@ -7,7 +7,7 @@ using SuperspectiveUtils;
 using LevelManagement;
 
 public class OutOfBounds : MonoBehaviour {
-	public Levels levelToLoad;
+	Levels levelToLoad;
 
 	Image redBackground;
 	Image blackForeground;
@@ -121,7 +121,7 @@ public class OutOfBounds : MonoBehaviour {
 	}
 
 	IEnumerator LoadLevel() {
-		LevelManager.instance.SwitchActiveScene(levelToLoad);
+		LevelManager.instance.SwitchActiveScene(LevelManager.instance.startingScene);
 
 		yield return new WaitForSeconds(2);
 

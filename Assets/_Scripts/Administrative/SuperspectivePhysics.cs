@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class SuperspectivePhysics {
+	private static readonly Vector3 originalGravity = Physics.gravity;
 	public readonly struct ColliderPair : IEquatable<ColliderPair> {
 		public readonly Collider col1;
 		public readonly Collider col2;
@@ -71,5 +72,24 @@ public static class SuperspectivePhysics {
 				ignoredCollisions[pair]--;
 			}
 		}
+	}
+
+	public static bool CollidersOverlap(Collider c1, Collider c2) {
+		// This function isn't typically used for this purpose (hence the two throwaway out arguments),
+		// but it's the best I could find that did a proper check of whether two Colliders would be in contact with each other
+		return Physics.ComputePenetration(
+			c1, c1.transform.position, c1.transform.rotation, 
+			c2, c2.transform.position, c2.transform.rotation,
+			out _, out _);
+	}
+
+	public static void ClearAllState() {
+		Physics.gravity = originalGravity;
+
+		foreach (var ignoredCollision in ignoredCollisions.Keys) {
+			Physics.IgnoreCollision(ignoredCollision.col1, ignoredCollision.col2, false);
+		}
+		
+		ignoredCollisions.Clear();
 	}
 }

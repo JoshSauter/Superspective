@@ -16,6 +16,7 @@ namespace Editor {
             }
 
             Selection.objects = newSelection.ToArray();
+            Debug.Log($"{Selection.count} objects found with material {material.name}.");
         }
 
         [MenuItem("My Tools/Select All Children With Material Recursively")]

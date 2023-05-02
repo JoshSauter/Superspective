@@ -116,6 +116,11 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		return propBlock.GetTexture(propName);
 	}
 
+	public Vector4 GetVector(string propName) {
+		r.GetPropertyBlock(propBlock);
+		return propBlock.GetVector(propName);
+	}
+
 	#endregion
 
 	/////////////
@@ -153,6 +158,12 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	public void SetTexture(string propName, Texture value) {
 		r.GetPropertyBlock(propBlock);
 		propBlock.SetTexture(propName, value);
+		r.SetPropertyBlock(propBlock);
+	}
+	
+	public void SetVector(string propName, Vector4 v) {
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetVector(propName, v);
 		r.SetPropertyBlock(propBlock);
 	}
 

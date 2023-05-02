@@ -21,9 +21,10 @@ struct SuberspectiveV2F {
 
 SuberspectiveV2F SuberspectiveVert(appdata_full v) {
 	SuberspectiveV2F o;
-	o.clipPos = UnityObjectToClipPos(v.vertex);
+	float3 vertex = v.vertex;
+	o.clipPos = UnityObjectToClipPos(vertex);
 	o.screenPos = ComputeScreenPos(o.clipPos);
-	o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+	o.worldPos = mul(unity_ObjectToWorld, float4(vertex.xyz, 1.0)).xyz;
 	o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
     o.uv_EmissionMap = TRANSFORM_TEX(v.texcoord, _EmissionMap);
 #ifdef DISSOLVE_OBJECT

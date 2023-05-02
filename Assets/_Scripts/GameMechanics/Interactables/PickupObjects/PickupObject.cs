@@ -103,7 +103,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     void Update() {
         if (interactable) {
-            if (scale > 6f * Player.instance.growShrink.currentScale) {
+            if (scale > 6f * Player.instance.scale) {
                 interactableObject.SetAsDisabled("(Too large)");
             }
             else {
@@ -290,7 +290,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             pickupSound.basePitch = currentPitch;
             AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, this, true);
             
-            Physics.IgnoreCollision(thisCollider, Player.instance.collider, true);
+            SuperspectivePhysics.IgnoreCollision(thisCollider, Player.instance.collider);
 
             OnPickupSimple?.Invoke();
             OnPickup?.Invoke(this);
@@ -314,7 +314,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
             AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, this, true);
             
-            Physics.IgnoreCollision(thisCollider, Player.instance.collider, false);
+            SuperspectivePhysics.RestoreCollision(thisCollider, Player.instance.collider);
 
             OnDropSimple?.Invoke();
             OnDrop?.Invoke(this);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using LevelSpecific.Fork;
+using PortalMechanics;
 using UnityEngine;
 using Saving;
 using StateUtils;
@@ -14,7 +13,17 @@ namespace GrowShrink {
         public Rigidbody thisRigidbody;
         // These values change/get set when this object enters a GrowShrinkHallway
         public float minScale, maxScale;
-        public float currentScale = 1;
+        private float _currentScale = 1;
+
+        public float currentScale {
+            get => _currentScale;
+            set {
+                debug.Log($"Setting currentScale to {value}");
+                _currentScale = value;
+            }
+        }
+        // Version of currentScale which never goes above 1 (for tracking effects that should only happen when smaller and not larger)
+        public float currentScaleClamped => Mathf.Clamp01(currentScale);
 
         public enum State {
             NotInHallway,
@@ -29,8 +38,28 @@ namespace GrowShrink {
 
             if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
+
+            state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.state}");
         }
-        
+
+        private void OnEnable() {
+            Portal.BeforeAnyPortalTeleport += HandlePortalTeleport;
+        }
+
+        private void OnDisable() {
+            Portal.BeforeAnyPortalTeleport -= HandlePortalTeleport;
+        }
+
+        void HandlePortalTeleport(Portal inPortal, Collider objTeleported) {
+            if (!inPortal.changeScale) return;
+            
+            if (objTeleported == thisRigidbody.GetComponent<Collider>()) {
+                SetScaleDirectly(currentScale * inPortal.scaleFactor);
+                minScale *= inPortal.scaleFactor;
+                maxScale *= inPortal.scaleFactor;
+            }
+        }
+
         private float MinScale(float scaleFactor) {
             switch (state.state) {
                 case State.NotInHallway:
@@ -58,33 +87,52 @@ namespace GrowShrink {
         public void EnteredHallway(GrowShrinkHallway hallway, bool enteredSmallSide) {
             state.Set(enteredSmallSide ? State.EnteredSmallSide : State.EnteredLargeSide);
             minScale = currentScale * MinScale(hallway.scaleFactor);
+            debug.Log($"minScale = {currentScale} * {MinScale(hallway.scaleFactor)}");
             maxScale = currentScale * MaxScale(hallway.scaleFactor);
         }
 
         public void ExitedHallway(GrowShrinkHallway hallway, bool exitedSmallSide) {
-            SetScale(hallway, exitedSmallSide ? 0 : 1);
+            SetScaleFromHallway(hallway, exitedSmallSide ? 0 : 1);
             state.Set(State.NotInHallway);
         }
 
-        public void SetScale(GrowShrinkHallway hallway, float percentThroughHallway) {
+        public void SetScaleFromHallway(GrowShrinkHallway hallway, float percentThroughHallway) {
+            if (state == State.NotInHallway) return;
+            
             float targetScale = Mathf.Lerp(minScale, maxScale, percentThroughHallway);
+            SetScaleDirectly(targetScale);
+        }
+
+        void SetScaleDirectly(float targetScale) {
+            float targetScaleClamped = Mathf.Clamp01(targetScale);
             Vector3 scaleWithoutMultiplier = transform.localScale / currentScale;
             transform.localScale = scaleWithoutMultiplier * targetScale;
 
             if (thisRigidbody != null) {
                 float massWithoutMultiplier = thisRigidbody.mass / currentScale;
                 thisRigidbody.mass = massWithoutMultiplier * targetScale;
+
+                Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / currentScale;
+                thisRigidbody.velocity = velocityWithoutMultiplier * targetScale;
             }
 
             if (this.TaggedAsPlayer()) {
                 Vector3 gravityWithoutMultiplier = Physics.gravity / currentScale;
                 Physics.gravity = gravityWithoutMultiplier * targetScale;
 
-                ColorfulFog fog = Player.instance.playerCam.GetComponent<ColorfulFog>();
-                float fogStartWithoutMultiplier = fog.startDistance / currentScale;
-                fog.startDistance = fogStartWithoutMultiplier * targetScale;
+                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.lastGroundVelocity / currentScale;
+                PlayerMovement.instance.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
 
-                // Camera cam = Player.instance.playerCam;
+                if (targetScale < 1f || currentScale < 1f) {
+                    ColorfulFog fog = Player.instance.playerCam.GetComponent<ColorfulFog>();
+                    float fogStartWithoutMultiplier = fog.startDistance / currentScaleClamped;
+                    fog.startDistance = fogStartWithoutMultiplier * targetScaleClamped;
+
+                    // Camera cam = Player.instance.playerCam;
+                    BladeEdgeDetection edges = MaskBufferRenderTextures.instance.edgeDetection;
+                    float depthSensWithoutMultiplier = edges.depthSensitivity * currentScaleClamped;
+                    edges.depthSensitivity = depthSensWithoutMultiplier / targetScaleClamped;
+                }
                 // float nearClipPlaneWithoutMultiplier = cam.nearClipPlane / currentScale;
                 // float farClipPlaneWithoutMultiplier = cam.farClipPlane / currentScale;
                 // cam.nearClipPlane = nearClipPlaneWithoutMultiplier * targetScale;

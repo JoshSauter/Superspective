@@ -34,13 +34,16 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         worldPositionLastFrame = transform.position;
     }
 
-    protected override void Start() {
-        base.Start();
+    private void OnEnable() {
         TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
-        Portal.OnAnyPortalTeleportSimple += obj => {
-            if (obj.TaggedAsPlayer()) RecalculateWorldPositionLastFrame();
-        };
+        Portal.OnAnyPortalTeleportSimple += RecalculateWorldPositionLastFrameForPlayer;
         Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
+    }
+    
+    private void OnDisable() {
+        TeleportEnter.OnAnyTeleportSimple -= RecalculateWorldPositionLastFrame;
+        Portal.OnAnyPortalTeleportSimple -= RecalculateWorldPositionLastFrameForPlayer;
+        Player.instance.look.OnViewLockExitFinish -= HandleViewUnlockEnd;
     }
 
     void FixedUpdate() {
@@ -88,6 +91,11 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         timeSinceCurrentLerpSpeedWasModified = 0f;
     }
 
+    public void RecalculateWorldPositionLastFrameForPlayer(Collider obj) {
+        if (obj.TaggedAsPlayer()) {
+            RecalculateWorldPositionLastFrame();
+        }
+    }
     // Restore the relative offset of worldPositionLastFrame after a jump-cut movement of the player
     public void RecalculateWorldPositionLastFrame() {
         worldPositionLastFrame = transform.parent.TransformPoint(relativePositionLastFrame);

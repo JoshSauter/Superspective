@@ -9,6 +9,7 @@ using PortalMechanics;
 using Saving;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 using Random = System.Random;
 
@@ -131,6 +132,8 @@ namespace SuperspectiveUtils {
             Vector3 lineDirection = end - start;
             float lineLength = lineDirection.magnitude;
             lineDirection.Normalize();
+            Debug.DrawLine(point, start, Color.green, 3f);
+            Debug.DrawLine(point, end, Color.red, 3f);
             float projectedLength = Mathf.Clamp(Vector3.Dot(point - start, lineDirection), 0f, lineLength);
             return start + lineDirection * projectedLength;
         }
@@ -153,6 +156,38 @@ namespace SuperspectiveUtils {
         }
         public static Vector3 WithZ(this Vector3 v, float z) {
             return new Vector3(v.x, v.y, z);
+        }
+
+        public static float MaxComponent(this Vector3 v, bool byAbsValue = true) {
+            Vector3 test = byAbsValue ? new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z)) : v;
+
+            // xyz, xzy, yxz, yzx, zxy, zyx
+            // X max
+            if (test.x > test.y && test.x > test.z) {
+                return v.x;
+            }
+            // Y max
+            else if (test.y > test.x && test.y > test.z) {
+                return v.y;
+            }
+            // Z max
+            else if (test.z > test.x && test.z > test.y) {
+                return v.z;
+            }
+            else {
+                throw new Exception($"No max value among {test:F2}, original vector {v:F2}");
+            }
+        }
+        // 0 = x, 1 = y, 2 = z
+        public static int MaxComponentDirection(this Vector3 v, bool byAbsValue = true) {
+            float max = v.MaxComponent(byAbsValue);
+            if (Math.Abs(v.x - max) < float.Epsilon) {
+                return 0;
+            }
+            else if (Math.Abs(v.y - max) < float.Epsilon) {
+                return 1;
+            }
+            else return 2;
         }
     }
 
@@ -202,6 +237,13 @@ namespace SuperspectiveUtils {
     }
 
     public static class Utils {
+        public static void ForceRefresh(this MeshCollider meshCollider) {
+            // Hack to force the MeshCollider to refresh the bounds
+            Mesh mesh = meshCollider.sharedMesh;
+            meshCollider.sharedMesh = null;
+            meshCollider.sharedMesh = mesh;
+        }
+        
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> keyValuePairs) {
             return keyValuePairs.ToDictionary(kv => kv.Key, kv => kv.Value);
         }
