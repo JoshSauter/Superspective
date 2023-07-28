@@ -9,6 +9,7 @@ using Saving;
 using SerializableClasses;
 using UnityEngine;
 using static Audio.AudioManager;
+using CubeSpawnerReference = SerializableClasses.SerializableReference<CubeSpawnerNew, CubeSpawnerNew.CubeSpawnerNewSave>;
 
 [RequireComponent(typeof(UniqueId))]
 public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave>, AudioJobOnGameObject {
@@ -37,8 +38,10 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public PortalableObject portalableObject;
     public GrowShrinkObject growShrinkObject;
+    public CubeSpawnerReference spawnedFrom;
 
-    public float scale => growShrinkObject != null ? growShrinkObject.currentScale : 1f;
+    public float scale => Mathf.Min(Player.instance.scale, (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
+    const float scaleMultiplier = 1.5f;
     float currentCooldown;
     InteractableGlow interactableGlow;
     InteractableObject interactableObject;
@@ -153,7 +156,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
             float pickupObjRadiusSpacer = GetObjectWidthTowardsCamera();
             //float holdDistanceToUse = pickupObjRadiusSpacer + holdDistance + playerRadiusSpacer;
-            float holdDistanceToUse = pickupObjRadiusSpacer + holdDistance * scale;
+            float holdDistanceToUse = pickupObjRadiusSpacer + holdDistance * Mathf.Max(scale, Mathf.Pow(scale, scaleMultiplier));
+            debug.Log($"Final hold distance: {holdDistanceToUse}\nPickupObjRadiusSpacer: {pickupObjRadiusSpacer}\nScaled hold distance: {holdDistance * Mathf.Pow(scale, scaleMultiplier)}");
             Vector3 targetPos = portalableObject == null
                 ? TargetHoldPosition(holdDistanceToUse, out SuperspectiveRaycast raycastHits)
                 : TargetHoldPositionThroughPortal(holdDistanceToUse, out raycastHits);
@@ -173,6 +177,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
             //debug.Log("Before: " + velBefore.ToString("F3") + "\nAfter: " + thisRigidbody.velocity.ToString("F3"));
         }
+
+        ResolveCollision();
 
         playerCamPosLastFrame = playerCam.transform.position;
     }
@@ -322,6 +328,73 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             OnAnyDrop?.Invoke(this);
         }
     }
+
+    public void Dematerialize() {
+        DynamicObject dynamicObject = gameObject.GetComponent<DynamicObject>();
+        DissolveObject dissolve = gameObject.GetOrAddComponent<DissolveObject>();
+        const float dematerializeTime = 2f;
+        dissolve.materializeTime = dematerializeTime;
+        
+        
+        // Don't allow shrinking cubes to be picked up
+        Drop();
+        interactable = false;
+        // Trick to get the cube to not interact with the player anymore but still collide with ground
+        gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+
+        if (dissolve.state == DissolveObject.State.Materialized) {
+            dissolve.Dematerialize();
+            AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, transform.position);
+            AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, transform.position);
+            StartCoroutine(DestroyObjectAfterDissolve(dissolve, dynamicObject));
+        }
+    }
+
+    private IEnumerator DestroyObjectAfterDissolve(DissolveObject dissolve, SerializableDynamicReference dynamicObjRef) {
+        yield return new WaitUntil(() => dissolve.state == DissolveObject.State.Dematerialized);
+
+        if (spawnedFrom != null) {
+            spawnedFrom.Reference.MatchAction(
+                obj => obj.HandleSpawnedCubeBeingDestroyed(),
+                save => save.HandleSpawnedCubeBeingDestroyed()
+            );
+        }
+        dynamicObjRef?.Reference.MatchAction(
+            dynamicObj => dynamicObj.Destroy(),
+            save => save.Destroy()
+        );
+    }
+    
+#region Custom Collision Logic
+
+    void ResolveCollision() {
+        Collider[] neighbors = Physics.OverlapSphere(transform.position, transform.localScale.x * (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
+
+        for (int i = 0; i < neighbors.Length; i++) {
+            Collider neighbor = neighbors[i];
+            if (neighbor == thisCollider ||
+                neighbor.TaggedAsPlayer() ||
+                Physics.GetIgnoreLayerCollision(gameObject.layer, neighbor.gameObject.layer) ||
+                SuperspectivePhysics.CollisionsAreIgnored(thisCollider, neighbor)) continue;
+
+            Vector3 neighborPosition = neighbor.transform.position;
+            Quaternion neighborRotation = neighbor.transform.rotation;
+
+            Vector3 resolveDirection;
+            float resolveDistance;
+
+            if (Physics.ComputePenetration(
+                thisCollider, transform.position, transform.rotation,
+                neighbor, neighborPosition, neighborRotation,
+                out resolveDirection, out resolveDistance)) {
+                Debug.DrawRay(transform.position, resolveDirection * resolveDistance, new Color(8f, .15f, .10f));
+                transform.position += resolveDirection * resolveDistance;
+                Physics.SyncTransforms();
+            }
+        }
+    }
+    
+#endregion
 
 #region Saving
 

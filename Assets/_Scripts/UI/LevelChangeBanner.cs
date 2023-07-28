@@ -18,8 +18,8 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     public Levels queuedBanner = Levels.ManagerScene;
     public bool isPlayingBanner;
 
-    float fadeTime = 2.5f;
-    float displayTime = 4f;
+    public const float fadeTime = 2.5f;
+    public const float displayTime = 4f;
 
     void Awake() {
         bannerGroup = GetComponent<CanvasGroup>();
@@ -56,9 +56,6 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
 
     // TODO: Make separate coroutine to track banner position and color state each frame. EDIT: Why though?
     IEnumerator PlayBannerCoroutine(Levels level) {
-        // TODO: Temporarily disabled while I test Nova UI stuff
-        yield break;
-        
         // managerScene acts as a flag value for "not set"
         if (lastBannerLoaded != Levels.ManagerScene) {
             levelToBanner[lastBannerLoaded].gameObject.SetActive(false);

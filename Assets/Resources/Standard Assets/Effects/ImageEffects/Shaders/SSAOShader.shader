@@ -225,11 +225,11 @@ half4 frag( v2f i ) : SV_Target
         sum += tex2D (_SSAO, nuv.xy).r * coef;
         denom += coef;
     }
-    for (int s = 0; s < NUM_BLUR_SAMPLES; ++s)
+    for (int t = 0; t < NUM_BLUR_SAMPLES; ++t)
     {
-        float2 nuv = i.uv - o * (s+1);
+        float2 nuv = i.uv - o * (t+1);
         half4 ngeom = tex2D (_CameraDepthNormalsTexture, nuv.xy);
-        half coef = (NUM_BLUR_SAMPLES - s) * CheckSame (geom, ngeom);
+        half coef = (NUM_BLUR_SAMPLES - t) * CheckSame (geom, ngeom);
         sum += tex2D (_SSAO, nuv.xy).r * coef;
         denom += coef;
     }
@@ -271,7 +271,7 @@ half4 frag( v2f i ) : SV_Target {
 	float depthValue;
 	float3 normalValue;
 	DecodeDepthNormal(depthNormalSample, depthValue, normalValue);
-	clip(-depthValue+.999);
+	clip(-depthValue+.9);
 
 	half4 c = tex2D (_MainTex, i.uv[0]);
 	half ao = tex2D (_SSAO, i.uv[1]).r;

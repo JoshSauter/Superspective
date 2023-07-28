@@ -5,7 +5,7 @@ using UnityEngine;
 
 // For when you just want to play a sound through a UnityEvent or something
 public class PlayGlobalSound : MonoBehaviour {
-    public AudioName audio;
+    public new AudioName audio;
     public string ID;
 
     public void Play() {

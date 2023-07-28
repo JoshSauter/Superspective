@@ -6,7 +6,6 @@ using UnityEngine;
 using Saving;
 using SerializableClasses;
 using SuperspectiveUtils;
-using UnityEditor.ProBuilder;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
@@ -34,7 +33,7 @@ namespace GrowShrink {
 
         // Note to self: If the results of this look fucked up, check that the pivot points for combined mesh & trigger zone hitbox are the same
         [Button("Compile", EButtonEnableMode.Editor)]
-        public async void Compile(bool forceRefreshMeshes = false) {
+        void Compile(bool forceRefreshMeshes = false) {
 #region Vertex Transformation Methods
             Vector3 pivotAxis;
             Vector3 smallSidePointWorld, largeSidePointWorld;
@@ -47,10 +46,10 @@ namespace GrowShrink {
             
             // Takes in a world position and returns the world position closest to it along the pivot line
             Vector3 PivotPoint(Vector3 sample) {
-                Vector3 sampleToOrigin = sample - smallSidePointWorld;
+                Vector3 sampleToOrigin = sample - largeSidePointWorld;
 
                 float dot = Vector3.Dot(sampleToOrigin, pivotAxis);
-                return smallSidePointWorld + pivotAxis * dot;
+                return largeSidePointWorld + pivotAxis * dot;
             }
 
             Vector3 TransformVertexShrink(Vector3 worldPos) {
@@ -75,7 +74,7 @@ namespace GrowShrink {
 
             Vector3 TransformVertexIn(Vector3 worldPos) {
                 Vector3 pivot = PivotPoint(worldPos);
-                float t = Mathf.Clamp01(Utils.Vector3InverseLerp(largeSidePointWorld, smallSidePointWorld, pivot));
+                float t = Mathf.Clamp(Utils.Vector3InverseLerp(largeSidePointWorld, smallSidePointWorld, pivot), 0, float.MaxValue);
                 // debug.Log($"InverseLerp({largeSidePointWorld.x}, {smallSidePointWorld.x}, {pivot.x:F2}) = {t}");
 
                 // Integral of some math I did who knows if it's actually right

@@ -1,22 +1,21 @@
-﻿Shader "Hidden/PortalMask"
-{
-	    SubShader
-    {
+﻿Shader "Hidden/PortalMask" {
+	CGINCLUDE
+    #include "UnityCG.cginc"
+	ENDCG
+	SubShader {
 		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "Standard" }
 
-        Pass
-        {
+        Pass {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
             #include "Suberspective/SuberspectiveHelpers.cginc"
 			
 			half4 _CameraDepthNormalsTexture_ST;
+			float _PortalScaleFactor = 1;
 
-            struct PortalMaskV2F
-            {
+            struct PortalMaskV2F {
 	            SuberspectiveV2F suberspective;
 				float4 nz : TEXCOORD5;
             };
@@ -41,24 +40,20 @@
 				DecodeDepthNormal(sample, sampleDepthValue, sampleNormalValue);
 				
 				//clip(.999 - sampleDepthValue);
-				i.nz.w = clamp(i.nz.w, 0, .999);
+				i.nz.w = clamp(i.nz.w / _PortalScaleFactor, 0, .999);
 				return fixed4(i.nz.w, i.nz.w, i.nz.w, 1);
 				return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 			}
             ENDCG
         }
     }
-		    SubShader
-    {
+	SubShader {
 		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "CullEverything" }
 
-        Pass
-        {
+        Pass {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
-            #include "UnityCG.cginc"
 			
 			// Depth + Normal texture information, gathered from Unity's built-in global shader variables
 			sampler2D _CameraDepthNormalsTexture;
@@ -99,17 +94,14 @@
             ENDCG
         }
     }
-    SubShader
-    {
+    SubShader {
 		Tags { "RenderType" = "Opaque" "Queue" = "Transparent" "PortalTag" = "Dimension" }
 
-        Pass
-        {
+        Pass {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
-            #include "UnityCG.cginc"
+            
 			#include "DimensionShaders/DimensionShaderHelpers.cginc"
 			
 			// Depth + Normal texture information, gathered from Unity's built-in global shader variables

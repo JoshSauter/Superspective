@@ -6,8 +6,10 @@ using UnityEngine;
 using System.Linq;
 using Library.Functional;
 using SuperspectiveUtils;
+using UnityEngine.Serialization;
 
 namespace SerializableClasses {
+	using DynamicObjectReference = Either<DynamicObject, DynamicObject.DynamicObjectSave>;
 	/// <summary>
 	/// Since unity doesn't flag the Vector2 as serializable, we
 	/// need to create our own version. This one will automatically convert
@@ -395,6 +397,48 @@ namespace SerializableClasses {
 		}
 	}
 
+	public class SerializableDynamicReference : SerializableReference<DynamicObject, DynamicObject.DynamicObjectSave> {
+		// Special-case reference should go through different method to find DynamicObjects
+		public new DynamicObjectReference Reference {
+			get {
+				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
+				return saveManagerForScene?.GetDynamicObject(referencedObjId)?.Match<DynamicObjectReference>(
+					// Map the results to the appropriate types
+					dynamicObj => dynamicObj,
+					serializedDynamicObject => serializedDynamicObject
+				);
+			}
+			set {
+				if (value != null) {
+					value.MatchAction(
+						dynamicObj => {
+							referencedSceneName = dynamicObj.gameObject.scene.name;
+							referencedObjId = dynamicObj.ID;
+						},
+						serializedDynamicObject => {
+							referencedSceneName = serializedDynamicObject.sceneName;
+							referencedObjId = serializedDynamicObject.ID;
+						}
+					);
+				}
+				else {
+					referencedSceneName = "";
+					referencedObjId = "";
+				}
+			}
+		}
+		
+		// Implicit SerializableReference creation from SaveableObject
+		public static implicit operator SerializableDynamicReference(DynamicObject obj) {
+			return obj != null ? new SerializableDynamicReference { Reference = obj } : null;
+		}
+		
+		// Implicit SerializableReference creation from SerializableSaveObject
+		public static implicit operator SerializableDynamicReference(DynamicObject.DynamicObjectSave save) {
+			return save != null ? new SerializableDynamicReference { Reference = save } : null;
+		}
+	}
+
 	[Serializable]
 	public class SerializableDictionary<K, V> {
 		List<K> keys;
@@ -468,18 +512,19 @@ namespace SerializableClasses {
 
 	[Serializable]
 	public class SerializableFloatSetting : SerializableSetting {
-		public float value;
+		[FormerlySerializedAs("value")]
+		public float floatValue;
 
 		public override void RestoreSettingValue(Setting setting) {
 			if (setting is FloatSetting fs) {
-				fs.value = value;
+				fs.value = floatValue;
 			}
 		}
 
 		public static SerializableSetting From(FloatSetting setting) {
 			return new SerializableFloatSetting() {
 				key = setting.key,
-				value = setting.value
+				floatValue = setting.value
 			};
 		}
 	}
@@ -570,18 +615,19 @@ namespace SerializableClasses {
 
 	[Serializable]
 	public class SerializableToggleSetting : SerializableSetting {
-		public bool value;
+		[FormerlySerializedAs("value")]
+		public bool boolValue;
 
 		public override void RestoreSettingValue(Setting setting) {
 			if (setting is not ToggleSetting ts) return;
 			
-			ts.value = value;
+			ts.value = boolValue;
 		}
 
 		public static SerializableSetting From(ToggleSetting setting) {
 			return new SerializableToggleSetting() {
 				key = setting.key,
-				value = setting.value
+				boolValue = setting.value
 			};
 		}
 	}

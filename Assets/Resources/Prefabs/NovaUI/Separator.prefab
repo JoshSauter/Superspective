@@ -228,11 +228,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 7166771015870840843
+    rid: 7179573506733506560
   references:
     version: 2
     RefIds:
-    - rid: 7166771015870840843
+    - rid: 7179573506733506560
       type: {class: SeparatorVisuals, ns: , asm: Assembly-CSharp}
 --- !u!1 &4324240098418655801
 GameObject:

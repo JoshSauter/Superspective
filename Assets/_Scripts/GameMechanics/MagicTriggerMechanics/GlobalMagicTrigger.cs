@@ -23,6 +23,7 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected override void UpdateLayers() { /* No need to change layers for global triggers */ }
+		protected override void AddBetterTriggers() { /* No colliders to modify for global triggers */ }
 
         void Update() {
             if (!IsActive()) return;

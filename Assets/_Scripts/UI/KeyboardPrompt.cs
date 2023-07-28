@@ -1,22 +1,44 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Library.Functional;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class KeyboardPrompt : MonoBehaviour {
     public Image promptImage;
-    public KeyCode key;
+    // Default key used to find the actual keybind that we should check for input
+    public KeyCode defaultKey;
+    // Key to display
+    public KeyCode key => keybind.primary?.Match(
+        mouseKey => (KeyCode)((int)KeyCode.Mouse0 + mouseKey),
+        keycode => keycode
+    ) ?? keybind.secondary.Match(
+        mouseKey => (KeyCode)((int)KeyCode.Mouse0 + mouseKey),
+        keycode => keycode
+    );
+    // Actual keybind we should check for input on
+    public KeyboardAndMouseInput keybind;
     
     // Start is called before the first frame update
     void Start() {
         if (promptImage == null) {
             promptImage = gameObject.GetOrAddComponent<Image>();
         }
+        
+        var maybeKeybind = GetKeybind();
+        if (maybeKeybind.IsEmpty()) {
+            Debug.LogError($"No keybind setting matches {defaultKey}");
+            enabled = false;
+        }
+
+        keybind = maybeKeybind.Get();
     }
 
-    private bool Dark => Input.GetKey(key);
+    private bool Dark => keybind?.Held ?? false;
     private string DarkOrLight => Dark ? "Dark" : "Light";
 
     private const float DarkColorMultiplier = 0.75f;
@@ -24,11 +46,16 @@ public class KeyboardPrompt : MonoBehaviour {
     private const float LerpMultiplier = 18f;
     private const float PromptImageAlpha = 0.975f;
 
+    // Used to fade images in/out
+    public float alphaMultiplier = 1;
+
     // Update is called once per frame
     void Update() {
+        if (!GameManager.instance.gameHasLoaded) return;
+
         ImageName().ForEach(imageName => {
             float lerpValue = LerpMultiplier * Time.deltaTime;
-            Color targetColor = (Color.white * (Dark ? DarkColorMultiplier : 1f)).WithAlpha(PromptImageAlpha);
+            Color targetColor = (Color.white * (Dark ? DarkColorMultiplier : 1f)).WithAlpha(PromptImageAlpha * alphaMultiplier);
             float targetScale = (Dark ? DarkScaleMultiplier : 1f);
             promptImage.transform.localScale = Vector3.Lerp(promptImage.transform.localScale, Vector3.one * targetScale, lerpValue);
             promptImage.color = Color.Lerp(promptImage.color, targetColor, lerpValue);
@@ -36,12 +63,43 @@ public class KeyboardPrompt : MonoBehaviour {
         });
     }
 
+    private Option<KeyboardAndMouseInput> GetKeybind() {
+        // This code is just to get the actual keybind from the settings menu that matches the default key specified for this prompt
+        Either<int, KeyCode> defaultKeyboardAndMouseInput = new Either<int, KeyCode>(defaultKey);
+        if (defaultKey.ToString().Contains("Mouse")) {
+            defaultKeyboardAndMouseInput = new Either<int, KeyCode>(int.Parse(defaultKey.ToString()[5..]));
+        }
+        bool SettingMatchesKey(KeybindSetting setting) {
+            KeyboardAndMouseInput compareTo = setting.defaultValue;
+            if (defaultKeyboardAndMouseInput.isLeft) {
+                if (compareTo.primary != null && compareTo.primary.isLeft && compareTo.primary.LeftOrDefault() == defaultKeyboardAndMouseInput.LeftOrDefault()) {
+                    return true;
+                }
+                else if (compareTo.secondary != null && compareTo.secondary.isLeft && compareTo.secondary.LeftOrDefault() == defaultKeyboardAndMouseInput.LeftOrDefault()) {
+                    return true;
+                }
+
+                return false;
+            }
+            else {
+                if (compareTo.primary != null && compareTo.primary.isRight && compareTo.primary.RightOrDefault() == defaultKeyboardAndMouseInput.RightOrDefault()) {
+                    return true;
+                }
+                else if (compareTo.secondary != null && compareTo.secondary.isRight && compareTo.secondary.RightOrDefault() == defaultKeyboardAndMouseInput.RightOrDefault()) {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        return Option<KeyboardAndMouseInput>.Of(Settings.allSettings.Values.OfType<KeybindSetting>().FirstOrDefault(SettingMatchesKey)?.value);
+    }
+
     public Option<string> ImageName() {
         string suffix = DarkOrLight;
         switch (key) {
             case KeyCode.None:
-                break;
-            case KeyCode.Backspace:
                 break;
             case KeyCode.Delete:
                 break;
@@ -55,8 +113,9 @@ public class KeyboardPrompt : MonoBehaviour {
                 break;
             case KeyCode.Escape:
                 break;
+            case KeyCode.Backspace:
             case KeyCode.Space:
-                break;
+                return Option<string>.Of($"{key.ToString()}_Key_{suffix}");
             case KeyCode.Keypad0:
             case KeyCode.Keypad1:
             case KeyCode.Keypad2:
@@ -83,13 +142,10 @@ public class KeyboardPrompt : MonoBehaviour {
             case KeyCode.KeypadEquals:
                 break;
             case KeyCode.UpArrow:
-                break;
             case KeyCode.DownArrow:
-                break;
             case KeyCode.RightArrow:
-                break;
             case KeyCode.LeftArrow:
-                break;
+                return Option<string>.Of($"Arrow_{key.ToString().StripSuffix("Arrow")}_Key_{suffix}");
             case KeyCode.Insert:
                 break;
             case KeyCode.Home:
@@ -101,35 +157,21 @@ public class KeyboardPrompt : MonoBehaviour {
             case KeyCode.PageDown:
                 break;
             case KeyCode.F1:
-                break;
             case KeyCode.F2:
-                break;
             case KeyCode.F3:
-                break;
             case KeyCode.F4:
-                break;
             case KeyCode.F5:
-                break;
             case KeyCode.F6:
-                break;
             case KeyCode.F7:
-                break;
             case KeyCode.F8:
-                break;
             case KeyCode.F9:
-                break;
             case KeyCode.F10:
-                break;
             case KeyCode.F11:
-                break;
             case KeyCode.F12:
-                break;
             case KeyCode.F13:
-                break;
             case KeyCode.F14:
-                break;
             case KeyCode.F15:
-                break;
+                return Option<string>.Of($"{key.ToString()}_Key_{suffix}");
             case KeyCode.Alpha0:
             case KeyCode.Alpha1:
             case KeyCode.Alpha2:
@@ -235,13 +277,12 @@ public class KeyboardPrompt : MonoBehaviour {
             case KeyCode.Numlock:
                 break;
             case KeyCode.CapsLock:
-                break;
+                return Option<string>.Of($"Caps_Lock_Key_{suffix}");
             case KeyCode.ScrollLock:
                 break;
             case KeyCode.RightShift:
-                break;
             case KeyCode.LeftShift:
-                break;
+                return Option<string>.Of($"Shift_Key_{suffix}");
             case KeyCode.RightControl:
                 break;
             case KeyCode.LeftControl:
@@ -271,9 +312,9 @@ public class KeyboardPrompt : MonoBehaviour {
             case KeyCode.Menu:
                 break;
             case KeyCode.Mouse0:
-                break;
+                return Option<string>.Of($"Mouse_Left_Key_{suffix}");
             case KeyCode.Mouse1:
-                break;
+                return Option<string>.Of($"Mouse_Right_Key_{suffix}");
             case KeyCode.Mouse2:
                 break;
             case KeyCode.Mouse3:

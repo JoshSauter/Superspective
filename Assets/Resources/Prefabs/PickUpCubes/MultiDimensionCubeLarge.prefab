@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 1544007497055716626}
   - component: {fileID: 1544007497055716625}
   - component: {fileID: 1866524469840165578}
+  - component: {fileID: -6560313610584749663}
   m_Layer: 0
   m_Name: MultiDimensionCubeLarge
   m_TagString: Untagged
@@ -223,6 +224,9 @@ MonoBehaviour:
   thisCollider: {fileID: 0}
   portalableObject: {fileID: 0}
   growShrinkObject: {fileID: 0}
+  spawnedFrom:
+    referencedSceneName: 
+    referencedObjId: 
   interactable: 1
 --- !u!114 &1544007497055716618
 MonoBehaviour:
@@ -294,6 +298,31 @@ MonoBehaviour:
   glowColor: {r: 0.6, g: 0.35, b: 0.25, a: 1}
   thisRendererParent: {fileID: 0}
   recursiveChildRenderers: 1
+--- !u!114 &-6560313610584749663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544007497055716613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39cb98eca5ecef4abc00d1332820c1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1544007497055716617}
+  DEBUG: 0
+  thisGravityObj: {fileID: 1544007497055716626}
+  thisRigidbody: {fileID: 1544007497055716628}
+  minScale: 0
+  maxScale: 0
+  _currentScale: 1
+  startingScale: 1
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!1 &1544007497585443698
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,9 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
-using UnityEngine;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Base class for classes that provide input to <see cref="SuperspectiveTextField"/>.

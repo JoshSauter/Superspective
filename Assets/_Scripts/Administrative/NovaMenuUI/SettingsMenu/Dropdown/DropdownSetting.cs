@@ -88,7 +88,7 @@ public class DropdownSetting : Setting {
         set {
             var index = dropdownSelection.allItems.FindIndex(option => option.DisplayName == value);
             if (index < 0) {
-                Debug.LogError($"Setting {value} not found in DropdownOptions");
+                Debug.LogWarning($"Setting {value} not found in DropdownOptions");
                 return;
             }
             var selection = dropdownSelection.allItems[index];

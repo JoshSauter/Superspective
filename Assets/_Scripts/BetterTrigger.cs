@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Saving;
 using UnityEngine;
 
 // A trigger which will actually trigger OnTriggerEnter/Exit when an object is teleported into or out of it
@@ -19,15 +20,30 @@ public class BetterTrigger : MonoBehaviour {
         if (listeners == null || listeners.Count == 0) {
             listeners = GetComponents<MonoBehaviour>().OfType<BetterTriggers>().ToList();
         }
+
+        trigger.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+    }
+    
+    private void OnEnable() {
+        SaveManager.BeforeLoad += ClearCollidersInZone;
+    }
+
+    private void OnDisable() {
+        SaveManager.BeforeLoad -= ClearCollidersInZone;
+    }
+
+    private void ClearCollidersInZone() {
+        collidersInZone.Clear();
     }
 
     private void FixedUpdate() {
+        if (GameManager.instance.IsCurrentlyLoading || !GameManager.instance.gameHasLoaded) return;
         // Check the positions of each collider we're tracking to see if we need to trigger OnBetterTriggerExit
         
         // Don't remove elements from the collection while we are iterating over it, remove them in bulk afterwards
         HashSet<Collider> collidersToRemove = new HashSet<Collider>();
         foreach (var c in collidersInZone) {
-            if (!IsInTriggerZone(c)) {
+            if (c == null || !IsInTriggerZone(c)) {
                 collidersToRemove.Add(c);
             }
         }
@@ -35,6 +51,8 @@ public class BetterTrigger : MonoBehaviour {
         // Remove any colliders no longer in contact w/ the trigger zone, and trigger OnBetterTriggerExit for each
         collidersInZone.RemoveWhere(collidersToRemove.Contains);
         foreach (var colliderRemoved in collidersToRemove) {
+            if (colliderRemoved == null) continue;
+
             foreach (var listener in listeners) {
                 listener.OnBetterTriggerExit(colliderRemoved);
             }

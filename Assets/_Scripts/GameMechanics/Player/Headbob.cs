@@ -1,4 +1,5 @@
 ﻿using System;
+using PortalMechanics;
 using Saving;
 using UnityEngine;
 
@@ -24,6 +25,17 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     protected override void Start() {
         base.Start();
         playerMovement = GetComponent<PlayerMovement>();
+        Portal.BeforeAnyPortalPlayerTeleport += HandlePlayerTeleport;
+    }
+
+    private void OnDisable() {
+        Portal.BeforeAnyPortalPlayerTeleport -= HandlePlayerTeleport;
+    }
+
+    void HandlePlayerTeleport(Portal portal) {
+        if (portal.changeScale) {
+            curBobAmount *= portal.scaleFactor;
+        }
     }
 
     void FixedUpdate() {

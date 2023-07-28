@@ -6,6 +6,7 @@ using SuperspectiveUtils;
 
 // Creates a copy of an object that is partially through a portal on the other side of the portal
 public class PortalCopy : MonoBehaviour {
+    public float fudgeDistance = 0.001f;
     public bool DEBUG = false;
     DebugLogger debug;
     public GameObject original;
@@ -111,6 +112,7 @@ public class PortalCopy : MonoBehaviour {
             foreach (var m in r.materials) {
                 m.SetVector("_PortalPos", portal.transform.position - portal.transform.forward * 0.00001f);
                 m.SetVector("_PortalNormal", portal.transform.forward);
+                m.SetFloat("_FudgeDistance", fudgeDistance);
             }
         }
     }
@@ -133,5 +135,8 @@ public class PortalCopy : MonoBehaviour {
 
         // Rotation
         transform.rotation = inPortal.TransformRotation(original.transform.rotation);
+        
+        // Scale
+        transform.localScale = original.transform.localScale;
     }
 }

@@ -29,7 +29,7 @@ float4 ClipShutteredAreas(float3 pos, float4 col, float disabled = 0.0) {
     float3 diff = pos - _ShutterCenter;
     float angle = atan2(diff.x, diff.z) + PI;
     const float anglePerShutter = PI * 2 / NUM_SHUTTERS;
-    int index = angle / anglePerShutter;
+    uint index = angle / anglePerShutter;
     int arrayIndex = ArrayIndex(index);
     int arrayIndexNext = ArrayIndex((index+1)%NUM_SHUTTERS);
     

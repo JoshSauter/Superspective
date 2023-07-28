@@ -86,6 +86,9 @@ public class TeleportEnter : MonoBehaviour {
         Vector3 playerTransformedWorldVelocity = teleportExit.transform.TransformDirection(playerRelativeVelocity);
         if (DEBUG) print("Velocity was " + playerWorldVelocity + " but is now " + playerTransformedWorldVelocity);
         playerRigidbody.velocity = playerTransformedWorldVelocity;
+        
+
+        Physics.gravity = Physics.gravity.magnitude * -player.transform.up;
 
         Vector3 playerWorldPos = player.transform.position;
         Vector3 playerLocalPos = teleportEnter.transform.InverseTransformPoint(playerWorldPos);

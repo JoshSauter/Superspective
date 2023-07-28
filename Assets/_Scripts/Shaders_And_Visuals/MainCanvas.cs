@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MainCanvas : Singleton<MainCanvas> {
+	[SerializeField]
+	private Canvas canvas;
 	public Image blackOverlay;
 	public enum BlackOverlayState {
 		Off,
@@ -27,7 +30,7 @@ public class MainCanvas : Singleton<MainCanvas> {
 	float blackOverlayFadeTime = 2f;
 
 	public float blackOverlayAlpha {
-		get { return blackOverlay.color.a; }
+		get => blackOverlay.color.a;
 		set {
 			Color col = blackOverlay.color;
 			col.a = value;
@@ -46,6 +49,17 @@ public class MainCanvas : Singleton<MainCanvas> {
 			if (blackOverlayAlpha == 0) {
 				blackOverlayState = BlackOverlayState.Off;
 			}
+		}
+	}
+
+	private void Update() {
+		if (!GameManager.instance.gameHasLoaded) return;
+
+		bool canvasIsVisible = canvas.renderMode == RenderMode.ScreenSpaceOverlay;
+		bool pauseMenuIsOpen = NovaPauseMenu.instance.PauseMenuIsOpen;
+		if (pauseMenuIsOpen == canvasIsVisible) {
+			// Hack to easily hide the canvas when the pause menu is open
+			canvas.renderMode = pauseMenuIsOpen ? RenderMode.WorldSpace : RenderMode.ScreenSpaceOverlay;
 		}
 	}
 }

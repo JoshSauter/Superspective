@@ -72,6 +72,7 @@
 			float2 uvOffset = tangentSpaceNormal.xy * _RefractionStrength;
 			// Normalize the offset in the X and Y directions
 			uvOffset.y *= _CameraDepthTexture_TexelSize.z * abs(_CameraDepthTexture_TexelSize.y);
+			screenPos.w = max(0.0000001, screenPos.w);
 			float2 uv = AlignWithGrabTexel((screenPos.xy + uvOffset) / screenPos.w);
 
 			float backgroundDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv));

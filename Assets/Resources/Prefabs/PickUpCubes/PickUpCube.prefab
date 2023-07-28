@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: -1455407386897224382}
   - component: {fileID: 4397215519273683910}
   - component: {fileID: 7486660522801237821}
+  - component: {fileID: 4760721684745978824}
   m_Layer: 0
   m_Name: PickUpCube
   m_TagString: Untagged
@@ -296,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  _id: {fileID: -1455407386897224382}
   DEBUG: 0
 --- !u!114 &-1455407386897224382
 MonoBehaviour:
@@ -348,3 +349,28 @@ MonoBehaviour:
   glowColor: {r: 0.6, g: 0.35, b: 0.25, a: 1}
   thisRendererParent: {fileID: 0}
   recursiveChildRenderers: 1
+--- !u!114 &4760721684745978824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7702703061741439296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39cb98eca5ecef4abc00d1332820c1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: -1455407386897224382}
+  DEBUG: 0
+  thisGravityObj: {fileID: 5678607679450239003}
+  thisRigidbody: {fileID: 4725270764708023329}
+  minScale: 0
+  maxScale: 0
+  _currentScale: 1
+  startingScale: 1
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []

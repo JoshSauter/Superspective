@@ -13,7 +13,7 @@ using UnityEditor;
 
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
-	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave> {
+	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
 		[HorizontalLine(color: EColor.Yellow)]
 		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
 		[HorizontalLine(color: EColor.Green)]
@@ -42,10 +42,22 @@ namespace MagicTriggerMechanics {
 			base.Awake();
 			UpdateLayers();
 		}
+		
+		protected override void Init() {
+			base.Init();
+			AddBetterTriggers();
+		}
 
 		protected virtual void UpdateLayers() {
 			if (gameObject.layer != LayerMask.NameToLayer("Portal")) {
 				gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+			}
+		}
+
+		// Any colliders for this MagicTrigger should use BetterTriggers
+		protected virtual void AddBetterTriggers() {
+			foreach (var c in GetComponentsInChildren<Collider>()) {
+				c.GetOrAddComponent<BetterTrigger>();
 			}
 		}
 
@@ -70,7 +82,7 @@ namespace MagicTriggerMechanics {
 			hasNegativeTriggeredOnStay = false;
 		}
 
-		protected void OnTriggerStay(Collider other) {
+		public void OnBetterTriggerStay(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
@@ -114,7 +126,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		protected void OnTriggerEnter(Collider other) {
+		public void OnBetterTriggerEnter(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
@@ -137,7 +149,7 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
-		protected void OnTriggerExit(Collider other) {
+		public void OnBetterTriggerExit(Collider other) {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
@@ -183,8 +195,8 @@ namespace MagicTriggerMechanics {
 		public class MagicTriggerSave : SerializableSaveObject<MagicTrigger> {
 			List<List<bool>> gameObjectsToEnableState = new List<List<bool>>();
 			List<List<bool>> gameObjectsToDisableState = new List<List<bool>>();
-			List<List<bool>> scriptsToEnableState = new List<List<bool>>();
-			List<List<bool>> scriptsToDisableState = new List<List<bool>>();
+			List<List<bool>> scriptsToEnableStatePerAction = new List<List<bool>>();
+			List<List<bool>> scriptsToDisableStatePerAction = new List<List<bool>>();
 			bool hasTriggeredOnStay;
 			bool hasNegativeTriggeredOnStay;
 
@@ -224,8 +236,8 @@ namespace MagicTriggerMechanics {
 					}
 					this.gameObjectsToEnableState.Add(objectsToEnableState);
 					this.gameObjectsToDisableState.Add(objectsToDisableState);
-					this.scriptsToEnableState.Add(scriptsToEnableState);
-					this.scriptsToDisableState.Add(scriptsToDisableState);
+					this.scriptsToEnableStatePerAction.Add(scriptsToEnableState);
+					this.scriptsToDisableStatePerAction.Add(scriptsToDisableState);
 				}
 				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
@@ -247,12 +259,12 @@ namespace MagicTriggerMechanics {
 					}
 					if (action.scriptsToEnable != null) {
 						for (int j = 0; j < action.scriptsToEnable.Length; j++) {
-							action.scriptsToEnable[j].enabled = this.scriptsToEnableState[i][j];
+							action.scriptsToEnable[j].enabled = this.scriptsToEnableStatePerAction[i][j];
 						}
 					}
 					if (action.scriptsToDisable != null) {
 						for (int j = 0; j < action.scriptsToDisable.Length; j++) {
-							action.scriptsToDisable[j].enabled = this.scriptsToDisableState[i][j];
+							action.scriptsToDisable[j].enabled = this.scriptsToDisableStatePerAction[i][j];
 						}
 					}
 				}

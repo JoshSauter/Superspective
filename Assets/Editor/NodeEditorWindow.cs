@@ -10,7 +10,7 @@ public class NodeEditorWindow : EditorWindow {
     public static void ShowNodeEditorWindow() {
         NodeEditorWindow window = ScriptableObject.CreateInstance(typeof(NodeEditorWindow)) as NodeEditorWindow;
         CenterOnMainWin(window);
-        window.title = "Node Properties";
+        window.titleContent = new GUIContent("Node Properties");
         window.ShowModalUtility();
     }
 

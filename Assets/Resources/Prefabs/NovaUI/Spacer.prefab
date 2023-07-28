@@ -496,11 +496,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 7166771079302348869
+    rid: 7179573506733506561
   references:
     version: 2
     RefIds:
-    - rid: 7166771079302348869
+    - rid: 7179573506733506561
       type: {class: SpacerVisuals, ns: , asm: Assembly-CSharp}
 --- !u!1 &1898054317181364056
 GameObject:

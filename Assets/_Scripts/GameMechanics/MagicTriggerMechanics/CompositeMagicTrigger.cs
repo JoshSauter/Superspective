@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace MagicTriggerMechanics {
@@ -12,8 +13,15 @@ namespace MagicTriggerMechanics {
         public HashSet<Collider> hasTriggeredStayThisFrameForCollider = new HashSet<Collider>();
         
         protected override void Init() {
-            base.Init();
+            // Initialize the colliders before modifying them to add BetterTriggers
             InitializeColliders();
+            base.Init();
+        }
+
+        protected override void AddBetterTriggers() {
+            foreach (var c in colliders) {
+                c.GetOrAddComponent<BetterTrigger>();
+            }
         }
 
         public void InitializeColliders() {
@@ -40,21 +48,21 @@ namespace MagicTriggerMechanics {
             if (hasTriggeredEnterThisFrameForCollider.Contains(other)) return;
             hasTriggeredEnterThisFrameForCollider.Add(other);
 
-            OnTriggerEnter(other);
+            OnBetterTriggerEnter(other);
         }
 
         public void OnAnyTriggerExit(Collider other) {
             if (hasTriggeredExitThisFrameForCollider.Contains(other)) return;
             hasTriggeredExitThisFrameForCollider.Add(other);
 
-            OnTriggerExit(other);
+            OnBetterTriggerExit(other);
         }
 
         public void OnAnyTriggerStay(Collider other) {
             if (hasTriggeredStayThisFrameForCollider.Contains(other)) return;
             hasTriggeredStayThisFrameForCollider.Add(other);
 
-            OnTriggerStay(other);
+            OnBetterTriggerStay(other);
         }
 
         void LateUpdate() {

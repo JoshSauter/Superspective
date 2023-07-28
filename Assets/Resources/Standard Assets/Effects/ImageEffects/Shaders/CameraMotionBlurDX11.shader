@@ -139,7 +139,7 @@
  
 		// in DX11 county we take more samples and interleave with sampling along vx direction to break up "patternized" look
 
-		for(int l=0; l<NUM_SAMPLES; l++) 
+		for(uint l=0; l<NUM_SAMPLES; l++) 
 		{
 			if (l==centerSample) continue;	// skip center sample
 

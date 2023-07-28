@@ -10,6 +10,9 @@
 		[HideInInspector] __DstBlend("__dst", Float) = 0.0
 		[HideInInspector] __ZWrite("__zw", Float) = 1.0
     	
+    	
+        _PortalScaleFactor("Portal scale factor", Range(0.000001, 1000000.0)) = 1
+    	
     	_MainTex("Main Texture", 2D) = "white" {}
 		_Color("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
     	_EmissionEnabled("Emission enabled", Float) = 1.0
@@ -56,6 +59,9 @@
 				#define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
 
 				uniform sampler2D_float _DepthNormals;
+
+				// Exposed here so we can read from the PortalMask replacement shader when adjusting depth through scaled Portals
+				uniform float _PortalScaleFactor = 1;
 
 				// These are all defined so that they can be used in the EdgeDetectionColorsThroughPortal replacement shader
 				//sampler2D _CameraDepthNormalsTexture;

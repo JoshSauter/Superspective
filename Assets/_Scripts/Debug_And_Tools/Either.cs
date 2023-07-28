@@ -8,7 +8,8 @@ namespace Library.Functional {
     /// <typeparam name="TL">Type of "Left" item.</typeparam>
     /// <typeparam name="TR">Type of "Right" item.</typeparam>
     public class Either<TL, TR> {
-        readonly bool isLeft;
+        public readonly bool isLeft;
+        public bool isRight => !isLeft;
         readonly TL left;
         readonly TR right;
 

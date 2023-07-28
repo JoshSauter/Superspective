@@ -18,7 +18,6 @@ public class CameraFlythrough : Singleton<CameraFlythrough> {
 
     Levels currentlyPlayingLevel = Levels.ManagerScene;
     public bool isPlayingFlythrough => currentlyPlayingLevel != Levels.ManagerScene;
-    float timeSinceStateChange = 0f;
     
     void Start() {
         levelPaths = GetComponentsInChildren<CameraFlythroughPath>().ToDictionary(p => p.level, p => p);
@@ -39,7 +38,6 @@ public class CameraFlythrough : Singleton<CameraFlythrough> {
     public void PlayForLevel(Levels level) {
         if (levelPaths.ContainsKey(level)) {
             currentlyPlayingLevel = level;
-            timeSinceStateChange = 0f;
             initialCameraTransform = new TransformInfo(flythroughCamera.transform);
             levelPaths[level].Play();
             flythroughCameraAnimator.enabled = true;
@@ -59,7 +57,6 @@ public class CameraFlythrough : Singleton<CameraFlythrough> {
             flythroughCameraAnimator.SetBool(currentlyPlayingLevel.ToName(), false);
             flythroughCameraAnimator.enabled = false;
             currentlyPlayingLevel = Levels.ManagerScene;
-            timeSinceStateChange = 0f;
             initialCameraTransform.ApplyToTransform(flythroughCamera.transform);
             
             Letterboxing.instance.state.Set(Letterboxing.State.Off);

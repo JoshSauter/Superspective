@@ -430,7 +430,7 @@ public class PillarDimensionObject : DimensionObject {
 		}
 
 		MeshFilter meshFilter = renderer.GetComponent<MeshFilter>();
-		if (renderer.r is MeshRenderer && meshFilter != null) {
+		if (renderer.r is MeshRenderer && meshFilter != null && meshFilter.sharedMesh != null) {
 			Bounds localBounds = meshFilter.sharedMesh.bounds;
 			return new Vector3[] {
 				meshFilter.transform.TransformPoint(new Vector3(localBounds.min.x, localBounds.min.y, localBounds.min.z)),
@@ -461,22 +461,9 @@ public class PillarDimensionObject : DimensionObject {
 	void OnDrawGizmosSelected() {
 		if (DEBUG && activePillar != null) {
 			DimensionPillarPlanes thisPillarPlanes = pillarPlanes[activePillar.ID];
-			DrawPlanes(activePillar.transform.position, thisPillarPlanes.leftParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance);
-			DrawPlanes(activePillar.transform.position, thisPillarPlanes.rightParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance);
+			ExtDebug.DrawPlane(activePillar.transform.position, thisPillarPlanes.leftParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance, Color.blue);
+			ExtDebug.DrawPlane(activePillar.transform.position, thisPillarPlanes.rightParallel.normal, activePillar.dimensionWall.PillarHeight, 2f*thisPillarPlanes.maxDistance, Color.blue);
 		}
-	}
-
-	void DrawPlanes(Vector3 point, Vector3 normal, float height = 16f, float width = 100f) {
-		Quaternion rotation = Quaternion.LookRotation(normal);
-		Matrix4x4 trs = Matrix4x4.TRS(point, rotation, Vector3.one);
-		Gizmos.matrix = trs;
-		Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
-		float depth = 0.0001f;
-		Gizmos.DrawCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
-		Gizmos.color = Color.blue;
-		Gizmos.DrawWireCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
-		Gizmos.matrix = Matrix4x4.identity;
-		Gizmos.color = Color.white;
 	}
 
 	#region Saving

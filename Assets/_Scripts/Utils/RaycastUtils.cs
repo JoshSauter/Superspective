@@ -124,7 +124,7 @@ namespace SuperspectiveUtils {
                         return null;
                     }
                 }
-                catch (Exception _) {
+                catch {
                     return null;
                 }
             }

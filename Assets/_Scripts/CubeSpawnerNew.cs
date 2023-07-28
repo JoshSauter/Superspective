@@ -68,18 +68,18 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
         startHeight = glass.transform.localPosition.y;
     }
 
-    bool ReferenceIsReplaceable(PickupObjectReference obj) {
+    static bool ReferenceIsReplaceable(PickupObjectReference obj) {
         return obj?.Reference?.Match(
             pickupObject => pickupObject.isReplaceable,
             saveObject => saveObject.isReplaceable
-        ) ?? false;
+        ) ?? true;
     }
 
     void UpdateButtonInteractability() {
         if (state == State.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
             button.interactableObject.SetAsDisabled("(Spawned cube locked in receptacle)");
         }
-        else if (state == State.CubeSpawnedButNotTaken) {
+        else if (state == State.CubeSpawnedButNotTaken && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
             button.interactableObject.SetAsHidden();
         }
         else {
@@ -150,11 +150,15 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
         DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
         newCubeDynamicObj.isGlobal = false; // Not global until retrieved from cube spawner
         PickupObject newCube = newCubeDynamicObj.GetComponent<PickupObject>();
+        Rigidbody newCubeRigidbody = newCube.thisRigidbody;
         newCube.transform.SetParent(null);
         newCube.transform.localScale = cubePrefab.transform.localScale;
         newCube.transform.position = transform.position + transform.up * spawnOffset;
+        newCubeRigidbody.MovePosition(newCube.transform.position);
         newCube.transform.Rotate(Random.insideUnitSphere.normalized, Random.Range(0, 20f));
+        newCubeRigidbody.MoveRotation(newCube.transform.rotation);
         newCube.thisGravity.gravityDirection = -transform.up;
+        newCube.spawnedFrom = this;
         SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
         AffixSpawnedCubeWithParentDimensionObject(newCube);
@@ -196,32 +200,42 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
     }
     
     void DestroyCubeAlreadyGrabbedFromSpawner() {
-        if (state == State.CubeTaken && ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
-            cubeGrabbedFromSpawner.Reference.MatchAction(
-                // If the object is loaded, play the shrink animation for this cube
-                pickupObject => {
-                    AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, button.transform.position);
-                    AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, pickupObject.transform.position);
-                    cubeDespawning = pickupObject;
+        void DissolveActiveCube(PickupObjectReference cube) {
+            if (ReferenceIsReplaceable(cube)) {
+                cube.Reference.MatchAction(
+                    // If the object is loaded, play the shrink animation for this cube
+                    pickupObject => {
+                        AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, button.transform.position);
+                        AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, pickupObject.transform.position);
+                        cubeDespawning = pickupObject;
 
-                    // Setup initial dissolve properties
-                    foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
-                        cubeRenderer.material.EnableKeyword("DISSOLVE_OBJECT");
-                        cubeRenderer.material.SetFloat("_DissolveBurnSize", .1f);
-                        if (cubeRenderer.gameObject == cubeDespawning.gameObject) {
-                            cubeRenderer.material.SetTextureScale("_DissolveTex", Vector2.one * 0.02f);
+                        // Setup initial dissolve properties
+                        foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
+                            cubeRenderer.material.EnableKeyword("DISSOLVE_OBJECT");
+                            cubeRenderer.material.SetFloat("_DissolveBurnSize", .1f);
+                            if (cubeRenderer.gameObject == cubeDespawning.gameObject) {
+                                cubeRenderer.material.SetTextureScale("_DissolveTex", Vector2.one * 0.02f);
+                            }
                         }
-                    }
 
-                    despawnStartSize = cubeDespawning.transform.localScale;
-                    timeSinceCubeDespawnStart = 0f;
-                },
-                // If the object is not loaded, just destroy it directly
-                saveObject => saveObject.Destroy()
-            );
+                        despawnStartSize = cubeDespawning.transform.localScale;
+                        timeSinceCubeDespawnStart = 0f;
+                    },
+                    // If the object is not loaded, just destroy it directly
+                    saveObject => saveObject.Destroy()
+                );
 
+                state = State.NoCubeSpawned;
+            }
+        }
+
+        if (state == State.CubeTaken) {
+            DissolveActiveCube(cubeGrabbedFromSpawner);
             cubeGrabbedFromSpawner = null;
-            state = State.NoCubeSpawned;
+        }
+        else if (state == State.CubeSpawnedButNotTaken) {
+            DissolveActiveCube(cubeSpawned);
+            cubeSpawned = null;
         }
     }
 
@@ -258,12 +272,16 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
                     cubeRenderer.SetPropertyBlock(propBlock);
                 }
                 cube.GetComponent<DynamicObject>().Destroy();
-                cubeDespawning = null;
-
-                if (button.state == Button.State.ButtonUnpressed) {
-                    button.PressButton();
-                }
+                HandleSpawnedCubeBeingDestroyed();
             }
+        }
+    }
+
+    public void HandleSpawnedCubeBeingDestroyed() {
+        cubeDespawning = null;
+
+        if (button.state == Button.State.ButtonUnpressed) {
+            button.PressButton();
         }
     }
 
@@ -336,6 +354,12 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
             spawner.cubeDespawning = this.cubeDespawning?.GetOrNull();
             spawner.timeSinceCubeDespawnStart = this.timeSinceCubeDespawnStart;
             spawner.cubeDespawnSizeCurve = this.cubeDespawnSizeCurve;
+        }
+
+        public void HandleSpawnedCubeBeingDestroyed() {
+            cubeGrabbedFromSpawner = null;
+            state = State.NoCubeSpawned;
+            // TODO: Handle button depressing on the CubeSpawner while unloaded?
         }
     }
     #endregion

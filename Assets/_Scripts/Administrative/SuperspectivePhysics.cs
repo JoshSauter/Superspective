@@ -50,6 +50,11 @@ public static class SuperspectivePhysics {
 	// Colliders ignoring each other -> # times the colliders have been instructed to ignore each other
 	private static readonly Dictionary<ColliderPair, int> ignoredCollisions = new Dictionary<ColliderPair, int>();
 
+	public static bool CollisionsAreIgnored(Collider collider1, Collider collider2) {
+		ColliderPair pair = new ColliderPair(collider1, collider2);
+		return ignoredCollisions.ContainsKey(pair) && ignoredCollisions[pair] > 0;
+	}
+
 	public static void IgnoreCollision(Collider collider1, Collider collider2) {
 		ColliderPair pair = new ColliderPair(collider1, collider2);
 		if (ignoredCollisions.ContainsKey(pair)) {
@@ -87,6 +92,8 @@ public static class SuperspectivePhysics {
 		Physics.gravity = originalGravity;
 
 		foreach (var ignoredCollision in ignoredCollisions.Keys) {
+			if (ignoredCollision.col1 == null || ignoredCollision.col2 == null) continue;
+			
 			Physics.IgnoreCollision(ignoredCollision.col1, ignoredCollision.col2, false);
 		}
 		

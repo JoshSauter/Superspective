@@ -177,7 +177,7 @@ namespace Saving {
                     return missingSaveableObject;
                 }
 
-                Debug.LogError($"No saveableObject found with id {id} in scene {sceneName}");
+                Debug.LogWarning($"No saveableObject found with id {id} in scene {sceneName}");
                 return null;
             }
             else {
@@ -185,7 +185,31 @@ namespace Saving {
                     return serializedSaveObjects[id];
                 }
                 
-                Debug.LogError($"No serializedSaveObject found with id {id} in scene {sceneName}");
+                Debug.LogWarning($"No serializedSaveObject found with id {id} in scene {sceneName}");
+                return null;
+            }
+        }
+        
+        public Either<DynamicObject, DynamicObjectSave> GetDynamicObject(string id) {
+            if (sceneIsLoaded) {
+                if (dynamicObjects.ContainsKey(id)) {
+                    if (dynamicObjects[id] == null) {
+                        dynamicObjects.Remove(id);
+                        return null;
+                    }
+
+                    return dynamicObjects[id];
+                }
+
+                Debug.LogError($"No dynamicObject found with id {id} in scene {sceneName}");
+                return null;
+            }
+            else {
+                if (serializedDynamicObjects.ContainsKey(id)) {
+                    return serializedDynamicObjects[id];
+                }
+                
+                Debug.LogError($"No serializedDynamicObject found with id {id} in scene {sceneName}");
                 return null;
             }
         }
@@ -223,21 +247,27 @@ namespace Saving {
             return true;
         }
         
+        static SerializableSaveObject GetSaveObject(ISaveableObject saveableObject) {
+            try {
+                return saveableObject.GetSaveObject();
+            }
+            catch (Exception e) {
+                string ID = "<Unknown ID>";
+                try {
+                    ID = saveableObject.ID;
+                }
+                catch (Exception) { } // Sometimes this fails for some reason, we don't really care as it's just for logging
+
+                Debug.LogError($"Could not get serialized save object for: {ID}, {saveableObject}. Details:\n{e}");
+                return null;
+            }
+        }
+        
         /// <summary>
         /// Creates a SaveFile for this scene and returns it
         /// </summary>
         /// <returns>SaveFileForScene for this scene</returns>
         public SaveDataForScene GetSaveFileForScene() {
-            static SerializableSaveObject GetSaveObject(ISaveableObject saveableObject) {
-                try {
-                    return saveableObject.GetSaveObject();
-                }
-                catch (Exception e) {
-                    Debug.LogError($"Could not get serialized save object for: {saveableObject.ID}, {saveableObject}. Details:\n{e}");
-                    return null;
-                }
-            }
-
             Dictionary<string, SerializableSaveObject> objectsToSave;
             Dictionary<string, DynamicObjectSave> dynamicObjectsToSave;
             if (sceneIsLoaded) {
@@ -470,9 +500,12 @@ namespace Saving {
             List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
                 .Where(s => HasValidId(s) && s.ID == id && IsObjectInThisScene(s))
                 .ToList();
+            List<DynamicObject> dynamicObjMatches = Resources.FindObjectsOfTypeAll<DynamicObject>()
+                .Where(dynamicObj => HasValidId(dynamicObj) && dynamicObj.ID == id && IsObjectInThisScene(dynamicObj))
+                .ToList();
 
             if (matches.Count == 0) {
-                Debug.LogError($"No saveableObject with id {id} found anywhere in scene {sceneName}");
+                Debug.LogWarning($"No saveableObject with id {id} found anywhere in scene {sceneName}");
                 return null;
             }
 

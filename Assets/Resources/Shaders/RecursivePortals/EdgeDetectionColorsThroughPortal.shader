@@ -13,7 +13,7 @@
             // make fog work
             #pragma multi_compile_fog
             
-			#include "Suberspective/SuberspectiveHelpers.cginc"
+			#include "../Suberspective/SuberspectiveHelpers.cginc"
             
             #define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
 

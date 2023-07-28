@@ -11,7 +11,7 @@ using SuperspectiveUtils;
 [RequireComponent(typeof(UniqueId), typeof(InteractableObject))]
 public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleButton.ColorPuzzleButtonSave> {
 	public ColorPuzzle colorPuzzle;
-	private Renderer renderer;
+	private new Renderer renderer;
 	private InteractableObject interact;
 	private BlackRoomMainConsole mainConsole => BlackRoomMainConsole.instance;
 	private ColorPuzzleManager colorPuzzleManager => ColorPuzzleManager.instance;

@@ -33,7 +33,7 @@ namespace PortalMechanics {
 			}
 
 			if (portalsByChannel[channelName].Count == portalsRequiredToActivate) {
-				debug.LogError($"Channel {channelName} already has {portalsRequiredToActivate} portals! Check the channels for the following portals:\n" +
+				Debug.LogError($"Channel {channelName} already has {portalsRequiredToActivate} portals! Check the channels for the following portals:\n" +
 					string.Join("\n", portalsByChannel[channelName].Select(p => p.name).ToArray()) + "\n" + portal.name);
 				return;
 			}
@@ -111,12 +111,13 @@ namespace PortalMechanics {
 
 			// Copy post-process effects from player's camera
 			// Order of components here matters; it affects the rendering order of the postprocess effects
-			//portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());                                          // Copy Bloom
-			ColorfulFog fog = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<ColorfulFog>());                            // Copy Fog
+			//portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());											 // Copy Bloom
+			virtualPortalCam.playerFog = playerCam.GetComponent<ColorfulFog>();
+			virtualPortalCam.fog = portalCamera.gameObject.PasteComponent(virtualPortalCam.playerFog);									 // Copy Fog
 			//BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 			//edgeDetection.enabled = false;
 			//edgeDetection.checkPortalDepth = false;
-			virtualPortalCam.postProcessEffects.Add(fog);
+			virtualPortalCam.postProcessEffects.Add(virtualPortalCam.fog);
 			//virtualPortalCam.postProcessEffects.Add(edgeDetection);
 
 			portalCamera.gameObject.name = "VirtualPortalCamera";

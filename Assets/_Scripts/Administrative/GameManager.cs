@@ -45,18 +45,23 @@ public class GameManager : Singleton<GameManager> {
     private void Awake() {
         // Hack so that I don't always have to have NovaUI enabled before pressing Play
         novaUI.SetActive(true);
+        settingsHaveLoaded = false;
     }
 
     public bool gameHasLoaded = false;
+    public static bool firstLaunch = true;
+    public bool settingsHaveLoaded = false;
     IEnumerator Start() {
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
         SaveManager.GetOrCreateSaveManagerForScene(gameObject.scene.name);
         SaveManager.LoadSettings();
+        settingsHaveLoaded = true;
         yield return new WaitWhile(() => LevelManager.instance.activeSceneName == "");
         yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
         yield return new WaitUntil(() => !LevelManager.instance.isCurrentlySwitchingScenes);
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;
+        firstLaunch = false;
         // Disable if you add a title screen or something where you don't want the mouse locked for gameplay
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -71,7 +76,7 @@ public class GameManager : Singleton<GameManager> {
         SaveManager.ClearAllState();
         SceneManager.LoadScene(this.gameObject.scene.buildIndex);
     }
-
+    
     public void QuitGame() {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

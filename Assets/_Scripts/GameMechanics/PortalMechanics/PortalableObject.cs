@@ -13,6 +13,16 @@ using UnityEngine.Rendering;
 namespace PortalMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
+		float fudgeDistance {
+			get {
+				if (fakeCopyInstance != null) {
+					return fakeCopyInstance.fudgeDistance;
+				}
+
+				return 0;
+			}
+		}
+
 		Portal _sittingInPortal;
 		Portal _hoveredThroughPortal;
 		Portal _grabbedThroughPortal;
@@ -144,7 +154,7 @@ namespace PortalMechanics {
 			thisFrameRaycastHits = Interact.instance.GetRaycastHits();
 
 			RecalculateHoveredThroughPortal();
-			PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal();
+			PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal();
 
 			if (copyShouldBeEnabled && fakeCopyInstance == null) {
 				CreateFakeCopyInstance();
@@ -225,7 +235,7 @@ namespace PortalMechanics {
 
 		// Being held illegally means the cube is being carried on the other side of the portal without the last frame raycast hitting that portal
 		// (or the player standing inside of that portal)
-		void PreventCubeFromBeingDroppedIfHeldLegallyThroughPortal() {
+		void PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal() {
 			// The actual dropping happens through a StateMachine trigger, we just reset the timer here if the cube is being held legally
 			if (hoveredThroughPortal != null &&
 			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.playerRemainsInPortal)) {
@@ -257,6 +267,7 @@ namespace PortalMechanics {
 				foreach (var m in r.materials) {
 					m.SetVector("_PortalPos", inPortal.transform.position + inPortal.transform.forward * 0.00001f);
 					m.SetVector("_PortalNormal", inPortal.transform.forward);
+					m.SetFloat("_FudgeDistance", fudgeDistance);
 				}
 			}
 		}

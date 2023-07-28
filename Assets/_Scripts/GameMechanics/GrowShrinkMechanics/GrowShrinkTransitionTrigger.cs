@@ -8,10 +8,21 @@ using UnityEngine;
 using SuperspectiveUtils;
 
 namespace GrowShrink {
-	[RequireComponent(typeof(BetterTrigger))]
+	[RequireComponent(typeof(BetterTrigger), typeof(MeshCollider))]
 	public class GrowShrinkTransitionTrigger : MonoBehaviour, BetterTriggers {
 		public bool DEBUG = false;
-		private DebugLogger debug;
+
+		private DebugLogger _debug;
+		private DebugLogger debug {
+			get {
+				if (_debug == null) {
+					_debug = new DebugLogger(this, () => DEBUG);
+				}
+
+				return _debug;
+			}
+			set => _debug = value;
+		}
 		Bounds bounds;
 
 		private Dictionary<Collider, Vector3> positionsLastFrame = new Dictionary<Collider, Vector3>();
@@ -27,7 +38,7 @@ namespace GrowShrink {
 		public event HallwayExitAction OnHallwayExit;
 
 		void Start() {
-			SetupBoundaries(GetComponent<Collider>());
+			SetupBoundaries(GetComponent<MeshCollider>());
 			bounds = GetComponent<Renderer>().bounds;
 			debug = new DebugLogger(this, () => DEBUG);
 		}
@@ -76,17 +87,19 @@ namespace GrowShrink {
 		private Vector3 boundsSize => bounds.size;
 
 		// Stored as local positions, converted to world when used
+		[ShowNonSerializedField]
 		private Vector3 largeSidePoint, smallSidePoint;
 		[ShowNativeProperty]
 		public Vector3 largeSidePointWorld => transform.TransformPoint(largeSidePoint);
 		[ShowNativeProperty]
 		public Vector3 smallSidePointWorld => transform.TransformPoint(smallSidePoint);
 
-		public void SetupBoundaries(Collider c) {
+		public void SetupBoundaries(MeshCollider c) {
 			Bounds b = c.bounds;
 			// Use the Y position of the Collider (should set its pivot point to the floor)
 			Vector3 center = new Vector3(b.center.x, c.transform.position.y, b.center.z);
-			float tunnelExtent = b.extents.MaxComponent() - 0.5f; // Assume longest side to be the direction
+			b = c.sharedMesh.bounds; // Switch to local bounds for tunnelExtent calculation
+			float tunnelExtent = (transform.position - center).magnitude - 0.5f;
 
 			int maxComponentDirection = b.extents.MaxComponentDirection();
 			Vector3 longestDirection = (new Vector3[3] { transform.right, transform.up, transform.forward })[maxComponentDirection];
@@ -104,23 +117,8 @@ namespace GrowShrink {
 
 		void OnDrawGizmosSelected() {
 			float size = 16f;
-			DrawPlanes(smallSidePointWorld, smallSidePlane.normal, size * .25f, size * .25f, Color.cyan);
-			DrawPlanes(largeSidePointWorld, largeSidePlane.normal, size, size, Color.yellow);
-		}
-
-		void DrawPlanes(Vector3 point, Vector3 normal, float height, float width, Color color) {
-			// if (!Application.isPlaying) return;
-			if (normal == Vector3.zero) return;
-			Quaternion rotation = Quaternion.LookRotation(normal);
-			Matrix4x4 trs = Matrix4x4.TRS(point, rotation, Vector3.one);
-			Gizmos.matrix = trs;
-			Gizmos.color = new Color(color.r, color.g, color.b, 0.5f);
-			float depth = 0.0001f;
-			Gizmos.DrawCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
-			Gizmos.color = new Color(color.r, color.g, color.b, 1f);
-			Gizmos.DrawWireCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
-			Gizmos.matrix = Matrix4x4.identity;
-			Gizmos.color = Color.white;
+			ExtDebug.DrawPlane(smallSidePointWorld, smallSidePlane.normal, size * .25f, size * .25f, Color.cyan);
+			ExtDebug.DrawPlane(largeSidePointWorld, largeSidePlane.normal, size, size, Color.yellow);
 		}
 	}
 }

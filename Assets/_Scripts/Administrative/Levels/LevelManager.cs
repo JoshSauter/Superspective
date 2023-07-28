@@ -77,6 +77,8 @@ namespace LevelManagement {
 		[OnValueChanged("LoadDefaultPlayerPosition")]
 		public Levels startingScene;
 
+		public const Levels newGameStartingScene = Levels.Fork;
+
 		bool initialized = false;
 
 #region PlayerDefaultLocations
@@ -460,13 +462,20 @@ namespace LevelManagement {
 
 		protected override void Start() {
 			base.Start();
+
+			StartCoroutine(nameof(StartCoro));
+		}
+
+		protected IEnumerator StartCoro() {
 			SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
 			SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
 			SceneManager.sceneUnloaded += FinishUnloadingScene;
 
+			yield return new WaitUntil(() => GameManager.instance.settingsHaveLoaded);
+
 #if !UNITY_EDITOR
 			if (!initialized) {
-				if (Settings.Autoload.AutoloadEnabled.value) {
+				if (GameManager.firstLaunch && Settings.Autoload.AutoloadEnabled.value) {
 					List<SaveMetadataWithScreenshot> metadata = SaveFileUtils.ReadAllSavedMetadata().ToList();
 					SaveMetadataWithScreenshot mostRecentlyLoadedSave = metadata.Find(m => m.metadata.lastLoadedTimestamp == metadata.Max(m => m.metadata.lastLoadedTimestamp));
 			

@@ -305,7 +305,7 @@ public class Settings : Singleton<Settings> {
 			key = "AutoloadEnabled",
 			name = "Autoload from last save...",
 			value = true,
-			defaultValue = true
+			defaultValue = false
 		};
 
 		public static readonly DropdownSetting AutoloadThreshold = DropdownSetting.Of(
@@ -338,7 +338,7 @@ public class Settings : Singleton<Settings> {
 		public static readonly KeybindSetting Jump = new KeybindSetting("Jump", new KeyboardAndMouseInput(KeyCode.Space));
 		public static readonly KeybindSetting Sprint = new KeybindSetting("Sprint", new KeyboardAndMouseInput(KeyCode.LeftShift, KeyCode.RightShift));
 		public static readonly KeybindSetting AutoRun = new KeybindSetting("Auto Run", new KeyboardAndMouseInput(KeyCode.BackQuote));
-		public static readonly KeybindSetting Interact = new KeybindSetting("Interact", new KeyboardAndMouseInput(KeyCode.E, 0)); // Left-mouse default
+		public static readonly KeybindSetting Interact = new KeybindSetting("Interact", new KeyboardAndMouseInput(0, KeyCode.E)); // Left-mouse default
 
 		public static readonly KeybindSetting Zoom = new KeybindSetting("Zoom", new KeyboardAndMouseInput(1)); // Right-mouse default
 		public static readonly KeybindSetting AlignObject = new KeybindSetting("Align Object", new KeyboardAndMouseInput(2)); // Middle-mouse default

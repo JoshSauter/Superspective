@@ -48,8 +48,9 @@ public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.Diss
             }
         }
     }
-    [ShowNonSerializedField, ReadOnly]
-    private float timeSinceStateChanged = 0f;
+    
+    [ReadOnly]
+    public float timeSinceStateChanged = 0f;
 
     public float materializeTime = 2f;
     private const string dissolveValueProp = "_DissolveValue";

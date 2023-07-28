@@ -12,48 +12,47 @@ namespace Saving {
         public int maxNumberOfAutosaves => (int)Settings.Autosave.NumAutosaves;
 
 #if UNITY_EDITOR
-        public bool canMakeAutosave => false;
+        public bool canMakeTimedAutosave => false;
+        public bool canMakeAutosaveOnLevelLoad => false;
 #else
-        public float minTimeBetweenAutosavesSec => 10;
-        public bool canMakeAutosave => Settings.Autosave.AutosaveEnabled && timeSinceLastAutosave > minTimeBetweenAutosavesSec;
+        private const float minTimeBetweenAutosavesSec = 10f;
+        private const float autosaveDisabledAfterLoadDelay = 30f;
+
+        private bool timedAutosaveEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnTimer;
+        private bool autosaveOnLevelLoadEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnLevelChange;
+        public bool canMakeTimedAutosave => timedAutosaveEnabled && timeSinceLastAutosave > minTimeBetweenAutosavesSec;
+        public bool canMakeAutosaveOnLevelLoad => autosaveOnLevelLoadEnabled && SaveManager.realtimeSinceLastLoad > autosaveDisabledAfterLoadDelay && timeSinceLastAutosave > minTimeBetweenAutosavesSec;
 #endif
 
         public float timeSinceLastAutosave = 0f;
 
         private const float delayAfterLevelLoadToSave = 1f;
-        private const float autosaveDisabledAfterLoadDelay = 30f;
 
         private void Start() {
             StartCoroutine(RegularAutosave());
 
             LevelManager.instance.OnActiveSceneChange += () => {
-                if (Settings.Autosave.AutosaveOnLevelChange && SaveManager.realtimeSinceLastLoad > autosaveDisabledAfterLoadDelay) {
-                    StartCoroutine(TryDoAutosaveDelayed(delayAfterLevelLoadToSave));
+                if (canMakeAutosaveOnLevelLoad) {
+                    StartCoroutine(DoAutosaveDelayed(delayAfterLevelLoadToSave));
                 }
             };
         }
 
-        IEnumerator TryDoAutosaveDelayed(float delay) {
+        IEnumerator DoAutosaveDelayed(float delay) {
             yield return new WaitForSeconds(delay);
             
-            TryDoAutosave();
+            DoAutosave();
         }
 
         IEnumerator RegularAutosave() {
             yield return new WaitForSeconds(autosaveInterval);
             
             while (true) {
-                if (Settings.Autosave.AutosaveOnTimer) {
-                    TryDoAutosave();
+                if (canMakeTimedAutosave) {
+                    DoAutosave();
                 }
 
                 yield return new WaitForSeconds(autosaveInterval);
-            }
-        }
-
-        public void TryDoAutosave() {
-            if (canMakeAutosave) {
-                DoAutosave();
             }
         }
 

@@ -64,6 +64,7 @@ public class NodeEditor : UnityEditor.Editor {
             t.selectedNode.pos = t.transform.InverseTransformPoint(newPosition);
         }
         
+        /*
         Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Quaternion rotation) {
             //Get a direction from the pivot to the point
             Vector3 dir = point - pivot;
@@ -73,7 +74,7 @@ public class NodeEditor : UnityEditor.Editor {
             point = dir + pivot; 
             //Return calculated vector
             return point; 
-        }
+        } */
     }
 
     void DrawLinesRecursively(NodeSystem system, Node curNode) {

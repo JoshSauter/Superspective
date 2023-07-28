@@ -14,7 +14,8 @@ public class FlashingColor : MonoBehaviour {
     
     public enum State {
         NotFlashing,
-        Flashing
+        Flashing,
+        FlashingIndefinitely
     }
 
     [SerializeField]
@@ -27,6 +28,10 @@ public class FlashingColor : MonoBehaviour {
                 timeSinceStateChanged = 0f;
             }
 
+            if (value == State.FlashingIndefinitely) {
+                timesToFlash = -1;
+            }
+
             _state = value;
         }
     }
@@ -36,6 +41,7 @@ public class FlashingColor : MonoBehaviour {
 
     public AnimationCurve flashCurve = AnimationCurve.EaseInOut(0,0,1,1);
     public float flashDuration = 1f; // Time to cycle to full flash and back off once
+    public float flashOffset = 0f; // Time to offset first cycle
     public Color flashColor = Color.red;
     [ColorUsage(true, true)]
     public Color flashEmission = Color.red;
@@ -56,19 +62,25 @@ public class FlashingColor : MonoBehaviour {
                 renderer = gameObject.AddComponent<SuperspectiveRenderer>();
             }
         }
+        
+        if (state == State.FlashingIndefinitely) {
+            timesToFlash = -1;
+        }
+
+        timeSinceStateChanged += flashOffset;
     }
 
     public void Update() {
         timeSinceStateChanged += Time.deltaTime;
 
-        if (state == State.Flashing) {
+        if (state != State.NotFlashing) {
             UpdateFlashing();
         }
     }
 
     void UpdateFlashing() {
         float timesFlashed = timeSinceStateChanged / flashDuration;
-        if (timesFlashed >= timesToFlash) {
+        if (timesToFlash > 0 && timesFlashed >= timesToFlash) {
             state = State.NotFlashing;
             return;
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using NaughtyAttributes;
 using PortalMechanics;
 using UnityEngine;
 using Saving;
@@ -13,8 +14,11 @@ namespace GrowShrink {
         public Rigidbody thisRigidbody;
         // These values change/get set when this object enters a GrowShrinkHallway
         public float minScale, maxScale;
-        private float _currentScale = 1;
+        public float _currentScale = 1;
 
+        public float startingScale = 1f;
+
+        [ShowNativeProperty]
         public float currentScale {
             get => _currentScale;
             set {
@@ -40,6 +44,10 @@ namespace GrowShrink {
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
 
             state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.state}");
+
+            if (Math.Abs(startingScale - currentScale) > float.Epsilon) {
+                SetScaleDirectly(startingScale);
+            }
         }
 
         private void OnEnable() {
@@ -112,8 +120,10 @@ namespace GrowShrink {
                 float massWithoutMultiplier = thisRigidbody.mass / currentScale;
                 thisRigidbody.mass = massWithoutMultiplier * targetScale;
 
-                Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / currentScale;
-                thisRigidbody.velocity = velocityWithoutMultiplier * targetScale;
+                if (!thisRigidbody.isKinematic) {
+                    Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / currentScale;
+                    thisRigidbody.velocity = velocityWithoutMultiplier * targetScale;
+                }
             }
 
             if (this.TaggedAsPlayer()) {

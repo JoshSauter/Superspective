@@ -15,6 +15,10 @@ using SerializableClasses;
 using UnityEngine.Events;
 
 namespace PortalMechanics {
+	/// <summary>
+	/// RecursiveTextures contains the mainTexture (what the camera sees)
+	/// as well as the depthNormalsTexture (used for image effects)
+	/// </summary>
 	[Serializable]
 	public class RecursiveTextures {
 		public RenderTexture mainTexture;
@@ -70,8 +74,17 @@ namespace PortalMechanics {
 
 		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
 		public bool doubleSidedPortals = false;
+		
+		[OnValueChanged(nameof(SetScaleFactor))]
+		public bool changeScale = false;
+		[ShowIf(nameof(changeScale))]
+		[OnValueChanged(nameof(SetScaleFactor))]
+		[Tooltip("Multiply the player size by this value when passing through this Portal (and inverse for the other Portal)")]
+		[Range(1f/64f, 64f)]
+		public float scaleFactor = 1;
 
 		GameObject volumetricPortalPrefab;
+		[SerializeField]
 		SuperspectiveRenderer[] volumetricPortals;
 		private const float volumetricPortalEnableDistance = 5f;
 
@@ -129,7 +142,8 @@ namespace PortalMechanics {
 		public bool portalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
 
 		[ShowNativeProperty]
-		public bool playerRemainsInPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
+		public bool playerRemainsInPortal => playerIsInThisPortal || (otherPortal != null && otherPortal.playerIsInThisPortal);
+		private bool playerIsInThisPortal => volumetricPortals?.Any(vp => vp.enabled) ?? false;
 
 		// May or may not exist on a Portal, affects what the PortalMaterial is
 		public DimensionObject dimensionObject;
@@ -138,22 +152,44 @@ namespace PortalMechanics {
 		private const float portalThickness = 0.55f;
 
 #region Events
+		// Type declarations
 		public delegate void PortalTeleportAction(Portal inPortal, Collider objectTeleported);
 		public delegate void SimplePortalTeleportAction(Collider objectTeleported);
+		public delegate void PortalPlayerTeleportAction(Portal inPortal);
+		public delegate void SimplePortalPlayerTeleportAction();
 
-		public delegate void SimplePortalTeleportPlayerAction();
+		// Any object teleported in this Portal
 		public event PortalTeleportAction BeforePortalTeleport;
 		public event PortalTeleportAction OnPortalTeleport;
+		
+		// Simple version of any object teleported in this Portal
 		public event SimplePortalTeleportAction BeforePortalTeleportSimple;
 		public event SimplePortalTeleportAction OnPortalTeleportSimple;
 		
-		public event SimplePortalTeleportPlayerAction BeforePortalTeleportPlayerSimple;
-		public event SimplePortalTeleportPlayerAction OnPortalTeleportPlayerSimple;
+		// Player teleported in this Portal
+		public event PortalPlayerTeleportAction BeforePortalPlayerTeleport;
+		public event PortalPlayerTeleportAction OnPortalPlayerTeleport;
+		
+		// Simple version of Player teleported in this Portal
+		public event SimplePortalPlayerTeleportAction BeforePortalTeleportPlayerSimple;
+		public event SimplePortalPlayerTeleportAction OnPortalTeleportPlayerSimple;
 
+		// Any object teleported in any Portal
 		public static event PortalTeleportAction BeforeAnyPortalTeleport;
 		public static event PortalTeleportAction OnAnyPortalTeleport;
+		
+		// Simple version of any object teleported in any Portal
 		public static event SimplePortalTeleportAction BeforeAnyPortalTeleportSimple;
 		public static event SimplePortalTeleportAction OnAnyPortalTeleportSimple;
+		
+		// Player teleported in any Portal
+		public static event PortalPlayerTeleportAction BeforeAnyPortalPlayerTeleport;
+		public static event PortalPlayerTeleportAction OnAnyPortalPlayerTeleport;
+		
+		// Simple version of Player teleported in any Portal
+		public static event SimplePortalPlayerTeleportAction BeforeAnyPortalPlayerTeleportSimple;
+		public static event SimplePortalPlayerTeleportAction OnAnyPortalPlayerTeleportSimple;
+		
 		public UnityEvent onPortalTeleport;
 		#endregion
 
@@ -172,9 +208,39 @@ namespace PortalMechanics {
 		[MenuItem("CONTEXT/Portal/Select other side of portal")]
 		public static void SelectOtherSideOfPortal(MenuCommand command) {
 			Portal thisPortal = (Portal)command.context;
-			Selection.objects = FindObjectsOfType<Portal>().Where(p => p != thisPortal && p.channel == thisPortal.channel).Select(p => p.gameObject).ToArray();
+			Selection.objects = GetOtherPortals(thisPortal).Select(p => p.gameObject).ToArray();
+		}
+
+		static Portal GetOtherPortal(Portal thisPortal) {
+			return GetOtherPortals(thisPortal).FirstOrDefault();
+		}
+
+		static Portal[] GetOtherPortals(Portal thisPortal) {
+			return FindObjectsOfType<Portal>().Where(p => p != thisPortal && p.channel == thisPortal.channel).ToArray();
 		}
 #endif
+
+		void SetScaleFactor() {
+			if (changeScale) {
+				// In Edit mode, update the other portal's scale factor to be the inverse of this one
+				if (!Application.isPlaying) {
+					Portal other = otherPortal;
+#if UNITY_EDITOR
+					other = GetOtherPortal(this);
+#endif
+					if (other != null) {
+						other.changeScale = changeScale;
+						other.scaleFactor = 1f / scaleFactor;
+					}
+					else {
+						Debug.LogWarning("No other portal to change scale of");
+					}
+				}
+			}
+			else {
+				scaleFactor = 1;
+			}
+		}
 
 #region MonoBehaviour Methods
 
@@ -210,6 +276,9 @@ namespace PortalMechanics {
 			foreach (var r in renderers) {
 				r.gameObject.layer = LayerMask.NameToLayer("Portal");
 				r.SetMaterial(portalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
+				if (changeScale) {
+					r.SetFloat("_PortalScaleFactor", scaleFactor);
+				}
 			}
 			if (colliders == null || colliders.Length == 0) {
 				if (compositePortal) {
@@ -241,8 +310,21 @@ namespace PortalMechanics {
 				}
 			}
 
+			if (volumetricPortals == null || volumetricPortals.Length == 0) {
+				InitializeVolumetricPortals();
+			}
+			
+			if (changeScale) {
+				foreach (SuperspectiveRenderer vp in volumetricPortals) {
+					vp.SetFloat("_PortalScaleFactor", scaleFactor);
+				}
+			}
+		}
+
+		private void InitializeVolumetricPortals() {
 			volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
-			volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
+			volumetricPortals = renderers.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
+			// volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
 			for (int i = 0; i < volumetricPortals.Length; i++) {
 				SuperspectiveRenderer vp = volumetricPortals[i];
 				Collider collider = colliders[i];
@@ -297,7 +379,7 @@ namespace PortalMechanics {
 			};
 		}
 
-		void CreateRenderTexture(int width, int height) {
+		private void CreateRenderTexture(int width, int height) {
 			// Not sure why but it seems sometimes the Portals don't get OnDisable called when scene unloaded
 			if (this == null) {
 				OnDisable();
@@ -311,7 +393,7 @@ namespace PortalMechanics {
 			SetPropertiesOnMaterial();
 		}
 
-		public void SetPropertiesOnMaterial() {
+		private void SetPropertiesOnMaterial() {
 			if (!portalRenderingIsEnabled) return;
 			
 			void SetTexturesForRenderers(SuperspectiveRenderer[] portalRenderers) {
@@ -330,7 +412,6 @@ namespace PortalMechanics {
 
 			if (dimensionObject != null) {
 				dimensionObject.SetStartingLayersFromCurrentLayers();
-				dimensionObject.OnStateChangeSimple += SetPropertiesOnMaterial;
 				dimensionObject.ignorePartiallyVisibleLayerChanges = true;
 			}
 			
@@ -338,7 +419,6 @@ namespace PortalMechanics {
 			playerCameraFollow = playerCamera.GetComponent<CameraFollow>();
 
 			CreateRenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
-			SuperspectiveScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
 
 			SetMaterialsToEffectiveMaterial();
 		}
@@ -346,6 +426,7 @@ namespace PortalMechanics {
 		protected override void Init() {
 			base.Init();
 			
+			SuperspectiveScreen.instance.OnScreenResolutionChanged += CreateRenderTexture;
 			SetPropertiesOnMaterial();
 		}
 
@@ -361,7 +442,7 @@ namespace PortalMechanics {
 			}
 
 			// If the player moves to the backside of a double-sided portal, rotate the portals to match
-			if (doubleSidedPortals && portalLogicIsEnabled && !playerRemainsInPortal && !otherPortal.playerRemainsInPortal) {
+			if (doubleSidedPortals && portalLogicIsEnabled && !playerRemainsInPortal) {
 				Vector3 portalToPlayer = playerCamera.position - transform.position;
 				Vector3 otherPortalToPlayer = playerCamera.position - otherPortal.transform.position;
 				if (portalToPlayer.magnitude < otherPortalToPlayer.magnitude) {
@@ -377,14 +458,26 @@ namespace PortalMechanics {
 
 		void OnEnable() {
 			StartCoroutine(AddPortalCoroutine());
+			
+			if (dimensionObject != null) {
+				dimensionObject.OnStateChangeSimple += SetPropertiesOnMaterial;
+			}
 		}
 
 		protected virtual void OnDisable() {
+			if (!Application.isPlaying) return; // ???
+			
 			SuperspectiveScreen.instance.OnScreenResolutionChanged -= CreateRenderTexture;
 			PortalManager.instance.RemovePortal(channel, this);
+			
+			if (dimensionObject != null) {
+				dimensionObject.OnStateChangeSimple -= SetPropertiesOnMaterial;
+			}
 		}
 
 		public void OnTriggerEnter(Collider other) {
+			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
+			// in the right position and moving the correct direction before triggering teleport
 			if (other.TaggedAsPlayer()) return;
 			
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
@@ -395,6 +488,8 @@ namespace PortalMechanics {
 		}
 
 		public void OnTriggerExit(Collider other) {
+			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
+			// in the right position and moving the correct direction before triggering teleport
 			if (other.TaggedAsPlayer()) return;
 			
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
@@ -411,27 +506,27 @@ namespace PortalMechanics {
 
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
-			if (!other.TaggedAsPlayer()) {
-				Vector3 closestPoint = ClosestPoint(other.transform.position, true, true);
-				bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
-				PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			if (other.TaggedAsPlayer()) return;
+			
+			Vector3 closestPoint = ClosestPoint(other.transform.position, true, true);
+			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(PortalNormal(), (other.transform.position - closestPoint).normalized)) > 0;
+			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
 
-				if (!objectShouldBeTeleported) {
-					if (portalableObj != null) {
-						portalableObj.sittingInPortal = this;
-					}
-
-					return;
+			if (!objectShouldBeTeleported) {
+				if (portalableObj != null) {
+					portalableObj.sittingInPortal = this;
 				}
+
+				return;
+			}
 				
-				if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
-					TeleportObject(portalableObj);
+			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
+				TeleportObject(portalableObj);
 
-					// Swap state to the other portal
-					objectsInPortal.Remove(portalableObj);
-					otherPortal.objectsInPortal.Add(portalableObj);
-					portalableObj.sittingInPortal = otherPortal;
-				}
+				// Swap state to the other portal
+				objectsInPortal.Remove(portalableObj);
+				otherPortal.objectsInPortal.Add(portalableObj);
+				portalableObj.sittingInPortal = otherPortal;
 			}
 		}
 
@@ -513,6 +608,7 @@ namespace PortalMechanics {
 
 		public void SetMaterialsToEffectiveMaterial() {
 			if (!renderers[0].r.sharedMaterial.name.Contains(effectiveMaterial.name)) {
+				debug.LogWarning($"Setting portal material to {effectiveMaterial.name}");
 				foreach (var r in renderers) {
 					r.SetMaterial(effectiveMaterial);
 				}
@@ -669,6 +765,7 @@ namespace PortalMechanics {
 		public virtual Vector3 TransformPoint(Vector3 point) {
 			Vector3 relativeObjPos = transform.InverseTransformPoint(point);
 			relativeObjPos = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeObjPos;
+			relativeObjPos *= scaleFactor;
 			return otherPortal.transform.TransformPoint(relativeObjPos);
 		}
 
@@ -743,6 +840,9 @@ namespace PortalMechanics {
 			BeforeAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
 
 			if (objBeingTeleported.TaggedAsPlayer()) {
+				BeforeAnyPortalPlayerTeleportSimple?.Invoke();
+				BeforeAnyPortalPlayerTeleport?.Invoke(this);
+				BeforePortalPlayerTeleport?.Invoke(this);
 				BeforePortalTeleportPlayerSimple?.Invoke();
 			}
 		}
@@ -755,6 +855,9 @@ namespace PortalMechanics {
 			onPortalTeleport?.Invoke();
 			
 			if (objBeingTeleported.TaggedAsPlayer()) {
+				OnAnyPortalPlayerTeleportSimple?.Invoke();
+				OnAnyPortalPlayerTeleport?.Invoke(this);
+				OnPortalPlayerTeleport?.Invoke(this);
 				OnPortalTeleportPlayerSimple?.Invoke();
 			}
 		}

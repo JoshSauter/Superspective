@@ -13,7 +13,7 @@ namespace Saving {
         protected UniqueId _id;
         protected UniqueId id {
             get {
-                if (_id == null) {
+                if (_id == null && gameObject != null) {
                     // Debug.Log($"About to get UniqueId for {gameObject.FullPath()}");
                     _id = GetComponent<UniqueId>();
                 }

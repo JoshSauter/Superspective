@@ -30,12 +30,12 @@ public class FindObjectByIdTool : ScriptableWizard {
 
         if (matches.Count == 0)
             Debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?");
-        else if (matches.Count > 1) {
-            Debug.LogWarning($"Multiple objects with id {id} found.");
+        else {
             Selection.objects = matches.Select(s => s.gameObject).ToArray();
+            if (Selection.objects.Length > 1) {
+                Debug.LogWarning($"Multiple objects with id {id} found.");
+            }
         }
-        else
-            Selection.objects = matches.Select(s => s.gameObject).ToArray();
     }
 
     bool HasValidId(ISaveableObject obj) {

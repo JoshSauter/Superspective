@@ -604,6 +604,21 @@ namespace SuperspectiveUtils {
     }
 
     public static class ExtDebug {
+        public static void DrawPlane(Vector3 point, Vector3 normal, float height, float width, Color color) {
+            // if (!Application.isPlaying) return;
+            if (normal == Vector3.zero) return;
+            Quaternion rotation = Quaternion.LookRotation(normal);
+            Matrix4x4 trs = Matrix4x4.TRS(point, rotation, Vector3.one);
+            Gizmos.matrix = trs;
+            Gizmos.color = new Color(color.r, color.g, color.b, 0.5f);
+            float depth = 0.0001f;
+            Gizmos.DrawCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+            Gizmos.color = new Color(color.r, color.g, color.b, 1f);
+            Gizmos.DrawWireCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+            Gizmos.matrix = Matrix4x4.identity;
+            Gizmos.color = Color.white;
+        }
+        
         //Draws just the box at where it is currently hitting.
         public static void DrawBoxCastOnHit(
             Vector3 origin,
@@ -1179,31 +1194,43 @@ namespace SuperspectiveUtils {
             }
         }
 
-        public void Log(object message) {
+        // Forces the debug log to print with the context, use for debugging then remove
+        public void ForceDebugLog(object message) {
             string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-            if (enabled.Invoke())
+            Debug.Log(
+                $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
+                context
+            );
+        }
+
+        public void Log(object message) {
+            if (enabled.Invoke()) {
+                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
                 Debug.Log(
                     $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
+            }
         }
 
         public void LogWarning(object message) {
-            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-            if (enabled.Invoke())
+            if (enabled.Invoke()) {
+                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
                 Debug.LogWarning(
                     $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
+            }
         }
 
         public void LogError(object message) {
-            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-            if (enabled.Invoke())
+            if (enabled.Invoke()) {
+                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
                 Debug.LogError(
                     $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
                     context
                 );
+            }
         }
     }
 

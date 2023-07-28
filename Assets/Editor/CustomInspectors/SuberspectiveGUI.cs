@@ -693,7 +693,7 @@ namespace UnityEditor {
                         shaderVariants.Add(shaderVariant);
                     }
                 }
-                catch (Exception _) {
+                catch {
                     // ignored
                 }
             }

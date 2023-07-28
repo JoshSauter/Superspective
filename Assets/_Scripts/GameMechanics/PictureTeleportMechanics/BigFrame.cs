@@ -16,7 +16,8 @@ namespace PictureTeleportMechanics {
 		[ReadOnly]
         public GlobalMagicTrigger disableFrameTrigger;
 
-        void OnValidate() {
+        protected override void OnValidate() {
+	        base.OnValidate();
 			if (disableFrameTrigger == null) {
 				disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
 			}
