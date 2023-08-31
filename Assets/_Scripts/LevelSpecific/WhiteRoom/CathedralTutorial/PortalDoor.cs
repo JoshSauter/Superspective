@@ -197,7 +197,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
 
 			public override void LoadSave(PortalDoor portalDoor) {
-                portalDoor.state.FromSave(stateSave);
+                portalDoor.state.LoadFromSave(stateSave);
             }
 		}
 #endregion

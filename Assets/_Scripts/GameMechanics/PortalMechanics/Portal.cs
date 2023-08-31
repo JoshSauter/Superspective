@@ -347,6 +347,7 @@ namespace PortalMechanics {
 
 		private void CreateCompositeTrigger() {
 			if (trigger == null) {
+				debug.Log("No trigger set, getting or adding a CompositeMagicTrigger");
 				// A CompositeMagicTrigger handles player passing through portals
 				trigger = gameObject.GetOrAddComponent<CompositeMagicTrigger>();
 				TriggerCondition positionCondition = new TriggerCondition {

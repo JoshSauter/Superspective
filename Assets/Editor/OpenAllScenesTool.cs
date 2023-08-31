@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 [InitializeOnLoad]
 public class OpenAllScenesTool {
-    [MenuItem("My Tools/Open All Scenes")]
+    [MenuItem("My Tools/Scenes/Open All Scenes")]
     public static void OpenAllScenes() {
         foreach (var level in LevelManager.instance.allLevels) {
             try {
@@ -24,5 +24,11 @@ public class OpenAllScenesTool {
                 Debug.LogError(e);
             }
         }
+    }
+
+    [MenuItem("My Tools/Scenes/Close Extra Scenes")]
+    public static void CloseExtraScenes() {
+        // Closes all scenes that aren't the ManagerScene nor any scene that should be loaded based on the startingLevel
+        LevelManager.instance.LoadDefaultPlayerPosition();
     }
 }

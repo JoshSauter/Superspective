@@ -126,7 +126,7 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
 			}
 
 			public override void LoadSave(ControlPrompt script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
 			}
 		}
 #endregion

@@ -324,9 +324,9 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 			}
 
 			public override void LoadSave(ElevatorButton script) {
-                script.buttonState.FromSave(this.buttonStateSave);
-                script.elevatorState.FromSave(this.elevatorStateSave);
-                script.floorState.FromSave(this.floorStateSave);
+                script.buttonState.LoadFromSave(this.buttonStateSave);
+                script.elevatorState.LoadFromSave(this.elevatorStateSave);
+                script.floorState.LoadFromSave(this.floorStateSave);
 			}
 		}
 #endregion

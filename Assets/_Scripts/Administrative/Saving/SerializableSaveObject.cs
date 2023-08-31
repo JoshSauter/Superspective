@@ -26,10 +26,20 @@ namespace Saving {
     public abstract class SerializableSaveObject<T> : SerializableSaveObject where T : MonoBehaviour, ISaveableObject {
         // Must be overridden by inheriting classes
         protected SerializableSaveObject(T script) {
-            this.ID = script.ID;
-            string lastPart = script.ID.Split('_').Last();
-            this.associationID = lastPart.IsGuid() ? lastPart : this.ID;
-            this.sceneName = script.gameObject.scene.name;
+            try {
+                this.ID = script.ID;
+                string lastPart = script.ID.Split('_').Last();
+                this.associationID = lastPart.IsGuid() ? lastPart : this.ID;
+                this.sceneName = script.gameObject.scene.name;
+            }
+            catch (Exception e) {
+                if (script != null) {
+                    new DebugLogger(script).LogError(e);
+                }
+                else {
+                    Debug.LogError($"Script is null! Can't save this object.");
+                }
+            }
         }
         
         public abstract void LoadSave(T script);

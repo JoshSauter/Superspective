@@ -56,7 +56,7 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 			}
 
 			public override void LoadSave(Letterboxing script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
 			}
 		}
 #endregion

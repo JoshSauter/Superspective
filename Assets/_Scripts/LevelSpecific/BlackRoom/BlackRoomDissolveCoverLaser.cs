@@ -142,7 +142,7 @@ namespace LevelSpecific.BlackRoom {
             }
             
             public override void LoadSave(BlackRoomDissolveCoverLaser script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
                 script.coverFiringAt = this.coverFiringAt?.GetOrNull();
                 this.laser.ApplyToParticleSystem(script.laser);
             }

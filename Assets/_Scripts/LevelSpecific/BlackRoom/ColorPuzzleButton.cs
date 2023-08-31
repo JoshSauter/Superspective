@@ -158,7 +158,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 			}
 
 			public override void LoadSave(ColorPuzzleButton script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
                 script.hasBeenSolvedBefore = this.hasBeenSolved;
 			}
 		}

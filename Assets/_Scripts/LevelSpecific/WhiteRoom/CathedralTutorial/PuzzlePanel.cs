@@ -245,7 +245,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
             
             public override void LoadSave(PuzzlePanel script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
             }
         }
 

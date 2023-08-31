@@ -176,7 +176,7 @@ namespace GrowShrink {
                 script.minScale = this.minScale;
                 script.maxScale = this.maxScale;
                 script.currentScale = this.currentScale;
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
             }
         }
 

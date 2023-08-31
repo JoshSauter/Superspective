@@ -75,7 +75,7 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
 			}
 
 			public override void LoadSave(WeirdLaserPillar script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
                 this.particleSystemSave.ApplyToParticleSystem(script.ps);
 			}
 		}

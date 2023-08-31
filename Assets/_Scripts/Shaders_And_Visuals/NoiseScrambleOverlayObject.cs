@@ -49,7 +49,7 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 			}
 
 			public override void LoadSave(NoiseScrambleOverlayObject script) {
-				script.scramblerState.FromSave(stateSave);
+				script.scramblerState.LoadFromSave(stateSave);
 			}
 		}
 #endregion

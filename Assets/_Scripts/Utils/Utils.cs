@@ -1177,6 +1177,8 @@ namespace SuperspectiveUtils {
         readonly string id = "";
         readonly bool idSet;
 
+        public DebugLogger(Object context) : this(context, () => true) {}
+
         public DebugLogger(Object context, Func<bool> enabled) {
             this.enabled = enabled;
             this.context = context;

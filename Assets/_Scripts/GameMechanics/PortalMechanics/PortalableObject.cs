@@ -357,7 +357,7 @@ namespace PortalMechanics {
 					obj.grabbedThroughPortal = this.grabbedThroughPortal.GetOrNull();
 				}
 
-				obj.holdState.FromSave(holdStateSave);
+				obj.holdState.LoadFromSave(holdStateSave);
 			}
 		}
 		#endregion

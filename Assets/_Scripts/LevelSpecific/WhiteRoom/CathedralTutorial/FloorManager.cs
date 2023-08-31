@@ -126,7 +126,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
             public override void LoadSave(FloorManager script) {
                 script.currentValue = this.currentValue;
-                script.floor.FromSave(this.stateSave);
+                script.floor.LoadFromSave(this.stateSave);
             }
         }
     }

@@ -16,7 +16,7 @@ public class SelectAllChildrenOnLayersRecursivelyTool : ScriptableWizard {
         Debug.Log($"{Selection.count} objects found on layer mask.");
     }
 
-    [MenuItem("My Tools/Select All Children On Layer Recursively")]
+    [MenuItem("My Tools/Selection/Select All Children On Layer Recursively")]
     static void SelectAllChildren() {
         DisplayWizard<SelectAllChildrenOnLayersRecursivelyTool>(
             "Select All Children Recursively",

@@ -80,7 +80,7 @@ public class PillarDimensionObject : DimensionObject {
 		disableColliderWhileInvisible = false;
 		if (thisObjectMoves) {
 			if (thisRigidbody == null && GetComponent<Rigidbody>() == null) {
-				DebugLogger tempDebug = new DebugLogger(gameObject, () => true);
+				DebugLogger tempDebug = new DebugLogger(gameObject);
 				tempDebug.LogError($"{gameObject.name} moves, but no rigidbody could be found (Consider setting it manually)");
 				thisObjectMoves = false;
 			}

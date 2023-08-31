@@ -44,6 +44,7 @@ public class StaircaseRotate : MonoBehaviour {
     private float baseGravMagnitude;
 
     public Vector3 pivotPoint => transform.parent.position;
+    Vector3 pivot => Vector3.Cross(startGravityDirection, endGravityDirection);
 
     void Start() {
         playerMovement = PlayerMovement.instance;
@@ -111,12 +112,14 @@ public class StaircaseRotate : MonoBehaviour {
 
             float gravAmplificationFactor = 1;
             if (treatedAsADownStairForPlayer) {
-                Vector3 projectedPlayerPos = ClosestPointOnLine(
+                Vector3 projectedPlayerPos = Vector3.ProjectOnPlane(ClosestPointOnLine(
                     effectiveStartPosition,
                     effectiveEndPosition,
                     playerMovement.bottomOfPlayer
-                );
-                float distanceFromPlayerToStairs = Vector3.Distance(playerMovement.bottomOfPlayer, projectedPlayerPos);
+                ), pivot);
+                // TODO: Fix so that displacement perpendicular to the axis isn't counted
+                Vector3 playerPositionOnPlane = Vector3.ProjectOnPlane(playerMovement.bottomOfPlayer, pivot);
+                float distanceFromPlayerToStairs = Vector3.Distance(playerPositionOnPlane, projectedPlayerPos);
                 gravAmplificationFactor = 1 + gravAmplificationMagnitude * Mathf.InverseLerp(
                     minDistanceForGravAmplification,
                     maxDistanceForGravAmplification,

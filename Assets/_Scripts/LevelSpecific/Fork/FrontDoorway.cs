@@ -80,7 +80,7 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
 			}
 
 			public override void LoadSave(FrontDoorway script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
 			}
 		}
 #endregion

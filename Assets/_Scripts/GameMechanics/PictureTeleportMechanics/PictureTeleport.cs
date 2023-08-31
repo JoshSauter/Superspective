@@ -6,6 +6,7 @@ using Saving;
 using System;
 using LevelManagement;
 using SerializableClasses;
+using UnityEngine.Events;
 
 namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
@@ -16,6 +17,8 @@ namespace PictureTeleportMechanics {
         public static string BigFrameKey(string scene, string name) {
             return scene + " " + name;
         }
+        
+        public UnityEvent onTeleport;
 
         public bool bigFrameIsInSameScene = true;
         [ShowIf("bigFrameIsInSameScene")]
@@ -107,6 +110,7 @@ namespace PictureTeleportMechanics {
             Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;
             
             OnPictureTeleport?.Invoke();
+            onTeleport?.Invoke();
         }
 
         #region Saving

@@ -16,7 +16,7 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
         Debug.Log($"{Selection.count} objects found containing {nameToMatch}.");
     }
 
-    [MenuItem("My Tools/Select All Children With Name Recursively")]
+    [MenuItem("My Tools/Selection/Select All Children With Name Recursively")]
     static void SelectAllChildren() {
         DisplayWizard<SelectAllChildrenWithNameRecursivelyTool>(
             "Select All Children Recursively",

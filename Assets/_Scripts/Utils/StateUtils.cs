@@ -313,7 +313,7 @@ namespace StateUtils {
             return save;
         }
 
-        public void FromSave(StateMachineSave save) {
+        public void LoadFromSave(StateMachineSave save) {
             this.state = save.state;
             this.timeSinceStateChanged = save.timeSinceStateChanged;
         }

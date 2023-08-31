@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Audio;
 using PowerTrailMechanics;
 using Saving;
 using StateUtils;
@@ -8,15 +9,19 @@ using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
     
-    public class RaiseLowerCubeReceptacle : SaveableObject<RaiseLowerCubeReceptacle, RaiseLowerCubeReceptacleSave> {
+    public class RaiseLowerCubeReceptacle : SaveableObject<RaiseLowerCubeReceptacle, RaiseLowerCubeReceptacleSave>, AudioJobOnGameObject {
         public PowerTrail powerTrail;
         public CubeReceptacle cubeReceptacle;
         
         private float raiseLowerSpeed = 1f;
-        private float maxHeight = -19.5f;
-        private float minHeight = -29f;
+        public float maxHeight = -19.5f;
+        public float minHeight = -29f;
         private float height => maxHeight - minHeight;
         private float timeToMove => height / raiseLowerSpeed;
+
+        const float juiceTime = 1.2f;
+        const float juiceFrequency = 8;
+        const float juiceAmplitude = 0.0625f;
         
         public enum State {
             Lowered,
@@ -42,6 +47,19 @@ namespace LevelSpecific.WhiteRoom {
             state.AddStateTransition(State.Lowering, State.Lowered, timeToMove);
             state.AddTrigger(State.Raised, 0f, () => SetHeight(maxHeight));
             state.AddTrigger(State.Lowered, 0f, () => SetHeight(minHeight));
+            
+            // SFX triggers
+            state.AddTrigger((state) => state is State.Raised or State.Lowered,
+                () => {
+                    AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
+                    AudioManager.instance.GetAudioJob(AudioName.MachineOn, ID).Stop();
+                });
+            state.AddTrigger((state) => state is State.Raised or State.Lowered, 0.5f, () => AudioManager.instance.PlayOnGameObject(AudioName.MachineOff, ID, this));
+            state.AddTrigger((state) => state is State.Raising or State.Lowering, () => {
+                    AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
+                    AudioManager.instance.PlayOnGameObject(AudioName.MachineOn, ID, this);
+                }
+            );
 
             powerTrail.OnPowerFinish += PowerOn;
             powerTrail.OnDepowerBegin += PowerOff;
@@ -91,10 +109,24 @@ namespace LevelSpecific.WhiteRoom {
         void Update() {
             switch (state.state) {
                 case State.Lowered:
-                    SetHeight(minHeight);
+                    if (state.timeSinceStateChanged < juiceTime) {
+                        float t = state.timeSinceStateChanged / juiceTime;
+                        float target = minHeight - juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
+                        SetHeight(target);
+                    }
+                    else {
+                        SetHeight(minHeight);
+                    }
                     break;
                 case State.Raised:
-                    SetHeight(maxHeight);
+                    if (state.timeSinceStateChanged < juiceTime) {
+                        float t = state.timeSinceStateChanged / juiceTime;
+                        float target = maxHeight + juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
+                        SetHeight(target);
+                    }
+                    else {
+                        SetHeight(maxHeight);
+                    }
                     break;
                 case State.Raising: {
                     float t = state.timeSinceStateChanged / timeToMove;
@@ -124,6 +156,8 @@ namespace LevelSpecific.WhiteRoom {
             transform.localPosition = transformLocalPosition;
             return delta;
         }
+
+        public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob audioJob) => transform;
     }
     
     #region Saving
@@ -137,7 +171,7 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         public override void LoadSave(RaiseLowerCubeReceptacle script) {
-            script.state.FromSave(stateSave);
+            script.state.LoadFromSave(stateSave);
         }
     }
     #endregion

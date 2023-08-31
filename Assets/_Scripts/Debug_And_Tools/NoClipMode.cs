@@ -20,6 +20,15 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 	public float moveSpeed = 45;
 	public float sprintSpeed = 125;
 	public float middleMouseVerticalSpeed = 4;
+	
+	
+	string label = "";
+	GUIStyle style = new GUIStyle();
+	void OnGUI() {
+		if (!enabled || !noClipOn) return;
+		// Show the player's position if you're in god mode/no clip mode
+		GUI.Label(new Rect(5, 145, 100, 25), $"{playerCamera.position:F0}", style);
+	}
 
 	protected override void Awake() {
 		base.Awake();

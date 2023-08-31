@@ -13,9 +13,9 @@ namespace Saving {
         protected UniqueId _id;
         protected UniqueId id {
             get {
-                if (_id == null && gameObject != null) {
+                if (_id == null && this != null && this.gameObject != null) {
                     // Debug.Log($"About to get UniqueId for {gameObject.FullPath()}");
-                    _id = GetComponent<UniqueId>();
+                    _id = this.GetComponent<UniqueId>();
                 }
                 return _id;
             }
@@ -25,7 +25,10 @@ namespace Saving {
                 if (id == null || string.IsNullOrEmpty(id.uniqueId)) {
                     throw new Exception($"{gameObject.name}.{GetType().Name} in {gameObject.scene.name} doesn't have a uniqueId set");
                 }
-                return $"{GetType().Name}_{id.uniqueId}";
+                
+
+                string suffix = id != null ? $"_{id.uniqueId}" : "";
+                return $"{GetType().Name}{suffix}";
             }
         }
 

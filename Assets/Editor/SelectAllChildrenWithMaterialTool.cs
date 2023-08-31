@@ -19,7 +19,7 @@ namespace Editor {
             Debug.Log($"{Selection.count} objects found with material {material.name}.");
         }
 
-        [MenuItem("My Tools/Select All Children With Material Recursively")]
+        [MenuItem("My Tools/Selection/Select All Children With Material Recursively")]
         static void SelectAllChildren() {
             DisplayWizard<SelectAllChildrenWithMaterialTool>(
                 "Select All Children Recursively",

@@ -22,7 +22,7 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
         method.Invoke(this, new object[] { });
     }
 
-    [MenuItem("My Tools/Select All Children Recursively")]
+    [MenuItem("My Tools/Selection/Select All Children Recursively")]
     static void SelectAllChildren() {
         DisplayWizard<SelectAllChildrenRecursivelyTool>("Select All Children Recursively", "Select All of Type")
             .typeName = PlayerPrefs.GetString(nameKey, "");

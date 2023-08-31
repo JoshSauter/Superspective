@@ -74,7 +74,7 @@ namespace LevelManagement {
 	}
 
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
-		[OnValueChanged("LoadDefaultPlayerPosition")]
+		[OnValueChanged(nameof(LoadDefaultPlayerPosition))]
 		public Levels startingScene;
 
 		public const Levels newGameStartingScene = Levels.Fork;
@@ -243,7 +243,7 @@ namespace LevelManagement {
 		}
 
 		[Button("Load default player position")]
-		void LoadDefaultPlayerPosition() {
+		public void LoadDefaultPlayerPosition() {
 #if !UNITY_EDITOR
 		return;
 #endif
@@ -480,12 +480,12 @@ namespace LevelManagement {
 					SaveMetadataWithScreenshot mostRecentlyLoadedSave = metadata.Find(m => m.metadata.lastLoadedTimestamp == metadata.Max(m => m.metadata.lastLoadedTimestamp));
 			
 					DateTime now = DateTime.Now;
-					DateTime lastSaveDateTime = new DateTime(mostRecentlyLoadedSave.metadata.saveTimestamp);
+					DateTime lastSaveDateTime = mostRecentlyLoadedSave == null ? now : new DateTime(mostRecentlyLoadedSave.metadata.saveTimestamp);
 					int autoloadDaysThreshold = (int)Settings.Autoload.AutoloadThreshold.dropdownSelection.selection.Datum;
 					if (autoloadDaysThreshold == -1) autoloadDaysThreshold = int.MaxValue; // -1 is a flag for "infinity"
 					bool lastSaveWasRecent = (now - lastSaveDateTime).Days < autoloadDaysThreshold;
 
-					if (lastSaveWasRecent) {
+					if (mostRecentlyLoadedSave != null && lastSaveWasRecent) {
 						// Don't loop this logic forever just do it once
 						initialized = true;
 						SaveManager.Load(mostRecentlyLoadedSave);

@@ -84,7 +84,7 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
 			}
 
 			public override void LoadSave(CurrentValueShutter script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
 			}
 		}
 #endregion

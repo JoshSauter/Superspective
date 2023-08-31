@@ -236,7 +236,7 @@ namespace LevelSpecific.BlackRoom {
             }
             
             public override void LoadSave(BlackRoomMainConsole script) {
-                script.state.FromSave(stateSave);
+                script.state.LoadFromSave(stateSave);
             }
         }
     }
