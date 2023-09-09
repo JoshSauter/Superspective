@@ -1,24 +1,39 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using StateUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
 	public class ColorPuzzleNode : MonoBehaviour {
-		bool _isSolved = false;
+		public StateMachine<PuzzleNodeState> state = new StateMachine<PuzzleNodeState>(PuzzleNodeState.NotSolved);
+
+		public enum PuzzleNodeState {
+			NotSolved,
+			Solved
+		}
 		public bool isSolved {
-			get { return _isSolved; }
+			get => state.state == PuzzleNodeState.Solved;
 			private set {
-				_isSolved = value;
-				OnSolutionNodeStateChange?.Invoke(this, value);
+				if (isSolved == value) return;
+
+				thisRenderer.SetColor("_EmissionColor", value ? solutionEmissionColor : unsolvedEmissionColor);
+				scaleWhenStateChanged = transform.localScale.x;
+				state.Set(value ? PuzzleNodeState.Solved : PuzzleNodeState.NotSolved);
 			}
 		}
 		public Color solution = Color.black;
-		public Color unsolvedColor = Color.white;
-		Color unsolvedEmissionColor = Color.black;
 		Color solutionColor;
 		Color solutionEmissionColor;
+		Color unsolvedEmissionColor = Color.black;
 		public LightProjector red, green, blue;
 		SuperspectiveRenderer thisRenderer;
+
+		float scaleWhenStateChanged = minScale;
+		const float minScale = 4f;
+		const float maxScale = 8f;
+		const float scaleChangeTime = .5f;
+		public AnimationCurve scaleCurve;
 
 		public delegate void SolutionNodeStateChange(ColorPuzzleNode node, bool solved);
 		public static event SolutionNodeStateChange OnSolutionNodeStateChange;
@@ -27,17 +42,42 @@ namespace LevelSpecific.BlackRoom {
 			thisRenderer = GetComponent<SuperspectiveRenderer>();
 			solutionColor = thisRenderer.GetMainColor();
 			solutionEmissionColor = thisRenderer.GetColor("_EmissionColor");
+			thisRenderer.SetMainColor(solutionColor);
+			thisRenderer.SetColor("_EmissionColor", unsolvedEmissionColor);
+		}
+
+		void OnEnable() {
+			state.OnStateChangeSimple += TriggerEvent;
+		}
+
+		void OnDisable() {
+			state.OnStateChangeSimple -= TriggerEvent;
+		}
+
+		void TriggerEvent() {
+			OnSolutionNodeStateChange?.Invoke(this, isSolved);
 		}
 
 		void Update() {
 			isSolved = solution == GetColor();
+			float t = state.timeSinceStateChanged / scaleChangeTime;
 			if (isSolved) {
-				thisRenderer.SetMainColor(solutionColor);
-				thisRenderer.SetColor("_EmissionColor", solutionEmissionColor);
+				if (t < 1) {
+					float size = Mathf.LerpUnclamped(scaleWhenStateChanged, maxScale, scaleCurve.Evaluate(t));
+					transform.localScale = new Vector3(size, transform.localScale.y, size);
+				}
+				else {
+					transform.localScale = new Vector3(maxScale, transform.localScale.y, maxScale);
+				}
 			}
 			else {
-				thisRenderer.SetMainColor(unsolvedColor);
-				thisRenderer.SetColor("_EmissionColor", unsolvedEmissionColor);
+				if (t < 1) {
+					float size = Mathf.LerpUnclamped(scaleWhenStateChanged, minScale, scaleCurve.Evaluate(t));
+					transform.localScale = new Vector3(size, transform.localScale.y, size);
+				}
+				else {
+					transform.localScale = new Vector3(minScale, transform.localScale.y, minScale);
+				}
 			}
 		}
 
@@ -60,7 +100,7 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		bool IsWithinCone(LightProjector projector) {
-			Vector3 testPos = transform.position;
+			Vector3 testPos = transform.position + Vector3.down;
 			Transform cone = projector.transform.GetChild(0);
 			if (!cone.gameObject.activeSelf) {
 				return false;

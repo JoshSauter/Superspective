@@ -5385,27 +5385,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 971708725311228175, guid: f14529a0ababebd4cb6d695be821feea,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 971708724323760989, guid: f14529a0ababebd4cb6d695be821feea,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 971708725107318512, guid: f14529a0ababebd4cb6d695be821feea,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 7532359257676714915, guid: f14529a0ababebd4cb6d695be821feea,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 971708724097332646, guid: f14529a0ababebd4cb6d695be821feea,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f14529a0ababebd4cb6d695be821feea, type: 3}
 --- !u!4 &176371789 stripped
 Transform:
@@ -13536,7 +13516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 28
+  startingScene: 14
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -15895,7 +15875,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 63.4
+  m_fontSize: 62.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -19832,7 +19812,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 90.35
+  m_fontSize: 88.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -20368,8 +20348,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0.22164206, z: 0, w: 0.9751281}
-  m_LocalPosition: {x: 876.75, y: 70.34271, z: -67.75}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: -800, y: 52.5, z: 337.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20379,7 +20359,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 25.611, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36065,7 +36045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1291436110
 Transform:
   m_ObjectHideFlags: 0
@@ -39282,7 +39262,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 101.7
+  m_fontSize: 102.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -51338,7 +51318,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 89.95
+  m_fontSize: 88.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -52951,7 +52931,7 @@ MonoBehaviour:
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
   edgeColorGradient:
     serializedVersion: 2
-    key0: {r: 0, g: 0, b: 0, a: 1}
+    key0: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
     key1: {r: 0, g: 0, b: 0, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0.03137255}
     key3: {r: 0, g: 0, b: 0, a: 0}
@@ -53036,7 +53016,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60879,15 +60859,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6726481963021318185, guid: 85a35c002e6fd9945a68b30b19efec74,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 6726481962828738142, guid: 85a35c002e6fd9945a68b30b19efec74,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 85a35c002e6fd9945a68b30b19efec74, type: 3}
 --- !u!4 &2080728760 stripped
 Transform:
@@ -64069,11 +64041,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7330659418199295224, guid: d541042c26ff22142a2f602a91fdf045,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d541042c26ff22142a2f602a91fdf045, type: 3}
 --- !u!1001 &7379859775189834874
 PrefabInstance:
