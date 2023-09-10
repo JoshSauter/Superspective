@@ -21,7 +21,9 @@ public class BetterTrigger : MonoBehaviour {
             listeners = GetComponents<MonoBehaviour>().OfType<BetterTriggers>().ToList();
         }
 
-        trigger.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        if (trigger.gameObject.layer != LayerMask.NameToLayer("Portal")) {
+            trigger.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        }
     }
     
     private void OnEnable() {

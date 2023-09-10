@@ -11,7 +11,6 @@ using UnityEngine.Serialization;
 namespace LevelSpecific.WhiteRoom {
     [RequireComponent(typeof(UniqueId))]
     public class RaiseLowerPlatform : SaveableObject<RaiseLowerPlatform, RaiseLowerPlatformSave>, AudioJobOnGameObject {
-        [FormerlySerializedAs("powerTrail")]
         public PowerTrail triggeredByPowerTrail;
         public CubeReceptacle cubeReceptacle;
         

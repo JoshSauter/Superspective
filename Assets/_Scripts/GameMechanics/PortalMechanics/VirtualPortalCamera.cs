@@ -484,11 +484,6 @@ namespace PortalMechanics {
 				debug.LogWarning("Too close to use oblique projection matrix, using default instead");
 				portalCamera.projectionMatrix = mainCamera.projectionMatrix;
 			}
-
-			// Modify the camera's edge detection if necessary
-			if (inPortal != null && inPortal.changeCameraEdgeDetection) {
-				// CopyEdgeColors(portalCameraEdgeDetection, inPortal.edgeColorMode, inPortal.edgeColor, inPortal.edgeColorGradient, inPortal.edgeColorGradientTexture);
-			}
 			
 			return new CameraSettings {
 				camPosition = portalCamera.transform.position,
