@@ -6,17 +6,19 @@ using PowerTrailMechanics;
 using Saving;
 using StateUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom {
-    
-    public class RaiseLowerCubeReceptacle : SaveableObject<RaiseLowerCubeReceptacle, RaiseLowerCubeReceptacleSave>, AudioJobOnGameObject {
-        public PowerTrail powerTrail;
+    [RequireComponent(typeof(UniqueId))]
+    public class RaiseLowerPlatform : SaveableObject<RaiseLowerPlatform, RaiseLowerPlatformSave>, AudioJobOnGameObject {
+        [FormerlySerializedAs("powerTrail")]
+        public PowerTrail triggeredByPowerTrail;
         public CubeReceptacle cubeReceptacle;
         
-        private float raiseLowerSpeed = 1f;
+        public float raiseLowerSpeed = 1f;
         public float maxHeight = -19.5f;
         public float minHeight = -29f;
-        private float height => maxHeight - minHeight;
+        private float height => Mathf.Abs(maxHeight - minHeight);
         private float timeToMove => height / raiseLowerSpeed;
 
         const float juiceTime = 1.2f;
@@ -61,17 +63,21 @@ namespace LevelSpecific.WhiteRoom {
                 }
             );
 
-            powerTrail.OnPowerFinish += PowerOn;
-            powerTrail.OnDepowerBegin += PowerOff;
+            if (triggeredByPowerTrail) {
+                triggeredByPowerTrail.OnPowerFinish += TriggeredByPowerOn;
+                triggeredByPowerTrail.OnDepowerBegin += TriggeredByPowerOff;
+            }
         }
 
         protected override void OnDestroy() {
             base.OnDestroy();
-            powerTrail.OnPowerFinish -= PowerOn;
-            powerTrail.OnDepowerBegin -= PowerOff;
+            if (triggeredByPowerTrail) {
+                triggeredByPowerTrail.OnPowerFinish -= TriggeredByPowerOn;
+                triggeredByPowerTrail.OnDepowerBegin -= TriggeredByPowerOff;
+            }
         }
 
-        void PowerOn() {
+        void TriggeredByPowerOn() {
             switch (state.state) {
                 case State.Lowered:
                     state.Set(State.Raising);
@@ -88,7 +94,7 @@ namespace LevelSpecific.WhiteRoom {
             }
         }
 
-        void PowerOff() {
+        void TriggeredByPowerOff() {
             switch (state.state) {
                 case State.Lowering:
                 case State.Lowered:
@@ -132,7 +138,7 @@ namespace LevelSpecific.WhiteRoom {
                     float t = state.timeSinceStateChanged / timeToMove;
                     float targetHeight = Mathf.Lerp(minHeight, maxHeight, t);
                     float delta = SetHeight(targetHeight);
-                    if (cubeReceptacle.isCubeInReceptacle) {
+                    if (cubeReceptacle?.isCubeInReceptacle ?? false) {
                         cubeReceptacle.cubeInReceptacle.transform.Translate(Vector3.up * delta, Space.World);
                     }
                     break;
@@ -163,14 +169,14 @@ namespace LevelSpecific.WhiteRoom {
     #region Saving
 
     [Serializable]
-    public class RaiseLowerCubeReceptacleSave : SerializableSaveObject<RaiseLowerCubeReceptacle> {
-        private StateMachine<RaiseLowerCubeReceptacle.State>.StateMachineSave stateSave;
+    public class RaiseLowerPlatformSave : SerializableSaveObject<RaiseLowerPlatform> {
+        private StateMachine<RaiseLowerPlatform.State>.StateMachineSave stateSave;
 
-        public RaiseLowerCubeReceptacleSave(RaiseLowerCubeReceptacle script) : base(script) {
+        public RaiseLowerPlatformSave(RaiseLowerPlatform script) : base(script) {
             stateSave = script.state.ToSave();
         }
 
-        public override void LoadSave(RaiseLowerCubeReceptacle script) {
+        public override void LoadSave(RaiseLowerPlatform script) {
             script.state.LoadFromSave(stateSave);
         }
     }
