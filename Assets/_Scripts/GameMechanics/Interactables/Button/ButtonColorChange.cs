@@ -22,7 +22,7 @@ public class ButtonColorChange : MonoBehaviour {
     public Color pressEmission = Color.black;
 
     public Button buttonToReactTo;
-    SuperspectiveRenderer r;
+    public SuperspectiveRenderer r;
 
     private const float lerpSpeed = 2f;
 
@@ -35,8 +35,12 @@ public class ButtonColorChange : MonoBehaviour {
             return;
         }
 
-        r = GetComponent<SuperspectiveRenderer>();
-        if (r == null) r = gameObject.AddComponent<SuperspectiveRenderer>();
+        if (r == null) {
+            r = GetComponent<SuperspectiveRenderer>();
+            if (r == null) {
+                r = gameObject.AddComponent<SuperspectiveRenderer>();
+            }
+        }
 
         if (useMaterialAsEndColor) {
             pressColor = overrideColorProperty ? r.GetColor(colorPropertyOverride) : r.GetMainColor();

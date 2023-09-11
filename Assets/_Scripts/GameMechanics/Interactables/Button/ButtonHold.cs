@@ -44,4 +44,8 @@ public class ButtonHold : Button {
             OnButtonHeld?.Invoke(this);
         }
     }
+
+    public void ReleaseButton() {
+        buttonHeld = false;
+    }
 }

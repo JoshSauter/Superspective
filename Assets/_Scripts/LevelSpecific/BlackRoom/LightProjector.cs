@@ -82,12 +82,14 @@ namespace LevelSpecific.BlackRoom {
 			curCircumferenceRotation = Quaternion.Lerp(curCircumferenceRotation, desiredCircumferenceRotation, circumferenceRotationLerpSpeed * Time.deltaTime);
 		}
 
-		public void IncreaseFrustumSize() {
-			ChangeFrustumSize(1 + frustumSizeChangeSpeed * Time.deltaTime / 100f);
+		// Returns true if the frustum size changed, false otherwise
+		public bool IncreaseFrustumSize() {
+			return ChangeFrustumSize(1 + frustumSizeChangeSpeed * Time.deltaTime / 100f);
 		}
 
-		public void DecreaseFrustumSize() {
-			ChangeFrustumSize(1 - frustumSizeChangeSpeed * Time.deltaTime / 100f);
+		// Returns true if the frustum size changed, false otherwise
+		public bool DecreaseFrustumSize() {
+			return ChangeFrustumSize(1 - frustumSizeChangeSpeed * Time.deltaTime / 100f);
 		}
 
 		public void RotateAngleLeft() {
@@ -107,14 +109,16 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		// Stretches the far plane of the frustum within the bounds minSize <-> maxSize
-		void ChangeFrustumSize(float multiplier) {
+		// Returns true if the size is within minSize <-> maxSize, false otherwise
+		bool ChangeFrustumSize(float multiplier) {
 			currentSize *= multiplier;
 			if (currentSize < minSize || currentSize > maxSize) {
 				currentSize = Mathf.Clamp(currentSize, minSize, maxSize);
 				transform.GetChild(0).localScale = new Vector3(currentSize, transform.GetChild(0).localScale.y, currentSize);
-				return;
+				return false;
 			}
 			transform.GetChild(0).localScale = new Vector3(currentSize, transform.GetChild(0).localScale.y, currentSize);
+			return true;
 		}
 
 		// Rotates the projector along the y-axis of rotation, within the bounds minRotation <-> maxRotation

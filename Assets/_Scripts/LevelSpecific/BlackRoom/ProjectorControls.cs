@@ -49,30 +49,38 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void IncreaseFrustumSize() {
-			projector.IncreaseFrustumSize();
+			bool isMaxedOut = !projector.IncreaseFrustumSize();
+			if (isMaxedOut) {
+				projectorSizeIncreaseButton.ReleaseButton();
+				projectorSizeIncreaseButton.interactableObject.SetAsDisabled("(Max size)");
+			}
 		}
 
 		void DecreaseFrustumSize() {
-			projector.DecreaseFrustumSize();
+			bool isMin = !projector.DecreaseFrustumSize();
+			if (isMin) {
+				projectorSizeDecreaseButton.ReleaseButton();
+				projectorSizeDecreaseButton.interactableObject.SetAsDisabled("(Min size)");
+			}
 		}
 
 		void RotateProjector(Angle diff) {
 			projector.RotateAroundCircumference(-diff.degrees / valveToLightRotationRatio);
 		}
 
-		void RotateProjectorLeftOnAxis() {
+		public void RotateProjectorLeftOnAxis() {
 			projector.RotateAngleLeft();
 		}
 
-		void RotateProjectorRightOnAxis() {
+		public void RotateProjectorRightOnAxis() {
 			projector.RotateAngleRight();
 		}
 
-		void RotateProjectorDownOnAxis() {
+		public void RotateProjectorDownOnAxis() {
 			projector.RotateAngleDown();
 		}
 
-		void RotateProjectorUpOnAxis() {
+		public void RotateProjectorUpOnAxis() {
 			projector.RotateAngleUp();
 		}
 	}
