@@ -5,6 +5,7 @@ using UnityEngine;
 using Saving;
 using StateUtils;
 using SuperspectiveUtils;
+using UnityStandardAssets.ImageEffects;
 
 namespace GrowShrink {
     [RequireComponent(typeof(UniqueId))]
@@ -16,6 +17,25 @@ namespace GrowShrink {
         public float _currentScale = 1;
 
         public float startingScale = 1f;
+        
+        // Change the SSAO to blend the teleport
+        ScreenSpaceAmbientOcclusion _ssao;
+        // SSAO will automatically clamp the intensity to >= 0.5,
+        // so we need to keep track of what the value actually is separately from what it is in the SSAO script
+        float ssaoActualIntensity;
+        ScreenSpaceAmbientOcclusion ssao {
+            get {
+                if (_ssao == null) {
+                    _ssao = SuperspectiveScreen.instance?.playerCamera?.GetComponent<ScreenSpaceAmbientOcclusion>();
+
+                    if (_ssao != null) {
+                        ssaoActualIntensity = _ssao.m_OcclusionIntensity;
+                    }
+                }
+
+                return _ssao;
+            }
+        }
 
         [ShowNativeProperty]
         public float currentScale {
@@ -141,6 +161,10 @@ namespace GrowShrink {
                     BladeEdgeDetection edges = MaskBufferRenderTextures.instance.edgeDetection;
                     float depthSensWithoutMultiplier = edges.depthSensitivity * currentScaleClamped;
                     edges.depthSensitivity = depthSensWithoutMultiplier / targetScaleClamped;
+
+                    float ssaoIntensityWithoutMultiplier = ssaoActualIntensity / currentScaleClamped;
+                    ssaoActualIntensity = ssaoIntensityWithoutMultiplier * targetScale;
+                    ssao.m_OcclusionIntensity = ssaoActualIntensity;
                 }
                 // float nearClipPlaneWithoutMultiplier = cam.nearClipPlane / currentScale;
                 // float farClipPlaneWithoutMultiplier = cam.farClipPlane / currentScale;
