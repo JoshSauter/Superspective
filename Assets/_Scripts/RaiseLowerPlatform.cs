@@ -31,6 +31,7 @@ namespace LevelSpecific.WhiteRoom {
             Lowering
         }
 
+        public bool playSfx = true;
         public StateMachine<State> state = new StateMachine<State>(State.Lowered);
 
         // Start is called before the first frame update
@@ -52,13 +53,22 @@ namespace LevelSpecific.WhiteRoom {
             // SFX triggers
             state.AddTrigger((state) => state is State.Raised or State.Lowered,
                 () => {
-                    AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
+                    if (playSfx) {
+                        AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
+                    }
                     AudioManager.instance.GetAudioJob(AudioName.MachineOn, ID).Stop();
                 });
-            state.AddTrigger((state) => state is State.Raised or State.Lowered, 0.5f, () => AudioManager.instance.PlayOnGameObject(AudioName.MachineOff, ID, this));
+            state.AddTrigger((state) => state is State.Raised or State.Lowered, 0.5f, () => {
+                    if (playSfx) {
+                        AudioManager.instance.PlayOnGameObject(AudioName.MachineOff, ID, this);
+                    }
+                }
+            );
             state.AddTrigger((state) => state is State.Raising or State.Lowering, () => {
-                    AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
-                    AudioManager.instance.PlayOnGameObject(AudioName.MachineOn, ID, this);
+                    if (playSfx) {
+                        AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
+                        AudioManager.instance.PlayOnGameObject(AudioName.MachineOn, ID, this);
+                    }
                 }
             );
 
