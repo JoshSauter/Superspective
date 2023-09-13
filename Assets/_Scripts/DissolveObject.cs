@@ -78,13 +78,19 @@ public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.Diss
     // The layer the objects would be on if not dissolved
     private int[] cachedLayers;
 
+    [Button("Dematerialize")]
     public void Dematerialize() {
+        if (!Application.isPlaying) return;
+
         if (state == State.Materialized) {
             state = State.Dematerializing;
         }
     }
 
+    [Button("Materialize")]
     public void Materialize() {
+        if (!Application.isPlaying) return;
+
         if (state == State.Dematerialized) {
             state = State.Materializing;
         }

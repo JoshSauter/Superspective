@@ -39282,7 +39282,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 102.4
+  m_fontSize: 100.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -52939,13 +52939,13 @@ MonoBehaviour:
   debugMode: 0
   doubleSidedEdges: 1
   checkPortalDepth: 1
-  depthSensitivity: 1
+  depthSensitivity: 4
   normalSensitivity: 1
   sampleDistance: 1
   weightedEdgeMode: 3
   depthWeightEffect: 0.5
   normalWeightEffect: 0.5
-  depthWeightMin: 0.25
+  depthWeightMin: 0.5
   normalWeightMin: 0
   edgeColorMode: 1
   edgeColor: {r: 0, g: 0, b: 0, a: 1}

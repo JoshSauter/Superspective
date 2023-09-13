@@ -332,6 +332,7 @@
 					float3 normalValue;
 					DecodeDepthNormal(samples[s], depthValue, normalValue);
 
+					// Multiplying the depth value by some scale amount seems to give better results for small depth value differences that are true positives
 					depthSamples[s] = depthValue;
 					normalSamples[s] = normalValue;
 					obliqueness[s] = ObliquenessFromNormal(normalValue, uvPositions.UVs[s]);
