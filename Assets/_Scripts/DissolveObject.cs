@@ -108,9 +108,9 @@ public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.Diss
 
     protected override void Awake() {
         base.Awake();
-        renderers = gameObject.GetComponentsInChildren<Renderer>();
+        renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();
         cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
-        colliders = gameObject.GetComponentsInChildren<Collider>();
+        colliders = gameObject.GetComponentsInChildrenRecursively<Collider>();
     }
 
     protected override void Start() {
