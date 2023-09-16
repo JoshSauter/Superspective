@@ -139,6 +139,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                 else {
                     endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
                     cubeInReceptacle.transform.position = endPos;
+                    cubeInReceptacle.thisRigidbody.isKinematic = true;
 
                     if (lockCubeInPlace) {
                         lockDissolve.Materialize();
@@ -213,6 +214,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     triggerZone.enabled = false;
 
                     state = State.Empty;
+                    cubeThatWasInReceptacle.thisRigidbody.isKinematic = false;
                     cubeInReceptacle = null;
                 }
 
