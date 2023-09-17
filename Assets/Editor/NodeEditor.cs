@@ -11,7 +11,7 @@ public class NodeEditor : UnityEditor.Editor {
     
     Camera sceneViewCam;
     SceneView sv;
-
+    
     void OnSceneGUI() {
         // get the chosen game object
         NodeSystem t = target as NodeSystem;

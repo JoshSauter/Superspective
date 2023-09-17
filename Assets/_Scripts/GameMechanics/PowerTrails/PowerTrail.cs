@@ -93,6 +93,8 @@ namespace PowerTrailMechanics {
 
 		public UnityEvent onPowerBegin;
 		public UnityEvent onPowerFinish;
+		public UnityEvent onDepowerBegin;
+		public UnityEvent onDepowerFinish;
 		#endregion
 
 		///////////
@@ -142,10 +144,12 @@ namespace PowerTrailMechanics {
 				}
 				else if (_state == PowerTrailState.Powered && value == PowerTrailState.PartiallyPowered) {
 					OnDepowerBegin?.Invoke();
+					onDepowerBegin?.Invoke();
 					OnDepowerBeginRef?.Invoke(this);
 				}
 				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Depowered) {
 					OnDepowerFinish?.Invoke();
+					onDepowerFinish?.Invoke();
 					OnDepowerFinishRef?.Invoke(this);
 				}
 				_state = value;
@@ -239,8 +243,6 @@ namespace PowerTrailMechanics {
 				}
 			}
 
-			// DEBUG: Remove this from Update after debugging
-			//PopulateStaticGPUInfo();
 			Material[] nowMaterials = renderers.Select(r => r.material).ToArray();
 			if (materials != null && nowMaterials != null && !materials.SequenceEqual(nowMaterials)) {
 				materials = nowMaterials;

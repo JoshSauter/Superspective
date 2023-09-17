@@ -172,8 +172,6 @@ public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.Cube
         cubeSpawned = newCube;
         AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerSpawn, ID, button.transform.position);
         state = State.CubeSpawnedButNotTaken;
-        
-        Debug.Break();
     }
 
     void AffixSpawnedCubeWithParentDimensionObject(PickupObject newCube) {
