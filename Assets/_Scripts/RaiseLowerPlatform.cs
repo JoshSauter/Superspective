@@ -41,6 +41,16 @@ namespace LevelSpecific.WhiteRoom {
             StartCoroutine(StartCo());
         }
 
+        protected override void OnValidate() {
+            base.OnValidate();
+            if (state.state is State.Lowered or State.Raising) {
+                SetHeight(minHeight);
+            }
+            else {
+                SetHeight(maxHeight);
+            }
+        }
+
         IEnumerator StartCo() {
             yield return new WaitWhile(() => !GameManager.instance.gameHasLoaded);
             if (gameObject == null) yield break;
