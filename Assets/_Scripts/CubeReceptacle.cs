@@ -96,6 +96,8 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     }
 
     void OnTriggerStay(Collider other) {
+        if (gameObject.layer == LayerMask.NameToLayer("Invisible")) return;
+        
         PickupObject cube = other.gameObject.GetComponent<PickupObject>();
         if (colorCoded != null && !colorCoded.AcceptedColor(other.gameObject.GetComponent<ColorCoded>())) return;
         if (cube != null && cubeInReceptacle == null) StartCubeEnter(cube);

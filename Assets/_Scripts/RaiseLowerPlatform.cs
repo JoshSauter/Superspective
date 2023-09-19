@@ -66,7 +66,7 @@ namespace LevelSpecific.WhiteRoom {
                     if (playSfx) {
                         AudioManager.instance.PlayOnGameObject(AudioName.MachineClick, ID, this);
                     }
-                    AudioManager.instance.GetAudioJob(AudioName.MachineOn, ID).Stop();
+                    AudioManager.instance.GetAudioJob(AudioName.MachineOn, ID)?.Stop();
                 });
             state.AddTrigger((state) => state is State.Raised or State.Lowered, 0.5f, () => {
                     if (playSfx) {
