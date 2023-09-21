@@ -445,6 +445,7 @@ MonoBehaviour:
   pressColor: {r: 0.17930403, g: 0.72300005, b: 0.2623111, a: 1}
   pressEmission: {r: 0, g: 0, b: 0, a: 1}
   buttonToReactTo: {fileID: 0}
+  r: {fileID: 0}
 --- !u!114 &7500548451249648734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5697,6 +5698,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
     m_PersistentCalls:
       m_Calls: []
   distance: 0

@@ -4768,6 +4768,12 @@ MonoBehaviour:
   onPowerFinish:
     m_PersistentCalls:
       m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
   distance: 0
   maxDistance: 0
   _powerIsOn: 0
@@ -16131,6 +16137,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
     m_PersistentCalls:
       m_Calls: []
   distance: 0
