@@ -13536,7 +13536,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 6
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -20368,8 +20368,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 525.13306, y: -8.66, z: -134.8}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0.43547004, y: -396.43, z: 37.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

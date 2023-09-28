@@ -128,26 +128,26 @@ namespace PowerTrailMechanics {
 		public bool fullyPowered => distance >= maxDistance;
 		public bool fullyDepowered => distance <= 0;
 		[SerializeField]
-		PowerTrailState _state = PowerTrailState.Depowered;
-		public PowerTrailState state {
+		PowerState _state = PowerState.Depowered;
+		public PowerState state {
 			get => _state;
 			private set {
-				if (_state == PowerTrailState.Depowered && value == PowerTrailState.PartiallyPowered) {
+				if (_state == PowerState.Depowered && value == PowerState.PartiallyPowered) {
 					OnPowerBegin?.Invoke();
 					onPowerBegin?.Invoke();
 					OnPowerBeginRef?.Invoke(this);
 				}
-				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Powered) {
+				else if (_state == PowerState.PartiallyPowered && value == PowerState.Powered) {
 					OnPowerFinish?.Invoke();
 					onPowerFinish?.Invoke();
 					OnPowerFinishRef?.Invoke(this);
 				}
-				else if (_state == PowerTrailState.Powered && value == PowerTrailState.PartiallyPowered) {
+				else if (_state == PowerState.Powered && value == PowerState.PartiallyPowered) {
 					OnDepowerBegin?.Invoke();
 					onDepowerBegin?.Invoke();
 					OnDepowerBeginRef?.Invoke(this);
 				}
-				else if (_state == PowerTrailState.PartiallyPowered && value == PowerTrailState.Depowered) {
+				else if (_state == PowerState.PartiallyPowered && value == PowerState.Depowered) {
 					OnDepowerFinish?.Invoke();
 					onDepowerFinish?.Invoke();
 					OnDepowerFinishRef?.Invoke(this);
@@ -163,7 +163,7 @@ namespace PowerTrailMechanics {
 				powerNodes = GetComponent<NodeSystem>();
 			}
 
-			_powerIsOn = (_state == PowerTrailState.PartiallyPowered || _state == PowerTrailState.Powered);
+			_powerIsOn = (_state == PowerState.PartiallyPowered || _state == PowerState.Powered);
 			foreach (var renderer in renderers) {
 				// UI only layer that doesn't collide w/ anything right now
 				renderer.gameObject.layer = LayerMask.NameToLayer(hiddenPowerTrail ? "UI" : "VisibleButNoPlayerCollision");
@@ -208,10 +208,10 @@ namespace PowerTrailMechanics {
 
 		void SetStartState() {
 			isInitialized = false;
-			if (state == PowerTrailState.Powered) {
+			if (state == PowerState.Powered) {
 				distance = maxDistance;
 			}
-			else if (state == PowerTrailState.Depowered) {
+			else if (state == PowerState.Depowered) {
 				distance = 0;
 			}
 		}
@@ -413,18 +413,18 @@ namespace PowerTrailMechanics {
 		void UpdateState(float prevDistance, float nextDistance) {
 			if (powerIsOn) {
 				if (prevDistance == 0 && nextDistance > 0) {
-					state = PowerTrailState.PartiallyPowered;
+					state = PowerState.PartiallyPowered;
 				}
 				else if (prevDistance < maxDistance && nextDistance == maxDistance) {
-					state = PowerTrailState.Powered;
+					state = PowerState.Powered;
 				}
 			}
 			else if (!powerIsOn) {
 				if (prevDistance == maxDistance && nextDistance < maxDistance) {
-					state = PowerTrailState.PartiallyPowered;
+					state = PowerState.PartiallyPowered;
 				}
 				else if (prevDistance > 0 && nextDistance == 0) {
-					state = PowerTrailState.Depowered;
+					state = PowerState.Depowered;
 				}
 			}
 		}
@@ -449,7 +449,7 @@ namespace PowerTrailMechanics {
 			const float shortWait = .025f;
 			const float longWait = .5f;
 			float timeElapsed = audioJob.timeRunning;
-			if (state == PowerTrailState.Depowered || audioJob.audio.volume == 0) {
+			if (state == PowerState.Depowered || audioJob.audio.volume == 0) {
 				// If depowered, only check once every longWait for this expensive calculation
 				if (timeElapsed < longWait) {
 					return;
@@ -676,7 +676,7 @@ namespace PowerTrailMechanics {
 					powerTrail.distance += 0.00001f;
 				}
 				powerTrail._powerIsOn = this.powerIsOn;
-				powerTrail._state = (PowerTrailState)this.state;
+				powerTrail._state = (PowerState)this.state;
 			}
 		}
 #endregion

@@ -1,5 +1,5 @@
 ﻿namespace PowerTrailMechanics {
-    public enum PowerTrailState {
+    public enum PowerState {
         Depowered,
         PartiallyPowered,
         Powered

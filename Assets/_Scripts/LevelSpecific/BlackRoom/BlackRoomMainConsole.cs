@@ -71,7 +71,7 @@ namespace LevelSpecific.BlackRoom {
 
         // Update is called once per frame
         void Update() {
-            if (state == State.Depowered && mainPower.state == PowerTrailState.Powered) {
+            if (state == State.Depowered && mainPower.state == PowerState.Powered) {
                 state.Set(State.Powering);
             }
             

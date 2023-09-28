@@ -1,10 +1,11 @@
 ﻿using PowerTrailMechanics;
+using StateUtils;
 using UnityEngine.Events;
 
 namespace PoweredObjects {
-    public interface PowerSource {
+    public interface PoweredObject {
         public delegate void PowerSourceAction();
-        public delegate void PowerSourceRefAction(PowerSource powerSource);
+        public delegate void PowerSourceRefAction(PoweredObject poweredObject);
         
         public event PowerSourceAction OnPowerBegin;
         public event PowerSourceAction OnPowerFinish;
@@ -14,12 +15,11 @@ namespace PoweredObjects {
         public event PowerSourceRefAction OnPowerFinishRef;
         public event PowerSourceRefAction OnDepowerBeginRef;
         public event PowerSourceRefAction OnDepowerFinishRef;
-        
-        bool PowerIsOn { get; }
-        bool IsFullyPowered { get; }
-        bool IsFullyDepowered { get; }
 
-        void Power();
-        void Depower();
+        public StateMachine<PowerState> PowerStateMachine { get; }
+        
+        bool PowerIsOn { get; set; }
+        bool IsFullyPowered => this.PowerStateMachine.state == PowerState.Powered;
+        bool IsFullyDepowered => this.PowerStateMachine.state == PowerState.Depowered;
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PowerButton : SaveableObject<PowerButton, PowerButton.PowerButtonSave> {
     public Button button;
-    public PowerTrailState powerState;
+    public PowerState powerState;
 
     public bool powerIsOn;
     
@@ -83,11 +83,11 @@ public class PowerButton : SaveableObject<PowerButton, PowerButton.PowerButtonSa
     #region Toggle mode
     void HandleToggleButtonPressBegin(Button button) {
         powerIsOn = !powerIsOn;
-        if (powerState == PowerTrailState.Depowered) {
-            powerState = PowerTrailState.PartiallyPowered;
+        if (powerState == PowerState.Depowered) {
+            powerState = PowerState.PartiallyPowered;
         }
-        else if (powerState == PowerTrailState.Powered) {
-            powerState = PowerTrailState.PartiallyPowered;
+        else if (powerState == PowerState.Powered) {
+            powerState = PowerState.PartiallyPowered;
         }
 
         if (powerIsOn) {
@@ -100,11 +100,11 @@ public class PowerButton : SaveableObject<PowerButton, PowerButton.PowerButtonSa
     
     void HandleToggleButtonPressFinish(Button button) {
         if (powerIsOn) {
-            powerState = PowerTrailState.Powered;
+            powerState = PowerState.Powered;
             OnPowerFinish?.Invoke();
         }
         else {
-            powerState = PowerTrailState.Depowered;
+            powerState = PowerState.Depowered;
             OnDepowerFinish?.Invoke();
         }
     }
@@ -114,23 +114,23 @@ public class PowerButton : SaveableObject<PowerButton, PowerButton.PowerButtonSa
 
     void HandleOnOffButtonPressBegin(Button button) {
         powerIsOn = true;
-        powerState = PowerTrailState.PartiallyPowered;
+        powerState = PowerState.PartiallyPowered;
         OnPowerStart?.Invoke();
     }
 
     void HandleOnOffButtonPressFinish(Button button) {
-        powerState = PowerTrailState.Powered;
+        powerState = PowerState.Powered;
         OnPowerFinish?.Invoke();
     }
 
     void HandleOnOffButtonUnpressBegin(Button button) {
         powerIsOn = false;
-        powerState = PowerTrailState.PartiallyPowered;
+        powerState = PowerState.PartiallyPowered;
         OnDepowerStart?.Invoke();
     }
 
     void HandleOnOffButtonUnpressFinish(Button button) {
-        powerState = PowerTrailState.Depowered;
+        powerState = PowerState.Depowered;
         OnDepowerFinish?.Invoke();
     }
     
@@ -140,7 +140,7 @@ public class PowerButton : SaveableObject<PowerButton, PowerButton.PowerButtonSa
     
     [Serializable]
     public class PowerButtonSave : SerializableSaveObject<PowerButton> {
-        private PowerTrailState powerState;
+        private PowerState powerState;
         private bool powerIsOn;
         
         public PowerButtonSave(PowerButton script) : base(script) {
