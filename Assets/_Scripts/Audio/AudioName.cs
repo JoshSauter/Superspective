@@ -70,7 +70,6 @@ namespace Audio {
 	public static class AudioNameExt {
 		private static AudioClip[] _glassFootstepClips;
 		private static AudioClip[] _correctAnswerClips;
-		private static AudioClip _lastCorrectAnswerClipPlayed;
 
 		private static AudioClip[] glassFootstepClips {
 			get {
@@ -95,11 +94,9 @@ namespace Audio {
 		public static AudioClip GetAudioClip(this AudioName audioType, AudioSource source) {
 			switch (audioType) {
 				case AudioName.PlayerFootstepGlass:
-					return glassFootstepClips.RandomElementFrom();
+					return glassFootstepClips.DifferentRandomElementFrom();
 				case AudioName.CorrectAnswer:
-					AudioClip nextClip = correctAnswerClips.Where(clip => clip != _lastCorrectAnswerClipPlayed).ToList().RandomElementFrom();
-					_lastCorrectAnswerClipPlayed = nextClip;
-					return nextClip;
+					return correctAnswerClips.DifferentRandomElementFrom();
 				default:
 					return source.clip;
 			}

@@ -82,6 +82,30 @@ namespace SuperspectiveUtils {
             collection.CopyTo(array, 0);
             return array[UnityEngine.Random.Range(0, count)];
         }
+
+        private static readonly Dictionary<int, object> _lastSelectedElements = new Dictionary<int, object>();
+        
+        /// <summary>
+        /// Remembers the last randomly selected element from a collection and generates a different element
+        /// </summary>
+        /// <param name="collection">Collection to select random element from</param>
+        /// <typeparam name="T">Type of the element of the collection</typeparam>
+        /// <returns>A different random value from a collection than what was last randomly generated</returns>
+        public static T DifferentRandomElementFrom<T>(this ICollection<T> collection) {
+            T lastSelectedElement = default;
+            bool IsNotLastSelectedElement(T element) {
+                return !EqualityComparer<T>.Default.Equals(element, lastSelectedElement);
+            }
+
+            int hash = collection.GetHashCode();
+            if (collection.Count > 1 && _lastSelectedElements.ContainsKey(hash)) {
+                lastSelectedElement = (T)_lastSelectedElements[hash];
+            }
+            
+            T nextSelectedElement = collection.Where(IsNotLastSelectedElement).ToList().RandomElementFrom();
+            _lastSelectedElements[hash] = nextSelectedElement;
+            return nextSelectedElement;
+        }
     }
 
     public static class BladeEdgeDetectionExt {

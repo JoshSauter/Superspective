@@ -259,7 +259,14 @@ namespace Smaa
 
 		void Clear(RenderTexture rt)
 		{
-			Graphics.Blit(rt, rt, Material, 0);
+			// Create a temporary RenderTexture for the destination
+			RenderTexture tempRT = RenderTexture.GetTemporary(rt.width, rt.height, rt.depth, rt.format);
+
+			// Perform the blit with the temporary RenderTexture
+			Graphics.Blit(rt, tempRT, Material, 0);
+
+			// Release the temporary RenderTexture
+			RenderTexture.ReleaseTemporary(tempRT);
 		}
 
 		RenderTexture TempRT(int width, int height, RenderTextureFormat format)
