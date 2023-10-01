@@ -118,11 +118,17 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Gameplay.CameraShake);
                 break;
             case MenuType.Gameplay:
+                settingsItems.Add(UIStyle.NewHeader("Movement"));
+                AddSettingCopy(Settings.Gameplay.SprintByDefault);
+                AddSettingCopy(Settings.Gameplay.SprintBehavior);
+                settingsItems.Add(UIStyle.NewHeader("Gameplay Visuals"));
                 AddSettingCopy(Settings.Gameplay.CameraShake);
                 AddSettingCopy(Settings.Gameplay.Headbob);
+                settingsItems.Add(UIStyle.NewHeader("Camera"));
                 AddSettingCopy(Settings.Gameplay.GeneralSensitivity);
                 AddSettingCopy(Settings.Gameplay.XSensitivity);
                 AddSettingCopy(Settings.Gameplay.YSensitivity);
+                settingsItems.Add(UIStyle.NewHeader("UI"));
                 AddSettingCopy(Settings.Gameplay.ShowInteractionHelp);
                 AddSettingCopy(Settings.Gameplay.ShowDisabledReason);
                 settingsItems.Add(UIStyle.NewHeader("Autosaves"));
