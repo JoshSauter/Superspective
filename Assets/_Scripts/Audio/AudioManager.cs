@@ -195,7 +195,8 @@ namespace Audio {
 		public float musicVolume = .50f;
 
 		Transform soundsRoot;
-		private float timeElapsedBeforeAudioAllowedToPlay = 1f;
+		private float timeElapsedBeforeAudioAllowedToPlay = 1f; // Presumably to prevent some buggy behavior when loading into a scene
+		Dictionary<AudioJob, Action<AudioJob>> queuedAudioJobs = new Dictionary<AudioJob, Action<AudioJob>>(); // Audio jobs that are queued to be played once the timeElapsedBeforeAudioAllowedToPlay has elapsed
 
 		private readonly Dictionary<AudioName, AudioSettings> defaultSettings = new Dictionary<AudioName, AudioSettings>();
 		private readonly Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
@@ -220,6 +221,11 @@ namespace Audio {
 		}
 
 		void Update() {
+			if (queuedAudioJobs.Count > 0 && Time.time > timeElapsedBeforeAudioAllowedToPlay) {
+				queuedAudioJobs.ToList().ForEach(kv => PlayWithSettings(kv.Key, kv.Value));
+				queuedAudioJobs.Clear();
+			}
+			
 			// Perform update actions for running audio jobs that have one
 			foreach (var updateJob in updateAudioJobs) {
 				AudioJob job = audioJobs[updateJob.Key];
@@ -284,8 +290,7 @@ namespace Audio {
 			AudioJob audioJob = GetOrCreateJob(audioName, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
-				settingsOverride?.Invoke(audioJob);
-				Play(audioJob);
+				PlayWithSettings(audioJob, settingsOverride);
 			}
 		}
 
@@ -295,8 +300,8 @@ namespace Audio {
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
 				audioJob.audio.transform.position = location;
-				settingsOverride?.Invoke(audioJob);
-				Play(audioJob);
+
+				PlayWithSettings(audioJob, settingsOverride);
 			}
 		}
 
@@ -317,8 +322,7 @@ namespace Audio {
 				serializableUpdateAudioOnGameObject[audioJob.id] = audioJobOnGameObject;
 				updateAudioJobs[audioJob.id] = update;
 
-				settingsOverride?.Invoke(audioJob);
-				Play(audioJob);
+				PlayWithSettings(audioJob, settingsOverride);
 			}
 		}
 
@@ -338,14 +342,22 @@ namespace Audio {
 					updateAudioJobs[audioJob.id] = customUpdate.UpdateAudio;
 				}
 
-				settingsOverride?.Invoke(audioJob);
-				Play(audioJob);
+				PlayWithSettings(audioJob, settingsOverride);
 			}
 		}
 
-		private void Play(AudioJob job) {
-			if (Time.time < timeElapsedBeforeAudioAllowedToPlay) return;
+		private void PlayWithSettings(AudioJob job, Action<AudioJob> settingsOverride) {
+			if (Time.time < timeElapsedBeforeAudioAllowedToPlay) {
+				queuedAudioJobs.Add(job, settingsOverride);
+				Log(job.id, $"Queueing audio job {job.id} to play soon");
+				return;
+			}
 			
+			Play(job);
+			settingsOverride?.Invoke(job);
+		}
+
+		private void Play(AudioJob job) {
 			Log(job.id, $"Playing audio job {job.id}");
 			job.Play();
 		}

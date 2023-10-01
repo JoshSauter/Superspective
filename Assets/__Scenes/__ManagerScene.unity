@@ -27458,7 +27458,6 @@ GameObject:
   m_Component:
   - component: {fileID: 930866879}
   - component: {fileID: 930866881}
-  - component: {fileID: 930866880}
   m_Layer: 5
   m_Name: FallingSfx
   m_TagString: Untagged
@@ -27481,27 +27480,6 @@ Transform:
   m_Father: {fileID: 623971849}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &930866880
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 930866878}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 16
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &930866881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51368,7 +51346,7 @@ GameObject:
   - component: {fileID: 1734990135}
   - component: {fileID: 1734990134}
   m_Layer: 0
-  m_Name: SprintTriggerZone
+  m_Name: SprintTriggerZone (Disabled)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51497,7 +51475,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -51962,7 +51940,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Sprint
+  m_text: 'Sprint/Walk
 
 '
   m_isRightToLeft: 0
@@ -51991,7 +51969,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 88.45
+  m_fontSize: 44.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
