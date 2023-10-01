@@ -168,7 +168,22 @@ public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.Diss
         }
 
         foreach (var c in colliders) {
-            c.enabled = state != State.Dematerialized;
+            bool isOverHalfMaterialized = false;
+            switch (state) {
+                case State.Materialized:
+                    isOverHalfMaterialized = true;
+                    break;
+                case State.Dematerializing:
+                case State.Materializing:
+                    isOverHalfMaterialized = dissolveAmount > 0.5f;
+                    break;
+                case State.Dematerialized:
+                    isOverHalfMaterialized = false;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            c.enabled = isOverHalfMaterialized;
         }
     }
 

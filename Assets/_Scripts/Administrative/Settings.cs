@@ -194,6 +194,28 @@ public class Settings : Singleton<Settings> {
 	}
 
 	public static class Gameplay {
+		public static readonly ToggleSetting SprintByDefault = new ToggleSetting() {
+			key = "SprintByDefault",
+			name = "Sprint By Default",
+			value = true,
+			defaultValue = true
+		};
+
+		public enum SprintBehaviorMode {
+			Toggle,
+			Hold
+		}
+		public static readonly DropdownSetting SprintBehavior = DropdownSetting.Of(
+			key: "SprintBehavior",
+			name: "Sprint Behavior",
+			allDropdownItems: new List<DropdownOption>() {
+				DropdownOption.Of("Toggle", SprintBehaviorMode.Toggle),
+				DropdownOption.Of("Hold", SprintBehaviorMode.Hold)
+			},
+			defaultIndex: 1,
+			selectedIndex: 1
+		);
+		
 		public static readonly FloatSetting CameraShake = new FloatSetting {
 			key = "CameraShake",
 			name = "Camera Shake",
@@ -369,6 +391,8 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Video.PortalDownsampleAmount);
 	    
 	    // Gameplay Settings
+	    AddSetting(Gameplay.SprintByDefault);
+	    AddSetting(Gameplay.SprintBehavior);
 	    AddSetting(Gameplay.CameraShake);
 	    AddSetting(Gameplay.Headbob);
 	    AddSetting(Gameplay.GeneralSensitivity);

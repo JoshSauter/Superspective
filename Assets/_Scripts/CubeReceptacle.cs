@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Audio;
 using SuperspectiveUtils;
 using Saving;
@@ -95,8 +96,19 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         UpdateCubeReceptacle();
     }
 
+    IEnumerator ResetPlayerInTriggerZoneState() {
+        yield return new WaitForFixedUpdate();
+        playerStillInTriggerZone = false;
+    }
+
+    private bool playerStillInTriggerZone = false;
     void OnTriggerStay(Collider other) {
         if (gameObject.layer == LayerMask.NameToLayer("Invisible")) return;
+        if (other.TaggedAsPlayer()) {
+            playerStillInTriggerZone = true;
+            StartCoroutine(ResetPlayerInTriggerZoneState());
+        }
+        if (playerStillInTriggerZone) return;
         
         PickupObject cube = other.gameObject.GetComponent<PickupObject>();
         if (colorCoded != null && !colorCoded.AcceptedColor(other.gameObject.GetComponent<ColorCoded>())) return;

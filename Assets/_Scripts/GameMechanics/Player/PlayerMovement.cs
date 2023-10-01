@@ -11,6 +11,8 @@ using Saving;
 using SerializableClasses;
 using StateUtils;
 using UnityEngine;
+// Alias Settings.Gameplay.SprintBehaviorMode to a more readable name
+using SprintBehaviorMode = Settings.Gameplay.SprintBehaviorMode;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
@@ -41,6 +43,10 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     const float _runSpeed = 14f;
     const float desiredMovespeedLerpSpeed = 10;
     public const float windResistanceMultiplier = 0.4f;
+
+    private bool SprintByDefault => Settings.Gameplay.SprintByDefault.value;
+    public bool ToggleSprint => ((SprintBehaviorMode)Settings.Gameplay.SprintBehavior.dropdownSelection.selection.Datum) == SprintBehaviorMode.Toggle;
+    public bool sprintIsToggled { get; private set; }
     
 #region StaircaseConfig
     public class StepFound {
@@ -180,7 +186,8 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
     // Use this for initialization
     new IEnumerator Start() {
         base.Start();
-        movespeed = walkSpeed;
+        movespeed = SprintByDefault ? runSpeed : walkSpeed;
+        sprintIsToggled = SprintByDefault;
 
         thisRigidbody.isKinematic = true;
         yield return new WaitUntil(() => GameManager.instance.gameHasLoaded);
@@ -194,6 +201,16 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
             if (!teleported.TaggedAsPlayer()) return;
 
             TransformTimeSlicesUponTeleport(inPortal.transform, inPortal.otherPortal.transform);
+        };
+        
+        Settings.Gameplay.SprintByDefault.OnValueChanged += (sprintByDefault) => {
+            if (sprintByDefault) {
+                sprintIsToggled = true;
+                movespeed = runSpeed;
+            } else {
+                sprintIsToggled = false;
+                movespeed = walkSpeed;
+            }
         };
 
         InitStaircaseStateMachine();
@@ -214,7 +231,21 @@ public class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMove
         if (Settings.Keybinds.AutoRun.Pressed) autoRun = !autoRun;
 
         bool recentlySteppedUp = stepState.prevState == StepState.SteppingDiagonal && stepState.timeSinceStateChanged < 0.25f;
-        if ((input.SprintHeld || autoRun) && !recentlySteppedUp) {
+
+        bool ShouldUseSprintSpeed() {
+            if (recentlySteppedUp) return false;
+            if (autoRun) return true;
+
+            if (ToggleSprint) {
+                if (input.SprintPressed) sprintIsToggled = !sprintIsToggled;
+
+                return sprintIsToggled;
+            }
+            else {
+                return input.SprintHeld ? !SprintByDefault : SprintByDefault;
+            }
+        }
+        if (ShouldUseSprintSpeed()) {
             movespeed = Mathf.Lerp(movespeed, runSpeed / scale, desiredMovespeedLerpSpeed * Time.deltaTime);
         }
         else {

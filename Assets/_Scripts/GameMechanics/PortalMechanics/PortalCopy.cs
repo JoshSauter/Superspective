@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
+using UnityEngine.Rendering;
 
 // Creates a copy of an object that is partially through a portal on the other side of the portal
 public class PortalCopy : MonoBehaviour {

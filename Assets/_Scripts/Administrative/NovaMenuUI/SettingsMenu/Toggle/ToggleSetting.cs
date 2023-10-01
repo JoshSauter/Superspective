@@ -2,9 +2,23 @@
 
 public class ToggleSetting : Setting {
     public string name;
-    public bool value;
+    private bool _value;
+
+    public bool value {
+        get => _value;
+        set {
+            if (_value == value) {
+                return;
+            }
+            
+            _value = value;
+            OnValueChanged?.Invoke(value);
+        }
+    }
     public bool defaultValue;
-    
+    public delegate void ValueChangedAction(bool newValue);
+    public event ValueChangedAction OnValueChanged;
+
     public override bool IsEqual(Setting otherSetting) {
         if (otherSetting is not ToggleSetting other) return false;
 

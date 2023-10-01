@@ -66,7 +66,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		// Unity is about to read the serializedNodes field's contents.
 		// The correct data must now be written into that field "just in time".
 		if (serializedNodes == null) serializedNodes = new List<SerializableNode>();
-		if (rootNode == null) rootNode = new Node(Vector3.down * 0.0625f, false, false);
+		if (rootNode == null) rootNode = new Node(Vector3.up * 0.0625f, false, false);
 		serializedNodes.Clear();
 		AddNodeToSerializedNodesRecursively(rootNode, -1);
 		// Now Unity is free to serialize this field, and we should get back the expected 
