@@ -30,17 +30,15 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
         : GetDistance(nearbyCollider);
 
     Vector3 GetClosestPosition(Collider c) {
-        bool wasConvex = false;
-        if (c is MeshCollider mc) {
-            wasConvex = mc.convex;
-            mc.convex = true;
+        // This isn't accurate, revisit later if you want to fix this
+        if (c.transform.rotation != Quaternion.identity) {
+            Quaternion rotation = c.transform.rotation;
+            c.transform.rotation = Quaternion.identity;
+            Vector3 point = c.ClosestPointOnBounds(cameraPos);
+            c.transform.rotation = rotation;
+            return point;
         }
-        Vector3 point = c.ClosestPoint(cameraPos);
-        if (c is MeshCollider mc2) {
-            mc2.convex = wasConvex;
-        }
-
-        return point;
+        return c.ClosestPointOnBounds(cameraPos);
     }
     
     float GetDistance(Collider c) {
@@ -100,7 +98,7 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
     }
 
     private void OnDrawGizmosSelected() {
-        if (nearbyCollider == null) return;
+        if (nearbyCollider == null || !DEBUG) return;
         Color color = Gizmos.color;
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(GetClosestPosition(nearbyCollider), GetDistance(nearbyCollider));
