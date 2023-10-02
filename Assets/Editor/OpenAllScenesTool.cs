@@ -26,8 +26,21 @@ public class OpenAllScenesTool {
         }
     }
 
-    [MenuItem("My Tools/Scenes/Close Extra Scenes")]
+    [MenuItem("My Tools/Scenes/Save and Close Extra Scenes")]
     public static void CloseExtraScenes() {
+        foreach (var level in LevelManager.instance.allLevels) {
+            try {
+                string sceneName = level.level.ToName();
+                Scene scene = EditorSceneManager.GetSceneByName(sceneName);
+                if (scene.IsValid() && scene.isDirty) {
+                    EditorSceneManager.SaveScene(scene);
+                }
+            }
+            catch (Exception e) {
+                Debug.LogError(e);
+            }
+        }
+        
         // Closes all scenes that aren't the ManagerScene nor any scene that should be loaded based on the startingLevel
         LevelManager.instance.LoadDefaultPlayerPosition();
     }

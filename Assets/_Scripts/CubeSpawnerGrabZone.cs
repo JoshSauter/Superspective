@@ -25,7 +25,7 @@ public class CubeSpawnerGrabZone : MonoBehaviour {
             }
         }
     }
-    public CubeSpawnerNew cubeSpawner;
+    public CubeSpawner cubeSpawner;
 
     void Update() {
         if (cubeSpawner.cubeSpawned != null) {

@@ -9,7 +9,7 @@ using Saving;
 using SerializableClasses;
 using UnityEngine;
 using static Audio.AudioManager;
-using CubeSpawnerReference = SerializableClasses.SerializableReference<CubeSpawnerNew, CubeSpawnerNew.CubeSpawnerNewSave>;
+using CubeSpawnerReference = SerializableClasses.SerializableReference<CubeSpawner, CubeSpawner.CubeSpawnerSave>;
 
 [RequireComponent(typeof(UniqueId))]
 public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave>, AudioJobOnGameObject {
