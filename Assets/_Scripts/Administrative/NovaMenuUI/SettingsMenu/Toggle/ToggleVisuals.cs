@@ -2,10 +2,10 @@
 using SuperspectiveUtils;
 
 public class ToggleVisuals : ItemVisuals {
-    // TODO: Centralize disableAlpha and DisabledOverlay logic
-    private const float disabledAlpha = .65f;
     public TextBlock name;
+    public NovaButton HoverButton; // Just used for the hovering over settings visuals
     public NovaButton ToggleButton;
+    public NovaButton ResetButton;
     public UIBlock2D DisabledOverlay;
     public ToggleSetting toggleSetting => _toggleSetting;
     private ToggleSetting _toggleSetting;
@@ -16,11 +16,13 @@ public class ToggleVisuals : ItemVisuals {
         View.UIBlock.gameObject.name = $"[Toggle] {setting.name}";
         _toggleSetting = setting;
         
-        ToggleButton.buttonState.Set(setting.value ? NovaButton.ButtonState.Clicked : NovaButton.ButtonState.Idle);
+        ToggleButton.clickState.Set(setting.value ? NovaButton.ClickState.Clicked : NovaButton.ClickState.Idle);
         ToggleButton.TextBlock.Map(tb => tb.Visible = setting.value);
         
-        DisabledOverlay.Color = DisabledOverlay.Color.WithAlpha(setting.isEnabled ? 0f : disabledAlpha);
-        ToggleButton.novaInteractable.enabled = setting.isEnabled;
+        DisabledOverlay.Color = setting.isEnabled ? UIStyle.Settings.DisabledOverlayColor.WithAlpha(0f) : UIStyle.Settings.DisabledOverlayColor;
+        ToggleButton.isEnabled = setting.isEnabled;
+        HoverButton.isEnabled = setting.isEnabled;
+        ResetButton.isEnabled = setting.isEnabled;
 
         if (!hasSubbedToEvents) {
             void UpdateWithNewValue(bool newValue) {
@@ -30,6 +32,12 @@ public class ToggleVisuals : ItemVisuals {
 
             ToggleButton.OnClickSimple += () => UpdateWithNewValue(true);
             ToggleButton.OnClickResetSimple += () => UpdateWithNewValue(false);
+
+            ResetButton.OnClickSimple += () => {
+                if (toggleSetting.value != toggleSetting.defaultValue) {
+                    ToggleButton.Click();
+                }
+            };
             
             hasSubbedToEvents = true;
         }

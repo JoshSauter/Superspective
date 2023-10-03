@@ -5,9 +5,8 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 public class SliderVisual : ItemVisuals {
-    private const float disabledAlpha = .65f;
-    
     public Slider Slider;
+    public NovaButton HoverButton; // Just used for the hovering over settings visuals
     public TextBlock Name;
     public TextBlock ValueTextBlock;
     public UIBlock2D Fill;
@@ -23,7 +22,10 @@ public class SliderVisual : ItemVisuals {
         Fill.Size.X.Percent = t;
         ValueTextBlock.Text = $"{Mathf.RoundToInt(setting.value)}";
 
-        DisabledOverlay.Color = DisabledOverlay.Color.WithAlpha(setting.isEnabled ? 0f : disabledAlpha);
+        DisabledOverlay.Color = setting.isEnabled ? UIStyle.Settings.DisabledOverlayColor.WithAlpha(0f) : UIStyle.Settings.DisabledOverlayColor;
         Slider.sliderBackgroundInteractable.enabled = setting.isEnabled;
+        HoverButton.isEnabled = setting.isEnabled;
+        Slider.valueInput.GetComponent<Interactable>().enabled = setting.isEnabled;
+        Slider.resetButton.isEnabled = setting.isEnabled;
     }
 }

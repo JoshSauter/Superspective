@@ -66,6 +66,8 @@ public static class UIStyle {
     }
 
     public static class Settings {
+        public static Color DisabledOverlayColor = Grayscale(156f, 0.65f);
+        
         public static class SmallIntSlider {
             public static Color fillColor = Grayscale(89f, 1f);
             public static Color unfilledColor = Color.white;

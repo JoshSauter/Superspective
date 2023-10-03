@@ -28,6 +28,10 @@ namespace LevelManagement {
 		public static Levels ToLevel(this string levelName) {
 			return LevelManager.enumToSceneName[levelName];
 		}
+
+		public static bool IsTestingLevel(this Levels level) {
+			return level is Levels.PortalTestScene or Levels.PowerTrailTestScene or Levels.TestScene;
+		}
 	}
 	
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
@@ -288,7 +292,8 @@ namespace LevelManagement {
 			try {
 				Scene scene = EditorSceneManager.GetSceneByName(sceneName);
 				if (!scene.IsValid()) {
-					string path = $"Assets/{(sceneName != enumToSceneName[Levels.TestScene] ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
+					bool isPrototypeScene = sceneName.ToLevel().IsTestingLevel();
+					string path = $"Assets/{(!isPrototypeScene ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
 					scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
 				}
 				EditorSceneManager.SetActiveScene(scene);
@@ -610,12 +615,12 @@ namespace LevelManagement {
 
 			// Then load the level if it's not already loaded
 			if (!(loadedSceneNames.Contains(levelName) || currentlyLoadingSceneNames.Contains(levelName))) {
-				currentlyLoadingSceneNames.Add(levelName);
-
-				BeforeSceneLoad?.Invoke(levelName);
-
-				scenesToBeLoadedFromDisk.Add(levelName);
 				if (ShouldLoadScene(levelName)) {
+					currentlyLoadingSceneNames.Add(levelName);
+
+					BeforeSceneLoad?.Invoke(levelName);
+
+					scenesToBeLoadedFromDisk.Add(levelName);
 					SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
 				}
 			}
@@ -630,12 +635,11 @@ namespace LevelManagement {
 			foreach (string connectedSceneName in connectedSceneNames) {
 				if (!(loadedSceneNames.Contains(connectedSceneName) ||
 				      currentlyLoadingSceneNames.Contains(connectedSceneName))) {
-					currentlyLoadingSceneNames.Add(connectedSceneName);
-
-					BeforeSceneLoad?.Invoke(connectedSceneName);
-
-					scenesToBeLoadedFromDisk.Add(connectedSceneName);
 					if (ShouldLoadScene(connectedSceneName)) {
+						currentlyLoadingSceneNames.Add(connectedSceneName);
+
+						BeforeSceneLoad?.Invoke(connectedSceneName);
+						scenesToBeLoadedFromDisk.Add(connectedSceneName);
 						SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
 					}
 				}

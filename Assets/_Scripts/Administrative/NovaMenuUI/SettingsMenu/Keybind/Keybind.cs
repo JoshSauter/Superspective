@@ -76,7 +76,7 @@ public class Keybind : UIControl<KeybindVisuals> {
         else {
             setting.value.SetSecondaryMapping(inputPressed);
         }
-        button.buttonState.Set(NovaButton.ButtonState.Idle);
+        button.clickState.Set(NovaButton.ClickState.Idle);
         Visuals.PopulateFrom(setting);
 
         state.Set(ListeningForKeybindState.Idle);

@@ -85,13 +85,13 @@ public class NovaSelection : MonoBehaviour {
         var selectedButtons = newSelections.Values.ToList();
         var unselectedButtons = selection.allItems.Where(item => !newSelections.ContainsKey(item.Text.Get())).ToList();
         unselectedButtons.ForEach(b => {
-            if (b.buttonState != NovaButton.ButtonState.Idle) {
-                b.buttonState.Set(NovaButton.ButtonState.Idle);
+            if (b.clickState != NovaButton.ClickState.Idle) {
+                b.clickState.Set(NovaButton.ClickState.Idle);
             }
         });
         selectedButtons.ForEach(b => {
-            if (b.buttonState != NovaButton.ButtonState.Clicked) {
-                b.buttonState.Set(NovaButton.ButtonState.Clicked);
+            if (b.clickState != NovaButton.ClickState.Clicked) {
+                b.clickState.Set(NovaButton.ClickState.Clicked);
             }
         });
     }

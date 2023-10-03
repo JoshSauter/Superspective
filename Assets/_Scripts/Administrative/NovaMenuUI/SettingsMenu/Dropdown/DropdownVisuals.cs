@@ -6,7 +6,6 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 public class DropdownVisuals : ItemVisuals {
-    private const float disabledAlpha = .4f;
     private const int minNumberOfItemsForScrollbar = 8;
     public Dropdown Dropdown;
 
@@ -32,9 +31,10 @@ public class DropdownVisuals : ItemVisuals {
 
         // Dropdown.DropdownOptionsSelection.TryFindIndex(setting.SelectedValue.DisplayName, out int indexOfMatch);
         // Dropdown.DropdownOptionsSelection.SetSelection(indexOfMatch, false);
-        
-        Dropdown.DisabledOverlay.Color = Dropdown.DisabledOverlay.Color.WithAlpha(setting.isEnabled ? 0f : disabledAlpha);
+
+        Dropdown.DisabledOverlay.Color = setting.isEnabled ? UIStyle.Settings.DisabledOverlayColor.WithAlpha(0f) : UIStyle.Settings.DisabledOverlayColor;
         Dropdown.SelectionButton.isEnabled = setting.isEnabled;
         Dropdown.ResetButton.isEnabled = setting.isEnabled;
+        Dropdown.HoverButton.isEnabled = setting.isEnabled;
     }
 }

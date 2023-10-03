@@ -77,7 +77,8 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
 
     void ResetAllButtons() {
         foreach (var child in children) {
-            child.buttonState.Set(NovaButton.ButtonState.Idle);
+            child.clickState.Set(NovaButton.ClickState.Idle);
+            child.hoverState.Set(NovaButton.HoverState.NotHovered);
         }
     }
 
@@ -98,12 +99,12 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         // When background is hovered, unhighlight the buttons (unless they're being clicked)
         HashSet<NovaButton> allButtons = children.ToHashSet();
         foreach (var button in allButtons) {
-            if (button.buttonState.state is NovaButton.ButtonState.ClickHeld or NovaButton.ButtonState.Clicked) continue;
+            if (button.clickState.state is NovaButton.ClickState.ClickHeld or NovaButton.ClickState.Clicked) continue;
 
             // Don't unhover things that just got hovered
-            if (button.buttonState.timeSinceStateChanged < 0.1f) continue;
+            if (button.hoverState.timeSinceStateChanged < 0.1f) continue;
             
-            button.buttonState.Set(NovaButton.ButtonState.Idle);
+            button.hoverState.Set(NovaButton.HoverState.NotHovered);
         }
     }
 

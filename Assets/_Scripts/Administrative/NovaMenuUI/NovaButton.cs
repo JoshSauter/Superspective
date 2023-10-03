@@ -13,14 +13,18 @@ using UnityEngine;
 public class NovaButton : MonoBehaviour {
     public bool DEBUG;
     public DebugLogger debug;
-    public enum ButtonState {
+    public enum HoverState {
+        NotHovered,
+        Hovered
+    }
+
+    public enum ClickState {
         Idle,
-        Hovered,
         ClickHeld,
         Clicked
     }
-
-    public StateMachine<ButtonState> buttonState = new StateMachine<ButtonState>(ButtonState.Idle, false, true);
+    public StateMachine<ClickState> clickState = new StateMachine<ClickState>(ClickState.Idle, false, true);
+    public StateMachine<HoverState> hoverState = new StateMachine<HoverState>(HoverState.NotHovered, false, true);
 
     private AnimationHandle buttonColorAnimationHandle;
 
@@ -48,6 +52,8 @@ public class NovaButton : MonoBehaviour {
     public bool unclickAfterClick = false;
     [ShowIf("unclickAfterClick")]
     public float timeToUnclick = .06f;
+
+    public bool onlyHover = false;
 
     public delegate void OnClickActionSimple();
     public delegate void OnClickAction(NovaButton thisButton);
@@ -123,62 +129,92 @@ public class NovaButton : MonoBehaviour {
     }
 
     void InitButtonStateMachine() {
+        // Delayed hover SFX
+        hoverState.AddTrigger(HoverState.Hovered, 0.05f, () => {
+            if (hoverState.prevState == HoverState.NotHovered) {
+                AudioManager.instance.Play(AudioName.UI_HoverBlip, shouldForcePlay: true);
+            }
+        });
+        
         if (unclickAfterClick) {
-            buttonState.AddStateTransition(ButtonState.Clicked, ButtonState.Hovered, timeToUnclick);
+            clickState.AddStateTransition(ClickState.Clicked, ClickState.Idle, timeToUnclick);
         }
         
-        buttonState.AddTrigger(ButtonState.Idle, () => {
-            if (buttonState.prevState == ButtonState.Clicked) {
-                OnClickReset?.Invoke(this);
-                OnClickResetSimple?.Invoke();
-            }
+        // NovaButton event triggers
+        clickState.AddTrigger(ClickState.Idle, () => {
+            OnClickReset?.Invoke(this);
+            OnClickResetSimple?.Invoke();
+        });
+        clickState.AddTrigger(ClickState.Clicked, () => {
+            OnAnyNovaButtonClick?.Invoke(this);
+            OnClick?.Invoke(this);
+            OnClickSimple?.Invoke();
         });
         
-        buttonState.AddTrigger((enumValue) => true, (newState) => {
-            BackgroundUIBlock.Shadow.Direction = (newState is ButtonState.Clicked or ButtonState.ClickHeld) ?
+        clickState.OnStateChangeSimple += () => {
+            BackgroundUIBlock.Shadow.Direction = (clickState.state is ClickState.Clicked or ClickState.ClickHeld) ?
                 ShadowDirection.In :
                 ShadowDirection.Out;
-        });
-        buttonState.OnStateChange += (prevState, unused) => {
-            void RunAnimation(Color endBgColor, Color endComponentColor) {
-                UIBlock[] all = allComponents.ToArray();
-                Color startComponentColor = (all.Length > 0) ? all[0].Color : Color.magenta;
-                ButtonColorAnimation animation = new ButtonColorAnimation {
-                    startBgColor = BackgroundUIBlock.Color,
-                    endBgColor = endBgColor,
-                    startComponentColor = startComponentColor,
-                    endComponentColor = endComponentColor,
-                    backgroundToAnimate = BackgroundUIBlock,
-                    componentsToAnimate = all,
-                };
+        };
+        
+        void RunAnimation(Color endBgColor, Color endComponentColor, float lerpTime) {
+            UIBlock[] all = allComponents.ToArray();
+            Color startComponentColor = (all.Length > 0) ? all[0].Color : Color.magenta;
+            ButtonColorAnimation animation = new ButtonColorAnimation {
+                startBgColor = BackgroundUIBlock.Color,
+                endBgColor = endBgColor,
+                startComponentColor = startComponentColor,
+                endComponentColor = endComponentColor,
+                backgroundToAnimate = BackgroundUIBlock,
+                componentsToAnimate = all,
+            };
 
-                bool on = (int)buttonState > (int)prevState;
-                buttonColorAnimationHandle = animation.Run(on ? colorLerpOnTime : colorLerpOffTime);
-            }
-
+            buttonColorAnimationHandle = animation.Run(lerpTime);
+        }
+        
+        clickState.OnStateChange += (prevState, _) => {
             buttonColorAnimationHandle.Cancel();
             Color endBgColor, endTextColor;
-            switch (buttonState.state) {
-                case ButtonState.Idle:
-                    endBgColor = UIStyle.NovaButton.DefaultBgColor;
+            switch (clickState.state) {
+                case ClickState.Idle:
+                    bool hovered = hoverState == HoverState.Hovered;
+                    endBgColor = hovered ? UIStyle.NovaButton.HoverBgColor : UIStyle.NovaButton.DefaultBgColor;
                     endTextColor = UIStyle.NovaButton.DefaultComponentColor;
                     break;
-                case ButtonState.Hovered:
-                    endBgColor = UIStyle.NovaButton.HoverBgColor;
-                    endTextColor = UIStyle.NovaButton.DefaultComponentColor;
-                    break;
-                case ButtonState.ClickHeld:
+                case ClickState.ClickHeld:
                     endBgColor = UIStyle.NovaButton.ClickHeldBgColor;
                     endTextColor = UIStyle.NovaButton.ClickHeldComponentColor;
                     break;
-                case ButtonState.Clicked:
+                case ClickState.Clicked:
                     endBgColor = UIStyle.NovaButton.ClickedBgColor;
                     endTextColor = UIStyle.NovaButton.ClickedComponentColor;
                     break;
                 default:
                     return;
             }
-            RunAnimation(endBgColor, endTextColor);
+            bool on = (int)clickState > (int)prevState;
+            RunAnimation(endBgColor, endTextColor, on ? colorLerpOnTime : colorLerpOffTime);
+        };
+
+        hoverState.OnStateChange += (prevState, _) => {
+            buttonColorAnimationHandle.Cancel();
+            Color endBgColor, endTextColor;
+            if (clickState != ClickState.Idle) return;
+            switch (hoverState.state) {
+                case HoverState.NotHovered:
+                    endBgColor = UIStyle.NovaButton.DefaultBgColor;
+                    endTextColor = UIStyle.NovaButton.DefaultComponentColor;
+                    break;
+                case HoverState.Hovered:
+                    endBgColor = UIStyle.NovaButton.HoverBgColor;
+                    endTextColor = UIStyle.NovaButton.DefaultComponentColor;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            bool on = (int)hoverState > (int)prevState;
+            RunAnimation(endBgColor, endTextColor, on ? colorLerpOnTime : colorLerpOffTime);
         };
     }
 
@@ -199,67 +235,70 @@ public class NovaButton : MonoBehaviour {
     private void HandleHoverEvent(Gesture.OnHover evt) {
         if (ShouldIgnoreInputs()) return;
         
-        if (buttonState != ButtonState.Clicked) {
-            debug.Log($"Hovered on {gameObject}");
-            AudioManager.instance.Play(AudioName.UI_HoverBlip, shouldForcePlay: true);
-            buttonState.Set(ButtonState.Hovered);
-            evt.Consume();
-        }
+        debug.Log($"Hovered on {gameObject}");
+        hoverState.Set(HoverState.Hovered);
+        evt.Consume();
     }
 
     private void HandleUnhoverEvent(Gesture.OnUnhover evt) {
         if (ShouldIgnoreInputs()) return;
 
         debug.Log($"Unhovered on {gameObject.name}!");
-        if (buttonState != ButtonState.Clicked) {
-            buttonState.Set(ButtonState.Idle);
-            evt.Consume();
-        }
+        hoverState.Set(HoverState.NotHovered);
+        evt.Consume();
     }
 
     private void HandleClickDownEvent(Gesture.OnPress evt) {
-        if (ShouldIgnoreInputs()) return;
+        if (ShouldIgnoreInputs() || onlyHover) return;
 
         debug.Log($"Click down on {gameObject.name}!");
-        buttonState.Set(ButtonState.ClickHeld);
+        clickState.Set(ClickState.ClickHeld);
         evt.Consume();
     }
 
     private void HandleReleaseEvent(Gesture.OnRelease evt) {
-        if (ShouldIgnoreInputs()) return;
+        if (ShouldIgnoreInputs() || onlyHover) return;
 
         debug.Log($"Released on {gameObject.name}!");
         // Mouse is over button
         if (evt.Hovering) {
             // Button was already in ClickHeld state
-            if (buttonState.state == ButtonState.ClickHeld) {
-                // Button used to be Clicked, toggle it to Hovered
-                if (buttonState.prevState == ButtonState.Clicked) {
-                    buttonState.Set(ButtonState.Hovered);
-                
-                    OnClickReset?.Invoke(this);
-                    OnClickResetSimple?.Invoke();
+            if (clickState.state == ClickState.ClickHeld) {
+                // Button used to be Clicked, toggle it to Idle
+                if (clickState.prevState == ClickState.Clicked) {
+                    clickState.Set(ClickState.Idle);
                 }
                 // Button used to be not Clicked, toggle it to Clicked
                 else {
-                    buttonState.Set(ButtonState.Clicked);
-            
-                    OnAnyNovaButtonClick?.Invoke(this);
-                    OnClick?.Invoke(this);
-                    OnClickSimple?.Invoke();
+                    clickState.Set(ClickState.Clicked);
                 }
             }
-            // Button was not in ClickHeld, set to Hovered
-            else {
-                buttonState.Set(ButtonState.Hovered);
-            }
         }
-        // Not hovering button, keep prev value
+        // Not hovering button, set click state to prevState
         else {
-            buttonState.Set(buttonState.prevState);
+            clickState.Set(clickState.prevState);
         }
 
         evt.Consume();
+    }
+
+    public void Click() {
+        switch (clickState.state) {
+            case ClickState.Idle:
+                clickState.Set(ClickState.Clicked);
+                break;
+            case ClickState.ClickHeld:
+                // Ignore input on ClickHeld
+                break;
+            case ClickState.Clicked:
+                // Unclick if already clicked and it is a toggle
+                if (!unclickAfterClick) {
+                    clickState.Set(ClickState.Idle);
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     void SubscribeToMouseEvents() {

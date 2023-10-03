@@ -31,7 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7902367959438855008
 MonoBehaviour:
@@ -62,10 +62,10 @@ MonoBehaviour:
   layout:
     Size:
       X:
-        Raw: 1
+        Raw: 0.6
         Type: 0
       Y:
-        Raw: 6
+        Raw: 2.4
         Type: 0
       Z:
         Raw: 0
@@ -210,7 +210,7 @@ MonoBehaviour:
     LightingModel: 0
     ShadowCastingMode: 2
     ReceiveShadows: 1
-  PreviewSize: {x: 1, y: 1, z: 0}
+  PreviewSize: {x: 0.6, y: 2.4, z: 0}
   visuals:
     Color: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
     CornerRadius:

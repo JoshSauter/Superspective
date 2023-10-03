@@ -15,6 +15,7 @@ public class Dropdown : UIControl<DropdownVisuals> {
     public ItemView ItemView;
 
     public TextBlock Name;
+    public NovaButton HoverButton; // Just used for the hovering over settings visuals
     public NovaButton SelectionButton;
     public TextBlock SelectionLabel;
     public UIBlock DropdownOptionsArea;
@@ -48,7 +49,10 @@ public class Dropdown : UIControl<DropdownVisuals> {
         
         state.OnStateChangeSimple += () => Debug.Log($"Setting Dropdown state to: {state.state}");
 
-        ResetButton.OnClick += (_) => UpdateVisuals(setting.defaultSelection);
+        ResetButton.OnClick += (_) => {
+            setting.dropdownSelection.allSelections = setting.defaultSelection;
+            UpdateVisuals(setting.defaultSelection);
+        };
         
         //NovaUIBackground.instance.BackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnClick>(HandleBGClicked);
 

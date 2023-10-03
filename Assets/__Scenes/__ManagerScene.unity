@@ -264,7 +264,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -274,6 +279,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.15
+  onlyHover: 0
 --- !u!114 &630323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2457,33 +2463,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
-    onStateChange:
-    - state: 3
-      onStateChange:
-        m_PersistentCalls:
-          m_Calls:
-          - m_Target: {fileID: 1045312108}
-            m_TargetAssemblyTypeName: DialogWindow, Assembly-CSharp
-            m_MethodName: ToggleOpen
-            m_Mode: 1
-            m_Arguments:
-              m_ObjectArgument: {fileID: 0}
-              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-              m_IntArgument: 0
-              m_FloatArgument: 0
-              m_StringArgument: 
-              m_BoolArgument: 0
-            m_CallState: 2
+    onStateChange: []
+  hoverState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
   BackgroundUIBlock: {fileID: 73842181}
   novaInteractable: {fileID: 73842180}
   OtherUIBlocks:
   - {fileID: 1299638361}
   unclickAfterClick: 1
   timeToUnclick: 0
+  onlyHover: 0
 --- !u!114 &73842180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4111,7 +4107,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -4121,6 +4122,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &140268487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10854,7 +10856,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -10864,6 +10871,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &327611009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11690,7 +11698,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -11700,6 +11713,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &354082755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11904,7 +11918,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1198222
+  m_Name: pb_Mesh8856276
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -13728,7 +13742,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-303538
+  m_Name: pb_Mesh34776
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15767,7 +15781,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -15777,6 +15796,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &519071467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16060,7 +16080,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.35
+  m_fontSize: 62.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -16805,7 +16825,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -16815,6 +16840,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &557195821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17776,7 +17802,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -17786,6 +17817,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &565593594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18411,7 +18443,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 8
+      Raw: 2
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -19997,7 +20029,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 88.85
+  m_fontSize: 88.9
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -20420,7 +20452,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -20430,6 +20467,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &619395357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24101,7 +24139,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -24111,6 +24154,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &808064979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24959,7 +25003,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 8
+      Raw: 2
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -28611,7 +28655,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1197182
+  m_Name: pb_Mesh8855326
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29143,7 +29187,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -29153,6 +29202,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &984988616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29401,7 +29451,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -29411,6 +29466,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &995400465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29740,7 +29796,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -29750,6 +29811,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1011424554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31309,7 +31371,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -31319,6 +31386,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.1
+  onlyHover: 0
 --- !u!114 &1059162786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31735,7 +31803,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1197424
+  m_Name: pb_Mesh8855570
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -34786,7 +34854,7 @@ MonoBehaviour:
   - {fileID: 5301445305512896750, guid: b2daf8734985c4f418324624fc42a188, type: 3}
   - {fileID: 446668325409718083, guid: 6cb663bde43a1aa4d8cb7b94cb62573b, type: 3}
   - {fileID: 8868642651461119495, guid: aa0eda13a3fe7ec4ca3e10fbf89ee783, type: 3}
-  - {fileID: 4925803620051260900, guid: 01e66ef81d2a5e4489bd270c6a7f87fd, type: 3}
+  - {fileID: 541034295164105307, guid: 01e66ef81d2a5e4489bd270c6a7f87fd, type: 3}
   - {fileID: 1898054317181363739, guid: 181ff38d6c384e74eaa66ae3300a1f9d, type: 3}
   outOfViewDistance: 0
   _uiBlock: {fileID: 0}
@@ -36791,7 +36859,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -36801,6 +36874,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1298870803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39562,7 +39636,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -39572,6 +39651,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1381303930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41457,7 +41537,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1201708
+  m_Name: pb_Mesh8859854
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41665,7 +41745,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -41675,6 +41760,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1466698886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42389,7 +42475,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1199302
+  m_Name: pb_Mesh8857412
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -43383,7 +43469,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1198990
+  m_Name: pb_Mesh8857016
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -44137,7 +44223,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -44147,6 +44238,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1563498104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46311,7 +46403,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -46321,6 +46418,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.15
+  onlyHover: 0
 --- !u!114 &1594753771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53570,7 +53668,7 @@ MonoBehaviour:
   debugMode: 0
   doubleSidedEdges: 1
   checkPortalDepth: 1
-  depthSensitivity: 4
+  depthSensitivity: 1
   normalSensitivity: 1
   sampleDistance: 1
   weightedEdgeMode: 3
@@ -53660,14 +53758,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54861,7 +54959,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 8
+      Raw: 1.5
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -57942,7 +58040,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -57952,6 +58055,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1955527356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58257,7 +58361,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -58267,6 +58376,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 0
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1958206510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58749,7 +58859,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -58759,6 +58874,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1962339898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59203,7 +59319,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -59213,6 +59334,7 @@ MonoBehaviour:
   OtherUIBlocks: []
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &1983855979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63596,7 +63718,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1198912
+  m_Name: pb_Mesh8856910
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
