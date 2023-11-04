@@ -64,10 +64,10 @@ namespace LevelSpecific.Fork {
 			elevatorButton.OnButtonPressBegin += (ctx) => RaiseLowerElevator(true);
 			elevatorButton.OnButtonUnpressBegin += (ctx) => RaiseLowerElevator(false);
 
-			initialPowerTrail.OnPowerFinish += () => {
+			initialPowerTrail.pwr.OnPowerFinish += () => {
 				if (state == State.NotPowered) state = State.DoorsOpening;
 			};
-			initialPowerTrail.OnDepowerBegin += () => {
+			initialPowerTrail.pwr.OnDepowerBegin += () => {
 				if (state == State.Idle) state = State.DoorsClosing;
 			};
 		}
@@ -93,7 +93,7 @@ namespace LevelSpecific.Fork {
 			if (!playerStandingInElevator) {
 				elevatorButton.interactableObject.SetAsHidden();
 			}
-			else if (!initialPowerTrail.powerIsOn || state != State.Idle) {
+			else if (!initialPowerTrail.pwr.PowerIsOn || state != State.Idle) {
 				elevatorButton.interactableObject.SetAsDisabled(DisabledText());
 			}
 			else {
@@ -159,12 +159,12 @@ namespace LevelSpecific.Fork {
 
 				// Transition state to ElevatorMoving after waiting .1 additional seconds
 				if (timeElapsedSinceStateChange >= totalAnimationTime + 0.1f) {
-					if (initialPowerTrail.powerIsOn) {
+					if (initialPowerTrail.pwr.PowerIsOn) {
 						CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
 						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, this, true);
 					}
 
-					state = initialPowerTrail.powerIsOn ? State.ElevatorMoving : State.NotPowered;
+					state = initialPowerTrail.pwr.PowerIsOn ? State.ElevatorMoving : State.NotPowered;
 				}
 			}
 		}
@@ -226,7 +226,7 @@ namespace LevelSpecific.Fork {
 				// Reverse direction for next execution
 				goingDown = !goingDown;
 
-				state = initialPowerTrail.powerIsOn ? State.DoorsOpening : State.NotPowered;
+				state = initialPowerTrail.pwr.PowerIsOn ? State.DoorsOpening : State.NotPowered;
 			}
 		}
 

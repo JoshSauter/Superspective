@@ -29,7 +29,7 @@ public class Dropdown : UIControl<DropdownVisuals> {
         Open
     }
     // Initialized open, immediately set to Closed at start
-    public StateMachine<DropdownState> state = new StateMachine<DropdownState>(DropdownState.Open, false, true);
+    public StateMachine<DropdownState> state;
 
     public DropdownSetting setting;
 
@@ -38,6 +38,8 @@ public class Dropdown : UIControl<DropdownVisuals> {
 
     // Start is called before the first frame update
     void Awake() {
+        state = this.StateMachine(DropdownState.Open, false, true);
+        
         DropdownOptionsListView.AddDataBinder<DropdownOption, DropdownOptionVisuals>(BindDropdownOption);
 
         SelectionButton.OnClick += (_) => {
@@ -47,7 +49,7 @@ public class Dropdown : UIControl<DropdownVisuals> {
         DropdownOptionsListView.AddGestureHandler<Gesture.OnHover, DropdownOptionVisuals>(HandleOptionHovered);
         DropdownOptionsListView.AddGestureHandler<Gesture.OnUnhover, DropdownOptionVisuals>(HandleOptionUnhovered);
         
-        state.OnStateChangeSimple += () => Debug.Log($"Setting Dropdown state to: {state.state}");
+        // state.OnStateChangeSimple += () => Debug.Log($"Setting Dropdown state to: {state.state}");
 
         ResetButton.OnClick += (_) => {
             setting.dropdownSelection.allSelections = setting.defaultSelection;
@@ -107,7 +109,7 @@ public class Dropdown : UIControl<DropdownVisuals> {
     private void BindDropdownOption(Data.OnBind<DropdownOption> evt, DropdownOptionVisuals target, int index) {
         target.name.Text = evt.UserData.DisplayName;
         target.View.gameObject.name = $"{target.name.Text} Option";
-        Debug.Log($"Bind {target.View.gameObject.name}");
+        // Debug.Log($"Bind {target.View.gameObject.name}");
 
         if (setting.dropdownSelection.allSelections.ContainsKey(evt.UserData.DisplayName)) {
             target.background.Color = UIStyle.NovaButton.ClickedBgColor;

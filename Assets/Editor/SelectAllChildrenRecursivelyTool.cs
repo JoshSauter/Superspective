@@ -5,13 +5,62 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
+public class SelectAllChildrenRecursivelyTool : EditorWindow {
     const string nameKey = "SelectAllChildrenRecursivelyTypeName";
     public bool selectInactive = true;
     public string typeName;
+    private bool typeNameNullOrEmpty => string.IsNullOrEmpty(typeName);
+
+    private string DisplayName(string name) => typeNameNullOrEmpty ? "<Type Name>" : name;
+    
+    // Cached selection data
+    private static string prevTypeName;
+    private static int goCount;
+    private static GameObject[] prevSelection;
+    private static bool prevSelectionCached;
+    
+    [MenuItem("My Tools/Selection/Select All Children Recursively")]
+    public static void ShowWindow() {
+        GetWindow(typeof(SelectAllChildrenRecursivelyTool));
+    }
+
+    void OnGUI() {
+        if (typeNameNullOrEmpty && !string.IsNullOrEmpty(prevTypeName)) {
+            typeName = prevTypeName;
+        }
+        typeName = EditorGUILayout.TextField("Type Name:", typeName);
+        if (GUILayout.Button($"Find {DisplayName(typeName)} in selected GameObjects")) {
+            FindInSelected(Selection.gameObjects);
+            Close();
+        }
+
+        if (!prevSelectionCached) return;
+        
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUILayout.LabelField($"{goCount} GameObjects with {DisplayName(prevTypeName)} previously selected");
+        EditorGUI.EndDisabledGroup();
+        if (prevSelection != null) {
+            if (GUILayout.Button("Reselect previous selection")) {
+                ReselectPrevSelection();
+                Close();
+            }
+        }
+    }
+
+    private void RememberSelection(GameObject[] selection) {
+        prevTypeName = typeName;
+        prevSelection = selection;
+        goCount = selection.Length;
+        prevSelectionCached = true;
+    }
+    
+    private void ReselectPrevSelection() {
+        typeName = prevTypeName;
+        FindInSelected(prevSelection);
+    }
 
     // Called when user clicks "Create" button (may be renamed)
-    void OnWizardCreate() {
+    void FindInSelected(GameObject[] selection) {
         PlayerPrefs.SetString(nameKey, typeName);
         PlayerPrefs.Save();
         Type type = GetTypeByName(typeName);
@@ -19,33 +68,29 @@ public class SelectAllChildrenRecursivelyTool : ScriptableWizard {
 
         MethodInfo method = GetType().GetMethod(nameof(SelectAllChildrenWithType))
             .MakeGenericMethod(type);
-        method.Invoke(this, new object[] { });
+        method.Invoke(this, new object[] { selection });
     }
 
-    [MenuItem("My Tools/Selection/Select All Children Recursively")]
-    static void SelectAllChildren() {
-        DisplayWizard<SelectAllChildrenRecursivelyTool>("Select All Children Recursively", "Select All of Type")
-            .typeName = PlayerPrefs.GetString(nameKey, "");
-    }
+    public void SelectAllChildrenWithType<T>(GameObject[] selection) where T : Component {
+        // Helper function to recursively select all children of a given type
+        void SelectAllChildrenRecursively(GameObject curNode, ref List<GameObject> selectionSoFar) {
+            if (curNode.GetComponent<T>() != null) selectionSoFar.Add(curNode);
 
-    public void SelectAllChildrenWithType<T>() where T : Component {
+            foreach (T child in curNode.transform.GetComponentsInChildren<T>(selectInactive)) {
+                if (child.gameObject != curNode) SelectAllChildrenRecursively(child.gameObject, ref selectionSoFar);
+            }
+        }
+        
         List<GameObject> newSelection = new List<GameObject>();
-        foreach (GameObject go in Selection.gameObjects) {
-            SelectAllChildrenRecursively<T>(go, ref newSelection);
+        foreach (GameObject go in selection) {
+            SelectAllChildrenRecursively(go, ref newSelection);
         }
 
         Selection.objects = newSelection.ToArray();
+        RememberSelection(Selection.gameObjects);
         Debug.Log($"{Selection.count} objects found of type {typeName}.");
     }
 
-    public void SelectAllChildrenRecursively<T>(GameObject curNode, ref List<GameObject> selectionSoFar)
-        where T : Component {
-        if (curNode.GetComponent<T>() != null) selectionSoFar.Add(curNode);
-
-        foreach (T child in curNode.transform.GetComponentsInChildren<T>(selectInactive)) {
-            if (child.gameObject != curNode) SelectAllChildrenRecursively<T>(child.gameObject, ref selectionSoFar);
-        }
-    }
 
     /// <summary>
     ///     Gets a all Type instances matching the specified class name with just non-namespace qualified class name.

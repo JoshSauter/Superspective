@@ -115,8 +115,8 @@ namespace LevelSpecific.WhiteRoom {
 
         protected override void Init() {
             foreach (var powerReceptacle in powerReceptacles) {
-                powerReceptacle.powerTrail.OnPowerFinish += () => currentValueDisplay.actualValue += powerReceptacle.powerGenerated;
-                powerReceptacle.powerTrail.OnDepowerBegin += () => currentValueDisplay.actualValue -= powerReceptacle.powerGenerated;
+                powerReceptacle.powerTrail.pwr.OnPowerFinish += () => currentValueDisplay.actualValue += powerReceptacle.powerGenerated;
+                powerReceptacle.powerTrail.pwr.OnDepowerBegin += () => currentValueDisplay.actualValue -= powerReceptacle.powerGenerated;
             }
         }
 
@@ -153,7 +153,7 @@ namespace LevelSpecific.WhiteRoom {
             }
 
             foreach (var powerReceptacle in powerReceptacles) {
-                powerReceptacle.powerTrail.powerIsOn = powerReceptacle.cubeReceptacle.isCubeInReceptacle;
+                powerReceptacle.powerTrail.pwr.PowerIsOn = powerReceptacle.cubeReceptacle.isCubeInReceptacle;
 			}
 
             float amountPlayerIsLookingAtHexes = Vector3.Dot(playerCamera.forward, (transform.position - playerCamera.position).normalized);
@@ -204,7 +204,7 @@ namespace LevelSpecific.WhiteRoom {
             if (hexState != HexState.CorrectValue) {
                 if (laserToReceiverStart.isPlaying) laserToReceiverStart.Stop();
                 if (laserToReceiver.isPlaying) laserToReceiver.Stop();
-                powerTrailToPortal.powerIsOn = false;
+                powerTrailToPortal.pwr.PowerIsOn = false;
             }
 
             switch (hexState) {
@@ -265,7 +265,7 @@ namespace LevelSpecific.WhiteRoom {
 					}
 
                     if (timeSinceHexStateChanged > 4f) {
-                        powerTrailToPortal.powerIsOn = true;
+                        powerTrailToPortal.pwr.PowerIsOn = true;
 					}
                     break;
                 default:
@@ -277,15 +277,7 @@ namespace LevelSpecific.WhiteRoom {
 
         void PopCubesOut() {
             foreach (var powerReceptacle in powerReceptacles) {
-                PickupObject cubeToEject = powerReceptacle.cubeReceptacle.cubeInReceptacle;
-                if (cubeToEject == null) {
-                    continue;
-                }
-                powerReceptacle.cubeReceptacle.ReleaseCubeFromReceptacleInstantly();
-                Vector2 randomDirection = UnityEngine.Random.insideUnitCircle.normalized;
-                float forceMagnitude = UnityEngine.Random.Range(240f, 350f);
-                Vector3 ejectionDirection = powerReceptacle.cubeReceptacle.transform.TransformDirection(new Vector3(-Mathf.Abs(randomDirection.x), 4, randomDirection.y));
-                cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
+                powerReceptacle.cubeReceptacle.ExpelCube();
             }
         }
 

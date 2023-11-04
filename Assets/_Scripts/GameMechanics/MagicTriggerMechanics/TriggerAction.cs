@@ -90,7 +90,7 @@ namespace MagicTriggerMechanics {
 					}
 					return;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
-					powerTrail.powerIsOn = setPowerIsOn;
+					powerTrail.pwr.PowerIsOn = setPowerIsOn;
 					return;
 				case TriggerActionType.ChangeVisibilityState:
 					foreach (var dimensionObject in dimensionObjects) {
@@ -148,7 +148,7 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.UnityEvent:
 					return;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
-					powerTrail.powerIsOn = !setPowerIsOn;
+					powerTrail.pwr.PowerIsOn = !setPowerIsOn;
 					return;
 				case TriggerActionType.ChangeVisibilityState:
 					foreach (var dimensionObject in dimensionObjects) {

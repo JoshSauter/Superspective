@@ -25,10 +25,12 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
         Closing,
         Closed
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Open);
+    public StateMachine<State> state;
 
     protected override void Start() {
         base.Start();
+
+        state = this.StateMachine(State.Open);
 
         state.AddStateTransition(State.Closing, State.Closed, timeToMove);
     }

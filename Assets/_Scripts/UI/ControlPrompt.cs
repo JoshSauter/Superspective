@@ -18,7 +18,8 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
         Displaying,
         FinishedDisplaying
     }
-    public StateMachine<State> state = new StateMachine<State>(State.NotYetDisplayed);
+
+    public StateMachine<State> state;
 
     private static float StartDelay => LevelChangeBanner.displayTime + LevelChangeBanner.fadeTime + 2f;
 
@@ -59,6 +60,8 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
 
     protected override void Awake() {
         base.Awake();
+        
+        state = this.StateMachine(State.NotYetDisplayed);
         
         if (keyboardPrompts == null || keyboardPrompts.Count == 0) {
             keyboardPrompts = GetComponentsInChildren<KeyboardPrompt>().ToList();

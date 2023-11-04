@@ -6,6 +6,7 @@ using LevelSpecific.Fork;
 using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,31 +31,28 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     const float glassMoveTime = 1.2f;
     float startHeight;
 
-    enum State {
+    public enum SpawnState {
         // Initial state
         NoCubeSpawned,
         // After button is pressed but before cube is removed from spawner
         CubeSpawnedButNotTaken,
         // After cube is removed from spawner area
-        CubeTaken
+        CubeTaken,
+        // Doesn't last as long as DespawnState.CubeBeingDestroyed so respawn is quicker than despawn time
+        InRespawnDelay
     }
 
-    float timeSinceStateChanged = 0f;
-    [ReadOnly]
-    [SerializeField]
-    State _state = State.NoCubeSpawned;
-    State state {
-        get => _state;
-        set {
-            if (value != _state) {
-                _state = value;
-                timeSinceStateChanged = 0f;
-            }
-        }
+    public enum DespawnState {
+        Idle,
+        // When Respawn Cube button is hit after cube is spawned
+        CubeBeingDestroyed
     }
+
+    public StateMachine<SpawnState> spawnState;
+    public StateMachine<DespawnState> despawnState;
 
     PickupObject cubeDespawning;
-    float timeSinceCubeDespawnStart = 0f;
+    private const float respawnDelay = glassRaiseDelay + glassMoveTime;
     const float despawnTime = 4f;
     Vector3 despawnStartSize = Vector3.one;
     private const float despawnEndSizeMultiplier = 4;
@@ -62,10 +60,103 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
     protected override void Awake() {
         base.Awake();
+        spawnState = this.StateMachine(SpawnState.NoCubeSpawned);
+        despawnState = this.StateMachine(DespawnState.Idle);
+        
         button.OnButtonPressBegin += (_) => SpawnNewCube();
         button.OnButtonUnpressBegin += (_) => DestroyCubeAlreadyGrabbedFromSpawner();
 
         startHeight = glass.transform.localPosition.y;
+    }
+
+    protected override void Init() {
+        base.Init();
+        InitializeSpawnStateMachine();
+        InitializeDespawnStateMachine();
+    }
+
+    void InitializeSpawnStateMachine() {
+        spawnState.AddStateTransition(SpawnState.InRespawnDelay, SpawnState.NoCubeSpawned, respawnDelay);
+
+        spawnState.OnStateChange += (prevState, _) => {
+            if (prevState == SpawnState.InRespawnDelay && spawnState == SpawnState.NoCubeSpawned) {
+                button.PressButton();
+            }
+        };
+        
+        spawnState.WithUpdate(SpawnState.NoCubeSpawned, _ => {
+            glass.localPosition = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
+        });
+        
+        spawnState.WithUpdate(SpawnState.CubeSpawnedButNotTaken, timeSinceStateChanged => {
+            if (cubeSpawned == null) {
+                spawnState.Set(SpawnState.NoCubeSpawned);
+                return;
+            }
+                
+            DimensionObject parentDimensionObj = cubeSpawned.GetComponentInParent<DimensionObject>();
+            // Disable new cube's colliders for the first half of the fall
+            if (timeSinceStateChanged <= timeToFallHalfway) {
+                foreach (var newCubeColliders in parentDimensionObj.colliders) {
+                    newCubeColliders.enabled = false;
+                }
+            }
+            else {
+                // Restore collision for the cube halfway through its fall
+                foreach (var newCubeColliders in parentDimensionObj.colliders) {
+                    newCubeColliders.enabled = true;
+                }
+            }
+
+            if (timeSinceStateChanged > glassLowerDelay && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
+                float time = timeSinceStateChanged - glassLowerDelay;
+                float t = time / glassMoveTime;
+                    
+                Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
+                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
+                glass.localPosition = Vector3.Lerp(startPos, endPos, t*t);
+            }
+            else if (timeSinceStateChanged >= glassMoveTime + glassLowerDelay) {
+                glass.localPosition = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
+            }
+        });
+
+        Action<float> respawnDelayAndTakenUpdate = (timeSinceStateChanged) => {
+            if (timeSinceStateChanged > glassRaiseDelay && timeSinceStateChanged < glassMoveTime + glassRaiseDelay) {
+                float time = timeSinceStateChanged - glassRaiseDelay;
+                float t = time / glassMoveTime;
+
+                Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
+                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight - glassOffset, glass.localPosition.z);
+                glass.localPosition = Vector3.Lerp(endPos, startPos, t * t);
+            }
+        };
+        spawnState.WithUpdate(SpawnState.InRespawnDelay, respawnDelayAndTakenUpdate);
+        spawnState.WithUpdate(SpawnState.CubeTaken, respawnDelayAndTakenUpdate);
+    }
+
+    void InitializeDespawnStateMachine() {
+        despawnState.AddStateTransition(DespawnState.CubeBeingDestroyed, DespawnState.Idle, despawnTime);
+
+        despawnState.OnStateChangeSimple += () => {
+            switch (despawnState.state) {
+                case DespawnState.Idle:
+                    if (cubeDespawning != null) {
+                        cubeDespawning.transform.FindInParentsRecursively<DynamicObject>().Destroy();
+                    }
+                    cubeDespawning = null;
+                    break;
+                case DespawnState.CubeBeingDestroyed:
+                    if (spawnState.state is SpawnState.CubeSpawnedButNotTaken or SpawnState.CubeTaken) {
+                        spawnState.Set(SpawnState.InRespawnDelay);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        };
+        
+        despawnState.WithUpdate(DespawnState.CubeBeingDestroyed, UpdateDematerializeCube);
     }
 
     static bool ReferenceIsReplaceable(PickupObjectReference obj) {
@@ -76,76 +167,27 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     }
 
     void UpdateButtonInteractability() {
-        if (state == State.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
+        if (spawnState == SpawnState.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
             button.interactableObject.SetAsDisabled("(Spawned cube locked in receptacle)");
         }
-        else if (state == State.CubeSpawnedButNotTaken && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
+        else if ((spawnState == SpawnState.CubeSpawnedButNotTaken && spawnState.timeSinceStateChanged < glassMoveTime + glassLowerDelay) || spawnState == SpawnState.InRespawnDelay) {
             button.interactableObject.SetAsHidden();
         }
         else {
-            string msg = state == State.NoCubeSpawned ? "Spawn cube" : "Respawn cube";
+            string msg = spawnState == SpawnState.NoCubeSpawned ? "Spawn cube" : "Respawn cube";
             button.interactableObject.SetAsInteractable(msg);
         }
     }
 
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
-        
-        timeSinceStateChanged += Time.deltaTime;
 
         // Make it so the button is only clickable when it will do something (spawn a cube or destroy a spawned cube)
         UpdateButtonInteractability();
-        
-        switch (state) {
-            case State.NoCubeSpawned:
-                glass.localPosition = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
-                break;
-            case State.CubeSpawnedButNotTaken:
-                DimensionObject parentDimensionObj = cubeSpawned.GetComponentInParent<DimensionObject>();
-                // Disable new cube's colliders for the first half of the fall
-                if (timeSinceStateChanged <= timeToFallHalfway) {
-                    foreach (var newCubeColliders in parentDimensionObj.colliders) {
-                        newCubeColliders.enabled = false;
-                    }
-                }
-                else {
-                    // Restore collision for the cube halfway through its fall
-                    foreach (var newCubeColliders in parentDimensionObj.colliders) {
-                        newCubeColliders.enabled = true;
-                    }
-                }
-
-                if (timeSinceStateChanged > glassLowerDelay && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
-                    float time = timeSinceStateChanged - glassLowerDelay;
-                    float t = time / glassMoveTime;
-                    
-                    Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
-                    Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
-                    glass.localPosition = Vector3.Lerp(startPos, endPos, t*t);
-                }
-                else if (timeSinceStateChanged >= glassMoveTime + glassLowerDelay) {
-                    glass.localPosition = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
-                }
-                break;
-            case State.CubeTaken:
-                if (timeSinceStateChanged > glassRaiseDelay && timeSinceStateChanged < glassMoveTime + glassRaiseDelay) {
-                    float time = timeSinceStateChanged - glassRaiseDelay;
-                    float t = time / glassMoveTime;
-
-                    Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
-                    Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
-                    glass.localPosition = Vector3.Lerp(endPos, startPos, t*t);
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        
-        UpdateDematerializeCube(cubeDespawning);
     }
 
     void SpawnNewCube() {
-        if (state != State.NoCubeSpawned) return;
+        if (spawnState != SpawnState.NoCubeSpawned) return;
 
         DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
         newCubeDynamicObj.isGlobal = false; // Not global until retrieved from cube spawner
@@ -171,7 +213,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
         cubeSpawned = newCube;
         AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerSpawn, ID, button.transform.position);
-        state = State.CubeSpawnedButNotTaken;
+        spawnState.Set(SpawnState.CubeSpawnedButNotTaken);
     }
 
     void AffixSpawnedCubeWithParentDimensionObject(PickupObject newCube) {
@@ -219,59 +261,61 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                         }
 
                         despawnStartSize = cubeDespawning.transform.localScale;
-                        timeSinceCubeDespawnStart = 0f;
+                        despawnState.Set(DespawnState.CubeBeingDestroyed);
                     },
                     // If the object is not loaded, just destroy it directly
-                    saveObject => saveObject.Destroy()
-                );
+                    saveObject => {
+                        despawnState.Set(DespawnState.CubeBeingDestroyed);
+                        saveObject.Destroy();
+                        despawnState.Set(DespawnState.Idle);
+                    });
 
-                state = State.NoCubeSpawned;
             }
         }
 
-        if (state == State.CubeTaken) {
+        if (spawnState == SpawnState.CubeTaken) {
             DissolveActiveCube(cubeGrabbedFromSpawner);
             cubeGrabbedFromSpawner = null;
         }
-        else if (state == State.CubeSpawnedButNotTaken) {
+        else if (spawnState == SpawnState.CubeSpawnedButNotTaken) {
             DissolveActiveCube(cubeSpawned);
             cubeSpawned = null;
         }
     }
 
-    void UpdateDematerializeCube(PickupObject cube) {
-        if (cube != null) {
+    void UpdateDematerializeCube(float timeSinceStateChanged) {
+        if (cubeDespawning != null) {
             // Don't allow shrinking cubes to be picked up
-            cube.interactable = false;
-            // Trick to get the cube to not interact with the player anymore but still collide with ground
-            cube.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
-            cube.thisRigidbody.isKinematic = true;
-            foreach (Collider collider in cube.GetComponentsInChildren<Collider>()) {
+            cubeDespawning.interactable = false;
+            // Trick to get the cubeDespawning to not interact with the player anymore but still collide with ground
+            cubeDespawning.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+            cubeDespawning.thisRigidbody.isKinematic = true;
+            foreach (Collider collider in cubeDespawning.GetComponentsInChildren<Collider>()) {
                 if (collider.isTrigger) collider.enabled = false;
                 else collider.isTrigger = true;
             }
 
             MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
-            if (timeSinceCubeDespawnStart < despawnTime) {
-                timeSinceCubeDespawnStart += Time.deltaTime;
-                float t = Mathf.Clamp01(timeSinceCubeDespawnStart / despawnTime);
+            if (timeSinceStateChanged < despawnTime) {
+                timeSinceStateChanged += Time.deltaTime;
+                float t = Mathf.Clamp01(timeSinceStateChanged / despawnTime);
 
-                cube.transform.localScale = Vector3.LerpUnclamped(
+                cubeDespawning.transform.localScale = Vector3.LerpUnclamped(
                     despawnStartSize,
                     despawnStartSize*despawnEndSizeMultiplier,
                     cubeDespawnSizeCurve.Evaluate(t)
                 );
                 propBlock.SetFloat("_DissolveValue", t);
-                foreach (var cubeRenderer in cube.GetComponentsInChildren<Renderer>()) {
+                foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
                     cubeRenderer.SetPropertyBlock(propBlock);
                 }
             }
             else {
                 propBlock.SetFloat("_DissolveValue", 1);
-                foreach (var cubeRenderer in cube.GetComponentsInChildren<Renderer>()) {
+                foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
                     cubeRenderer.SetPropertyBlock(propBlock);
                 }
-                cube.GetComponent<DynamicObject>().Destroy();
+                cubeDespawning.GetComponent<DynamicObject>().Destroy();
                 HandleSpawnedCubeBeingDestroyed();
             }
         }
@@ -279,8 +323,9 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
     public void HandleSpawnedCubeBeingDestroyed() {
         cubeDespawning = null;
-
-        if (button.state == Button.State.ButtonUnpressed) {
+        spawnState.Set(SpawnState.NoCubeSpawned);
+        
+        if (button.stateMachine.state == Button.State.ButtonUnpressed) {
             button.PressButton();
         }
     }
@@ -288,7 +333,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     void OnTriggerExit(Collider other) {
         PickupObject cube = other.GetComponent<PickupObject>();
         if (cube != null && cube == cubeSpawned) {
-            state = State.CubeTaken;
+            spawnState.Set(SpawnState.CubeTaken);
             AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerClose, ID, glass.transform.position);
             
             // Restore collision with the roof of the Cube Spawner when the cube is taken from the spawner
@@ -325,21 +370,19 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public class CubeSpawnerSave : SerializableSaveObject<CubeSpawner> {
         PickupObjectReference cubeSpawned;
         PickupObjectReference cubeGrabbedFromSpawner;
-        float timeSinceStateChanged = 0f;
-        State state;
+        private StateMachine<SpawnState>.StateMachineSave spawnStateSave;
+        private StateMachine<DespawnState>.StateMachineSave despawnStateSave;
 
         PickupObjectReference cubeDespawning;
-        float timeSinceCubeDespawnStart;
         SerializableVector3 shrinkStartSize;
         SerializableAnimationCurve cubeDespawnSizeCurve;
 
         public CubeSpawnerSave(CubeSpawner spawner) : base(spawner) {
             this.cubeSpawned = spawner.cubeSpawned;
             this.cubeGrabbedFromSpawner = spawner.cubeGrabbedFromSpawner;
-            this.timeSinceStateChanged = spawner.timeSinceStateChanged;
-            this.state = spawner.state;
+            spawnStateSave = spawner.spawnState.ToSave();
+            despawnStateSave = spawner.despawnState.ToSave();
             this.cubeDespawning = spawner.cubeDespawning;
-            this.timeSinceCubeDespawnStart = spawner.timeSinceCubeDespawnStart;
             this.cubeDespawnSizeCurve = spawner.cubeDespawnSizeCurve;
         }
 
@@ -349,16 +392,15 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                 spawner.AffixSpawnedCubeWithParentDimensionObject(spawner.cubeSpawned);
             }
             spawner.cubeGrabbedFromSpawner = this.cubeGrabbedFromSpawner;
-            spawner.timeSinceStateChanged = this.timeSinceStateChanged;
-            spawner._state = this.state;
+            spawner.spawnState.LoadFromSave(spawnStateSave);
+            spawner.despawnState.LoadFromSave(despawnStateSave);
             spawner.cubeDespawning = this.cubeDespawning?.GetOrNull();
-            spawner.timeSinceCubeDespawnStart = this.timeSinceCubeDespawnStart;
             spawner.cubeDespawnSizeCurve = this.cubeDespawnSizeCurve;
         }
 
         public void HandleSpawnedCubeBeingDestroyed() {
             cubeGrabbedFromSpawner = null;
-            state = State.NoCubeSpawned;
+            spawnStateSave.state = SpawnState.NoCubeSpawned;
             // TODO: Handle button depressing on the CubeSpawner while unloaded?
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using LevelManagement;
 using PortalMechanics;
 using Saving;
@@ -139,6 +140,10 @@ namespace SuperspectiveUtils {
             }
 
             return target;
+        }
+        
+        public static V GetOrNull<K, V>(this Dictionary<K, V> source, K key) {
+            return source.ContainsKey(key) ? source[key] : default(V);
         }
     }
 
@@ -409,7 +414,7 @@ namespace SuperspectiveUtils {
             return null;
         }
 
-        // Recursively search up the transform tree through parents to find a DimensionObject
+        // Recursively search up the transform tree through parents to find a T Component
         public static T FindInParentsRecursively<T>(this Transform child) where T : Component {
             T component = child.GetComponent<T>();
             Transform parent = child.parent;

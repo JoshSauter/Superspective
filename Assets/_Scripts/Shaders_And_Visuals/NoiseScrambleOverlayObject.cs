@@ -13,7 +13,7 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 		On
 	}
 
-	public StateMachine<ScramblerState> scramblerState = new StateMachine<ScramblerState>(ScramblerState.Off);
+	public StateMachine<ScramblerState> scramblerState;
 	private InteractableObject interactableObject;
 
 	private void RegisterScrambler() {
@@ -24,6 +24,9 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 
 	protected override void Awake() {
 		base.Awake();
+
+		scramblerState = this.StateMachine(ScramblerState.Off);
+		
 		// Temp for debug:
 		interactableObject = gameObject.GetOrAddComponent<InteractableObject>();
 		interactableObject.OnLeftMouseButtonDown += ToggleOnOff;

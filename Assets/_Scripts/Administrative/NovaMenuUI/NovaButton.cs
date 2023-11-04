@@ -23,8 +23,8 @@ public class NovaButton : MonoBehaviour {
         ClickHeld,
         Clicked
     }
-    public StateMachine<ClickState> clickState = new StateMachine<ClickState>(ClickState.Idle, false, true);
-    public StateMachine<HoverState> hoverState = new StateMachine<HoverState>(HoverState.NotHovered, false, true);
+    public StateMachine<ClickState> clickState;
+    public StateMachine<HoverState> hoverState;
 
     private AnimationHandle buttonColorAnimationHandle;
 
@@ -102,6 +102,9 @@ public class NovaButton : MonoBehaviour {
 
     // Start is called before the first frame update
     void Awake() {
+        clickState = this.StateMachine(ClickState.Idle, false, true);
+        hoverState = this.StateMachine(HoverState.NotHovered, false, true);
+        
         debug = new DebugLogger(gameObject, () => DEBUG);
         
         novaInteractable = GetComponent<Interactable>();
@@ -131,6 +134,7 @@ public class NovaButton : MonoBehaviour {
     void InitButtonStateMachine() {
         // Delayed hover SFX
         hoverState.AddTrigger(HoverState.Hovered, 0.05f, () => {
+            if (!GameManager.instance.gameHasLoaded) return;
             if (hoverState.prevState == HoverState.NotHovered) {
                 AudioManager.instance.Play(AudioName.UI_HoverBlip, shouldForcePlay: true);
             }

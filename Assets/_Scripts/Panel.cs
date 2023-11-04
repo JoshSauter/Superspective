@@ -2,6 +2,7 @@
 using Audio;
 using Saving;
 using SerializableClasses;
+using SuperspectiveUtils;
 using UnityEngine;
 using static Audio.AudioManager;
 
@@ -66,9 +67,10 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
         thisRenderer = gameObject.GetComponent<SuperspectiveRenderer>();
         if (thisRenderer == null) thisRenderer = gameObject.AddComponent<SuperspectiveRenderer>();
 
-        gemButton = GetComponentInChildren<Button>();
-        SuperspectiveRenderer gemButtonRenderer = gemButton.GetComponent<SuperspectiveRenderer>();
-        if (gemButtonRenderer == null) gemButtonRenderer = gemButton.gameObject.AddComponent<SuperspectiveRenderer>();
+        if (gemButton == null) {
+            gemButton = GetComponentInChildren<Button>();
+        }
+        SuperspectiveRenderer gemButtonRenderer = gemButton.GetOrAddComponent<SuperspectiveRenderer>();
         gemColor = gemButtonRenderer.GetMainColor();
     }
 
@@ -80,7 +82,9 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
 
         gemButton.OnButtonPressBegin += ctx => soundActivated = true;
         gemButton.OnButtonUnpressBegin += ctx => soundActivated = false;
+    }
 
+    protected override void Init() {
         AudioManager.instance.PlayWithUpdate(AudioName.PanelHum, ID, this);
     }
 

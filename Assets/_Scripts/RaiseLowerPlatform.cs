@@ -32,11 +32,13 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         public bool playSfx = true;
-        public StateMachine<State> state = new StateMachine<State>(State.Lowered);
+        public StateMachine<State> state;
 
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
+
+            state = this.StateMachine(State.Lowered);
 
             StartCoroutine(StartCo());
         }
@@ -83,16 +85,16 @@ namespace LevelSpecific.WhiteRoom {
             );
 
             if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.OnPowerFinish += TriggeredByPowerOn;
-                triggeredByPowerTrail.OnDepowerBegin += TriggeredByPowerOff;
+                triggeredByPowerTrail.pwr.OnPowerFinish += TriggeredByPowerOn;
+                triggeredByPowerTrail.pwr.OnDepowerBegin += TriggeredByPowerOff;
             }
         }
 
         protected override void OnDestroy() {
             base.OnDestroy();
             if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.OnPowerFinish -= TriggeredByPowerOn;
-                triggeredByPowerTrail.OnDepowerBegin -= TriggeredByPowerOff;
+                triggeredByPowerTrail.pwr.OnPowerFinish -= TriggeredByPowerOn;
+                triggeredByPowerTrail.pwr.OnDepowerBegin -= TriggeredByPowerOff;
             }
         }
 
@@ -165,7 +167,10 @@ namespace LevelSpecific.WhiteRoom {
                 case State.Lowering: {
                     float t = state.timeSinceStateChanged / timeToMove;
                     float targetHeight = Mathf.Lerp(maxHeight, minHeight, t);
-                    SetHeight(targetHeight);
+                    float delta = SetHeight(targetHeight);
+                    if (cubeReceptacle?.isCubeInReceptacle ?? false) {
+                        cubeReceptacle.cubeInReceptacle.transform.Translate(Vector3.up * delta, Space.World);
+                    }
                     break;
                 }
                 default:

@@ -12,7 +12,7 @@ public class SendingDialog : DialogWindow {
         FailedToSend
     }
 
-    public StateMachine<SendingState> sendingState = new StateMachine<SendingState>(SendingState.Sending);
+    public StateMachine<SendingState> sendingState;
 
     public bool isSending => sendingState == SendingState.Sending;
     private const string Sent = "Thank you for your feedback!";
@@ -22,6 +22,10 @@ public class SendingDialog : DialogWindow {
 
     private const float animationTime = 0.375f;
     public const float closeDelay = 1.75f;
+
+    void Awake() {
+        sendingState = this.StateMachine(SendingState.Sending);
+    }
 
     protected override void Start() {
         base.Start();

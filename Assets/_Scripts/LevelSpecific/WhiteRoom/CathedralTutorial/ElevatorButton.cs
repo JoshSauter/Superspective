@@ -28,20 +28,20 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
         Incorrect,
         Correct
     }
-    public StateMachine<ButtonState> buttonState = new StateMachine<ButtonState>(ButtonState.Idle);
+    public StateMachine<ButtonState> buttonState;
 
     public enum FloorState {
 	    TopFloor,
 	    PuzzleFloor,
 	    SecretFloor
     }
-    public StateMachine<FloorState> floorState = FloorState.TopFloor;
+    public StateMachine<FloorState> floorState;
 
     public enum ElevatorState {
 	    Idle,
 	    MovingDown
     }
-    public StateMachine<ElevatorState> elevatorState = new StateMachine<ElevatorState>(ElevatorState.Idle);
+    public StateMachine<ElevatorState> elevatorState;
     public AnimationCurve elevatorCameraShakeIntensity;
 
     private const float elevatorSpeed = 4f;
@@ -85,6 +85,10 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 
     protected override void Start() {
         base.Start();
+
+        buttonState = this.StateMachine(ButtonState.Idle);
+        floorState = this.StateMachine(FloorState.TopFloor);
+        elevatorState = this.StateMachine(ElevatorState.Idle);
         
         interactableObject = GetComponent<InteractableObject>();
         button.OnButtonPressFinish += OnButtonPress;

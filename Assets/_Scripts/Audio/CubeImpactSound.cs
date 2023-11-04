@@ -22,6 +22,7 @@ namespace Audio {
 		float cooldown = 0.05f;
 
 		void OnCollisionEnter(Collision collision) {
+			if (!GameManager.instance.gameHasLoaded) return;
 			float impactSpeed = Mathf.Clamp(collision.relativeVelocity.magnitude, 0f, maxSpeed);
 			float impactLerpSpeed = Mathf.InverseLerp(minSpeed, maxSpeed, impactSpeed);
 			//Debug.Log(impactSpeed);

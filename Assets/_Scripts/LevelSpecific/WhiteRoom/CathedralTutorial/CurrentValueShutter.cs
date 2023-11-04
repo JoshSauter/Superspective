@@ -28,12 +28,15 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
         Moving,
         Shut
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Open);
+    public StateMachine<State> state;
     public bool isSetToOpen;
     private float lerpTime = 0; // 0 <-> 1
 
     protected override void Awake() {
         base.Awake();
+
+        state = this.StateMachine(State.Open);
+        
         // All 4 share the same pivot so this is the same for all of them
         startingPosition = topLeft.localPosition;
         distanceToOpen = distancesToOpen.RandomElementFrom();

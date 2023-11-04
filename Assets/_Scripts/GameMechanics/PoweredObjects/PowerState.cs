@@ -2,6 +2,7 @@
     public enum PowerState {
         Depowered,
         PartiallyPowered,
-        Powered
+        Powered,
+        PartiallyDepowered
     }
 }

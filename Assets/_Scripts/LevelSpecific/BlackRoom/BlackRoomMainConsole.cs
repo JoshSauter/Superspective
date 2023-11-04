@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using DissolveObjects;
 using PowerTrailMechanics;
 using Saving;
 using StateUtils;
@@ -71,7 +72,7 @@ namespace LevelSpecific.BlackRoom {
 
         // Update is called once per frame
         void Update() {
-            if (state == State.Depowered && mainPower.state == PowerState.Powered) {
+            if (state == State.Depowered && mainPower.pwr.FullyPowered) {
                 state.Set(State.Powering);
             }
             

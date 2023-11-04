@@ -13,8 +13,8 @@ namespace LevelSpecific.BehindForkTransition {
         bool paintingActive = false;
 
         void Update() {
-            if (paintingActive != powerTrail.fullyPowered) {
-                paintingActive = powerTrail.fullyPowered;
+            if (paintingActive != powerTrail.IsFullyPowered) {
+                paintingActive = powerTrail.IsFullyPowered;
                 window.SetActive(!paintingActive);
                 painting.SetActive(paintingActive);
             }

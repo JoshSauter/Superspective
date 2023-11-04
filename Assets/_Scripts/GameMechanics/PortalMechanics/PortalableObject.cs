@@ -77,7 +77,7 @@ namespace PortalMechanics {
 			NoPortalBetweenCubeAndPlayer,
 			PortalBetweenCubeAndPlayer
 		}
-		private StateMachine<HoldState> holdState = new StateMachine<HoldState>(HoldState.NoPortalBetweenCubeAndPlayer);
+		private StateMachine<HoldState> holdState;
 
 		InteractableObject interact;
 		PickupObject pickupObject;
@@ -123,6 +123,9 @@ namespace PortalMechanics {
 
 		protected override void Awake() {
 			base.Awake();
+
+			holdState = this.StateMachine(HoldState.NoPortalBetweenCubeAndPlayer);
+			
 			interact = GetComponent<InteractableObject>();
 			pickupObject = GetComponent<PickupObject>();
 

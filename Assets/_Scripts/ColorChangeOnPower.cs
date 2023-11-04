@@ -1,17 +1,11 @@
 ﻿using System;
 using NaughtyAttributes;
-using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
 using System.Linq;
-
-
-public enum MultiMode {
-    Single,
-    Any,
-    All
-}
+using PoweredObjects;
+using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
 public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChangeOnPower.ColorChangeOnPowerSave> {
@@ -41,9 +35,9 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     [Space]
     public MultiMode mode = MultiMode.Single;
     [HideIf("IsMulti")]
-    public PowerTrail powerTrailToReactTo;
+    public PoweredObject poweredObjectToReactTo;
     [ShowIf("IsMulti")]
-    public PowerTrail[] powerTrailsToReactTo;
+    public PoweredObject[] poweredObjectsToReactTo;
     public SuperspectiveRenderer[] renderers;
     float timeElapsedSinceStateChange;
 
@@ -57,8 +51,8 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     // Use this for initialization
     protected override void Awake() {
         base.Awake();
-        if (powerTrailToReactTo == null) powerTrailToReactTo = GetComponent<PowerTrail>();
-        if (powerTrailToReactTo == null && !IsMulti()) {
+        if (poweredObjectToReactTo == null) poweredObjectToReactTo = GetComponent<PoweredObject>();
+        if (poweredObjectToReactTo == null && !IsMulti()) {
             Debug.LogWarning("No Power Trail to react to, disabling color change script", gameObject);
             enabled = false;
             return;
@@ -87,49 +81,55 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         }
 
         if (!IsMulti()) {
+            if (poweredObjectToReactTo == null) {
+                new DebugLogger(this).LogError($"PoweredObjectToReactTo is null on {poweredObjectToReactTo.FullPath()}, disabling color change script");
+                enabled = false;
+                return;
+            }
+            
             switch (timing) {
                 case ActivationTiming.OnPowerBegin:
-                    powerTrailToReactTo.OnPowerBegin += PowerOn;
-                    powerTrailToReactTo.OnDepowerFinish += PowerOff;
+                    poweredObjectToReactTo.OnPowerBegin += PowerOn;
+                    poweredObjectToReactTo.OnDepowerFinish += PowerOff;
                     break;
                 case ActivationTiming.OnPowerFinish:
-                    powerTrailToReactTo.OnPowerFinish += PowerOn;
-                    powerTrailToReactTo.OnDepowerBegin += PowerOff;
+                    poweredObjectToReactTo.OnPowerFinish += PowerOn;
+                    poweredObjectToReactTo.OnDepowerBegin += PowerOff;
                     break;
                 case ActivationTiming.OnDepowerBegin:
-                    powerTrailToReactTo.OnDepowerBegin += PowerOn;
-                    powerTrailToReactTo.OnPowerFinish += PowerOff;
+                    poweredObjectToReactTo.OnDepowerBegin += PowerOn;
+                    poweredObjectToReactTo.OnPowerFinish += PowerOff;
                     break;
                 case ActivationTiming.OnDepowerFinish:
-                    powerTrailToReactTo.OnDepowerFinish += PowerOn;
-                    powerTrailToReactTo.OnPowerBegin += PowerOff;
+                    poweredObjectToReactTo.OnDepowerFinish += PowerOn;
+                    poweredObjectToReactTo.OnPowerBegin += PowerOff;
                     break;
             }
         }
         else {
             switch (timing) {
                 case ActivationTiming.OnPowerBegin:
-                    foreach (var pt in powerTrailsToReactTo) {
+                    foreach (var pt in poweredObjectsToReactTo) {
                         pt.OnPowerBegin += PowerOn;
                         pt.OnDepowerFinish += PowerOff;
                     }
                     break;
                 case ActivationTiming.OnPowerFinish:
-                    foreach (var pt in powerTrailsToReactTo) {
+                    foreach (var pt in poweredObjectsToReactTo) {
                         pt.OnPowerFinish += PowerOn;
                         pt.OnDepowerBegin += PowerOff;
                     }
 
                     break;
                 case ActivationTiming.OnDepowerBegin:
-                    foreach (var pt in powerTrailsToReactTo) {
+                    foreach (var pt in poweredObjectsToReactTo) {
                         pt.OnDepowerBegin += PowerOn;
                         pt.OnPowerFinish += PowerOff;
                     }
 
                     break;
                 case ActivationTiming.OnDepowerFinish:
-                    foreach (var pt in powerTrailsToReactTo) {
+                    foreach (var pt in poweredObjectsToReactTo) {
                         pt.OnDepowerFinish += PowerOn;
                         pt.OnPowerBegin += PowerOff;
                     }
@@ -146,11 +146,11 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         bool PowerIsOn() {
             switch (mode) {
                 case MultiMode.Single:
-                    return powerTrailToReactTo.powerIsOn;
+                    return poweredObjectToReactTo.PowerIsOn;
                 case MultiMode.Any:
-                    return powerTrailsToReactTo.ToList().Exists(pt => pt.powerIsOn);
+                    return poweredObjectsToReactTo.ToList().Exists(pt => pt.PowerIsOn);
                 case MultiMode.All:
-                    return powerTrailsToReactTo.ToList().TrueForAll(pt => pt.powerIsOn);
+                    return poweredObjectsToReactTo.ToList().TrueForAll(pt => pt.PowerIsOn);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
 	public class ColorPuzzleNode : MonoBehaviour {
-		public StateMachine<PuzzleNodeState> state = new StateMachine<PuzzleNodeState>(PuzzleNodeState.NotSolved);
+		public StateMachine<PuzzleNodeState> state;
 
 		public enum PuzzleNodeState {
 			NotSolved,
@@ -47,6 +47,8 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void OnEnable() {
+			state = this.StateMachine(PuzzleNodeState.NotSolved);
+			
 			state.OnStateChangeSimple += TriggerEvent;
 		}
 

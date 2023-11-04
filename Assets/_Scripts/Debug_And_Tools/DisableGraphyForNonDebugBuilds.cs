@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DebugAndTools {
     public class DisableGraphyForNonDebugBuilds : MonoBehaviour {
-        public void Awake() {
+        public void Start() {
             if (!Debug.isDebugBuild) gameObject.SetActive(false);
         }
     }

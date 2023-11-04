@@ -1,5 +1,6 @@
 using System;
 using Saving;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace UnityStandardAssets.ImageEffects

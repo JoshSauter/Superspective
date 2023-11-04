@@ -39,10 +39,12 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         LoadSave,
         WriteSave
     }
-    public StateMachine<SaveMenuState> saveMenuState = new StateMachine<SaveMenuState>(SaveMenuState.Off, false, true);
+    public StateMachine<SaveMenuState> saveMenuState;
 
     // Start is called before the first frame update
-    void Start() {;
+    void Start() {
+        saveMenuState = this.StateMachine(SaveMenuState.Off, false, true);
+
         includeAutosavesSettingsListView.AddDataBinder<ToggleSetting, ToggleVisuals>(SettingsList.BindToggle);
         includeAutosavesSettingsListView.SetDataSource(new List<Setting>() { includeAutosavesToggle } );
 

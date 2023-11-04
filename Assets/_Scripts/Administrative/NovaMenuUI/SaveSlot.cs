@@ -83,7 +83,7 @@ public class SaveSlot : MonoBehaviour {
         ClickHeld,
         Clicked
     }
-    public StateMachine<ButtonState> saveSlotButtonState = new StateMachine<ButtonState>(ButtonState.Idle, false, true);
+    public StateMachine<ButtonState> saveSlotButtonState;
 
     public enum DeleteButtonState {
         Invisible,
@@ -93,9 +93,9 @@ public class SaveSlot : MonoBehaviour {
         DeleteConfirmation
     }
     // This will be set to Invisible at Start, but needs to start not on Invisible so that OnStateChange triggers then
-    public StateMachine<DeleteButtonState> deleteButtonState = new StateMachine<DeleteButtonState>(DeleteButtonState.Idle, false, true);
-    public StateMachine<ButtonState> deleteConfirmButtonState = new StateMachine<ButtonState>(ButtonState.Idle, false, true);
-    public StateMachine<ButtonState> deleteCancelButtonState = new StateMachine<ButtonState>(ButtonState.Idle, false, true);
+    public StateMachine<DeleteButtonState> deleteButtonState;
+    public StateMachine<ButtonState> deleteConfirmButtonState;
+    public StateMachine<ButtonState> deleteCancelButtonState;
 
     // UI Animation
     private AnimationHandle saveSlotColorAnimationHandle;
@@ -178,6 +178,11 @@ public class SaveSlot : MonoBehaviour {
     }
 
     protected void Start() {
+        saveSlotButtonState = this.StateMachine(ButtonState.Idle, false, true);
+        deleteButtonState = this.StateMachine(DeleteButtonState.Invisible, false, true);
+        deleteConfirmButtonState = this.StateMachine(ButtonState.Idle, false, true);
+        deleteCancelButtonState = this.StateMachine(ButtonState.Idle, false, true);
+
         InitSaveSlotStateMachine();
         InitDeleteButtonStateMachine();
         InitDeleteConfirmStateMachine();

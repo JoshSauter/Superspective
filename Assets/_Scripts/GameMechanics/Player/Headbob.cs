@@ -42,7 +42,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
         Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.averageVelocityRecently) / Player.instance.scale;
         // Don't bob faster when we artificially speed up the player
         float playerSpeed = playerVelocity.magnitude / playerMovement.movespeedMultiplier;
-        if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f && !NoClipMode.instance.noClipOn) {
+        if (playerMovement.IsGrounded && playerSpeed > 0.2f && !NoClipMode.instance.noClipOn) {
             curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
             curAmplitude = headbobAmount * Mathf.Lerp(
                 minAmplitude,

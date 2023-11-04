@@ -65,6 +65,7 @@ public class StaircaseRotate : MonoBehaviour {
         GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         float testLerpValue = 0;
         if (other.TaggedAsPlayer()) {
+            Player.instance.movement.pauseSnapToGround = true;
             baseGravMagnitude = currentGravity.magnitude;
             testLerpValue = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
         }
@@ -87,6 +88,7 @@ public class StaircaseRotate : MonoBehaviour {
 
         GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         if (other.TaggedAsPlayer()) {
+            Player.instance.movement.pauseSnapToGround = false;
             Physics.gravity = baseGravMagnitude * exitGravity;
 
             float angleBetween = Vector3.Angle(playerMovement.transform.up, -Physics.gravity.normalized);
@@ -107,6 +109,7 @@ public class StaircaseRotate : MonoBehaviour {
 
     void OnTriggerStay(Collider other) {
         if (other.TaggedAsPlayer()) {
+            Player.instance.movement.pauseSnapToGround = true;
             t = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
             if (treatedAsADownStairForPlayer) t = 1 - t;
 

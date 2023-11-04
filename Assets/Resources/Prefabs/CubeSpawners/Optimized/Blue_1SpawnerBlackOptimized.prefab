@@ -3153,6 +3153,7 @@ GameObject:
   - component: {fileID: 4879460733718220497}
   - component: {fileID: 6020698447462003216}
   - component: {fileID: 8031942769338832874}
+  - component: {fileID: 3055741451832433315}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -5129,6 +5130,7 @@ MonoBehaviour:
   pressColor: {r: 0.20784315, g: 0.21176472, b: 1, a: 1}
   pressEmission: {r: 0.047794934, g: 0.047794934, b: 1.3041189, a: 1}
   buttonToReactTo: {fileID: 8031942769338832874}
+  r: {fileID: 0}
 --- !u!114 &8031942769338832874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5143,7 +5145,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 4879460733718220497}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -5199,7 +5200,6 @@ MonoBehaviour:
   pressDistance: -0.03125
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  _state: 0
   automaticallySetHelpText: 0
   buttonOffHelpText: Turn on
   buttonOnHelpText: Turn off
@@ -5209,6 +5209,49 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+--- !u!114 &3055741451832433315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 661467732728882062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 4879460733718220497}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1090790806814970462
 GameObject:
   m_ObjectHideFlags: 0
@@ -15680,6 +15723,7 @@ MonoBehaviour:
   pressColor: {r: 0.20784315, g: 0.21176472, b: 1, a: 1}
   pressEmission: {r: 0.047794934, g: 0.047794934, b: 1.3041189, a: 1}
   buttonToReactTo: {fileID: 8031942769338832874}
+  r: {fileID: 0}
 --- !u!1 &6904607687702163850
 GameObject:
   m_ObjectHideFlags: 0
@@ -20194,6 +20238,6 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}

@@ -1,22 +1,35 @@
 ﻿using System;
 using Audio;
 using NaughtyAttributes;
+using PoweredObjects;
+using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
+using StateUtils;
+using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
-[RequireComponent(typeof(UniqueId))]
+[RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
 public class Button : SaveableObject<Button, Button.ButtonSave> {
+    private PoweredObject _pwr;
+    public PoweredObject pwr {
+        get {
+            if (_pwr == null) {
+                _pwr = this.GetOrAddComponent<PoweredObject>();
+            }
+
+            return _pwr;
+        }
+        set => _pwr = value;
+    }
     public enum State {
         ButtonUnpressed,
         ButtonPressing,
         ButtonPressed,
         ButtonUnpressing
     }
-
-    public float timeSinceStateChange;
 
     public bool oneTimeButton = false;
     public InteractableObject interactableObject;
@@ -33,8 +46,6 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     [FormerlySerializedAs("depressAfterPress")]
     public bool unpressAfterPress;
     public float timeBetweenPressEndDepressStart = 0.5f;
-    [SerializeField]
-    State _state = State.ButtonUnpressed;
 
     public bool automaticallySetHelpText = true;
     [ShowIf("automaticallySetHelpText")]
@@ -54,85 +65,94 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
     public event ButtonAction OnButtonUnpressFinish;
 #endregion
 
-    public State state {
-        get => _state;
-        set {
-            if (_state == value) return;
-            switch (value) {
+    public StateMachine<State> stateMachine;
+
+    float distanceCurrentlyPressed = 0f;
+
+    public bool buttonPressed => stateMachine.state == State.ButtonPressed;
+
+    protected override void Awake() {
+        base.Awake();
+
+        stateMachine = this.StateMachine(State.ButtonUnpressed);
+        
+        interactableObject = GetComponent<InteractableObject>();
+        if (interactableObject == null) interactableObject = gameObject.AddComponent<InteractableObject>();
+        interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
+
+        if (stateMachine.state == State.ButtonPressed) {
+            distanceCurrentlyPressed = pressDistance;
+        }
+
+        if (automaticallySetHelpText) {
+            interactableObject.enabledHelpText = stateMachine.state == State.ButtonPressed ? buttonOnHelpText : buttonOffHelpText;
+        }
+    }
+
+    protected override void Start() {
+        base.Start();
+        InitializeStateMachine();
+    }
+
+    protected virtual void Update() {
+        UpdateButtonPosition();
+    }
+
+    protected virtual void InitializeStateMachine() {
+        stateMachine.AddStateTransition(State.ButtonPressing, State.ButtonPressed, timeToPressButton);
+        if (unpressAfterPress) {
+            stateMachine.AddStateTransition(State.ButtonPressed, State.ButtonUnpressing, timeBetweenPressEndDepressStart);
+        }
+        stateMachine.AddStateTransition(State.ButtonUnpressing, State.ButtonUnpressed, timeToUnpressButton);
+
+        stateMachine.OnStateChange += (prevState, _) => {
+            switch (stateMachine.state) {
                 case State.ButtonUnpressed:
+                    transform.position -= (distanceCurrentlyPressed) * transform.up;
+                    distanceCurrentlyPressed = 0f;
+                    
+                    if (prevState == State.ButtonUnpressing) {
+                        pwr.state.Set(PowerState.Depowered);
+                    }
+
                     if (automaticallySetHelpText) interactableObject.enabledHelpText = buttonOffHelpText;
                     OnButtonUnpressFinish?.Invoke(this);
                     break;
                 case State.ButtonPressing:
+                    if (prevState == State.ButtonUnpressed) {
+                        pwr.state.Set(PowerState.PartiallyPowered);
+                    }
+
                     if (automaticallySetHelpText) interactableObject.enabledHelpText = buttonOnHelpText;
                     AudioManager.instance.PlayAtLocation(AudioName.ButtonPress, ID, transform.position, true);
                     OnButtonPressBegin?.Invoke(this);
                     break;
                 case State.ButtonPressed:
+                    transform.position += (pressDistance - distanceCurrentlyPressed) * transform.up;
+                    distanceCurrentlyPressed = pressDistance;
+                    
+                    if (prevState == State.ButtonPressing) {
+                        pwr.state.Set(PowerState.Powered);
+                    }
+
                     if (automaticallySetHelpText) interactableObject.enabledHelpText = buttonOnHelpText;
                     OnButtonPressFinish?.Invoke(this);
                     onButtonPressFinish?.Invoke();
                     break;
                 case State.ButtonUnpressing:
+                    if (prevState == State.ButtonPressed) {
+                        pwr.state.Set(PowerState.Depowered);
+                    }
+
                     if (automaticallySetHelpText) interactableObject.enabledHelpText = buttonOffHelpText;
                     AudioManager.instance.PlayAtLocation(AudioName.ButtonUnpress, ID, transform.position, true);
                     OnButtonUnpressBegin?.Invoke(this);
                     onButtonUnpressBegin?.Invoke();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            timeSinceStateChange = 0f;
-            _state = value;
-        }
-    }
-
-    float distanceCurrentlyPressed = 0f;
-
-    public bool buttonPressed => state == State.ButtonPressed;
-
-    protected override void Awake() {
-        base.Awake();
-        interactableObject = GetComponent<InteractableObject>();
-        if (interactableObject == null) interactableObject = gameObject.AddComponent<InteractableObject>();
-        interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
-
-        if (state == State.ButtonPressed) {
-            distanceCurrentlyPressed = pressDistance;
-        }
-
-        if (automaticallySetHelpText) {
-            interactableObject.enabledHelpText = state == State.ButtonPressed ? buttonOnHelpText : buttonOffHelpText;
-        }
-    }
-
-    void Update() {
-        UpdateState();
-        timeSinceStateChange += Time.deltaTime;
-        UpdateButtonPosition();
-    }
-
-    protected virtual void UpdateState() {
-        switch (state) {
-            case State.ButtonUnpressed:
-                break;
-            case State.ButtonPressing:
-                if (timeSinceStateChange > timeToPressButton) {
-                    state = State.ButtonPressed;
-                }
-                break;
-            case State.ButtonPressed:
-                if (unpressAfterPress && timeSinceStateChange > timeBetweenPressEndDepressStart) {
-                    state = State.ButtonUnpressing;
-                }
-                break;
-            case State.ButtonUnpressing:
-                if (timeSinceStateChange > timeToUnpressButton) {
-                    state = State.ButtonUnpressed;
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        };
     }
 
     public virtual void OnLeftMouseButtonDown() {
@@ -141,42 +161,34 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
     protected virtual void UpdateButtonPosition() {
         // if (pressDistance <= 0) return;
-        float t = timeSinceStateChange / timeToPressButton;
-        switch (state) {
+        float t = stateMachine.timeSinceStateChanged / timeToPressButton;
+        switch (stateMachine.state) {
             case State.ButtonUnpressed:
             case State.ButtonPressed:
                 break;
             case State.ButtonPressing:
-                if (timeSinceStateChange < timeToPressButton) {
+                if (stateMachine.timeSinceStateChanged < timeToPressButton) {
                     float delta = Time.deltaTime * (pressDistance / timeToPressButton);
                     distanceCurrentlyPressed += delta;
                     transform.position += delta * transform.up;
                 }
-                else {
-                    transform.position += (pressDistance - distanceCurrentlyPressed) * transform.up;
-                    distanceCurrentlyPressed = pressDistance;
-                }
                 break;
             case State.ButtonUnpressing:
-                if (timeSinceStateChange < timeToUnpressButton) {
+                if (stateMachine.timeSinceStateChanged < timeToUnpressButton) {
                     float delta = Time.deltaTime * (pressDistance / timeToUnpressButton);
                     distanceCurrentlyPressed -= delta;
                     transform.position -= delta * transform.up;
-                }
-                else {
-                    transform.position -= (distanceCurrentlyPressed) * transform.up;
-                    distanceCurrentlyPressed = 0f;
                 }
                 break;
         }
     }
 
     public void PressButton() {
-        if (state == State.ButtonUnpressed) {
-            state = State.ButtonPressing;
+        if (stateMachine == State.ButtonUnpressed) {
+            stateMachine.Set(State.ButtonPressing);
         }
-        else if (state == State.ButtonPressed) {
-            state = State.ButtonUnpressing;
+        else if (stateMachine == State.ButtonPressed) {
+            stateMachine.Set(State.ButtonUnpressing);
         }
 
         if (oneTimeButton) {
@@ -188,21 +200,19 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
 
     [Serializable]
     public class ButtonSave : SerializableSaveObject<Button> {
-        public float timeSinceStateChange;
         SerializableAnimationCurve buttonDepressCurve;
         SerializableAnimationCurve buttonPressCurve;
 
         bool depressAfterPress;
         float depressDistance;
-        int state;
+        StateMachine<State>.StateMachineSave stateSave;
         float timeBetweenPressEndDepressStart;
         float timeToDepressButton;
         float timeToPressButton;
         bool oneTimeButton;
 
         public ButtonSave(Button button) : base(button) {
-            state = (int) button.state;
-            timeSinceStateChange = button.timeSinceStateChange;
+            stateSave = button.stateMachine.ToSave();
             buttonPressCurve = button.buttonPressCurve;
             buttonDepressCurve = button.buttonUnpressCurve;
             timeToPressButton = button.timeToPressButton;
@@ -215,8 +225,7 @@ public class Button : SaveableObject<Button, Button.ButtonSave> {
         }
 
         public override void LoadSave(Button button) {
-            button.state = (State) state;
-            button.timeSinceStateChange = timeSinceStateChange;
+            button.stateMachine.LoadFromSave(this.stateSave);
             button.buttonPressCurve = buttonPressCurve;
             button.buttonUnpressCurve = buttonDepressCurve;
             button.timeToPressButton = timeToPressButton;

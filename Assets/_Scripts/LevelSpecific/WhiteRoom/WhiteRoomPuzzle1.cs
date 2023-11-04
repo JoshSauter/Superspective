@@ -133,7 +133,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
     void Update() {
 	    if (GameManager.instance.IsCurrentlyLoading) return;
 	    
-		fakePortalTargetPos = powerTrail.state == PowerState.Powered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
+		fakePortalTargetPos = powerTrail.pwr.FullyPowered ? fakePortalSolvedPos : fakePortalUnsolvedPos;
 		bool fakePortalActive = !(state == State.Unsolved && Vector3.Distance(fakePortal.transform.position, fakePortalUnsolvedPos) < 0.1f);
 		if (fakePortal.activeSelf != fakePortalActive) {
 			fakePortal.SetActive(fakePortalActive);
@@ -143,12 +143,12 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 		switch (state) {
 			case State.Unsolved:
-				if (powerTrail.state == PowerState.Powered || this.InstaSolvePuzzle()) {
+				if (powerTrail.pwr.FullyPowered || this.InstaSolvePuzzle()) {
 					state = State.FakePortalPowered;
 				}
 				break;
 			case State.FakePortalPowered:
-				if (powerTrail.state != PowerState.Powered) {
+				if (!powerTrail.pwr.FullyPowered) {
 					state = State.Unsolved;
 				}
 				break;

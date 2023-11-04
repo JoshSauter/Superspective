@@ -196,7 +196,6 @@ namespace Audio {
 
 		Transform soundsRoot;
 		private float timeElapsedBeforeAudioAllowedToPlay = 1f; // Presumably to prevent some buggy behavior when loading into a scene
-		Dictionary<AudioJob, Action<AudioJob>> queuedAudioJobs = new Dictionary<AudioJob, Action<AudioJob>>(); // Audio jobs that are queued to be played once the timeElapsedBeforeAudioAllowedToPlay has elapsed
 
 		private readonly Dictionary<AudioName, AudioSettings> defaultSettings = new Dictionary<AudioName, AudioSettings>();
 		private readonly Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
@@ -221,11 +220,6 @@ namespace Audio {
 		}
 
 		void Update() {
-			if (queuedAudioJobs.Count > 0 && Time.time > timeElapsedBeforeAudioAllowedToPlay) {
-				queuedAudioJobs.ToList().ForEach(kv => PlayWithSettings(kv.Key, kv.Value));
-				queuedAudioJobs.Clear();
-			}
-			
 			// Perform update actions for running audio jobs that have one
 			foreach (var updateJob in updateAudioJobs) {
 				AudioJob job = audioJobs[updateJob.Key];
@@ -348,8 +342,7 @@ namespace Audio {
 
 		private void PlayWithSettings(AudioJob job, Action<AudioJob> settingsOverride) {
 			if (Time.time < timeElapsedBeforeAudioAllowedToPlay) {
-				queuedAudioJobs.Add(job, settingsOverride);
-				Log(job.id, $"Queueing audio job {job.id} to play soon");
+				Debug.LogError("Not allowed to play audio job: not initialized yet");
 				return;
 			}
 			
@@ -410,6 +403,12 @@ namespace Audio {
 		public void Log(string audioJobId, string msg) {
 			if (audioJobsToDebug == null || audioJobsToDebug.Count == 0 || audioJobsToDebug.Exists(audioJobId.Contains)) {
 				debug.Log(msg);
+			}
+		}
+		
+		public void LogError(string audioJobId, string msg) {
+			if (audioJobsToDebug == null || audioJobsToDebug.Count == 0 || audioJobsToDebug.Exists(audioJobId.Contains)) {
+				debug.LogError(msg);
 			}
 		}
 		

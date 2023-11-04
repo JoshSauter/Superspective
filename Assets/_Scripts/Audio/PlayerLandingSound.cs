@@ -42,16 +42,16 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
     }
 
     void FixedUpdate() {
-        if (wasGrounded && !playerMovement.grounded.isGrounded) {
+        if (wasGrounded && !playerMovement.IsGrounded) {
 			keepTrackOfPlayerAirHeight = true;
 
 			verticalOffset = 0f;
 			maxHeight = verticalOffset;
 		}
-		wasGrounded = playerMovement.grounded.isGrounded;
+		wasGrounded = playerMovement.IsGrounded;
 
 		if (keepTrackOfPlayerAirHeight) {
-			if (!playerMovement.grounded.isGrounded) {
+			if (!playerMovement.IsGrounded) {
 				float diff = Vector3.Dot(playerMovement.ProjectedVerticalVelocity(), -Physics.gravity.normalized) * Time.fixedDeltaTime;
 				verticalOffset += diff;
 				if (verticalOffset > maxHeight) {
@@ -78,7 +78,7 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 
 						AudioManager.instance.PlayOnGameObject(AudioName.PlayerJumpLandingThump, ID, this);
 
-						if (playerMovement.WalkingOnGlass()) {
+						if (playerMovement.groundMovement.WalkingOnGlass()) {
 							AudioManager.instance.PlayOnGameObject(AudioName.PlayerFootstepGlass, ID, this, false, (audioJob) => audioJob.audio.volume = thumpVolume/2f);
 						}
 					}

@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using NaughtyAttributes;
-using SerializableClasses;
-using UnityEditor;
+using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Events;
-
-// ReSharper disable All
+using UnityObject = UnityEngine.Object;
 
 namespace StateUtils {
     [Serializable]
     public class StateMachine<T> where T : Enum, IConvertible {
-        // Used to execute State Transitions only after other events have fired
-        private const int stateTransitionPriority = 10;
-        
+        private bool hasUnityObjectOwner;
+        private UnityObject _owner;
         [SerializeField, Label("State")]
         private T _state;
         [SerializeField, Label("Previous State"), ReadOnly]
@@ -52,7 +48,7 @@ namespace StateUtils {
                 InitIdempotent();
                 return _state;
             }
-            set {
+            private set {
                 InitIdempotent();
                 if (value.Equals(_state)) {
                     return;
@@ -89,7 +85,6 @@ namespace StateUtils {
         }
 
         public static implicit operator T(StateMachine<T> stateMachine) => stateMachine.state;
-        public static implicit operator StateMachine<T>(T enumValue) => new StateMachine<T>(enumValue);
         public static implicit operator int(StateMachine<T> stateMachine) => (int)(object)stateMachine.state;
 
         public void Set(T newState, bool forceTimeReset = false) {
@@ -103,41 +98,42 @@ namespace StateUtils {
         public void AddStateTransition(T fromState, Func<T> toStateDef, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
-                atTime = atTime,
-                priority = stateTransitionPriority
+                atTime = atTime
             };
             
-            timedEvents.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
+            timedStateTransitions.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
         }
         
         public void AddStateTransition(T fromState, Func<T> toStateDef, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
-                triggerWhen = triggerWhen,
-                priority = stateTransitionPriority
+                triggerWhen = triggerWhen
             };
             
-            customEvents.Add(customEventTrigger, () => state = toStateDef.Invoke());
+            customStateTransitions.Add(customEventTrigger, () => state = toStateDef.Invoke());
         }
 
         public void AddStateTransition(T fromState, T toState, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
-                atTime = atTime,
-                priority = stateTransitionPriority
+                atTime = atTime
             };
             
-            timedEvents.Add(stateTransitionTrigger, () => state = toState);
+            timedStateTransitions.Add(stateTransitionTrigger, () => state = toState);
+        }
+
+        public void AddStateTransition(T fromState, T toState, Func<float> atTimeProvider) {
+            throw new NotImplementedException("Time to make this work obviously");
+            // TODO: Implement this and add the other AddStateTransition method signatures for it
         }
 
         public void AddStateTransition(T fromState, T toState, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
-                triggerWhen = triggerWhen,
-                priority = stateTransitionPriority
+                triggerWhen = triggerWhen
             };
             
-            customEvents.Add(customEventTrigger, () => state = toState);
+            customStateTransitions.Add(customEventTrigger, () => state = toState);
         }
 
         public void AddTrigger(Func<T, bool> forStates, Action whatToDo) {
@@ -172,17 +168,43 @@ namespace StateUtils {
             TimedEventTrigger timedEventTrigger = new TimedEventTrigger { forState = forState, atTime = atTime };
             timedEvents.Add(timedEventTrigger, whatToDo);
         }
+
+        public void WithUpdate(T forState, Action<float> forTime) {
+            CustomUpdate customUpdate = new CustomUpdate { forState = forState, updateAction = forTime };
+            List<CustomUpdate> customUpdatesForState = updateActions.GetOrNull(forState) ?? new List<CustomUpdate>();
+            customUpdatesForState.Add(customUpdate);
+            updateActions[forState] = customUpdatesForState;
+        }
+        
+        # region Custom Update
+
+        class CustomUpdate {
+            public T forState;
+            public Action<float> updateAction;
+        }
+        
+        [NonSerialized]
+        private Dictionary<T, List<CustomUpdate>> _updateActions;
+        private Dictionary<T, List<CustomUpdate>> updateActions {
+            get {
+                if (_updateActions == null) {
+                    _updateActions = new Dictionary<T, List<CustomUpdate>>();
+                }
+
+                return _updateActions;
+            }
+        }
+        #endregion
         
         #region Custom Events
 
         class CustomEventTrigger {
             public T forState;
             public Func<bool> triggerWhen;
-            public int priority = 0;
         }
 
-        [NonSerialized] private Dictionary<CustomEventTrigger, Action> _customEvents;
-
+        [NonSerialized]
+        private Dictionary<CustomEventTrigger, Action> _customEvents;
         private Dictionary<CustomEventTrigger, Action> customEvents {
             get {
                 if (_customEvents == null) {
@@ -196,11 +218,9 @@ namespace StateUtils {
         class TimedEventTrigger {
             public T forState;
             public float atTime;
-            public int priority = 0; // Lower value == executed first
         }
 
         [NonSerialized] private Dictionary<TimedEventTrigger, Action> _timedEvents;
-
         private Dictionary<TimedEventTrigger, Action> timedEvents {
             get {
                 if (_timedEvents == null) {
@@ -211,41 +231,104 @@ namespace StateUtils {
             }
         }
 
+        [NonSerialized]
+        private Dictionary<TimedEventTrigger, Action> _timedStateTransitions;
+        private Dictionary<TimedEventTrigger, Action> timedStateTransitions {
+            get {
+                if (_timedStateTransitions == null) {
+                    _timedStateTransitions = new Dictionary<TimedEventTrigger, Action>();
+                }
+
+                return _timedStateTransitions;
+            }
+        }
+        
+        [NonSerialized]
+        private Dictionary<CustomEventTrigger, Action> _customStateTransitions;
+        private Dictionary<CustomEventTrigger, Action> customStateTransitions {
+            get {
+                if (_customStateTransitions == null) {
+                    _customStateTransitions = new Dictionary<CustomEventTrigger, Action>();
+                }
+
+                return _customStateTransitions;
+            }
+        }
+
         private void TriggerEvents(float prevTime) {
             // Don't trigger events while Time.deltaTime is 0
             if (Math.Abs(prevTime - _timeSinceStateChanged) < float.Epsilon) return;
-            
-            var timedEventsToTrigger = timedEvents.Where(triggerAndAction => {
+
+            // Timed and Custom events are triggered before state transitions
+            foreach (var triggerAndAction in timedEvents) {
                 TimedEventTrigger trigger = triggerAndAction.Key;
-                return trigger.forState.Equals(_state) &&
-                       trigger.atTime >= prevTime &&
-                       trigger.atTime < _timeSinceStateChanged;
-            }).OrderBy(triggerAndAction => triggerAndAction.Key.priority)
-                .Select(triggerAndAction => triggerAndAction.Value);
-
-            foreach (Action action in timedEventsToTrigger) {
-                action.Invoke();
+                if (trigger.forState.Equals(_state) && trigger.atTime >= prevTime &&
+                    trigger.atTime < _timeSinceStateChanged) {
+                    triggerAndAction.Value.Invoke();
+                }
             }
-
-            var customEventsToTrigger = customEvents.Where(triggerAndAction => {
+            foreach (var triggerAndAction in customEvents) {
                 CustomEventTrigger trigger = triggerAndAction.Key;
-                return trigger.forState.Equals(_state) && trigger.triggerWhen.Invoke();
-            }).OrderBy(triggerAndAction => triggerAndAction.Key.priority)
-                .Select(triggerAndAction => triggerAndAction.Value);
+                if (trigger.forState.Equals(_state) && trigger.triggerWhen.Invoke()) {
+                    triggerAndAction.Value.Invoke();
+                }
+            }
+            
+            // Timed and Custom state transitions are triggered after all other events
+            foreach (var triggerAndAction in timedStateTransitions) {
+                TimedEventTrigger trigger = triggerAndAction.Key;
+                if (trigger.forState.Equals(_state) && trigger.atTime >= prevTime &&
+                    trigger.atTime < _timeSinceStateChanged) {
+                    triggerAndAction.Value.Invoke();
+                }
+            }
+            foreach (var triggerAndAction in customStateTransitions) {
+                CustomEventTrigger trigger = triggerAndAction.Key;
+                if (trigger.forState.Equals(_state) && trigger.triggerWhen.Invoke()) {
+                    triggerAndAction.Value.Invoke();
+                }
+            }
+        }
 
-            foreach (var action in customEventsToTrigger) {
-                action.Invoke();
+        private void RunUpdateActions() {
+            if (updateActions.ContainsKey(state)) {
+                foreach (var update in updateActions[state]) {
+                    try {
+                        update.updateAction.Invoke(timeSinceStateChanged);
+                    }
+                    catch (Exception e) {
+                        Debug.LogError(_owner + " threw an exception: " + e.Message);
+                    }
+                }
             }
         }
         #endregion
         
-        public StateMachine(T startingState) {
+        // Hide this constructor behind a static method to make sure the user intends it
+        public static StateMachine<T> CreateWithoutOwner(T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
+            return new StateMachine<T>(startingState, useFixedUpdateInstead, useRealTime);
+        }
+
+        private StateMachine(T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
+            this.hasUnityObjectOwner = false;
+            this._state = startingState;
+            this._prevState = _state;
+            this._timeSinceStateChanged = 0f;
+            this.useFixedUpdateInstead = useFixedUpdateInstead;
+            this.useRealTime = useRealTime;
+        }
+        
+        public StateMachine(UnityObject owner, T startingState) {
+            this.hasUnityObjectOwner = true;
+            this._owner = owner;
             this._state = startingState;
             this._prevState = _state;
             this._timeSinceStateChanged = 0f;
         }
         
-        public StateMachine(T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
+        public StateMachine(UnityObject owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
+            this.hasUnityObjectOwner = true;
+            this._owner = owner;
             this._state = startingState;
             this._prevState = _state;
             this._timeSinceStateChanged = 0f;
@@ -255,7 +338,7 @@ namespace StateUtils {
 
         private StateMachine() { }
 
-        ~StateMachine() {
+        public void CleanUp() {
             if (hasSubscribedToUpdate) {
                 try {
                     GlobalUpdate.instance.UpdateGlobal -= Update;
@@ -280,6 +363,12 @@ namespace StateUtils {
 
         // Does either Update or FixedUpdate based on config
         private void Update() {
+            // If the Unity Object that was using this StateMachine is destroyed, cleanup event subscriptions
+            if (hasUnityObjectOwner && _owner == null) {
+                CleanUp();
+                return;
+            }
+            
             float prevTime = _timeSinceStateChanged;
 
             float GetDeltaTime() {
@@ -302,7 +391,9 @@ namespace StateUtils {
             }
             
             _timeSinceStateChanged += GetDeltaTime();
+            
             TriggerEvents(prevTime);
+            RunUpdateActions();
         }
 
         public StateMachineSave ToSave() {
@@ -314,14 +405,25 @@ namespace StateUtils {
         }
 
         public void LoadFromSave(StateMachineSave save) {
-            this.state = save.state;
-            this.timeSinceStateChanged = save.timeSinceStateChanged;
+            this.InitIdempotent();
+            this._state = save.state;
+            this._timeSinceStateChanged = save.timeSinceStateChanged;
         }
         
         [Serializable]
         public class StateMachineSave {
             public float timeSinceStateChanged;
             public T state;
+        }
+    }
+
+    public static class StateMachineExt {
+        public static StateMachine<T> StateMachine<T>(this UnityObject owner, T startingState) where T : Enum {
+            return new StateMachine<T>(owner, startingState);
+        }
+        
+        public static StateMachine<T> StateMachine<T>(this UnityObject owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) where T : Enum {
+            return new StateMachine<T>(owner, startingState, useFixedUpdateInstead, useRealTime);
         }
     }
 }

@@ -12,7 +12,10 @@ public class Keybind : UIControl<KeybindVisuals> {
         Idle,
         ListeningForKeybind
     }
-    public static StateMachine<ListeningForKeybindState> state = new StateMachine<ListeningForKeybindState>(ListeningForKeybindState.Idle, false, true);
+
+    private static StateMachine<ListeningForKeybindState> _state;
+    public static StateMachine<ListeningForKeybindState> state => _state ??= StateMachine<ListeningForKeybindState>.CreateWithoutOwner(ListeningForKeybindState.Idle, false, true);
+
     // Disable inputs for a short time after state goes back to Idle to prevent input fallthrough
     public static bool isListeningForNewKeybind => state == ListeningForKeybindState.ListeningForKeybind ||
                                                    (state.prevState == ListeningForKeybindState.ListeningForKeybind && state.timeSinceStateChanged < 0.05f);

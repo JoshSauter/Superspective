@@ -16,7 +16,13 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
         Off,
         On
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Off);
+    public StateMachine<State> state;
+
+    protected override void Awake() {
+	    base.Awake();
+	    
+	    state = this.StateMachine(State.Off);
+    }
 
     void Update() {
 	    float t = state.timeSinceStateChanged / letterboxAppearTime;

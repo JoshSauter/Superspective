@@ -23,10 +23,10 @@ namespace LevelSpecific.BlackRoom {
 			b = GetComponent<Button>();
 			b.OnButtonPressBegin += ctx => TurnOnPowerTrail();
 			b.OnButtonUnpressBegin += ctx => TurnOffPowerTrail();
-			powerTrail.OnPowerFinish += TurnOnProjector;
-			powerTrail.OnDepowerBegin += TurnOffProjector;
+			powerTrail.pwr.OnPowerFinish += TurnOnProjector;
+			powerTrail.pwr.OnDepowerBegin += TurnOffProjector;
 
-			projectorTurnedOn = powerTrail.powerIsOn && powerTrail.maxDistance - powerTrail.distance < 0.01f;
+			projectorTurnedOn = powerTrail.pwr.PowerIsOn && powerTrail.maxDistance - powerTrail.distance < 0.01f;
 
 			if (projectorTurnedOn) {
 				TurnOnProjector();
@@ -34,11 +34,11 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void TurnOnPowerTrail() {
-			powerTrail.powerIsOn = true;
+			powerTrail.pwr.PowerIsOn = true;
 		}
 
 		void TurnOffPowerTrail() {
-			powerTrail.powerIsOn = false;
+			powerTrail.pwr.PowerIsOn = false;
 		}
 
 		void TurnOnProjector() {

@@ -22,11 +22,11 @@ namespace LevelSpecific.WhiteRoom {
 
         protected override void Start() {
             base.Start();
-            powerButton.OnButtonPressBegin += (ctx) => powerTrail.powerIsOn = true;
-            powerButton.OnButtonUnpressFinish += (ctx) => powerTrail.powerIsOn = false;
+            powerButton.OnButtonPressBegin += (ctx) => powerTrail.pwr.PowerIsOn = true;
+            powerButton.OnButtonUnpressFinish += (ctx) => powerTrail.pwr.PowerIsOn = false;
 
-            powerTrail.OnPowerFinish += () => barsAreUp = false;
-            powerTrail.OnDepowerBegin += () => barsAreUp = true;
+            powerTrail.pwr.OnPowerFinish += () => barsAreUp = false;
+            powerTrail.pwr.OnDepowerBegin += () => barsAreUp = true;
         }
 
         void Update() {

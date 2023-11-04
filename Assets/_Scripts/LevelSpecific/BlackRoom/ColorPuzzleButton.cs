@@ -46,10 +46,12 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         Incorrect,
         Correct
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Off);
+    public StateMachine<State> state;
 
     protected override void Awake() {
 	    base.Awake();
+	    
+	    state = this.StateMachine(State.Off);
 
 	    renderer = GetComponent<Renderer>();
     }

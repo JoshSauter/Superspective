@@ -17,7 +17,7 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
         Off,
         On
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Off);
+    public StateMachine<State> state;
 
     private const float powerPropagationSpeed = 9.5f;
     private float initialDelay => Mathf.Max(0f, (Vector3.Distance(transform.position, powerTrailToReactTo.transform.position) - 17.5f) / powerPropagationSpeed);
@@ -35,9 +35,11 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
     protected override void Start() {
         base.Start();
 
+        state = this.StateMachine(State.Off);
+
         ps = GetComponentInChildren<ParticleSystem>();
 
-        powerTrailToReactTo.OnPowerBegin += () => state.Set(State.On);
+        powerTrailToReactTo.pwr.OnPowerBegin += () => state.Set(State.On);
         
         state.AddTrigger(State.On, initialDelay, () => AudioManager.instance.PlayAtLocation(AudioName.AirWhoosh, ID, transform.position));
         state.AddTrigger(State.On, initialDelay + airWhooshCrescendoTime, () => {

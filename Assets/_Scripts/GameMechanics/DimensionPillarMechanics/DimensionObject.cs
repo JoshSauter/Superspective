@@ -137,7 +137,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		OnStateChangeImmediate?.Invoke(this);
 		OnStateChange?.Invoke(this);
 		OnStateChangeSimple?.Invoke();
-		SetChannelValuesInMaterials(false);
+		try {
+			SetChannelValuesInMaterials(false);
+		} catch {}
 	}
 
 	void OnEnable() {

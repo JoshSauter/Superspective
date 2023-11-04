@@ -177,7 +177,7 @@ namespace Saving {
 
             List<SaveMetadataWithScreenshot> result = files
                 .Select(ReadMetadataFromDisk)
-                // .Where(m => IsCompatibleWith(m.metadata.version, Application.version))
+                .Where(m => m != null/* && IsCompatibleWith(m.metadata.version, Application.version)*/)
                 .ToList();
             playerSaveMetadataCache = result.Where(sm => !sm.metadata.saveFilename.StartsWith("Autosave")).ToDictionary(sm => sm.metadata.saveFilename, sm => sm);
             allSavesMetadataCache = result.ToDictionary(sm => sm.metadata.saveFilename, sm => sm);
@@ -209,6 +209,11 @@ namespace Saving {
             byte[] headerBytes = ReadBytes(headerSize);
             string headerJson = Encoding.Unicode.GetString(headerBytes.ToArray());
             Header header = JsonUtility.FromJson<Header>(headerJson);
+
+            if (header == null) {
+                Debug.LogError($"Failed to load save metadata from {saveFilename}, header was null (Save file may be corrupted)");
+                return null;
+            }
 
             byte[] jsonMetadataBytes = ReadBytes(header.jsonMetadataByteSize);
             string jsonMetadata = Encoding.Unicode.GetString(jsonMetadataBytes);

@@ -77,12 +77,12 @@ namespace LevelSpecific.WhiteRoom {
         void UpdateState() {
             switch (state) {
                 case State.Closed:
-                    if (powerTrailToReactTo.fullyPowered || this.InstaSolvePuzzle()) {
+                    if (powerTrailToReactTo.IsFullyPowered || this.InstaSolvePuzzle()) {
                         state = State.Opening;
                     }
                     break;
                 case State.Opening:
-                    if (!powerTrailToReactTo.fullyPowered) {
+                    if (!powerTrailToReactTo.IsFullyPowered) {
                         float cachedTimeSinceStateChange = timeSinceStateChanged;
                         state = State.Closing;
                         // Don't start from 0 if opening or closing was interrupted
@@ -93,12 +93,12 @@ namespace LevelSpecific.WhiteRoom {
                     }
                     break;
                 case State.Open:
-                    if (!powerTrailToReactTo.fullyPowered) {
+                    if (!powerTrailToReactTo.IsFullyPowered) {
                         state = State.Closing;
                     }
                     break;
                 case State.Closing:
-                    if (powerTrailToReactTo.fullyPowered) {
+                    if (powerTrailToReactTo.IsFullyPowered) {
                         float cachedTimeSinceStateChange = timeSinceStateChanged;
                         state = State.Opening;
                         // Don't start from 0 if opening or closing was interrupted

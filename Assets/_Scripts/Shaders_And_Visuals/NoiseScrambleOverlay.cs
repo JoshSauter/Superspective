@@ -50,12 +50,20 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     [ShowNativeProperty]
     private float intensity => Mathf.Pow(1-Mathf.InverseLerp(maxVolumeDistance, zeroVolumeDistance, minDistance), 2);
 
+    protected override void Awake() {
+        base.Awake();
+        if (noiseShader == null) {
+            Debug.LogWarning($"Noise shader is null on {gameObject.FullPath()}, disabling noise scramble overlay");
+            enabled = false;
+            return;
+        }
+        mat = new Material(noiseShader);
+    }
     
     // Start is called before the first frame update
-    protected override void Start() {
-        base.Start();
-        mat = new Material(noiseShader);
-        AudioManager.instance.PlayWithUpdate(AudioName.WhiteNoiseSpacey, ID, this);
+    protected override void Init() {
+        base.Init();
+        AudioManager.instance.PlayWithUpdate(AudioName.WhiteNoiseSpacey, ID, this, settingsOverride: (job) => job.audio.volume = 0);
 
         SaveManager.BeforeLoad += () => scramblers.Clear();
     }
@@ -65,6 +73,12 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
             Graphics.Blit(source, destination);
             return;
         }
+        #if UNITY_EDITOR
+        if (!Application.isPlaying || mat == null) {
+            return;
+        }
+        #endif
+        
         
         mat.SetFloat("_Intensity", intensity);
         Graphics.Blit(source, destination, mat);

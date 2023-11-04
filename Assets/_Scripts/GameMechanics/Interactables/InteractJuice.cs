@@ -22,7 +22,7 @@ public class InteractJuice : MonoBehaviour {
         Interactable,
         Disabled
     }
-    private StateMachine<JuiceColorState> juiceColorState = new StateMachine<JuiceColorState>(JuiceColorState.Nothing);
+    private StateMachine<JuiceColorState> juiceColorState;
     
     // Reticle Bloom Juice
     private const float newInteractableObjHoveredReticleBloom = 1.75f;
@@ -31,18 +31,23 @@ public class InteractJuice : MonoBehaviour {
         Idle,
         Blooming
     }
-    private StateMachine<BloomState> bloomState = new StateMachine<BloomState>(BloomState.Idle);
+    private StateMachine<BloomState> bloomState;
 
     enum LastObjectHoveredState {
         Idle,
         HoveredOverSomething
     }
-    private StateMachine<LastObjectHoveredState> lastObjectHoveredState = new StateMachine<LastObjectHoveredState>(LastObjectHoveredState.Idle);
+    private StateMachine<LastObjectHoveredState> lastObjectHoveredState;
     private InteractableObject lastObjectHovered;
     private const float timeBeforeLosingLastObjectHovered = 0.25f;
     
 
     private void Start() {
+        juiceColorState = this.StateMachine(JuiceColorState.Nothing);
+        bloomState = this.StateMachine(BloomState.Idle);
+        lastObjectHoveredState = this.StateMachine(LastObjectHoveredState.Idle);
+        
+        
         reticleUnselectColor = reticle.color;
         reticleOutsideUnselectColor = reticleOutside.color;
         

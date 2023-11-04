@@ -9,6 +9,7 @@ using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     public enum PuzzleState {
@@ -25,14 +26,16 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     public class PuzzlePanel : SaveableObject<PuzzlePanel, PuzzlePanel.PuzzlePanelSave>, AudioJobOnGameObject {
 
         public FloorPuzzle floorPuzzle;
-        
-        public StateMachine<PuzzleState> state = new StateMachine<PuzzleState>(PuzzleState.Off);
+
+        public PuzzleState startingState = PuzzleState.Off;
+        public StateMachine<PuzzleState> state;
         public ValueDisplay valueIcon;
-        public PowerButton powerButton;
+        [FormerlySerializedAs("powerButton2")]
+        public Button powerButton;
         public PowerTrail powerTrailFromPrevPuzzle;
         public PowerTrail powerTrail;
         public PowerTrail powerTrailToNextPuzzle;
-        public List<PowerButton> powerButtonsToDisable;
+        public List<Button> powerButtonsToDisable;
         
         [ShowNativeProperty]
         public int value => valueIcon.actualValue;
@@ -53,15 +56,16 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
-            floorPuzzle.powerTrailBottomMiddle.OnDepowerFinish += () => powerTrail.powerIsOn = false;
+            floorPuzzle.powerTrailBottomMiddle.pwr.OnDepowerFinish += () => powerTrail.pwr.PowerIsOn = false;
             if (powerTrailFromPrevPuzzle != null) {
-                powerTrailFromPrevPuzzle.OnPowerFinish += () => {
+                powerTrailFromPrevPuzzle.pwr.OnPowerFinish += () => {
                     if (state == PuzzleState.Off) state.Set(PuzzleState.Idle);
                 };
             }
             
             isLastPuzzle = powerTrailToNextPuzzle.name.Contains("PowerTrailToPortalDoor");
 
+            state = this.StateMachine(startingState);
             Invoke(nameof(InitStateMachine), 0.1f);
         }
         
@@ -79,23 +83,23 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
             // Depowering power trails
             state.AddTrigger(PuzzleState.Depowering, 0f, () => {
-                powerButton.powerIsOn = false;
-                floorPuzzle.powerTrailBottomMiddle.powerIsOn = false;
+                powerButton.pwr.PowerIsOn = false;
+                floorPuzzle.powerTrailBottomMiddle.pwr.PowerIsOn = false;
             });
             // Powering next puzzle panel
-            state.AddTrigger(stateToCheck => stateToCheck is not (PuzzleState.Correct or PuzzleState.CorrectIdle), 0f, () => powerTrailToNextPuzzle.powerIsOn = false);
+            state.AddTrigger(stateToCheck => stateToCheck is not (PuzzleState.Correct or PuzzleState.CorrectIdle), 0f, () => powerTrailToNextPuzzle.pwr.PowerIsOn = false);
             state.AddTrigger(PuzzleState.CorrectIdle, 0f, () => {
                 if (isLastPuzzle) {
                     floorPuzzle.currentValueShutter.isSetToOpen = true;
                     floorPuzzle.currentValueShutter.state.Set(CurrentValueShutter.State.Moving);
                 }
-                powerTrailToNextPuzzle.powerIsOn = true;
+                powerTrailToNextPuzzle.pwr.PowerIsOn = true;
             });
             
             // Reset state for new puzzle panel
             state.AddTrigger(PuzzleState.CorrectIdle, 0f, () => {
                 FloorManager.instance.TurnOffAllPowerSources();
-                floorPuzzle.powerTrailBottomMiddle.powerIsOn = false;
+                floorPuzzle.powerTrailBottomMiddle.pwr.PowerIsOn = false;
             });
             
             // Turning off PowerButtons that are disabled for this puzzle
@@ -109,7 +113,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                     DisablePowerButton(button);
                 }
 
-                foreach (PowerButton button in floorPuzzle.powerSources.Select(ps => ps.powerButton).Except(powerButtonsToDisable)) {
+                foreach (Button button in floorPuzzle.powerSources.Select(ps => ps.powerButton).Except(powerButtonsToDisable)) {
                     EnablePowerButton(button);
                 }
             });
@@ -121,7 +125,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                 floorPuzzle.currentValue.desiredColor = correctColor;
             });
             if (isLastPuzzle) {
-                powerTrailToNextPuzzle.OnPowerFinish += () => floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
+                powerTrailToNextPuzzle.pwr.OnPowerFinish += () => floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
             }
             state.AddTrigger(PuzzleState.Idle, floorPuzzle.powerTrailTopMiddle.duration + .125f, () => {
                 if (floorPuzzle.currentValue.actualValue == 0) {
@@ -131,8 +135,8 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             
             // Floor 2 has opening and closing shutters
             if (floorPuzzle.floor == FloorManager.Floor.Floor2) {
-                powerTrail.OnPowerBegin += OpenShutters;
-                powerTrail.OnDepowerBegin += CloseShutters;
+                powerTrail.pwr.OnPowerBegin += OpenShutters;
+                powerTrail.pwr.OnDepowerBegin += CloseShutters;
             }
         }
 
@@ -148,10 +152,10 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             floorPuzzle.currentValueShutter.state.Set(CurrentValueShutter.State.Moving);
         }
 
-        void DisablePowerButton(PowerButton powerButton) {
-            if (powerButton == null || powerButton.button == null || powerButton.button.interactableObject == null) return;
+        void DisablePowerButton(Button powerButton) {
+            if (powerButton == null || powerButton == null || powerButton.interactableObject == null) return;
             
-            powerButton.button.interactableObject.SetAsDisabled("(Disabled)");
+            powerButton.interactableObject.SetAsDisabled("(Disabled)");
             AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, powerButton.ID, powerButton.transform.position);
             powerButton.GetComponent<ButtonColorChange>().startColor = disabledPowerSourceButtonColor;
             foreach (ValueDisplay vd in powerButton.GetComponentsInChildren<ValueDisplay>()) {
@@ -159,10 +163,10 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
         }
 
-        void EnablePowerButton(PowerButton powerButton) {
-            if (powerButton == null || powerButton.button == null || powerButton.button.interactableObject == null) return;
+        void EnablePowerButton(Button powerButton) {
+            if (powerButton == null || powerButton.interactableObject == null) return;
 
-            powerButton.button.interactableObject.SetAsInteractable();
+            powerButton.interactableObject.SetAsInteractable();
             powerButton.GetComponent<ButtonColorChange>().startColor = Color.white;
             foreach (ValueDisplay vd in powerButton.GetComponentsInChildren<ValueDisplay>()) {
                 vd.spriteAlpha = 1;
@@ -188,7 +192,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                     valueIcon.SetColorImmediately(Color.black);
                     break;
                 case PuzzleState.Idle:
-                    if (powerTrail.powerIsOn) {
+                    if (powerTrail.pwr.PowerIsOn) {
                         state.Set(PuzzleState.PoweringUp);
                         return;
                     }
@@ -215,13 +219,13 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
 
             if (state == PuzzleState.Off) {
-                powerButton.button.interactableObject.SetAsDisabled("(Missing power)");
+                powerButton.interactableObject.SetAsDisabled("(Missing power)");
             }
             else if (state == PuzzleState.Idle) {
-                powerButton.button.interactableObject.SetAsInteractable("Check solution");
+                powerButton.interactableObject.SetAsInteractable("Check solution");
             }
             else {
-                powerButton.button.interactableObject.SetAsHidden();
+                powerButton.interactableObject.SetAsHidden();
             }
         }
         

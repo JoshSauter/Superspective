@@ -38,7 +38,7 @@ public class TimedMessage : MonoBehaviour {
         FadingOut
     }
 
-    private readonly StateMachine<State> state = new StateMachine<State>(State.Off);
+    private StateMachine<State> state;
 
     private void OnTriggerEnter(Collider other) {
         if (other.TaggedAsPlayer()) {
@@ -49,6 +49,8 @@ public class TimedMessage : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
+        state = this.StateMachine(State.Off);
+        
         state.AddStateTransition(State.FadingIn, State.Displayed, fadeInTime);
         if (!displayForever) {
             state.AddStateTransition(State.Displayed, State.FadingOut, timeToDisplay);

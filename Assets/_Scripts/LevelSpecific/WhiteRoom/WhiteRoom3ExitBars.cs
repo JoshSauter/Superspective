@@ -10,6 +10,7 @@ using System.Linq;
 
 namespace LevelSpecific.WhiteRoom {
     public class WhiteRoom3ExitBars : SaveableObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave>, AudioJobOnGameObject {
+        public CubeReceptacle[] puzzleReceptacles;
         public PowerTrail[] powerTrails;
         public Transform[] bars;
         public GameObject invisibleWall;
@@ -24,8 +25,8 @@ namespace LevelSpecific.WhiteRoom {
         protected override void Start() {
             base.Start();
             foreach (var powerTrail in powerTrails) {
-                powerTrail.OnPowerFinish += () => numSolved++;
-                powerTrail.OnDepowerBegin += () => numSolved--;
+                powerTrail.pwr.OnPowerFinish += () => numSolved++;
+                powerTrail.pwr.OnDepowerBegin += () => numSolved--;
             }
         }
 
@@ -39,6 +40,11 @@ namespace LevelSpecific.WhiteRoom {
             if (solved && !wasSolvedLastFrame) {
                 AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
                 AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
+
+                foreach (var receptacle in puzzleReceptacles) {
+                    receptacle.lockCubeInPlace = true;
+                    receptacle.makesCubeIrreplaceable = true;
+                }
             }
 
             invisibleWall.SetActive(!solved);

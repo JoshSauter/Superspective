@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 258049248693470635}
   - component: {fileID: 3126861947388351729}
   - component: {fileID: 8522727232292851517}
-  - component: {fileID: 7500548451249648734}
+  - component: {fileID: 2121873483150877983}
   m_Layer: 0
   m_Name: InterferenceScreen
   m_TagString: Untagged
@@ -357,7 +357,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 258049248693470635}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -413,7 +412,6 @@ MonoBehaviour:
   pressDistance: 0
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  _state: 0
   automaticallySetHelpText: 1
   buttonOffHelpText: Power on
   buttonOnHelpText: Power off
@@ -423,6 +421,11 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!114 &8522727232292851517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -446,7 +449,7 @@ MonoBehaviour:
   pressEmission: {r: 0, g: 0, b: 0, a: 1}
   buttonToReactTo: {fileID: 0}
   r: {fileID: 0}
---- !u!114 &7500548451249648734
+--- !u!114 &2121873483150877983
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -455,14 +458,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 281791940}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58b9575a187873145b9a7aa0ca17d840, type: 3}
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 258049248693470635}
   DEBUG: 0
-  button: {fileID: 3126861947388351729}
-  powerState: 0
-  powerIsOn: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &836642800
 GameObject:
   m_ObjectHideFlags: 0
@@ -4262,29 +4287,29 @@ MonoBehaviour:
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: 0, y: 0, z: 1, w: -1}
-  - {x: -0.000000059604645, y: -1.3820009e-21, z: 1, w: -1}
-  - {x: -0.000000059604645, y: -1.3820009e-21, z: 1, w: -1}
+  - {x: -0.000000059604645, y: 0, z: 1, w: -1}
+  - {x: -0.000000059604645, y: 0, z: 1, w: -1}
   - {x: -0.00000011920929, y: 0, z: 1, w: -1}
   - {x: 1, y: 0, z: 0, w: -1}
   - {x: 1, y: 0, z: 0, w: -1}
   - {x: 1, y: 0, z: 0, w: -1}
   - {x: 1, y: 0, z: 0, w: -1}
   - {x: 0, y: 0, z: -1, w: -1}
-  - {x: 0.000000059604645, y: 1.3998332e-21, z: -1, w: -1}
-  - {x: 0.000000059604645, y: 1.3998332e-21, z: -1, w: -1}
+  - {x: 0.000000059604645, y: 0, z: -1, w: -1}
+  - {x: 0.000000059604645, y: 0, z: -1, w: -1}
   - {x: 0.00000011920929, y: 0, z: -1, w: -1}
-  - {x: 1, y: 0, z: -0.00000011920926, w: -1}
-  - {x: 1, y: 0, z: -0.00000011920926, w: -1}
-  - {x: 1, y: 0, z: -0.00000011920926, w: -1}
-  - {x: 1, y: 0, z: -0.00000011920926, w: -1}
+  - {x: 1, y: 0, z: 0.00000011920923, w: -1}
+  - {x: 1, y: 0, z: 0.00000011920923, w: -1}
+  - {x: 1, y: 0, z: 0.00000011920923, w: -1}
+  - {x: 1, y: 0, z: 0.00000011920923, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
-  - {x: -1, y: 0, z: -0.000000059055385, w: -1}
-  - {x: -1, y: 0, z: -0.000000059055385, w: -1}
-  - {x: -1, y: 0, z: -0.00000011811077, w: -1}
+  - {x: -1, y: 0, z: 0, w: -1}
+  - {x: -1, y: 0, z: 0, w: -1}
+  - {x: -1, y: 0, z: 0, w: -1}
   - {x: 0.99999994, y: 1.6365385e-17, z: 0.00037385183, w: -1}
   - {x: 0.99999994, y: 8.18419e-18, z: 0.00034714714, w: -1}
   - {x: 0.99999994, y: 8.18419e-18, z: 0.00034714714, w: -1}
@@ -4293,26 +4318,26 @@ MonoBehaviour:
   - {x: 0.99999994, y: 0, z: -0.00034712773, w: -1}
   - {x: 0.99999994, y: 0, z: -0.00034712773, w: -1}
   - {x: 0.99999994, y: 0, z: -0.0003738287, w: -1}
-  - {x: 1, y: 0, z: -0.000000117744975, w: -1}
-  - {x: 1, y: 0, z: -1.1104362e-10, w: -1}
-  - {x: 1, y: 0, z: -1.1104362e-10, w: -1}
-  - {x: 1, y: 0, z: 0.00000011752288, w: -1}
-  - {x: 1, y: 0, z: 0.00000011920925, w: -1}
-  - {x: 1, y: 0, z: 0.00000011920925, w: -1}
-  - {x: 1, y: 0, z: 0.00000011920925, w: -1}
-  - {x: 1, y: 0, z: 0.00000011920924, w: -1}
-  - {x: -0.000030636787, y: 1.1686559e-18, z: -1, w: -1}
+  - {x: 1, y: 0, z: 0.000000117449034, w: -1}
+  - {x: 1, y: 0, z: 0.00000017606295, w: -1}
+  - {x: 1, y: 0, z: 0.00000017606295, w: -1}
+  - {x: 1, y: 0, z: 0.00000023467688, w: -1}
+  - {x: 1, y: 0, z: 0, w: -1}
+  - {x: 1, y: 0, z: 0, w: -1}
+  - {x: 1, y: 0, z: 0, w: -1}
+  - {x: 1, y: 0, z: 0, w: -1}
+  - {x: -0.000030636787, y: 0, z: -1, w: -1}
   - {x: -0.000030636787, y: 0, z: -1, w: -1}
   - {x: -0.000030636787, y: 0, z: -1, w: -1}
   - {x: -0.000030636787, y: 0, z: -1, w: -1}
   - {x: 0.000030636787, y: 0, z: 1, w: -1}
   - {x: 0.000030636787, y: 0, z: 1, w: -1}
   - {x: 0.000030636787, y: 0, z: 1, w: -1}
-  - {x: 0.000030636787, y: -1.1686559e-18, z: 1, w: -1}
-  - {x: -1, y: 0, z: -0.00000011920925, w: -1}
-  - {x: -1, y: 0, z: -0.00000011920925, w: -1}
-  - {x: -1, y: 0, z: -0.00000011920925, w: -1}
-  - {x: -1, y: 0, z: -0.00000011920925, w: -1}
+  - {x: 0.000030636787, y: 0, z: 1, w: -1}
+  - {x: -1, y: 0, z: 0.00000023841832, w: -1}
+  - {x: -1, y: 0, z: 0.00000023841832, w: -1}
+  - {x: -1, y: 0, z: 0.00000023841832, w: -1}
+  - {x: -1, y: 0, z: 0.00000023841832, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
   - {x: -1, y: 0, z: 0, w: -1}
@@ -4471,7 +4496,7 @@ GameObject:
   - component: {fileID: 368950477549591830}
   - component: {fileID: 4562047940476477240}
   - component: {fileID: 3404423330971745639}
-  - component: {fileID: 1559800678933238275}
+  - component: {fileID: 2779360306034961930}
   m_Layer: 0
   m_Name: PowerTrailToMiddle
   m_TagString: Untagged
@@ -5676,6 +5701,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 4562047940476477240}
   DEBUG: 1
+  _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 368950477549591830}
   numAudioSources: 4
@@ -5691,6 +5717,28 @@ MonoBehaviour:
   objectMoves: 0
   hiddenPowerTrail: 0
   revealAfterPowering: 0
+  distance: 0
+  maxDistance: 0
+--- !u!114 &2779360306034961930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5167824938599726092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 4562047940476477240}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
   sources: []
@@ -5706,24 +5754,10 @@ MonoBehaviour:
   onDepowerFinish:
     m_PersistentCalls:
       m_Calls: []
-  distance: 0
-  maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
---- !u!114 &1559800678933238275
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5167824938599726092}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 7500548451249648734}
-  whatToControl: 0
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &7336252611901677118
 GameObject:
   m_ObjectHideFlags: 0

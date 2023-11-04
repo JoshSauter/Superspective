@@ -1,5 +1,6 @@
 ﻿using System;
 using NaughtyAttributes;
+using SuperspectiveUtils;
 using UnityEngine;
 
 public class ButtonColorChange : MonoBehaviour {
@@ -36,10 +37,7 @@ public class ButtonColorChange : MonoBehaviour {
         }
 
         if (r == null) {
-            r = GetComponent<SuperspectiveRenderer>();
-            if (r == null) {
-                r = gameObject.AddComponent<SuperspectiveRenderer>();
-            }
+            r = this.GetOrAddComponent<SuperspectiveRenderer>();
         }
 
         if (useMaterialAsEndColor) {
@@ -79,16 +77,16 @@ public class ButtonColorChange : MonoBehaviour {
 
     void UpdateColor() {
         float t;
-        switch (buttonToReactTo.state) {
+        switch (buttonToReactTo.stateMachine.state) {
             case Button.State.ButtonPressing:
-                t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToPressButton;
+                t = buttonToReactTo.stateMachine.timeSinceStateChanged / buttonToReactTo.timeToPressButton;
 
                 SetColor(Color.Lerp(startColor, pressColor, buttonToReactTo.buttonPressCurve.Evaluate(t)));
                 SetEmission(Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t)));
 
                 break;
             case Button.State.ButtonUnpressing:
-                t = buttonToReactTo.timeSinceStateChange / buttonToReactTo.timeToUnpressButton;
+                t = buttonToReactTo.stateMachine.timeSinceStateChanged / buttonToReactTo.timeToUnpressButton;
 
                 SetColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
                 SetEmission(Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));

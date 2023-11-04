@@ -7,6 +7,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using SuperspectiveUtils;
+using UnityStandardAssets.ImageEffects;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
@@ -82,8 +83,8 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 
 	// get components from main game camera.
 	Component[] GetComponents() {
-		var result = myCamera.GetComponents<Component>();
-		if (result != null && result.Length > 1) {
+		List<Component> result = myCamera.GetComponents<Component>().ToList();
+		if (result != null && result.Count > 1) {
 			// exlude these components:
 			List<Component> excludes = new List<Component>();
 			excludes.Add(myCamera.transform);
@@ -97,9 +98,24 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent<CameraFollow>()) excludes.Add(myCamera.GetComponent<CameraFollow>());
 			if (myCamera.GetComponent<InteractableGlowManager>()) excludes.Add(myCamera.GetComponent<InteractableGlowManager>());
 			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
-			result = result.Except(excludes).ToArray();
+			result = result.Except(excludes).ToList();
 		}
-		return result;
+
+		
+		int bloomIndex = result.FindIndex(c => c is FastBloom);
+		int ssaoIndex = result.FindIndex(c => c is ScreenSpaceAmbientOcclusion);
+
+		// Hack to fix buggy black background in SceneView when rendered the order it is in-game
+		// We move the FastBloom component to an earlier render time than the SSAO component as a bandaid fix
+		if (bloomIndex >= 0 && ssaoIndex >= 0) {
+			Component bloom = result[bloomIndex];
+			result.RemoveAt(bloomIndex);
+			// Updated list, refind ssao index
+			ssaoIndex = result.FindIndex(c => c is ScreenSpaceAmbientOcclusion);
+			result.Insert(ssaoIndex, bloom);
+		}
+		
+		return result.ToArray();
 	}
 
 	public void Update() {

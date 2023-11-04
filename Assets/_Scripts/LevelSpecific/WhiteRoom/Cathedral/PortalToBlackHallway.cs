@@ -26,17 +26,17 @@ namespace LevelSpecific.WhiteRoom {
 
         IEnumerator Initialize() {
             yield return new WaitUntil(() => portal.otherPortal != null);
-            portal.changeCameraEdgeDetection = powerTrail.fullyPowered;
-            portal.otherPortal.changeCameraEdgeDetection = powerTrail.fullyPowered;
+            portal.changeCameraEdgeDetection = powerTrail.IsFullyPowered;
+            portal.otherPortal.changeCameraEdgeDetection = powerTrail.IsFullyPowered;
 
-            HandlePowerTrail(powerTrail.fullyPowered);
+            HandlePowerTrail(powerTrail.IsFullyPowered);
         }
 
         void Update() {
             if (!hasInitialized) return;
 
-            if (powerTrail.fullyPowered != poweredNow) {
-                poweredNow = powerTrail.fullyPowered;
+            if (powerTrail.IsFullyPowered != poweredNow) {
+                poweredNow = powerTrail.IsFullyPowered;
                 HandlePowerTrail(poweredNow);
             }
         }

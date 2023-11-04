@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
 using PortalMechanics;
+using PoweredObjects;
 using PowerTrailMechanics;
 using Saving;
 using StateUtils;
@@ -14,20 +15,20 @@ using UnityEngine;
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     public class FloorPuzzle : MonoBehaviour {
         [Serializable]
-        public struct PowerSource {
+        public struct PuzzlePowerSource {
             public bool negative;
             public SpriteRenderer valueIcon;
             public int value => (negative ? -1 : 1) * int.Parse(valueIcon.sprite.name);
             public PowerTrail powerTrail;
-            public PowerButton powerButton;
+            public Button powerButton;
         }
 
         public FloorManager.Floor floor;
         public Portal[] floorPortals;
 
         public CurrentValueDisplay currentValue;
-        public PowerSource[] powerSources;
-        private Dictionary<PowerTrail, PowerSource> powerSourceLookup;
+        public PuzzlePowerSource[] powerSources;
+        private Dictionary<PoweredObject, PuzzlePowerSource> powerSourceLookup;
         public PowerTrail powerTrailBottomMiddle;
         public PowerTrail powerTrailTopMiddle;
         public PortalDoor entranceDoor;
@@ -39,7 +40,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         // Start is called before the first frame update
         void Start() {
-            powerSourceLookup = powerSources.ToDictionary(ps => ps.powerTrail, ps => ps);
+            powerSourceLookup = powerSources.ToDictionary(ps => ps.powerTrail.pwr, ps => ps);
 
             InitShutter();
             InitEvents();
@@ -82,8 +83,8 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         #region Events
         void InitEvents() {
             foreach (var powerSource in powerSources) {
-                powerSource.powerTrail.OnPowerFinishRef += AddPower;
-                powerSource.powerTrail.OnDepowerBeginRef += RemovePower;
+                powerSource.powerTrail.pwr.OnPowerFinishRef += AddPower;
+                powerSource.powerTrail.pwr.OnDepowerBeginRef += RemovePower;
             }
 
             SaveManager.BeforeLoad += StopAllCoroutines;
@@ -91,29 +92,29 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         void TeardownEvents() {
             foreach (var powerSource in powerSources) {
-                powerSource.powerTrail.OnPowerFinishRef -= AddPower;
-                powerSource.powerTrail.OnDepowerBeginRef -= RemovePower;
+                powerSource.powerTrail.pwr.OnPowerFinishRef -= AddPower;
+                powerSource.powerTrail.pwr.OnDepowerBeginRef -= RemovePower;
             }
 
             SaveManager.BeforeLoad -= StopAllCoroutines;
         }
         #endregion
 
-        IEnumerator AddPowerDelayed(PowerTrail powerTrail) {
+        IEnumerator AddPowerDelayed(PoweredObject powerTrail) {
             yield return new WaitForSeconds(powerTrailTopMiddle.duration);
             FloorManager.instance.currentValue += powerSourceLookup[powerTrail].value;
         }
         
-        IEnumerator RemovePowerDelayed(PowerTrail powerTrail) {
+        IEnumerator RemovePowerDelayed(PoweredObject powerTrail) {
             yield return new WaitForSeconds(powerTrailTopMiddle.duration);
             FloorManager.instance.currentValue -= powerSourceLookup[powerTrail].value;
         }
 
-        void AddPower(PowerTrail powerTrail) {
+        void AddPower(PoweredObject powerTrail) {
             StartCoroutine(AddPowerDelayed(powerTrail));
         }
         
-        void RemovePower(PowerTrail powerTrail) {
+        void RemovePower(PoweredObject powerTrail) {
             StartCoroutine(RemovePowerDelayed(powerTrail));
         }
     }

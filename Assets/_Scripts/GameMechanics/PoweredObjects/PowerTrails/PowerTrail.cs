@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
-using System.Net.Mime;
 using System.Linq;
-using System.IO;
 using NaughtyAttributes;
 using Audio;
 using Saving;
-using System.Runtime.Serialization.Formatters.Binary;
+using PoweredObjects;
+using StateUtils;
 using UnityEngine.Events;
 using static Audio.AudioManager;
 
@@ -21,8 +19,21 @@ namespace PowerTrailMechanics {
 		public float endDistance;
 	}
 
-	[RequireComponent(typeof(UniqueId))]
+	[RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
 	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
+		[Label("Power")]
+		[SerializeField]
+		private PoweredObject _pwr;
+		public PoweredObject pwr {
+			get {
+				if (_pwr == null) {
+					_pwr = this.GetOrAddComponent<PoweredObject>();
+				}
+
+				return _pwr;
+			}
+			set => _pwr = value;
+		}
 		public Renderer[] renderers;
 		Collider[] colliders;
 		Material[] materials;
@@ -56,46 +67,20 @@ namespace PowerTrailMechanics {
 		public bool useSeparateSpeedsForPowerOnOff = false;
 		// Just used for NaughtyAttributes
 		bool useSameSpeedsForPowerOnOff => !useSeparateSpeedsForPowerOnOff;
-		[ShowIf("useDurationInsteadOfSpeed")]
+		[ShowIf(nameof(useDurationInsteadOfSpeed))]
 		public float targetDuration = 3f;
-		[ShowIf(EConditionOperator.And, "useDurationInsteadOfSpeed", "useSeparateSpeedsForPowerOnOff")]
+		[ShowIf(EConditionOperator.And, nameof(useDurationInsteadOfSpeed), nameof(useSeparateSpeedsForPowerOnOff))]
 		public float targetDurationPowerOff = 3f;
-		[HideIf("useDurationInsteadOfSpeed")]
+		[HideIf(nameof(useDurationInsteadOfSpeed))]
 		public float speed = 15f;
-		[HideIf(EConditionOperator.Or, "useDurationInsteadOfSpeed", "useSameSpeedsForPowerOnOff")]
+		[HideIf(EConditionOperator.Or, nameof(useDurationInsteadOfSpeed), nameof(useSameSpeedsForPowerOnOff))]
 		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
 		public bool skipStartupShutdownSounds = false;
 		public bool objectMoves = false;
 		public bool hiddenPowerTrail = false;
-		[ShowIf("hiddenPowerTrail")]
+		[ShowIf(nameof(hiddenPowerTrail))]
 		public bool revealAfterPowering = false;
-		
-		[Header("Parent PowerTrails")]
-		public MultiMode parentMultiMode = MultiMode.Single;
-		[HideIf("IsMulti")]
-		public PowerTrail source;
-		[ShowIf("IsMulti")]
-		public PowerTrail[] sources;
-
-		#region events
-		public delegate void PowerTrailAction();
-
-		public delegate void PowerTrailActionWithRef(PowerTrail powerTrail);
-		public event PowerTrailAction OnPowerBegin;
-		public event PowerTrailAction OnPowerFinish;
-		public event PowerTrailAction OnDepowerBegin;
-		public event PowerTrailAction OnDepowerFinish;
-		public event PowerTrailActionWithRef OnPowerBeginRef;
-		public event PowerTrailActionWithRef OnPowerFinishRef;
-		public event PowerTrailActionWithRef OnDepowerBeginRef;
-		public event PowerTrailActionWithRef OnDepowerFinishRef;
-
-		public UnityEvent onPowerBegin;
-		public UnityEvent onPowerFinish;
-		public UnityEvent onDepowerBegin;
-		public UnityEvent onDepowerFinish;
-		#endregion
 
 		///////////
 		// State //
@@ -105,56 +90,11 @@ namespace PowerTrailMechanics {
 		[Header("Current State")]
 		public float distance = 0f;
 		public float maxDistance = 0f;
-		[SerializeField]
-		private bool _powerIsOn = false;
 
-		public bool powerIsOn {
-			get => _powerIsOn;
-			set {
-				if (value != _powerIsOn) {
-					if (!skipStartupShutdownSounds) {
-						if (value) {
-							AudioManager.instance.Play(AudioName.PowerTrailBootup, ID, true);
-						}
-						else {
-							AudioManager.instance.Play(AudioName.PowerTrailShutdown, ID, true);
-						}
-					}
-				}
-
-				_powerIsOn = value;
-			}
-		}
-		public bool fullyPowered => distance >= maxDistance;
-		public bool fullyDepowered => distance <= 0;
-		[SerializeField]
-		PowerState _state = PowerState.Depowered;
-		public PowerState state {
-			get => _state;
-			private set {
-				if (_state == PowerState.Depowered && value == PowerState.PartiallyPowered) {
-					OnPowerBegin?.Invoke();
-					onPowerBegin?.Invoke();
-					OnPowerBeginRef?.Invoke(this);
-				}
-				else if (_state == PowerState.PartiallyPowered && value == PowerState.Powered) {
-					OnPowerFinish?.Invoke();
-					onPowerFinish?.Invoke();
-					OnPowerFinishRef?.Invoke(this);
-				}
-				else if (_state == PowerState.Powered && value == PowerState.PartiallyPowered) {
-					OnDepowerBegin?.Invoke();
-					onDepowerBegin?.Invoke();
-					OnDepowerBeginRef?.Invoke(this);
-				}
-				else if (_state == PowerState.PartiallyPowered && value == PowerState.Depowered) {
-					OnDepowerFinish?.Invoke();
-					onDepowerFinish?.Invoke();
-					OnDepowerFinishRef?.Invoke(this);
-				}
-				_state = value;
-			}
-		}
+		[ShowNativeProperty]
+		public bool IsFullyPowered => distance >= maxDistance;
+		[ShowNativeProperty]
+		public bool IsFullyDepowered => distance <= 0;
 		bool isInitialized = false;
 
 		protected override void Awake() {
@@ -163,7 +103,6 @@ namespace PowerTrailMechanics {
 				powerNodes = GetComponent<NodeSystem>();
 			}
 
-			_powerIsOn = (_state == PowerState.PartiallyPowered || _state == PowerState.Powered);
 			foreach (var renderer in renderers) {
 				// UI only layer that doesn't collide w/ anything right now
 				renderer.gameObject.layer = LayerMask.NameToLayer(hiddenPowerTrail ? "UI" : "VisibleButNoPlayerCollision");
@@ -172,6 +111,11 @@ namespace PowerTrailMechanics {
 
 		protected override void Start() {
 			base.Start();
+			if (pwr == null) {
+				Debug.LogError($"{this.FullPath()}: pwr is null. Disabling PowerTrail");
+				enabled = false;
+				return;
+			}
 			if (renderers == null || renderers.Length == 0) {
 				renderers = GetComponents<Renderer>();
 			}
@@ -187,19 +131,50 @@ namespace PowerTrailMechanics {
 				}
 			}
 
-			InitializeAudioSegments();
-
 			PopulateStaticGPUInfo();
-			InitDaisyChainEvents();
+			InitializePowerStateMachine();
 			SetStartState();
+
+			switch (pwr.parentMultiMode) {
+				case MultiMode.Single:
+					if (pwr.source != null && pwr.source.GetComponent<PowerTrail>() != null) {
+						skipStartupShutdownSounds = true;
+					}
+					break;
+				case MultiMode.Any:
+				case MultiMode.All:
+					if (pwr.sources != null && pwr.sources.Length > 0 && pwr.sources.ToList().Exists(source => source.GetComponent<PowerTrail>() != null)) {
+						skipStartupShutdownSounds = true;
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+		
+		protected override void Init() {
+			base.Init();
+
+			InitializeAudioSegments();
 		}
 
-		private void OnDisable() {
-			TeardownDaisyChainEvents();
+		private void InitializePowerStateMachine() {
+			// Bootup and shutdown SFX
+			pwr.state.OnStateChangeSimple += () => {
+				if (!GameManager.instance.gameHasLoaded) return;
+				if (!pwr.PartiallyPowered || skipStartupShutdownSounds) return;
+
+				AudioManager.instance.Play(pwr.PowerIsOn ? AudioName.PowerTrailBootup : AudioName.PowerTrailShutdown, ID, true);
+			};
+			
+			// State transitions
+			pwr.state.AddStateTransition(PowerState.PartiallyDepowered, PowerState.Depowered, () => IsFullyDepowered);
+			pwr.state.AddStateTransition(PowerState.PartiallyPowered, PowerState.Powered, () => IsFullyPowered);
 		}
 
 		void InitializeAudioSegments() {
-			for (int i = 0; i < numAudioSources; i++) {
+			// TODO: Revert iterator to numAudioSources after debugging slow performance
+			for (int i = 0; i < 1/*numAudioSources*/; i++) {
 				// Axiom: Audio job's uniqueIdentifier ends with "_<0 to numAudioSources>"
 				string audioId = $"{ID}_{i}";
 				AudioManager.instance.PlayWithUpdate(AudioName.PowerTrailHum, audioId, this);
@@ -208,17 +183,17 @@ namespace PowerTrailMechanics {
 
 		void SetStartState() {
 			isInitialized = false;
-			if (state == PowerState.Powered) {
+			if (pwr.FullyPowered) {
 				distance = maxDistance;
 			}
-			else if (state == PowerState.Depowered) {
+			else if (pwr.FullyDepowered) {
 				distance = 0;
 			}
 		}
 
 		void Update() {
 			if (DEBUG && DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown("t")) {
-				powerIsOn = !powerIsOn;
+				pwr.PowerIsOn = !pwr.PowerIsOn;
 			}
 
 			if (objectMoves) {
@@ -230,13 +205,13 @@ namespace PowerTrailMechanics {
 			if (nextDistance == prevDistance && isInitialized) return;
 			isInitialized = true;
 
-			if (hiddenPowerTrail && powerIsOn && gameObject.layer != LayerMask.NameToLayer("VisibleButNoPlayerCollision")) {
+			if (hiddenPowerTrail && pwr.PowerIsOn && gameObject.layer != LayerMask.NameToLayer("VisibleButNoPlayerCollision")) {
 				foreach (var renderer in renderers) {
 					renderer.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
 				}
 			}
 
-			if (hiddenPowerTrail && revealAfterPowering && fullyPowered) {
+			if (hiddenPowerTrail && revealAfterPowering && IsFullyPowered) {
 				hiddenPowerTrail = false;
 				foreach (var material in materials) {
 					material.SetInt(hiddenPowerTrailKey, 0);
@@ -250,7 +225,6 @@ namespace PowerTrailMechanics {
 			}
 			
 			distance = nextDistance;
-			UpdateState(prevDistance, nextDistance);
 			
 			UpdateInterpolationValues(nextDistance);
 		}
@@ -401,40 +375,21 @@ namespace PowerTrailMechanics {
 			foreach (var material in materials) {
 				material.SetInt(reverseVisibilityKey, reverseVisibility ? 1 : 0);
 				material.SetFloatArray(interpolationValuesKey, interpolationValues);
-				if (!material.IsKeywordEnabled(powerTrailKeyword) && !fullyPowered) {
+				if (!material.IsKeywordEnabled(powerTrailKeyword) && !IsFullyPowered) {
 					material.EnableKeyword(powerTrailKeyword);
 				}
-				else if (material.IsKeywordEnabled(powerTrailKeyword) && fullyPowered) {
+				else if (material.IsKeywordEnabled(powerTrailKeyword) && IsFullyPowered) {
 					material.DisableKeyword(powerTrailKeyword);
 				}
 			}
 		}
 
-		void UpdateState(float prevDistance, float nextDistance) {
-			if (powerIsOn) {
-				if (prevDistance == 0 && nextDistance > 0) {
-					state = PowerState.PartiallyPowered;
-				}
-				else if (prevDistance < maxDistance && nextDistance == maxDistance) {
-					state = PowerState.Powered;
-				}
-			}
-			else if (!powerIsOn) {
-				if (prevDistance == maxDistance && nextDistance < maxDistance) {
-					state = PowerState.PartiallyPowered;
-				}
-				else if (prevDistance > 0 && nextDistance == 0) {
-					state = PowerState.Depowered;
-				}
-			}
-		}
-
 		float NextDistance() {
-			float effectiveSpeed = useSeparateSpeedsForPowerOnOff && !powerIsOn ? speedPowerOff : speed;
-			if (powerIsOn && distance < maxDistance) {
+			float effectiveSpeed = useSeparateSpeedsForPowerOnOff && !pwr.PowerIsOn ? speedPowerOff : speed;
+			if (pwr.PowerIsOn && distance < maxDistance) {
 				return Mathf.Min(maxDistance, distance + Time.deltaTime * effectiveSpeed);
 			}
-			else if (!powerIsOn && distance > 0) {
+			else if (!pwr.PowerIsOn && distance > 0) {
 				return Mathf.Max(0, distance - Time.deltaTime * effectiveSpeed);
 			}
 			else return distance;
@@ -449,7 +404,7 @@ namespace PowerTrailMechanics {
 			const float shortWait = .025f;
 			const float longWait = .5f;
 			float timeElapsed = audioJob.timeRunning;
-			if (state == PowerState.Depowered || audioJob.audio.volume == 0) {
+			if (pwr.FullyDepowered || audioJob.audio.volume == 0) {
 				// If depowered, only check once every longWait for this expensive calculation
 				if (timeElapsed < longWait) {
 					return;
@@ -556,75 +511,6 @@ namespace PowerTrailMechanics {
 		}
 #endregion
 
-#region Parent PowerTrails
-		bool IsMulti() {
-			return parentMultiMode != MultiMode.Single;
-		}
-				
-		bool ParentsFullyPowered {
-			get {
-				switch (parentMultiMode) {
-					case MultiMode.Single:
-						return source.powerIsOn;
-					case MultiMode.Any:
-						return sources.ToList().Exists(s => s.fullyPowered);
-					case MultiMode.All:
-						return sources.ToList().TrueForAll(s => s.fullyPowered);
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-			}
-		}
-
-		void PowerFromParents() {
-			powerIsOn = ParentsFullyPowered;
-		}
-
-		void InitDaisyChainEvents() {
-			switch (parentMultiMode) {
-				case MultiMode.Single:
-					if (source == null) return;
-					skipStartupShutdownSounds = true;
-					source.OnPowerFinish += PowerFromParents;
-					source.OnDepowerBegin += PowerFromParents;
-					break;
-				case MultiMode.Any:
-				case MultiMode.All:
-					if (sources == null || sources.Length == 0) return;
-					skipStartupShutdownSounds = true;
-					foreach (var parent in sources) {
-						parent.OnPowerFinish += PowerFromParents;
-						parent.OnDepowerBegin += PowerFromParents;
-					}
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-		void TeardownDaisyChainEvents() {
-			switch (parentMultiMode) {
-				case MultiMode.Single:
-					if (source == null) return;
-					skipStartupShutdownSounds = true;
-					source.OnPowerFinish -= PowerFromParents;
-					source.OnDepowerBegin -= PowerFromParents;
-					break;
-				case MultiMode.Any:
-				case MultiMode.All:
-					if (sources == null || sources.Length == 0) return;
-					skipStartupShutdownSounds = true;
-					foreach (var parent in sources) {
-						parent.OnPowerFinish -= PowerFromParents;
-						parent.OnDepowerBegin -= PowerFromParents;
-					}
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-#endregion
 #region Saving
 		
 		[Serializable]
@@ -639,8 +525,6 @@ namespace PowerTrailMechanics {
 			public float powerTrailRadius;
 			public float distance;
 			public float maxDistance;
-			public bool powerIsOn;
-			public int state;
 
 			public PowerTrailSave(PowerTrail powerTrail) : base(powerTrail) {
 				this.reverseVisibility = powerTrail.reverseVisibility;
@@ -653,8 +537,6 @@ namespace PowerTrailMechanics {
 				this.powerTrailRadius = powerTrail.powerTrailRadius;
 				this.distance = powerTrail.distance;
 				this.maxDistance = powerTrail.maxDistance;
-				this.powerIsOn = powerTrail.powerIsOn;
-				this.state = (int)powerTrail._state;
 			}
 
 			public override void LoadSave(PowerTrail powerTrail) {
@@ -675,8 +557,6 @@ namespace PowerTrailMechanics {
 				else if (powerTrail.distance == 0) {
 					powerTrail.distance += 0.00001f;
 				}
-				powerTrail._powerIsOn = this.powerIsOn;
-				powerTrail._state = (PowerState)this.state;
 			}
 		}
 #endregion

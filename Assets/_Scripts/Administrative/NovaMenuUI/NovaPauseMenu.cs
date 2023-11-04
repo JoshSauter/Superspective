@@ -15,7 +15,7 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         PauseMenuOpen,
         SubMenuOpen
     }
-    public StateMachine<MenuState> currentMenuState = new StateMachine<MenuState>(MenuState.Off, false, true);
+    public StateMachine<MenuState> currentMenuState;
     
     public bool PauseMenuIsOpen => MenuBackground.Tint.a > 0.05f;
     public CursorLockMode cachedLockMode;
@@ -41,6 +41,8 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
     public DialogWindow ExitGameDialogWindow;
 
     private void Awake() {
+        currentMenuState = this.StateMachine(MenuState.Off, false, true);
+        
         children = GetComponentsInChildren<NovaButton>().ToList();
         PauseMenu = GetComponent<ClipMask>();
 
@@ -155,7 +157,7 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
             Time.timeScale = 1;
         }
         
-        Debug.Log("ClosePauseMenu called");
+        // Debug.Log("ClosePauseMenu called");
 
         if (restoreLockState) {
             Cursor.visible = false;

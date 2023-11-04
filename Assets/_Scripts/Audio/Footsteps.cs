@@ -19,8 +19,8 @@ public class Footsteps : MonoBehaviour {
 	float minTimeBetweenHits = 0.175f;
 	float timeSinceLastHit = 0f;
 
-	private const float glassMinVolume = 0.025f;
-	private const float glassMaxVolume = 0.15f;
+	private const float glassMinVolume = 0.05f;
+	private const float glassMaxVolume = 0.3f;
 	private float lastGlassVolume = glassMinVolume;
 
 	private float randomGlassVolume {
@@ -69,7 +69,7 @@ public class Footsteps : MonoBehaviour {
 			audioJobRight.audio.volume = curVolume;
 		}
 
-		if (playerMovement.grounded.isGrounded && playerSpeed > 0.2f) {
+		if (playerMovement.IsGrounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
 			float thisFrameOffset = thisFrameBobAmount - curBobAmountUnamplified;
 			curBobAmountUnamplified = thisFrameBobAmount;
@@ -107,7 +107,7 @@ public class Footsteps : MonoBehaviour {
 		timeSinceLastHit = 0f;
 		string audioJobId = leftFootActive ? audioJobLeft.uniqueIdentifier : audioJobRight.uniqueIdentifier;
 		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay);
-		if (playerMovement.WalkingOnGlass()) {
+		if (playerMovement.groundMovement.WalkingOnGlass()) {
 			string glassAudioJobId = leftFootActive ? audioJobLeftGlass.uniqueIdentifier : audioJobRightGlass.uniqueIdentifier;
 			AudioManager.instance.Play(AudioName.PlayerFootstepGlass, glassAudioJobId, shouldForcePlay, SetGlassVolume);
 		}

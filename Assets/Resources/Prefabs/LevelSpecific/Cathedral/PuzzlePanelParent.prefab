@@ -2943,6 +2943,7 @@ GameObject:
   - component: {fileID: 1505295270675203196}
   - component: {fileID: 4589337593553540818}
   - component: {fileID: 5864334266207758981}
+  - component: {fileID: 1678334698652951275}
   m_Layer: 0
   m_Name: PowerTrailCircleFloor
   m_TagString: Untagged
@@ -4744,6 +4745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 4589337593553540818}
   DEBUG: 0
+  _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1505295270675203196}
   numAudioSources: 4
@@ -4759,6 +4761,28 @@ MonoBehaviour:
   objectMoves: 0
   hiddenPowerTrail: 0
   revealAfterPowering: 0
+  distance: 0
+  maxDistance: 0
+--- !u!114 &1678334698652951275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1595403255356048654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 4589337593553540818}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
   sources: []
@@ -4774,10 +4798,10 @@ MonoBehaviour:
   onDepowerFinish:
     m_PersistentCalls:
       m_Calls: []
-  distance: 0
-  maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1834143662545531666
 GameObject:
   m_ObjectHideFlags: 0
@@ -6042,9 +6066,9 @@ GameObject:
   - component: {fileID: 1834143664177482044}
   - component: {fileID: 1834143664177481990}
   - component: {fileID: 1834143664177481985}
-  - component: {fileID: 1834143664177481991}
   - component: {fileID: 2331844844923839940}
   - component: {fileID: 5875243252119802430}
+  - component: {fileID: 1640907582886676023}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -14748,7 +14772,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1834143664177481990}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -14804,7 +14827,6 @@ MonoBehaviour:
   pressDistance: -0.0625
   unpressAfterPress: 1
   timeBetweenPressEndDepressStart: 0.0625
-  _state: 0
   automaticallySetHelpText: 1
   buttonOffHelpText: Turn on
   buttonOnHelpText: Turn off
@@ -14814,23 +14836,11 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1834143664177481991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1834143664177482046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58b9575a187873145b9a7aa0ca17d840, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 1834143664177481990}
-  DEBUG: 0
-  button: {fileID: 1834143664177481985}
-  powerState: 0
-  powerIsOn: 0
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!114 &2331844844923839940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14875,6 +14885,45 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.3
   m_Center: {x: 0, y: -0.0011820571, z: -0.000006526816}
+--- !u!114 &1640907582886676023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834143664177482046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1834143664177481990}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1834143664251104398
 GameObject:
   m_ObjectHideFlags: 0
@@ -14926,13 +14975,14 @@ MonoBehaviour:
   _id: {fileID: 3701876309933440621}
   DEBUG: 0
   floorPuzzle: {fileID: 0}
+  startingState: 0
   state:
     _state: 1
     _prevState: 0
     _timeSinceStateChanged: 0
     onStateChange: []
   valueIcon: {fileID: 3896326707807030746}
-  powerButton: {fileID: 1834143664177481991}
+  powerButton: {fileID: 1834143664177481985}
   powerTrailFromPrevPuzzle: {fileID: 0}
   powerTrail: {fileID: 1834143664506403152}
   powerTrailToNextPuzzle: {fileID: 5864334266207758981}
@@ -15483,9 +15533,9 @@ GameObject:
   - component: {fileID: 1834143664506403151}
   - component: {fileID: 1834143664506403150}
   - component: {fileID: 1834143664506403155}
-  - component: {fileID: 1834143664506403154}
   - component: {fileID: 1834143664506403153}
   - component: {fileID: 1834143664506403152}
+  - component: {fileID: 1398743713989365466}
   m_Layer: 0
   m_Name: PowerTrail
   m_TagString: Untagged
@@ -16074,20 +16124,6 @@ MonoBehaviour:
     indexOfFirstChild: 3
     zeroDistanceToChildren: 0
     staircaseSegment: 0
---- !u!114 &1834143664506403154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1834143664506403144}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 1834143664177481991}
-  whatToControl: 1
 --- !u!114 &1834143664506403153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16115,6 +16151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1834143664506403153}
   DEBUG: 0
+  _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1834143664506403155}
   numAudioSources: 4
@@ -16130,6 +16167,28 @@ MonoBehaviour:
   objectMoves: 0
   hiddenPowerTrail: 0
   revealAfterPowering: 0
+  distance: 0
+  maxDistance: 0
+--- !u!114 &1398743713989365466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834143664506403144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1834143664506403153}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
   sources: []
@@ -16145,10 +16204,10 @@ MonoBehaviour:
   onDepowerFinish:
     m_PersistentCalls:
       m_Calls: []
-  distance: 0
-  maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1839044528784212429
 GameObject:
   m_ObjectHideFlags: 0

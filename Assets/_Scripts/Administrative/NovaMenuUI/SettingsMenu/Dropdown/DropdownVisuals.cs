@@ -19,7 +19,7 @@ public class DropdownVisuals : ItemVisuals {
 
         Dropdown.Scroller.ScrollbarVisual.Visible = setting.dropdownSelection.allItems.Count > minNumberOfItemsForScrollbar;
 
-        Debug.Log($"{setting.name} {this.View.UIBlock.CalculatedPosition.Percent:F2}");
+        // Debug.Log($"{setting.name} {this.View.UIBlock.CalculatedPosition.Percent:F2}");
         
         Dropdown.SetDatasource();
         if (settingWasntSet) {

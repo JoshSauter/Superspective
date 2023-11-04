@@ -11,8 +11,8 @@ namespace LevelSpecific.Fork {
 
         IEnumerator Start() {
             portal = GetComponent<Portal>();
-            powerTrail.OnPowerFinish += Enable;
-            powerTrail.OnDepowerBegin += Disable;
+            powerTrail.pwr.OnPowerFinish += Enable;
+            powerTrail.pwr.OnDepowerBegin += Disable;
 
             yield return new WaitUntil(() => portal.otherPortal != null);
         }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -573,7 +573,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639208
+  m_Name: pb_Mesh632172
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -738,7 +738,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639528
+  m_Name: pb_Mesh632496
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2511,7 +2511,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639432
+  m_Name: pb_Mesh632400
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2676,7 +2676,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639138
+  m_Name: pb_Mesh632102
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2841,7 +2841,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639158
+  m_Name: pb_Mesh632122
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3006,7 +3006,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639228
+  m_Name: pb_Mesh632192
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3255,7 +3255,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639412
+  m_Name: pb_Mesh632380
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3877,6 +3877,7 @@ MonoBehaviour:
     targetLevels: 
     allowTriggeringWhileInsideObject: 0
   actionsToTrigger: []
+  playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
 --- !u!114 &491816013
@@ -3925,7 +3926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  _id: {fileID: 491816013}
   DEBUG: 0
   channel: Portal1
   changeActiveSceneOnTeleport: 0
@@ -3966,6 +3967,9 @@ MonoBehaviour:
   renderRecursivePortals: 0
   compositePortal: 0
   doubleSidedPortals: 0
+  changeScale: 0
+  scaleFactor: 1
+  volumetricPortals: []
   fallbackMaterial: {fileID: 0}
   renderers: []
   colliders: []
@@ -3973,8 +3977,8 @@ MonoBehaviour:
   internalRenderTexturesCopy:
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  pauseRenderingOnly: 0
-  pauseRenderingAndLogic: 0
+  pauseRendering: 0
+  pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 491816012}
   onPortalTeleport:
@@ -4631,7 +4635,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639398
+  m_Name: pb_Mesh632366
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4796,7 +4800,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639378
+  m_Name: pb_Mesh632346
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4961,7 +4965,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639108
+  m_Name: pb_Mesh632072
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5126,7 +5130,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1285782
+  m_Name: pb_Mesh632432
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5291,7 +5295,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639544
+  m_Name: pb_Mesh632512
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5466,7 +5470,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639304
+  m_Name: pb_Mesh632270
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5816,7 +5820,7 @@ GameObject:
   - component: {fileID: 705201491}
   - component: {fileID: 705201490}
   - component: {fileID: 705201489}
-  - component: {fileID: 705201488}
+  - component: {fileID: 705201496}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -5840,23 +5844,6 @@ Transform:
   m_Father: {fileID: 1581752672}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 26.8, y: 0, z: 0}
---- !u!114 &705201488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 705201486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58b9575a187873145b9a7aa0ca17d840, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 0}
-  DEBUG: 0
-  button: {fileID: 705201489}
-  powerState: 0
-  powerIsOn: 0
 --- !u!114 &705201489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5871,7 +5858,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 705201490}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -5927,13 +5913,20 @@ MonoBehaviour:
   pressDistance: -0.0625
   unpressAfterPress: 1
   timeBetweenPressEndDepressStart: 0.0625
-  _state: 0
+  automaticallySetHelpText: 1
+  buttonOffHelpText: Turn on
+  buttonOnHelpText: Turn off
   onButtonPressFinish:
     m_PersistentCalls:
       m_Calls: []
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!114 &705201490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17272,6 +17265,45 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &705201496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 705201486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 705201490}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!850595691 &742470885
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -17335,13 +17367,14 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaAO: 1
   m_PVRTiledBaking: 0
   m_NumRaysToShootPerTexel: -1
+  m_RespectSceneVisibilityWhenBakingGI: 0
 --- !u!43 &760719490
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639022
+  m_Name: pb_Mesh631984
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18107,7 +18140,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639178
+  m_Name: pb_Mesh632142
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18272,7 +18305,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639190
+  m_Name: pb_Mesh632154
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18437,7 +18470,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639008
+  m_Name: pb_Mesh631970
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18602,7 +18635,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639242
+  m_Name: pb_Mesh632206
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18767,7 +18800,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1638976
+  m_Name: pb_Mesh631938
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -19000,6 +19033,7 @@ MonoBehaviour:
     targetLevels: 
     allowTriggeringWhileInsideObject: 0
   actionsToTrigger: []
+  playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
 --- !u!114 &1016995196
@@ -19048,7 +19082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  _id: {fileID: 1016995196}
   DEBUG: 0
   channel: Portal2
   changeActiveSceneOnTeleport: 0
@@ -19089,6 +19123,9 @@ MonoBehaviour:
   renderRecursivePortals: 0
   compositePortal: 0
   doubleSidedPortals: 0
+  changeScale: 0
+  scaleFactor: 1
+  volumetricPortals: []
   fallbackMaterial: {fileID: 0}
   renderers: []
   colliders: []
@@ -19096,8 +19133,8 @@ MonoBehaviour:
   internalRenderTexturesCopy:
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  pauseRenderingOnly: 0
-  pauseRenderingAndLogic: 0
+  pauseRendering: 0
+  pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1016995195}
   onPortalTeleport:
@@ -19801,7 +19838,7 @@ GameObject:
   - component: {fileID: 1100334105}
   - component: {fileID: 1100334104}
   - component: {fileID: 1100334103}
-  - component: {fileID: 1100334102}
+  - component: {fileID: 1100334110}
   m_Layer: 0
   m_Name: PowerTrailMedium
   m_TagString: Untagged
@@ -19824,20 +19861,6 @@ Transform:
   m_Father: {fileID: 839515179}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
---- !u!114 &1100334102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1100334100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 705201488}
-  whatToControl: 0
 --- !u!114 &1100334103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19852,6 +19875,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1100334104}
   DEBUG: 0
+  _pwr: {fileID: 1100334110}
   renderers: []
   powerNodes: {fileID: 1100334105}
   numAudioSources: 4
@@ -19865,19 +19889,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1100334104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21195,6 +21210,45 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1100334110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100334100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1100334104}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 705201496}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1121270033
 GameObject:
   m_ObjectHideFlags: 0
@@ -21211,7 +21265,7 @@ GameObject:
   - component: {fileID: 1121270042}
   - component: {fileID: 1121270041}
   - component: {fileID: 1121270040}
-  - component: {fileID: 1121270039}
+  - component: {fileID: 1121270043}
   m_Layer: 0
   m_Name: PowerTrailFast
   m_TagString: Untagged
@@ -21646,20 +21700,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!114 &1121270039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1121270033}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 705201488}
-  whatToControl: 0
 --- !u!114 &1121270040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21674,6 +21714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1121270041}
   DEBUG: 0
+  _pwr: {fileID: 1121270043}
   renderers:
   - {fileID: 1121270037}
   - {fileID: 3069937}
@@ -21689,19 +21730,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1121270041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21758,6 +21790,45 @@ MonoBehaviour:
     indexOfFirstChild: 4
     zeroDistanceToChildren: 0
     staircaseSegment: 0
+--- !u!114 &1121270043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1121270033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1121270041}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 705201496}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1161905954
 GameObject:
   m_ObjectHideFlags: 0
@@ -22892,7 +22963,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639320
+  m_Name: pb_Mesh632286
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -23614,7 +23685,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639364
+  m_Name: pb_Mesh632332
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -23779,7 +23850,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639086
+  m_Name: pb_Mesh632050
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -24748,7 +24819,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639444
+  m_Name: pb_Mesh632412
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -24923,6 +24994,7 @@ GameObject:
   - component: {fileID: 1315186210}
   - component: {fileID: 1315186209}
   - component: {fileID: 1315186208}
+  - component: {fileID: 1315186215}
   m_Layer: 0
   m_Name: ResultPowerTrail
   m_TagString: Untagged
@@ -24959,6 +25031,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1315186210}
   DEBUG: 1
+  _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1315186209}
   numAudioSources: 4
@@ -24972,22 +25045,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 1
-  source: {fileID: 0}
-  sources:
-  - {fileID: 1100334103}
-  - {fileID: 1121270040}
-  - {fileID: 1977453004}
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1315186209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25567,6 +25628,48 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1315186215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1315186206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1315186210}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 1
+  source: {fileID: 0}
+  sources:
+  - {fileID: 1100334110}
+  - {fileID: 1121270043}
+  - {fileID: 1977453011}
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1343261094
 GameObject:
   m_ObjectHideFlags: 0
@@ -25657,7 +25760,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639058
+  m_Name: pb_Mesh632020
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -25900,6 +26003,7 @@ MonoBehaviour:
     targetLevels: 
     allowTriggeringWhileInsideObject: 0
   actionsToTrigger: []
+  playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
 --- !u!114 &1411538285
@@ -25948,7 +26052,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  _id: {fileID: 1411538285}
   DEBUG: 0
   channel: Portal1
   changeActiveSceneOnTeleport: 0
@@ -25989,6 +26093,9 @@ MonoBehaviour:
   renderRecursivePortals: 0
   compositePortal: 0
   doubleSidedPortals: 0
+  changeScale: 0
+  scaleFactor: 1
+  volumetricPortals: []
   fallbackMaterial: {fileID: 0}
   renderers: []
   colliders: []
@@ -25996,8 +26103,8 @@ MonoBehaviour:
   internalRenderTexturesCopy:
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  pauseRenderingOnly: 0
-  pauseRenderingAndLogic: 0
+  pauseRendering: 0
+  pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1411538284}
   onPortalTeleport:
@@ -26127,7 +26234,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1638916
+  m_Name: pb_Mesh631878
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26292,7 +26399,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639346
+  m_Name: pb_Mesh632312
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26457,7 +26564,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1638944
+  m_Name: pb_Mesh631906
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27715,7 +27822,7 @@ GameObject:
   - component: {fileID: 1583444905}
   - component: {fileID: 1583444904}
   - component: {fileID: 1583444903}
-  - component: {fileID: 1583444902}
+  - component: {fileID: 1583444910}
   m_Layer: 0
   m_Name: PowerTrailSlow
   m_TagString: Untagged
@@ -27738,20 +27845,6 @@ Transform:
   m_Father: {fileID: 319642959}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!114 &1583444902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1583444900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 2117780535}
-  whatToControl: 0
 --- !u!114 &1583444903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27766,6 +27859,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1583444904}
   DEBUG: 0
+  _pwr: {fileID: 1583444910}
   renderers: []
   powerNodes: {fileID: 1583444905}
   numAudioSources: 4
@@ -27779,19 +27873,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1583444904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31077,13 +31162,52 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1583444910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583444900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1583444904}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 2117780544}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!43 &1603057302
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639492
+  m_Name: pb_Mesh632460
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31248,7 +31372,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639564
+  m_Name: pb_Mesh632534
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31413,7 +31537,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639126
+  m_Name: pb_Mesh632090
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31588,6 +31712,7 @@ GameObject:
   - component: {fileID: 1716652306}
   - component: {fileID: 1716652305}
   - component: {fileID: 1716652304}
+  - component: {fileID: 1716652311}
   m_Layer: 0
   m_Name: ResultPowerTrail
   m_TagString: Untagged
@@ -31624,6 +31749,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1716652306}
   DEBUG: 1
+  _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1716652305}
   numAudioSources: 4
@@ -31637,22 +31763,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 2
-  source: {fileID: 0}
-  sources:
-  - {fileID: 1833302162}
-  - {fileID: 1996799286}
-  - {fileID: 1583444903}
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1716652305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32232,6 +32346,48 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1716652311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1716652302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1716652306}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 2
+  source: {fileID: 0}
+  sources:
+  - {fileID: 1833302169}
+  - {fileID: 1996799293}
+  - {fileID: 1583444910}
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1720200011
 GameObject:
   m_ObjectHideFlags: 0
@@ -32413,7 +32569,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639292
+  m_Name: pb_Mesh632258
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -32588,7 +32744,7 @@ GameObject:
   - component: {fileID: 1833302164}
   - component: {fileID: 1833302163}
   - component: {fileID: 1833302162}
-  - component: {fileID: 1833302161}
+  - component: {fileID: 1833302169}
   m_Layer: 0
   m_Name: PowerTrailMedium
   m_TagString: Untagged
@@ -32611,20 +32767,6 @@ Transform:
   m_Father: {fileID: 319642959}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
---- !u!114 &1833302161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1833302159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 2117780535}
-  whatToControl: 0
 --- !u!114 &1833302162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32639,6 +32781,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1833302163}
   DEBUG: 0
+  _pwr: {fileID: 1833302169}
   renderers: []
   powerNodes: {fileID: 1833302164}
   numAudioSources: 4
@@ -32652,19 +32795,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1833302163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33982,6 +34116,45 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1833302169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833302159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1833302163}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 2117780544}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1891823723
 GameObject:
   m_ObjectHideFlags: 0
@@ -34313,7 +34486,7 @@ GameObject:
   - component: {fileID: 1977453006}
   - component: {fileID: 1977453005}
   - component: {fileID: 1977453004}
-  - component: {fileID: 1977453003}
+  - component: {fileID: 1977453011}
   m_Layer: 0
   m_Name: PowerTrailSlow
   m_TagString: Untagged
@@ -34336,20 +34509,6 @@ Transform:
   m_Father: {fileID: 839515179}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!114 &1977453003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1977453001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 705201488}
-  whatToControl: 0
 --- !u!114 &1977453004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34364,6 +34523,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1977453005}
   DEBUG: 0
+  _pwr: {fileID: 1977453011}
   renderers: []
   powerNodes: {fileID: 1977453006}
   numAudioSources: 4
@@ -34377,19 +34537,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1977453005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37675,6 +37826,45 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1977453011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977453001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1977453005}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 705201496}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1995424581
 GameObject:
   m_ObjectHideFlags: 0
@@ -37866,7 +38056,7 @@ GameObject:
   - component: {fileID: 1996799288}
   - component: {fileID: 1996799287}
   - component: {fileID: 1996799286}
-  - component: {fileID: 1996799285}
+  - component: {fileID: 1996799293}
   m_Layer: 0
   m_Name: PowerTrailFast
   m_TagString: Untagged
@@ -37892,20 +38082,6 @@ Transform:
   m_Father: {fileID: 319642959}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1996799285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1996799283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b26321068b8c604eb716e15e4c4727a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 2117780535}
-  whatToControl: 0
 --- !u!114 &1996799286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37920,6 +38096,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1996799287}
   DEBUG: 0
+  _pwr: {fileID: 1996799293}
   renderers:
   - {fileID: 1996799291}
   - {fileID: 2099894380}
@@ -37935,19 +38112,10 @@ MonoBehaviour:
   powerTrailRadius: 0.25
   skipStartupShutdownSounds: 0
   objectMoves: 0
-  parentMultiMode: 0
-  source: {fileID: 0}
-  sources: []
-  onPowerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-  onPowerFinish:
-    m_PersistentCalls:
-      m_Calls: []
+  hiddenPowerTrail: 0
+  revealAfterPowering: 0
   distance: 0
   maxDistance: 0
-  _powerIsOn: 0
-  _state: 0
 --- !u!114 &1996799287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38413,6 +38581,45 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!114 &1996799293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996799283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1996799287}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 2117780544}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &2026757163
 GameObject:
   m_ObjectHideFlags: 0
@@ -38743,7 +38950,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639046
+  m_Name: pb_Mesh632008
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -38908,7 +39115,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639512
+  m_Name: pb_Mesh632480
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -39465,6 +39672,7 @@ MonoBehaviour:
     targetLevels: 
     allowTriggeringWhileInsideObject: 0
   actionsToTrigger: []
+  playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
 --- !u!114 &2086538053
@@ -39513,7 +39721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  _id: {fileID: 2086538053}
   DEBUG: 0
   channel: Portal2
   changeActiveSceneOnTeleport: 0
@@ -39554,6 +39762,9 @@ MonoBehaviour:
   renderRecursivePortals: 0
   compositePortal: 0
   doubleSidedPortals: 0
+  changeScale: 0
+  scaleFactor: 1
+  volumetricPortals: []
   fallbackMaterial: {fileID: 0}
   renderers: []
   colliders: []
@@ -39561,8 +39772,8 @@ MonoBehaviour:
   internalRenderTexturesCopy:
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  pauseRenderingOnly: 0
-  pauseRenderingAndLogic: 0
+  pauseRendering: 0
+  pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 2086538052}
   onPortalTeleport:
@@ -39692,7 +39903,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1638990
+  m_Name: pb_Mesh631952
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -40301,7 +40512,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1638932
+  m_Name: pb_Mesh631894
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -40466,7 +40677,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639268
+  m_Name: pb_Mesh632234
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -40946,7 +41157,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1639480
+  m_Name: pb_Mesh632448
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41121,7 +41332,7 @@ GameObject:
   - component: {fileID: 2117780538}
   - component: {fileID: 2117780537}
   - component: {fileID: 2117780536}
-  - component: {fileID: 2117780535}
+  - component: {fileID: 2117780544}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -41129,23 +41340,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2117780535
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2117780534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58b9575a187873145b9a7aa0ca17d840, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 0}
-  DEBUG: 0
-  button: {fileID: 2117780536}
-  powerState: 0
-  powerIsOn: 0
 --- !u!114 &2117780536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41160,7 +41354,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 2117780537}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -41216,13 +41409,20 @@ MonoBehaviour:
   pressDistance: -0.0625
   unpressAfterPress: 1
   timeBetweenPressEndDepressStart: 0.0625
-  _state: 0
+  automaticallySetHelpText: 1
+  buttonOffHelpText: Turn on
+  buttonOnHelpText: Turn off
   onButtonPressFinish:
     m_PersistentCalls:
       m_Calls: []
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!114 &2117780537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52577,6 +52777,45 @@ Transform:
   m_Father: {fileID: 1247923134}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 26.8, y: 0, z: 0}
+--- !u!114 &2117780544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117780534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 2117780537}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &2120214019
 GameObject:
   m_ObjectHideFlags: 0

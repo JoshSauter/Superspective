@@ -54,10 +54,12 @@ namespace GrowShrink {
             EnteredLargeSide
         }
 
-        public StateMachine<State> state = new StateMachine<State>(State.NotInHallway);
+        public StateMachine<State> state;
 
         protected override void Awake() {
             base.Awake();
+
+            state = this.StateMachine(State.NotInHallway);
 
             if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
@@ -149,8 +151,8 @@ namespace GrowShrink {
                 Vector3 gravityWithoutMultiplier = Physics.gravity / currentScale;
                 Physics.gravity = gravityWithoutMultiplier * targetScale;
 
-                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.lastGroundVelocity / currentScale;
-                PlayerMovement.instance.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
+                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.groundMovement.lastGroundVelocity / currentScale;
+                PlayerMovement.instance.groundMovement.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
 
                 if (targetScale < 1f || currentScale < 1f) {
                     ColorfulFog fog = Player.instance.playerCam.GetComponent<ColorfulFog>();

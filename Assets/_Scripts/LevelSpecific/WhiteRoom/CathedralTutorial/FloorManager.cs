@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PortalMechanics;
 using Saving;
-using SerializableClasses;
 using StateUtils;
-using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
@@ -20,7 +17,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             Center
         }
 
-        public StateMachine<Floor> floor = new StateMachine<Floor>(Floor.None);
+        public StateMachine<Floor> floor;
 
         [Serializable]
         struct PortalsOnAFloor {
@@ -56,6 +53,8 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         protected override void Start() {
             base.Start();
+
+            floor = this.StateMachine(Floor.None);
             
             if (puzzleFloors != null && (floors == null || floors.Count == 0)) {
                 floors = puzzleFloors.ToDictionary(pf => pf.floor, pf => pf);
@@ -93,9 +92,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                 if (floor == Floor.Center || floor == Floor.None) continue;
                 
                 foreach (var powerSource in puzzle.powerSources) {
-                    powerSource.powerTrail.powerIsOn = false;
-                    if (powerSource.powerButton.powerIsOn) {
-                        powerSource.powerButton.button.PressButton();
+                    powerSource.powerTrail.pwr.PowerIsOn = false;
+                    if (powerSource.powerButton.pwr.PowerIsOn) {
+                        powerSource.powerButton.PressButton();
                     }
                 }
             }

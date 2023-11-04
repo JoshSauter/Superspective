@@ -27,7 +27,7 @@ public class EndOfPlaytestMessage : Singleton<EndOfPlaytestMessage> {
         DiscordLinkFadingIn,
         Finished
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Off);
+    public StateMachine<State> state;
     
     // Animation settings
     private const float timeForBackgroundFadeIn = 3f;
@@ -36,6 +36,8 @@ public class EndOfPlaytestMessage : Singleton<EndOfPlaytestMessage> {
     private const float timeForDiscordLinkFadeIn = 2f;
 
     protected void Start() {
+	    state = this.StateMachine(State.Off);
+	    
 	    state.AddStateTransition(State.BackgroundFadingIn, State.GameNameFadingIn, timeForBackgroundFadeIn);
 	    state.AddStateTransition(State.GameNameFadingIn, State.ThankYouTextFadingIn, timeForGameNameFadeIn);
 	    state.AddStateTransition(State.ThankYouTextFadingIn, State.DiscordLinkFadingIn, timeForThankYouFadeIn);

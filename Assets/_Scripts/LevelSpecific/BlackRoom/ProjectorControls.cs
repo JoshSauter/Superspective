@@ -40,7 +40,7 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void Update() {
-			if (powerTrail.fullyPowered) {
+			if (powerTrail.IsFullyPowered) {
 				viewLock.interactableObject.SetAsInteractable("Operate controls");
 			}
 			else {

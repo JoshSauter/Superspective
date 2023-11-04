@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using DissolveObjects;
 using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
@@ -38,7 +39,7 @@ namespace LevelSpecific.BlackRoom {
 
         protected override void Start() {
             base.Start();
-            state = new StateMachine<LaserState>(LaserState.Idle);
+            state = this.StateMachine(LaserState.Idle);
             
             state.AddStateTransition(LaserState.FiringAtCover, LaserState.Idle, laser.main.duration);
             state.AddTrigger(LaserState.FiringAtCover, timeBeforeDissolveBegin, DissolveCoverFiringAt);

@@ -91,7 +91,6 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 
 	public Texture cameraDepthNormalsTexture;
 	
-	[ImageEffectOpaque]
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (shaderMaterial == null && !CreateMaterial()) {
 			Debug.LogError("Failed to create shader material!");

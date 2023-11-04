@@ -1,6 +1,7 @@
 ﻿using PowerTrailMechanics;
 using System.Collections;
 using System.Collections.Generic;
+using DissolveObjects;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {

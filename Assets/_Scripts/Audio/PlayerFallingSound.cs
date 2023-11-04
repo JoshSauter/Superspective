@@ -45,8 +45,8 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
         return Vector3.Distance(cameraPos, GetClosestPosition(c));
     }
 
-    protected override void Start() {
-        base.Start();
+    protected override void Init() {
+        base.Init();
         
         // Start with the audio at zero to not blast the player with wind sound when they start the game
         AudioManager.instance.PlayWithUpdate(AudioName.FallingWind, ID, this, settingsOverride: job => job.audio.volume = 0);

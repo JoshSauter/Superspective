@@ -31,7 +31,7 @@ public class DialogWindow : MonoBehaviour {
 
     public bool isOpen => dialogWindowState == DialogWindowState.Open;
 
-    public StateMachine<DialogWindowState> dialogWindowState = new StateMachine<DialogWindowState>(DialogWindowState.Closed, false, true);
+    public StateMachine<DialogWindowState> dialogWindowState;
 
     [Header("Events")]
     public UnityEvent OnSubmit;
@@ -66,6 +66,8 @@ public class DialogWindow : MonoBehaviour {
     }
 
     protected virtual void Start() {
+        dialogWindowState = this.StateMachine(DialogWindowState.Closed, false, true);
+        
         InitStateMachine();
 
         RunAnimation();

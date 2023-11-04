@@ -44,7 +44,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             Closing
         }
 
-        public StateMachine<DoorState> state = new StateMachine<DoorState>(DoorState.Closed);
+        public StateMachine<DoorState> state;
         
         // Config
         private const float cameraShakeIntensity = .125f;
@@ -55,6 +55,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
+
+            state = this.StateMachine(DoorState.Closed);
+            
             state.AddStateTransition(DoorState.Opening, DoorState.Open, timeToOpen);
             state.AddStateTransition(DoorState.Closing, DoorState.Closed, timeToOpen);
             

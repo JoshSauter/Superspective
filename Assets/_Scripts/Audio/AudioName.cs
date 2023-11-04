@@ -92,6 +92,10 @@ namespace Audio {
 		}
 		
 		public static AudioClip GetAudioClip(this AudioName audioType, AudioSource source) {
+			if (source == null) {
+				Debug.LogError("Can't get audio clip for " + audioType + " because source is null");
+				return null;
+			}
 			switch (audioType) {
 				case AudioName.PlayerFootstepGlass:
 					return glassFootstepClips.DifferentRandomElementFrom();
