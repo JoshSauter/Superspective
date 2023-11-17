@@ -215,12 +215,15 @@ namespace SerializableClasses {
 	}
 
 	[Serializable]
-	public class SerializableGradient {
+	public class SerializableGradient : ISerializationCallbackReceiver {
 		const int GRADIENT_ARRAY_SIZE = 10;
+		
+		private const int COLOR_SIZE = 4;
+		private const int ALPHA_VALUE_SIZE = 2;
 		// RGB + Key Time
-		public float[,] colors = new float[GRADIENT_ARRAY_SIZE, 4];
+		public float[,] colors = new float[GRADIENT_ARRAY_SIZE, COLOR_SIZE];
 		// Value + Key Time
-		public float[,] alphaValues = new float[GRADIENT_ARRAY_SIZE, 2];
+		public float[,] alphaValues = new float[GRADIENT_ARRAY_SIZE, ALPHA_VALUE_SIZE];
 
 		public Gradient Gradient {
 			get {
@@ -249,8 +252,9 @@ namespace SerializableClasses {
 					alphaKeys.Add(alphaKey);
 				}
 
-				newGradient.colorKeys = colorKeys.ToArray();
-				newGradient.alphaKeys = alphaKeys.ToArray();
+				// TODO: Migrate GRADIENT_ARRAY_SIZE to 8 to match Unity's max
+				newGradient.colorKeys = colorKeys.Take(8).ToArray();
+				newGradient.alphaKeys = alphaKeys.Take(8).ToArray();
 				return newGradient;
 			}
 			set {
@@ -282,6 +286,54 @@ namespace SerializableClasses {
 		//makes this class assignable by Gradient, SerializableGradient myGradient = gradientReference;
 		public static implicit operator SerializableGradient(Gradient gradient) {
 			return new SerializableGradient { Gradient = gradient };
+		}
+
+		[SerializeField]
+		private float[] flattenedColors;
+		[SerializeField]
+		private float[] flattenedAlphaValues;
+
+		public void OnBeforeSerialize() {
+			float[] FlattenArray(float[,] array) {
+				int rows = array.GetLength(0);
+				int cols = array.GetLength(1);
+
+				float[] flattenedArray = new float[rows * cols];
+
+				for (int i = 0; i < rows; i++) {
+					for (int j = 0; j < cols; j++) {
+						flattenedArray[i * cols + j] = array[i, j];
+					}
+				}
+
+				return flattenedArray;
+			}
+			
+			flattenedColors = FlattenArray(colors);
+			flattenedAlphaValues = FlattenArray(alphaValues);
+		}
+
+		public void OnAfterDeserialize() {
+			// Helper method to restore a 2D array from a flattened 1D array
+			float[,] UnflattenArray(float[] flattenedArray, int size) {
+				int rows = flattenedArray.Length / size;
+				int cols = size;
+
+				float[,] newArray = new float[rows, cols];
+
+				for (int i = 0; i < rows; i++) {
+					for (int j = 0; j < cols; j++) {
+						newArray[i, j] = flattenedArray[i * cols + j];
+					}
+				}
+
+				return newArray;
+			}
+
+			if (flattenedColors != null && flattenedAlphaValues != null) {
+				colors = UnflattenArray(flattenedColors, COLOR_SIZE);
+				alphaValues = UnflattenArray(flattenedAlphaValues, ALPHA_VALUE_SIZE);
+			}
 		}
 	}
 

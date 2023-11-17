@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DeveloperConsole;
 using LevelManagement;
 using NaughtyAttributes;
 using UnityEngine;
@@ -40,7 +41,7 @@ public class GameManager : Singleton<GameManager> {
         LevelManager.instance.isCurrentlySwitchingScenes ||
         SaveManager.isCurrentlyLoadingSave;
 
-    public bool IsCurrentlyPaused => NovaPauseMenu.instance.PauseMenuIsOpen;
+    public bool IsCurrentlyPaused => NovaPauseMenu.instance.PauseMenuIsOpen || DevConsoleBehaviour.instance.IsActive;
 
     private void Awake() {
         // Hack so that I don't always have to have NovaUI enabled before pressing Play

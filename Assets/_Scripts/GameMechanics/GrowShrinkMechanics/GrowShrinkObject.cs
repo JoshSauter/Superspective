@@ -65,6 +65,10 @@ namespace GrowShrink {
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
 
             state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.state}");
+        }
+
+        protected override void Start() {
+            base.Start();
 
             if (Math.Abs(startingScale - currentScale) > float.Epsilon) {
                 SetScaleDirectly(startingScale);

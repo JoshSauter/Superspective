@@ -138,7 +138,13 @@ namespace PortalMechanics {
 		public bool pauseRendering = false;
 		public bool pauseLogic = false;
 		private Material effectiveMaterial => portalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
-		public bool portalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf;
+
+		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+		public bool portalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf
+#if UNITY_EDITOR
+		                                        && false // Disable portal rendering in editor to increase performance of play mode
+#endif
+		;
 		public bool portalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
 
 		[ShowNativeProperty]

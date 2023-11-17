@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SuperspectiveUtils;
 using NaughtyAttributes;
 using UnityEngine;
@@ -46,6 +47,8 @@ public class StaircaseRotate : MonoBehaviour {
     public Vector3 pivotPoint => transform.parent.position;
     Vector3 pivot => Vector3.Cross(startGravityDirection, endGravityDirection);
 
+    private Dictionary<GravityObject, bool> objectsInStaircase = new Dictionary<GravityObject, bool>();
+
     void Start() {
         playerMovement = PlayerMovement.instance;
         baseGravMagnitude = Physics.gravity.magnitude;
@@ -62,32 +65,35 @@ public class StaircaseRotate : MonoBehaviour {
     }
 
     void OnTriggerEnter(Collider other) {
-        GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
-        float testLerpValue = 0;
         if (other.TaggedAsPlayer()) {
             Player.instance.movement.pauseSnapToGround = true;
             baseGravMagnitude = currentGravity.magnitude;
-            testLerpValue = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
+            float testLerpValue = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
+            treatedAsADownStairForPlayer = TreatedAsDownStair(testLerpValue);
         }
-        else if (gravityObj != null) testLerpValue = GetLerpPositionOfPoint(other.transform.position);
-        Vector3 testGravityDirection1 =
-            Vector3.Lerp(startGravityDirection, endGravityDirection, testLerpValue).normalized;
-        Vector3 testGravityDirection2 =
-            Vector3.Lerp(startGravityDirection, endGravityDirection, 1 - testLerpValue).normalized;
+        else if (other.TryGetComponent(out GravityObject gravity)) {
+            float testLerpValue = GetLerpPositionOfPoint(other.transform.position);
+            bool treatedAsDownStair = TreatedAsDownStair(testLerpValue);
+            objectsInStaircase.Add(gravity, treatedAsDownStair);
+        }
+        
+        bool TreatedAsDownStair(float testLerpValue) {
+            Vector3 testGravityDirection1 =
+                Vector3.Lerp(startGravityDirection, endGravityDirection, testLerpValue).normalized;
+            Vector3 testGravityDirection2 =
+                Vector3.Lerp(startGravityDirection, endGravityDirection, 1 - testLerpValue).normalized;
 
-        if (other.TaggedAsPlayer())
-            treatedAsADownStairForPlayer = Vector3.Angle(testGravityDirection1, Physics.gravity.normalized) >
-                                           Vector3.Angle(testGravityDirection2, Physics.gravity.normalized);
+            return Vector3.Angle(testGravityDirection1, Physics.gravity.normalized) >
+                   Vector3.Angle(testGravityDirection2, Physics.gravity.normalized);
+        }
     }
 
     void OnTriggerExit(Collider other) {
-        float angleToStartDirection = Vector3.Angle(startGravityDirection, Physics.gravity.normalized);
-        float angleToEndDirection = Vector3.Angle(endGravityDirection, Physics.gravity.normalized);
-
-        Vector3 exitGravity = angleToStartDirection < angleToEndDirection ? startGravityDirection : endGravityDirection;
-
-        GravityObject gravityObj = other.gameObject.GetComponent<GravityObject>();
         if (other.TaggedAsPlayer()) {
+            float angleToStartDirection = Vector3.Angle(startGravityDirection, Physics.gravity.normalized);
+            float angleToEndDirection = Vector3.Angle(endGravityDirection, Physics.gravity.normalized);
+
+            Vector3 exitGravity = angleToStartDirection < angleToEndDirection ? startGravityDirection : endGravityDirection;
             Player.instance.movement.pauseSnapToGround = false;
             Physics.gravity = baseGravMagnitude * exitGravity;
 
@@ -104,7 +110,17 @@ public class StaircaseRotate : MonoBehaviour {
             );
             playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
         }
-        else if (gravityObj != null) gravityObj.gravityDirection = exitGravity;
+        else if (other.TryGetComponent(out GravityObject gravityObj)) {
+            float angleToStartDirection = Vector3.Angle(startGravityDirection, gravityObj.gravityDirection.normalized);
+            float angleToEndDirection = Vector3.Angle(endGravityDirection, gravityObj.gravityDirection.normalized);
+
+            Vector3 exitGravity = angleToStartDirection < angleToEndDirection ? startGravityDirection : endGravityDirection;
+            
+            gravityObj.gravityDirection = exitGravity;
+            if (objectsInStaircase.ContainsKey(gravityObj)) {
+                objectsInStaircase.Remove(gravityObj);
+            }
+        }
     }
 
     void OnTriggerStay(Collider other) {
@@ -148,6 +164,9 @@ public class StaircaseRotate : MonoBehaviour {
         }
         else if (other.gameObject.TryGetComponent(out GravityObject gravityObj)) {
             float objT = GetLerpPositionOfPoint(other.transform.position);
+            if (objectsInStaircase.ContainsKey(gravityObj)) {
+                if (objectsInStaircase[gravityObj]) objT = 1 - objT;
+            }
             gravityObj.gravityDirection = Vector3.Lerp(startGravityDirection, endGravityDirection, objT).normalized;
         }
     }
@@ -156,7 +175,6 @@ public class StaircaseRotate : MonoBehaviour {
         Vector3 projectedPlayerPos = ClosestPointOnLine(effectiveStartPosition, effectiveEndPosition, point);
         float t = Utils.Vector3InverseLerp(effectiveStartPosition, effectiveEndPosition, projectedPlayerPos);
 
-        //debug.Log("StartPos: " + stairStartPos + ", EndPos: " + stairEndPos + ", PlayerPos: " + playerPos + ", t=" + t);
         return t;
     }
 

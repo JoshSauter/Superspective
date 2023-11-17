@@ -359,7 +359,7 @@ public class Settings : Singleton<Settings> {
 		
 		public static readonly KeybindSetting Jump = new KeybindSetting("Jump", new KeyboardAndMouseInput(KeyCode.Space));
 		public static readonly KeybindSetting Sprint = new KeybindSetting("Sprint", new KeyboardAndMouseInput(KeyCode.LeftShift, KeyCode.RightShift));
-		public static readonly KeybindSetting AutoRun = new KeybindSetting("Auto Run", new KeyboardAndMouseInput(KeyCode.BackQuote));
+		// public static readonly KeybindSetting AutoRun = new KeybindSetting("Auto Run", new KeyboardAndMouseInput(KeyCode.BackQuote));
 		public static readonly KeybindSetting Interact = new KeybindSetting("Interact", new KeyboardAndMouseInput(0, KeyCode.E)); // Left-mouse default
 
 		public static readonly KeybindSetting Zoom = new KeybindSetting("Zoom", new KeyboardAndMouseInput(1)); // Right-mouse default
@@ -419,7 +419,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Keybinds.Right);
 	    AddSetting(Keybinds.Jump);
 	    AddSetting(Keybinds.Sprint);
-	    AddSetting(Keybinds.AutoRun);
+	    // AddSetting(Keybinds.AutoRun);
 	    AddSetting(Keybinds.Interact);
 	    AddSetting(Keybinds.Zoom);
 	    AddSetting(Keybinds.AlignObject);

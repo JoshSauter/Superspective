@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Audio;
+using Interactables;
 using NaughtyAttributes;
 using PowerTrailMechanics;
 using Saving;

@@ -158,7 +158,7 @@ public class SettingsList : MonoBehaviour {
                 settingsItems.Add(UIStyle.NewSpacer());
                 AddSettingCopy(Settings.Keybinds.Jump);
                 AddSettingCopy(Settings.Keybinds.Sprint);
-                AddSettingCopy(Settings.Keybinds.AutoRun);
+                // AddSettingCopy(Settings.Keybinds.AutoRun);
                 settingsItems.Add(UIStyle.NewHeader("Interaction"));
                 AddSettingCopy(Settings.Keybinds.Interact);
                 AddSettingCopy(Settings.Keybinds.AlignObject);

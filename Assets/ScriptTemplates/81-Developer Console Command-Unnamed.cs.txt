@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace DeveloperConsole {
+    public class #SCRIPTNAME# : ConsoleCommand {
+        public #SCRIPTNAME#(string commandWord) : base(commandWord) { }
+        
+        public override CommandResponse Execute(string[] args) {
+            // Parse the input and run the command here
+        }
+    }
+}

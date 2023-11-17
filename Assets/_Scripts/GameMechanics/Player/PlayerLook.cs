@@ -77,7 +77,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     }
 
     void Update() {
-        if (frozen || !GameManager.instance.gameHasLoaded) return;
+        if (frozen || !GameManager.instance.gameHasLoaded || GameManager.instance.IsCurrentlyPaused) return;
 
         if (state == ViewLockState.ViewLocked && GameManager.instance.IsCurrentlyLoading) return;
 

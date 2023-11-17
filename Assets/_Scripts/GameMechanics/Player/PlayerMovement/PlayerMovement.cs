@@ -197,7 +197,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     void Update() {
         if (!GameManager.instance.gameHasLoaded) return;
-        if (Settings.Keybinds.AutoRun.Pressed) autoRun = !autoRun;
+        // if (Settings.Keybinds.AutoRun.Pressed) autoRun = !autoRun;
 
 
         bool ShouldUseSprintSpeed() {
@@ -314,6 +314,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     }
 
     public void StopMovement() {
+        if (thisRigidbody.isKinematic) return;
         thisRigidbody.velocity = Vector3.zero;
     }
 

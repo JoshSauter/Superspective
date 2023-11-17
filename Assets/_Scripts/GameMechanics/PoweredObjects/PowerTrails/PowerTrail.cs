@@ -97,16 +97,31 @@ namespace PowerTrailMechanics {
 		public bool IsFullyDepowered => distance <= 0;
 		bool isInitialized = false;
 
+		private DimensionObject thisDimensionObject;
+		// If there's no parent dimension object, set the layer dynamically based on the player's size
+		private int EffectiveLayer {
+			get {
+				// Don't change the layer if there is a parent dimension object
+				if (thisDimensionObject != null) {
+					return gameObject.layer;
+				}
+
+				// UI only layer that doesn't collide w/ anything right now
+				if (hiddenPowerTrail) {
+					return LayerMask.NameToLayer("UI");
+				}
+				
+				return LayerMask.NameToLayer(Player.instance.scale < 1 ? "Default" : "VisibleButNoPlayerCollision");
+			}
+		}
+
 		protected override void Awake() {
 			base.Awake();
 			if (powerNodes == null) {
 				powerNodes = GetComponent<NodeSystem>();
 			}
 
-			foreach (var renderer in renderers) {
-				// UI only layer that doesn't collide w/ anything right now
-				renderer.gameObject.layer = LayerMask.NameToLayer(hiddenPowerTrail ? "UI" : "VisibleButNoPlayerCollision");
-			}
+			thisDimensionObject = gameObject.FindDimensionObjectRecursively<DimensionObject>();
 		}
 
 		protected override void Start() {
@@ -150,6 +165,15 @@ namespace PowerTrailMechanics {
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+
+			void SetLayers() {
+				foreach (var renderer in renderers) {
+					renderer.gameObject.layer = EffectiveLayer;
+				}
+			}
+
+			Player.instance.growShrink.state.OnStateChangeSimple += SetLayers;
+			SetLayers();
 		}
 		
 		protected override void Init() {

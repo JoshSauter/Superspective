@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Audio;
+using Interactables;
 using NaughtyAttributes;
 using PowerTrailMechanics;
 using Saving;

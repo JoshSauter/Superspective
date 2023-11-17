@@ -42,7 +42,7 @@ public partial class PlayerMovement {
         private Vector3 CurrentStepUp => currentStep?.StepOffsetVertical + (transform.up * 0.01f) ?? Vector3.zero;
         [ShowNativeProperty]
         // Move in the direction of player desired movement, with the distance == the radius of the player
-        private Vector3 CurrentStepForward => m.ProjectHorizontalVelocity(m.groundMovement.lastGroundVelocity.normalized) * (m.thisCollider == null ? 0 : m.thisCollider.radius);
+        private Vector3 CurrentStepForward => m.ProjectHorizontalVelocity(m.groundMovement.lastGroundVelocity.normalized) * (m.thisCollider == null ? 0 : m.thisCollider.radius * m.scale);
         [ShowNativeProperty]
         private Vector3 CurrentStepDiagonal => (CurrentStepUp + CurrentStepForward);
         
@@ -84,6 +84,19 @@ public partial class PlayerMovement {
         }
 
         public void UpdateStaircase(Vector3 desiredVelocity) {
+            bool CheckCapsule(CapsuleCollider capsuleCollider) {
+                // Get the relevant properties from the CapsuleCollider
+                Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
+                float capsuleHeight = capsuleCollider.height * m.scale;
+                float capsuleRadius = capsuleCollider.radius * m.scale;
+
+                Vector3 capsuleAxis = transform.up;
+                Vector3 p1 = capsuleCenter - (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
+                Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
+
+                return Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore).Length > 0;
+            }
+            
             void MoveAlongStep(Vector3 moveDirection) {
                 // How much distance do we actually have left to go
                 float distanceRemaining = moveDirection.magnitude - distanceMovedForStaircaseOffset;
@@ -94,6 +107,10 @@ public partial class PlayerMovement {
                 m.debug.LogWarning($"Offset this frame: {diff:F3}");
                 // Move the player up, record the distance moved
                 transform.Translate(diff, Space.World);
+                // If we move into colliding w/ something else undo it
+                if (CheckCapsule(m.thisCollider)) {
+                    transform.Translate(-diff, Space.World);
+                }
                 distanceMovedForStaircaseOffset += distanceToMove;
             }
             

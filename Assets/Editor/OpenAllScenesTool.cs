@@ -42,6 +42,6 @@ public class OpenAllScenesTool {
         }
         
         // Closes all scenes that aren't the ManagerScene nor any scene that should be loaded based on the startingLevel
-        LevelManager.instance.LoadDefaultPlayerPosition();
+        LevelManager.instance.ChangeLevelInEditor();
     }
 }

@@ -49,9 +49,9 @@ partial class PlayerMovement {
         /// <param name="movementVector"></param>
         /// <returns>True if there is something in the way of the player's desired movement vector, false otherwise.</returns>
         Vector3 AirCollisionMovementAdjustment(Vector3 movementVector) {
-            float rayDistance = m.effectiveMovespeed * Time.fixedDeltaTime + m.thisCollider.radius;
+            float rayDistance = m.effectiveMovespeed * Time.fixedDeltaTime + m.thisCollider.radius * m.scale;
             RaycastHit obstacle = new RaycastHit();
-            Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance);
+            Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance, Player.instance.interactsWithPlayerLayerMask);
             
             if (obstacle.collider == null || obstacle.collider.isTrigger ||
                 (obstacle.collider.gameObject.GetComponent<PickupObject>()?.isHeld ?? false)) {

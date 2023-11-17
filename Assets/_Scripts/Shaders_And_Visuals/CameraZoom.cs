@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.ImageEffects;
 
 public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> {
     public float defaultFOV = 90f;
@@ -17,11 +18,17 @@ public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> 
     public List<Camera> otherCameras = new List<Camera>();
     PlayerButtonInput input;
 
+    private const float VIGNETTE_MULTIPLIER = 1.6f;
+    private float defaultVignetteMagnitude;
+    private VignetteAndChromaticAberration vignette;
+
     protected override void Awake() {
 	    base.Awake();
 		mainCamera = GetComponent<Camera>();
 		defaultFOV = mainCamera.fieldOfView;
-	}
+		vignette = mainCamera.GetComponent<VignetteAndChromaticAberration>();
+		defaultVignetteMagnitude = vignette.intensity;
+    }
 
     protected override void Start() {
 	    base.Start();
@@ -43,7 +50,9 @@ public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> 
         foreach (var cam in otherCameras) {
             cam.fieldOfView = mainCamera.fieldOfView;
 		}
-	}
+
+        vignette.intensity = Mathf.Lerp(vignette.intensity, zoomed ? defaultVignetteMagnitude * VIGNETTE_MULTIPLIER : defaultVignetteMagnitude, Time.deltaTime * zoomLerpSpeed * (zoomed ? 1f : 2f));
+    }
 
 	#region Saving
 	// There's only one player so we don't need a UniqueId here

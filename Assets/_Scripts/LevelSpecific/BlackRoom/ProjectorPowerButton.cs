@@ -4,6 +4,7 @@ using UnityEngine;
 using PowerTrailMechanics;
 using Saving;
 using System;
+using Interactables;
 
 namespace LevelSpecific.BlackRoom {
 	[RequireComponent(typeof(Button))]

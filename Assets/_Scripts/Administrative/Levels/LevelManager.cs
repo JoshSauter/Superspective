@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -37,9 +38,10 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 29
+	// Next level: 30
 	[Serializable]
 	public enum Levels {
+		TitleCard = 29,
 		ManagerScene = 0,
 		TestScene = 1,
 		PortalTestScene = 17,
@@ -78,7 +80,7 @@ namespace LevelManagement {
 	}
 
 	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
-		[OnValueChanged(nameof(LoadDefaultPlayerPosition))]
+		[OnValueChanged(nameof(ChangeLevelInEditor))]
 		public Levels startingScene;
 
 		public const Levels newGameStartingScene = Levels.Fork;
@@ -86,157 +88,35 @@ namespace LevelManagement {
 		bool initialized = false;
 
 #region PlayerDefaultLocations
-		const string EdgeDetectionSettingsKeyPrefix = "edgeDetectionSettings";
-		[Serializable]
-		class EDSettings {
-			BladeEdgeDetection.EdgeColorMode edgeColorMode;
-			SerializableColor edgeColor;
-			SerializableGradient edgeColorGradient;
-			// Can't save textures easily
+		private DefaultPlayerSettings _defaultPlayerSettings;
 
-			public EDSettings(BladeEdgeDetection edgeDetection) {
-				this.edgeColorMode = edgeDetection.edgeColorMode;
-				this.edgeColor = edgeDetection.edgeColor;
-
-				this.edgeColorGradient = new Gradient {
-					alphaKeys = edgeDetection.edgeColorGradient.alphaKeys,
-					colorKeys = edgeDetection.edgeColorGradient.colorKeys,
-					mode = edgeDetection.edgeColorGradient.mode
-				};
-			}
-
-			public void ApplyTo(BladeEdgeDetection edgeDetection) {
-				edgeDetection.edgeColorMode = this.edgeColorMode;
-				edgeDetection.edgeColor = this.edgeColor;
-				edgeDetection.edgeColorGradient = this.edgeColorGradient;
+		private DefaultPlayerSettings defaultPlayerSettings {
+			get {
+				if (_defaultPlayerSettings == null) {
+					_defaultPlayerSettings = DefaultPlayerSettings.LoadFromDisk();
+				}
+				
+				return _defaultPlayerSettings;
 			}
 		}
+		const string EdgeDetectionSettingsKeyPrefix = "edgeDetectionSettings";
 		const string PositionKeyPrefix = "playerStartingPositions";
 		const string RotationKeyPrefix = "playerStartingRotations";
 		public bool defaultPlayerPosition = false;
 		bool hasLoadedDefaultPlayerPosition = false;
 
-#if UNITY_EDITOR
-		[ShowNativeProperty]
-		public Vector3 StartingPositionForScene {
-			get {
-				string sceneName = GetSceneName();
-				string key = $"{PositionKeyPrefix}.{sceneName}";
-				return HasVector3(key) ? GetVector3(key) : Vector3.zero;
-			}
-		}
-
 		[Button("Set default player position")]
 		void SetDefaultPlayerPositionForScene() {
-			string sceneName = GetSceneName();
-			SetVector3($"{PositionKeyPrefix}.{sceneName}", Player.instance.transform.position);
-			SetVector3($"{RotationKeyPrefix}.{sceneName}", Player.instance.transform.rotation.eulerAngles);
-			Camera mainCam = GameObject.Find("Main Camera")?.GetComponent<Camera>();
-			BladeEdgeDetection edgeDetection = (mainCam == null) ? null : mainCam.GetComponent<BladeEdgeDetection>();
-			if (edgeDetection != null) {
-				string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
-				SetEDSettings(edgeDetectionKey, new EDSettings(edgeDetection));
-			}
-
-			if (DEBUG) {
-				Debug.Log(
-					$"Starting position for player set to {Player.instance.transform.position} for scene {sceneName}"
-				);
-			}
+			defaultPlayerSettings.SetDefaultPlayerPositionForScene(Application.isPlaying ? activeSceneName.ToLevel() : startingScene);
 		}
 
-		[Button("Remove default player position for this scene")]
-		void UnsetDefaultPlayerPositionForScene() {
-			string sceneName = GetSceneName();
-			string positionKey = $"{PositionKeyPrefix}.{sceneName}";
-			string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
-			string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
-
-			if (HasVector3(positionKey)) {
-				RemoveVector3(positionKey);
+		public void LoadDefaultPlayerPosition(Levels level) {
+			_defaultPlayerSettings = DefaultPlayerSettings.LoadFromDisk();
+			if (defaultPlayerSettings.playerSettingsByLevel.ContainsKey(level)) {
+				defaultPlayerSettings.playerSettingsByLevel[level].Apply();
 			}
-
-			if (HasVector3(rotationKey)) {
-				RemoveVector3(rotationKey);
-			}
-
-			if (PlayerPrefs.HasKey(edgeDetectionKey)) {
-				PlayerPrefs.DeleteKey(edgeDetectionKey);
-			}
-		}
-#endif
-		void SetEDSettings(string key, EDSettings settings) {
-			string serializedSettings = Convert.ToBase64String(settings.SerializeToByteArray());
-			PlayerPrefs.SetString(key, serializedSettings);
 		}
 		
-		EDSettings GetEDSettings(string key) {
-			if (PlayerPrefs.HasKey(key)) {
-				string serializedSettings = PlayerPrefs.GetString(key);
-				return Convert.FromBase64String(serializedSettings).Deserialize<EDSettings>();
-			}
-			else {
-				throw new ArgumentException($"No PlayerPrefs key for {key}");
-			}
-		}
-
-		bool HasVector3(string key) {
-			string xKey = $"{key}.x";
-			string yKey = $"{key}.y";
-			string zKey = $"{key}.z";
-
-			return (PlayerPrefs.HasKey(xKey) && PlayerPrefs.HasKey(yKey) && PlayerPrefs.HasKey(zKey));
-		}
-
-		void RemoveVector3(string key) {
-			string xKey = $"{key}.x";
-			string yKey = $"{key}.y";
-			string zKey = $"{key}.z";
-
-			PlayerPrefs.DeleteKey(xKey);
-			PlayerPrefs.DeleteKey(yKey);
-			PlayerPrefs.DeleteKey(zKey);
-		}
-
-		void SetVector3(string key, Vector3 value) {
-			PlayerPrefs.SetFloat($"{key}.x", value.x);
-			PlayerPrefs.SetFloat($"{key}.y", value.y);
-			PlayerPrefs.SetFloat($"{key}.z", value.z);
-		}
-
-		Vector3 GetVector3(string key) {
-			Vector3 returnVector = Vector3.zero;
-			string xKey = $"{key}.x";
-			string yKey = $"{key}.y";
-			string zKey = $"{key}.z";
-
-			// X
-			if (PlayerPrefs.HasKey(xKey)) {
-				returnVector.x = PlayerPrefs.GetFloat(xKey);
-			}
-			else {
-				throw new ArgumentException($"No PlayerPrefs key for {key}");
-			}
-
-			// Y
-			if (PlayerPrefs.HasKey(yKey)) {
-				returnVector.y = PlayerPrefs.GetFloat(yKey);
-			}
-			else {
-				throw new ArgumentException($"No PlayerPrefs key for {key}");
-			}
-
-			// Z
-			if (PlayerPrefs.HasKey(zKey)) {
-				returnVector.z = PlayerPrefs.GetFloat(zKey);
-			}
-			else {
-				throw new ArgumentException($"No PlayerPrefs key for {key}");
-			}
-
-			return returnVector;
-		}
-
 		string GetSceneName() {
 			string sceneName = activeSceneName;
 			if (!Application.isPlaying) {
@@ -247,43 +127,15 @@ namespace LevelManagement {
 		}
 
 		[Button("Load default player position")]
-		public void LoadDefaultPlayerPosition() {
+		public void ChangeLevelInEditor() {
 #if !UNITY_EDITOR
 		return;
 #endif
 
 		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
-
+		
 		string sceneName = GetSceneName();
-		string positionKey = $"{PositionKeyPrefix}.{sceneName}";
-		string rotationKey = $"{RotationKeyPrefix}.{sceneName}";
-		string edgeDetectionKey = $"{EdgeDetectionSettingsKeyPrefix}.{sceneName}";
-
-		if (HasVector3(positionKey) && HasVector3(rotationKey)) {
-			Vector3 pos = GetVector3(positionKey);
-			Vector3 eulerRot = GetVector3(rotationKey);
-
-			Player.instance.transform.position = pos;
-			Player.instance.transform.rotation = Quaternion.Euler(eulerRot);
-		}
-
-		if (PlayerPrefs.HasKey(edgeDetectionKey)) {
-			Camera mainCam = GameObject.Find("Main Camera")?.GetComponent<Camera>();
-			BladeEdgeDetection edgeDetection = (mainCam == null) ? null : mainCam.GetComponent<BladeEdgeDetection>();
-			if (edgeDetection != null) {
-				GetEDSettings(edgeDetectionKey).ApplyTo(edgeDetection);
-			}
-		}
-
-		if (DEBUG) {
-			if (!HasVector3(positionKey)) {
-				Debug.LogError($"No position key found for {positionKey}");
-			}
-
-			if (!HasVector3(rotationKey)) {
-				Debug.LogError($"No rotation key found for {rotationKey}");
-			}
-		}
+		LoadDefaultPlayerPosition(sceneName.ToLevel());
 
 		// Hijacking this to display level banner on load, even when it's already the active scene
 		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
@@ -340,7 +192,8 @@ namespace LevelManagement {
 		public List<Level> allLevels;
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build
 		public Dictionary<string, Level> levels;
-		internal static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
+		public static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
+			{ Levels.TitleCard, "__TitleCard" },
 			{ Levels.ManagerScene, ManagerScene },
 			{ Levels.TestScene, "_TestScene" },
 			{ Levels.PortalTestScene, "PortalTestScene" },
@@ -388,18 +241,23 @@ namespace LevelManagement {
 			readonly bool loadActivatedScenesFromDisk;
 			readonly bool checkActiveSceneName;
 
+			[NonSerialized]
+			private readonly Action callback;
+
 			public QueuedSceneSwitch(
 				string levelName,
 				bool playBanner = true,
 				bool saveDeactivatedScenesToDisk = true,
 				bool loadActivatedScenesFromDisk = true,
-				bool checkActiveSceneName = true
+				bool checkActiveSceneName = true,
+				Action callback = null
 			) {
 				this.levelName = levelName;
 				this.playBanner = playBanner;
 				this.saveDeactivatedScenesToDisk = saveDeactivatedScenesToDisk;
 				this.loadActivatedScenesFromDisk = loadActivatedScenesFromDisk;
 				this.checkActiveSceneName = checkActiveSceneName;
+				this.callback = callback;
 			}
 
 			public void Invoke() {
@@ -473,7 +331,7 @@ namespace LevelManagement {
 
 		protected IEnumerator StartCoro() {
 			SceneManager.sceneLoaded += (scene, mode) => FinishLoadingScene(scene);
-			SceneManager.sceneLoaded += (scene, mode) => { LoadDefaultPlayerPosition(); };
+			SceneManager.sceneLoaded += (scene, mode) => { ChangeLevelInEditor(); };
 			SceneManager.sceneUnloaded += FinishUnloadingScene;
 
 			yield return new WaitUntil(() => GameManager.instance.settingsHaveLoaded);
@@ -529,19 +387,22 @@ namespace LevelManagement {
 		/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
 		/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
 		/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
+		/// <param name="onFinishCallback">Callback to be invoked once the scene change is complete.</param>
 		public void SwitchActiveScene(
 			Levels level,
 			bool playBanner = true,
 			bool saveDeactivatedScenesToDisk = true,
 			bool loadActivatedScenesFromDisk = true,
-			bool checkActiveSceneName = true
+			bool checkActiveSceneName = true,
+			Action onFinishCallback = null
 		) {
 			SwitchActiveScene(
 				enumToSceneName[level],
 				playBanner,
 				saveDeactivatedScenesToDisk,
 				loadActivatedScenesFromDisk,
-				checkActiveSceneName
+				checkActiveSceneName,
+				onFinishCallback
 			);
 		}
 
@@ -559,13 +420,14 @@ namespace LevelManagement {
 			bool playBanner = true,
 			bool saveDeactivatedScenesToDisk = true,
 			bool loadActivatedScenesFromDisk = true,
-			bool checkActiveSceneName = true
+			bool checkActiveSceneName = true,
+			Action onFinishCallback = null
 		) {
 			if (IsCurrentlyLoadingScenes) {
-				queuedActiveSceneSwitch = new QueuedSceneSwitch(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
+				queuedActiveSceneSwitch = new QueuedSceneSwitch(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
 			}
 			else {
-				SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
+				SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
 			}
 		}
 
@@ -577,12 +439,14 @@ namespace LevelManagement {
 		/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
 		/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
 		/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
+		/// <param name="onFinishCallback">Callback to be invoked once the scene switch is complete.</param>
 		async void SwitchActiveSceneNow(
 			string levelName,
 			bool playBanner = true,
 			bool saveDeactivatedScenesToDisk = true,
 			bool loadActivatedScenesFromDisk = true,
-			bool checkActiveSceneName = true
+			bool checkActiveSceneName = true,
+			Action onFinishCallback = null
 		) {
 			if (!levels.ContainsKey(levelName)) {
 				debug.LogError("No level name found in world graph with name " + levelName);
@@ -626,7 +490,7 @@ namespace LevelManagement {
 			}
 			else {
 				if (!hasLoadedDefaultPlayerPosition) {
-					LoadDefaultPlayerPosition();
+					ChangeLevelInEditor();
 				}
 			}
 
@@ -674,6 +538,7 @@ namespace LevelManagement {
 			}
 			
 			OnActiveSceneChange?.Invoke();
+			onFinishCallback?.Invoke();
 			
 			isCurrentlySwitchingScenes = false;
 		}

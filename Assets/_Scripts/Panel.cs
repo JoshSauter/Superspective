@@ -1,5 +1,6 @@
 ﻿using System;
 using Audio;
+using Interactables;
 using Saving;
 using SerializableClasses;
 using SuperspectiveUtils;

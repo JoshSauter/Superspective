@@ -98,6 +98,8 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent<CameraFollow>()) excludes.Add(myCamera.GetComponent<CameraFollow>());
 			if (myCamera.GetComponent<InteractableGlowManager>()) excludes.Add(myCamera.GetComponent<InteractableGlowManager>());
 			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
+			if (myCamera.GetComponent<CameraZoom>()) excludes.Add(myCamera.GetComponent<CameraZoom>());
+			if (myCamera.GetComponent<NoiseScrambleOverlay>()) excludes.Add(myCamera.GetComponent<NoiseScrambleOverlay>());
 			result = result.Except(excludes).ToList();
 		}
 

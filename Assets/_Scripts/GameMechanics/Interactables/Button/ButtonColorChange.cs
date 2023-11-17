@@ -1,4 +1,5 @@
 ﻿using System;
+using Interactables;
 using NaughtyAttributes;
 using SuperspectiveUtils;
 using UnityEngine;

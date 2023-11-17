@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using LevelManagement;
+using NaughtyAttributes;
 using UnityEngine;
 using SuperspectiveUtils;
 #if UNITY_EDITOR
@@ -18,7 +19,8 @@ namespace MagicTriggerMechanics {
 		RendererVisible,
 		RendererNotVisible,
 		PlayerInDirectionFromPoint,
-		LevelsAreActive
+		LevelsAreActive,
+		PlayerScaleWithinRange
 	}
 
 	[Serializable]
@@ -34,6 +36,8 @@ namespace MagicTriggerMechanics {
 		public Renderer targetRenderer;
 		public Vector3 targetPosition;
 		public Levels[] targetLevels;
+		[MinMaxSlider(0.0f, 64f)]
+		public Vector2 targetPlayerScaleRange;
 
 		public bool allowTriggeringWhileInsideObject = false;
 
@@ -80,6 +84,8 @@ namespace MagicTriggerMechanics {
 					return Vector3.Dot(realTargetDirection.normalized, playerToPositionDirection);
 				case TriggerConditionType.LevelsAreActive:
 					return targetLevels.Contains(LevelManager.instance.ActiveScene) ? 1 : -1;
+				case TriggerConditionType.PlayerScaleWithinRange:
+					return Player.instance.scale >= targetPlayerScaleRange.x && Player.instance.scale <= targetPlayerScaleRange.y ? 1 : -1;
 				default:
 					throw new Exception($"TriggerCondition: {triggerCondition} not handled!");
 			}
@@ -117,6 +123,7 @@ namespace MagicTriggerMechanics {
 			SerializedProperty targetRenderer = property.FindPropertyRelative("targetRenderer");
 			SerializedProperty targetPosition = property.FindPropertyRelative("targetPosition");
 			SerializedProperty targetLevels = property.FindPropertyRelative("targetLevels");
+			SerializedProperty targetPlayerScaleRange = property.FindPropertyRelative("targetPlayerScaleRange");
 
 			EditorGUILayout.PropertyField(triggerCondition);
 			EditorGUILayout.Space();
@@ -129,6 +136,7 @@ namespace MagicTriggerMechanics {
 			GUIContent positionLabel = new GUIContent("Target Position:");
 			GUIContent thresholdLabel = new GUIContent("Trigger Threshold:");
 			GUIContent targetLevelsLabel = new GUIContent("Target level(s):");
+			GUIContent targetPlayerScaleRangeLabel = new GUIContent("Target Player scale range:");
 			GUIContent allowTriggeringInsideObjectLabel = new GUIContent("Allow triggering while inside of target object?");
 			GUIContent useLocalCoordinatesLabel = new GUIContent("Use local coordinates?");
 
@@ -173,6 +181,9 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerConditionType.LevelsAreActive:
 					EditorGUILayout.PropertyField(targetLevels, targetLevelsLabel);
+					break;
+				case TriggerConditionType.PlayerScaleWithinRange:
+					EditorGUILayout.PropertyField(targetPlayerScaleRange, targetPlayerScaleRangeLabel);
 					break;
 			}
 

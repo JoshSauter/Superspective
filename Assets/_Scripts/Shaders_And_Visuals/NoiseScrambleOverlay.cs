@@ -53,7 +53,7 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     protected override void Awake() {
         base.Awake();
         if (noiseShader == null) {
-            Debug.LogWarning($"Noise shader is null on {gameObject.FullPath()}, disabling noise scramble overlay");
+            // Debug.LogWarning($"Noise shader is null on {gameObject.FullPath()}, disabling noise scramble overlay");
             enabled = false;
             return;
         }

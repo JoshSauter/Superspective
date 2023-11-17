@@ -139,7 +139,10 @@ namespace LevelSpecific.WhiteRoom {
                     if (state.timeSinceStateChanged < juiceTime) {
                         float t = state.timeSinceStateChanged / juiceTime;
                         float target = minHeight - juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
-                        SetHeight(target);
+                        float delta = SetHeight(target);
+                        if (cubeReceptacle?.isCubeInReceptacle ?? false) {
+                            cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
+                        }
                     }
                     else {
                         SetHeight(minHeight);
@@ -149,7 +152,10 @@ namespace LevelSpecific.WhiteRoom {
                     if (state.timeSinceStateChanged < juiceTime) {
                         float t = state.timeSinceStateChanged / juiceTime;
                         float target = maxHeight + juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
-                        SetHeight(target);
+                        float delta = SetHeight(target);
+                        if (cubeReceptacle?.isCubeInReceptacle ?? false) {
+                            cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
+                        }
                     }
                     else {
                         SetHeight(maxHeight);
@@ -160,7 +166,7 @@ namespace LevelSpecific.WhiteRoom {
                     float targetHeight = Mathf.Lerp(minHeight, maxHeight, t);
                     float delta = SetHeight(targetHeight);
                     if (cubeReceptacle?.isCubeInReceptacle ?? false) {
-                        cubeReceptacle.cubeInReceptacle.transform.Translate(Vector3.up * delta, Space.World);
+                        cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
                     }
                     break;
                 }
@@ -169,7 +175,7 @@ namespace LevelSpecific.WhiteRoom {
                     float targetHeight = Mathf.Lerp(maxHeight, minHeight, t);
                     float delta = SetHeight(targetHeight);
                     if (cubeReceptacle?.isCubeInReceptacle ?? false) {
-                        cubeReceptacle.cubeInReceptacle.transform.Translate(Vector3.up * delta, Space.World);
+                        cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
                     }
                     break;
                 }

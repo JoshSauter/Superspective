@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using Interactables;
 using LevelManagement;
 using LevelSpecific.WhiteRoom.CathedralTutorial;
 using MagicTriggerMechanics;
