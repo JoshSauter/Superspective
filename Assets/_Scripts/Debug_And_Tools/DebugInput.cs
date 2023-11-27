@@ -2,18 +2,22 @@
 using UnityEngine;
 
 public static class DebugInput {
-    public static bool GetKeyDown(KeyCode keyCode) => Debug.isDebugBuild && Input.GetKeyDown(keyCode);
-    public static bool GetKeyDown(string key) => Debug.isDebugBuild && Input.GetKeyDown(key);
-    public static bool GetKeyUp(KeyCode keyCode) => Debug.isDebugBuild && Input.GetKeyUp(keyCode);
-    public static bool GetKeyUp(string key) => Debug.isDebugBuild && Input.GetKeyUp(key);
-    public static bool GetKey(KeyCode keyCode) => Debug.isDebugBuild && Input.GetKey(keyCode);
-    public static bool GetKey(string key) => Debug.isDebugBuild && Input.GetKey(key);
+    public static bool isDebugBuildOverride = false;
+
+    private static bool IsDebugBuild => isDebugBuildOverride || Debug.isDebugBuild;
+    
+    public static bool GetKeyDown(KeyCode keyCode) => IsDebugBuild && Input.GetKeyDown(keyCode);
+    public static bool GetKeyDown(string key) => IsDebugBuild && Input.GetKeyDown(key);
+    public static bool GetKeyUp(KeyCode keyCode) => IsDebugBuild && Input.GetKeyUp(keyCode);
+    public static bool GetKeyUp(string key) => IsDebugBuild && Input.GetKeyUp(key);
+    public static bool GetKey(KeyCode keyCode) => IsDebugBuild && Input.GetKey(keyCode);
+    public static bool GetKey(string key) => IsDebugBuild && Input.GetKey(key);
 
     // Ctrl+Shift+W for global "win-the-puzzle" cheatcode (Up to individual puzzles to implement)
     public static bool InstaSolvePuzzle(this Component c) {
         // if (!GameManager.instance.gameHasLoaded) return false;
         
-        return Debug.isDebugBuild &&
+        return IsDebugBuild &&
                !NovaPauseMenu.instance.PauseMenuIsOpen &&
                LevelManager.enumToSceneName[c.gameObject.scene.name] == LevelManager.instance.ActiveScene &&
                Input.GetKey(KeyCode.LeftControl) &&

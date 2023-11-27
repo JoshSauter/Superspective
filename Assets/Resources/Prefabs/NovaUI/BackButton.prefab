@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7330659417364143313}
   - component: {fileID: 7330659417364143327}
   - component: {fileID: 7330659417364143326}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LeftArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -281,7 +281,7 @@ GameObject:
   - component: {fileID: 7330659418199295172}
   - component: {fileID: 7330659418199295175}
   - component: {fileID: 7330659418199295174}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -635,7 +635,7 @@ GameObject:
   - component: {fileID: 7330659418808293747}
   - component: {fileID: 7330659418808293758}
   - component: {fileID: 5998334535217926408}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -871,7 +871,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
-  buttonState:
+  clickState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  hoverState:
     _state: 0
     _prevState: 0
     _timeSinceStateChanged: 0
@@ -882,6 +887,7 @@ MonoBehaviour:
   - {fileID: 7330659418199295175}
   unclickAfterClick: 1
   timeToUnclick: 0.5
+  onlyHover: 0
 --- !u!114 &5998334535217926408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -909,7 +915,7 @@ GameObject:
   - component: {fileID: 7330659418883344570}
   - component: {fileID: 7330659418883344568}
   - component: {fileID: 7330659418883344571}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}

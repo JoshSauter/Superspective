@@ -20,6 +20,8 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	public static readonly int PortalMask = Shader.PropertyToID("_PortalMask");
 	public static readonly int EdgeColorsThroughPortalsMask = Shader.PropertyToID("_EdgeColorsThroughPortalsMask");
 
+	private static readonly int PlayerCamPos = Shader.PropertyToID("_PlayerCamPos");
+
 	[SerializeField]
 	private Shader edgeDetectionColorsThroughPortalShader;
 
@@ -122,6 +124,8 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 
 		// Will write to global texture named _PortalMask
 		Shader.SetGlobalTexture(PortalMask, portalMaskTexture);
+		
+		Shader.SetGlobalVector(PlayerCamPos, Player.instance.playerCam.transform.position);
 	}
 
 	void ReleaseAllTextures() {

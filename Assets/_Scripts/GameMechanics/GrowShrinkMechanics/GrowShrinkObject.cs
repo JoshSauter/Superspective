@@ -136,7 +136,7 @@ namespace GrowShrink {
             SetScaleDirectly(targetScale);
         }
 
-        void SetScaleDirectly(float targetScale) {
+        public void SetScaleDirectly(float targetScale) {
             float targetScaleClamped = Mathf.Clamp01(targetScale);
             Vector3 scaleWithoutMultiplier = transform.localScale / currentScale;
             transform.localScale = scaleWithoutMultiplier * targetScale;

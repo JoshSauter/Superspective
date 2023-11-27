@@ -12,7 +12,7 @@ class UnfuckNewProbuilderObjects {
             if (_proBuilderWindow == null) {
                 var windows = (EditorWindow[])Resources.FindObjectsOfTypeAll(typeof(EditorWindow));
                 foreach (var window in windows) {
-                    if (window != null && window.GetType().FullName == "UnityEditor.ProBuilder.ShapeEditor") {
+                    if (window != null && window.GetType().FullName == nameof(UnityEditor.ProBuilder.PolyShapeTool)) {
                         _proBuilderWindow = window;
                         break;
                     }

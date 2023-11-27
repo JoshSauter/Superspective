@@ -16,7 +16,7 @@ namespace Editor {
             }
 
             Selection.objects = newSelection.ToArray();
-            Debug.Log($"{Selection.count} objects found with material {material.name}.");
+            Debug.Log($"{Selection.count} objects found with material {(material == null ? "(Missing)" : material.name)}.");
         }
 
         [MenuItem("My Tools/Selection/Select All Children With Material Recursively")]
@@ -29,8 +29,15 @@ namespace Editor {
 
         public void SelectAllChildrenRecusivelyWithMaterial(GameObject curNode, ref List<GameObject> selectionSoFar) {
             bool containsMaterial = false;
-            if (curNode.TryGetComponent(out Renderer renderer)) {
-                containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m.name.StripSuffix(" (Instance)") == material.name);
+            if (curNode.TryGetComponent(out Renderer renderer) && renderer.sharedMaterials != null) {
+                // Allow searching for no material set
+                if (material == null) {
+                    containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m == null);
+                }
+                // Normal material matching
+                else {
+                    containsMaterial = renderer.sharedMaterials.ToList().Exists(m => m != null && m.name.StripSuffix(" (Instance)") == material.name);
+                }
             }
             
             if (containsMaterial) selectionSoFar.Add(curNode);

@@ -52,6 +52,13 @@ namespace PortalMechanics {
 	
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
+		public static bool allowPortalRendering =
+#if UNITY_EDITOR
+			// Disable portal rendering in editor to increase performance of play mode
+			false;
+#else
+		true;
+#endif
 		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGB32;
 
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
@@ -113,7 +120,7 @@ namespace PortalMechanics {
 				Vector3 playerCamPos = playerCamera.position;
 				Vector3 portalPos = transform.position;
 				Vector3 outOfPortal = -PortalNormal();
-				Vector3 adjustedPortalPos = portalPos - outOfPortal * portalThickness;
+				Vector3 adjustedPortalPos = portalPos - outOfPortal * portalThickness * transform.lossyScale.z;
 				return Vector3.Dot(playerCamPos - adjustedPortalPos, outOfPortal) > 0;
 			}
 		}
@@ -140,11 +147,7 @@ namespace PortalMechanics {
 		private Material effectiveMaterial => portalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-		public bool portalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf
-#if UNITY_EDITOR
-		                                        && false // Disable portal rendering in editor to increase performance of play mode
-#endif
-		;
+		public bool portalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf && allowPortalRendering;
 		public bool portalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
 
 		[ShowNativeProperty]
@@ -361,7 +364,7 @@ namespace PortalMechanics {
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
 					targetPosition = Vector3.zero,
-					triggerThreshold = 0.01f
+					triggerThreshold = 0f
 				};
 				TriggerCondition movementCondition = new TriggerCondition {
 					triggerCondition = TriggerConditionType.PlayerMovingDirection,

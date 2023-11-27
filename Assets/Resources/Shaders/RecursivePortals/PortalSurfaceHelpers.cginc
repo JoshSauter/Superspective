@@ -1,4 +1,4 @@
-#define DEPTH_OFFSET 0.00388
+#define DEPTH_OFFSET 0.00488
 
 sampler2D _PortalMask;
 sampler2D _CameraDepthNormalsTexture;
@@ -12,6 +12,5 @@ bool SampleBehindPortal(float2 uv) {
 	float4 portalMaskSample = tex2D(_PortalMask, uv);
 	DecodeDepthNormal(portalMaskSample, portalDepth, normal);
 
-	//return portalDepth < 0.2175;
 	return depth > portalDepth-DEPTH_OFFSET && portalDepth < 1;
 }

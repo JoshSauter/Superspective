@@ -34,7 +34,7 @@ public partial class PlayerMovement {
         private const float MAX_STEP_HEIGHT = 0.6f;
         private const float MIN_STEP_HEIGHT = 0.1f;
         private const float STEP_SPEED_MULTIPLIER = 2.5f;
-        private const int FRAMES_AFTER_STEP_TO_KEEP_VELOCITY_ZERO = 5;
+        private const float CAPSULE_CHECK_OFFSET_FROM_BOTTOM = 0.5f;
 
         // Properties
         public bool RecentlySteppedUp => stepState.state == StepState.SteppingDiagonal || stepState.timeSinceStateChanged < RECENTLY_STEPPED_UP_TIME;
@@ -84,6 +84,9 @@ public partial class PlayerMovement {
         }
 
         public void UpdateStaircase(Vector3 desiredVelocity) {
+            // Staircase stepping while in staircase rotate zone caused gravity direction bugs. TODO: Make this just work
+            if (StaircaseRotate.playerIsInAnyStaircaseRotateZone) return;
+            
             bool CheckCapsule(CapsuleCollider capsuleCollider) {
                 // Get the relevant properties from the CapsuleCollider
                 Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
@@ -91,7 +94,7 @@ public partial class PlayerMovement {
                 float capsuleRadius = capsuleCollider.radius * m.scale;
 
                 Vector3 capsuleAxis = transform.up;
-                Vector3 p1 = capsuleCenter - (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
+                Vector3 p1 = capsuleCenter - (capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius) + CAPSULE_CHECK_OFFSET_FROM_BOTTOM));
                 Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
 
                 return Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore).Length > 0;
@@ -110,6 +113,7 @@ public partial class PlayerMovement {
                 // If we move into colliding w/ something else undo it
                 if (CheckCapsule(m.thisCollider)) {
                     transform.Translate(-diff, Space.World);
+                    
                 }
                 distanceMovedForStaircaseOffset += distanceToMove;
             }

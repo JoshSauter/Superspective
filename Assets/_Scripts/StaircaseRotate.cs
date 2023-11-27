@@ -5,6 +5,7 @@ using NaughtyAttributes;
 using UnityEngine;
 
 public class StaircaseRotate : MonoBehaviour {
+    public static bool playerIsInAnyStaircaseRotateZone = false;
     public bool DEBUG;
 
     [ShowIf("DEBUG")]
@@ -90,6 +91,7 @@ public class StaircaseRotate : MonoBehaviour {
 
     void OnTriggerExit(Collider other) {
         if (other.TaggedAsPlayer()) {
+            playerIsInAnyStaircaseRotateZone = false;
             float angleToStartDirection = Vector3.Angle(startGravityDirection, Physics.gravity.normalized);
             float angleToEndDirection = Vector3.Angle(endGravityDirection, Physics.gravity.normalized);
 
@@ -125,6 +127,7 @@ public class StaircaseRotate : MonoBehaviour {
 
     void OnTriggerStay(Collider other) {
         if (other.TaggedAsPlayer()) {
+            playerIsInAnyStaircaseRotateZone = true;
             Player.instance.movement.pauseSnapToGround = true;
             t = GetLerpPositionOfPoint(playerMovement.bottomOfPlayer);
             if (treatedAsADownStairForPlayer) t = 1 - t;

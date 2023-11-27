@@ -40,7 +40,7 @@
 				DecodeDepthNormal(sample, sampleDepthValue, sampleNormalValue);
 				
 				//clip(.999 - sampleDepthValue);
-				i.nz.w = clamp(i.nz.w / _PortalScaleFactor, 0, .999);
+				i.nz.w = clamp(i.nz.w * _PortalScaleFactor, 0, .999);
 				return fixed4(i.nz.w, i.nz.w, i.nz.w, 1);
 				return EncodeDepthNormal (i.nz.w, i.nz.xyz);
 			}

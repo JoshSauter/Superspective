@@ -96,6 +96,9 @@ Material:
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
+    - _DistanceFadeEffect: 0
+    - _DistanceFadeEffectMagnitude: 1
+    - _DistanceFadeEffectStartDistance: 0.13
     - _DstBlend: 10
     - _EmissionEnabled: 0
     - _FlatShading: 0

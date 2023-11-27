@@ -278,29 +278,27 @@
 				return tex2D(_GradientTexture, distance);
 			}
 
-			fixed4 FinalColor(fixed4 original, float depthRatio, float normalDiff, float depth, float3 ray, int allSamplesBehindPortal, fixed4 portalEdgeColor) {
-				int depthEdge = depthRatio > DEPTH_THRESHOLD_CONSTANT;
+			fixed4 FinalColor(fixed4 original, float depthRatio, float normalDiff, float depth, float3 ray, int allSamplesBehindPortal, int isEdgeOfPortal, fixed4 portalEdgeColor) {
+				// Only normal differences should be considered at Portal edges
+				int depthEdge = min(depthRatio > DEPTH_THRESHOLD_CONSTANT, 1-isEdgeOfPortal);
 				int normalEdge = normalDiff > NORMAL_THRESHOLD_CONSTANT;
 				int isEdge = max(depthEdge, normalEdge);
 
+				// Calculate the edge weight to use
 				float depthEdgeWeight = saturate(depthRatio / (0.0001 + _DepthWeightEffect * 100 * DEPTH_THRESHOLD_CONSTANT));
 				float normalEdgeWeight = saturate(normalDiff / (0.0001 + _NormalWeightEffect * 17 * NORMAL_THRESHOLD_CONSTANT));
 				depthEdgeWeight = depthEdge * max(depthEdgeWeight, 1 - (_WeightedEdgeMode & 1));
 				normalEdgeWeight = normalEdge * max(normalEdgeWeight, 1 - (_WeightedEdgeMode & 2));
 				depthEdgeWeight = lerp(_DepthWeightMin, 1, depthEdgeWeight);
 				normalEdgeWeight = lerp(_NormalWeightMin, 1, normalEdgeWeight);
-
 				float edgeWeight = max(depthEdgeWeight, normalEdgeWeight);
 
+				// Calculate the edge color to use
 				fixed4 edgeColor = fixed4(0,0,0,0);
 				float distance = saturate((length(ray * depth) - _ProjectionParams.y) / _ProjectionParams.z);
 				if (_ColorMode == 0) edgeColor = _EdgeColor;
 				if (_ColorMode == 1) edgeColor = GradientColor(distance);
 				if (_ColorMode == 2) edgeColor = GradientFromTexture(distance);
-				if (allSamplesBehindPortal > 0)
-				{
-					//return fixed4(portalEdgeColor.a, 0, 0, 1);
-				}
 				//return fixed4(allSamplesBehindPortal, allSamplesBehindPortal, allSamplesBehindPortal, 1);
 				edgeColor = (1-allSamplesBehindPortal)*edgeColor + allSamplesBehindPortal*portalEdgeColor;
 
@@ -345,7 +343,9 @@
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
 #ifdef CHECK_PORTAL_DEPTH
-				half allSamplesBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
+				int centerSampleBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
+				int allSurroundingSamplesBehindPortal = 1;
+				int someSurroundingSamplesBehindPortal = centerSampleBehindPortal;
 				fixed4 portalEdgeColor = tex2D(_EdgeColorsThroughPortalsMask, uvPositions.UVs[0]);
 #endif
 				float maxDepthRatio = 0;
@@ -363,7 +363,10 @@
 
 #ifdef CHECK_PORTAL_DEPTH
 					// "if (x >= SAMPLE_RANGE_START) allSamplesBehindPortal = allSamplesBehindPortal * SampleBehindPortal"
-					allSamplesBehindPortal = allSamplesBehindPortal * max(step(SAMPLE_RANGE_START, x), SampleBehindPortal(uvPositions.UVs[x]));
+					int xInRange = step(SAMPLE_RANGE_START, x);
+					int thisSampleIsBehindPortal = SampleBehindPortal(uvPositions.UVs[x]);
+					allSurroundingSamplesBehindPortal = allSurroundingSamplesBehindPortal * max(xInRange, thisSampleIsBehindPortal);
+					someSurroundingSamplesBehindPortal = max(someSurroundingSamplesBehindPortal, thisSampleIsBehindPortal);
 #endif
 
 					/////////////////////////
@@ -401,20 +404,26 @@
 					maxNormalDiff = max(maxNormalDiff, normalDiff * step(SAMPLE_RANGE_START, x));
 				}
 
+#ifdef CHECK_PORTAL_DEPTH
+				// If center sample is behind portal, check if any other sample is NOT behind a portal mask
+				int isEdgeOfPortal = max(min(1-centerSampleBehindPortal, someSurroundingSamplesBehindPortal), min(centerSampleBehindPortal, 1-allSurroundingSamplesBehindPortal));
+				int allSamplesBehindPortal = allSurroundingSamplesBehindPortal & centerSampleBehindPortal; // AND
+#endif
+
 				
 				// minDepthValue check to get rid of lines from CullEverything material against nothing
 				if (minDepthValue > .99) {
 #ifdef CHECK_PORTAL_DEPTH
-					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, allSamplesBehindPortal, portalEdgeColor);
+					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
-					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, 0, original);
+					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, 0, 0, original);
 #endif
 				}
 
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
 				if (allDepthsAreDissimilar > 0) {
-					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 0, minDepthValue, uvPositions.ray, 0, fixed4(0,0,0,0));
+					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 0, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
 				}
 #endif
 
@@ -484,9 +493,9 @@
 				}
 
 #ifdef CHECK_PORTAL_DEPTH
-				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, allSamplesBehindPortal, portalEdgeColor);
+				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
-				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, 0, fixed4(0,0,0,0));
+				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
 #endif
 			}
 			ENDCG

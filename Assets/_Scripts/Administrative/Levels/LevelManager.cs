@@ -38,7 +38,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 30
+	// Next level: 32
 	[Serializable]
 	public enum Levels {
 		TitleCard = 29,
@@ -70,7 +70,9 @@ namespace LevelManagement {
 		BehindForkTransition = 25,
 		ForkBlackRoom3 = 26,
 		ForkCathedralTutorial = 6,
-		GrowShrinkIntro = 28
+		GrowShrinkIntro = 28,
+		GrowShrinkIntroBetweenWorlds = 30,
+		GrowShrinkIntroDarkSide = 31
 	}
 
 	public static class LevelsExt {
@@ -222,7 +224,9 @@ namespace LevelManagement {
 			{ Levels.MetaEdgeDetection, "_Meta_EdgeDetection" },
 			{ Levels.ForkBlackRoom3, "_Fork_BlackRoom3" },
 			{ Levels.ForkCathedralTutorial, "_Fork_Cathedral_Tutorial" },
-			{ Levels.GrowShrinkIntro, "_GrowShrinkIntro" }
+			{ Levels.GrowShrinkIntro, "_GrowShrinkIntro" },
+			{ Levels.GrowShrinkIntroBetweenWorlds, "_GrowShrinkIntroBetweenWorlds" },
+			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" }
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();

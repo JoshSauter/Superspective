@@ -42,7 +42,10 @@ public class Footsteps : MonoBehaviour {
 
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
-		playerMovement.OnStaircaseStepUp += () => { PlayFootstepAtVolume(shouldForceStepSound, 0.125f); shouldForceStepSound = !shouldForceStepSound; };
+		playerMovement.OnStaircaseStepUp += () => {
+			PlayFootstep(shouldForceStepSound, 0.125f);
+			shouldForceStepSound = !shouldForceStepSound;
+		};
 
 		bob = GetComponent<Headbob>();
 		AudioManager.instance.GetOrCreateJob(AudioName.PlayerFootstep, id + "_Left", SetPanForAudio);
@@ -62,12 +65,6 @@ public class Footsteps : MonoBehaviour {
 		Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity();
 		float playerSpeed = playerVelocity.magnitude;
 		float curVolume = Mathf.Lerp(defaultVolume - defaultVolume/2f, defaultVolume + defaultVolume / 2f, Mathf.InverseLerp(0f, 20f, playerSpeed));
-		if (leftFootActive) {
-			audioJobLeft.audio.volume = curVolume;
-		}
-		else {
-			audioJobRight.audio.volume = curVolume;
-		}
 
 		if (playerMovement.IsGrounded && playerSpeed > 0.2f) {
 			float thisFrameBobAmount = bob.viewBobCurve.Evaluate(bob.t);
@@ -75,14 +72,14 @@ public class Footsteps : MonoBehaviour {
 			curBobAmountUnamplified = thisFrameBobAmount;
 			bool playerIsHeadingUpThisFrame = thisFrameOffset > 0;
 			if (playerWasHeadingDownLastFrame && playerIsHeadingUpThisFrame) {
-				PlayFootstep(shouldForcePlay);
+				PlayFootstep(shouldForcePlay, curVolume);
 				timeSinceLastHit = 0f;
 			}
 			playerWasHeadingDownLastFrame = !playerIsHeadingUpThisFrame;
 		}
 		else {
 			if (playerWasHeadingDownLastFrame) {
-				PlayFootstep(shouldForcePlay);
+				PlayFootstep(shouldForcePlay, curVolume);
 			}
 			playerWasHeadingDownLastFrame = false;
 		}
@@ -93,20 +90,12 @@ public class Footsteps : MonoBehaviour {
 	    audioJob.audio.panStereo = isLeftFoot ? -panMagnitude : panMagnitude;
     }
 
-	void PlayFootstepAtVolume(bool shouldForcePlay, float tempVolume) {
-		AudioJob audioJob = leftFootActive ? audioJobLeft : audioJobRight;
-		float tmp = audioJob.audio.volume;
-		audioJob.audio.volume = tempVolume;
-		PlayFootstep(shouldForcePlay);
-		audioJob.audio.volume = tmp;
-	}
-
-	void PlayFootstep(bool shouldForcePlay) {
+	void PlayFootstep(bool shouldForcePlay, float volume) {
 		// Since adding left/right foot sounds, shouldForcePlay is just actually whether it should play at all or not
 		if (!shouldForcePlay) return;
 		timeSinceLastHit = 0f;
 		string audioJobId = leftFootActive ? audioJobLeft.uniqueIdentifier : audioJobRight.uniqueIdentifier;
-		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay);
+		AudioManager.instance.Play(AudioName.PlayerFootstep, audioJobId, shouldForcePlay, (audio) => audio.baseVolume = volume);
 		if (playerMovement.groundMovement.WalkingOnGlass()) {
 			string glassAudioJobId = leftFootActive ? audioJobLeftGlass.uniqueIdentifier : audioJobRightGlass.uniqueIdentifier;
 			AudioManager.instance.Play(AudioName.PlayerFootstepGlass, glassAudioJobId, shouldForcePlay, SetGlassVolume);

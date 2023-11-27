@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
+// AKA GodMode
 public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipSave> {
 	Transform playerCamera;
 	PlayerMovement playerMovement;
@@ -68,7 +69,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 			float middleMouseScroll = Input.mouseScrollDelta.y;
 			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
 
-			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed);
+			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed * Player.instance.scale);
 		}
     }
 
@@ -79,6 +80,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 		playerMovement.enabled = !noClipOn;
 		playerRigidbody.isKinematic = noClipOn;
 		playerCollider.isTrigger = noClipOn;
+		playerMovement.groundMovement.grounded.IsGrounded = false;
 	}
 
 	#region Saving

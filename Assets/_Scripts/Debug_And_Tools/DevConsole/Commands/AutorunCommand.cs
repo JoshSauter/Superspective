@@ -6,7 +6,7 @@ namespace DeveloperConsole {
         
         public override CommandResponse Execute(string[] args) {
             PlayerMovement.instance.autoRun = !PlayerMovement.instance.autoRun;
-            return new SuccessResponse();
+            return new SuccessResponse($"Autorun {(PlayerMovement.instance.autoRun ? "enabled (but kinda broken)" : "disabled")}");
         }
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4384241672883691631}
   - component: {fileID: 4384241672883691616}
   - component: {fileID: 8868642651461119495}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -248,7 +248,7 @@ GameObject:
   - component: {fileID: 4384241673374420381}
   - component: {fileID: 4384241673374420382}
   - component: {fileID: 4384241673374420383}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -599,7 +599,7 @@ GameObject:
   - component: {fileID: 4384241673488080635}
   - component: {fileID: 4384241673488080633}
   - component: {fileID: 4384241673488080634}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: NameArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -866,6 +866,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4384241673488080635}
     m_Modifications:
+    - target: {fileID: 4029572198129412358, guid: d228cb411b0645f4f8c31cde2c28be73,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4029572198129412410, guid: d228cb411b0645f4f8c31cde2c28be73,
         type: 3}
       propertyPath: layout.AutoSize.Y
@@ -1069,6 +1074,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4029572198571173179, guid: d228cb411b0645f4f8c31cde2c28be73,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029572198684332274, guid: d228cb411b0645f4f8c31cde2c28be73,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4029572198684332275, guid: d228cb411b0645f4f8c31cde2c28be73,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -1181,6 +1196,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ExpandingTextField
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029572199395122824, guid: d228cb411b0645f4f8c31cde2c28be73,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4029572199395122825, guid: d228cb411b0645f4f8c31cde2c28be73,
         type: 3}

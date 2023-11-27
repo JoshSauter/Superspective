@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine;
@@ -13,8 +14,12 @@ public class TranslateMultipleObjectsTool : EditorWindow {
     }
 
     private static TranslateOperation op = TranslateOperation.Add;
+    private static float magnitude;
+    private static bool translateX = false;
+    private static bool translateY = false;
+    private static bool translateZ = false;
     
-    [MenuItem("CONTEXT/Transform/Translate Multiple Objects")]
+    [MenuItem("CONTEXT/Transform/Bulk Translate")]
     public static void TranslateMultipleObjects () {
         TranslateMultipleObjectsTool wnd = GetWindow<TranslateMultipleObjectsTool>();
         wnd.titleContent = new GUIContent("TranslateMultipleObjectsTool");
@@ -37,20 +42,25 @@ public class TranslateMultipleObjectsTool : EditorWindow {
         operation.RegisterValueChangedCallback(evt => op = (TranslateOperation)evt.newValue);
         root.Add(operation);
 
-        FloatField input = new FloatField($"Magnitude:");
+        FloatField input = new FloatField($"Magnitude:") {
+            value = magnitude
+        };
         root.Add(input);
         
         Toggle toggleX = new Toggle {
             name = "X",
-            label = "Translate X value"
+            label = "Translate X value",
+            value = translateX
         };
         Toggle toggleY = new Toggle {
             name = "Y",
-            label = "Translate Y value"
+            label = "Translate Y value",
+            value = translateY
         };
         Toggle toggleZ = new Toggle {
             name = "Z",
-            label = "Translate Z value"
+            label = "Translate Z value",
+            value = translateZ
         };
         // Create toggles
         root.Add(toggleX);
@@ -64,10 +74,21 @@ public class TranslateMultipleObjectsTool : EditorWindow {
         };
         button.clicked += () => {
             if (TranslateObjects(op, input.value, toggleX.value, toggleY.value, toggleZ.value)) {
+                magnitude = input.value;
+                translateX = toggleX.value;
+                translateY = toggleY.value;
+                translateZ = toggleZ.value;
                 CloseWindow();
             }
         };
         root.Add(button);
+    }
+
+    // Needed because else we will invoke on same objects repeatedly
+    private static HashSet<Transform> processedObjects = new HashSet<Transform>();
+    [MenuItem("CONTEXT/Transform/Repeat Last Bulk Translation %#t")]
+    public static void RepeatLastBulkTranslation() {
+        TranslateObjects(op, magnitude, translateX, translateY, translateZ);
     }
     
     public static bool TranslateObjects(TranslateOperation op, float value, bool translateX, bool translateY, bool translateZ) {
@@ -79,6 +100,7 @@ public class TranslateMultipleObjectsTool : EditorWindow {
         }
         
         foreach (Transform t in Selection.GetTransforms(SelectionMode.TopLevel | SelectionMode.Editable)) {
+            if (processedObjects.Contains(t)) continue;
             switch (op) {
                 case TranslateOperation.Add:
                     t.localPosition += new Vector3(translateX ? value : 0, translateY ? value : 0, translateZ ? value : 0);
@@ -95,8 +117,11 @@ public class TranslateMultipleObjectsTool : EditorWindow {
                 default:
                     throw new ArgumentOutOfRangeException(nameof(op), op, null);
             }
+
+            processedObjects.Add(t);
         }
 
+        EditorApplication.delayCall += () => processedObjects.Clear();
         return true;
     }
 }

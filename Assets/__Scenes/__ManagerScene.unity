@@ -2342,7 +2342,7 @@ GameObject:
   - component: {fileID: 70297412}
   - component: {fileID: 70297414}
   - component: {fileID: 70297415}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: NovaUICamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6791,15 +6791,16 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u200B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b718734e55f5bf442810fc40a06932bb, type: 2}
+  m_sharedMaterial: {fileID: -1512782408413207575, guid: b718734e55f5bf442810fc40a06932bb,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -6816,15 +6817,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 24
+  m_fontSizeBase: 28
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 24
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -6852,7 +6853,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 7.7801514, y: 0, z: 6.98999, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -12615,7 +12616,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8856276
+  m_Name: pb_Mesh21069400
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -14690,10 +14691,16 @@ MonoBehaviour:
     connectedLevels: 
   - level: 28
     _displayName: 
-    connectedLevels: 
+    connectedLevels: 1e0000001f000000
   - level: 29
     _displayName: (Title Card)
     connectedLevels: 
+  - level: 30
+    _displayName: A Small Space Between Worlds
+    connectedLevels: 1c0000001f000000
+  - level: 31
+    _displayName: 
+    connectedLevels: 1c0000001e000000
   activeSceneName: 
   loadedSceneNames: []
   currentlyLoadingSceneNames: []
@@ -14796,7 +14803,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh48286
+  m_Name: pb_Mesh159086
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15139,17 +15146,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Enter a command or press Tab for autcomplete...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b718734e55f5bf442810fc40a06932bb, type: 2}
+  m_sharedMaterial: {fileID: -1512782408413207575, guid: b718734e55f5bf442810fc40a06932bb,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 2150773298
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
+    rgba: 2164260863
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0.5}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -15166,15 +15174,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 24
+  m_fontSizeBase: 28
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 2
+  m_fontSizeMax: 24
+  m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -15202,7 +15210,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 9.868591, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -21807,7 +21815,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 407567762}
-  m_VersionIndex: 2520
+  m_VersionIndex: 2541
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -26648,6 +26656,7 @@ MonoBehaviour:
   - {fileID: 9092835979267700043, guid: d7d84166d22cb0845b323d4657ac5fd1, type: 3}
   - {fileID: 5301445305512896750, guid: b2daf8734985c4f418324624fc42a188, type: 3}
   - {fileID: 5691352673696320428, guid: 54bcb69609272ea43944a644e42a02fb, type: 3}
+  - {fileID: 6856606736351991969, guid: 821e28a4c275cbd448316cbc7ef7aa59, type: 3}
   outOfViewDistance: 0
   _uiBlock: {fileID: 0}
 --- !u!114 &838283179
@@ -30500,7 +30509,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8855326
+  m_Name: pb_Mesh21068272
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -33649,7 +33658,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8855570
+  m_Name: pb_Mesh21068578
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -38607,7 +38616,7 @@ GameObject:
   - component: {fileID: 1291436110}
   - component: {fileID: 1291436111}
   - component: {fileID: 1291436112}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: NovaUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43387,7 +43396,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8859854
+  m_Name: pb_Mesh21073036
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -44325,7 +44334,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8857412
+  m_Name: pb_Mesh21070682
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -45388,14 +45397,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 8680811a0bad6cc46be0756a2553c2a9, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -45404,7 +45413,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 4
 --- !u!222 &1538325376
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -45495,7 +45504,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8857016
+  m_Name: pb_Mesh21070316
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -52886,7 +52895,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 3f6d336f90a84b24daed9c795bc450cb, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.343
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -55753,10 +55762,9 @@ GameObject:
   - component: {fileID: 1809741065}
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741068}
-  - component: {fileID: 1809741075}
   - component: {fileID: 1809741070}
+  - component: {fileID: 1809741075}
   - component: {fileID: 1809741071}
-  - component: {fileID: 1809741079}
   - component: {fileID: 1809741061}
   - component: {fileID: 1809741069}
   - component: {fileID: 1809741066}
@@ -55769,6 +55777,8 @@ GameObject:
   - component: {fileID: 1809741073}
   - component: {fileID: 1809741077}
   - component: {fileID: 1809741078}
+  - component: {fileID: 1809741080}
+  - component: {fileID: 1809741079}
   m_Layer: 14
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -55920,7 +55930,7 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
-  m_AllowMSAA: 0
+  m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 1
   m_OcclusionCulling: 1
@@ -56136,7 +56146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56293,6 +56303,33 @@ MonoBehaviour:
   BloomThreshold: 1
   BloomSoftness: 0.459
   material: {fileID: 2100000, guid: 6ced9dc3165b9bd439f57ddcee8abac6, type: 2}
+--- !u!114 &1809741080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 646b5bc27a658f447b1d929fd5ffbd70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  showGeneratedNormals: 0
+  offsetScale: 0.2
+  blurRadius: 18
+  edgeThresholdMin: 0.05
+  edgeThreshold: 0.2
+  edgeSharpness: 4
+  dlaaSharp: 0
+  ssaaShader: {fileID: 4800000, guid: b3728d1488b02490cbd196c7941bf1f8, type: 3}
+  dlaaShader: {fileID: 4800000, guid: 017ca72b9e8a749058d13ebd527e98fa, type: 3}
+  nfaaShader: {fileID: 4800000, guid: ce0cb2621f6d84e21a87414e471a3cce, type: 3}
+  shaderFXAAPreset2: {fileID: 4800000, guid: 6f1418cffd12146f2a83be795f6fa5a7, type: 3}
+  shaderFXAAPreset3: {fileID: 4800000, guid: c182fa94a5a0a4c02870641efcd38cd5, type: 3}
+  shaderFXAAII: {fileID: 4800000, guid: cd5b323dcc592457790ff18b528f5e67, type: 3}
+  shaderFXAAIII: {fileID: 4800000, guid: c547503fff0e8482ea5793727057041c, type: 3}
 --- !u!1 &1812285093
 GameObject:
   m_ObjectHideFlags: 0
@@ -66266,7 +66303,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8856910
+  m_Name: pb_Mesh21070228
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

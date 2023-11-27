@@ -461,7 +461,9 @@ namespace PortalMechanics {
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
-			bool shouldUseDefaultProjectionMatrix = depth == 0 && Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) < 2*clearSpaceBehindPortal;
+			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.scaleFactor;
+			inPortal.debug.Log($"Distance to portal (scale adjusted): {distanceToPortal:F3}");
+			bool shouldUseDefaultProjectionMatrix = depth == 0 && distanceToPortal < 2*clearSpaceBehindPortal;
 			if (DEBUG) {
 				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
 			}

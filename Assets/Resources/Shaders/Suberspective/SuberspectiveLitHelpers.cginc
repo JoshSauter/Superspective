@@ -15,6 +15,7 @@ struct SuberspectiveV2F {
 	float3 normalDir : NORMAL;
     float2 uv_MainTex : TEXCOORD3;
     float2 uv_EmissionMap : TEXCOORD4;
+    float linearDepth : SV_Depth;
 #ifdef DISSOLVE_OBJECT
     float2 uv_DissolveTex : TEXCOORD5;
 #endif
@@ -28,6 +29,7 @@ SuberspectiveV2F SuberspectiveVert(appdata_full v) {
 	o.normalDir = UnityObjectToWorldNormal(v.normal);
     o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
     o.uv_EmissionMap = TRANSFORM_TEX(v.texcoord, _EmissionMap);
+    o.linearDepth = COMPUTE_DEPTH_01;
 #ifdef DISSOLVE_OBJECT
     o.uv_DissolveTex = TRANSFORM_TEX(v.texcoord, _DissolveTex);
 #endif

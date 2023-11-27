@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Saving;
+using SuperspectiveUtils;
 using TMPro;
 using UnityEngine;
 
@@ -17,10 +18,20 @@ namespace DeveloperConsole {
         [SerializeField]
         private TMP_InputField inputField;
 
+        private TMP_Text _placeholderText;
+        private TMP_Text PlaceholderText => _placeholderText ??= inputField.PlaceholderText();
+        private string originalPlaceholderText;
+
         private float pausedTimeScale;
         
         private DeveloperConsole _developerConsole;
         private DeveloperConsole DeveloperConsole => _developerConsole ??= new DeveloperConsole(commands);
+
+        private string lastAutoCompletedWord;
+        private string lastPlayerInput;
+        private int matchIndex = 0;
+
+        private const float responseReadoutDelay = 1f;
         
         // Command-specific config
         public DynamicObject cubePrefab;
@@ -41,14 +52,31 @@ namespace DeveloperConsole {
                 new LoadLevelCommand("loadLevel"),
                 new SpawnCommand("spawn", spawnableObjects),
                 new AutorunCommand("autorun"),
+                new TogglePortalRenderingCommand("togglePortals"),
+                new ToggleDebugModeCommand("toggleDebug"),
+                new ChangeScaleCommand("changeScale")
             };
             
             inputField.onSubmit.AddListener(ProcessCommand);
+            inputField.onValueChanged.AddListener(RememberPlayerInput);
+        }
+
+        private void Start() {
+            originalPlaceholderText = PlaceholderText.text;
         }
 
         public void Update() {
             if (Input.GetKeyDown(KeyCode.BackQuote)) {
                 Toggle();
+            }
+
+            if (uiCanvas.activeSelf) {
+                if (Input.GetKeyDown(KeyCode.Tab)) {
+                    lastAutoCompletedWord = DeveloperConsole.AutoCompleteCommand(lastPlayerInput, matchIndex);
+                    inputField.text = lastAutoCompletedWord;
+                    inputField.MoveToEndOfLine(false, false);
+                    matchIndex++;
+                }
             }
         }
 
@@ -60,17 +88,35 @@ namespace DeveloperConsole {
             else {
                 pausedTimeScale = Time.timeScale;
                 Time.timeScale = 0;
+                PlaceholderText.color = Color.white;
+                PlaceholderText.text = originalPlaceholderText;
                 uiCanvas.SetActive(true);
                 inputField.ActivateInputField();
             }
         }
 
         public void ProcessCommand(string inputValue) {
-            if (DeveloperConsole.ProcessCommand(inputValue)) {
-                Toggle();
+            CommandResponse response = DeveloperConsole.ProcessCommand(inputValue);
+            if (response) {
+                this.InvokeRealtime(nameof(Toggle), responseReadoutDelay);
+                PlaceholderText.color = Color.green;
+                PlaceholderText.text = ((SuccessResponse)response).Message;
+            }
+            else {
+                this.InvokeRealtime(nameof(Toggle), responseReadoutDelay);
+                PlaceholderText.color = Color.red;
+                PlaceholderText.text = ((FailureResponse)response).Reason;
             }
 
             inputField.text = string.Empty;
+            lastAutoCompletedWord = string.Empty;
+        }
+
+        private void RememberPlayerInput(string inputText) {
+            if (inputText == lastAutoCompletedWord) return;
+            
+            lastPlayerInput = inputText;
+            matchIndex = 0;
         }
     }
 }

@@ -7,6 +7,11 @@
     
     public class SuccessResponse : CommandResponse {
         public override bool WasSuccessful => true;
+        public string Message { get; }
+
+        public SuccessResponse(string message) {
+            Message = message;
+        }
     }
     
     public class FailureResponse : CommandResponse {

@@ -191,6 +191,13 @@ public class Settings : Singleton<Settings> {
 			defaultIndex: 0,
 			selectedIndex: 0
 		);
+
+		public static readonly ToggleSetting AntiAliasingEnabled = new ToggleSetting() {
+			key = "AntiAliasingEnabled",
+			name = "Anti-Aliasing Enabled",
+			value = false,
+			defaultValue = false,
+		};
 	}
 
 	public static class Gameplay {
@@ -388,6 +395,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Video.Resolution);
 	    AddSetting(Video.TargetFramerate);
 	    AddSetting(Video.VSync);
+	    AddSetting(Video.AntiAliasingEnabled);
 	    AddSetting(Video.PortalDownsampleAmount);
 	    
 	    // Gameplay Settings

@@ -105,10 +105,8 @@ namespace UnityStandardAssets.ImageEffects
         }
 
 
-        public void OnRenderImage(RenderTexture source, RenderTexture destination)
-        {
-            if (CheckResources() == false)
-            {
+        public void OnRenderImage(RenderTexture source, RenderTexture destination) {
+            if (!Settings.Video.AntiAliasingEnabled || CheckResources() == false) {
                 Graphics.Blit(source, destination);
                 return;
             }

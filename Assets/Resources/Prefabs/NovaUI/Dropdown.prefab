@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 889474183811491638}
   - component: {fileID: 889474183811491637}
   - component: {fileID: 889474183811491636}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -366,7 +366,7 @@ GameObject:
   - component: {fileID: 889474184504629666}
   - component: {fileID: 1515657898557833317}
   - component: {fileID: 1418890149074815787}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: DropdownLayoutLeftAligned
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -692,7 +692,7 @@ GameObject:
   - component: {fileID: 2248748563734276679}
   - component: {fileID: 2610946327129630324}
   - component: {fileID: 5938092892443414302}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SelectionLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1043,7 +1043,7 @@ GameObject:
   - component: {fileID: 5429578792641168951}
   - component: {fileID: 4676498809882590198}
   - component: {fileID: 8475915461722725897}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: DropdownArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1315,7 +1315,7 @@ GameObject:
   - component: {fileID: 6388343321495556452}
   - component: {fileID: 5301445305512896750}
   - component: {fileID: 2351433904900537772}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1577,7 +1577,7 @@ GameObject:
   - component: {fileID: 6318636013510528109}
   - component: {fileID: 6354461827443691664}
   - component: {fileID: 1010452862245639759}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: DropdownArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1845,7 +1845,7 @@ GameObject:
   - component: {fileID: 3644319810280503532}
   - component: {fileID: 935090926714987326}
   - component: {fileID: 9006556048593557290}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: DisabledOverlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2116,7 +2116,7 @@ GameObject:
   - component: {fileID: 8049418829833371361}
   - component: {fileID: 1568345826314538442}
   - component: {fileID: 8304426317600894668}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: OptionsList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2439,7 +2439,7 @@ GameObject:
   - component: {fileID: 3977911069759070981}
   - component: {fileID: 5820589171771644508}
   - component: {fileID: 6505201973994996668}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: OptionsListScrollbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2727,7 +2727,7 @@ GameObject:
   - component: {fileID: 8001023967797601448}
   - component: {fileID: 4904114068117857168}
   - component: {fileID: 3297466595339470417}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Options
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2997,7 +2997,7 @@ GameObject:
   - component: {fileID: 7356486422681266962}
   - component: {fileID: 4218256383188850533}
   - component: {fileID: 1648088195873028233}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: DropdownLayoutRightAligned
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3274,7 +3274,7 @@ GameObject:
   - component: {fileID: 6759298669893711183}
   - component: {fileID: 7783590615187346233}
   - component: {fileID: 7809828624075515791}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SelectionLabelArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3590,6 +3590,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7356486422681266962}
     m_Modifications:
+    - target: {fileID: 578736999638403514, guid: caa55f10cd376eb44988d1a04d3b676e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 689209513947614788, guid: caa55f10cd376eb44988d1a04d3b676e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6518141571374555865, guid: caa55f10cd376eb44988d1a04d3b676e,
         type: 3}
       propertyPath: layout.Alignment.X
@@ -3659,6 +3669,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ResetToDefaultButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 8022059176630153928, guid: caa55f10cd376eb44988d1a04d3b676e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

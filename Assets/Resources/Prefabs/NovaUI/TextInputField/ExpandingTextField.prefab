@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1935595596877927797}
   - component: {fileID: 7656807367809786370}
   - component: {fileID: 4154663100418092526}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -361,7 +361,7 @@ GameObject:
   - component: {fileID: 4029572198571173169}
   - component: {fileID: 4029572198571173170}
   - component: {fileID: 4029572198571173168}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextBlock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -713,7 +713,7 @@ GameObject:
   - component: {fileID: 4029572198684332278}
   - component: {fileID: 4029572198684332277}
   - component: {fileID: 4029572198684332276}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: PlaceHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1063,7 +1063,7 @@ GameObject:
   - component: {fileID: 4029572199395122827}
   - component: {fileID: 4029572199395122826}
   - component: {fileID: 4029572199395122825}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ExpandingTextField
   m_TagString: Untagged
   m_Icon: {fileID: 0}

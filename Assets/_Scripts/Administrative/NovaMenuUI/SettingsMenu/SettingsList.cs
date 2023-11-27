@@ -114,6 +114,7 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Video.Resolution);
                 AddSettingCopy(Settings.Video.TargetFramerate);
                 AddSettingCopy(Settings.Video.VSync);
+                AddSettingCopy(Settings.Video.AntiAliasingEnabled);
                 AddSettingCopy(Settings.Video.PortalDownsampleAmount);
                 AddSettingCopy(Settings.Gameplay.CameraShake);
                 break;

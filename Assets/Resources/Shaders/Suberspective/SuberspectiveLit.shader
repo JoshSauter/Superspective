@@ -44,6 +44,9 @@ Shader "Suberspective/SuberspectiveLit" {
     	// RenderInZone
     	_MinRenderZone("Min Render Zone", Vector) = (0,0,0)
     	_MaxRenderZone("Max Render Zone", Vector) = (0,0,0)
+		// Distance Fade
+		_DistanceFadeEffectMagnitude("Distance Fade Effect Magnitude", Range(0, 1)) = 0.0
+		_DistanceFadeEffectStartDistance("Distance Fade Effect Start Distance", Range(0, 1)) = 0.0
 	}
 	SubShader {
         Tags { "LightMode" = "ForwardBase" "Queue"="Geometry" "RenderType"="Suberspective" }
@@ -70,6 +73,10 @@ Shader "Suberspective/SuberspectiveLit" {
 			uniform float _DiffuseMagnitude;
 			uniform float _SpecularMagnitude;
 			uniform float _AmbientMagnitude;
+
+			uniform float _DistanceFadeEffectMagnitude;
+			uniform float _DistanceFadeEffectStartDistance;
+			uniform float3 _PlayerCamPos;
 
 			// unity defined variables
 			uniform float4 _LightColor0;
@@ -111,6 +118,10 @@ Shader "Suberspective/SuberspectiveLit" {
             	col += emissionEnabled * emissionBrightness * emissionSample.a * _EmissionColor;
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
+
+				const float linearDepth = i.linearDepth;
+				const float depthEffectLerpValue = (linearDepth - _DistanceFadeEffectStartDistance) / (1 - _DistanceFadeEffectStartDistance);
+				col.a = lerp(col.a, col.a * (1 - _DistanceFadeEffectMagnitude), saturate(depthEffectLerpValue));
                 return col;
 			}
 			ENDCG

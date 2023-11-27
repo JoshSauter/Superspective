@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace DeveloperConsole {
     public class DeveloperConsole {
         private readonly IEnumerable<IConsoleCommand> commands;
         private readonly Dictionary<string, IConsoleCommand> commandLookup;
+        private Trie wordTree;
         
         public DeveloperConsole(IEnumerable<IConsoleCommand> commands) {
             // Avoid multiple enumerations of the commands
@@ -13,9 +15,10 @@ namespace DeveloperConsole {
 
             this.commands = consoleCommands;
             this.commandLookup = consoleCommands.ToDictionary(c => c.CommandWord);
+            this.wordTree = new Trie(commandLookup.Keys);
         }
         
-        public bool ProcessCommand(string commandInput) {
+        public CommandResponse ProcessCommand(string commandInput) {
             Debug.Log($"Processing input for {commandInput}");
             
             string[] inputSplit = commandInput.Split(' ');
@@ -25,8 +28,8 @@ namespace DeveloperConsole {
             return ProcessCommand(commandWord, args);
         }
 
-        public bool ProcessCommand(string commandWord, string[] args) {
-            if (!commandLookup.ContainsKey(commandWord)) return false;
+        public CommandResponse ProcessCommand(string commandWord, string[] args) {
+            if (!commandLookup.ContainsKey(commandWord)) return new FailureResponse($"No matching command word: '{commandWord}'");
 
             IConsoleCommand command = commandLookup[commandWord];
             CommandResponse result = command.Execute(args);
@@ -38,6 +41,10 @@ namespace DeveloperConsole {
             }
 
             return result;
+        }
+
+        public string AutoCompleteCommand(string inputFieldText, int matchIndex) {
+            return wordTree.AutoComplete(inputFieldText, matchIndex);
         }
     }
 }

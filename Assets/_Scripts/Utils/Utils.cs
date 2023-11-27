@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -8,6 +10,7 @@ using JetBrains.Annotations;
 using LevelManagement;
 using PortalMechanics;
 using Saving;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -265,6 +268,121 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public class TrieNode {
+        public char Value { get; set; }
+        public bool IsEndOfWord { get; set; }
+        public Dictionary<char, TrieNode> Children { get; } = new Dictionary<char, TrieNode>();
+    }
+
+    public class Trie {
+        private readonly TrieNode root = new TrieNode();
+        private readonly List<string> words = new List<string>();
+        private readonly Dictionary<string, string> lowerToCamelCase = new Dictionary<string, string>();
+
+        public Trie(IEnumerable<string> words) {
+            foreach (string word in words) {
+                Insert(word);
+            }
+        }
+
+        public void Insert(string word) {
+            TrieNode node = root;
+            string lowerInvariantWord = word.ToLowerInvariant();
+            foreach (char c in lowerInvariantWord) {
+                if (!node.Children.ContainsKey(c)) {
+                    node.Children[c] = new TrieNode { Value = c };
+                }
+                node = node.Children[c];
+                
+            }
+            node.IsEndOfWord = true;
+            
+            words.Add(lowerInvariantWord);
+            words.Sort();
+
+            lowerToCamelCase[word.ToLowerInvariant()] = word;
+        }
+
+        public string AutoComplete(string inputText, int matchIndex) {
+            if (string.IsNullOrWhiteSpace(inputText)) {
+                return lowerToCamelCase[words[matchIndex % words.Count]];
+            }
+            
+            TrieNode node = root;
+            string lowercaseInput = inputText.ToLowerInvariant();
+
+            List<string> matches = new List<string>();
+            foreach (char c in lowercaseInput) {
+                if (node.Children.TryGetValue(c, out TrieNode childNode)) {
+                    node = childNode;
+                }
+                else {
+                    node = null;
+                    // No prefix-match, look for string.Contains match instead
+                    matches = FallbackSearch(lowercaseInput);
+                    break;
+                }
+            }
+
+            if (node != root && node != null) {
+                matches = FindAllMatches(node, lowercaseInput);
+            }
+            return matches.Count > 0 ? lowerToCamelCase[matches[matchIndex % matches.Count]] : inputText;
+        }
+
+        private List<string> FallbackSearch(string inputText) {
+            List<string> matches = new List<string>();
+            foreach (string word in words) {
+                if (word.Contains(inputText)) {
+                    matches.Add(word);
+                }
+            }
+
+            return matches;
+        }
+
+        private List<string> FindAllMatches(TrieNode node, string currentPrefix) {
+            void FindAllMatchesRecursive(TrieNode node, string currentPrefix, List<string> matches) {
+                if (node.IsEndOfWord) {
+                    matches.Add(currentPrefix);
+                }
+
+                foreach (var childNode in node.Children.Values) {
+                    FindAllMatchesRecursive(childNode, currentPrefix + childNode.Value, matches);
+                }
+            }
+
+            List<string> matches = new List<string>();
+            FindAllMatchesRecursive(node, currentPrefix, matches);
+            return matches;
+        }
+    }
+
+    public static class TMP_TextExt {
+        public static TMP_Text PlaceholderText(this TMP_InputField inputField) {
+            var result = inputField.textViewport.transform.Find("Placeholder")?.GetComponent<TMP_Text>();
+            if (result != null) {
+                return result;
+            }
+            else {
+                Debug.LogError($"No child named 'Placeholder' found under inputField: {inputField.FullPath()}");
+                return null;
+            }
+        }
+    }
+    
+    public static class MonobehaviourExt {
+        public static void InvokeRealtime(this MonoBehaviour mb, string methodName, float time) {
+            mb.StartCoroutine(WaitRealtimeToInvoke(mb, methodName, time));
+        }
+
+        public static IEnumerator WaitRealtimeToInvoke(this MonoBehaviour mb, string methodName, float time) {
+            yield return new WaitForSecondsRealtime(time);
+            
+            mb.Invoke(methodName, 0f);
+        }
+    }
+
     public static class Utils {
         public static void ForceRefresh(this MeshCollider meshCollider) {
             // Hack to force the MeshCollider to refresh the bounds
@@ -393,7 +511,7 @@ namespace SuperspectiveUtils {
 
         public static T[] GetComponentsInChildrenOnly<T>(this Transform parent) where T : Component {
             T[] all = parent.GetComponentsInChildren<T>();
-            T[] children = new T[parent.childCount];
+            T[] children = new T[all.Length - 1];
             int index = 0;
             foreach (T each in all) {
                 if (each.transform != parent) {

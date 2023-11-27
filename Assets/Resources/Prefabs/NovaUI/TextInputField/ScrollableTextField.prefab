@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 433028251448810308}
   - component: {fileID: 433028251448810304}
   - component: {fileID: 433028251448810311}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextBlock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -365,7 +365,7 @@ GameObject:
   - component: {fileID: 433028251544217116}
   - component: {fileID: 433028251544217090}
   - component: {fileID: 433028251544217088}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Scroller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -676,7 +676,7 @@ GameObject:
   - component: {fileID: 8750488819296990473}
   - component: {fileID: 279253111568321570}
   - component: {fileID: 3693892395042930131}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1023,7 +1023,7 @@ GameObject:
   - component: {fileID: 433028252434717264}
   - component: {fileID: 433028252434717267}
   - component: {fileID: 433028252434717266}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: PlaceHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1373,7 +1373,7 @@ GameObject:
   - component: {fileID: 433028253456703508}
   - component: {fileID: 433028253456703511}
   - component: {fileID: 433028253456703510}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ScrollableTextField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1642,7 +1642,7 @@ GameObject:
   - component: {fileID: 5898453053907482154}
   - component: {fileID: 7812705702843204663}
   - component: {fileID: 8496996194767132148}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Scrollbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}

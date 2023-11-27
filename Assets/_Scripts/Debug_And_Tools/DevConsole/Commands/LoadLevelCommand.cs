@@ -7,7 +7,7 @@ namespace DeveloperConsole {
 
         public override CommandResponse Execute(string[] args) {
             if (args.Length < 1) {
-                return new FailureResponse("No level index or level name provided.");
+                return LoadLevel(LevelManager.instance.ActiveScene);
             }
             
             string levelArg = args[0];
@@ -52,7 +52,7 @@ namespace DeveloperConsole {
                 resetPlayerPosition ? () => LevelManager.instance.LoadDefaultPlayerPosition(level) : null
             );
 
-            return new SuccessResponse();
+            return new SuccessResponse($"Loaded level {level.ToName()} ({level.ToDisplayName()})");
         }
     }
 }

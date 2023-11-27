@@ -60,11 +60,9 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
     private void FixedUpdate() {
         if (curFallingSpeed > windSpeedThreshold) {
             Collider[] hitColliders = Physics.OverlapSphere(Player.instance.playerCam.transform.position, lowWindSoundMaxDistance, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
-
-
             
             nearbyCollider = hitColliders
-                .Where(c => !(c.TaggedAsPlayer() || c.isTrigger))
+                .Where(c => !(c.TaggedAsPlayer() || c.isTrigger || c.gameObject.layer == LayerMask.NameToLayer("CollideWithPlayerOnly")))
                 .ToDictionary(c => c, GetDistance)
                 .OrderBy(kv => kv.Value)
                 .FirstOrDefault()
