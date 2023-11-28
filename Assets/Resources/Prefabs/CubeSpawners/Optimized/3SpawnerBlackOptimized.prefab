@@ -5361,6 +5361,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 1}
   buttonToReactTo: {fileID: 1798755781728460906}
+  r: {fileID: 0}
 --- !u!1 &1798755779990504618
 GameObject:
   m_ObjectHideFlags: 0
@@ -5787,6 +5788,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 1}
   buttonToReactTo: {fileID: 1798755780073238020}
+  r: {fileID: 0}
 --- !u!1 &1798755780073238022
 GameObject:
   m_ObjectHideFlags: 0
@@ -5803,6 +5805,7 @@ GameObject:
   - component: {fileID: 1798755780073238026}
   - component: {fileID: 1798755780073238027}
   - component: {fileID: 1798755780073238020}
+  - component: {fileID: 2596514976411436073}
   m_Layer: 0
   m_Name: Button0
   m_TagString: Untagged
@@ -7779,6 +7782,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.0592737, g: 1.0592737, b: 1.0592737, a: 1}
   buttonToReactTo: {fileID: 1798755780073238020}
+  r: {fileID: 0}
 --- !u!114 &1798755780073238020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7793,7 +7797,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1798755780073238026}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -7849,7 +7852,6 @@ MonoBehaviour:
   pressDistance: -0.03125
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  _state: 0
   automaticallySetHelpText: 0
   buttonOffHelpText: Turn on
   buttonOnHelpText: Turn off
@@ -7859,6 +7861,50 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+--- !u!114 &2596514976411436073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755780073238022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1798755780073238026}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1798755780110025885
 GameObject:
   m_ObjectHideFlags: 0
@@ -11898,6 +11944,7 @@ GameObject:
   - component: {fileID: 1798755780267672891}
   - component: {fileID: 1798755780267672884}
   - component: {fileID: 1798755780267672885}
+  - component: {fileID: 8568383403652086693}
   m_Layer: 0
   m_Name: Button120
   m_TagString: Untagged
@@ -13874,6 +13921,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.0592737, g: 1.0592737, b: 1.0592737, a: 1}
   buttonToReactTo: {fileID: 1798755780267672885}
+  r: {fileID: 0}
 --- !u!114 &1798755780267672885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13888,7 +13936,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1798755780267672891}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -13944,7 +13991,6 @@ MonoBehaviour:
   pressDistance: -0.03125
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  _state: 0
   automaticallySetHelpText: 0
   buttonOffHelpText: Turn on
   buttonOnHelpText: Turn off
@@ -13954,6 +14000,50 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+--- !u!114 &8568383403652086693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755780267672886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1798755780267672891}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1798755780271775606
 GameObject:
   m_ObjectHideFlags: 0
@@ -13963,9 +14053,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1798755780271775611}
-  - component: {fileID: 1798755780271775605}
   - component: {fileID: 1798755780271775604}
   - component: {fileID: 2494046941255492597}
+  - component: {fileID: 1426608678140511241}
   m_Layer: 2
   m_Name: CubeSpawner120
   m_TagString: Untagged
@@ -13988,31 +14078,6 @@ Transform:
   m_Father: {fileID: 1798755781749392542}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1798755780271775605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1798755780271775606}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 2494046941255492597}
-  DEBUG: 0
-  backWall: {fileID: 1798755780756937968}
-  button: {fileID: 1798755780267672885}
-  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
-    type: 3}
-  cubeSpawned: {fileID: 0}
-  cubeGrabbedFromSpawner:
-    referencedSceneName: 
-    referencedObjId: 
-  roofCollider: {fileID: 1798755780365177365}
-  glass: {fileID: 1798755780544169859}
-  _state: 0
 --- !u!65 &1798755780271775604
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14047,6 +14112,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
+--- !u!114 &1426608678140511241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755780271775606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 2494046941255492597}
+  DEBUG: 0
+  backWall: {fileID: 1798755780756937968}
+  button: {fileID: 1798755780267672885}
+  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
+    type: 3}
+  cubeSpawned: {fileID: 0}
+  cubeGrabbedFromSpawner:
+    referencedSceneName: 
+    referencedObjId: 
+  roofCollider: {fileID: 1798755780365177365}
+  glass: {fileID: 1798755780544169859}
+  spawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  despawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!1 &1798755780289235679
 GameObject:
   m_ObjectHideFlags: 0
@@ -17369,9 +17468,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1798755780530399234}
-  - component: {fileID: 1798755780530399260}
   - component: {fileID: 1798755780530399235}
   - component: {fileID: 2586511488857163534}
+  - component: {fileID: 9105334021800001706}
   m_Layer: 2
   m_Name: CubeSpawner240
   m_TagString: Untagged
@@ -17394,31 +17493,6 @@ Transform:
   m_Father: {fileID: 1798755781749392542}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1798755780530399260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1798755780530399261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 2586511488857163534}
-  DEBUG: 0
-  backWall: {fileID: 1798755780177155281}
-  button: {fileID: 1798755781728460906}
-  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
-    type: 3}
-  cubeSpawned: {fileID: 0}
-  cubeGrabbedFromSpawner:
-    referencedSceneName: 
-    referencedObjId: 
-  roofCollider: {fileID: 1798755780365177365}
-  glass: {fileID: 1798755781677262111}
-  _state: 0
 --- !u!65 &1798755780530399235
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17453,6 +17527,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
+--- !u!114 &9105334021800001706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755780530399261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 2586511488857163534}
+  DEBUG: 0
+  backWall: {fileID: 1798755780177155281}
+  button: {fileID: 1798755781728460906}
+  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
+    type: 3}
+  cubeSpawned: {fileID: 0}
+  cubeGrabbedFromSpawner:
+    referencedSceneName: 
+    referencedObjId: 
+  roofCollider: {fileID: 1798755780365177365}
+  glass: {fileID: 1798755781677262111}
+  spawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  despawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!1 &1798755780539923790
 GameObject:
   m_ObjectHideFlags: 0
@@ -25451,6 +25559,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 1}
   buttonToReactTo: {fileID: 1798755780267672885}
+  r: {fileID: 0}
 --- !u!1 &1798755781438800527
 GameObject:
   m_ObjectHideFlags: 0
@@ -27362,7 +27471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 1798755781531382453}
+  cubeSpawner: {fileID: 3112668042614171940}
 --- !u!1 &1798755781531382454
 GameObject:
   m_ObjectHideFlags: 0
@@ -27372,9 +27481,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1798755781531382459}
-  - component: {fileID: 1798755781531382453}
   - component: {fileID: 1798755781531382452}
   - component: {fileID: 5776005482559565093}
+  - component: {fileID: 3112668042614171940}
   m_Layer: 2
   m_Name: CubeSpawner0
   m_TagString: Untagged
@@ -27397,31 +27506,6 @@ Transform:
   m_Father: {fileID: 1798755781749392542}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1798755781531382453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1798755781531382454}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 5776005482559565093}
-  DEBUG: 0
-  backWall: {fileID: 1798755781571134221}
-  button: {fileID: 1798755780073238020}
-  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
-    type: 3}
-  cubeSpawned: {fileID: 0}
-  cubeGrabbedFromSpawner:
-    referencedSceneName: 
-    referencedObjId: 
-  roofCollider: {fileID: 1798755780365177365}
-  glass: {fileID: 1798755780997325684}
-  _state: 0
 --- !u!65 &1798755781531382452
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -27456,6 +27540,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
+--- !u!114 &3112668042614171940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755781531382454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 5776005482559565093}
+  DEBUG: 0
+  backWall: {fileID: 1798755781571134221}
+  button: {fileID: 1798755780073238020}
+  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
+    type: 3}
+  cubeSpawned: {fileID: 0}
+  cubeGrabbedFromSpawner:
+    referencedSceneName: 
+    referencedObjId: 
+  roofCollider: {fileID: 1798755780365177365}
+  glass: {fileID: 1798755780997325684}
+  spawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  despawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!1 &1798755781571134223
 GameObject:
   m_ObjectHideFlags: 0
@@ -30848,7 +30966,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 1798755780530399260}
+  cubeSpawner: {fileID: 9105334021800001706}
 --- !u!1 &1798755781677262104
 GameObject:
   m_ObjectHideFlags: 0
@@ -31085,6 +31203,7 @@ GameObject:
   - component: {fileID: 1798755781728460904}
   - component: {fileID: 1798755781728460905}
   - component: {fileID: 1798755781728460906}
+  - component: {fileID: 323821639795350727}
   m_Layer: 0
   m_Name: Button240
   m_TagString: Untagged
@@ -33061,6 +33180,7 @@ MonoBehaviour:
   pressColor: {r: 1, g: 1, b: 1, a: 1}
   pressEmission: {r: 1.0592737, g: 1.0592737, b: 1.0592737, a: 1}
   buttonToReactTo: {fileID: 1798755781728460906}
+  r: {fileID: 0}
 --- !u!114 &1798755781728460906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33075,7 +33195,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1798755781728460904}
   DEBUG: 0
-  timeSinceStateChange: 0
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -33131,7 +33250,6 @@ MonoBehaviour:
   pressDistance: -0.03125
   unpressAfterPress: 0
   timeBetweenPressEndDepressStart: 0.5
-  _state: 0
   automaticallySetHelpText: 0
   buttonOffHelpText: Turn on
   buttonOnHelpText: Turn off
@@ -33141,6 +33259,50 @@ MonoBehaviour:
   onButtonUnpressBegin:
     m_PersistentCalls:
       m_Calls: []
+  stateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+--- !u!114 &323821639795350727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798755781728460907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1798755781728460904}
+  DEBUG: 0
+  state:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  powerMode: 3
+  parentMultiMode: 0
+  source: {fileID: 0}
+  sources: []
+  onPowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onPowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+  onDepowerFinish:
+    m_PersistentCalls:
+      m_Calls: []
+  automaticallyFinishPowering: 0
+  automaticFinishPoweringTime: 0
+  automaticallyFinishDepowering: 0
+  automaticFinishDepoweringTime: 0
 --- !u!1 &1798755781749392543
 GameObject:
   m_ObjectHideFlags: 0
@@ -34685,7 +34847,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 1798755780271775605}
+  cubeSpawner: {fileID: 1426608678140511241}
 --- !u!1 &3971012888228889849
 GameObject:
   m_ObjectHideFlags: 0

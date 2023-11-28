@@ -9445,9 +9445,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5674360502206882381}
-  - component: {fileID: 7551554354621687104}
   - component: {fileID: 1109594354386017863}
   - component: {fileID: 7080475695950457514}
+  - component: {fileID: 7891451953826717286}
   m_Layer: 2
   m_Name: CubeSpawner
   m_TagString: Untagged
@@ -9470,31 +9470,6 @@ Transform:
   m_Father: {fileID: 651225172522682688}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7551554354621687104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2562754332582752804}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 7080475695950457514}
-  DEBUG: 0
-  backWall: {fileID: 6374576950839930035}
-  button: {fileID: 3594075626327734280}
-  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
-    type: 3}
-  cubeSpawned: {fileID: 0}
-  cubeGrabbedFromSpawner:
-    referencedSceneName: 
-    referencedObjId: 
-  roofCollider: {fileID: 5021221546031491952}
-  glass: {fileID: 5986597257203689996}
-  _state: 0
 --- !u!65 &1109594354386017863
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9529,6 +9504,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
+--- !u!114 &7891451953826717286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2562754332582752804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 7080475695950457514}
+  DEBUG: 0
+  backWall: {fileID: 6374576950839930035}
+  button: {fileID: 3594075626327734280}
+  cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
+    type: 3}
+  cubeSpawned: {fileID: 0}
+  cubeGrabbedFromSpawner:
+    referencedSceneName: 
+    referencedObjId: 
+  roofCollider: {fileID: 5021221546031491952}
+  glass: {fileID: 5986597257203689996}
+  spawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  despawnState:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!1 &3377466744187580294
 GameObject:
   m_ObjectHideFlags: 0
@@ -12069,6 +12078,7 @@ MonoBehaviour:
     _prevState: 0
     _timeSinceStateChanged: 0
     onStateChange: []
+  powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
   sources: []
@@ -17014,7 +17024,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 7551554354621687104}
+  cubeSpawner: {fileID: 7891451953826717286}
 --- !u!1 &8226502273305919265
 GameObject:
   m_ObjectHideFlags: 0

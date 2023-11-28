@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using LevelManagement;
 using UnityEngine;
 using NaughtyAttributes;
 using PortalMechanics;
 using PowerTrailMechanics;
+using SerializableClasses;
 using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -52,8 +54,8 @@ namespace MagicTriggerMechanics {
 		public DimensionObject[] dimensionObjects;
 		public VisibilityState visibilityState;
 		public Levels flythroughCameraLevel;
-		public Portal[] portalsToEnable;
-		public Portal[] portalsToDisable;
+		public SerializableReference[] portalsToEnable;
+		public SerializableReference[] portalsToDisable;
 		public UnityEvent unityEvent;
 
 		public void Execute(MagicTrigger triggerScript) {
@@ -101,12 +103,8 @@ namespace MagicTriggerMechanics {
 					CameraFlythrough.instance.PlayForLevel(flythroughCameraLevel);
 					break;
 				case TriggerActionType.EnablePortalRendering:
-					foreach (var portal in portalsToEnable) {
-						portal.pauseRendering = false;
-					}
-					foreach (var portal in portalsToDisable) {
-						portal.pauseRendering = true;
-					}
+					PortalRenderingToggle(portalsToEnable, false);
+					PortalRenderingToggle(portalsToDisable, true);
 					break;
 				case TriggerActionType.UnityEvent:
 					unityEvent?.Invoke();
@@ -156,12 +154,8 @@ namespace MagicTriggerMechanics {
 					}
 					break;
 				case TriggerActionType.EnablePortalRendering:
-					foreach (var portal in portalsToEnable) {
-						portal.pauseRendering = true;
-					}
-					foreach (var portal in portalsToDisable) {
-						portal.pauseRendering = false;
-					}
+					PortalRenderingToggle(portalsToEnable, true);
+					PortalRenderingToggle(portalsToDisable, false);
 					break;
 				default:
 					return;
@@ -174,6 +168,23 @@ namespace MagicTriggerMechanics {
 
 		bool HasTiming(ActionTiming timing) {
 			return (int)timing > 0;
+		}
+
+		private void PortalRenderingToggle(IEnumerable<SerializableReference> portals, bool pauseRendering) {
+			foreach (var portal in portals) {
+				portal.Reference.MatchAction(
+					saveableObject => {
+						if (saveableObject is Portal loadedPortal) {
+							loadedPortal.pauseRendering = pauseRendering;
+						}
+					},
+					serializedSaveObject => {
+						if (serializedSaveObject is Portal.PortalSave unloadedPortal) {
+							unloadedPortal.pauseRendering = pauseRendering;
+						}
+					}
+				);
+			}
 		}
 	}
 

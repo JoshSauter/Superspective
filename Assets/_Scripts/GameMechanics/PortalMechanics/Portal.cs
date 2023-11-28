@@ -1086,7 +1086,7 @@ namespace PortalMechanics {
 			bool compositePortal;
 			bool teleportingPlayer = false;
 
-			bool pauseRendering = false;
+			public bool pauseRendering = false;
 			bool pauseLogic = false;
 
 			public PortalSave(Portal portal) : base(portal) {

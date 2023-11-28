@@ -11,10 +11,14 @@ using UnityEngine;
 namespace Editor {
     [CustomPropertyDrawer(typeof(SerializableReference))]
     public class SerializableReferencePropertyDrawer : PropertyDrawer {
-        bool viewAsReference = true;
-        SaveableObject cachedReference;
-        string cachedSceneName;
-        string cachedId;
+        public class CachedReference {
+            public SaveableObject cachedReference;
+            public string cachedSceneName;
+            public string cachedId;
+        }
+
+        private static Dictionary<string, CachedReference> cachedReferences = new Dictionary<string, CachedReference>();
+        private bool viewAsReference = false;
 
         public override void OnGUI(
             Rect position,
@@ -29,6 +33,12 @@ namespace Editor {
             SerializedProperty referencedSceneName = property.FindPropertyRelative("referencedSceneName");
             SerializedProperty referencedObjId = property.FindPropertyRelative("referencedObjId");
 
+            if (!cachedReferences.ContainsKey(referencedObjId.stringValue)) {
+                cachedReferences.Add(referencedObjId.stringValue, new CachedReference());
+            }
+
+            CachedReference cached = cachedReferences[referencedObjId.stringValue];
+
             float height = (position.height) / (viewAsReference ? 2.0f : 3.0f);
 
             Rect sameSceneRect = new Rect(position.x, position.y, position.width, height);
@@ -40,6 +50,8 @@ namespace Editor {
 
             if (viewAsReference) {
                 Type genericReferenceType = GetSaveableObjectType();
+                string cachedId = cached.cachedId;
+                string cachedSceneName = cached.cachedSceneName;
 
                 if (cachedId != referencedObjId.stringValue || cachedSceneName != referencedSceneName.stringValue) {
                     cachedId = referencedObjId.stringValue;
@@ -48,23 +60,23 @@ namespace Editor {
                     // If the current ID & sceneName are present, try to update the cached reference accordingly
                     if (!string.IsNullOrEmpty(cachedId) && !string.IsNullOrEmpty(cachedSceneName)) {
                         List<SaveableObject> matches = FindObjectById(cachedSceneName, cachedId);
-                        if (matches.Count == 1 && matches[0].GetType() == genericReferenceType) {
-                            cachedReference = matches[0];
+                        if (matches.Count == 1 && genericReferenceType.IsInstanceOfType(matches[0])) {
+                            cached.cachedReference = matches[0];
                         }
                     }
                 }
 
-                SaveableObject prevReference = cachedReference;
-                cachedReference = EditorGUI.ObjectField(
+                SaveableObject prevReference = cached.cachedReference;
+                cached.cachedReference = EditorGUI.ObjectField(
                     referenceRect,
-                    cachedReference,
+                    cached.cachedReference,
                     genericReferenceType,
                     viewAsReference
                 ) as SaveableObject;
 
-                if (cachedReference != prevReference && cachedReference != null) {
-                    referencedSceneName.stringValue = cachedReference.gameObject.scene.name;
-                    referencedObjId.stringValue = cachedReference.ID;
+                if (cached.cachedReference != prevReference && cached.cachedReference != null) {
+                    referencedSceneName.stringValue = cached.cachedReference.gameObject.scene.name;
+                    referencedObjId.stringValue = cached.cachedReference.ID;
                 }
             }
             else {
