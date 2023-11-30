@@ -87,9 +87,9 @@ namespace GrowShrink {
             if (!inPortal.changeScale) return;
             
             if (objTeleported == thisRigidbody.GetComponent<Collider>()) {
-                SetScaleDirectly(currentScale * inPortal.scaleFactor);
-                minScale *= inPortal.scaleFactor;
-                maxScale *= inPortal.scaleFactor;
+                SetScaleDirectly(currentScale * inPortal.ScaleFactor);
+                minScale *= inPortal.ScaleFactor;
+                maxScale *= inPortal.ScaleFactor;
             }
         }
 
@@ -137,6 +137,7 @@ namespace GrowShrink {
         }
 
         public void SetScaleDirectly(float targetScale) {
+            // Debug.LogWarning($"{ID}: SetScaleDirectly: setting scale to {targetScale} from {currentScale}");
             float targetScaleClamped = Mathf.Clamp01(targetScale);
             Vector3 scaleWithoutMultiplier = transform.localScale / currentScale;
             transform.localScale = scaleWithoutMultiplier * targetScale;

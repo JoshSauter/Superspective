@@ -85,20 +85,20 @@ namespace LevelSpecific.WhiteRoom {
             );
 
             if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.pwr.OnPowerFinish += TriggeredByPowerOn;
-                triggeredByPowerTrail.pwr.OnDepowerBegin += TriggeredByPowerOff;
+                triggeredByPowerTrail.pwr.OnPowerFinish += Raise;
+                triggeredByPowerTrail.pwr.OnDepowerBegin += Lower;
             }
         }
 
         protected override void OnDestroy() {
             base.OnDestroy();
             if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.pwr.OnPowerFinish -= TriggeredByPowerOn;
-                triggeredByPowerTrail.pwr.OnDepowerBegin -= TriggeredByPowerOff;
+                triggeredByPowerTrail.pwr.OnPowerFinish -= Raise;
+                triggeredByPowerTrail.pwr.OnDepowerBegin -= Lower;
             }
         }
 
-        void TriggeredByPowerOn() {
+        public void Raise() {
             switch (state.state) {
                 case State.Lowered:
                     state.Set(State.Raising);
@@ -115,7 +115,7 @@ namespace LevelSpecific.WhiteRoom {
             }
         }
 
-        void TriggeredByPowerOff() {
+        public void Lower() {
             switch (state.state) {
                 case State.Lowering:
                 case State.Lowered:

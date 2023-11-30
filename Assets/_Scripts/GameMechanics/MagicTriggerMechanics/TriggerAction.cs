@@ -6,6 +6,7 @@ using NaughtyAttributes;
 using PortalMechanics;
 using PowerTrailMechanics;
 using SerializableClasses;
+using SuperspectiveUtils;
 using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,7 +25,8 @@ namespace MagicTriggerMechanics {
 		ChangeVisibilityState = 9,
 		PlayCameraFlythrough = 10,
 		EnablePortalRendering = 11,		// Enables Portal rendering when triggered forward, disable when triggered negatively
-		UnityEvent = 12
+		UnityEvent = 12,
+		ToggleColliders = 13
 	}
 
 	[Flags]
@@ -45,6 +47,7 @@ namespace MagicTriggerMechanics {
 		public GameObject[] objectsToDisable;
 		public MonoBehaviour[] scriptsToEnable;
 		public MonoBehaviour[] scriptsToDisable;
+		public bool onlyTriggerForward;
 		public Levels levelForward;
 		public Levels levelBackward;
 		public bool forwardSameScenePillar = true;
@@ -57,6 +60,8 @@ namespace MagicTriggerMechanics {
 		public SerializableReference[] portalsToEnable;
 		public SerializableReference[] portalsToDisable;
 		public UnityEvent unityEvent;
+		public Collider[] collidersToEnable;
+		public Collider[] collidersToDisable;
 
 		public void Execute(MagicTrigger triggerScript) {
 			triggerScript.debug.Log($"Timing: {actionTiming} Execute");
@@ -82,6 +87,11 @@ namespace MagicTriggerMechanics {
 						objectToEnable.SetActive(true);
 					}
 					foreach (var objectToDisable in objectsToDisable) {
+						if (objectToDisable == null) {
+							Debug.LogError($"{triggerScript.FullPath()}.MagicTrigger has a null objectToDisable!");
+							continue;
+						}
+						
 						objectToDisable.SetActive(false);
 					}
 					return;
@@ -109,12 +119,18 @@ namespace MagicTriggerMechanics {
 				case TriggerActionType.UnityEvent:
 					unityEvent?.Invoke();
 					break;
+				case TriggerActionType.ToggleColliders:
+					ColliderToggle(collidersToEnable, true);
+					ColliderToggle(collidersToDisable, false);
+					break;
 				default:
 					return;
 			}
 		}
 
 		public void NegativeExecute() {
+			if (onlyTriggerForward) return;
+			
 			switch (action) {
 				case TriggerActionType.ToggleScripts:
 					foreach (var scriptToEnable in scriptsToEnable) {
@@ -157,6 +173,10 @@ namespace MagicTriggerMechanics {
 					PortalRenderingToggle(portalsToEnable, true);
 					PortalRenderingToggle(portalsToDisable, false);
 					break;
+				case TriggerActionType.ToggleColliders:
+					ColliderToggle(collidersToEnable, false);
+					ColliderToggle(collidersToDisable, true);
+					break;
 				default:
 					return;
 			}
@@ -186,6 +206,12 @@ namespace MagicTriggerMechanics {
 				);
 			}
 		}
+		
+		private void ColliderToggle(IEnumerable<Collider> colliders, bool enabled) {
+			foreach (var collider in colliders) {
+				collider.enabled = enabled;
+			}
+		}
 	}
 
 #if UNITY_EDITOR
@@ -210,6 +236,7 @@ namespace MagicTriggerMechanics {
 			SerializedProperty scriptsToEnable = property.FindPropertyRelative("scriptsToEnable");
 			SerializedProperty scriptsToDisable = property.FindPropertyRelative("scriptsToDisable");
 
+			SerializedProperty onlyTriggerForward = property.FindPropertyRelative("onlyTriggerForward");
 			SerializedProperty levelForward = property.FindPropertyRelative("levelForward");
 			SerializedProperty levelBackward = property.FindPropertyRelative("levelBackward");
 
@@ -225,11 +252,15 @@ namespace MagicTriggerMechanics {
 			SerializedProperty portalsToDisable = property.FindPropertyRelative("portalsToDisable");
 
 			SerializedProperty unityEvent = property.FindPropertyRelative("unityEvent");
+			
+			SerializedProperty collidersToEnable = property.FindPropertyRelative("collidersToEnable");
+			SerializedProperty collidersToDisable = property.FindPropertyRelative("collidersToDisable");
 
 			GUIContent scriptsToEnableLabel = new GUIContent("Scripts to Enable:");
 			GUIContent scriptsToDisableLabel = new GUIContent("Scripts to Disable:");
 			GUIContent objectsToEnableLabel = new GUIContent("Objects to Enable:");
 			GUIContent objectsToDisableLabel = new GUIContent("Objects to Disable:");
+			GUIContent onlyTriggerForwardLabel = new GUIContent("Only trigger forward?");
 			GUIContent forwardLevelLabel = new GUIContent("Forward Level:");
 			GUIContent backwardLevelLabel = new GUIContent("Backward Level:");
 			GUIContent powerTrailLabel = new GUIContent("Power trail:");
@@ -240,6 +271,8 @@ namespace MagicTriggerMechanics {
 			GUIContent portalsToEnableLabel = new GUIContent("Portals to Enable Rendering:");
 			GUIContent portalsToDisableLabel = new GUIContent("Portals to Disable Rendering:");
 			GUIContent unityEventLabel = new GUIContent("Unity events:");
+			GUIContent collidersToEnableLabel = new GUIContent("Colliders to Enable:");
+			GUIContent collidersToDisableLabel = new GUIContent("Colliders to Disable:");
 
 			EditorGUILayout.PropertyField(action);
 			EditorGUILayout.PropertyField(actionTiming);
@@ -264,8 +297,11 @@ namespace MagicTriggerMechanics {
 					EditorGUILayout.PropertyField(objectsToDisable, objectsToDisableLabel, true);
 					break;
 				case TriggerActionType.ChangeLevel:
+					EditorGUILayout.PropertyField(onlyTriggerForward, onlyTriggerForwardLabel);
 					EditorGUILayout.PropertyField(levelForward, forwardLevelLabel);
-					EditorGUILayout.PropertyField(levelBackward, backwardLevelLabel);
+					if (!onlyTriggerForward.boolValue) {
+						EditorGUILayout.PropertyField(levelBackward, backwardLevelLabel);
+					}
 					break;
 				case TriggerActionType.PowerOrDepowerPowerTrail:
 					EditorGUILayout.PropertyField(powerTrail, powerTrailLabel);
@@ -284,6 +320,10 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerActionType.UnityEvent:
 					EditorGUILayout.PropertyField(unityEvent, unityEventLabel);
+					break;
+				case TriggerActionType.ToggleColliders:
+					EditorGUILayout.PropertyField(collidersToEnable, collidersToEnableLabel);
+					EditorGUILayout.PropertyField(collidersToDisable, collidersToDisableLabel);
 					break;
 				default:
 					break;

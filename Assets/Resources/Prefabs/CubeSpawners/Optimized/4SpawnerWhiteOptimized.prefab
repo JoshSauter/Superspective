@@ -9737,7 +9737,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 2295704462809673125}
+  cubeSpawner: {fileID: 3998603865669801442}
 --- !u!1 &1723911209156189497
 GameObject:
   m_ObjectHideFlags: 0
@@ -13993,7 +13993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 5745203099443339486}
+  cubeSpawner: {fileID: 7416353504794467077}
 --- !u!1 &2701652501416058115
 GameObject:
   m_ObjectHideFlags: 0
@@ -17269,7 +17269,7 @@ GameObject:
   - component: {fileID: 6453158981169860403}
   - component: {fileID: 553550443364037351}
   - component: {fileID: 7631741699580191375}
-  - component: {fileID: 7596675781379281535}
+  - component: {fileID: 5774405114814893732}
   m_Layer: 2
   m_Name: CubeSpawner90
   m_TagString: Untagged
@@ -17326,7 +17326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &7596675781379281535
+--- !u!114 &5774405114814893732
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17335,7 +17335,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4116579686691144751}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 7631741699580191375}
@@ -18509,7 +18509,7 @@ GameObject:
   - component: {fileID: 8093704653957204444}
   - component: {fileID: 647586767314504405}
   - component: {fileID: 24330935813939073}
-  - component: {fileID: 2295704462809673125}
+  - component: {fileID: 3998603865669801442}
   m_Layer: 2
   m_Name: CubeSpawner270
   m_TagString: Untagged
@@ -18566,7 +18566,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &2295704462809673125
+--- !u!114 &3998603865669801442
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -18575,7 +18575,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4387184333491775723}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 24330935813939073}
@@ -25215,7 +25215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 6466669141728833387}
+  cubeSpawner: {fileID: 2208996126419302887}
 --- !u!1 &5881057937687120287
 GameObject:
   m_ObjectHideFlags: 0
@@ -25551,7 +25551,7 @@ GameObject:
   - component: {fileID: 1071313794929500362}
   - component: {fileID: 7155932482576349242}
   - component: {fileID: 6570144937180173072}
-  - component: {fileID: 6466669141728833387}
+  - component: {fileID: 2208996126419302887}
   m_Layer: 2
   m_Name: CubeSpawner180
   m_TagString: Untagged
@@ -25608,7 +25608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &6466669141728833387
+--- !u!114 &2208996126419302887
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -25617,7 +25617,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5979927544372679029}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 6570144937180173072}
@@ -47464,7 +47464,7 @@ GameObject:
   - component: {fileID: 77587014343162581}
   - component: {fileID: 4668779284064765663}
   - component: {fileID: 8442737581552956141}
-  - component: {fileID: 5745203099443339486}
+  - component: {fileID: 7416353504794467077}
   m_Layer: 2
   m_Name: CubeSpawner0
   m_TagString: Untagged
@@ -47521,7 +47521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &5745203099443339486
+--- !u!114 &7416353504794467077
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47530,7 +47530,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7799248665140734652}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 8442737581552956141}
@@ -50886,7 +50886,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 7596675781379281535}
+  cubeSpawner: {fileID: 5774405114814893732}
 --- !u!1 &9061594629469462669
 GameObject:
   m_ObjectHideFlags: 0

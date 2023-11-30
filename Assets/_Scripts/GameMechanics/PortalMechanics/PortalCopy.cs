@@ -138,6 +138,6 @@ public class PortalCopy : MonoBehaviour {
         transform.rotation = inPortal.TransformRotation(original.transform.rotation);
         
         // Scale
-        transform.localScale = original.transform.localScale;
+        transform.localScale = original.transform.localScale * inPortal.ScaleFactor;
     }
 }

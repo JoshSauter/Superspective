@@ -280,7 +280,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         thisRigidbody.useGravity = !IsGrounded;
 
         if (!thisRigidbody.isKinematic && stairMovement.stepState == StairMovement.StepState.StepReady) {
-            debug.Log($"Player velocity: {thisRigidbody.velocity:F2}\nSetting it to: {desiredVelocity}");
+            // debug.Log($"Player velocity: {thisRigidbody.velocity:F2}\nSetting it to: {desiredVelocity}");
             thisRigidbody.velocity = desiredVelocity;
         }
 

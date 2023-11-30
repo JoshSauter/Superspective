@@ -72,7 +72,8 @@ namespace LevelManagement {
 		ForkCathedralTutorial = 6,
 		GrowShrinkIntro = 28,
 		GrowShrinkIntroBetweenWorlds = 30,
-		GrowShrinkIntroDarkSide = 31
+		GrowShrinkIntroDarkSide = 31,
+		TransitionWhiteRoom3GrowShrinkIntro = 32
 	}
 
 	public static class LevelsExt {
@@ -116,6 +117,8 @@ namespace LevelManagement {
 			_defaultPlayerSettings = DefaultPlayerSettings.LoadFromDisk();
 			if (defaultPlayerSettings.playerSettingsByLevel.ContainsKey(level)) {
 				defaultPlayerSettings.playerSettingsByLevel[level].Apply();
+				// ReSharper disable once Unity.NoNullPropagation (Player is never deleted)
+				Player.instance.cameraFollow?.RecalculateWorldPositionLastFrame();
 			}
 		}
 		
@@ -226,7 +229,8 @@ namespace LevelManagement {
 			{ Levels.ForkCathedralTutorial, "_Fork_Cathedral_Tutorial" },
 			{ Levels.GrowShrinkIntro, "_GrowShrinkIntro" },
 			{ Levels.GrowShrinkIntroBetweenWorlds, "_GrowShrinkIntroBetweenWorlds" },
-			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" }
+			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" },
+			{ Levels.TransitionWhiteRoom3GrowShrinkIntro, "_TransitionWhiteRoom3GrowShrinkIntro" }
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();
@@ -468,7 +472,12 @@ namespace LevelManagement {
 			
 			Debug.Log($"Switching to level {levelName}");
 
-			BeforeActiveSceneChange?.Invoke(levelName);
+			try {
+				BeforeActiveSceneChange?.Invoke(levelName);
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error during BeforeActiveSceneChange: {e.Message}: {e.StackTrace}");
+			}
 
 			activeSceneName = levelName;
 
@@ -486,7 +495,12 @@ namespace LevelManagement {
 				if (ShouldLoadScene(levelName)) {
 					currentlyLoadingSceneNames.Add(levelName);
 
-					BeforeSceneLoad?.Invoke(levelName);
+					try {
+						BeforeSceneLoad?.Invoke(levelName);
+					}
+					catch (Exception e) {
+						Debug.LogError($"Error during BeforeSceneLoad({levelName}): {e.Message}: {e.StackTrace}");
+					}
 
 					scenesToBeLoadedFromDisk.Add(levelName);
 					SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
@@ -506,7 +520,12 @@ namespace LevelManagement {
 					if (ShouldLoadScene(connectedSceneName)) {
 						currentlyLoadingSceneNames.Add(connectedSceneName);
 
-						BeforeSceneLoad?.Invoke(connectedSceneName);
+						try {
+							BeforeSceneLoad?.Invoke(connectedSceneName);
+						}
+						catch (Exception e) {
+							Debug.LogError($"Error during BeforeSceneLoad({connectedSceneName}): {e.Message}: {e.StackTrace}");
+						}
 						scenesToBeLoadedFromDisk.Add(connectedSceneName);
 						SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
 					}
@@ -519,7 +538,12 @@ namespace LevelManagement {
 
 			if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					BeforeSceneRestoreDynamicObjects?.Invoke(sceneToBeLoaded);
+					try {
+						BeforeSceneRestoreDynamicObjects?.Invoke(sceneToBeLoaded);
+					}
+					catch (Exception e) {
+						Debug.LogError($"Error during BeforeSceneRestoreDynamicObjects({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+					}
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
@@ -528,7 +552,12 @@ namespace LevelManagement {
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					BeforeSceneRestoreState?.Invoke(sceneToBeLoaded);
+					try {
+						BeforeSceneRestoreState?.Invoke(sceneToBeLoaded);
+					}
+					catch (Exception e) {
+						Debug.LogError($"Error during BeforeSceneRestoreState({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+					}
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
@@ -537,12 +566,27 @@ namespace LevelManagement {
 				}
 
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					AfterSceneRestoreState?.Invoke(sceneToBeLoaded);
+					try {
+						AfterSceneRestoreState?.Invoke(sceneToBeLoaded);
+					}
+					catch (Exception e) {
+						Debug.LogError($"Error during AfterSceneRestoreState({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+					}
 				}
 			}
 			
-			OnActiveSceneChange?.Invoke();
-			onFinishCallback?.Invoke();
+			try {
+				OnActiveSceneChange?.Invoke();
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error during OnActiveSceneChange: {e.Message}: {e.StackTrace}");
+			}
+			try {
+				onFinishCallback?.Invoke();
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error during onFinishCallback: {e.Message}: {e.StackTrace}");
+			}
 			
 			isCurrentlySwitchingScenes = false;
 		}
@@ -562,7 +606,12 @@ namespace LevelManagement {
 
 			if (serializeDeactivatingScenes) {
 				foreach (var sceneToDeactivate in scenesToDeactivate) {
-					BeforeSceneSerializeState?.Invoke(sceneToDeactivate);
+					try {
+						BeforeSceneSerializeState?.Invoke(sceneToDeactivate);
+					}
+					catch (Exception e) {
+						Debug.LogError($"Error during BeforeSceneSerializeState: {e.Message}: {e.StackTrace}");
+					}
 				}
 			}
 
@@ -580,7 +629,12 @@ namespace LevelManagement {
 			}
 
 			foreach (var sceneToDeactivate in scenesToDeactivate) {
-				BeforeSceneUnload?.Invoke(sceneToDeactivate);
+				try {
+					BeforeSceneUnload?.Invoke(sceneToDeactivate);
+				}
+				catch (Exception e) {
+					Debug.LogError($"Error during BeforeSceneUnload: {e.Message}: {e.StackTrace}");
+				}
 			}
 
 			foreach (var sceneToDeactivate in scenesToDeactivate) {
@@ -603,7 +657,12 @@ namespace LevelManagement {
 				SceneManager.SetActiveScene(loadedScene);
 			}
 
-			AfterSceneLoad?.Invoke(loadedScene.name);
+			try {
+				AfterSceneLoad?.Invoke(loadedScene.name);
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error during AfterSceneLoad({loadedScene.name}): {e.Message}: {e.StackTrace}");
+			}
 
 			if (currentlyLoadingSceneNames.Contains(loadedScene.name)) {
 				currentlyLoadingSceneNames.Remove(loadedScene.name);
@@ -623,8 +682,13 @@ namespace LevelManagement {
 			if (unloadedScene.name == activeSceneName) {
 				debug.LogError("Just unloaded the active scene!");
 			}
-
-			AfterSceneUnload?.Invoke(unloadedScene.name);
+			
+			try {
+				AfterSceneUnload?.Invoke(unloadedScene.name);
+			}
+			catch (Exception e) {
+				Debug.LogError($"Error during AfterSceneUnload({unloadedScene.name}): {e.Message}: {e.StackTrace}");
+			}
 
 			if (currentlyUnloadingSceneNames.Contains(unloadedScene.name)) {
 				currentlyUnloadingSceneNames.Remove(unloadedScene.name);

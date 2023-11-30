@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1028441952}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -12616,7 +12616,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21069400
+  m_Name: pb_Mesh2278586
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -14602,7 +14602,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 28
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -14643,7 +14643,7 @@ MonoBehaviour:
     connectedLevels: 180000001400000016000000
   - level: 20
     _displayName: The Rose Room
-    connectedLevels: 06000000
+    connectedLevels: 20000000
   - level: 18
     _displayName: The Cathedral
     connectedLevels: 13000000
@@ -14652,7 +14652,7 @@ MonoBehaviour:
     connectedLevels: 1200000019000000
   - level: 25
     _displayName: A Space Between
-    connectedLevels: 130000001500000016000000
+    connectedLevels: 200000001500000016000000
   - level: 14
     _displayName: The Auditorium
     connectedLevels: 0c000000
@@ -14691,16 +14691,19 @@ MonoBehaviour:
     connectedLevels: 
   - level: 28
     _displayName: 
-    connectedLevels: 1e0000001f000000
+    connectedLevels: 1e0000001f00000020000000
   - level: 29
     _displayName: (Title Card)
     connectedLevels: 
   - level: 30
     _displayName: A Small Space Between Worlds
-    connectedLevels: 1c0000001f000000
+    connectedLevels: 1c0000001f00000020000000
   - level: 31
     _displayName: 
-    connectedLevels: 1c0000001e000000
+    connectedLevels: 1c0000001e00000020000000
+  - level: 32
+    _displayName: 
+    connectedLevels: 1c0000001e0000001f0000001400000019000000
   activeSceneName: 
   loadedSceneNames: []
   currentlyLoadingSceneNames: []
@@ -14803,7 +14806,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh159086
+  m_Name: pb_Mesh6590404
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15330,6 +15333,7 @@ MonoBehaviour:
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -15356,12 +15360,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    collidersToEnable: []
+    collidersToDisable: []
   - actionTiming: 4
     action: 0
     objectsToEnable: []
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -15376,6 +15383,8 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls: []
+    collidersToEnable: []
+    collidersToDisable: []
   playerIsInTriggerZone: 0
 --- !u!114 &441290176
 MonoBehaviour:
@@ -17299,7 +17308,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.35
+  m_fontSize: 39.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21461,7 +21470,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 41.85
+  m_fontSize: 55.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21815,7 +21824,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 407567762}
-  m_VersionIndex: 2541
+  m_VersionIndex: 2544
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -22341,8 +22350,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0.86911523, z: 0, w: -0.49460965}
-  m_LocalPosition: {x: 869, y: 61.75, z: -36.5}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0.10573147, y: -395.21072, z: 31.94942}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22352,7 +22361,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30509,7 +30518,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21068272
+  m_Name: pb_Mesh2277520
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30879,6 +30888,7 @@ MonoBehaviour:
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -30905,12 +30915,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    collidersToEnable: []
+    collidersToDisable: []
   - actionTiming: 4
     action: 12
     objectsToEnable: []
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -30937,12 +30950,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    collidersToEnable: []
+    collidersToDisable: []
   - actionTiming: 4
     action: 0
     objectsToEnable: []
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -30957,6 +30973,8 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls: []
+    collidersToEnable: []
+    collidersToDisable: []
   playerIsInTriggerZone: 0
 --- !u!114 &978358504
 MonoBehaviour:
@@ -33658,7 +33676,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21068578
+  m_Name: pb_Mesh2277752
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41851,7 +41869,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50.25
+  m_fontSize: 67.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -43396,7 +43414,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21073036
+  m_Name: pb_Mesh2282246
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -44334,7 +44352,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21070682
+  m_Name: pb_Mesh2279820
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -45504,7 +45522,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21070316
+  m_Name: pb_Mesh2279448
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -52895,7 +52913,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 3f6d336f90a84b24daed9c795bc450cb, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -53876,6 +53894,7 @@ MonoBehaviour:
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -53902,12 +53921,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    collidersToEnable: []
+    collidersToDisable: []
   - actionTiming: 4
     action: 0
     objectsToEnable: []
     objectsToDisable: []
     scriptsToEnable: []
     scriptsToDisable: []
+    onlyTriggerForward: 0
     levelForward: 0
     levelBackward: 0
     forwardSameScenePillar: 0
@@ -53922,6 +53944,8 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls: []
+    collidersToEnable: []
+    collidersToDisable: []
   playerIsInTriggerZone: 0
 --- !u!114 &1734990132
 MonoBehaviour:
@@ -54447,7 +54471,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.75
+  m_fontSize: 27.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -56146,7 +56170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66303,7 +66327,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21070228
+  m_Name: pb_Mesh2279360
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

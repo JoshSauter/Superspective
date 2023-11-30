@@ -95,15 +95,20 @@ namespace DeveloperConsole {
             }
         }
 
+        private void ToggleOff() {
+            if (!uiCanvas.activeSelf) return;
+            Toggle();
+        }
+
         public void ProcessCommand(string inputValue) {
             CommandResponse response = DeveloperConsole.ProcessCommand(inputValue);
             if (response) {
-                this.InvokeRealtime(nameof(Toggle), responseReadoutDelay);
+                this.InvokeRealtime(nameof(ToggleOff), responseReadoutDelay);
                 PlaceholderText.color = Color.green;
                 PlaceholderText.text = ((SuccessResponse)response).Message;
             }
             else {
-                this.InvokeRealtime(nameof(Toggle), responseReadoutDelay);
+                this.InvokeRealtime(nameof(ToggleOff), responseReadoutDelay);
                 PlaceholderText.color = Color.red;
                 PlaceholderText.text = ((FailureResponse)response).Reason;
             }

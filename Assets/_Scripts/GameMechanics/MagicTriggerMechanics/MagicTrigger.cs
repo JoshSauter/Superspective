@@ -249,21 +249,25 @@ namespace MagicTriggerMechanics {
 
 					if (action.objectsToEnable != null) {
 						for (int j = 0; j < action.objectsToEnable.Length; j++) {
+							if (action.objectsToEnable[j] == null) continue;
 							action.objectsToEnable[j].SetActive(this.gameObjectsToEnableState[i][j]);
 						}
 					}
 					if (action.objectsToDisable != null) {
 						for (int j = 0; j < action.objectsToDisable.Length; j++) {
+							if (action.objectsToDisable[j] == null) continue;
 							action.objectsToDisable[j].SetActive(this.gameObjectsToDisableState[i][j]);
 						}
 					}
 					if (action.scriptsToEnable != null) {
 						for (int j = 0; j < action.scriptsToEnable.Length; j++) {
+							if (action.scriptsToEnable[j] == null) continue;
 							action.scriptsToEnable[j].enabled = this.scriptsToEnableStatePerAction[i][j];
 						}
 					}
 					if (action.scriptsToDisable != null) {
 						for (int j = 0; j < action.scriptsToDisable.Length; j++) {
+							if (action.scriptsToDisable[j] == null) continue;
 							action.scriptsToDisable[j].enabled = this.scriptsToDisableStatePerAction[i][j];
 						}
 					}

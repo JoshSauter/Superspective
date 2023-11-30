@@ -44,7 +44,8 @@ public static class MergeProBuilderMeshesRecursivelyTool {
         "ProBuilderShape",
         "MeshFilter",
         "MeshCollider",
-        "MeshRenderer"
+        "MeshRenderer",
+        "BoxCollider"       // Used for double-sided colliders for plane objects
     };
 
     private const string MERGED_ROOT_NAME = "Merged";

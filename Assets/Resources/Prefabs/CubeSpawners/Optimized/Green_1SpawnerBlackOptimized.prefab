@@ -3295,7 +3295,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInZone: 0
   _cubeInteractable: 0
-  cubeSpawner: {fileID: 5091729359810586712}
+  cubeSpawner: {fileID: 6917646017052265765}
 --- !u!1 &1606976855277570747
 GameObject:
   m_ObjectHideFlags: 0
@@ -10725,7 +10725,7 @@ GameObject:
   - component: {fileID: 3860368319653896419}
   - component: {fileID: 8379996552711445737}
   - component: {fileID: 6422969471252101777}
-  - component: {fileID: 5091729359810586712}
+  - component: {fileID: 6917646017052265765}
   m_Layer: 2
   m_Name: CubeSpawner
   m_TagString: Untagged
@@ -10782,7 +10782,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 
---- !u!114 &5091729359810586712
+--- !u!114 &6917646017052265765
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10791,7 +10791,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6394288092862754954}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8976cb7e1122f24cac756b79cc1da1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c2733e2b63248a4d9ef5c23079ec9da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 6422969471252101777}

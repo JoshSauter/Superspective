@@ -74,6 +74,7 @@ namespace SuperspectiveUtils {
                 if (part.hitPortal && distanceRemaining > 0) {
                     currentRay = part.NextRay();
                     lastPortalHit = part.portalHit;
+                    distanceRemaining *= part.portalHit.ScaleFactor;
                 }
 
                 result.AddPart(part);

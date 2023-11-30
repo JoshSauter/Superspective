@@ -198,6 +198,12 @@ namespace Interactables {
             }
         }
 
+        public void TurnButtonOff() {
+            if (stateMachine == State.ButtonPressed || stateMachine == State.ButtonPressing) {
+                stateMachine.Set(State.ButtonUnpressing);
+            }
+        }
+
         public void PressButton() {
             if (stateMachine == State.ButtonUnpressed) {
                 stateMachine.Set(State.ButtonPressing);

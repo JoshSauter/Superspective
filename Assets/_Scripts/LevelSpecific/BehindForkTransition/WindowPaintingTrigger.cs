@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,14 @@ namespace LevelSpecific.BehindForkTransition {
         // GetOrNull valid here because we wait until we are in the active scene to reference it
         Portal portal => serializedPortalReference.GetOrNull();
         public TriggerActionType triggerType = TriggerActionType.ToggleGameObjects;
-        
-        IEnumerator Start() {
+        private bool inAsyncReferenceSetup = false;
+
+        private void Start() {
+            StartCoroutine(AsyncReferenceSetup());
+        }
+
+        IEnumerator AsyncReferenceSetup() {
+            inAsyncReferenceSetup = true;
             yield return new WaitUntil(() => gameObject.IsInActiveScene());
             yield return new WaitWhile(() => LevelManager.instance.IsCurrentlyLoadingScenes);
             yield return new WaitUntil(() => portal != null);
@@ -30,6 +37,20 @@ namespace LevelSpecific.BehindForkTransition {
                 List<GameObject> objects = action.objectsToDisable.ToList();
                 objects.Add(portal.gameObject);
                 action.objectsToDisable = objects.ToArray();
+            }
+            inAsyncReferenceSetup = false;
+        }
+
+        private void Update() {
+            if (!inAsyncReferenceSetup) {
+                MagicTrigger trigger = GetComponent<MagicTrigger>();
+                TriggerAction action = trigger.actionsToTrigger.Find(a => a.action == triggerType);
+
+                // Restore references broken by scene loads
+                if (action.objectsToDisable.ToList().Exists(o => o == null)) {
+                    action.objectsToDisable = null;
+                    StartCoroutine(AsyncReferenceSetup());
+                }
             }
         }
     }

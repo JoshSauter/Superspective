@@ -142,7 +142,7 @@ namespace DissolveObjects {
 
         // Update is called once per frame
         void Update() {
-            if (DebugInput.GetKeyDown(KeyCode.Alpha0)) {
+            if (DEBUG && DebugInput.GetKeyDown(KeyCode.Alpha0)) {
                 state = (state == State.Materialized || state == State.Materializing)
                     ? State.Dematerializing
                     : State.Materializing;

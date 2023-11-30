@@ -403,7 +403,8 @@ namespace PortalMechanics {
 			bool isInCameraFrustum = testPortal.IsVisibleFrom(cam);
 			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
 			bool isFacingCamera = Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
-			return isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera && !IsInvisibleDimensionObject();
+			bool result = isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera && !IsInvisibleDimensionObject();
+			return result;
 		}
 
 		void SetCameraSettings(Camera cam, CameraSettings settings) {
@@ -461,7 +462,7 @@ namespace PortalMechanics {
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
-			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.scaleFactor;
+			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.ScaleFactor;
 			inPortal.debug.Log($"Distance to portal (scale adjusted): {distanceToPortal:F3}");
 			bool shouldUseDefaultProjectionMatrix = depth == 0 && distanceToPortal < 2*clearSpaceBehindPortal;
 			if (DEBUG) {

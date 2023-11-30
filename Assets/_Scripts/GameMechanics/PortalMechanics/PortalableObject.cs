@@ -6,6 +6,7 @@ using System.Linq;
 using NaughtyAttributes;
 using Saving;
 using System;
+using GrowShrink;
 using SerializableClasses;
 using StateUtils;
 using UnityEngine.Rendering;
@@ -139,7 +140,7 @@ namespace PortalMechanics {
 		protected override void Start() {
 			base.Start();
 			OnObjectTeleported += UpdateGrabbedThroughPortalAfterObjectTeleports;
-			Portal.BeforeAnyPortalTeleport += (Portal inPortal, Collider objBeingTeleported) => UpdateGrabbedThroughPortalAfterPlayerTeleports(inPortal);
+			Portal.BeforeAnyPortalTeleport += UpdateGrabbedThroughPortalAfterTeleports;
 			InitializeHoldStateMachine();
 		}
 
@@ -206,13 +207,15 @@ namespace PortalMechanics {
 			}
 		}
 
-		void UpdateGrabbedThroughPortalAfterPlayerTeleports(Portal inPortal) {
-			if (pickupObject.isHeld) {
-				if (grabbedThroughPortal == inPortal) {
-					grabbedThroughPortal = null;
-				}
-				else {
-					grabbedThroughPortal = inPortal.otherPortal;
+		void UpdateGrabbedThroughPortalAfterTeleports(Portal inPortal, Collider objBeingTeleported) {
+			if (objBeingTeleported.TaggedAsPlayer()) {
+				if (pickupObject.isHeld) {
+					if (grabbedThroughPortal == inPortal) {
+						grabbedThroughPortal = null;
+					}
+					else {
+						grabbedThroughPortal = inPortal.otherPortal;
+					}
 				}
 			}
 		}

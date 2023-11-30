@@ -166,16 +166,20 @@ namespace PowerTrailMechanics {
 					throw new ArgumentOutOfRangeException();
 			}
 
-			void SetLayers() {
-				foreach (var renderer in renderers) {
-					renderer.gameObject.layer = EffectiveLayer;
-				}
-			}
-
 			Player.instance.growShrink.state.OnStateChangeSimple += SetLayers;
 			SetLayers();
 		}
-		
+
+		void SetLayers() {
+			foreach (var renderer in renderers) {
+				renderer.gameObject.layer = EffectiveLayer;
+			}
+		}
+
+		private void OnDisable() {
+			Player.instance.growShrink.state.OnStateChangeSimple -= SetLayers;
+		}
+
 		protected override void Init() {
 			base.Init();
 

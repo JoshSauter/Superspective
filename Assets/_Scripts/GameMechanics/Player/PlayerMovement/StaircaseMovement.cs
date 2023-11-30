@@ -49,7 +49,7 @@ public partial class PlayerMovement {
         private float StepSpeed => m.effectiveMovespeed * STEP_SPEED_MULTIPLIER; // _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
 
         // How far do we move into the step before raycasting down?
-        float StepOverbiteMagnitude => m.effectiveMovespeed * Time.fixedDeltaTime * m.scale;
+        float StepOverbiteMagnitude => m.effectiveMovespeed * Time.fixedDeltaTime;
         float MaxStepHeight => MAX_STEP_HEIGHT * m.scale;
         float MinStepHeight => MIN_STEP_HEIGHT * m.scale;
 
@@ -77,7 +77,7 @@ public partial class PlayerMovement {
                 distanceMovedForStaircaseOffset >= CurrentStepDiagonal.magnitude
             );
         
-            stepState.AddTrigger(StepState.SteppingDiagonal, () => Debug.DrawRay(m.bottomOfPlayer, CurrentStepDiagonal, Color.yellow, 10));
+            stepState.AddTrigger(StepState.SteppingDiagonal, () => Debug.DrawRay(m.bottomOfPlayer, CurrentStepDiagonal, Color.yellow));
         
             // Reset distance moved whenever we change state
             stepState.OnStateChangeSimple += () => distanceMovedForStaircaseOffset = 0f;
@@ -94,9 +94,15 @@ public partial class PlayerMovement {
                 float capsuleRadius = capsuleCollider.radius * m.scale;
 
                 Vector3 capsuleAxis = transform.up;
-                Vector3 p1 = capsuleCenter - (capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius) + CAPSULE_CHECK_OFFSET_FROM_BOTTOM));
+                Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius));
                 Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
 
+                float distanceFromCapsuleCenterToStepPoint = Vector3.Dot(capsuleCenter - currentStep.contact.point, capsuleAxis);
+                float distanceFromCapsuleCenterToP1 = Vector3.Dot(capsuleCenter - p1, capsuleAxis);
+
+                float distanceFromCapsuleCenterToOffsetStartPoint = Mathf.Min(distanceFromCapsuleCenterToStepPoint, distanceFromCapsuleCenterToP1);
+                p1 = capsuleCenter - capsuleAxis * (distanceFromCapsuleCenterToOffsetStartPoint - CAPSULE_CHECK_OFFSET_FROM_BOTTOM * m.scale);
+                
                 return Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore).Length > 0;
             }
             
@@ -116,6 +122,11 @@ public partial class PlayerMovement {
                     
                 }
                 distanceMovedForStaircaseOffset += distanceToMove;
+
+                if (distanceRemaining == distanceToMove) {
+                    stepState.Set(StepState.StepReady);
+                    LookForStep(desiredVelocity);
+                }
             }
             
             switch (stepState.state) {
@@ -210,11 +221,11 @@ public partial class PlayerMovement {
 
             Vector3 raycastStartPos = smarterRaycastStartPos + transform.up * MaxStepHeight;
             // Move the raycast inwards towards the stair (we will be raycasting down at the stair)
-            Debug.DrawRay(raycastStartPos, stepOverbite, Color.red, 10);
+            Debug.DrawRay(raycastStartPos, stepOverbite, Color.red);
             raycastStartPos += stepOverbite;
             Vector3 direction = -transform.up;
 
-            Debug.DrawRay(raycastStartPos, direction * MaxStepHeight, Color.green, 10);
+            Debug.DrawRay(raycastStartPos, direction * MaxStepHeight, Color.green);
             bool stepFound = contact.otherCollider.Raycast(
                 new Ray(raycastStartPos, direction),
                 out stepTest,
@@ -231,7 +242,7 @@ public partial class PlayerMovement {
                 Vector3 stepOffset = stepOverbite + transform.up * stepHeight;
                 //Debug.DrawRay(smarterRaycastStartPos, stepOffset, Color.yellow, 10);
                 step = new StepFound(contact, contactNormal, stepOffset);
-                m.debug.Log($"Step: {contact}\n{stepOffset:F3}\nstepHeight:{stepHeight}");
+                m.debug.Log($"Step: {contact.point}\n{stepOffset:F3}\nstepHeight:{stepHeight}");
             }
 
             return stepFound;

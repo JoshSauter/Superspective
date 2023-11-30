@@ -81,6 +81,8 @@ namespace PortalMechanics {
 
 		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
 		public bool doubleSidedPortals = false;
+
+		public bool skipIsVisibleCheck = false; // Useful for very large portals where the isVisible check doesn't work well
 		
 		[OnValueChanged(nameof(SetScaleFactor))]
 		public bool changeScale = false;
@@ -88,7 +90,9 @@ namespace PortalMechanics {
 		[OnValueChanged(nameof(SetScaleFactor))]
 		[Tooltip("Multiply the player size by this value when passing through this Portal (and inverse for the other Portal)")]
 		[Range(1f/64f, 64f)]
-		public float scaleFactor = 1;
+		[SerializeField]
+		private float scaleFactor = 1;
+		public float ScaleFactor => changeScale ? scaleFactor : 1f;
 
 		GameObject volumetricPortalPrefab;
 		[SerializeField]
@@ -144,6 +148,13 @@ namespace PortalMechanics {
 
 		public bool pauseRendering = false;
 		public bool pauseLogic = false;
+
+		// I can't seem to set pauseLogic from a UnityEvent so this is a workaround
+		public void SetPauseLogic(bool toValue) {
+			pauseRendering = toValue;
+			pauseLogic = toValue;
+		}
+		
 		private Material effectiveMaterial => portalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -531,6 +542,7 @@ namespace PortalMechanics {
 			}
 				
 			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
+				// Debug.LogWarning($"{ID} teleporting object {portalableObj.ID}");
 				TeleportObject(portalableObj);
 
 				// Swap state to the other portal
@@ -630,6 +642,8 @@ namespace PortalMechanics {
 		}
 
 		public bool IsVisibleFrom(Camera cam) {
+			if (skipIsVisibleCheck) return true;
+			
 			return renderers.Any(r => r.r.IsVisibleFrom(cam)) || volumetricPortals.Any(vp => vp.r.IsVisibleFrom(cam));
 		}
 
@@ -743,8 +757,12 @@ namespace PortalMechanics {
 
 		public void TeleportObject(PortalableObject portalableObject, bool transformVelocity = true) {
 			portalableObject.BeforeObjectTeleported?.Invoke(this);
+			
+			TriggerEventsBeforeTeleport(portalableObject.colliders[0]);
 
 			TransformObject(portalableObject.transform, transformVelocity);
+			
+			TriggerEventsAfterTeleport(portalableObject.colliders[0]);
 
 			portalableObject.OnObjectTeleported?.Invoke(this);
 		}

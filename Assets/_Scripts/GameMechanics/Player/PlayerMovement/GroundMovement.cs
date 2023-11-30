@@ -151,7 +151,6 @@ partial class PlayerMovement {
             }
 
             float adjustedMovespeed = ground.otherCollider.CompareTag("Staircase") ? m.walkSpeed : m.effectiveMovespeed;
-            m.debug.Log($"Movespeed: {m.effectiveMovespeed}");
             return Vector3.Lerp(
                 m.thisRigidbody.velocity,
                 moveDirection * adjustedMovespeed,

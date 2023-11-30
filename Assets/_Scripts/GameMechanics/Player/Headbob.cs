@@ -34,7 +34,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
 
     void HandlePlayerTeleport(Portal portal) {
         if (portal.changeScale) {
-            curBobAmount *= portal.scaleFactor;
+            curBobAmount *= portal.ScaleFactor;
         }
     }
 
