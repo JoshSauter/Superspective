@@ -15,7 +15,7 @@ using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
 [RequireComponent(typeof(UniqueId))]
-public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSave> {
+public class CubeSpawnerNew : SaveableObject<CubeSpawnerNew, CubeSpawnerNew.CubeSpawnerSave> {
     public DimensionObject backWall;
     public Button button;
     const float spawnOffset = 12;
@@ -368,7 +368,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     #region Saving
 
     [Serializable]
-    public class CubeSpawnerSave : SerializableSaveObject<CubeSpawner> {
+    public class CubeSpawnerSave : SerializableSaveObject<CubeSpawnerNew> {
         PickupObjectReference cubeSpawned;
         PickupObjectReference cubeGrabbedFromSpawner;
         private StateMachine<SpawnState>.StateMachineSave spawnStateSave;
@@ -378,7 +378,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         SerializableVector3 shrinkStartSize;
         SerializableAnimationCurve cubeDespawnSizeCurve;
 
-        public CubeSpawnerSave(CubeSpawner spawner) : base(spawner) {
+        public CubeSpawnerSave(CubeSpawnerNew spawner) : base(spawner) {
             this.cubeSpawned = spawner.cubeSpawned;
             this.cubeGrabbedFromSpawner = spawner.cubeGrabbedFromSpawner;
             spawnStateSave = spawner.spawnState.ToSave();
@@ -387,7 +387,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             this.cubeDespawnSizeCurve = spawner.cubeDespawnSizeCurve;
         }
 
-        public override void LoadSave(CubeSpawner spawner) {
+        public override void LoadSave(CubeSpawnerNew spawner) {
             spawner.cubeSpawned = this.cubeSpawned?.GetOrNull();
             if (spawner.cubeSpawned != null) {
                 spawner.AffixSpawnedCubeWithParentDimensionObject(spawner.cubeSpawned);
