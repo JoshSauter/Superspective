@@ -292,7 +292,15 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
             );
 
         // We don't collide with other objects while kinematic, so keep the contactThisFrame data while we remain kinematic
-        if (!thisRigidbody.isKinematic) {
+        CapsuleCollider capsuleCollider = thisCollider;
+        Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
+        float capsuleHeight = capsuleCollider.height * scale;
+        float capsuleRadius = capsuleCollider.radius * scale;
+
+        Vector3 capsuleAxis = transform.up;
+        Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius)) - capsuleAxis.normalized * 0.01f * scale;
+        Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
+        if (!thisRigidbody.isKinematic || !Physics.CheckCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore)) {
             allContactThisFrame.Clear();
         }
     }

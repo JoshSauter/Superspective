@@ -153,6 +153,7 @@ namespace PortalMechanics {
 		public void SetPauseLogic(bool toValue) {
 			pauseRendering = toValue;
 			pauseLogic = toValue;
+			SetMaterialsToEffectiveMaterial();
 		}
 		
 		private Material effectiveMaterial => portalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
@@ -453,6 +454,10 @@ namespace PortalMechanics {
 
 		bool test = false;
 		void FixedUpdate() {
+			foreach (Collider c in colliders) {
+				c.isTrigger = portalLogicIsEnabled;
+			}
+			
 			bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position, true)) < 0.99f;
 			if (playerIsCloseToPortal && !test) {
 				test = true;
@@ -816,6 +821,8 @@ namespace PortalMechanics {
 		/// <param name="player"></param>
 		/// <returns></returns>
 		IEnumerator TeleportPlayer(Transform player) {
+			if (!portalLogicIsEnabled) yield break;
+			
 			teleportingPlayer = true;
 
 			//if (DEBUG) Debug.Break();

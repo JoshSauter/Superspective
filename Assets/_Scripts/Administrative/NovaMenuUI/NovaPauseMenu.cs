@@ -94,7 +94,7 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         LoadButton.OnClick += (_) => OpenLoadMenu();
         NewGameButton.OnClick += (_) => NewGame();
         SettingsButton.OnClick += (_) => OpenSettingsMenu();
-        ExitGameButton.OnClick += (_) => ExitGameDialogWindow.Open();
+        ExitGameButton.OnClick += (_) => GameManager.instance.QuitGame();
     }
 
     private void HandleBackgroundHoverEvent(Gesture.OnHover evt) {
@@ -176,6 +176,8 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         SaveMenu.instance.saveMenuState.Set(SaveMenu.SaveMenuState.Off);
         SaveMenu.instance.Close();
         
+        ResetPlayerConfirmationState();
+        
         // Fade out the background too
         RunAnimation(MenuBackground, 0f, ref backgroundAnimationHandle);
     }
@@ -192,6 +194,10 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         currentMenuState.Set(MenuState.SubMenuOpen);
         
         RunAnimation(PauseMenu, 0f, ref pauseMenuAnimationHandle);
+    }
+
+    public void ResetPlayerConfirmationState() {
+        AltF4ConfirmIntercept.userHasConfirmed = false;
     }
     
     private void RunAnimation(UIBlock target, float targetAlpha, ref AnimationHandle handle) {

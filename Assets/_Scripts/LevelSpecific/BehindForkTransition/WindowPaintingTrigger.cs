@@ -47,7 +47,7 @@ namespace LevelSpecific.BehindForkTransition {
                 TriggerAction action = trigger.actionsToTrigger.Find(a => a.action == triggerType);
 
                 // Restore references broken by scene loads
-                if (action.objectsToDisable.ToList().Exists(o => o == null)) {
+                if (action.objectsToDisable == null || action.objectsToDisable.ToList().Exists(o => o == null)) {
                     action.objectsToDisable = null;
                     StartCoroutine(AsyncReferenceSetup());
                 }

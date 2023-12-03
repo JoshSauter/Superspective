@@ -175,8 +175,8 @@ partial class PlayerMovement {
             PickupObject maybeCube1 = null, maybeCube2 = null;
             if (contact.thisCollider != null) maybeCube1 = contact.thisCollider.GetComponent<PickupObject>();
             if (contact.otherCollider != null) maybeCube2 = contact.otherCollider.GetComponent<PickupObject>();
-            bool cube1IsHeld = maybeCube1 != null && maybeCube1.isHeld;
-            bool cube2IsHeld = maybeCube2 != null && maybeCube2.isHeld;
+            bool cube1IsHeld = maybeCube1 != null && (maybeCube1.isHeld || !maybeCube1.IsGrounded());
+            bool cube2IsHeld = maybeCube2 != null && (maybeCube2.isHeld || !maybeCube2.IsGrounded());
             //debug.Log($"Grounded: {grounded.isGrounded}\nCube1IsHeld: {cube1IsHeld}\nCube2IsHeld: {cube2IsHeld}");
             return cube1IsHeld || cube2IsHeld;
         }

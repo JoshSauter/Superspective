@@ -202,7 +202,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 	void ResetMaterialsThisDimension() {
 		kinematicCollider.enabled = false;
 		if (pickupCube.thisRigidbody != null) {
-			pickupCube.thisRigidbody.isKinematic = false;
+			pickupCube.freezeRigidbodyDueToNearbyPlayer = false;
 		}
 
 		// Always keep these materials visible

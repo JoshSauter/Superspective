@@ -6,11 +6,11 @@ public class FreezeRigidbodyWhenPlayerIsNear : MonoBehaviour {
 
     void OnTriggerEnter(Collider other) {
         if (other.TaggedAsPlayer() && multiDimensionCube.thisCollider.enabled)
-            multiDimensionCube.pickupCube.thisRigidbody.isKinematic = true;
+            multiDimensionCube.pickupCube.freezeRigidbodyDueToNearbyPlayer = true;
     }
 
     void OnTriggerExit(Collider other) {
         if (other.TaggedAsPlayer() && multiDimensionCube.thisCollider.enabled)
-            multiDimensionCube.pickupCube.thisRigidbody.isKinematic = false;
+            multiDimensionCube.pickupCube.freezeRigidbodyDueToNearbyPlayer = false;
     }
 }

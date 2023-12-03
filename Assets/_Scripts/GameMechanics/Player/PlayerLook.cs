@@ -98,7 +98,11 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
                 break;
         }
 
-        if (state == ViewLockState.ViewLocked && PlayerButtonInput.instance.LeftStickHeld && !GameManager.instance.gameHasLoaded) UnlockView();
+        if (state == ViewLockState.ViewLocked) {
+            if (PlayerButtonInput.instance.LeftStickHeld && !GameManager.instance.IsCurrentlyLoading) {
+                UnlockView();
+            }
+        }
     }
 
     void OnApplicationFocus(bool focus) {

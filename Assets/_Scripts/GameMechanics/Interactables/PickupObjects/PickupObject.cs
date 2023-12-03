@@ -18,7 +18,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public delegate void PickupObjectSimpleAction();
 
-    public const float pickupDropCooldown = 0.1f;
+    public const float pickupDropCooldown = 0.2f;
     public const float holdDistance = 1.5f;
     const float minDistanceFromPlayer = 0.25f;
     const float followSpeed = 15;
@@ -34,6 +34,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public bool isHeld;
     public bool shouldFollow = true;
     public GravityObject thisGravity;
+    public bool freezeRigidbodyDueToNearbyPlayer = false;
     public Rigidbody thisRigidbody;
     public Collider thisCollider;
 
@@ -106,6 +107,13 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     void Update() {
+        if (freezeRigidbodyDueToNearbyPlayer || GameManager.instance.IsCurrentlyLoading) {
+            thisRigidbody.isKinematic = true;
+        }
+        else {
+            thisRigidbody.isKinematic = false;
+        }
+        
         if (interactable) {
             if (scale > 6f * Player.instance.scale) {
                 interactableObject.SetAsDisabled("(Too large)");
@@ -369,7 +377,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 #region Custom Collision Logic
 
     void ResolveCollision() {
-        Collider[] neighbors = Physics.OverlapSphere(transform.position, transform.localScale.x * (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
+        Collider[] neighbors = Physics.OverlapSphere(transform.position, transform.localScale.x * scale);
 
         for (int i = 0; i < neighbors.Length; i++) {
             Collider neighbor = neighbors[i];
@@ -393,6 +401,12 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
                 Physics.SyncTransforms();
             }
         }
+    }
+
+    public bool IsGrounded() {
+        Collider[] neighborsBelow = Physics.OverlapSphere(transform.position + thisGravity.gravityDirection * 0.125f * scale, transform.localScale.x * scale * .5f);
+
+        return neighborsBelow.Where(c => c.gameObject != this.gameObject && !c.TaggedAsPlayer()).ToList().Count > 0;
     }
     
 #endregion
