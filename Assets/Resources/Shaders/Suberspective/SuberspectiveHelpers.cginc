@@ -46,7 +46,10 @@ inline void SuberspectiveClipOnly(SuberspectiveV2F i) {
 	SuberspectiveClipOnly(uv_DimensionMask, uv_DissolveTex, i.worldPos);
 }
 
+#ifndef DEPTH_NORMALS_TEXTURE
+#define DEPTH_NORMALS_TEXTURE
 sampler2D_float _CameraDepthNormalsTexture;
+#endif
 
 inline float4 DepthColor(float2 screenPos) {
 	float depthValue;

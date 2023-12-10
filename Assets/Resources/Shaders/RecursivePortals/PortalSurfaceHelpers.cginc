@@ -1,7 +1,12 @@
 #define DEPTH_OFFSET 0.00488
 
-sampler2D _PortalMask;
-sampler2D _CameraDepthNormalsTexture;
+uniform float4x4 _PortalScalingMatrix;
+sampler2D_float _PortalMask;
+
+#ifndef DEPTH_NORMALS_TEXTURE
+#define DEPTH_NORMALS_TEXTURE
+sampler2D_float _CameraDepthNormalsTexture;
+#endif
 
 bool SampleBehindPortal(float2 uv) {
 	float4 depthNormalSample = tex2D(_CameraDepthNormalsTexture, uv);

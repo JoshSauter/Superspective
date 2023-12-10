@@ -384,6 +384,13 @@ namespace SuperspectiveUtils {
     }
 
     public static class Utils {
+        public static void Clear(this RenderTexture renderTexture) {
+            RenderTexture rt = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+            GL.Clear(true, true, Color.white);
+            RenderTexture.active = rt;
+        }
+        
         public static void ForceRefresh(this MeshCollider meshCollider) {
             // Hack to force the MeshCollider to refresh the bounds
             Mesh mesh = meshCollider.sharedMesh;

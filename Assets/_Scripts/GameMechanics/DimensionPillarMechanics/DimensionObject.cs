@@ -79,6 +79,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public const int COLLISION_MATRIX_COLS = 6;
 	public DimensionObjectCollisions collisionLogic;
 
+	public const string IgnoreCollisionsTriggerZone = "IgnoreCollisionsTriggerZone";
 	public bool isBeingDestroyed = false;
 
 #region events
@@ -185,8 +186,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		size.y /= transform.lossyScale.y;
 		size.z /= transform.lossyScale.z;
 		Vector3 center = (max + min) / 2f;
-		
-		GameObject triggerGO = new GameObject("IgnoreCollisionsTriggerZone") {
+
+		GameObject triggerGO = new GameObject(IgnoreCollisionsTriggerZone) {
 			layer = LayerMask.NameToLayer("Ignore Raycast")
 		};
 		triggerGO.transform.SetParent(transform, false);

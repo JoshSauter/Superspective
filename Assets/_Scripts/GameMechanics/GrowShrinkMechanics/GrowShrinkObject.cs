@@ -167,11 +167,11 @@ namespace GrowShrink {
                     // Camera cam = Player.instance.playerCam;
                     BladeEdgeDetection edges = MaskBufferRenderTextures.instance.edgeDetection;
                     float depthSensWithoutMultiplier = edges.depthSensitivity * currentScaleClamped;
-                    edges.depthSensitivity = depthSensWithoutMultiplier / targetScaleClamped;
+                    // edges.depthSensitivity = depthSensWithoutMultiplier / targetScaleClamped;
 
                     float ssaoIntensityWithoutMultiplier = ssaoActualIntensity / currentScaleClamped;
                     ssaoActualIntensity = ssaoIntensityWithoutMultiplier * targetScale;
-                    ssao.m_OcclusionIntensity = ssaoActualIntensity;
+                    // ssao.m_OcclusionIntensity = ssaoActualIntensity;
                 }
                 // float nearClipPlaneWithoutMultiplier = cam.nearClipPlane / currentScale;
                 // float farClipPlaneWithoutMultiplier = cam.farClipPlane / currentScale;

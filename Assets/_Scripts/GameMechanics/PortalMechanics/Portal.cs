@@ -21,10 +21,11 @@ namespace PortalMechanics {
 	/// </summary>
 	[Serializable]
 	public class RecursiveTextures {
+		public string portalName;
 		public RenderTexture mainTexture;
 		public RenderTexture depthNormalsTexture;
 
-		public static RecursiveTextures CreateTextures(string name) {
+		public static RecursiveTextures CreateTextures(string name, string associatedPortalName) {
 			int width = SuperspectiveScreen.instance.currentPortalWidth;
 			int height = SuperspectiveScreen.instance.currentPortalHeight;
 			
@@ -34,6 +35,7 @@ namespace PortalMechanics {
 			};
 			recursiveTextures.mainTexture.name = $"{name}_MainTex";
 			recursiveTextures.depthNormalsTexture.name = $"{name}_DepthNormals";
+			recursiveTextures.portalName = associatedPortalName;
 			return recursiveTextures;
 		}
 
@@ -94,14 +96,17 @@ namespace PortalMechanics {
 		private float scaleFactor = 1;
 		public float ScaleFactor => changeScale ? scaleFactor : 1f;
 
-		GameObject volumetricPortalPrefab;
 		[SerializeField]
 		SuperspectiveRenderer[] volumetricPortals;
 		private const float volumetricPortalEnableDistance = 5f;
 
-		private bool volumetricPortalsShouldBeEnabled {
+		[SerializeField]
+		private float volumetricPortalThickness = 1f;
+		public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
+
+		private bool VolumetricPortalsShouldBeEnabled {
 			get {
-				if (!hasInitialized || !portalRenderingIsEnabled || !playerCamIsCloseEnoughToInFrontOfPortal || dimensionObject || IsInvisible) return false;
+				if (!hasInitialized || !portalRenderingIsEnabled || !PlayerCamIsCloseEnoughToInFrontOfPortal || dimensionObject || IsInvisible) return false;
 				Vector3 playerCamPos = playerCamera.position;
 				float playerCamToPortal = Vector3.Distance(playerCamPos, ClosestPoint(playerCamPos, true));
 				float playerCamToOtherPortal = Vector3.Distance(playerCamPos, otherPortal.ClosestPoint(playerCamPos, true));
@@ -119,12 +124,12 @@ namespace PortalMechanics {
 			}
 		}
 
-		private bool playerCamIsCloseEnoughToInFrontOfPortal {
+		private bool PlayerCamIsCloseEnoughToInFrontOfPortal {
 			get {
 				Vector3 playerCamPos = playerCamera.position;
 				Vector3 portalPos = transform.position;
 				Vector3 outOfPortal = -PortalNormal();
-				Vector3 adjustedPortalPos = portalPos - outOfPortal * portalThickness * transform.lossyScale.z;
+				Vector3 adjustedPortalPos = portalPos - outOfPortal * PORTAL_THICKNESS * transform.lossyScale.z;
 				return Vector3.Dot(playerCamPos - adjustedPortalPos, outOfPortal) > 0;
 			}
 		}
@@ -170,7 +175,7 @@ namespace PortalMechanics {
 		public DimensionObject dimensionObject;
 		public CompositeMagicTrigger trigger;
 
-		private const float portalThickness = 0.55f;
+		private const float PORTAL_THICKNESS = 0.55f;
 
 #region Events
 		// Type declarations
@@ -325,7 +330,7 @@ namespace PortalMechanics {
 					c.gameObject.AddComponent<PortalCollider>().portal = this;
 					if (c is BoxCollider boxCollider) {
 						var size = boxCollider.size;
-						size = new Vector3(size.x, size.y, portalThickness);
+						size = new Vector3(size.x, size.y, PORTAL_THICKNESS);
 						boxCollider.size = size;
 					}
 				}
@@ -343,27 +348,17 @@ namespace PortalMechanics {
 		}
 
 		private void InitializeVolumetricPortals() {
-			volumetricPortalPrefab = Resources.Load<GameObject>("Prefabs/VolumetricPortal");
-			volumetricPortals = renderers.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
-			// volumetricPortals = colliders.Select(r => Instantiate(volumetricPortalPrefab, r.transform, false).GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
-			for (int i = 0; i < volumetricPortals.Length; i++) {
-				SuperspectiveRenderer vp = volumetricPortals[i];
-				Collider collider = colliders[i];
-				Vector3 vpScale = Vector3.one;
-				if (collider is BoxCollider boxCollider) {
-					vpScale = boxCollider.size / 10f;
-				}
-				else if (collider is MeshCollider meshCollider) {
-					vpScale = meshCollider.bounds.size / 10f;
-				}
-				else {
-					Debug.LogError("Collider type: " + collider.GetType().ToString() + " not handled.");
-				}
-				vpScale.z = 1f;
-				vp.transform.localScale = vpScale;
+			List<SuperspectiveRenderer> volumetricPortalsList = new List<SuperspectiveRenderer>();
+			foreach (SuperspectiveRenderer r in renderers) {
+				SuperspectiveRenderer vp = GenerateExtrudedMesh(r.GetComponent<MeshFilter>(), VolumetricPortalThickness)
+					.GetOrAddComponent<SuperspectiveRenderer>();
 
 				vp.enabled = false;
+				vp.SetMaterial(r.r.sharedMaterial);
+				volumetricPortalsList.Add(vp);
 			}
+
+			volumetricPortals = volumetricPortalsList.ToArray();
 		}
 
 		private void CreateCompositeTrigger() {
@@ -411,7 +406,7 @@ namespace PortalMechanics {
 			if (internalRenderTexturesCopy != null && (internalRenderTexturesCopy.mainTexture != null || internalRenderTexturesCopy.depthNormalsTexture != null)) {
 				internalRenderTexturesCopy.Release();
 			}
-			internalRenderTexturesCopy = RecursiveTextures.CreateTextures(ID);
+			internalRenderTexturesCopy = RecursiveTextures.CreateTextures(ID, $"{channel}: {name}");
 			SetPropertiesOnMaterial();
 		}
 
@@ -561,7 +556,7 @@ namespace PortalMechanics {
 		void LateUpdate() {
 			SetEdgeDetectionColorProperties();
 			//debug.Log(volumetricPortalsShouldBeEnabled);
-			if (volumetricPortalsShouldBeEnabled) {
+			if (VolumetricPortalsShouldBeEnabled) {
 				EnableVolumetricPortal();
 				
 				// Experimental code for moving around a smaller volumetric portal that tracks the player:
@@ -584,8 +579,29 @@ namespace PortalMechanics {
 			}
 		}
 		#endregion
+		
+		MeshFilter GenerateExtrudedMesh(MeshFilter planarMeshFilter, float extrusionDistance) {
+			Mesh planarMesh = planarMeshFilter.sharedMesh;
+			Mesh extrudedMesh = new Mesh();
+			Matrix4x4[] extrusionMatrix = { Matrix4x4.identity, Matrix4x4.Translate(extrusionDistance * Vector3.forward) };
+			Matrix4x4 scalarMatrix = Matrix4x4.Scale(Vector3.one * 0.9f);
+			MeshUtils.ExtrudeMesh(planarMesh, extrudedMesh, extrusionMatrix, scalarMatrix, true, true);
 
-		#region Public Interface
+			// Assign the mesh to the MeshFilter
+			var newMeshObj = new GameObject("Volumetric Portal");
+			var meshFilter = newMeshObj.AddComponent<MeshFilter>();
+			newMeshObj.AddComponent<MeshRenderer>();
+			newMeshObj.transform.SetParent(planarMeshFilter.transform, false);
+			meshFilter.mesh = extrudedMesh;
+
+			// Optional: Recalculate normals and bounds
+			extrudedMesh.RecalculateNormals();
+			extrudedMesh.RecalculateBounds();
+
+			return meshFilter;
+		}
+
+#region Public Interface
 		public void EnablePortal(Portal other) {
 			otherPortal = other;
 			CreatePortalTeleporter();

@@ -14602,7 +14602,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 12
+  startingScene: 32
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -14806,7 +14806,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6590404
+  m_Name: pb_Mesh5315788
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -22350,8 +22350,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0.10573147, y: -395.21072, z: 31.94942}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 824.7556, y: 61.080933, z: 15.70166}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -55846,6 +55846,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7bc38481807aa747b16d0ae8d984dc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  portalMaskReplacementShader: {fileID: 0}
+  portalScaleMaskReplacementShader: {fileID: 0}
   edgeDetection: {fileID: 1809741071}
   visibilityMaskTexture: {fileID: 0}
   portalMaskTexture: {fileID: 0}
@@ -56085,7 +56087,7 @@ MonoBehaviour:
   debugMode: 0
   doubleSidedEdges: 0
   checkPortalDepth: 1
-  depthSensitivity: 1
+  depthSensitivity: 4
   normalSensitivity: 1
   sampleDistance: 1
   weightedEdgeMode: 2
@@ -56175,14 +56177,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 0
+  cachedEnableState: 1
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0

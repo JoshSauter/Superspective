@@ -8,7 +8,7 @@ namespace SuperspectiveUtils {
         static readonly int NUM_CHANNELS_PER_COLOR = Mathf.CeilToInt(DimensionObject.NUM_CHANNELS / 3.0f);
         static int MAX_VALUE_PER_CHANNEL = Mathf.RoundToInt(Mathf.Pow(2, NUM_CHANNELS_PER_COLOR) - 1);
         
-        public static int MaskValueFromSample(Color rgb) {
+        public static int ChannelFromColor(Color rgb) {
             int rValue = Mathf.RoundToInt(rgb.r * MAX_VALUE_PER_CHANNEL);
             int gValue = Mathf.RoundToInt(rgb.g * MAX_VALUE_PER_CHANNEL);
             int bValue = Mathf.RoundToInt(rgb.b * MAX_VALUE_PER_CHANNEL);

@@ -297,7 +297,7 @@ namespace StateUtils {
                         update.updateAction.Invoke(timeSinceStateChanged);
                     }
                     catch (Exception e) {
-                        Debug.LogError(_owner + " threw an exception: " + e.Message);
+                        Debug.LogError(_owner + " threw an exception: " + e.Message + "\n" + e.StackTrace);
                     }
                 }
             }

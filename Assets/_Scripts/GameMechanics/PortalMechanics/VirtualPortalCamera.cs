@@ -48,6 +48,7 @@ namespace PortalMechanics {
 			public Vector3 camPosition;
 			public Quaternion camRotation;
 			public Matrix4x4 camProjectionMatrix;
+			public float fogStartDistance;
 			// [HideInInspector]
 			// public EDColors edgeColors;
 		}
@@ -72,8 +73,8 @@ namespace PortalMechanics {
 		BladeEdgeDetection portalCameraEdgeDetection;
 
 		public int MaxDepth = 4;
-		public int MaxRenderSteps = 12;
-		public float MaxRenderDistance = 400;
+		public int MaxRenderSteps = 24;
+		public float MaxRenderDistance = 500;
 		public float distanceToStartCheckingPortalBounds = 5f;
 		public float clearSpaceBehindPortal = 0.49f;
 
@@ -89,10 +90,8 @@ namespace PortalMechanics {
 
 		Shader depthNormalsReplacementShader;
 		private Shader visibilityMaskReplacementShader;
-		Shader portalMaskReplacementShader;
 		const string depthNormalsReplacementTag = "RenderType";
 		const string visibilityMaskReplacementTag = "RenderType";
-		const string portalMaskReplacementTag = "PortalTag";
 
 		static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
@@ -105,13 +104,22 @@ namespace PortalMechanics {
 
 			depthNormalsReplacementShader = Shader.Find("Custom/CustomDepthNormalsTexture");
 			visibilityMaskReplacementShader = Shader.Find("Hidden/VisibilityMask");
-			portalMaskReplacementShader = Shader.Find("Hidden/PortalMask");
 
 			SuperspectiveScreen.instance.OnPlayerCamPreRender += RenderPortals;
 			SuperspectiveScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
 
 			renderStepTextures = new List<RecursiveTextures>();
 			portalMaskTextures = new List<RenderTexture>();
+		}
+
+		private void ClearRenderTextureBuffers() {
+			renderStepTextures.ForEach(rt => {
+				rt.mainTexture.Clear();
+				rt.depthNormalsTexture.Clear();
+			});
+			if (DEBUG) {
+				portalMaskTextures.ForEach(rt => rt.Clear());
+			}
 		}
 
 		void ClearRenderTextures() {
@@ -129,19 +137,18 @@ namespace PortalMechanics {
 		void RenderPortals() {
 			List<Portal> allActivePortals = PortalManager.instance.activePortals;
 			Dictionary<Portal, RecursiveTextures> finishedPortalTextures = new Dictionary<Portal, RecursiveTextures>();
+			ClearRenderTextureBuffers();
 
 			CameraSettings mainCamSettings = new CameraSettings {
 				camPosition = mainCamera.transform.position,
 				camRotation = mainCamera.transform.rotation,
-				camProjectionMatrix = mainCamera.projectionMatrix
+				camProjectionMatrix = mainCamera.projectionMatrix,
+				fogStartDistance = playerFog.startDistance
 				// edgeColors = new EDColors(mainCameraEdgeDetection)
 			};
 			SetCameraSettings(portalCamera, mainCamSettings);
 			SetCameraSettings(SuperspectiveScreen.instance.portalMaskCamera, mainCamSettings);
 			SetCameraSettings(SuperspectiveScreen.instance.dimensionCamera, mainCamSettings);
-
-			// Copy fog settings from MainCamera (changes with player scale)
-			fog.startDistance = playerFog.startDistance;
 
 			if (DEBUG) {
 				portalOrder.Clear();
@@ -163,7 +170,7 @@ namespace PortalMechanics {
 				if (PortalIsSeenByCamera(p, mainCamera, fullScreenRect, portalScreenBounds) || p.IsVolumetricPortalEnabled()) {
 					SetCameraSettings(portalCamera, mainCamSettings);
 
-					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.name);
+					finishedPortalTextures[p] = RenderPortalDepth(0, p, portalScreenBounds, p.ScaleFactor, p.name);
 
 					if (DEBUG) {
 						portalOrder.Add(p);
@@ -172,14 +179,16 @@ namespace PortalMechanics {
 				}
 			}
 
-			foreach (var finishedPortalTexture in finishedPortalTextures) {
-				finishedPortalTexture.Key.SetTexture(finishedPortalTexture.Value.mainTexture);
-				finishedPortalTexture.Key.SetDepthNormalsTexture(finishedPortalTexture.Value.depthNormalsTexture);
+			foreach (var finishedPortal in finishedPortalTextures) {
+				finishedPortal.Key.SetTexture(finishedPortal.Value.mainTexture);
+				finishedPortal.Key.SetDepthNormalsTexture(finishedPortal.Value.depthNormalsTexture);
 			}
 
 			// Reset mask buffer cams and render the VisibilityMask and PortalMask textures once more from the main camera's perspective
 			RenderVisibilityMaskTexture(null, mainCamSettings);
 			RenderPortalMaskTexture(mainCamSettings);
+			// Reset the world scale factor as well
+			SetGlobalPortalScale(1f);
 
 			debug.LogError($"End of frame: renderSteps: {renderSteps}");
 		}
@@ -194,9 +203,10 @@ namespace PortalMechanics {
 		/// <param name="depth">Depth of current recursion</param>
 		/// <param name="portal">The portal we're trying to render</param>
 		/// <param name="portalScreenBounds">The array of Rects defining the screen space taken up by the Portal</param>
+		/// <param name="effectivePortalScale">The product of recursive portal's ScaleFactor, used to modify some effects like fog
 		/// <param name="tree">Debug string showing the render tree</param>
 		/// <returns>The final textures to be used for rendering this Portal</returns>
-		RecursiveTextures RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, string tree) {
+		RecursiveTextures RenderPortalDepth(int depth, Portal portal, Rect[] portalScreenBounds, float effectivePortalScale, string tree) {
 			if (depth == MaxDepth || renderSteps >= MaxRenderSteps) {
 				Debug.LogError($"At max depth or max render steps:\nDepth: {depth}/{MaxDepth}\nRenderSteps: {renderSteps}/{MaxRenderSteps}");
 				return null;
@@ -205,7 +215,7 @@ namespace PortalMechanics {
 			var index = renderSteps;
 			renderSteps++;
 
-			CameraSettings modifiedCamSettings = SetupPortalCameraForPortal(portal, portal.otherPortal, depth);
+			CameraSettings modifiedCamSettings = SetupPortalCameraForPortal(portal, portal.otherPortal, depth, effectivePortalScale);
 
 			// Key == Visible Portal, Value == visible portal screen bounds
 			Dictionary<Portal, VisiblePortalInfo> visiblePortals = GetVisiblePortalsInfo(portal, portalScreenBounds, depth);
@@ -223,7 +233,7 @@ namespace PortalMechanics {
 					Rect[] nextPortalBounds = IntersectionOfBounds(portalScreenBounds, visiblePortalInfo.screenBounds);
 
 					// Remember state
-					visiblePortalTextures[visiblePortal] = RenderPortalDepth(depth + 1, visiblePortal, nextPortalBounds, nextTree);
+					visiblePortalTextures[visiblePortal] = RenderPortalDepth(depth + 1, visiblePortal, nextPortalBounds, effectivePortalScale * visiblePortal.ScaleFactor, nextTree);
 				}
 
 				// RESTORE STATE
@@ -250,8 +260,9 @@ namespace PortalMechanics {
 			}
 			SetCameraSettings(portalCamera, modifiedCamSettings);
 
+			string portalIdentifier = $"{portal.channel}: {portal.name}";
 			while (renderStepTextures.Count <= index) {
-				renderStepTextures.Add(RecursiveTextures.CreateTextures($"VirtualPortalCamera_{index}"));
+				renderStepTextures.Add(RecursiveTextures.CreateTextures($"VirtualPortalCamera_{index}", portalIdentifier));
 			}
 			
 			List<PillarDimensionObject> allRelevantPillarDimensionObjects = PillarDimensionObject.allPillarDimensionObjects
@@ -287,6 +298,7 @@ namespace PortalMechanics {
 
 			debug.Log($"Rendering: {index} to {portal.name}'s RenderTexture, depth: {depth}");
 			portalCamera.targetTexture = renderStepTextures[index].mainTexture;
+			renderStepTextures[index].portalName = portalIdentifier;
 
 			portalCamera.Render();
 
@@ -316,6 +328,7 @@ namespace PortalMechanics {
 			// Setup
 			portalCamera.targetTexture = renderStepTextures[index].depthNormalsTexture;
 			List<bool> postProcessEffectsWereEnabled = DisablePostProcessEffects();
+			SetGlobalPortalScale(portal.ScaleFactor);
 			
 			// Render
 			portalCamera.RenderWithShader(depthNormalsReplacementShader, depthNormalsReplacementTag);
@@ -324,7 +337,17 @@ namespace PortalMechanics {
 			// Restore previous state
 			ReEnablePostProcessEffects(postProcessEffectsWereEnabled);
 		}
-		
+
+		private void SetGlobalPortalScale(float scaleFactor) {
+			Matrix4x4 scalingMatrix = new Matrix4x4(
+				new Vector4(1f/scaleFactor, 0, 0, 0),
+				new Vector4(0, 1f/scaleFactor, 0, 0),
+				new Vector4(0, 0, 1f/scaleFactor, 0),
+				new Vector4(0, 0, 0, 1f/scaleFactor));
+			Shader.SetGlobalMatrix("_PortalScalingMatrix", scalingMatrix);
+			Shader.SetGlobalFloat("_PortalScaleFactor", scaleFactor);
+		}
+
 		/// <summary>
 		/// Renders the visibilityMaskCamera, then sets the result as _DimensionMask global texture
 		/// </summary>
@@ -344,9 +367,12 @@ namespace PortalMechanics {
 		/// </summary>
 		void RenderPortalMaskTexture(CameraSettings camSettings) {
 			Camera maskCam = SuperspectiveScreen.instance.portalMaskCamera;
+
+			Shader portalMaskShader = MaskBufferRenderTextures.instance.portalMaskReplacementShader;
+			
 			SetCameraSettings(maskCam, camSettings);
 
-			maskCam.RenderWithShader(portalMaskReplacementShader, portalMaskReplacementTag);
+			maskCam.RenderWithShader(portalMaskShader, MaskBufferRenderTextures.PORTAL_MASK_REPLACEMENT_TAG);
 
 			Shader.SetGlobalTexture(MaskBufferRenderTextures.PortalMask, MaskBufferRenderTextures.instance.portalMaskTexture);
 		}
@@ -365,7 +391,8 @@ namespace PortalMechanics {
 		}
 
 		bool IsWithinRenderDistance(Portal portal, Camera camera) {
-			return Vector3.Distance(portal.transform.position, camera.transform.position) < MaxRenderDistance;
+			float fovInRadians = camera.fieldOfView * Mathf.PI / 180.0f;
+			return Vector3.Distance(portal.ClosestPoint(camera.transform.position), camera.transform.position) < (MaxRenderDistance / Mathf.Cos(fovInRadians / 2.0f));
 		}
 
 		/// <summary>
@@ -408,13 +435,15 @@ namespace PortalMechanics {
 		}
 
 		void SetCameraSettings(Camera cam, CameraSettings settings) {
-			SetCameraSettings(cam, settings.camPosition, settings.camRotation, settings.camProjectionMatrix);
+			SetCameraSettings(cam, settings.camPosition, settings.camRotation, settings.camProjectionMatrix, settings.fogStartDistance);
 		}
 
-		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix) {
+		void SetCameraSettings(Camera cam, Vector3 position, Quaternion rotation, Matrix4x4 projectionMatrix, float fogStartDistance) {
 			cam.transform.position = position;
 			cam.transform.rotation = rotation;
 			cam.projectionMatrix = projectionMatrix;
+
+			fog.startDistance = fogStartDistance;
 
 			// CopyEdgeColors(portalCameraEdgeDetection, edgeColors);
 		}
@@ -452,12 +481,15 @@ namespace PortalMechanics {
 			}
 		}
 		
-		private CameraSettings SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth) {
+		private CameraSettings SetupPortalCameraForPortal(Portal inPortal, Portal outPortal, int depth, float effectivePortalScale) {
 			// Position the camera behind the other portal.
 			portalCamera.transform.position = inPortal.TransformPoint(portalCamera.transform.position);
 
 			// Rotate the camera to look through the other portal.
 			portalCamera.transform.rotation = inPortal.TransformRotation(portalCamera.transform.rotation);
+			
+			// Copy fog settings from MainCamera (changes with player scale)
+			fog.startDistance = playerFog.startDistance * effectivePortalScale;
 
 			// Set the camera's oblique view frustum.
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
@@ -491,7 +523,8 @@ namespace PortalMechanics {
 			return new CameraSettings {
 				camPosition = portalCamera.transform.position,
 				camRotation = portalCamera.transform.rotation,
-				camProjectionMatrix = portalCamera.projectionMatrix
+				camProjectionMatrix = portalCamera.projectionMatrix,
+				fogStartDistance = fog.startDistance
 			};
 		}
 		

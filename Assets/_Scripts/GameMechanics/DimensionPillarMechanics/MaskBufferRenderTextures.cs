@@ -6,6 +6,8 @@ using UnityEngine.Rendering;
 
 // Creates and handles the visibility masks and any other render texture buffers used for rendering
 public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
+	public Shader portalMaskReplacementShader;
+	
 	public BladeEdgeDetection edgeDetection;
 	public RenderTexture visibilityMaskTexture;
 	public RenderTexture portalMaskTexture;
@@ -21,6 +23,8 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 	public static readonly int EdgeColorsThroughPortalsMask = Shader.PropertyToID("_EdgeColorsThroughPortalsMask");
 
 	private static readonly int PlayerCamPos = Shader.PropertyToID("_PlayerCamPos");
+	
+	public const string PORTAL_MASK_REPLACEMENT_TAG = "PortalTag";
 
 	[SerializeField]
 	private Shader edgeDetectionColorsThroughPortalShader;
@@ -30,7 +34,9 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		SuperspectiveScreen.instance.OnScreenResolutionChanged += HandleScreenResolutionChanged;
 		CreateAllRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
-		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(Shader.Find("Hidden/PortalMask"), "PortalTag");
+		portalMaskReplacementShader = Shader.Find("Hidden/PortalMask");
+		
+		SuperspectiveScreen.instance.portalMaskCamera.SetReplacementShader(portalMaskReplacementShader, PORTAL_MASK_REPLACEMENT_TAG);
 
 		edgeDetection.BeforeRenderEdgeDetection += RenderEdgeColorsThroughPortalTexture;
 
@@ -99,7 +105,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		// Only one pixel so we can sample at 0, 0
 		Color sample = visibilityMaskTex.GetPixel(0, 0);
 
-		visibilityMaskValue = DimensionShaderUtils.MaskValueFromSample(sample.linear);
+		visibilityMaskValue = DimensionShaderUtils.ChannelFromColor(sample.linear);
 	}
 
 	void OnDisable() {

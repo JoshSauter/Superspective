@@ -1,3 +1,6 @@
+#ifndef DIMENSION_SHADER_HELPERS
+#define DIMENSION_SHADER_HELPERS
+
 // If you change this make sure you change the channel range in DimensionObject.cs to match
 #define NUM_CHANNELS 8
 #pragma multi_compile __ USE_ADVANCED_CHANNEL_LOGIC
@@ -42,7 +45,7 @@ inline fixed4 ColorFromChannel(int channel) {
 
 // These methods are GPU equivalent of the CPU-based code in DimensionUtils.cs
 // When logic in one changes, update the other
-inline int MaskValueFromSample(fixed4 rgb) {
+inline int ChannelFromColor(fixed4 rgb) {
 	const uint numChannelsPerColor = ceil(NUM_CHANNELS / 3.0);
 	const float maxValue = pow(2, numChannelsPerColor) - 1;
 
@@ -89,7 +92,7 @@ float ClipDimensionObject(float2 vertex, float disabled = 0.0) {
 	fixed4 dimensionSample = tex2D(_DimensionMask, viewportVertex);
 #ifdef USE_ADVANCED_CHANNEL_LOGIC
 	const int maxMaskValue = (1 << NUM_CHANNELS) - 1;
-	int maskValue = clamp(MaskValueFromSample(dimensionSample), 0, maxMaskValue);
+	int maskValue = clamp(ChannelFromColor(dimensionSample), 0, maxMaskValue);
 	float dimensionTest = _AcceptableMaskValues[maskValue];
 #else
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
@@ -104,7 +107,7 @@ fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, float disabled
 	fixed4 dimensionSample = tex2D(_DimensionMask, screenPos);
 #ifdef USE_ADVANCED_CHANNEL_LOGIC
 	const int maxMaskValue = (1 << NUM_CHANNELS) - 1;
-	int maskValue = clamp(MaskValueFromSample(dimensionSample), 0, maxMaskValue);
+	int maskValue = clamp(ChannelFromColor(dimensionSample), 0, maxMaskValue);
 	float dimensionTest = _AcceptableMaskValues[maskValue];
 #else
 	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
@@ -114,3 +117,5 @@ fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, float disabled
 
 	return dimensionTest;
 }
+
+#endif

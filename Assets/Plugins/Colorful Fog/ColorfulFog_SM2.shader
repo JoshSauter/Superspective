@@ -12,7 +12,7 @@ Shader "Hidden/JG/ColorfulFog"
 	#define HIDE_FOG_BEHIND_PORTALS
 		
 	#include "UnityCG.cginc"
-	#include "../../Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
+	#include "Assets/Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
 	#pragma target 2.0
 	uniform sampler2D _MainTex;
 	uniform int _UseCustomDepth;
@@ -107,6 +107,7 @@ Shader "Hidden/JG/ColorfulFog"
 		// subtracting the near value. Not a perfect approximation
 		// if near plane is very large, but good enough.
 		dist -= _ProjectionParams.y;
+		
 		return dist;
 	}
 
