@@ -5,10 +5,25 @@ using UnityEngine;
 
 public static class SuperspectivePhysics {
 	private static readonly Vector3 originalGravity = Physics.gravity;
+
+	private static int _ignoreRaycastLayer = -1;
+	public static int IgnoreRaycastLayer => _ignoreRaycastLayer < 0 ? _ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast") : _ignoreRaycastLayer;
+	private static int _playerLayer = -1;
+	public static int PlayerLayer => _playerLayer < 0 ? _playerLayer = LayerMask.NameToLayer("Player") : _playerLayer;
+	private static int _invisibleLayer = -1;
+	public static int InvisibleLayer => _invisibleLayer < 0 ? _invisibleLayer = LayerMask.NameToLayer("Invisible") : _invisibleLayer;
+	private static int _collideWithPlayerOnlyLayer = -1;
+	public static int CollideWithPlayerOnlyLayer => _collideWithPlayerOnlyLayer < 0 ? _collideWithPlayerOnlyLayer = LayerMask.NameToLayer("CollideWithPlayerOnly") : _collideWithPlayerOnlyLayer;
+	public static int PhysicsRaycastLayerMask =>
+		~((1 << IgnoreRaycastLayer) |
+		  (1 << PlayerLayer) |
+		  (1 << InvisibleLayer) |
+		  (1 << CollideWithPlayerOnlyLayer));
+
 	public readonly struct ColliderPair : IEquatable<ColliderPair> {
 		public readonly Collider col1;
 		public readonly Collider col2;
-		
+
 		public ColliderPair(Collider col1, Collider col2) {
 			this.col1 = col1;
 			this.col2 = col2;
@@ -18,17 +33,17 @@ public static class SuperspectivePhysics {
 			return (this.col1 == other.col1 && this.col2 == other.col2) ||
 			       (this.col2 == other.col1 && this.col1 == other.col2);
 		}
-		
+
 		public override bool Equals(System.Object obj) {
 			//Check for null and compare run-time types.
 			if ((obj == null) || this.GetType() != obj.GetType()) {
 				return false;
 			}
 			else {
-				return Equals((ColliderPair) obj);
+				return Equals((ColliderPair)obj);
 			}
 		}
-		
+
 		public static bool operator ==(ColliderPair pair1, ColliderPair pair2) {
 			return pair1.Equals(pair2);
 		}

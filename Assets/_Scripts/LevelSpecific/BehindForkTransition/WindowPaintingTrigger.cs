@@ -24,7 +24,7 @@ namespace LevelSpecific.BehindForkTransition {
         IEnumerator AsyncReferenceSetup() {
             inAsyncReferenceSetup = true;
             yield return new WaitUntil(() => gameObject.IsInActiveScene());
-            yield return new WaitWhile(() => LevelManager.instance.IsCurrentlyLoadingScenes);
+            yield return new WaitWhile(() => LevelManager.instance.IsCurrentlySwitchingScenes);
             yield return new WaitUntil(() => portal != null);
             MagicTrigger trigger = GetComponent<MagicTrigger>();
             TriggerAction action = trigger.actionsToTrigger.Find(a => a.action == triggerType);

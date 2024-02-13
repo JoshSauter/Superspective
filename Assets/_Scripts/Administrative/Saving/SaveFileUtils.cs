@@ -105,7 +105,7 @@ namespace Saving {
         }
         
         private static Texture2D ScreenshotOfPlayerCameraView() {
-            Camera cam = Player.instance.playerCam;
+            Camera cam = Player.instance.PlayerCam;
             int width = 600;
             int height = 400;
             RenderTexture screenTexture = new RenderTexture(width, height, 16);

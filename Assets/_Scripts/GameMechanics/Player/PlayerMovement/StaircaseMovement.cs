@@ -33,7 +33,7 @@ public partial class PlayerMovement {
         private const float RECENTLY_STEPPED_UP_TIME = 0.25f;
         private const float MAX_STEP_HEIGHT = 0.6f;
         private const float MIN_STEP_HEIGHT = 0.1f;
-        private const float STEP_SPEED_MULTIPLIER = 2.5f;
+        private const float STEP_SPEED_MULTIPLIER = 10f;
         private const float CAPSULE_CHECK_OFFSET_FROM_BOTTOM = 0.5f;
 
         // Properties

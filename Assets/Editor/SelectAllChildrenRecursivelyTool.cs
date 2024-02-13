@@ -8,6 +8,7 @@ using UnityEngine;
 public class SelectAllChildrenRecursivelyTool : EditorWindow {
     const string nameKey = "SelectAllChildrenRecursivelyTypeName";
     public bool selectInactive = true;
+    public bool allowInheritance = true;
     public string typeName;
     private bool typeNameNullOrEmpty => string.IsNullOrEmpty(typeName);
 
@@ -17,8 +18,9 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
     private static string prevTypeName;
     private static int goCount;
     private static GameObject[] prevSelection;
+    private static bool prevAllowInheritance;
     private static bool prevSelectionCached;
-    
+
     [MenuItem("My Tools/Selection/Select All Children Recursively")]
     public static void ShowWindow() {
         GetWindow(typeof(SelectAllChildrenRecursivelyTool));
@@ -28,6 +30,8 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
         if (typeNameNullOrEmpty && !string.IsNullOrEmpty(prevTypeName)) {
             typeName = prevTypeName;
         }
+
+        allowInheritance = EditorGUILayout.Toggle("Allow inheritance?", allowInheritance);
         typeName = EditorGUILayout.TextField("Type Name:", typeName);
         if (GUILayout.Button($"Find {DisplayName(typeName)} in selected GameObjects")) {
             FindInSelected(Selection.gameObjects);
@@ -51,11 +55,13 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
         prevTypeName = typeName;
         prevSelection = selection;
         goCount = selection.Length;
+        prevAllowInheritance = allowInheritance;
         prevSelectionCached = true;
     }
     
     private void ReselectPrevSelection() {
         typeName = prevTypeName;
+        allowInheritance = prevAllowInheritance;
         FindInSelected(prevSelection);
     }
 
@@ -74,9 +80,12 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
     public void SelectAllChildrenWithType<T>(GameObject[] selection) where T : Component {
         // Helper function to recursively select all children of a given type
         void SelectAllChildrenRecursively(GameObject curNode, ref List<GameObject> selectionSoFar) {
-            if (curNode.GetComponent<T>() != null) selectionSoFar.Add(curNode);
+            T curNodeComponent = curNode.GetComponent<T>();
+            if (curNodeComponent != null && (allowInheritance || curNodeComponent.GetType().Name == typeof(T).Name)) selectionSoFar.Add(curNode);
 
             foreach (T child in curNode.transform.GetComponentsInChildren<T>(selectInactive)) {
+                if (!allowInheritance && child.GetType().Name != typeof(T).Name) continue;
+                
                 if (child.gameObject != curNode) SelectAllChildrenRecursively(child.gameObject, ref selectionSoFar);
             }
         }

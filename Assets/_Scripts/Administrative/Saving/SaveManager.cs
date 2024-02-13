@@ -56,9 +56,9 @@ namespace Saving {
             timeOfLastLoad = Time.realtimeSinceStartup;
             isCurrentlyLoadingSave = true;
             
-            if (LevelManager.instance.IsCurrentlyLoadingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
+            if (LevelManager.instance.IsCurrentlySwitchingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
                 Debug.Log("Waiting for in-progress scene loading to finish before starting load...");
-                await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes && !LevelManager.instance.isCurrentlySwitchingScenes);
+                await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes && !LevelManager.instance.isCurrentlySwitchingScenes);
             }
 
             BeforeLoad?.Invoke();
@@ -83,7 +83,7 @@ namespace Saving {
             saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
 
             Debug.Log("Waiting for scenes to be loaded...");
-            await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+            await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
             Debug.Log("All scenes loaded into memory, loading save...");
 
             // Load records of all DynamicObjects from disk

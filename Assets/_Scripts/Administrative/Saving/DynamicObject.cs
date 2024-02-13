@@ -21,6 +21,8 @@ namespace Saving {
 	    UniqueId _id;
 		public UniqueId id {
 			get {
+				if (this == null || this.gameObject == null) return null;
+				
 				if (_id == null) {
 					_id = GetComponent<UniqueId>();
 				}
@@ -33,7 +35,17 @@ namespace Saving {
 		public string prefabPath;
 
 		public bool SkipSave { get; set; }
-		public string ID => id.uniqueId;
+		public string ID {
+			get {
+				if (id != null) {
+					LastKnownID = id.uniqueId;
+					return id.uniqueId;
+				}
+				else return LastKnownID;
+			}
+		}
+
+		private string LastKnownID = "";
 		public bool isGlobal = true;
 		bool hasRegistered = false;
 
@@ -72,7 +84,7 @@ namespace Saving {
 		}
 
 		IEnumerator Start() {
-			yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+			yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
 			
 			Register();
 		}

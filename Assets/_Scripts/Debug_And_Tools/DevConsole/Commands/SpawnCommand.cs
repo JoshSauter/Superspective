@@ -35,12 +35,12 @@ namespace DeveloperConsole {
                     return new FailureResponse($"Argument {dynamicObjIndex} is not a valid {nameof(DynamicObjectType)} index.");
                 }
 
-                Transform camTransform = Player.instance.playerCam.transform;
-                return SpawnObject((DynamicObjectType)dynamicObjIndex, camTransform.position + camTransform.forward * SPAWN_DISTANCE * Player.instance.scale);
+                Transform camTransform = Player.instance.PlayerCam.transform;
+                return SpawnObject((DynamicObjectType)dynamicObjIndex, camTransform.position + camTransform.forward * SPAWN_DISTANCE * Player.instance.Scale);
             }
             else if (Enum.TryParse(spawnObjArg, true, out DynamicObjectType type)) {
-                Transform camTransform = Player.instance.playerCam.transform;
-                return SpawnObject(type, camTransform.position + camTransform.forward * SPAWN_DISTANCE * Player.instance.scale);
+                Transform camTransform = Player.instance.PlayerCam.transform;
+                return SpawnObject(type, camTransform.position + camTransform.forward * SPAWN_DISTANCE * Player.instance.Scale);
             }
             else {
                 return new FailureResponse($"Argument {spawnObjArg} is not a valid DyanmicObjectType index or name.");
@@ -54,7 +54,7 @@ namespace DeveloperConsole {
 
             DynamicObject spawnedObj = Object.Instantiate(spawnableObjects[type], location, Quaternion.identity);
             if (spawnedObj.TryGetComponent(out GrowShrinkObject growShrink)) {
-                growShrink.startingScale = Player.instance.scale;
+                growShrink.startingScale = Player.instance.Scale;
             }
 
             if (spawnedObj.TryGetComponent(out GravityObject gravity)) {

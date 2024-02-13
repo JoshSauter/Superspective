@@ -14,7 +14,6 @@ namespace Saving {
         protected UniqueId id {
             get {
                 if (_id == null && this != null && this.gameObject != null) {
-                    // Debug.Log($"About to get UniqueId for {gameObject.FullPath()}");
                     _id = this.GetComponent<UniqueId>();
                 }
                 return _id;

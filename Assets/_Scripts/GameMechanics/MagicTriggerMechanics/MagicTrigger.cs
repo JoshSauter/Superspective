@@ -34,6 +34,9 @@ namespace MagicTriggerMechanics {
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
+		public bool AllConditionsSatisfied => triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, Player.instance.gameObject));
+		public bool AllConditionsNegativelySatisfied => triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, Player.instance.gameObject));
+		
 		public bool playerIsInTriggerZone = false;
 		protected bool hasTriggeredOnStay = false;
 		protected bool hasNegativeTriggeredOnStay = false;
@@ -91,8 +94,8 @@ namespace MagicTriggerMechanics {
 					PrintDebugInfo(player);
 				}
 
-				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, player));
-				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
+				bool allConditionsSatisfied = AllConditionsSatisfied;
+				bool allConditionsNegativelySatisfied = AllConditionsNegativelySatisfied;
 				// Magic Events triggered
 				if (allConditionsSatisfied) {
 					debug.Log($"Triggering MagicTrigger for {gameObject.name}!\nFirst trigger? {!hasTriggeredOnStay}");
@@ -136,8 +139,8 @@ namespace MagicTriggerMechanics {
 					PrintDebugInfo(player);
 				}
 
-				bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, player));
-				bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
+				bool allConditionsSatisfied = AllConditionsSatisfied;
+				bool allConditionsNegativelySatisfied = AllConditionsNegativelySatisfied;
 				if (allConditionsSatisfied) {
 					ExecuteActionsForTiming(ActionTiming.OnEnter);
 					OnMagicTriggerEnter?.Invoke();
@@ -182,9 +185,7 @@ namespace MagicTriggerMechanics {
 		protected void PrintDebugInfo(GameObject player) {
 			string debugString = $"{gameObject.name}:\n";
 			foreach (var condition in triggerConditions) {
-				float triggerValue = condition.Evaluate(transform, player);
-				debugString += $"Type: {condition.triggerCondition}\nAmount facing: {triggerValue}\nThreshold: {condition.triggerThreshold}\nPass ?: {(triggerValue > condition.triggerThreshold)}\n";
-				debugString += "--------\n";
+				debugString += condition.GetDebugInfo(transform, player);
 			}
 			debug.Log(debugString);
 		}

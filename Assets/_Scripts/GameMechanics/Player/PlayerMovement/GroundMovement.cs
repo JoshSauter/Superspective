@@ -132,6 +132,22 @@ partial class PlayerMovement {
 
             Vector3 moveDirection = forward * m.input.LeftStick.y + right * m.input.LeftStick.x;
             if (m.autoRun) moveDirection = forward + right * m.input.LeftStick.x;
+            switch (m.endGameMovement) {
+                case EndGameMovement.NotStarted:
+                case EndGameMovement.Walking:
+                    break;
+                case EndGameMovement.HorizontalInputMovesPlayerForward:
+                    moveDirection.x = Mathf.Abs(moveDirection.x);
+                    break;
+                case EndGameMovement.AllInputMovesPlayerForward:
+                    moveDirection = Vector3.right * moveDirection.magnitude;
+                    break;
+                case EndGameMovement.AllInputDisabled:
+                    moveDirection = Vector3.right;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             // DEBUG:
             if (m.DEBUG) {
@@ -140,7 +156,7 @@ partial class PlayerMovement {
             }
 
             // If no keys are pressed, decelerate to a stop
-            if (!m.input.LeftStickHeld && !m.autoRun) {
+            if (!m.input.LeftStickHeld && !m.autoRun && m.endGameMovement != EndGameMovement.AllInputDisabled) {
                 Vector3 horizontalVelocity = m.ProjectedHorizontalVelocity();
                 Vector3 desiredHorizontalVelocity = Vector3.Lerp(
                     horizontalVelocity,

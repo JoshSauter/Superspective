@@ -1,79 +1,74 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using StateUtils;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LoadingIcon : Singleton<LoadingIcon> {
-    public bool DEBUG = false;
     Image icon;
 
-    // Maybe figure out a different animation for this, but fill animation doens't work well while loading
-    float iconSpinSpeed = 0f;
-    float iconFadeOutSpeed = 2.5f;
+    private float iconFadeInOutTime = .75f;
+    private float minIconPresentTime = 1f;
+    private AnimationCurve fadeInOutCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     
     public enum State {
         Idle,
-        Loading
+        FadingIn,
+        IconPresent,
+        FadingOut
     }
-
-    State _state;
-    public State state {
-        get => _state;
-        set {
-            if (value == _state) {
-                return;
-            }
-
-            switch (value) {
-                case State.Idle:
-                    break;
-                case State.Loading:
-                    icon.fillAmount = 1;
-                    icon.fillClockwise = true;
-                    icon.enabled = true;
-                    icon.color = new Color(1, 1, 1, Mathf.Max(icon.color.a, .5f));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
-            }
-
-            _state = value;
-        }
-    }
+    public StateMachine<State> stateMachine;
 
     Color clear = new Color(1, 1, 1, 0);
 
+    public bool IsDisplayed => stateMachine != State.Idle;
+
+    public void ShowLoadingIcon() {
+        if (stateMachine.state is State.Idle or State.FadingOut) {
+            stateMachine.Set(State.FadingIn);
+        }
+    }
+
     void Awake() {
+        stateMachine = this.StateMachine(State.Idle);
         icon = GetComponent<Image>();
+
+        InitializeStateMachine();
+    }
+
+    void InitializeStateMachine() {
+        stateMachine.AddStateTransition(State.FadingIn, State.IconPresent, iconFadeInOutTime);
+        stateMachine.AddStateTransition(
+            State.IconPresent,
+            State.FadingOut,
+            () => stateMachine.timeSinceStateChanged >= minIconPresentTime && !GameManager.instance.IsCurrentlyLoading
+        );
+        stateMachine.AddStateTransition(State.FadingOut, State.Idle, iconFadeInOutTime);
+        
+        stateMachine.AddTrigger(State.FadingIn, () => {
+            icon.enabled = true;
+            icon.color = new Color(1, 1, 1, Mathf.Max(icon.color.a, .5f));
+        });
+        
+        stateMachine.AddTrigger(State.Idle, () => {
+            icon.enabled = false;
+            icon.color = clear;
+        });
     }
 
     void Update() {
-        if (!DEBUG) {
-            state = GameManager.instance.IsCurrentlyLoading ? State.Loading : State.Idle;
-        }
-
-        if (DEBUG && DebugInput.GetKeyDown("x")) {
-            state = state == State.Idle ? State.Loading : State.Idle;
-        }
-
-        icon.fillAmount = Mathf.Clamp01(icon.fillAmount + (icon.fillClockwise ? 1 : -1) * iconSpinSpeed * Time.deltaTime);
-        switch (state) {
+        switch (stateMachine.state) {
             case State.Idle:
-                if (icon.fillAmount == 0) {
-                    icon.fillClockwise = !icon.fillClockwise;
-                }
-                icon.color = Color.Lerp(icon.color, clear, iconFadeOutSpeed * Time.deltaTime);
-                if (icon.color.a < 0.01f) {
-                    icon.color = clear;
-                    icon.enabled = false;
-                }
                 break;
-            case State.Loading:
-                if (icon.fillAmount == 1 || icon.fillAmount == 0) {
-                    icon.fillClockwise = !icon.fillClockwise;
-                }
-                icon.color = Color.Lerp(icon.color, Color.white, iconFadeOutSpeed * Time.deltaTime);
+            case State.FadingOut:
+                icon.color = Color.Lerp(icon.color, clear, fadeInOutCurve.Evaluate(stateMachine.timeSinceStateChanged / iconFadeInOutTime));
+                break;
+            case State.FadingIn:
+                icon.color = Color.Lerp(icon.color, Color.white, fadeInOutCurve.Evaluate(stateMachine.timeSinceStateChanged / iconFadeInOutTime));
+                break;
+            case State.IconPresent:
+                icon.color = Color.white;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

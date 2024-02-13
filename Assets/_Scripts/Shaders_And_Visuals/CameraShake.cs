@@ -27,6 +27,8 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 	float endIntensity;
 	AnimationCurve curve;
 	float intensityMultiplier;
+	// TODO: See if this is really annoying to have camera shake amplified by Player being small
+	bool isWorldShake = true;
 
 	float intensity;
 	float timeShaking = 0f;
@@ -64,6 +66,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 				float t = timeShaking / duration;
 
 				intensity = isUsingCurve ? curve.Evaluate(t) * intensityMultiplier : Mathf.Lerp(startIntensity, endIntensity, t);
+				intensity = isWorldShake ? 1f / Player.instance.Scale : 1f;
 				intensity *= settingsIntensityMultiplier;
 				Vector2 random = UnityEngine.Random.insideUnitCircle * intensity / 10f;
 				Vector2 offset = Vector2.Lerp(Vector2.zero, -appliedOffset, t) + random;

@@ -41,7 +41,7 @@ public class CameraFlythroughPath : MonoBehaviour {
         foreach (GameObject selected in Selection.gameObjects) {
             if (selected.TryGetComponent(out CameraFlythroughPath path)) {
                 GameObject newNode = new GameObject("Node");
-                newNode.transform.SetParent(Player.instance.playerCam.transform, false);
+                newNode.transform.SetParent(Player.instance.PlayerCam.transform, false);
                 newNode.transform.SetParent(path.transform, true);
                 
                 path.nodes.Add(new TransformInfo(newNode.transform, false));
@@ -72,7 +72,7 @@ public class CameraFlythroughPath : MonoBehaviour {
         
         // If the camera should start on the player, insert (exactly once) or update the first node to match Player transform
         if (startOnPlayerCam) {
-            Transform playerCam = Player.instance.playerCam.transform;
+            Transform playerCam = Player.instance.PlayerCam.transform;
             if (!hasInsertedPlayerCamTransformAtStart) {
                 nodes.Insert(0, new TransformInfo(playerCam, levelRoot));
                 hasInsertedPlayerCamTransformAtStart = true;

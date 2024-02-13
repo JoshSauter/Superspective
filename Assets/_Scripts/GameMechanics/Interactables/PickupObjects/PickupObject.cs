@@ -32,9 +32,13 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public bool isReplaceable = true;
     public bool isHeld;
+    public CubeReceptacle receptacleHeldIn;
+    private bool IsHeldInReceptacle => receptacleHeldIn != null;
     public bool shouldFollow = true;
     public GravityObject thisGravity;
     public bool freezeRigidbodyDueToNearbyPlayer = false;
+
+    private bool RigidbodyShouldBeFrozen => GameManager.instance.IsCurrentlyLoading || freezeRigidbodyDueToNearbyPlayer || IsHeldInReceptacle;
     public Rigidbody thisRigidbody;
     public Collider thisCollider;
 
@@ -42,7 +46,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public GrowShrinkObject growShrinkObject;
     public CubeSpawnerReference spawnedFrom;
 
-    public float scale => Mathf.Min(Player.instance.scale, (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
+    public float scale => Mathf.Min(Player.instance.Scale, (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
     const float scaleMultiplier = 1.5f;
     float currentCooldown;
     InteractableGlow interactableGlow;
@@ -107,7 +111,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     void Update() {
-        if (freezeRigidbodyDueToNearbyPlayer || GameManager.instance.IsCurrentlyLoading) {
+        if (RigidbodyShouldBeFrozen) {
             thisRigidbody.isKinematic = true;
         }
         else {
@@ -115,7 +119,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         }
         
         if (interactable) {
-            if (scale > 6f * Player.instance.scale) {
+            if (scale > 6f * Player.instance.Scale) {
                 interactableObject.SetAsDisabled("(Too large)");
             }
             else {
@@ -225,11 +229,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     Vector3 TargetHoldPosition(float holdDistance, out SuperspectiveRaycast raycastHits) {
-        // TODO: Don't work with strings every frame, clean this up
-        int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
-        int layerMask = ~((1 << ignoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
-                          (1 << LayerMask.NameToLayer("Invisible")) |
-                          (1 << LayerMask.NameToLayer("CollideWithPlayerOnly")));
+        int ignoreRaycastLayer = SuperspectivePhysics.IgnoreRaycastLayer;
+        int layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
         int tempLayer = gameObject.layer;
         gameObject.layer = ignoreRaycastLayer;
 
@@ -256,8 +257,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         // TODO: Don't work with strings every frame, clean this up
         int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
         int layerMask = ~((1 << ignoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
-                          (1 << LayerMask.NameToLayer("Invisible")) |
-                          (1 << LayerMask.NameToLayer("CollideWithPlayerOnly")));
+                          (1 << SuperspectivePhysics.InvisibleLayer) |
+                          (1 << SuperspectivePhysics.CollideWithPlayerOnlyLayer));
         int tempLayer = gameObject.layer;
         gameObject.layer = ignoreRaycastLayer;
 
@@ -274,7 +275,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (portalableObject.copyIsEnabled) portalableObject.fakeCopyInstance.gameObject.layer = tempLayerPortalCopy;
 
         bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null &&
-                                          portalableObject.grabbedThroughPortal.portalRenderingIsEnabled &&
+                                          portalableObject.grabbedThroughPortal.PortalRenderingIsEnabled &&
                                           !raycastHits.hitPortal;
         bool throughInPortalToOutPortal =
             portalableObject.grabbedThroughPortal == null && raycastHits.hitPortal;
@@ -322,7 +323,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
             //transform.parent = originalParent;
             thisGravity.useGravity = true;
-            //thisRigidbody.isKinematic = false;
             thisRigidbody.velocity += PlayerMovement.instance.thisRigidbody.velocity;
             isHeld = false;
             currentCooldown = pickupDropCooldown;
@@ -420,6 +420,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         bool interactable;
         bool isHeld;
 
+        SerializableReference<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> receptacleHeldIn;
+
         public bool isReplaceable;
         SerializableVector3 localScale;
         float mass;
@@ -446,6 +448,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             isReplaceable = obj.isReplaceable;
             interactable = obj.interactable;
             isHeld = obj.isHeld;
+            receptacleHeldIn = obj.receptacleHeldIn;
             currentCooldown = obj.currentCooldown;
         }
 
@@ -466,6 +469,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             obj.isReplaceable = isReplaceable;
             obj.interactable = interactable;
             obj.isHeld = isHeld;
+            obj.receptacleHeldIn = receptacleHeldIn.GetOrNull();
             obj.currentCooldown = currentCooldown;
         }
     }

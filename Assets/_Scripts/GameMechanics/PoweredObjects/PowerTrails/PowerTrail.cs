@@ -90,6 +90,7 @@ namespace PowerTrailMechanics {
 		[Header("Current State")]
 		public float distance = 0f;
 		public float maxDistance = 0f;
+		public float targetFillAmount = 1f; // 0-1 value representing how much distance/maxDistance to allow the PowerTrail to fill
 
 		[ShowNativeProperty]
 		public bool IsFullyPowered => distance >= maxDistance;
@@ -111,7 +112,7 @@ namespace PowerTrailMechanics {
 					return LayerMask.NameToLayer("UI");
 				}
 				
-				return LayerMask.NameToLayer(Player.instance.scale < 1 ? "Default" : "VisibleButNoPlayerCollision");
+				return LayerMask.NameToLayer(Player.instance.Scale < 1 ? "Default" : "VisibleButNoPlayerCollision");
 			}
 		}
 
@@ -414,8 +415,9 @@ namespace PowerTrailMechanics {
 
 		float NextDistance() {
 			float effectiveSpeed = useSeparateSpeedsForPowerOnOff && !pwr.PowerIsOn ? speedPowerOff : speed;
-			if (pwr.PowerIsOn && distance < maxDistance) {
-				return Mathf.Min(maxDistance, distance + Time.deltaTime * effectiveSpeed);
+			float max = maxDistance * targetFillAmount;
+			if (pwr.PowerIsOn && distance < max) {
+				return Mathf.Min(max, distance + Time.deltaTime * effectiveSpeed);
 			}
 			else if (!pwr.PowerIsOn && distance > 0) {
 				return Mathf.Max(0, distance - Time.deltaTime * effectiveSpeed);

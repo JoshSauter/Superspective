@@ -1,4 +1,6 @@
 using System;
+using GrowShrink;
+using SuperspectiveUtils;
 
 namespace DeveloperConsole {
     public class ChangeScaleCommand : ConsoleCommand {
@@ -22,7 +24,15 @@ namespace DeveloperConsole {
             if (targetScale <= 0) {
                 return new FailureResponse($"Target scale {targetScale} is not greater than 0");
             }
-            
+
+            var objHovered = Interact.instance.interactableObjectHovered;
+            if (objHovered != null) {
+                GrowShrinkObject growShrink = objHovered.transform.GetComponentInChildren<GrowShrinkObject>();
+                if (growShrink != null) {
+                    growShrink.SetScaleDirectly(targetScale);
+                    return new SuccessResponse($"Set {growShrink.name} scale to {targetScale}");
+                }
+            }
             Player.instance.growShrink.SetScaleDirectly(targetScale);
             return new SuccessResponse($"Set player scale to {targetScale}");
         }

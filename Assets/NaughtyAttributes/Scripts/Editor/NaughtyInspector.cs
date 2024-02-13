@@ -185,7 +185,7 @@ namespace NaughtyAttributes.Editor
 
 				foreach (var method in _methods)
 				{
-					NaughtyEditorGUI.Button(serializedObject.targetObject, method);
+					NaughtyEditorGUI.Button(serializedObject.targetObject, serializedObject.targetObjects, method);
 				}
 			}
 		}

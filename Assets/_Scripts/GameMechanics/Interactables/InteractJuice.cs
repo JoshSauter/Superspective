@@ -85,7 +85,7 @@ public class InteractJuice : MonoBehaviour {
         
         InteractableObject interactableObjectHovered = interact.interactableObjectHovered;
         bool hoveredOverNewObject = UpdateLastHoveredOverState(interactableObjectHovered);
-        UpdateColorState(Player.instance.isHoldingSomething ? lastObjectHovered : interactableObjectHovered);
+        UpdateColorState(Player.instance.IsHoldingSomething ? lastObjectHovered : interactableObjectHovered);
         UpdateReticleBloomState(hoveredOverNewObject);
         UpdateHelpText();
     }
@@ -112,7 +112,7 @@ public class InteractJuice : MonoBehaviour {
                 
                 // Play an on-hover sound (unless it's an object we're already holding)
                 bool hoveredOverHeldObj = false;
-                if (Player.instance.isHoldingSomething) {
+                if (Player.instance.IsHoldingSomething) {
                     if (Player.instance.heldObject != null &&
                         Player.instance.heldObject.gameObject == interactableObjectHovered.gameObject) {
                         hoveredOverHeldObj = true;
@@ -126,7 +126,7 @@ public class InteractJuice : MonoBehaviour {
             }
             lastObjectHovered = interactableObjectHovered;
             lastObjectHoveredState.Set(LastObjectHoveredState.HoveredOverSomething, true);
-        } else if (Player.instance.isHoldingSomething) {
+        } else if (Player.instance.IsHoldingSomething) {
             lastObjectHoveredState.Set(LastObjectHoveredState.HoveredOverSomething, true);
         }
 

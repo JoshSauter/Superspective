@@ -37,7 +37,7 @@ public class GameManager : Singleton<GameManager> {
     // There are lots of ways the game can be in a loading state, this aggregates all of them into one
     public bool IsCurrentlyLoading =>
         !gameHasLoaded ||
-        LevelManager.instance.IsCurrentlyLoadingScenes ||
+        LevelManager.instance.IsCurrentlySwitchingScenes ||
         LevelManager.instance.isCurrentlySwitchingScenes ||
         SaveManager.isCurrentlyLoadingSave;
 
@@ -58,7 +58,7 @@ public class GameManager : Singleton<GameManager> {
         SaveManager.LoadSettings();
         settingsHaveLoaded = true;
         yield return new WaitWhile(() => LevelManager.instance.activeSceneName == "");
-        yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+        yield return new WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
         yield return new WaitUntil(() => !LevelManager.instance.isCurrentlySwitchingScenes);
         yield return new WaitForSeconds(1f);
         gameHasLoaded = true;

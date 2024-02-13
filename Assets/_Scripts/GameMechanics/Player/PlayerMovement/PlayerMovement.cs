@@ -63,10 +63,10 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         CameraFlythrough.instance.isPlayingFlythrough ||
         !GameManager.instance.gameHasLoaded;
 
-    CapsuleCollider thisCollider;
+    public CapsuleCollider thisCollider;
     MeshRenderer thisRenderer;
 
-    private float scale => Player.instance.scale;
+    private float scale => Player.instance.Scale;
 
     [ShowNativeProperty]
     public Vector3 curVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
@@ -78,7 +78,16 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public float walkSpeed => _walkSpeed * scale * movespeedMultiplier;
     public float runSpeed => _runSpeed * scale * movespeedMultiplier;
     public Vector3 bottomOfPlayer => transform.position - (transform.up * 2.5f * scale);
-
+    
+    // End-game mechanics
+    public enum EndGameMovement {
+        NotStarted,
+        Walking,
+        HorizontalInputMovesPlayerForward,
+        AllInputMovesPlayerForward,
+        AllInputDisabled
+    }
+    public EndGameMovement endGameMovement;
 
     public struct TimeSlice {
         public float time;
@@ -201,6 +210,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
 
         bool ShouldUseSprintSpeed() {
+            if (endGameMovement != EndGameMovement.NotStarted) return false;
             if (stairMovement.RecentlySteppedUp) return false;
             if (autoRun) return true;
 
@@ -238,7 +248,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         
         bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && Grounded.IsGrounded && !stairMovement.RecentlySteppedUp && !MoveDirectionHeldRecently;
 
-        thisRigidbody.isKinematic = stopped || stairMovement.stepState != StairMovement.StepState.StepReady || stopPlayerWhenStanding;
+        thisRigidbody.isKinematic = (stopped || stairMovement.stepState != StairMovement.StepState.StepReady || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
 
         if (timeSlices.Count >= 10) {
             timeSlices.RemoveAt(0);

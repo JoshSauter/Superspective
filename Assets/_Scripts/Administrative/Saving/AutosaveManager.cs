@@ -57,6 +57,7 @@ namespace Saving {
         }
 
         public void DoAutosave() {
+            LoadingIcon.instance.ShowLoadingIcon();
             SaveManager.Save(CreateAutosave());
             timeSinceLastAutosave = 0;
 

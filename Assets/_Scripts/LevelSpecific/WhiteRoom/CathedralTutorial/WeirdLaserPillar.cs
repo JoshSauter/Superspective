@@ -30,7 +30,7 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
     private float cameraShakeMultiplier => Mathf.Lerp(cameraShakeStartIntensityMultiplierMin, 1,
 	    1-Mathf.InverseLerp(5f, 40f, distanceFromPlayer));
 
-    private float distanceFromPlayer => Vector3.Distance(Player.instance.playerCam.transform.position, transform.position);
+    private float distanceFromPlayer => Vector3.Distance(Player.instance.PlayerCam.transform.position, transform.position);
 
     protected override void Start() {
         base.Start();

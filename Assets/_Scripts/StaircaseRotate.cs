@@ -20,12 +20,12 @@ public class StaircaseRotate : MonoBehaviour {
     [ShowIf("DEBUG")]
     [ReadOnly]
     public Vector3 startPosition;
-    public Vector3 effectiveStartPosition => startPosition + (endPosition - startPosition).normalized * startEndGap * Player.instance.scale;
+    public Vector3 effectiveStartPosition => startPosition + (endPosition - startPosition).normalized * startEndGap * Player.instance.Scale;
 
     [ShowIf("DEBUG")]
     [ReadOnly]
     public Vector3 endPosition;
-    public Vector3 effectiveEndPosition => endPosition - (endPosition - startPosition).normalized * startEndGap * Player.instance.scale;
+    public Vector3 effectiveEndPosition => endPosition - (endPosition - startPosition).normalized * startEndGap * Player.instance.Scale;
 
     public Vector3 startGravityDirection = Vector3.zero;
     public Vector3 endGravityDirection = Vector3.zero;
@@ -202,7 +202,7 @@ public class StaircaseRotate : MonoBehaviour {
     }
 
     private void OnDrawGizmos() {
-        float sphereSize = .25f * Player.instance.scale;
+        float sphereSize = .25f * Player.instance.Scale;
         Color originalColor = Gizmos.color;
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(effectiveStartPosition, sphereSize);

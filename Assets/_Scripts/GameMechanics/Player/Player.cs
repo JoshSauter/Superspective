@@ -10,13 +10,13 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public PlayerLook look;
 	public PlayerMovement movement;
 	public Headbob headbob;
-	public Camera playerCam => SuperspectiveScreen.instance.playerCamera;
+	public Camera PlayerCam => SuperspectiveScreen.instance.playerCamera;
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
 
-	public float scale => growShrink != null ? growShrink.currentScale : 1f;
+	public float Scale => growShrink != null ? growShrink.currentScale : 1f;
 	public GrowShrinkObject growShrink;
-	public bool isHoldingSomething => heldObject != null;
+	public bool IsHoldingSomething => heldObject != null;
 
 	public new Collider collider;
 	public new Renderer renderer;

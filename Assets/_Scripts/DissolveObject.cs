@@ -32,26 +32,61 @@ namespace DissolveObjects {
                 _state = value;
                 switch (value) {
                     case State.Dematerialized:
-                        int invisibleLayer = LayerMask.NameToLayer("Invisible");
-                        cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
-                        foreach (Renderer r in renderers) {
-                            r.gameObject.layer = invisibleLayer;
+                        int invisibleLayer = SuperspectivePhysics.InvisibleLayer;
+                        if (IsInvisibleDimensionObj) {
+                            cachedLayers = defaultLayers;
                         }
+                        else {
+                            cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
+                        }
+                        ApplyLayers(invisibleLayer);
+
+                        SubscribedToResetLayers = false;
                         break;
                     case State.Materialized:
                     case State.Dematerializing:
                     case State.Materializing:
-                        // Hack fix... not sure a better way to handle this situation yet
-                        if (thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.invisible) break;
-                        
-                        for (var i = 0; i < renderers.Length; i++) {
-                            renderers[i].gameObject.layer = cachedLayers[i];
+                        // Fix to DissolveObjects interacting with DimensionObjects on their parent tree
+                        if (IsInvisibleDimensionObj) {
+                            SubscribedToResetLayers = true;
+                            return;
                         }
+
+                        ApplyLayers(cachedLayers);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(value), value, null);
                 }
             }
+        }
+
+        private bool IsInvisibleDimensionObj => thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.invisible;
+        private bool hasSubscribedToResetLayers = false;
+        private bool SubscribedToResetLayers {
+            get => thisDimensionObj != null && hasSubscribedToResetLayers;
+            set {
+                if (thisDimensionObj == null) {
+                    hasSubscribedToResetLayers = false;
+                    return;
+                }
+
+                if (value) {
+                    thisDimensionObj.OnStateChangeSimple += ResetLayersToDefaultsOnVisibilityState;
+                }
+                else {
+                    thisDimensionObj.OnStateChangeSimple -= ResetLayersToDefaultsOnVisibilityState;
+                }
+            }
+        }
+        void ResetLayersToDefaultsOnVisibilityState() {
+            if (thisDimensionObj == null) return;
+            // Only trigger when the visibility state become some sort of visible
+            if (IsInvisibleDimensionObj) return;
+
+            // Only trigger once
+            SubscribedToResetLayers = false;
+            
+            ApplyLayers(defaultLayers);
         }
         
         [ReadOnly]
@@ -81,6 +116,8 @@ namespace DissolveObjects {
 
         public Renderer[] renderers;
         public Collider[] colliders;
+        // Default layers are the layers at object initialization time
+        private int[] defaultLayers;
         // The layer the objects would be on if not dissolved
         private int[] cachedLayers;
 
@@ -118,6 +155,7 @@ namespace DissolveObjects {
             base.Awake();
             renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();
             cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
+            defaultLayers = renderers.Select(r => r.gameObject.layer).ToArray();
             colliders = gameObject.GetComponentsInChildrenRecursively<Collider>();
             thisDimensionObj = gameObject.FindDimensionObjectRecursively<DimensionObject>();
         }
@@ -193,6 +231,18 @@ namespace DissolveObjects {
                         throw new ArgumentOutOfRangeException();
                 }
                 c.enabled = isOverMaterializedThreshold;
+            }
+        }
+
+        void ApplyLayers(int[] layersToApply) {
+            for (var i = 0; i < renderers.Length; i++) {
+                renderers[i].gameObject.layer = layersToApply[i];
+            }
+        }
+
+        void ApplyLayers(int layerToApply) {
+            for (var i = 0; i < renderers.Length; i++) {
+                renderers[i].gameObject.layer = layerToApply;
             }
         }
 

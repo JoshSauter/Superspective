@@ -84,8 +84,8 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	// get components from main game camera.
 	Component[] GetComponents() {
 		List<Component> result = myCamera.GetComponents<Component>().ToList();
-		if (result != null && result.Count > 1) {
-			// exlude these components:
+		if (result.Count > 1) {
+			// exclude these components:
 			List<Component> excludes = new List<Component>();
 			excludes.Add(myCamera.transform);
 			excludes.Add(myCamera);
@@ -100,9 +100,12 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
 			if (myCamera.GetComponent<CameraZoom>()) excludes.Add(myCamera.GetComponent<CameraZoom>());
 			if (myCamera.GetComponent<NoiseScrambleOverlay>()) excludes.Add(myCamera.GetComponent<NoiseScrambleOverlay>());
+			
 			result = result.Except(excludes).ToList();
 		}
 
+		// Fix depth sensitivity to 1 for scene camera
+		result.OfType<BladeEdgeDetection>().First().depthSensitivity = 1f;
 		
 		int bloomIndex = result.FindIndex(c => c is FastBloom);
 		int ssaoIndex = result.FindIndex(c => c is ScreenSpaceAmbientOcclusion);

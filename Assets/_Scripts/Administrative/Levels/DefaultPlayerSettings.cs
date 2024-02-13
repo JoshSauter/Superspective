@@ -70,7 +70,7 @@ namespace LevelManagement {
         public void Apply() {
             Player.instance.transform.position = position;
             Player.instance.transform.rotation = Quaternion.Euler(rotation);
-            edgeDetectionSettings.ApplyTo(Player.instance.playerCam.GetComponent<BladeEdgeDetection>());
+            edgeDetectionSettings.ApplyTo(Player.instance.PlayerCam.GetComponent<BladeEdgeDetection>());
         }
     }
     

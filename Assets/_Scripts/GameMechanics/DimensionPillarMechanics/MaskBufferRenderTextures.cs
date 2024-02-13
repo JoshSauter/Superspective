@@ -131,7 +131,7 @@ public class MaskBufferRenderTextures : Singleton<MaskBufferRenderTextures> {
 		// Will write to global texture named _PortalMask
 		Shader.SetGlobalTexture(PortalMask, portalMaskTexture);
 		
-		Shader.SetGlobalVector(PlayerCamPos, Player.instance.playerCam.transform.position);
+		Shader.SetGlobalVector(PlayerCamPos, Player.instance.PlayerCam.transform.position);
 	}
 
 	void ReleaseAllTextures() {

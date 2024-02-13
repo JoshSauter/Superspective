@@ -69,7 +69,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 			float middleMouseScroll = Input.mouseScrollDelta.y;
 			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
 
-			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed * Player.instance.scale);
+			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed * Player.instance.Scale);
 		}
     }
 

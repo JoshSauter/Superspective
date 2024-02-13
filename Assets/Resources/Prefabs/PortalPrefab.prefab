@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3668606191556050536}
   - component: {fileID: 1387972421290461201}
   - component: {fileID: 7766382829534227124}
+  - component: {fileID: 3891552408048059444}
+  - component: {fileID: 2019617493216915242}
   m_Layer: 0
   m_Name: PortalPrefab
   m_TagString: Untagged
@@ -31,6 +33,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 7, z: 2.4999962}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -54,6 +57,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -146,6 +150,8 @@ MonoBehaviour:
     m_AreaError: 15
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
+  m_Mesh: {fileID: 0}
+  m_VersionIndex: 0
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -158,9 +164,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198351188593925569}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 7, y: 7, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7766382829534227124
@@ -175,7 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: e760afb3-8cf7-4aa9-9d42-bab94d8e8cc7
+  _id: {fileID: 3891552408048059444}
   DEBUG: 0
   channel: <Not set>
   changeActiveSceneOnTeleport: 0
@@ -209,13 +223,59 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
+    m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   edgeColorGradientTexture: {fileID: 0}
   renderRecursivePortals: 0
   compositePortal: 0
-  renderers: []
+  doubleSidedPortals: 0
+  skipIsVisibleCheck: 0
+  changeScale: 0
+  scaleFactor: 1
+  volumetricPortals: []
+  volumetricPortalThickness: 1
+  fallbackMaterial: {fileID: 0}
+  renderers:
+  - {fileID: 2019617493216915242}
   colliders: []
   otherPortal: {fileID: 0}
-  pauseRenderingOnly: 0
-  pauseRenderingAndLogic: 0
+  internalRenderTexturesCopy:
+    portalName: 
+    mainTexture: {fileID: 0}
+    depthNormalsTexture: {fileID: 0}
+  pauseRendering: 0
+  pauseLogic: 0
+  dimensionObject: {fileID: 0}
+  trigger: {fileID: 0}
+  onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &3891552408048059444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198351188593925569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c21c976dffda3c4a873e018b4bd3a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 
+--- !u!114 &2019617493216915242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198351188593925569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 307b6c6f0d5b8e243bb584fef84e115e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  printLookupValue: 0
+  lookupType: 2
+  lookupString: Look up anything

@@ -19,7 +19,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     public float curPeriod = 1f;
     public float headbobAmount => 2 * Settings.Gameplay.Headbob.value / 100f;
     float curAmplitude = 1f;
-    private float effectiveAmplitude => curAmplitude * Player.instance.scale;
+    private float effectiveAmplitude => curAmplitude * Player.instance.Scale;
     PlayerMovement playerMovement;
 
     protected override void Start() {
@@ -39,7 +39,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     }
 
     void FixedUpdate() {
-        Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.averageVelocityRecently) / Player.instance.scale;
+        Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.averageVelocityRecently) / Player.instance.Scale;
         // Don't bob faster when we artificially speed up the player
         float playerSpeed = playerVelocity.magnitude / playerMovement.movespeedMultiplier;
         if (playerMovement.IsGrounded && playerSpeed > 0.2f && !NoClipMode.instance.noClipOn) {

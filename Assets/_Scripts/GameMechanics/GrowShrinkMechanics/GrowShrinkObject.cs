@@ -160,7 +160,7 @@ namespace GrowShrink {
                 PlayerMovement.instance.groundMovement.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
 
                 if (targetScale < 1f || currentScale < 1f) {
-                    ColorfulFog fog = Player.instance.playerCam.GetComponent<ColorfulFog>();
+                    ColorfulFog fog = Player.instance.PlayerCam.GetComponent<ColorfulFog>();
                     float fogStartWithoutMultiplier = fog.startDistance / currentScaleClamped;
                     fog.startDistance = fogStartWithoutMultiplier * targetScaleClamped;
 

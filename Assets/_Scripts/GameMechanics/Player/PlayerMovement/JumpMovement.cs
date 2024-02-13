@@ -92,7 +92,7 @@ partial class PlayerMovement {
             while (!m.IsGrounded) {
                 float height = Vector3.Dot(transform.up, transform.position - startPosition);
                 if (height > maxHeight) maxHeight = height;
-                float adjustedHeight = Vector3.Dot(transform.up, transform.position - startPosition) / Player.instance.scale;
+                float adjustedHeight = Vector3.Dot(transform.up, transform.position - startPosition) / Player.instance.Scale;
                 if (adjustedHeight > maxAdjustedHeight) maxAdjustedHeight = adjustedHeight;
                 yield return new WaitForFixedUpdate();
             }

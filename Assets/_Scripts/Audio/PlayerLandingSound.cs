@@ -13,7 +13,7 @@ public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
 	AudioJob ruffleSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);
 	AudioJob thumpSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingThump, ID);
 
-	private float scale => Player.instance.scale;
+	private float scale => Player.instance.Scale;
 	PlayerMovement playerMovement;
 	bool wasGrounded = true;
 	float ruffleStartVolume;

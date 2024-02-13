@@ -393,7 +393,12 @@ namespace Saving {
             
             serializedDynamicObjects.Clear();
             foreach (DynamicObject dynamicObject in dynamicObjects.Values) {
-                serializedDynamicObjects[dynamicObject.ID] = dynamicObject.GetSaveObject() as DynamicObjectSave;
+                try {
+                    serializedDynamicObjects[dynamicObject.ID] = dynamicObject.GetSaveObject() as DynamicObjectSave;
+                }
+                catch (Exception e) {
+                    Debug.LogError($"Error serializing {dynamicObject.ID}, cause: {e.StackTrace}");
+                }
             }
             dynamicObjects.Clear();
         }

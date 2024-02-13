@@ -30,7 +30,7 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
                     .Where(scramblerRef => scramblerRef.GetOrNull()?.enabled ?? false)
                     .Select(scramblerRef => scramblerRef.GetOrNull())
                     .Where(scrambler => scrambler.scramblerState == NoiseScrambleOverlayObject.ScramblerState.On)
-                    .Select(scrambler => RaycastUtils.MinDistanceBetweenPoints(scrambler.transform.position, Player.instance.playerCam.transform.position))
+                    .Select(scrambler => RaycastUtils.MinDistanceBetweenPoints(scrambler.transform.position, Player.instance.PlayerCam.transform.position))
                     // Find the closest scrambler
                     .OrderBy(distance => distance)
                     .ToList();

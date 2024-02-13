@@ -38,7 +38,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 32
+	// Next level: 34
 	[Serializable]
 	public enum Levels {
 		TitleCard = 29,
@@ -73,7 +73,8 @@ namespace LevelManagement {
 		GrowShrinkIntro = 28,
 		GrowShrinkIntroBetweenWorlds = 30,
 		GrowShrinkIntroDarkSide = 31,
-		TransitionWhiteRoom3GrowShrinkIntro = 32
+		TransitionWhiteRoom3GrowShrinkIntro = 32,
+		EdgeOfAUniverse = 33,
 	}
 
 	public static class LevelsExt {
@@ -230,7 +231,8 @@ namespace LevelManagement {
 			{ Levels.GrowShrinkIntro, "_GrowShrinkIntro" },
 			{ Levels.GrowShrinkIntroBetweenWorlds, "_GrowShrinkIntroBetweenWorlds" },
 			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" },
-			{ Levels.TransitionWhiteRoom3GrowShrinkIntro, "_TransitionWhiteRoom3GrowShrinkIntro" }
+			{ Levels.TransitionWhiteRoom3GrowShrinkIntro, "_TransitionWhiteRoom3GrowShrinkIntro" },
+			{ Levels.EdgeOfAUniverse, "_EdgeOfAUniverse" }
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();
@@ -268,14 +270,15 @@ namespace LevelManagement {
 				this.callback = callback;
 			}
 
-			public void Invoke() {
-				Debug.LogWarning($"Queued level change happening now for {levelName}");
+			public void Invoke(DebugLogger debug) {
+				debug.LogWarning($"Queued level change happening now for {levelName}");
 				LevelManager.instance.SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
 			}
 		}
 
-		public bool IsCurrentlyLoadingScenes =>
-			currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
+		public bool IsCurrentlySwitchingScenes => isCurrentlySwitchingScenes || ScenesAreLoading;
+
+		private bool ScenesAreLoading => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
 
 		/// <summary>
 		/// Order of events:
@@ -380,8 +383,8 @@ namespace LevelManagement {
 		void Update() {
 			if (!initialized) return;
 
-			if (queuedActiveSceneSwitch != null && !IsCurrentlyLoadingScenes) {
-				queuedActiveSceneSwitch.Invoke();
+			if (queuedActiveSceneSwitch != null && !IsCurrentlySwitchingScenes) {
+				queuedActiveSceneSwitch.Invoke(debug);
 				queuedActiveSceneSwitch = null;
 			}
 		}
@@ -431,8 +434,9 @@ namespace LevelManagement {
 			bool checkActiveSceneName = true,
 			Action onFinishCallback = null
 		) {
-			if (IsCurrentlyLoadingScenes) {
+			if (IsCurrentlySwitchingScenes) {
 				queuedActiveSceneSwitch = new QueuedSceneSwitch(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
+				debug.LogWarning($"Queued scene switch to {levelName}");
 			}
 			else {
 				SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
@@ -468,9 +472,9 @@ namespace LevelManagement {
 
 			isCurrentlySwitchingScenes = true;
 			// Immediately turn on the loading icon instead of waiting for a frame into the loading
-			LoadingIcon.instance.state = LoadingIcon.State.Loading;
+			LoadingIcon.instance.ShowLoadingIcon();
 			
-			Debug.Log($"Switching to level {levelName}");
+			debug.Log($"Switching to level {levelName}");
 
 			try {
 				BeforeActiveSceneChange?.Invoke(levelName);
@@ -533,8 +537,10 @@ namespace LevelManagement {
 			}
 
 			debug.Log("Waiting for scenes to be loaded...");
-			await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlyLoadingScenes);
+			await TaskEx.WaitUntil(() => !LevelManager.instance.ScenesAreLoading);
 			debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
+
+			SceneManager.SetActiveScene(SceneManager.GetSceneByName(levelName));
 
 			if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
 				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
@@ -651,10 +657,6 @@ namespace LevelManagement {
 		void FinishLoadingScene(Scene loadedScene) {
 			if (loadedScene.name == ManagerScene) {
 				return;
-			}
-
-			if (loadedScene.name == activeSceneName) {
-				SceneManager.SetActiveScene(loadedScene);
 			}
 
 			try {

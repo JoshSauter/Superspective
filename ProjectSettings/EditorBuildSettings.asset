@@ -101,4 +101,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_TransitionWhiteRoom3GrowShrinkIntro.unity
     guid: 259f0f41c3ddd9540a03169cc3bfca71
+  - enabled: 1
+    path: Assets/__Scenes/_EdgeOfAUniverse.unity
+    guid: 95f001b7ba173c04280aaa680885fc52
   m_configObjects: {}

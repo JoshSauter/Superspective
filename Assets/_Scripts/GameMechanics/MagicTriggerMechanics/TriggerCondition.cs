@@ -85,10 +85,49 @@ namespace MagicTriggerMechanics {
 				case TriggerConditionType.LevelsAreActive:
 					return targetLevels.Contains(LevelManager.instance.ActiveScene) ? 1 : -1;
 				case TriggerConditionType.PlayerScaleWithinRange:
-					return Player.instance.scale >= targetPlayerScaleRange.x && Player.instance.scale <= targetPlayerScaleRange.y ? 1 : -1;
+					return Player.instance.Scale >= targetPlayerScaleRange.x && Player.instance.Scale <= targetPlayerScaleRange.y ? 1 : -1;
 				default:
 					throw new Exception($"TriggerCondition: {triggerCondition} not handled!");
 			}
+		}
+
+		public string GetDebugInfo(Transform transform, GameObject player) {
+			float triggerValue = Evaluate(transform, player);
+			string debugString = $"Type: {triggerCondition}\nTriggerValue: {triggerValue}\nThreshold: {triggerThreshold}\nPass ?: {(triggerValue > triggerThreshold)}\n";
+
+			string worldOrLocal = useLocalCoordinates ? "local" : "world";
+			switch (triggerCondition) {
+				case TriggerConditionType.PlayerFacingDirection:
+					debugString += $"Player facing direction ({worldOrLocal}): {(useLocalCoordinates ? transform.TransformDirection(targetDirection) : targetDirection):F3}";
+					break;
+				case TriggerConditionType.PlayerFacingObject:
+					break;
+				case TriggerConditionType.PlayerFacingAwayFromObject:
+					break;
+				case TriggerConditionType.PlayerFacingPosition:
+					break;
+				case TriggerConditionType.PlayerFacingAwayFromPosition:
+					break;
+				case TriggerConditionType.PlayerMovingDirection:
+					break;
+				case TriggerConditionType.RendererVisible:
+					break;
+				case TriggerConditionType.RendererNotVisible:
+					break;
+				case TriggerConditionType.PlayerInDirectionFromPoint:
+					Vector3 playerPos = (useLocalCoordinates ? transform.InverseTransformPoint(player.transform.position) : player.transform.position);
+					Vector3 playerToTargetPosition = playerPos - targetPosition;
+					debugString += $"Player position ({worldOrLocal}): {playerPos}\nPlayer to target position: {playerToTargetPosition}\n";
+					break;
+				case TriggerConditionType.LevelsAreActive:
+					break;
+				case TriggerConditionType.PlayerScaleWithinRange:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			debugString += "--------\n";
+			return debugString;
 		}
 
 		public bool IsTriggered(Transform triggerTransform, GameObject player) {

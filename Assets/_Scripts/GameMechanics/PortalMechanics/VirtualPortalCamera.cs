@@ -159,7 +159,7 @@ namespace PortalMechanics {
 			foreach (var p in allActivePortals) {
 				p.SetMaterialsToEffectiveMaterial();
 				// Ignore disabled portals
-				if (!p.portalRenderingIsEnabled) continue;
+				if (!p.PortalRenderingIsEnabled) continue;
 
 				float portalSurfaceArea = GetPortalSurfaceArea(p);
 				float distanceFromPortalToCam = Vector3.Distance(mainCamera.transform.position, p.ClosestPoint(mainCamera.transform.position));
@@ -386,7 +386,7 @@ namespace PortalMechanics {
 			if (parentPortal != null) {
 				parentRendersRecursively = parentPortal.renderRecursivePortals;
 			}
-			bool pausedRendering = !visiblePortal.portalRenderingIsEnabled;
+			bool pausedRendering = !visiblePortal.PortalRenderingIsEnabled;
 			return parentDepth < MaxDepth - 1 && IsWithinRenderDistance(visiblePortal, portalCamera) && parentRendersRecursively && !pausedRendering && !IsInvisible();
 		}
 
@@ -408,7 +408,7 @@ namespace PortalMechanics {
 				// Ignore the portal we're looking through
 				if (p == portal.otherPortal) continue;
 				// Ignore disabled portals
-				if (!p.portalRenderingIsEnabled) continue;
+				if (!p.PortalRenderingIsEnabled) continue;
 
 				VisiblePortalInfo info = new VisiblePortalInfo() {
 					screenBounds = p.GetScreenRects(portalCamera),
@@ -429,7 +429,7 @@ namespace PortalMechanics {
 			}
 			bool isInCameraFrustum = testPortal.IsVisibleFrom(cam);
 			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
-			bool isFacingCamera = Vector3.Dot(testPortal.PortalNormal(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
+			bool isFacingCamera = Vector3.Dot(testPortal.IntoPortalVector(), (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
 			bool result = isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera && !IsInvisibleDimensionObject();
 			return result;
 		}
@@ -495,7 +495,6 @@ namespace PortalMechanics {
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
 			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.ScaleFactor;
-			inPortal.debug.Log($"Distance to portal (scale adjusted): {distanceToPortal:F3}");
 			bool shouldUseDefaultProjectionMatrix = depth == 0 && distanceToPortal < 2*clearSpaceBehindPortal;
 			if (DEBUG) {
 				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
@@ -507,7 +506,7 @@ namespace PortalMechanics {
 			if (!shouldUseDefaultProjectionMatrix) {
 				Vector3 closestPointOnOutPortal = outPortal.ClosestPoint(portalCamera.transform.position, useInfinitelyThinBounds: true);
 
-				Plane p = new Plane(-outPortal.PortalNormal(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.PortalNormal());
+				Plane p = new Plane(-outPortal.IntoPortalVector(), closestPointOnOutPortal + clearSpaceBehindPortal * outPortal.IntoPortalVector());
 				Vector4 clipPlane = new Vector4(p.normal.x, p.normal.y, p.normal.z, p.distance);
 				Vector4 clipPlaneCameraSpace = Matrix4x4.Transpose(Matrix4x4.Inverse(portalCamera.worldToCameraMatrix)) * clipPlane;
 

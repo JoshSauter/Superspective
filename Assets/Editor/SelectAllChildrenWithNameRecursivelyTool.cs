@@ -9,7 +9,7 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
     void OnWizardCreate() {
         List<GameObject> newSelection = new List<GameObject>();
         foreach (GameObject go in Selection.gameObjects) {
-            SelectAllChildrenRecusivelyWithName(go, ref newSelection);
+            SelectAllChildrenRecursivelyWithName(go, ref newSelection);
         }
 
         Selection.objects = newSelection.ToArray();
@@ -24,11 +24,11 @@ public class SelectAllChildrenWithNameRecursivelyTool : ScriptableWizard {
         );
     }
 
-    public void SelectAllChildrenRecusivelyWithName(GameObject curNode, ref List<GameObject> selectionSoFar) {
+    public void SelectAllChildrenRecursivelyWithName(GameObject curNode, ref List<GameObject> selectionSoFar) {
         if (curNode.name.Contains(nameToMatch)) selectionSoFar.Add(curNode);
 
         foreach (Transform child in curNode.transform.GetComponentsInChildren<Transform>(selectInactive)) {
-            if (child.gameObject != curNode) SelectAllChildrenRecusivelyWithName(child.gameObject, ref selectionSoFar);
+            if (child.gameObject != curNode) SelectAllChildrenRecursivelyWithName(child.gameObject, ref selectionSoFar);
         }
     }
 }

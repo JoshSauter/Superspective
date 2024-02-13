@@ -29,7 +29,7 @@ public class HideInteractOnCondition : MonoBehaviour {
     void Update() {
         switch (conditionType) {
             case ConditionType.PlayerScale:
-                float playerScale = Player.instance.scale;
+                float playerScale = Player.instance.Scale;
                 if (playerScale >= acceptablePlayerScaleRange.x && playerScale < acceptablePlayerScaleRange.y) {
                     interactableObject.SetAsInteractable();
                 }

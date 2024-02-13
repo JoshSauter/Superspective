@@ -4,9 +4,11 @@ using Saving;
 using SerializableClasses;
 using System;
 using System.Collections;
+using DissolveObjects;
 using SuperspectiveUtils;
 using Library.Functional;
 using UnityEngine;
+using UnityEngine.Serialization;
 using DimensionObjectReference = SerializableClasses.SerializableReference<DimensionObject, DimensionObject.DimensionObjectSave>;
 using MaybeDimensionObject = Library.Functional.Either<DimensionObject, DimensionObject.DimensionObjectSave>;
 
@@ -23,7 +25,13 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	const float fakePortalLerpSpeedUp = 4;
 	const float fakePortalLerpSpeedDown = 10;
 
-	public PillarDimensionObject dimension0;
+	public PillarDimensionObject dimension1;
+
+	// Not sure if I like this idea yet, easy way to turn it off or on for playtesting
+	public bool hideButtonPedestalAtFirst = true;
+	public GameObject buttonPedestal;
+	public DissolveObject dissolveBridge;
+	private bool ShouldRevealButtonPedestal => dissolveBridge.state != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.visible;
 
 	// Fake portal plane needs to temporarily disappear if the player walks backwards through it
 	public GameObject fakePortalPlane;
@@ -47,7 +55,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	State _state;
 
 	public State state {
-        get { return _state; }
+        get => _state;
         set {
             if (_state == value) {
                 return;
@@ -102,6 +110,10 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 		fakePortalSolvedPos = fakePortal.transform.position;
 
 		fakePortal.transform.position = fakePortalUnsolvedPos;
+
+		if (hideButtonPedestalAtFirst) {
+			buttonPedestal.SetActive(false);
+		}
 	}
 
 	protected override void Start() {
@@ -140,6 +152,11 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 		}
 
 		fakePortal.transform.position = Vector3.Lerp(fakePortal.transform.position, fakePortalTargetPos, Time.deltaTime * fakePortalLerpSpeed);
+		if (hideButtonPedestalAtFirst) {
+			if (!buttonPedestal.activeSelf && ShouldRevealButtonPedestal) {
+				buttonPedestal.SetActive(true);
+			}
+		}
 
 		switch (state) {
 			case State.Unsolved:

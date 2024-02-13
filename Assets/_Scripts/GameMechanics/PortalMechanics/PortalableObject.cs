@@ -169,7 +169,7 @@ namespace PortalMechanics {
 			}
 			if (sittingInPortal != null) {
 				foreach (var r in renderers) {
-					r.enabled = sittingInPortal.portalRenderingIsEnabled;
+					r.enabled = sittingInPortal.PortalRenderingIsEnabled;
 				}
 			}
 			else {
@@ -244,7 +244,7 @@ namespace PortalMechanics {
 		void PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal() {
 			// The actual dropping happens through a StateMachine trigger, we just reset the timer here if the cube is being held legally
 			if (hoveredThroughPortal != null &&
-			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.playerRemainsInPortal)) {
+			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.PlayerRemainsInPortal)) {
 				
 				holdState.Set(HoldState.PortalBetweenCubeAndPlayer);
 				holdState.timeSinceStateChanged = 0f;

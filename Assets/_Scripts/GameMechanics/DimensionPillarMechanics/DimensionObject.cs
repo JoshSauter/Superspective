@@ -352,11 +352,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 				case VisibilityState.invisible:
 					renderer.gameObject.layer = reverseVisibilityStates
 						? startingLayers[renderer]
-						: LayerMask.NameToLayer("Invisible");
+						: SuperspectivePhysics.InvisibleLayer;
 					break;
 				case VisibilityState.visible:
 					renderer.gameObject.layer = reverseVisibilityStates
-						? LayerMask.NameToLayer("Invisible")
+						? SuperspectivePhysics.InvisibleLayer
 						: startingLayers[renderer];
 					break;
 				case VisibilityState.partiallyVisible:

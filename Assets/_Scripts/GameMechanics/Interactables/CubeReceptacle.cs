@@ -88,7 +88,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             
             endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
             cubeInReceptacle.transform.position = endPos;
-            cubeInReceptacle.thisRigidbody.isKinematic = true;
             
             if (!AcceptedColor(cubeInReceptacle.gameObject)) {
                 ExpelCube();
@@ -127,7 +126,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             cubeThatWasInReceptacle.isReplaceable = true;
             triggerZone.enabled = false;
 
-            cubeThatWasInReceptacle.thisRigidbody.isKinematic = false;
+            cubeThatWasInReceptacle.receptacleHeldIn = null;
             cubeInReceptacle = null;
         });
 
@@ -190,7 +189,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
 
     private bool playerStillInTriggerZone = false;
     void OnTriggerStay(Collider other) {
-        if (gameObject.layer == LayerMask.NameToLayer("Invisible")) return;
+        if (gameObject.layer == SuperspectivePhysics.InvisibleLayer) return;
         if (other.TaggedAsPlayer()) {
             playerStillInTriggerZone = true;
             StartCoroutine(ResetPlayerInTriggerZoneState());
@@ -298,10 +297,11 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
     }
 
     void StartCubeEnter(PickupObject cube) {
+        cube.receptacleHeldIn = this;
+        
         Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
         cube.Drop();
         cube.interactable = false;
-        cubeRigidbody.isKinematic = true;
         cubeInReceptacle = cube;
         cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
 
@@ -342,7 +342,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         triggerZone.enabled = false;
 
         stateMachine.Set(State.Empty);
-        cubeThatWasInReceptacle.thisRigidbody.isKinematic = false;
         cubeInReceptacle = null;
     }
 

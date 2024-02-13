@@ -570,6 +570,20 @@ namespace SuperspectiveUtils {
             return parent.GetComponentsInChildrenOnly<Transform>();
         }
 
+        public static Transform[] GetChildrenMatchingNameRecursively(this Transform transform, string nameToMatch, bool selectInactive = false) {
+            void FindChildrenRecursivelyWithName(Transform curNode, ref List<Transform> selectionSoFar) {
+                if (curNode.name.Contains(nameToMatch)) selectionSoFar.Add(curNode);
+
+                foreach (Transform child in curNode.transform.GetComponentsInChildren<Transform>(selectInactive)) {
+                    if (child != curNode) FindChildrenRecursivelyWithName(child, ref selectionSoFar);
+                }
+            }
+
+            List<Transform> matches = new List<Transform>();
+            FindChildrenRecursivelyWithName(transform, ref matches);
+            return matches.ToArray();
+        }
+
         public static bool IsVisibleFrom(this Renderer r, Camera camera) {
             Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
             return GeometryUtility.TestPlanesAABB(planes, r.bounds);
