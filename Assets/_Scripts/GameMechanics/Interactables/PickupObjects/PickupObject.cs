@@ -111,12 +111,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     void Update() {
-        if (RigidbodyShouldBeFrozen) {
-            thisRigidbody.isKinematic = true;
-        }
-        else {
-            thisRigidbody.isKinematic = false;
-        }
+        RecalculateRigidbodyKinematics();
         
         if (interactable) {
             if (scale > 6f * Player.instance.Scale) {
@@ -254,18 +249,16 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     Vector3 TargetHoldPositionThroughPortal(float holdDistance, out SuperspectiveRaycast raycastHits) {
-        // TODO: Don't work with strings every frame, clean this up
-        int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
-        int layerMask = ~((1 << ignoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
+        int layerMask = ~((1 << SuperspectivePhysics.IgnoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
                           (1 << SuperspectivePhysics.InvisibleLayer) |
                           (1 << SuperspectivePhysics.CollideWithPlayerOnlyLayer));
         int tempLayer = gameObject.layer;
-        gameObject.layer = ignoreRaycastLayer;
+        gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
 
         int tempLayerPortalCopy = 0;
         if (portalableObject.copyIsEnabled) {
             tempLayerPortalCopy = portalableObject.fakeCopyInstance.gameObject.layer;
-            portalableObject.fakeCopyInstance.gameObject.layer = ignoreRaycastLayer;
+            portalableObject.fakeCopyInstance.gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
         }
 
         raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance, layerMask);
@@ -407,6 +400,15 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         Collider[] neighborsBelow = Physics.OverlapSphere(transform.position + thisGravity.gravityDirection * 0.125f * scale, transform.localScale.x * scale * .5f);
 
         return neighborsBelow.Where(c => c.gameObject != this.gameObject && !c.TaggedAsPlayer()).ToList().Count > 0;
+    }
+
+    public void RecalculateRigidbodyKinematics() {
+        if (RigidbodyShouldBeFrozen) {
+            thisRigidbody.isKinematic = true;
+        }
+        else {
+            thisRigidbody.isKinematic = false;
+        }
     }
     
 #endregion

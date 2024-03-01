@@ -94,7 +94,13 @@ namespace StateUtils {
             }
         }
 
-        // If we want to determine the toState at runtime, we can pass a method to provide it
+        /// <summary>
+        /// Automatically transition between states at a given time.
+        /// Target state is defined at transition time by a given function.
+        /// </summary>
+        /// <param name="fromState">State to be in before the transition</param>
+        /// <param name="toStateDef">Function whose output is the state to be in after the transition</param>
+        /// <param name="atTime">Time when state transition occurs</param>
         public void AddStateTransition(T fromState, Func<T> toStateDef, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
@@ -104,6 +110,13 @@ namespace StateUtils {
             timedStateTransitions.Add(stateTransitionTrigger, () => state = toStateDef.Invoke());
         }
         
+        /// <summary>
+        /// Automatically transition between states when a given predicate is satisfied.
+        /// Checks once per Update, and target state is defined at transition time by a given function.
+        /// </summary>
+        /// <param name="fromState">State to be in before the transition</param>
+        /// <param name="toStateDef">Function whose output is the state to be in after the transition</param>
+        /// <param name="triggerWhen">Predicate to be satisfied to transition state</param>
         public void AddStateTransition(T fromState, Func<T> toStateDef, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
@@ -113,6 +126,12 @@ namespace StateUtils {
             customStateTransitions.Add(customEventTrigger, () => state = toStateDef.Invoke());
         }
 
+        /// <summary>
+        /// Automatically transition between states at a given time
+        /// </summary>
+        /// <param name="fromState">State to be in before the transition</param>
+        /// <param name="toState">State to be in after the transition</param>
+        /// <param name="atTime">Time when state transition occurs</param>
         public void AddStateTransition(T fromState, T toState, float atTime) {
             TimedEventTrigger stateTransitionTrigger = new TimedEventTrigger() {
                 forState = fromState,
@@ -122,11 +141,12 @@ namespace StateUtils {
             timedStateTransitions.Add(stateTransitionTrigger, () => state = toState);
         }
 
-        public void AddStateTransition(T fromState, T toState, Func<float> atTimeProvider) {
-            throw new NotImplementedException("Time to make this work obviously");
-            // TODO: Implement this and add the other AddStateTransition method signatures for it
-        }
-
+        /// <summary>
+        /// Automatically transition between states when a given predicate is satisfied. Checks once per Update
+        /// </summary>
+        /// <param name="fromState">State to be in before the transition</param>
+        /// <param name="toState">State to be in after the transition</param>
+        /// <param name="triggerWhen">Predicate to be satisfied to transition state</param>
         public void AddStateTransition(T fromState, T toState, Func<bool> triggerWhen) {
             CustomEventTrigger customEventTrigger = new CustomEventTrigger() {
                 forState = fromState,
@@ -136,10 +156,21 @@ namespace StateUtils {
             customStateTransitions.Add(customEventTrigger, () => state = toState);
         }
 
+        /// <summary>
+        /// Registers action to be triggered immediately upon switching to a state that satisfies the given predicate
+        /// </summary>
+        /// <param name="forStates">Predicate for current state to satisfy for triggering action</param>
+        /// <param name="whatToDo">Action to fire</param>
         public void AddTrigger(Func<T, bool> forStates, Action whatToDo) {
-            AddTrigger(forStates, 0f, whatToDo);
+            AddTriggerImmediatelyForStates(forStates, whatToDo);
         }
 
+        /// <summary>
+        /// Registers action to be triggered at a given time after switching to a state that satisfies the given predicate
+        /// </summary>
+        /// <param name="forStates">Predicate for current state to satisfy for triggering action</param>
+        /// <param name="atTime">Time after switching to target state to trigger action at</param>
+        /// <param name="whatToDo">Action to fire</param>
         public void AddTrigger(Func<T, bool> forStates, float atTime, Action whatToDo) {
             foreach (T enumValue in Enum.GetValues(typeof(T))) {
                 if (forStates.Invoke(enumValue)) {
@@ -147,28 +178,40 @@ namespace StateUtils {
                 }
             }
         }
-        
-        public void AddTrigger(Func<T, bool> forStates, Action<T> whatToDo) {
-            AddTrigger(forStates, 0f, whatToDo);
-        }
-        
-        public void AddTrigger(Func<T, bool> forStates, float atTime, Action<T> whatToDo) {
-            foreach (T enumValue in Enum.GetValues(typeof(T))) {
-                if (forStates.Invoke(enumValue)) {
-                    AddTrigger(enumValue, atTime, () => whatToDo.Invoke(enumValue));
-                }
-            }
-        }
 
+        /// <summary>
+        /// Registers action to be triggered immediately upon switching to the given state
+        /// </summary>
+        /// <param name="forState">State to trigger the action in</param>
+        /// <param name="whatToDo">Action to fire</param>
         public void AddTrigger(T forState, Action whatToDo) {
-            AddTrigger(forState, 0f, whatToDo);
+            AddTriggerImmediatelyForStates(s => s.Equals(forState), whatToDo);
         }
         
+        /// <summary>
+        /// Registers action to be triggered at a given time after switching to a given state
+        /// </summary>
+        /// <param name="forState">State to trigger the action in</param>
+        /// <param name="atTime">Time after switching to target state to trigger action at</param>
+        /// <param name="whatToDo">Action to fire</param>
         public void AddTrigger(T forState, float atTime, Action whatToDo) {
             TimedEventTrigger timedEventTrigger = new TimedEventTrigger { forState = forState, atTime = atTime };
             timedEvents.Add(timedEventTrigger, whatToDo);
         }
 
+        private void AddTriggerImmediatelyForStates(Func<T, bool> forStates, Action whatToDo) {
+            this.OnStateChangeSimple += () => {
+                if (forStates(state)) {
+                    whatToDo.Invoke();
+                }
+            };
+        }
+
+        /// <summary>
+        /// Registers runs the supplied action to run on every Update while in given state
+        /// </summary>
+        /// <param name="forState">State to be in when running the action</param>
+        /// <param name="forTime">Action to run at a given time since state changed</param>
         public void WithUpdate(T forState, Action<float> forTime) {
             CustomUpdate customUpdate = new CustomUpdate { forState = forState, updateAction = forTime };
             List<CustomUpdate> customUpdatesForState = updateActions.GetOrNull(forState) ?? new List<CustomUpdate>();

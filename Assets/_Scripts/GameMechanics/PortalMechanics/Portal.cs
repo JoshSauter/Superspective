@@ -54,6 +54,8 @@ namespace PortalMechanics {
 	
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
+		private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
+		private int consecutiveFramesVPShouldBeDisabled = 0;
 		private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
 		private static int lastTeleportedFrame = 0;
 		
@@ -631,9 +633,16 @@ namespace PortalMechanics {
 				// 	Vector3 targetPos = portalBounds.ClosestPoint(camPos);
 				// 	vpTransform.position = targetPos;
 				// }
+				consecutiveFramesVPShouldBeDisabled = 0;
 			}
 			else {
-				DisableVolumetricPortal();
+				// Replacing with delayed disabling of VP
+				// DisableVolumetricPortal();
+				if (consecutiveFramesVPShouldBeDisabled > FRAMES_TO_WAIT_BEFORE_DISABLING_VP) {
+					DisableVolumetricPortal();
+				}
+				
+				consecutiveFramesVPShouldBeDisabled++;
 			}
 		}
 		#endregion
@@ -945,7 +954,8 @@ namespace PortalMechanics {
 			}
 
 			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
-			DisableVolumetricPortal();
+			// Replacing with delayed disabling of VP
+			// DisableVolumetricPortal();
 			otherPortal.EnableVolumetricPortal();
 			otherPortal.pauseRendering = false;
 			yield return null;

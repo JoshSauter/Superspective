@@ -47,9 +47,9 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 		speed = moveSpeed;
 	}
 
-    void Update() {
-        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.G) ||
-            (allowGodModeInNonDevBuild && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G))) {
+	void Update() {
+		if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.G) ||
+		    (allowGodModeInNonDevBuild && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.G))) {
 			ToggleNoClip();
 		}
 
@@ -61,15 +61,22 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 				desiredSpeed = (desiredSpeed == slowMoveSpeed) ? moveSpeed : slowMoveSpeed;
 			}
 			
+			
+			float middleMouseScroll = Input.mouseScrollDelta.y;
+			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
+			transform.position += verticalScroll;
+		}
+	}
+
+    void FixedUpdate() {
+		if (noClipOn) {
 			Vector2 moveInput = input.LeftStick;
 
 			Vector3 moveDirection = playerCamera.forward * moveInput.y + playerCamera.right * moveInput.x;
 
-			speed = Mathf.Lerp(speed, desiredSpeed, Time.deltaTime * 6f);
-			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
+			speed = Mathf.Lerp(speed, desiredSpeed, Time.fixedDeltaTime * 6f);
 
-			transform.position += (verticalScroll + moveDirection) * (Time.deltaTime * speed * Player.instance.Scale);
+			transform.position += moveDirection * (Time.fixedDeltaTime * speed * Player.instance.Scale);
 		}
     }
 

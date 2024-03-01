@@ -170,6 +170,7 @@ namespace LevelManagement {
 					if (!connectedLevels.Contains(level.level)) {
 						Scene scene = EditorSceneManager.GetSceneByName(level.level.ToName());
 						if (scene.IsValid()) {
+							EditorSceneManager.SaveScene(scene);
 							EditorSceneManager.CloseScene(scene, true);
 						}
 					}

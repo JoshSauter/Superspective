@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SimpleFPS : MonoBehaviour {
+public class SimpleFPS : Singleton<SimpleFPS> {
 	public Gradient fpsTextGradient;
 	string label = "";
 	float count;

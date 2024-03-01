@@ -119,6 +119,7 @@ namespace Interactables {
             stateMachine.AddStateTransition(State.ButtonUnpressing, State.ButtonUnpressed, timeToUnpressButton);
 
             stateMachine.OnStateChange += (prevState, _) => {
+                debug.Log($"Button state set to {stateMachine.state} from {prevState}");
                 switch (stateMachine.state) {
                     case State.ButtonUnpressed:
                         transform.position -= (distanceCurrentlyPressed) * transform.up;

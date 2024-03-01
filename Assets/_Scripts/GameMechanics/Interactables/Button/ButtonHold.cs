@@ -1,8 +1,10 @@
 ﻿using System;
 using Interactables;
+using SuperspectiveUtils;
 using UnityEngine;
 
 public class ButtonHold : Button {
+    [SerializeField]
     bool buttonHeld;
 
     protected override void Awake() {
@@ -19,19 +21,11 @@ public class ButtonHold : Button {
     protected override void InitializeStateMachine() {
         base.InitializeStateMachine();
         stateMachine.AddStateTransition(State.ButtonPressed, State.ButtonUnpressing, () => !buttonHeld);
+        stateMachine.AddTrigger(State.ButtonPressing, () => buttonHeld = true);
     }
     
     protected override void Update() {
         base.Update();
-
-        UpdateState();
-        if (buttonHeld) {
-            OnButtonHeld?.Invoke(this);
-        }
-    }
-
-    void UpdateState() {
-        if (stateMachine.timeSinceStateChanged == 0 && stateMachine.state == State.ButtonPressing) buttonHeld = true;
 
         if (buttonHeld) {
             OnButtonHeld?.Invoke(this);
@@ -39,6 +33,7 @@ public class ButtonHold : Button {
     }
 
     public void ReleaseButton() {
+        debug.Log($"Releasing button");
         buttonHeld = false;
     }
 }

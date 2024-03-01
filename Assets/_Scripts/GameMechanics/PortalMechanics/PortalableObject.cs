@@ -24,8 +24,11 @@ namespace PortalMechanics {
 			}
 		}
 
+		[SerializeField, ReadOnly]
 		Portal _sittingInPortal;
+		[SerializeField, ReadOnly]
 		Portal _hoveredThroughPortal;
+		[SerializeField, ReadOnly]
 		Portal _grabbedThroughPortal;
 		private bool resetSittingInPortal = false;
 		public Portal sittingInPortal {

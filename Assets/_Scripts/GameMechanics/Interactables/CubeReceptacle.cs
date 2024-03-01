@@ -90,6 +90,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             cubeInReceptacle.transform.position = endPos;
             
             if (!AcceptedColor(cubeInReceptacle.gameObject)) {
+                AudioManager.instance.PlayAtLocation(AudioName.DisabledSound, ID, transform.position);
                 ExpelCube();
                 return;
             };
@@ -127,6 +128,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             triggerZone.enabled = false;
 
             cubeThatWasInReceptacle.receptacleHeldIn = null;
+            cubeThatWasInReceptacle.RecalculateRigidbodyKinematics();
             cubeInReceptacle = null;
         });
 
@@ -161,9 +163,6 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                         }
 
                         pwr.state.Set(PowerState.Powered);
-                    }
-                    else {
-                        AudioManager.instance.PlayAtLocation(AudioName.DisabledSound, ID, transform.position);
                     }
                     break;
                 case State.CubeExiting:

@@ -7786,7 +7786,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec677c358f7f45dfbf4e73405599f5a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiCanvas: {fileID: 272460796}
+  uiCanvas: {fileID: 272460800}
   inputField: {fileID: 1538325373}
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
     type: 3}
@@ -22181,7 +22181,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28073,7 +28073,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8661018
+  m_Name: pb_Mesh14955492
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -56387,7 +56387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0

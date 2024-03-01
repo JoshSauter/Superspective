@@ -63,6 +63,8 @@ public class StaircaseRotate : MonoBehaviour {
                         endGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, endGravityDirection));
         endPosition = pivotPoint -
                       startGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, startGravityDirection));
+
+        gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
     }
 
     void OnTriggerEnter(Collider other) {

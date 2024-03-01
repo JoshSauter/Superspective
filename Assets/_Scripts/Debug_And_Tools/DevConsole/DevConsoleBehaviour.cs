@@ -7,13 +7,12 @@ using UnityEngine;
 
 namespace DeveloperConsole {
     public class DevConsoleBehaviour : Singleton<DevConsoleBehaviour> {
-        public bool IsActive => uiCanvas.activeSelf;
+        public bool IsActive => uiCanvas.gameObject.activeSelf;
         
         private ConsoleCommand[] commands;
 
         [Header("UI")]
-        [SerializeField]
-        private GameObject uiCanvas;
+        public Canvas uiCanvas;
 
         [SerializeField]
         private TMP_InputField inputField;
@@ -54,6 +53,7 @@ namespace DeveloperConsole {
                 new AutorunCommand("autorun"),
                 new TogglePortalRenderingCommand("togglePortals"),
                 new ToggleDebugModeCommand("toggleDebug"),
+                new ToggleUICommand("toggleUI"),
                 new ChangeScaleCommand("changeScale")
             };
             
@@ -70,7 +70,7 @@ namespace DeveloperConsole {
                 Toggle();
             }
 
-            if (uiCanvas.activeSelf) {
+            if (uiCanvas.gameObject.activeSelf) {
                 if (Input.GetKeyDown(KeyCode.Tab)) {
                     lastAutoCompletedWord = DeveloperConsole.AutoCompleteCommand(lastPlayerInput, matchIndex);
                     inputField.text = lastAutoCompletedWord;
@@ -81,22 +81,22 @@ namespace DeveloperConsole {
         }
 
         public void Toggle() {
-            if (uiCanvas.activeSelf) {
+            if (uiCanvas.gameObject.activeSelf) {
                 Time.timeScale = pausedTimeScale;
-                uiCanvas.SetActive(false);
+                uiCanvas.gameObject.SetActive(false);
             }
             else {
                 pausedTimeScale = Time.timeScale;
                 Time.timeScale = 0;
                 PlaceholderText.color = Color.white;
                 PlaceholderText.text = originalPlaceholderText;
-                uiCanvas.SetActive(true);
+                uiCanvas.gameObject.SetActive(true);
                 inputField.ActivateInputField();
             }
         }
 
         private void ToggleOff() {
-            if (!uiCanvas.activeSelf) return;
+            if (!uiCanvas.gameObject.activeSelf) return;
             Toggle();
         }
 

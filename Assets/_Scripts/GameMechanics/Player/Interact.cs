@@ -175,7 +175,7 @@ public class Interact : Singleton<Interact> {
     }
 
     void OnGUI() {
-        if (!DEBUG || !Debug.isDebugBuild) return;
+        if (!DEBUG || !DebugInput.IsDebugBuild) return;
         
         GUI.depth = 2;
         style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;

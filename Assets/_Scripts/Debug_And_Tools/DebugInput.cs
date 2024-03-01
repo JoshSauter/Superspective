@@ -4,7 +4,7 @@ using UnityEngine;
 public static class DebugInput {
     public static bool isDebugBuildOverride = false;
 
-    private static bool IsDebugBuild => isDebugBuildOverride || Debug.isDebugBuild;
+    public static bool IsDebugBuild => isDebugBuildOverride || Debug.isDebugBuild;
     
     public static bool GetKeyDown(KeyCode keyCode) => IsDebugBuild && Input.GetKeyDown(keyCode);
     public static bool GetKeyDown(string key) => IsDebugBuild && Input.GetKeyDown(key);
