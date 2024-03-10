@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 using Saving;
@@ -103,7 +104,8 @@ public partial class PlayerMovement {
                 float distanceFromCapsuleCenterToOffsetStartPoint = Mathf.Min(distanceFromCapsuleCenterToStepPoint, distanceFromCapsuleCenterToP1);
                 p1 = capsuleCenter - capsuleAxis * (distanceFromCapsuleCenterToOffsetStartPoint - CAPSULE_CHECK_OFFSET_FROM_BOTTOM * m.scale);
                 
-                return Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore).Length > 0;
+                var result = Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore);
+                return result.Where(c => c != Player.instance.heldObject.thisCollider).ToList().Count > 0;
             }
             
             void MoveAlongStep(Vector3 moveDirection) {
