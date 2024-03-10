@@ -31935,7 +31935,6 @@ MonoBehaviour:
   level: 18
   startOnPlayerCam: 1
   levelRootReference:
-    referencedSceneName: _Fork_Cathedral
     referencedObjId: LevelRoot__Fork_Cathedral
   nodes: []
 --- !u!1 &1012951216
@@ -42073,7 +42072,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 67.4
+  m_fontSize: 67.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -56387,7 +56386,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 0
+  cachedEnableState: 1
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0

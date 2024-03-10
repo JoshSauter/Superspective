@@ -471,7 +471,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             obj.isReplaceable = isReplaceable;
             obj.interactable = interactable;
             obj.isHeld = isHeld;
-            obj.receptacleHeldIn = receptacleHeldIn.GetOrNull();
+            obj.receptacleHeldIn = receptacleHeldIn?.GetOrNull();
             obj.currentCooldown = currentCooldown;
         }
     }

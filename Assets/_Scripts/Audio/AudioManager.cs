@@ -459,7 +459,12 @@ namespace Audio {
 					string id = kv.Key;
 					SerializableReference customAudioJobReference = kv.Value;
 
-					customAudioJobReference.Reference.MatchAction(
+					var reference = customAudioJobReference.Reference;
+					if (reference == null) {
+						Debug.LogError($"AudioManager hit an error while trying to play CustomUpdate audio, cause: {kv.Key} is null!");
+						continue;
+					}
+					reference.MatchAction(
 						saveableObject => {
 							if (saveableObject is CustomAudioJob customAudioJob) {
 								audioManager.updateAudioJobs[id] = customAudioJob.UpdateAudio;
@@ -476,8 +481,13 @@ namespace Audio {
 				foreach (var kv in audioManager.serializableUpdateAudioOnGameObject) {
 					string id = kv.Key;
 					SerializableReference updateAudioOnGameObjectReference = kv.Value;
-					
-					updateAudioOnGameObjectReference.Reference.MatchAction(
+
+					var reference = updateAudioOnGameObjectReference.Reference;
+					if (reference == null) {
+						Debug.LogError($"AudioManager hit an error while trying to play UpdateOnGameObject audio, cause: {kv.Key} is null!");
+						continue;
+					}
+					reference.MatchAction(
 						saveableObject => {
 							AudioJobOnGameObject audioJobOnGameObject = saveableObject as AudioJobOnGameObject;
 							if (audioJobOnGameObject != null) {

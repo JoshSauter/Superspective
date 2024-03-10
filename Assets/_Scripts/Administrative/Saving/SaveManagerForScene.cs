@@ -19,7 +19,7 @@ namespace Saving {
             this.sceneName = sceneName;
         }
         
-        public string sceneName;
+        public readonly string sceneName;
 
         public bool sceneIsLoaded => sceneName == LevelManager.ManagerScene ||
                                      LevelManager.instance.loadedSceneNames.Contains(sceneName);
@@ -29,6 +29,10 @@ namespace Saving {
         
         Dictionary<string, SerializableSaveObject> serializedSaveObjects = new Dictionary<string, SerializableSaveObject>();
         Dictionary<string, DynamicObjectSave> serializedDynamicObjects = new Dictionary<string, DynamicObjectSave>();
+
+        private static bool DEBUG = false;
+        private static DebugLogger _debug;
+        private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, () => DEBUG);
         
         /// <summary>
         /// Register a SaveableObject, if it's not already registered.
@@ -43,10 +47,11 @@ namespace Saving {
                     saveableObjects[id] = saveableObject;
                     return true;
                 }
-                Debug.LogWarning($"saveableObjects already contains key {id}: {saveableObjects[id]}");
+                debug.LogWarning($"saveableObjects already contains key {id}: {saveableObjects[id]}");
                 return false;
             }
             
+            SaveManager.sceneLookupForId[id] = saveableObject.gameObject.scene.name;
             saveableObjects.Add(id, saveableObject);
             return true;
         }
@@ -59,10 +64,11 @@ namespace Saving {
         /// <returns>True if the SaveableObject was successfully unregistered, false otherwise</returns>
         public bool UnregisterSaveableObject(string id) {
             if (!saveableObjects.ContainsKey(id)) {
-                Debug.LogWarning($"Attempting to remove SaveableObject with id: {id}, but no entry for that id exists.");
+                debug.LogWarning($"Attempting to remove SaveableObject with id: {id}, but no entry for that id exists.");
                 return false;
             }
 
+            SaveManager.sceneLookupForId.Remove(id);
             saveableObjects.Remove(id);
             return true;
         }
@@ -88,7 +94,7 @@ namespace Saving {
                     }
                 }
 
-                Debug.Log($"About to unregister {associatedIds.Count} SaveableObjects: {string.Join("\n", associatedIds)}");
+                debug.Log($"About to unregister {associatedIds.Count} SaveableObjects: {string.Join("\n", associatedIds)}");
                 foreach (string idToDelete in associatedIds) {
                     allUnregistrationSuccessful = allUnregistrationSuccessful && UnregisterSaveableObject(idToDelete);
                 }
@@ -104,7 +110,7 @@ namespace Saving {
                     }
                 }
 
-                Debug.Log($"About to unregister {associatedIds.Count} DynamicObjects: {string.Join("\n", associatedIds)}");
+                debug.Log($"About to unregister {associatedIds.Count} DynamicObjects: {string.Join("\n", associatedIds)}");
                 foreach (string idToDelete in associatedIds) {
                     allUnregistrationSuccessful = allUnregistrationSuccessful && UnregisterDynamicObject(idToDelete);
                 }
@@ -119,7 +125,7 @@ namespace Saving {
                     }
                 }
 
-                Debug.Log($"About to unregister {associatedIds.Count} SaveableObjects: {string.Join("\n", associatedIds)}");
+                debug.Log($"About to unregister {associatedIds.Count} SaveableObjects: {string.Join("\n", associatedIds)}");
                 foreach (string idToDelete in associatedIds) {
                     allUnregistrationSuccessful = allUnregistrationSuccessful && UnregisterSaveableObject(idToDelete);
                 }
@@ -132,26 +138,13 @@ namespace Saving {
                     }
                 }
 
-                Debug.Log($"About to unregister {associatedIds.Count} DynamicObjects: {string.Join("\n", associatedIds)}");
+                debug.Log($"About to unregister {associatedIds.Count} DynamicObjects: {string.Join("\n", associatedIds)}");
                 foreach (string idToDelete in associatedIds) {
                     allUnregistrationSuccessful = allUnregistrationSuccessful && UnregisterSaveableObject(idToDelete);
                 }
             }
 
             return allUnregistrationSuccessful;
-        }
-
-        public bool HasSaveableObject(string id) {
-            if (saveableObjects.ContainsKey(id)) {
-                if (saveableObjects[id] == null) {
-                    saveableObjects.Remove(id);
-                    return false;
-                }
-                
-                return true;
-            }
-
-            return false;
         }
         
         /// <summary>
@@ -164,20 +157,25 @@ namespace Saving {
             if (sceneIsLoaded) {
                 if (saveableObjects.ContainsKey(id)) {
                     if (saveableObjects[id] == null) {
+                        SaveableObject foundSaveableObject = LookForMissingSaveableObject<SaveableObject>(id);
+                        if (foundSaveableObject != null) {
+                            return foundSaveableObject;
+                        }
                         saveableObjects.Remove(id);
                         return null;
+
                     }
 
                     return saveableObjects[id];
                 }
 
-                SaveableObject missingSaveableObject = LookForMissingSaveableObject(id);
+                SaveableObject missingSaveableObject = LookForMissingSaveableObject<SaveableObject>(id);
                 if (missingSaveableObject != null) {
                     missingSaveableObject.Register();
                     return missingSaveableObject;
                 }
 
-                Debug.LogWarning($"No saveableObject found with id {id} in scene {sceneName}");
+                debug.LogWarning($"No saveableObject found with id {id} in scene {sceneName}");
                 return null;
             }
             else {
@@ -185,7 +183,7 @@ namespace Saving {
                     return serializedSaveObjects[id];
                 }
                 
-                Debug.LogWarning($"No serializedSaveObject found with id {id} in scene {sceneName}");
+                debug.LogWarning($"No serializedSaveObject found with id {id} in scene {sceneName}");
                 return null;
             }
         }
@@ -223,10 +221,11 @@ namespace Saving {
         public bool RegisterDynamicObject(DynamicObject dynamicObject) {
             string id = dynamicObject.ID;
             if (dynamicObjects.ContainsKey(id)) {
-                Debug.LogWarning($"dynamicObjects already contains key {id}: {dynamicObjects[id]}");
+                debug.LogWarning($"dynamicObjects already contains key {id}: {dynamicObjects[id]}");
                 return false;
             }
 
+            SaveManager.sceneLookupForId[id] = dynamicObject.gameObject.scene.name;
             dynamicObjects.Add(id, dynamicObject);
             return true;
         }
@@ -239,10 +238,11 @@ namespace Saving {
         /// <returns>True if the object was unregistered, false otherwise</returns>
         public bool UnregisterDynamicObject(string id) {
             if (!dynamicObjects.ContainsKey(id)) {
-                Debug.LogWarning($"Attempting to remove DynamicObject with id: {id}, but no entry for that id exists.");
+                debug.LogWarning($"Attempting to remove DynamicObject with id: {id}, but no entry for that id exists.");
                 return false;
             }
-            
+
+            SaveManager.sceneLookupForId.Remove(id);
             dynamicObjects.Remove(id);
             return true;
         }
@@ -345,7 +345,7 @@ namespace Saving {
                     foreach (var id in currentSaveData.serializedSaveObjects.Keys) {
                         SaveableObject saveableObject = GetSaveableObjectOrNull(id);
                         if (saveableObject == null) {
-                            Debug.LogWarning($"{id} not found in scene {sceneName}");
+                            debug.LogWarning($"{id} not found in scene {sceneName}");
                             continue;
                         }
 
@@ -361,7 +361,7 @@ namespace Saving {
                     serializedSaveObjects = currentSaveData.serializedSaveObjects;
                 }
 
-                Debug.Log($"Loaded {sceneName} from save");
+                debug.Log($"Loaded {sceneName} from save");
             }
         }
 
@@ -415,12 +415,18 @@ namespace Saving {
             }
             
             foreach (string id in serializedSaveObjects.Keys) {
-                SaveableObject saveableObject = GetSaveableObjectOrNull(id);
-                if (saveableObject == null) {
-                    Debug.LogError($"{id} not found in scene {sceneName}");
-                    continue;
+                try {
+                    SaveableObject saveableObject = GetSaveableObjectOrNull(id);
+                    if (saveableObject == null) {
+                        Debug.LogError($"{id} not found in scene {sceneName}");
+                        continue;
+                    }
+
+                    saveableObject.RestoreStateFromSave(serializedSaveObjects[id]);
                 }
-                saveableObject.RestoreStateFromSave(serializedSaveObjects[id]);
+                catch (Exception e) {
+                    Debug.LogError($"{id} failed to restore state, cause: {e}");
+                }
             }
             serializedSaveObjects.Clear();
         }
@@ -437,8 +443,13 @@ namespace Saving {
             }
             
             foreach (string id in serializedDynamicObjects.Keys) {
-                DynamicObject dynamicObject = GetOrCreateDynamicObject(id, serializedDynamicObjects[id]);
-                dynamicObject.RestoreStateFromSave(serializedDynamicObjects[id]);
+                try {
+                    DynamicObject dynamicObject = GetOrCreateDynamicObject(id, serializedDynamicObjects[id]);
+                    dynamicObject.RestoreStateFromSave(serializedDynamicObjects[id]);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"{id} DynamicObject failed to restore state, cause: {e}");
+                }
             }
             serializedDynamicObjects.Clear();
         }
@@ -481,7 +492,9 @@ namespace Saving {
         /// </summary>
         public void DeleteAllDynamicObjectsInScene() {
             foreach (var dynamicObj in dynamicObjects.Values) {
-                Object.Destroy(dynamicObj.gameObject);
+                if (dynamicObj != null && dynamicObj.gameObject != null) {
+                    Object.Destroy(dynamicObj.gameObject);
+                }
             }
             dynamicObjects.Clear();
         }
@@ -489,8 +502,8 @@ namespace Saving {
         // Sometimes SaveableObjects don't register themselves by the time they are referenced by something else
         // (for example, if they start deactivated), and we need to find them by ID.
         // This is inefficient and should be avoided when possible.
-        SaveableObject LookForMissingSaveableObject(string id) {
-            // Debug.LogWarning($"Having to search for a missing id {id} in scene {sceneName}");
+        T LookForMissingSaveableObject<T>(string id) where T : MonoBehaviour,  ISaveableObject {
+            // debug.LogWarning($"Having to search for a missing id {id} in scene {sceneName}");
             bool HasValidId(ISaveableObject obj) {
                 try {
                     string s = obj.ID;
@@ -502,15 +515,12 @@ namespace Saving {
                 }
             }
             
-            List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
+            List<T> matches = Resources.FindObjectsOfTypeAll<T>()
                 .Where(s => HasValidId(s) && s.ID == id && IsObjectInThisScene(s))
-                .ToList();
-            List<DynamicObject> dynamicObjMatches = Resources.FindObjectsOfTypeAll<DynamicObject>()
-                .Where(dynamicObj => HasValidId(dynamicObj) && dynamicObj.ID == id && IsObjectInThisScene(dynamicObj))
                 .ToList();
 
             if (matches.Count == 0) {
-                Debug.LogWarning($"No saveableObject with id {id} found anywhere in scene {sceneName}");
+                debug.LogWarning($"No saveableObject with id {id} found anywhere in scene {sceneName}");
                 return null;
             }
 
@@ -537,6 +547,13 @@ namespace Saving {
                 return dynamicObjects[id];
             }
 
+            // Try finding the object, maybe it already exists in the scene ;)
+            var foundDynamicObj = LookForMissingSaveableObject<DynamicObject>(id);
+            if (foundDynamicObj != null) {
+                dynamicObjects.Add(id, foundDynamicObj);
+                return foundDynamicObj;
+            }
+            
             DynamicObjectManager.CreateInstanceFromSavedInfo(id, dynamicObjectSave);
             if (!dynamicObjects.ContainsKey(id)) {
                 Debug.LogError($"Newly created dynamic object {dynamicObjectSave}, id: {id} not present in dynamicObjects Dictionary");

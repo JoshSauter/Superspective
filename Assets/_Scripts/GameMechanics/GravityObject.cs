@@ -1,5 +1,6 @@
 ﻿using System;
 using GrowShrink;
+using NaughtyAttributes;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
@@ -15,6 +16,9 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     public float gravityMagnitude = Physics.gravity.magnitude;
 
     private int raycastLayermask => ~LayerMask.GetMask("Player");
+
+    [ShowNativeProperty]
+    private Vector3 currentVelocity => thisRigidbody.velocity;
 
     protected override void Awake() {
         base.Awake();

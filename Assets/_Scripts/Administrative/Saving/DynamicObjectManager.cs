@@ -143,6 +143,9 @@ namespace Saving {
 				Debug.LogWarning($"Trying to change scene for DynamicObject {dynamicObject}, but existing entry for id {id} is already in {newScene}. Nothing to do.");
 				return true;
 			}
+			
+			// Update all associated SaveableObject IDs' scenes
+			SaveManager.GetAllAssociatedIds(dynamicObject.ID).ForEach(associatedId => SaveManager.sceneLookupForId[associatedId] = newScene);
 
 			DynamicObjectRecord record = allDynamicObjectRecords[id];
 			record.sceneName = newScene;

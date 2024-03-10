@@ -11,4 +11,17 @@
 
         bool SkipSave { get; set; }
     }
+
+    public static class ISaveableObjectExt {
+        public static bool HasValidId(this ISaveableObject obj) {
+            try {
+                string s = obj.ID;
+
+                return !string.IsNullOrEmpty(s);
+            }
+            catch {
+                return false;
+            }
+        }
+    }
 }

@@ -339,7 +339,6 @@ namespace SerializableClasses {
 
 	[Serializable]
 	public class SerializableReference {
-		public string referencedSceneName;
 		public string referencedObjId;
 		
 		// Implicit SerializableReference creation from SaveableObject
@@ -354,8 +353,7 @@ namespace SerializableClasses {
 
 		public Either<SaveableObject, SerializableSaveObject> Reference {
 			get {
-				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
-				return saveManagerForScene?.GetSaveableObject(referencedObjId).Match(
+				return SaveManager.GetSaveableObjectById(referencedObjId)?.Match(
 					saveableObject => new Either<SaveableObject, SerializableSaveObject>(saveableObject),
 					serializedSaveObject => new Either<SaveableObject, SerializableSaveObject>(serializedSaveObject)
 				);
@@ -364,17 +362,14 @@ namespace SerializableClasses {
 				if (value != null) {
 					value.MatchAction(
 						saveableObject => {
-							referencedSceneName = saveableObject.gameObject.scene.name;
 							referencedObjId = saveableObject.ID;
 						},
 						serializedSaveObject => {
-							referencedSceneName = serializedSaveObject.sceneName;
 							referencedObjId = serializedSaveObject.ID;
 						}
 					);
 				}
 				else {
-					referencedSceneName = "";
 					referencedObjId = "";
 				}
 			}
@@ -384,14 +379,12 @@ namespace SerializableClasses {
 	[Serializable]
 	public class SerializableReference<T> : SerializableReference where T : MonoBehaviour, ISaveableObject {
 		public T GetOrNull() {
-			SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
-			return saveManagerForScene?.GetSaveableObject(referencedObjId).LeftOrDefault() as T;
+			return SaveManager.GetSaveableObjectById(referencedObjId).LeftOrDefault() as T;
 		}
 
 		// Implicit SerializableReference creation from SaveableObject
 		public static implicit operator SerializableReference<T>(T obj) {
 			return obj != null ? new SerializableReference<T> {
-				referencedSceneName = obj.gameObject.scene.name,
 				referencedObjId = obj.ID
 			} : null;
 		}
@@ -404,8 +397,7 @@ namespace SerializableClasses {
 
 		public new Either<T, S> Reference {
 			get {
-				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
-				return saveManagerForScene?.GetSaveableObject(referencedObjId)?.Match(
+				return SaveManager.GetSaveableObjectById(referencedObjId)?.Match(
 					// Map the results to the appropriate types
 					saveableObject => new Either<T, S>(saveableObject as T),
 					serializedSaveObject => new Either<T, S>(serializedSaveObject as S)
@@ -415,17 +407,14 @@ namespace SerializableClasses {
 				if (value != null) {
 					value.MatchAction(
 						saveableObject => {
-							referencedSceneName = saveableObject.gameObject.scene.name;
 							referencedObjId = saveableObject.ID;
 						},
 						serializedSaveObject => {
-							referencedSceneName = serializedSaveObject.sceneName;
 							referencedObjId = serializedSaveObject.ID;
 						}
 					);
 				}
 				else {
-					referencedSceneName = "";
 					referencedObjId = "";
 				}
 			}
@@ -453,8 +442,7 @@ namespace SerializableClasses {
 		// Special-case reference should go through different method to find DynamicObjects
 		public new DynamicObjectReference Reference {
 			get {
-				SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(referencedSceneName);
-				return saveManagerForScene?.GetDynamicObject(referencedObjId)?.Match<DynamicObjectReference>(
+				return SaveManager.GetDynamicObjectById(referencedObjId)?.Match<DynamicObjectReference>(
 					// Map the results to the appropriate types
 					dynamicObj => dynamicObj,
 					serializedDynamicObject => serializedDynamicObject
@@ -464,17 +452,14 @@ namespace SerializableClasses {
 				if (value != null) {
 					value.MatchAction(
 						dynamicObj => {
-							referencedSceneName = dynamicObj.gameObject.scene.name;
 							referencedObjId = dynamicObj.ID;
 						},
 						serializedDynamicObject => {
-							referencedSceneName = serializedDynamicObject.sceneName;
 							referencedObjId = serializedDynamicObject.ID;
 						}
 					);
 				}
 				else {
-					referencedSceneName = "";
 					referencedObjId = "";
 				}
 			}

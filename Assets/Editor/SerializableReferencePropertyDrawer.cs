@@ -13,7 +13,6 @@ namespace Editor {
     public class SerializableReferencePropertyDrawer : PropertyDrawer {
         public class CachedReference {
             public SaveableObject cachedReference;
-            public string cachedSceneName;
             public string cachedId;
         }
 
@@ -43,25 +42,22 @@ namespace Editor {
 
             Rect sameSceneRect = new Rect(position.x, position.y, position.width, height);
             Rect referenceRect = new Rect(position.x, position.y + 20, position.width, height);
-            Rect sceneNameRect = new Rect(position.x, position.y + 20, position.width, height);
-            Rect idRect = new Rect(position.x, position.y + 40, position.width, height);
+            Rect idRect = new Rect(position.x, position.y + 20, position.width, height);
 
             viewAsReference = EditorGUI.Toggle(sameSceneRect, "View as reference?", viewAsReference);
 
             if (viewAsReference) {
                 Type genericReferenceType = GetSaveableObjectType();
                 string cachedId = cached.cachedId;
-                string cachedSceneName = cached.cachedSceneName;
 
-                if (cachedId != referencedObjId.stringValue || cachedSceneName != referencedSceneName.stringValue) {
+                if (cachedId != referencedObjId.stringValue) {
                     cachedId = referencedObjId.stringValue;
-                    cachedSceneName = referencedSceneName.stringValue;
 
                     // If the current ID & sceneName are present, try to update the cached reference accordingly
-                    if (!string.IsNullOrEmpty(cachedId) && !string.IsNullOrEmpty(cachedSceneName)) {
-                        List<SaveableObject> matches = FindObjectById(cachedSceneName, cachedId);
-                        if (matches.Count == 1 && genericReferenceType.IsInstanceOfType(matches[0])) {
-                            cached.cachedReference = matches[0];
+                    if (!string.IsNullOrEmpty(cachedId)) {
+                        SaveableObject match = SaveManager.FindObjectById<SaveableObject>(cachedId);
+                        if (genericReferenceType.IsInstanceOfType(match)) {
+                            cached.cachedReference = match;
                         }
                     }
                 }
@@ -75,12 +71,10 @@ namespace Editor {
                 ) as SaveableObject;
 
                 if (cached.cachedReference != prevReference && cached.cachedReference != null) {
-                    referencedSceneName.stringValue = cached.cachedReference.gameObject.scene.name;
                     referencedObjId.stringValue = cached.cachedReference.ID;
                 }
             }
             else {
-                EditorGUI.PropertyField(sceneNameRect, referencedSceneName);
                 EditorGUI.PropertyField(idRect, referencedObjId);
             }
         }
@@ -89,41 +83,8 @@ namespace Editor {
             return typeof(SaveableObject);
         }
 
-        List<SaveableObject> FindObjectById(string sceneName, string id) {
-            if (!EditorSceneManager.GetSceneByName(sceneName).isLoaded) {
-                return new List<SaveableObject>();
-            }
-                
-            List<SaveableObject> matches = Resources.FindObjectsOfTypeAll<SaveableObject>()
-                .Where(s => HasValidId(s) && s.ID.Contains(id))
-                .Where(s => s.gameObject.scene.name == sceneName)
-                .ToList();
-
-            if (matches.Count == 0) {
-                Debug.LogError($"No object with id {id} found in scene {sceneName}");
-                return null;
-            }
-            else if (matches.Count > 1) {
-                Debug.LogWarning($"Multiple objects with id {id} found in scene {sceneName}.");
-                return matches;
-            }
-            else
-                return matches;
-        }
-
-        bool HasValidId(ISaveableObject obj) {
-            try {
-                string s = obj.ID;
-
-                return !string.IsNullOrEmpty(s);
-            }
-            catch {
-                return false;
-            }
-        }
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-            return viewAsReference ? 40 : 60;
+            return viewAsReference ? 40 : 50;
         }
     }
     

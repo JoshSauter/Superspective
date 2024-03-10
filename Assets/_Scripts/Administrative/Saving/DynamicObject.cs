@@ -108,7 +108,7 @@ namespace Saving {
 			bool dynamicObjectManagerRegistered = dynamicObjectRegistrationStatus.IsSuccess() || (SaveManager.isCurrentlyLoadingSave && !dynamicObjectRegistrationStatus.IsAlreadyDestroyed());
 			if (dynamicObjectManagerRegistered) {
 				SaveForScene.RegisterDynamicObject(this);
-				debug.Log($"Registration succeeded for {this.name}, scene {SceneName}");
+				debug.Log($"Registration succeeded for {ID}, scene {SceneName}");
 				hasRegistered = true;
 			}
 			else {

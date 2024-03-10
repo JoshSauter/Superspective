@@ -24,7 +24,7 @@ public class FindObjectByIdTool : ScriptableWizard {
     public void FindObjectById() {
         List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
             .OfType<ISaveableObject>()
-            .Where(s => HasValidId(s) && s.ID.Contains(id))
+            .Where(s => s.HasValidId() && s.ID.Contains(id))
             .OfType<MonoBehaviour>()
             .ToList();
 
@@ -35,17 +35,6 @@ public class FindObjectByIdTool : ScriptableWizard {
             if (Selection.objects.Length > 1) {
                 Debug.LogWarning($"Multiple objects with id {id} found.");
             }
-        }
-    }
-
-    bool HasValidId(ISaveableObject obj) {
-        try {
-            string s = obj.ID;
-
-            return !string.IsNullOrEmpty(s);
-        }
-        catch {
-            return false;
         }
     }
 }

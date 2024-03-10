@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using DissolveObjects;
 using LevelSpecific.BlackRoom;
 using UnityEngine;
 using Saving;
@@ -38,6 +39,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 	private const float incorrectFlashDuration = 2.4f;
 	private const float correctTime = 1.5f;
 
+	// TODO: Remove hasBeenSolvedBefore, no longer serves a purpose since we now check the DissolveState of the next button cover instead
 	private bool hasBeenSolvedBefore = false;
 	
     public enum State {
@@ -86,9 +88,15 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         
         // After showing correct for a short time, fire the laser (or just move the active puzzle to next)
         state.AddTrigger(State.Correct, correctTime, () => {
+	        if (!hasBeenSolvedBefore) {
+		        hasBeenSolvedBefore = true;
+	        }
 	        if (!isLastPuzzle) {
 		        if (!hasBeenSolvedBefore) {
 			        hasBeenSolvedBefore = true;
+		        }
+
+		        if (mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1].state == DissolveObject.State.Materialized) {
 			        mainConsole.dissolveLaser.FireAt(
 				        mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1]);
 		        }
@@ -96,9 +104,6 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 			        mainConsole.puzzleSelectButtons[mainConsole.colorPuzzleManager.activePuzzle + 1].state
 				        .Set(State.On);
 		        }
-	        }
-	        else if (!hasBeenSolvedBefore) {
-		        hasBeenSolvedBefore = true;
 	        }
         });
         

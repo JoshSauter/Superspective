@@ -8,6 +8,7 @@ using static Saving.SaveManagerForScene;
 using System.Reflection;
 using SuperspectiveUtils;
 using LevelManagement;
+using Library.Functional;
 using Newtonsoft.Json;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -19,6 +20,8 @@ namespace Saving {
         public static bool DEBUG = false;
         public static bool isCurrentlyLoadingSave = false;
         public static readonly Dictionary<string, SaveManagerForScene> saveManagers = new Dictionary<string, SaveManagerForScene>();
+        // Keeps track of what scene a given SaveableObject ID can be located in
+        public static readonly Dictionary<string, string> sceneLookupForId = new Dictionary<string, string>();
 
         public delegate void SaveAction();
 
@@ -140,6 +143,7 @@ namespace Saving {
         public static void ClearAllState() {
             DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
             saveManagers.Clear();
+            sceneLookupForId.Clear();
         }
 
         public static void SaveSettings() {
@@ -150,18 +154,71 @@ namespace Saving {
             Settings.instance.LoadSettings(SettingsFilePath);
         }
 
-        static void CopyDirectory(string sourcePath, string targetPath) {
-            if (Directory.Exists(sourcePath)) {
-                Directory.CreateDirectory(targetPath);
-                string[] files = Directory.GetFiles(sourcePath);
+        public static List<string> GetAllAssociatedIds(string associationId) {
+            List<string> associatedIds = new List<string>();
+            foreach (string id in sceneLookupForId.Keys) {
+                string lastPart = id.Split('_').Last();
+                string curAssociationId = lastPart.IsGuid() ? lastPart : id;
 
-                // Copy the files and overwrite destination files if they already exist.
-                foreach (string s in files) {
-                    // Use static Path methods to extract only the file name from the path.
-                    string fileName = Path.GetFileName(s);
-                    string destFile = Path.Combine(targetPath, fileName);
-                    File.Copy(s, destFile, true);
+                if (curAssociationId == associationId) {
+                    associatedIds.Add(id);
                 }
+            }
+
+            return associatedIds;
+        }
+
+        public static Either<DynamicObject, DynamicObject.DynamicObjectSave> GetDynamicObjectById(string id) {
+            if (!Application.isPlaying) {
+                return FindObjectById<DynamicObject>(id);
+            }
+            else if (!sceneLookupForId.ContainsKey(id)) {
+                DynamicObject objFound = FindObjectById<DynamicObject>(id);
+                if (objFound != null) {
+                    sceneLookupForId[id] = objFound.gameObject.scene.name;
+                }
+
+                return objFound;
+            }
+            else {
+                return GetOrCreateSaveManagerForScene(sceneLookupForId[id]).GetDynamicObject(id);
+            }
+        }
+
+        public static Either<SaveableObject, SerializableSaveObject> GetSaveableObjectById(string id) {
+            if (!Application.isPlaying) {
+                return FindObjectById<SaveableObject>(id);
+            }
+            else if (!sceneLookupForId.ContainsKey(id)) {
+                SaveableObject objFound = FindObjectById<SaveableObject>(id);
+                if (objFound != null) {
+                    sceneLookupForId[id] = objFound.gameObject.scene.name;
+                }
+
+                return objFound;
+            }
+            else {
+                return GetOrCreateSaveManagerForScene(sceneLookupForId[id]).GetSaveableObject(id);
+            }
+        }
+        
+        public static T FindObjectById<T>(string id) where T : class, ISaveableObject {
+            List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
+                .OfType<ISaveableObject>()
+                .Where(s => s.HasValidId() && s.ID.Contains(id))
+                .OfType<MonoBehaviour>()
+                .ToList();
+
+            if (matches.Count == 0) {
+                Debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?");
+                return null;
+            }
+            else if (matches.Count > 1) {
+                Debug.LogWarning($"Multiple objects with id {id} found.");
+                return matches[0] as T;
+            }
+            else {
+                return matches[0] as T;
             }
         }
 
