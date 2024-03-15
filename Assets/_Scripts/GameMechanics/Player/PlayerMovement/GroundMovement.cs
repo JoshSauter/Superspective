@@ -36,6 +36,7 @@ partial class PlayerMovement {
         // Dot(face normal, transform.up) must be greater than this value to be for snap-to-ground to occur
         public const float SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD = 0.9f;
 
+        public string lastGroundTouchedDebug = "";
         public GroundedState grounded;
         public Vector3 lastGroundVelocity;
         
@@ -59,7 +60,11 @@ partial class PlayerMovement {
             if (isGroundedNow) {
                 grounded.framesWaitedAfterLeavingGround = 0;
                 grounded.contact = groundContactPoint;
+                if (m.DEBUG) {
+                    DebugExtension.DebugWireSphere(groundContactPoint.point, Color.green, 0.25f, 1f);
+                }
                 Vector3 contactNormal = groundContactPoint.normal;//GetGroundNormal(groundContactPoint, out bool rayHit, out RaycastHit hitInfo);
+                lastGroundTouchedDebug = grounded.contact.otherCollider.FullPath();
                 // if (rayHit) {
                 //     grounded.contactNormal = contactNormal;
                 // }

@@ -18,7 +18,12 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     private int raycastLayermask => ~LayerMask.GetMask("Player");
 
     [ShowNativeProperty]
-    private Vector3 currentVelocity => thisRigidbody.velocity;
+    private Vector3 currentVelocity {
+        get {
+            if (thisRigidbody == null) return Vector3.zero;
+            return thisRigidbody.velocity;
+        }
+    }
 
     protected override void Awake() {
         base.Awake();

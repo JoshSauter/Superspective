@@ -287,10 +287,18 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (dimObj.visibilityState == VisibilityState.invisible && isHeld) Drop();
     }
 
+    // Singular place to set isKinematic so I can track it in one place when debugging
+    public void SetRigidbodyIsKinematic(bool isKinematic) {
+        if (thisRigidbody.isKinematic != isKinematic) {
+            debug.Log($"Setting thisRigidbody.isKinematic to {isKinematic}");
+            thisRigidbody.isKinematic = isKinematic;
+        }
+    }
+
     public void Pickup() {
         if (!isHeld && !onCooldown && interactable) {
             thisGravity.useGravity = false;
-            thisRigidbody.isKinematic = false;
+            SetRigidbodyIsKinematic(false);
             isHeld = true;
             currentCooldown = pickupDropCooldown;
 
@@ -403,12 +411,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     public void RecalculateRigidbodyKinematics() {
-        if (RigidbodyShouldBeFrozen) {
-            thisRigidbody.isKinematic = true;
-        }
-        else {
-            thisRigidbody.isKinematic = false;
-        }
+        SetRigidbodyIsKinematic(RigidbodyShouldBeFrozen);
     }
     
 #endregion

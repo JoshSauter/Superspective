@@ -316,6 +316,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     }
 
     void OnCollisionStay(Collision collision) {
+        // TODO: Don't use collision.contacts, it produces memory garbage
         allContactThisFrame.AddRange(collision.contacts);
     }
 

@@ -1,19 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using SuperspectiveUtils;
+using UnityEditor;
 using UnityEngine;
 
 public static class SuperspectivePhysics {
 	private static readonly Vector3 originalGravity = Physics.gravity;
 
 	private static int _ignoreRaycastLayer = -1;
-	public static int IgnoreRaycastLayer => _ignoreRaycastLayer < 0 ? _ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast") : _ignoreRaycastLayer;
 	private static int _playerLayer = -1;
-	public static int PlayerLayer => _playerLayer < 0 ? _playerLayer = LayerMask.NameToLayer("Player") : _playerLayer;
 	private static int _invisibleLayer = -1;
-	public static int InvisibleLayer => _invisibleLayer < 0 ? _invisibleLayer = LayerMask.NameToLayer("Invisible") : _invisibleLayer;
 	private static int _collideWithPlayerOnlyLayer = -1;
-	public static int CollideWithPlayerOnlyLayer => _collideWithPlayerOnlyLayer < 0 ? _collideWithPlayerOnlyLayer = LayerMask.NameToLayer("CollideWithPlayerOnly") : _collideWithPlayerOnlyLayer;
+	private static int _cullEverythingLayer = -1;
+
+	private static int LazyLayer(ref int layer, string layerName) {
+		return layer < 0 ? layer = LayerMask.NameToLayer(layerName) : layer;
+	}
+	public static int IgnoreRaycastLayer => LazyLayer(ref _ignoreRaycastLayer, "Ignore Raycast");
+	public static int PlayerLayer => LazyLayer(ref _playerLayer, "Player");
+	public static int InvisibleLayer => LazyLayer(ref _invisibleLayer,"Invisible");
+	public static int CollideWithPlayerOnlyLayer => LazyLayer(ref _collideWithPlayerOnlyLayer, "CollideWithPlayerOnly");
+	public static int CullEverythingLayer => LazyLayer(ref _cullEverythingLayer, "CullEverythingLayer");
 	public static int PhysicsRaycastLayerMask =>
 		~((1 << IgnoreRaycastLayer) |
 		  (1 << PlayerLayer) |
@@ -114,4 +123,22 @@ public static class SuperspectivePhysics {
 		
 		ignoredCollisions.Clear();
 	}
+
+#if UNITY_EDITOR
+	[MenuItem("My Tools/Superspective Physics/Print Ignored Collider Pairs")]
+	public static void PrintIgnoredColliderPairs() {
+		StringBuilder sb = new StringBuilder();
+		sb.Append("Ignored Collider Pairs:\n");
+		foreach (var kv in ignoredCollisions) {
+			ColliderPair pair = kv.Key;
+			// Ignore bad entries for now, may want to change behavior later
+			if (pair.col1 == null || pair.col2 == null) continue;
+			int timesIgnored = kv.Value;
+
+			sb.Append($"{pair.col1.FullPath()}\n<>\n{pair.col2.FullPath()}\nTimes Ignored: {timesIgnored}\n\n");
+		}
+		
+		Debug.Log(sb.ToString());
+	}
+#endif
 }

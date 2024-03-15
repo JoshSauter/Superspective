@@ -99,16 +99,10 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             }
                 
             DimensionObject parentDimensionObj = cubeSpawned.GetComponentInParent<DimensionObject>();
-            Transform parent = parentDimensionObj.transform;
-            List<Transform> children = new List<Transform>();
-            foreach (Transform child in parent) {
-                if (child.name == DimensionObject.IgnoreCollisionsTriggerZone) continue;
-                child.parent = null;
-                children.Add(child);
-            }
-            parent.position = cubeSpawned.transform.position;
-            foreach (Transform child in children) {
-                child.SetParent(parent);
+            // Make sure the collision logic trigger zone follows the actual cube that's falling
+            var ignoreCollisionsTriggerZone = parentDimensionObj.ignoreCollisionsTriggerZone;
+            if (ignoreCollisionsTriggerZone != null && ignoreCollisionsTriggerZone.transform.parent != cubeSpawned.transform) {
+                ignoreCollisionsTriggerZone.transform.SetParent(cubeSpawned.transform);
             }
 
             float distanceFallen = Vector3.Distance(lastCubeSpawnedPosition, cubeSpawned.transform.position);

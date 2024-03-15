@@ -948,7 +948,7 @@ namespace PortalMechanics {
 			if (otherPortal.dimensionObject != null && otherPortal.dimensionObject is PillarDimensionObject pillarDimensionObject) {
 				DimensionPillar activePillar = pillarDimensionObject.activePillar;
 				if (activePillar != null) {
-					activePillar.curDimension = pillarDimensionObject.Dimension;
+					activePillar.curDimension = pillarDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible);
 					activePillar.dimensionWall.UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
 				}
 			}

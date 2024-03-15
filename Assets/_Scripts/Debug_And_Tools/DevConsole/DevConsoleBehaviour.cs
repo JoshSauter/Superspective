@@ -54,7 +54,8 @@ namespace DeveloperConsole {
                 new TogglePortalRenderingCommand("togglePortals"),
                 new ToggleDebugModeCommand("toggleDebug"),
                 new ToggleUICommand("toggleUI"),
-                new ChangeScaleCommand("changeScale")
+                new ChangeScaleCommand("changeScale"),
+                new HideCullEverythingLayer("hideCullMask")
             };
             
             inputField.onSubmit.AddListener(ProcessCommand);

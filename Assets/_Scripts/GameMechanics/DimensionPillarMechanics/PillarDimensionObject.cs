@@ -208,21 +208,22 @@ public class PillarDimensionObject : DimensionObject {
 
 		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
 		
-		UpdateStateForCamera(playerCam, activePillar.curDimension);
+		UpdateStateForCamera(playerCam, activePillar.curDimension, true);
 	}
 
-	public void UpdateStateForCamera(Camera cam, int pillarDimension) {
+	public void UpdateStateForCamera(Camera cam, int pillarDimension, bool sendEvents = false) {
 		camSetUpFor = cam;
 		camQuadrant = DetermineQuadrant(cam.transform.position);
 		
-		UpdateState(pillarDimension);
+		// Don't trigger state change events when we're just doing it for the rendering
+		UpdateState(pillarDimension, false, sendEvents);
 	}
 
-	void UpdateState(int pillarDimension, bool forceUpdate = false) {
+	void UpdateState(int pillarDimension, bool forceUpdate = false, bool sendEvents = true) {
 		VisibilityState nextState = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, pillarDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
-			SwitchVisibilityState(nextState, true);
+			SwitchVisibilityState(nextState, true, sendEvents);
 		}
 	}
 

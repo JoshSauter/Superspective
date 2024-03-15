@@ -28,12 +28,11 @@ namespace GrowShrink {
 
         string GetId(Collider c) => GrowShrinkTransitionTrigger.GetId(c);
 
-        [Button("Compile w/ Force Refresh", EButtonEnableMode.Editor)]
-        public void CompileWithRefresh() => Compile(true);
-
         // Note to self: If the results of this look fucked up, check that the pivot points for combined mesh & trigger zone hitbox are the same
         [Button("Compile", EButtonEnableMode.Editor)]
-        void Compile(bool forceRefreshMeshes = false) {
+        void Compile() {
+            Decompile();
+            
 #region Vertex Transformation Methods
             Vector3 pivotAxis;
             Vector3 smallSidePointWorld, largeSidePointWorld;
@@ -103,7 +102,7 @@ namespace GrowShrink {
             targetPbMesh.transform.SetSiblingIndex(0);
             targetPbMesh.gameObject.name = $"{gameObject.name}_CombinedMesh";
             
-            if (pbMeshes == null || pbMeshes.Length == 0 || forceRefreshMeshes) {
+            if (pbMeshes == null || pbMeshes.Length == 0) {
                 // Get all mesh renderers from children recursively, skipping this gameObject and the triggerZone gameObject
                 pbMeshes = gameObject.GetComponentsInChildrenRecursively<ProBuilderMesh>()
                     .Where(mf => mf.gameObject.activeSelf

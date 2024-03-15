@@ -5719,6 +5719,7 @@ MonoBehaviour:
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
+  targetFillAmount: 1
 --- !u!114 &2779360306034961930
 MonoBehaviour:
   m_ObjectHideFlags: 0

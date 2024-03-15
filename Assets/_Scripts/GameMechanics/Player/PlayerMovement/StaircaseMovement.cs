@@ -105,7 +105,15 @@ public partial class PlayerMovement {
                 p1 = capsuleCenter - capsuleAxis * (distanceFromCapsuleCenterToOffsetStartPoint - CAPSULE_CHECK_OFFSET_FROM_BOTTOM * m.scale);
                 
                 var result = Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore);
-                return result.Where(c => c != Player.instance.heldObject.thisCollider).ToList().Count > 0;
+
+                bool FilterOutHeldObjects(Collider c) {
+                    if (Player.instance.IsHoldingSomething) {
+                        return c != Player.instance.heldObject.thisCollider;
+                    }
+
+                    return true;
+                }
+                return result.Where(FilterOutHeldObjects).ToList().Count > 0;
             }
             
             void MoveAlongStep(Vector3 moveDirection) {

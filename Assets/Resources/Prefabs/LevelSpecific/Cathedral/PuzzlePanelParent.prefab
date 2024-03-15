@@ -4763,6 +4763,7 @@ MonoBehaviour:
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
+  targetFillAmount: 1
 --- !u!114 &1678334698652951275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16169,6 +16170,7 @@ MonoBehaviour:
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
+  targetFillAmount: 1
 --- !u!114 &1398743713989365466
 MonoBehaviour:
   m_ObjectHideFlags: 0

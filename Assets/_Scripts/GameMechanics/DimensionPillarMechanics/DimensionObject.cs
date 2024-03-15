@@ -55,6 +55,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public SuperspectiveRenderer[] renderers;
 	public Collider[] colliders;
 	Dictionary<SuperspectiveRenderer, int> startingLayers;
+	public SphereCollider ignoreCollisionsTriggerZone;
 
 	public VisibilityState startingVisibilityState = VisibilityState.visible;
 	public VisibilityState visibilityState = VisibilityState.visible;
@@ -158,11 +159,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 #region Physics
 	void SetupDimensionCollisionLogic() {
 		if (colliders != null && colliders.Length > 0) {
-			CreateTriggerZone();
+			ignoreCollisionsTriggerZone = CreateTriggerZone();
 		}
 	}
 	
-	public void CreateTriggerZone() {
+	public SphereCollider CreateTriggerZone() {
 		Vector3 MinOfTwoVectors(Vector3 a, Vector3 b) {
 			return new Vector3(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Min(a.z, b.z));
 		}
@@ -197,6 +198,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		trigger.radius = Mathf.Max(size.x, size.y, size.z);
 		trigger.center = transform.InverseTransformPoint(center);
 		trigger.isTrigger = true;
+
+		return trigger;
 	}
 
 	public bool IsVisibleFromMask(int maskValue) {
@@ -287,7 +290,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	////////////////////////
 #region State Change
 
-	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false) {
+	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true) {
 		if (!(ignoreTransitionRules || IsValidNextState(nextState))) return;
 
 		debug.Log("State transition: " + visibilityState + " --> " + nextState);
@@ -311,12 +314,14 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			SetShaderProperties(r);
 		}
 		SetChannelValuesInMaterials();
+
+		if (sendEvents) {
+			OnStateChangeImmediate?.Invoke(this);
 		
-		OnStateChangeImmediate?.Invoke(this);
-		
-		if (nextState == visibilityState) {
-			OnStateChangeSimple?.Invoke();
-			OnStateChange?.Invoke(this);
+			if (nextState == visibilityState) {
+				OnStateChangeSimple?.Invoke();
+				OnStateChange?.Invoke(this);
+			}
 		}
 	}
 
@@ -348,6 +353,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 	void SetShaderProperties(SuperspectiveRenderer renderer) {
 		void SetLayers() {
+			if (!startingLayers.ContainsKey(renderer)) {
+				startingLayers.Add(renderer, renderer.gameObject.layer);
+			}
+			
 			switch (visibilityState) {
 				case VisibilityState.invisible:
 					renderer.gameObject.layer = reverseVisibilityStates
