@@ -19,6 +19,9 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	[ShowNativeProperty]
 	public int collidersIgnoredCount => collidersIgnored.Count;
 
+	// TODO: Find a less hacky fix to MultiDimensionCubes having a race condition with ignoring/restoring collisions upon being pulled out of a spawner
+	public bool pleaseStopIgnoringCollisionsForASecond = false;
+
 	[Button("Print current state")]
 	void PrintIgnoreInfo() {
 		Debug.Log($"DimensionObjects Ignored:\n{string.Join("\n", dimensionObjectsIgnored)}");
@@ -87,6 +90,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		else {
 			if (!dimensionObject.ShouldCollideWith(otherDimensionObj)) {
 				IgnoreCollisionWithDimensionObject(otherDimensionObj);
+				var x = dimensionObject.ShouldCollideWith(otherDimensionObj);
 			}
 			else {
 				RestoreCollisionWithDimensionObject(otherDimensionObj);
@@ -107,6 +111,9 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	void IgnoreCollisionWithDimensionObject(DimensionObject other) {
+		// WTF
+		if (pleaseStopIgnoringCollisionsForASecond) return;
+		
 		if (!dimensionObjectsIgnored.Contains(other)) {
 			if (dimensionObject != null) {
 				dimensionObject.debug.Log($"{dimensionObject.name} ignoring collision with {other.name}");

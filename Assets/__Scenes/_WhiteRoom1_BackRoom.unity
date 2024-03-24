@@ -1160,6 +1160,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 0
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -29207,6 +29208,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 0
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -29915,6 +29917,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 0
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -31466,6 +31469,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 0
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -45325,6 +45329,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 0
   collisionMatrix: 010000000000000100000100000001000101000000010101
@@ -47499,6 +47504,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 0
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101

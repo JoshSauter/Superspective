@@ -23,11 +23,19 @@ namespace Editor {
 
             foreach (var material1Renderer in materialSelection) {
                 material1Renderer.sharedMaterial = swapTo;
+                // If an object is named after the material (e.g. after a merge), rename it to reflect the new material
+                if (material1Renderer.gameObject.name == material.name) {
+                    material1Renderer.gameObject.name = swapTo.name;
+                } 
             }
 
             if (swapBothWays) {
                 foreach (var material2Renderer in swapToSelection) {
                     material2Renderer.sharedMaterial = material;
+                    // If an object is named after the material (e.g. after a merge), rename it to reflect the new material
+                    if (material2Renderer.gameObject.name == swapTo.name) {
+                        material2Renderer.gameObject.name = material.name;
+                    } 
                 }
             }
         }

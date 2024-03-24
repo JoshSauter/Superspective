@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using SuperspectiveUtils;
 using UnityEditor;
@@ -127,18 +128,31 @@ public static class SuperspectivePhysics {
 #if UNITY_EDITOR
 	[MenuItem("My Tools/Superspective Physics/Print Ignored Collider Pairs")]
 	public static void PrintIgnoredColliderPairs() {
-		StringBuilder sb = new StringBuilder();
-		sb.Append("Ignored Collider Pairs:\n");
-		foreach (var kv in ignoredCollisions) {
+		IgnoredColliderPairsDebugString().ForEach(Debug.Log);
+	}
+
+	[MenuItem("My Tools/Superspective Physics/Print Non-Player Ignored Collider Pairs")]
+	public static void PrintNonPlayerIgnoredColliderPairs() {
+		IgnoredColliderPairsDebugString(
+				(pair) => pair.col1 == Player.instance.collider || pair.col2 == Player.instance.collider)
+			.ForEach(Debug.Log);
+	}
+
+	private static List<string> IgnoredColliderPairsDebugString(Func<ColliderPair, bool> filterOutCondition = null) {
+		string GetDebugString(KeyValuePair<ColliderPair, int> kv) {
+			(ColliderPair pair, int timesIgnored) = kv;
+
+			return $"{pair.col1.FullPath()}\n<>\n{pair.col2.FullPath()}\nTimes Ignored: {timesIgnored}\n\n";
+		}
+
+		bool AppliedFilter(KeyValuePair<ColliderPair, int> kv) {
 			ColliderPair pair = kv.Key;
 			// Ignore bad entries for now, may want to change behavior later
-			if (pair.col1 == null || pair.col2 == null) continue;
-			int timesIgnored = kv.Value;
-
-			sb.Append($"{pair.col1.FullPath()}\n<>\n{pair.col2.FullPath()}\nTimes Ignored: {timesIgnored}\n\n");
+			// Also filter by the filterOutCondition, if provided
+			return !(pair.col1 == null || pair.col2 == null || (filterOutCondition != null && filterOutCondition.Invoke(pair)));
 		}
-		
-		Debug.Log(sb.ToString());
+
+		return ignoredCollisions.Where(AppliedFilter).Select(GetDebugString).ToList();
 	}
 #endif
 }

@@ -15,11 +15,11 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 
 	private bool allowGodModeInNonDevBuild = true;
 	public bool noClipOn = false;
-	float desiredSpeed;
+	private const float MIN_SPEED = 0.01f;
+	private const float BASE_SPEED = 10;
+	private const float MAX_SPEED = 300;
+	private const float SPEED_MULTIPLIER_DELTA = 1.02f; // Multiplier (or divisor) per frame to the speed
 	float speed;
-	public float slowMoveSpeed = 15f;
-	public float moveSpeed = 45;
-	public float sprintSpeed = 125;
 	public float middleMouseVerticalSpeed = 4;
 	
 	
@@ -28,7 +28,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 	void OnGUI() {
 		if (!enabled || !noClipOn) return;
 		// Show the player's position if you're in god mode/no clip mode
-		GUI.Label(new Rect(5, 145, 100, 25), $"{playerCamera.position:F0}", style);
+		GUI.Label(new Rect(5, 145, 100, 25), $"{playerCamera.position:F0}, Speed: {speed:F2} (Ctrl -, Shift +)", style);
 	}
 
 	protected override void Awake() {
@@ -44,7 +44,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 		
 		playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 		input = PlayerButtonInput.instance;
-		speed = moveSpeed;
+		speed = BASE_SPEED;
 	}
 
 	void Update() {
@@ -54,16 +54,18 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 		}
 
 		if (noClipOn) {
-			if (DebugInput.GetKeyDown(KeyCode.LeftShift) || (allowGodModeInNonDevBuild && Input.GetKeyDown(KeyCode.LeftShift))) {
-				desiredSpeed = (desiredSpeed == sprintSpeed) ? moveSpeed : sprintSpeed;
+			if (DebugInput.GetKey(KeyCode.LeftShift) || (allowGodModeInNonDevBuild && Input.GetKey(KeyCode.LeftShift))) {
+				//speed = Mathf.Clamp(Mathf.Pow(speed, SPEED_MULTIPLIER_DELTA), MIN_SPEED, MAX_SPEED);
+				speed = Mathf.Clamp(speed * SPEED_MULTIPLIER_DELTA, MIN_SPEED, MAX_SPEED);
 			}
-			else if (DebugInput.GetKeyDown(KeyCode.LeftControl) || (allowGodModeInNonDevBuild && Input.GetKeyDown(KeyCode.LeftControl))) {
-				desiredSpeed = (desiredSpeed == slowMoveSpeed) ? moveSpeed : slowMoveSpeed;
+			else if (DebugInput.GetKey(KeyCode.LeftControl) || (allowGodModeInNonDevBuild && Input.GetKey(KeyCode.LeftControl))) {
+				//speed = Mathf.Clamp(Mathf.Pow(speed, 1f / SPEED_MULTIPLIER_DELTA), MIN_SPEED, MAX_SPEED);
+				speed = Mathf.Clamp(speed / SPEED_MULTIPLIER_DELTA, MIN_SPEED, MAX_SPEED);
 			}
 			
 			
 			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed);
+			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed) * (speed / BASE_SPEED);
 			transform.position += verticalScroll;
 		}
 	}
@@ -74,14 +76,12 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 
 			Vector3 moveDirection = playerCamera.forward * moveInput.y + playerCamera.right * moveInput.x;
 
-			speed = Mathf.Lerp(speed, desiredSpeed, Time.fixedDeltaTime * 6f);
-
 			transform.position += moveDirection * (Time.fixedDeltaTime * speed * Player.instance.Scale);
 		}
     }
 
 	void ToggleNoClip() {
-		desiredSpeed = moveSpeed;
+		speed = BASE_SPEED;
 		noClipOn = !noClipOn;
 		debug.Log(noClipOn ? "Enabling noclip" : "Disabling noclip");
 		playerMovement.enabled = !noClipOn;

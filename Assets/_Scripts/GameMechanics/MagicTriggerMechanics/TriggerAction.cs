@@ -97,7 +97,7 @@ namespace MagicTriggerMechanics {
 					return;
 				case TriggerActionType.ChangeLevel:
 					// ManagerScene is a flag that we don't want to change level in this direction
-					if (levelForward != Levels.ManagerScene) {
+					if (levelForward != Levels.ManagerScene && LevelManager.instance.ActiveScene != levelForward) {
 						LevelManager.instance.SwitchActiveScene(levelForward);
 					}
 					return;
@@ -150,7 +150,7 @@ namespace MagicTriggerMechanics {
 					return;
 				case TriggerActionType.ChangeLevel:
 					// ManagerScene is a flag that we don't want to change level in this direction
-					if (levelBackward != Levels.ManagerScene) {
+					if (levelBackward != Levels.ManagerScene && LevelManager.instance.ActiveScene != levelBackward) {
 						LevelManager.instance.SwitchActiveScene(levelBackward);
 					}
 					return;

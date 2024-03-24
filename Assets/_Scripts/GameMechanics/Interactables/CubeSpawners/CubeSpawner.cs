@@ -14,8 +14,8 @@ using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
-[RequireComponent(typeof(UniqueId))]
-public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSave> {
+[RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
+public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSave>, BetterTriggers {
     public DimensionObject backWall;
     public Button button;
     public float tDistanceBeforeEnablingNewCubeColliders = 0.5f;
@@ -29,6 +29,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public PickupObjectReference cubeGrabbedFromSpawner;
     public Collider roofCollider;
     public Transform glass;
+    public Transform glassHitbox;
     const float glassLowerDelay = 1.75f;
     const float glassRaiseDelay = 0.25f;
     const float glassOffset = 1.5f;
@@ -77,6 +78,19 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         base.Init();
         InitializeSpawnStateMachine();
         InitializeDespawnStateMachine();
+
+        if (glassHitbox != null) {
+            StartCoroutine(MatchGlassHitboxPosition());
+        }
+    }
+
+    IEnumerator MatchGlassHitboxPosition() {
+        while (true) {
+            if (GameManager.instance.IsCurrentlyLoading) yield return null;
+            glassHitbox.position = glass.position;
+            
+            yield return null;
+        }
     }
 
     void InitializeSpawnStateMachine() {
@@ -272,7 +286,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     void DestroyCubeAlreadyGrabbedFromSpawner() {
         void DissolveActiveCube(PickupObjectReference cube) {
             if (ReferenceIsReplaceable(cube)) {
-                cube.Reference.MatchAction(
+                cube?.Reference?.MatchAction(
                     // If the object is loaded, play the shrink animation for this cube
                     pickupObject => {
                         AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, button.transform.position);
@@ -358,7 +372,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         }
     }
 
-    void OnTriggerExit(Collider other) {
+    public void OnBetterTriggerExit(Collider other) {
         PickupObject cube = other.GetComponent<PickupObject>();
         if (cube != null && cube == cubeSpawned) {
             spawnState.Set(SpawnState.CubeTaken);
@@ -381,6 +395,12 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             // Also remove the dimension parent object
             DimensionObject dimensionParent = cube.transform.parent?.GetComponent<DimensionObject>();
             dimensionParent.SwitchVisibilityState(VisibilityState.visible, true);
+            dimensionParent.collisionLogic.RestoreAllCollisions();
+            dimensionParent.collisionLogic.pleaseStopIgnoringCollisionsForASecond = true;
+            foreach (var childDimensionObj in cube.gameObject.GetComponentsInChildrenRecursively<DimensionObject>()) {
+                childDimensionObj.collisionLogic.RestoreAllCollisions();
+                childDimensionObj.collisionLogic.pleaseStopIgnoringCollisionsForASecond = true;
+            }
             dimensionParent.Unregister();
             Transform parent = cube.transform.parent;
             cube.transform.SetParent(null);
@@ -391,8 +411,15 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             cube.gameObject.layer = LayerMask.NameToLayer("Default");
         }
     }
-    
-    #region Saving
+    public void OnBetterTriggerEnter(Collider other) { }
+    public void OnBetterTriggerStay(Collider other) { }
+
+    IEnumerator RestoreCollisionLogicAfterABriefPause(List<DimensionObject> dimensionObjs) {
+        yield return null;
+        dimensionObjs.ForEach(d => d.collisionLogic.pleaseStopIgnoringCollisionsForASecond = false);
+    }
+
+#region Saving
 
     [Serializable]
     public class CubeSpawnerSave : SerializableSaveObject<CubeSpawner> {

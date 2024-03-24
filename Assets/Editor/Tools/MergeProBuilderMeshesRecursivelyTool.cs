@@ -50,6 +50,7 @@ public static class MergeProBuilderMeshesRecursivelyTool {
 
     private const string MERGED_ROOT_NAME = "Merged";
     private const string UNMERGED_ROOT_NAME = "Unmerged";
+    private const string DUPLICATES_ROOT_NAME = "Temporary Duplicate of Unmerged";
 
     [MenuItem("GameObject/Unmerge ProBuilder Objects %#m")] // // % = Ctrl, # = Shift M
     public static void UnmergeProBuilderMeshes() {
@@ -83,6 +84,9 @@ public static class MergeProBuilderMeshesRecursivelyTool {
     }
 
     private static bool IsRootOfMergeableObject(Transform objectInQuestion) {
+        // Cannot merge prefabs since they don't allow children moving around
+        if (PrefabUtility.GetPrefabAssetType(objectInQuestion.gameObject) != PrefabAssetType.NotAPrefab) return false;
+        
         bool isJustEmptyTransform = objectInQuestion.GetComponents<Component>().Length == 1;
         bool hasUnmergedRoot = objectInQuestion.Find(UNMERGED_ROOT_NAME);
         bool hasMergedRoot = objectInQuestion.Find(MERGED_ROOT_NAME);
@@ -104,49 +108,60 @@ public static class MergeProBuilderMeshesRecursivelyTool {
     }
 
     private static void MergeProBuilderMeshesByMaterialUnderRoot(Transform root) {
-        foreach (Transform child in root) {
-            MergeProBuilderMeshesByMaterialUnderRoot(child);
-        }
-        if (!IsRootOfMergeableObject(root) || !root.gameObject.activeSelf) return;
-        
+        if (!IsRootOfMergeableObject(root) || !root.gameObject.activeSelf) {
+            Debug.LogError($"Cannot merge {root.gameObject.FullPath()}, not a valid root!");
+            return;
+        };
+
         Dictionary<Material, List<PBMesh>> allPbMeshesByMaterial = GetPBMeshesByMaterialInSelection(root, true);
-        List<Transform> allChildren = root.GetComponentsInChildrenOnly<Transform>().ToList();
 
         Transform unmergedRoot = GetOrCreateChild(root, UNMERGED_ROOT_NAME);
         Transform mergedRoot = GetOrCreateChild(root, MERGED_ROOT_NAME);
-        unmergedRoot.SetSiblingIndex(0);
-        mergedRoot.SetSiblingIndex(1);
-        
-        foreach (Transform child in root) {
-            if (child.name == UNMERGED_ROOT_NAME || child.name == MERGED_ROOT_NAME) continue;
-            
-            child.SetParent(unmergedRoot.transform);
-        }
-        
-        Transform unmergedRootDuplicate = GameObject.Instantiate(unmergedRoot, root.transform);
-        unmergedRootDuplicate.name = "Temporary Duplicate of Unmerged";
-        
-        Dictionary<Material, List<PBMesh>> duplicatedPbMeshesToBeMerged = GetPBMeshesByMaterialInSelection(unmergedRootDuplicate);
-        foreach (var material in duplicatedPbMeshesToBeMerged.Keys) {
-            string materialName = material.name;
-            if (mergedRoot.Find(materialName)) {
-                Object.DestroyImmediate(mergedRoot.Find(materialName).gameObject);
+        Transform duplicatesRoot = GetOrCreateChild(root, DUPLICATES_ROOT_NAME);
+        try {
+            unmergedRoot.SetSiblingIndex(0);
+            mergedRoot.SetSiblingIndex(1);
+            duplicatesRoot.SetSiblingIndex(2);
+
+            List<Transform> childrenToMove = new List<Transform>();
+            foreach (Transform child in root) {
+                if (child.name is UNMERGED_ROOT_NAME or MERGED_ROOT_NAME or DUPLICATES_ROOT_NAME) continue;
+                var duplicate = GameObject.Instantiate(child, duplicatesRoot).gameObject;
+
+                if (PrefabUtility.GetPrefabAssetType(duplicate) != PrefabAssetType.NotAPrefab) {
+                    PrefabUtility.UnpackPrefabInstance(duplicate, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                }
+                
+                duplicate.transform.SetParent(duplicatesRoot);
+                
+                childrenToMove.Add(child);
             }
-        
-            // For some reason cannot seem to programmatically create a new ProBuilderMesh without errors,
-            // so we just use the first PBMesh in the List as the mergedTo mesh
-            Transform materialRoot = duplicatedPbMeshesToBeMerged[material][0].transform;
-            materialRoot.gameObject.name = materialName;
-            materialRoot.SetParent(mergedRoot);
-            PBMesh materialRootPbMesh = materialRoot.GetOrAddComponent<PBMesh>();
-            CombineMeshes.Combine(duplicatedPbMeshesToBeMerged[material], materialRootPbMesh);
-            materialRootPbMesh.SetPivot(mergedRoot.position);
+            childrenToMove.ForEach(child => child.SetParent(unmergedRoot));
+            
+            Dictionary<Material, List<PBMesh>> duplicatedPbMeshesToBeMerged = GetPBMeshesByMaterialInSelection(duplicatesRoot);
+            foreach (var material in duplicatedPbMeshesToBeMerged.Keys) {
+                string materialName = material.name;
+                if (mergedRoot.Find(materialName)) {
+                    Object.DestroyImmediate(mergedRoot.Find(materialName).gameObject);
+                }
+            
+                // For some reason cannot seem to programmatically create a new ProBuilderMesh without errors,
+                // so we just use the first PBMesh in the List as the mergedTo mesh
+                Transform materialRoot = duplicatedPbMeshesToBeMerged[material][0].transform;
+                materialRoot.gameObject.name = materialName;
+                materialRoot.SetParent(mergedRoot);
+                PBMesh materialRootPbMesh = materialRoot.GetOrAddComponent<PBMesh>();
+                CombineMeshes.Combine(duplicatedPbMeshesToBeMerged[material], materialRootPbMesh);
+                materialRootPbMesh.SetPivot(mergedRoot.position);
+            }
+            
+            unmergedRoot.gameObject.SetActive(false);
+            
+            Debug.Log($"Merged {allPbMeshesByMaterial.Values.ToList().SelectMany(pbMeshes => pbMeshes).ToList().Count} ProBuilderMeshes into {allPbMeshesByMaterial.Keys.Count}.");
         }
-        
-        unmergedRoot.gameObject.SetActive(false);
-        Object.DestroyImmediate(unmergedRootDuplicate.gameObject);
-        
-        Debug.Log($"Merged {allPbMeshesByMaterial.Values.ToList().SelectMany(pbMeshes => pbMeshes).ToList().Count} ProBuilderMeshes into {allPbMeshesByMaterial.Keys.Count}.");
+        finally {
+            Object.DestroyImmediate(duplicatesRoot.gameObject);
+        }
     }
 
     private static Dictionary<Material, List<PBMesh>> GetPBMeshesByMaterialInSelection(Transform selection, bool debugLog = false) {
