@@ -17,6 +17,9 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         public Portal upperPlatformPortal;
         public Portal lowerPlatformPortal;
         public TeleportEnter infiniteTeleporter;
+        public GlobalMagicTrigger goingNowhereText;
+        public int timesInfTeleported = 0;
+        private const int MAX_INF_TELEPORT_FOR_TEXT = 11; // How many times we can move the text before we should just turn it off
 
         void Start() {
             SubscribeToEvents();
@@ -35,6 +38,17 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
 
             pastTeleportTrigger.OnMagicTriggerStayOneTime += ConnectExits;
             pastTeleportTriggerUpper.OnMagicTriggerStayOneTime += ConnectExits;
+            
+            infiniteTeleporter.OnTeleport += MoveText;
+        }
+
+        void MoveText(Collider teleportEnter, Collider teleportExit, GameObject player) {
+            goingNowhereText.transform.position += (teleportExit.transform.position - teleportEnter.transform.position);
+            timesInfTeleported++;
+            if (timesInfTeleported >= MAX_INF_TELEPORT_FOR_TEXT) {
+                // Turn on the GlobalMagicTrigger that will disable the text when the player looks away
+                goingNowhereText.enabled = true;
+            }
         }
 
         void UnsubscribeFromEvents() {
@@ -46,6 +60,8 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
 
             pastTeleportTrigger.OnMagicTriggerStayOneTime -= ConnectExits;
             pastTeleportTriggerUpper.OnMagicTriggerStayOneTime -= ConnectExits;
+            
+            infiniteTeleporter.OnTeleport += MoveText;
         }
 
         void Update() {

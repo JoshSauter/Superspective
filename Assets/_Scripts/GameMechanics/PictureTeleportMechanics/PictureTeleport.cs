@@ -29,12 +29,25 @@ namespace PictureTeleportMechanics {
         public string bigFrameName;
 
         ViewLockObject viewLockObject;
+
         [Header("Target position/rotation is local to the BigFrame destination\n(so that it is still valid if moved around)")]
+        [OnValueChanged(nameof(SetDragNDropTransform))]
+        public Transform dragNDropCameraTransform; // Drag a desired Transform into this to set the position & rotation from it
         public Vector3 targetPosition;
         public Vector3 targetRotation;
         public Vector3 targetCameraPosition;
         public Vector3 targetCameraRotation;
         public float targetLookY = 90f;
+        
+        private void SetDragNDropTransform() {
+            Transform t = dragNDropCameraTransform;
+            if (t == null) return;
+
+            targetCameraPosition = t.localPosition;
+            targetCameraRotation = t.localRotation.eulerAngles;
+
+            dragNDropCameraTransform = null;
+        }
 
         // Change the SSAO to blend the teleport
         private ScreenSpaceAmbientOcclusion _ssao;
@@ -51,6 +64,7 @@ namespace PictureTeleportMechanics {
         
         float startSsaoIntensity;
         const float ssaoMultiplier = .75f;
+        public bool enabledSsaoBlending = true;
         public float ssaoBlendTimeRemaining = 0f;
 
         public delegate void PictureTeleportEvent();
@@ -70,11 +84,11 @@ namespace PictureTeleportMechanics {
             viewLockObject.cursorIsStationaryOnLock = true;
             viewLockObject.OnViewLockEnterBegin += () => ssaoBlendTimeRemaining = viewLockObject.viewLockTime;
             viewLockObject.OnViewLockEnterFinish += TeleportPlayer;
-            viewLockObject.interactableObject.enabledHelpText = "Look closer";
+            viewLockObject.interactableObject.enabledHelpText = "Take a closer look";
         }
 
         void Update() {
-            if (ssaoBlendTimeRemaining > 0f) {
+            if (enabledSsaoBlending && ssaoBlendTimeRemaining > 0f) {
                 UpdateSSAOBlend();
             }
 		}
@@ -100,11 +114,13 @@ namespace PictureTeleportMechanics {
             Transform player = Player.instance.transform;
             Transform camContainer = SuperspectiveScreen.instance.playerCamera.transform.parent;
 
-            player.position = bigFrameToTeleportTo.transform.TransformPoint(targetPosition);
-            player.rotation = bigFrameToTeleportTo.transform.rotation * Quaternion.Euler(targetRotation);
+            player.position = bigFrameToTeleportTo.frameRenderer.transform.TransformPoint(targetPosition);
+            player.rotation = bigFrameToTeleportTo.frameRenderer.transform.rotation * Quaternion.Euler(targetRotation);
             camContainer.localPosition = targetCameraPosition;
             camContainer.localRotation = Quaternion.Euler(targetCameraRotation);
-            ssao.m_OcclusionIntensity = startSsaoIntensity;
+            if (enabledSsaoBlending) {
+                ssao.m_OcclusionIntensity = startSsaoIntensity;
+            }
             PlayerLook.instance.rotationY = targetLookY;
             PlayerLook.instance.rotationBeforeViewLock = camContainer.rotation;
             Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;

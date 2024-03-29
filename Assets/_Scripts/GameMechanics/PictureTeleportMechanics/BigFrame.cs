@@ -13,37 +13,73 @@ namespace PictureTeleportMechanics {
 		public Renderer frameRenderer;
 		public Collider frameCollider;
 
+		public Renderer[] otherRenderers;
+		public Collider[] otherColliders;
+
 		[ReadOnly]
         public GlobalMagicTrigger disableFrameTrigger;
 
         protected override void OnValidate() {
 	        base.OnValidate();
-			if (disableFrameTrigger == null) {
-				disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
-			}
-			if (disableFrameTrigger == null) {
-				disableFrameTrigger = AddGlobalEnableTrigger();
-				disableFrameTrigger.enabled = true;
-			}
 
-			disableFrameTrigger.OnMagicTriggerStayOneTime += TurnOffFrame;
+			Initialize();
 		}
+
+		void Initialize() {
+	        if (disableFrameTrigger == null) {
+		        disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
+	        }
+	        if (disableFrameTrigger == null) {
+		        disableFrameTrigger = AddGlobalEnableTrigger();
+		        disableFrameTrigger.enabled = true;
+	        }
+	        disableFrameTrigger.OnMagicTriggerStayOneTime += TurnOffFrame;
+        }
 
         protected override void Awake() {
 	        base.Awake();
-			frameRenderer = GetComponent<Renderer>();
-			frameCollider = GetComponent<Collider>();
+	        Initialize();
+	        if (frameRenderer == null) {
+		        frameRenderer = GetComponent<Renderer>();
+	        }
+	        if (frameCollider == null) {
+		        frameCollider = GetComponent<Collider>();
+	        }
 		}
 
-		public void TurnOnFrame() {
+        public void TurnOnFrame() {
 			frameRenderer.enabled = true;
 			frameCollider.enabled = true;
+			if (otherRenderers != null) {
+				foreach (Renderer otherRenderer in otherRenderers) {
+					otherRenderer.enabled = true;
+				}
+			}
+
+			if (otherColliders != null) {
+				foreach (Collider otherCollider in otherColliders) {
+					otherCollider.enabled = true;
+				}
+			}
+			
 			disableFrameTrigger.enabled = true;
 		}
 
 		public void TurnOffFrame() {
 			frameRenderer.enabled = false;
 			frameCollider.enabled = false;
+			
+			if (otherRenderers != null) {
+				foreach (Renderer otherRenderer in otherRenderers) {
+					otherRenderer.enabled = false;
+				}
+			}
+
+			if (otherColliders != null) {
+				foreach (Collider otherCollider in otherColliders) {
+					otherCollider.enabled = false;
+				}
+			}
 		}
 
 		void OnEnable() {
@@ -61,7 +97,7 @@ namespace PictureTeleportMechanics {
 			// Add condition
 			TriggerCondition condition = new TriggerCondition {
 				triggerCondition = TriggerConditionType.RendererNotVisible,
-				targetRenderer = GetComponent<Renderer>()
+				targetRenderer = frameRenderer == null ? GetComponent<Renderer>() : frameRenderer
 			};
 			trigger.triggerConditions.Add(condition);
 

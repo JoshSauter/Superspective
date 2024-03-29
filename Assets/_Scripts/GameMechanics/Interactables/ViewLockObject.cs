@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Audio;
+using NaughtyAttributes;
 using Saving;
 using UnityEngine;
 
@@ -14,6 +16,8 @@ public struct ViewLockInfo {
 public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.ViewLockObjectSave>, AudioJobOnGameObject {
     public delegate void ViewLockEvent();
 
+    [OnValueChanged(nameof(SetDragNDropTransform))]
+    public Transform dragNDropCameraTransform; // Drag a desired Transform into this to set the position & rotation from it
     public ViewLockInfo[] viewLockOptions;
     public bool cursorIsStationaryOnLock = false;
     public float viewLockTime = 0.75f;
@@ -28,6 +32,20 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
     public ViewLockEvent OnViewLockExitBegin;
     public ViewLockEvent OnViewLockExitFinish;
     Transform playerCamera;
+    
+    private void SetDragNDropTransform() {
+        Transform t = dragNDropCameraTransform;
+        if (t == null) return;
+        
+        List<ViewLockInfo> optionList = new List<ViewLockInfo>(viewLockOptions);
+        optionList.Add(new ViewLockInfo() {
+            camPosition = t.localPosition,
+            camRotationEuler = t.localRotation.eulerAngles
+        });
+        viewLockOptions = optionList.ToArray();
+
+        dragNDropCameraTransform = null;
+    }
 
     public PlayerLook.ViewLockState state {
         get => _state;

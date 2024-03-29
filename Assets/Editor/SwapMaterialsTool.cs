@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -6,10 +7,19 @@ using UnityEngine.Serialization;
 
 namespace Editor {
     public class SwapMaterialsTool : ScriptableWizard {
-        public bool swapBothWays = false;
+        public bool swapBothWays = true;
         public bool selectInactive = true;
-        [FormerlySerializedAs("material1")] public Material material;
-        [FormerlySerializedAs("material2")] public Material swapTo;
+        private Material _defaultMaterial;
+        private Material DefaultMaterial => _defaultMaterial == null ? _defaultMaterial = Resources.Load<Material>("Materials/Unlit/Unlit") : _defaultMaterial;
+        private Material _defaultSwapTo;
+        private Material DefaultSwapTo => _defaultSwapTo == null ? _defaultSwapTo = Resources.Load<Material>("Materials/Unlit/UnlitBlack") : _defaultSwapTo;
+        public Material material;
+        public Material swapTo;
+
+        private void OnEnable() {
+            material = DefaultMaterial;
+            swapTo = DefaultSwapTo;
+        }
 
         void OnWizardCreate() {
             List<Renderer> materialSelection = new List<Renderer>();
@@ -24,7 +34,7 @@ namespace Editor {
             foreach (var material1Renderer in materialSelection) {
                 material1Renderer.sharedMaterial = swapTo;
                 // If an object is named after the material (e.g. after a merge), rename it to reflect the new material
-                if (material1Renderer.gameObject.name == material.name) {
+                if (material1Renderer.gameObject.name.Contains(material.name)) {
                     material1Renderer.gameObject.name = swapTo.name;
                 } 
             }
@@ -33,7 +43,7 @@ namespace Editor {
                 foreach (var material2Renderer in swapToSelection) {
                     material2Renderer.sharedMaterial = material;
                     // If an object is named after the material (e.g. after a merge), rename it to reflect the new material
-                    if (material2Renderer.gameObject.name == swapTo.name) {
+                    if (material2Renderer.gameObject.name.Contains(swapTo.name)) {
                         material2Renderer.gameObject.name = material.name;
                     } 
                 }

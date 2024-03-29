@@ -169,6 +169,7 @@ namespace PortalMechanics {
 		[ShowIf("DEBUG")]
 		RecursiveTextures internalRenderTexturesCopy;
 
+		public bool disableColliderWhilePaused = false;
 		public bool pauseRendering = false;
 		public bool pauseLogic = false;
 
@@ -236,6 +237,7 @@ namespace PortalMechanics {
 		public static event SimplePortalPlayerTeleportAction OnAnyPortalPlayerTeleportSimple;
 		
 		public UnityEvent onPortalTeleport;
+		public UnityEvent onOtherPortalTeleport;
 		#endregion
 
 #if UNITY_EDITOR
@@ -497,6 +499,10 @@ namespace PortalMechanics {
 		void FixedUpdate() {
 			foreach (Collider c in colliders) {
 				c.isTrigger = PortalLogicIsEnabled;
+				if (disableColliderWhilePaused) {
+					c.enabled = PortalLogicIsEnabled;
+				}
+				
 			}
 			
 			bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position, true)) < 0.99f;
@@ -987,6 +993,7 @@ namespace PortalMechanics {
 			OnPortalTeleportSimple?.Invoke(objBeingTeleported);
 			OnAnyPortalTeleportSimple?.Invoke(objBeingTeleported);
 			onPortalTeleport?.Invoke();
+			otherPortal.onOtherPortalTeleport?.Invoke();
 			
 			if (objBeingTeleported.TaggedAsPlayer()) {
 				OnAnyPortalPlayerTeleportSimple?.Invoke();
@@ -1211,7 +1218,7 @@ namespace PortalMechanics {
 			bool teleportingPlayer = false;
 
 			public bool pauseRendering = false;
-			bool pauseLogic = false;
+			public bool pauseLogic = false;
 
 			public PortalSave(Portal portal) : base(portal) {
 				this.channel = portal.channel;

@@ -14581,8 +14581,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
-  DEBUG: 1
-  startingScene: 31
+  DEBUG: 0
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -14677,13 +14677,13 @@ MonoBehaviour:
     connectedLevels: 
   - level: 30
     _displayName: A Small Space Between Worlds
-    connectedLevels: 1c0000001f00000020000000
+    connectedLevels: 1c0000001f000000
   - level: 31
     _displayName: 
-    connectedLevels: 1c0000001e00000020000000
+    connectedLevels: 1c0000001e000000
   - level: 32
     _displayName: 
-    connectedLevels: 1c0000001e0000001f0000001400000019000000
+    connectedLevels: 1c0000001f0000001400000019000000
   - level: 33
     _displayName: At the Edge of a Universe
     connectedLevels: 20000000
@@ -15161,6 +15161,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -15196,6 +15197,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -17126,7 +17128,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 41.75
+  m_fontSize: 41.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21288,7 +21290,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 59.5
+  m_fontSize: 58.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -22137,9 +22139,6 @@ MonoBehaviour:
   _id: {fileID: 0}
   DEBUG: 0
   noClipOn: 0
-  slowMoveSpeed: 10
-  moveSpeed: 30
-  sprintSpeed: 75
   middleMouseVerticalSpeed: 10
 --- !u!114 &623971848
 MonoBehaviour:
@@ -22171,8 +22170,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 792.0126, y: 63.323303, z: -50.883877}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: -396.5, z: 35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22182,7 +22181,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22196,9 +22195,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 1
-  layerMask:
-    serializedVersion: 2
-    m_Bits: 671006515
   reticle: {fileID: 1024018085}
   reticleOutside: {fileID: 1127265934}
   interactionDistance: 6.5
@@ -28074,7 +28070,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh780840
+  m_Name: pb_Mesh7974544
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30888,6 +30884,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -30923,6 +30920,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -30958,6 +30956,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -54120,6 +54119,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -54155,6 +54155,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -54687,7 +54688,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.5
+  m_fontSize: 29.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -56380,7 +56381,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 

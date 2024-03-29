@@ -57,6 +57,7 @@ namespace MagicTriggerMechanics {
 		public DimensionObject[] dimensionObjects;
 		public VisibilityState visibilityState;
 		public Levels flythroughCameraLevel;
+		public bool logicAndRendering = false;
 		public SerializableReference[] portalsToEnable;
 		public SerializableReference[] portalsToDisable;
 		public UnityEvent unityEvent;
@@ -196,11 +197,17 @@ namespace MagicTriggerMechanics {
 					saveableObject => {
 						if (saveableObject is Portal loadedPortal) {
 							loadedPortal.pauseRendering = pauseRendering;
+							if (logicAndRendering) {
+								loadedPortal.pauseLogic = pauseRendering;
+							}
 						}
 					},
 					serializedSaveObject => {
 						if (serializedSaveObject is Portal.PortalSave unloadedPortal) {
 							unloadedPortal.pauseRendering = pauseRendering;
+							if (logicAndRendering) {
+								unloadedPortal.pauseLogic = pauseRendering;
+							}
 						}
 					}
 				);
@@ -248,11 +255,12 @@ namespace MagicTriggerMechanics {
 
 			SerializedProperty flythroughCameraLevel = property.FindPropertyRelative("flythroughCameraLevel");
 
+			SerializedProperty logicAndRendering = property.FindPropertyRelative("logicAndRendering");
 			SerializedProperty portalsToEnable = property.FindPropertyRelative("portalsToEnable");
 			SerializedProperty portalsToDisable = property.FindPropertyRelative("portalsToDisable");
-
-			SerializedProperty unityEvent = property.FindPropertyRelative("unityEvent");
 			
+			SerializedProperty unityEvent = property.FindPropertyRelative("unityEvent");
+
 			SerializedProperty collidersToEnable = property.FindPropertyRelative("collidersToEnable");
 			SerializedProperty collidersToDisable = property.FindPropertyRelative("collidersToDisable");
 
@@ -268,6 +276,7 @@ namespace MagicTriggerMechanics {
 			GUIContent dimensionObjectsLabel = new GUIContent("Dimension Objects:");
 			GUIContent visibilityStateLabel = new GUIContent("Visibility State:");
 			GUIContent flythroughCameraLabel = new GUIContent("Flythrough Camera Level:");
+			GUIContent logicAndRenderingLabel = new GUIContent("Logic and Rendering?");
 			GUIContent portalsToEnableLabel = new GUIContent("Portals to Enable Rendering:");
 			GUIContent portalsToDisableLabel = new GUIContent("Portals to Disable Rendering:");
 			GUIContent unityEventLabel = new GUIContent("Unity events:");
@@ -315,6 +324,7 @@ namespace MagicTriggerMechanics {
 					EditorGUILayout.PropertyField(flythroughCameraLevel, flythroughCameraLabel);
 					break;
 				case TriggerActionType.EnablePortalRendering:
+					EditorGUILayout.PropertyField(logicAndRendering, logicAndRenderingLabel);
 					EditorGUILayout.PropertyField(portalsToEnable, portalsToEnableLabel);
 					EditorGUILayout.PropertyField(portalsToDisable, portalsToDisableLabel);
 					break;

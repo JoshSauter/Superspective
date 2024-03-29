@@ -15,6 +15,7 @@ public static class SuperspectivePhysics {
 	private static int _invisibleLayer = -1;
 	private static int _collideWithPlayerOnlyLayer = -1;
 	private static int _cullEverythingLayer = -1;
+	private static int _visibilityMaskLayer = -1;
 
 	private static int LazyLayer(ref int layer, string layerName) {
 		return layer < 0 ? layer = LayerMask.NameToLayer(layerName) : layer;
@@ -24,10 +25,12 @@ public static class SuperspectivePhysics {
 	public static int InvisibleLayer => LazyLayer(ref _invisibleLayer,"Invisible");
 	public static int CollideWithPlayerOnlyLayer => LazyLayer(ref _collideWithPlayerOnlyLayer, "CollideWithPlayerOnly");
 	public static int CullEverythingLayer => LazyLayer(ref _cullEverythingLayer, "CullEverythingLayer");
+	public static int VisibilityMaskLayer => LazyLayer(ref _visibilityMaskLayer, "VisibilityMask");
 	public static int PhysicsRaycastLayerMask =>
 		~((1 << IgnoreRaycastLayer) |
 		  (1 << PlayerLayer) |
 		  (1 << InvisibleLayer) |
+		  (1 << VisibilityMaskLayer) |
 		  (1 << CollideWithPlayerOnlyLayer));
 
 	public readonly struct ColliderPair : IEquatable<ColliderPair> {

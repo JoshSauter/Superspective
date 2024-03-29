@@ -12,7 +12,8 @@ public class Interact : Singleton<Interact> {
     // For debug GUI
     string nameOfFirstObjectHit = "";
     readonly GUIStyle style = new GUIStyle();
-    public LayerMask layerMask;
+    [NonSerialized]
+    private LayerMask layerMask;
     public Image reticle;
     public Image reticleOutside;
     public float interactionDistance = defaultInteractionDistance;
@@ -40,6 +41,7 @@ public class Interact : Singleton<Interact> {
 
     // Use this for initialization
     void Start() {
+        layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
         debug = new DebugLogger(this, () => DEBUG);
         if (reticle == null) {
             Debug.LogError("Reticle not set in Interact script, disabling script");

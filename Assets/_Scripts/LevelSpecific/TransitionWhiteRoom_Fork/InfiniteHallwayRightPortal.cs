@@ -19,6 +19,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         bool playerIsInInfiniteHallway = false;
         public bool hasBeenSolved = false;
         public AnimationCurve wallsShiftingCameraShakeAnimCurve;
+        public GlobalMagicTrigger inCirclesText;
 
         private void Awake() {
             lowerPlatformPortal.pauseRendering = !exitsAreConnected;
@@ -85,6 +86,8 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
             if (!exitsAreConnected && !hasBeenSolved) {
                 CameraShake.instance.Shake(1.5f, 3f, wallsShiftingCameraShakeAnimCurve);
                 AudioManager.instance.PlayAtLocation(AudioName.WallsShifting, "InfiniteHallwayRight", teleportFacingForward.transform.position);
+                inCirclesText.gameObject.SetActive(true);
+                inCirclesText.enabled = true;
             }
             exitsAreConnected = true;
         }

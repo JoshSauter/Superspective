@@ -26,7 +26,10 @@ namespace MagicTriggerMechanics {
 		protected override void AddBetterTriggers() { /* No colliders to modify for global triggers */ }
 
         void Update() {
-            if (!IsActive()) return;
+	        if (!IsActive()) {
+		        debug.Log("IsActive is false");
+		        return;
+	        }
 			GameObject player = Player.instance.gameObject;
 			if (DEBUG) {
 				PrintDebugInfo(player);
