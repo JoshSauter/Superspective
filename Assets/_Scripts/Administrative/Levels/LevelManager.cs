@@ -297,6 +297,7 @@ namespace LevelManagement {
 		/// </summary>
 		public delegate void ActiveSceneChange();
 
+		// Called at the very end of the scene change process, after active scene has already changed
 		public event ActiveSceneChange OnActiveSceneChange;
 
 		public delegate void ActiveSceneWillChange(string nextSceneName);
@@ -351,24 +352,25 @@ namespace LevelManagement {
 #if !UNITY_EDITOR
 			if (!initialized) {
 				if (GameManager.firstLaunch && Settings.Autoload.AutoloadEnabled.value) {
-					List<SaveMetadataWithScreenshot> metadata = SaveFileUtils.ReadAllSavedMetadata().ToList();
-					SaveMetadataWithScreenshot mostRecentlyLoadedSave = metadata.Find(m => m.metadata.lastLoadedTimestamp == metadata.Max(m => m.metadata.lastLoadedTimestamp));
+					SaveFileUtils.ReadAllSavedMetadataWithScreenshot((metadata) => {
+						SaveMetadataWithScreenshot mostRecentlyLoadedSave = metadata.Find(m => m.metadata.lastLoadedTimestamp == metadata.Max(m => m.metadata.lastLoadedTimestamp));
 			
-					DateTime now = DateTime.Now;
-					DateTime lastSaveDateTime = mostRecentlyLoadedSave == null ? now : new DateTime(mostRecentlyLoadedSave.metadata.saveTimestamp);
-					int autoloadDaysThreshold = (int)Settings.Autoload.AutoloadThreshold.dropdownSelection.selection.Datum;
-					if (autoloadDaysThreshold == -1) autoloadDaysThreshold = int.MaxValue; // -1 is a flag for "infinity"
-					bool lastSaveWasRecent = (now - lastSaveDateTime).Days < autoloadDaysThreshold;
+						DateTime now = DateTime.Now;
+						DateTime lastSaveDateTime = mostRecentlyLoadedSave == null ? now : new DateTime(mostRecentlyLoadedSave.metadata.saveTimestamp);
+						int autoloadDaysThreshold = (int)Settings.Autoload.AutoloadThreshold.dropdownSelection.selection.Datum;
+						if (autoloadDaysThreshold == -1) autoloadDaysThreshold = int.MaxValue; // -1 is a flag for "infinity"
+						bool lastSaveWasRecent = (now - lastSaveDateTime).Days < autoloadDaysThreshold;
 
-					if (mostRecentlyLoadedSave != null && lastSaveWasRecent) {
-						// Don't loop this logic forever just do it once
-						initialized = true;
-						SaveManager.Load(mostRecentlyLoadedSave);
-					}
-					else {
-						SwitchActiveScene(startingScene, true, false, false, false);
-						initialized = true;
-					}
+						if (mostRecentlyLoadedSave != null && lastSaveWasRecent) {
+							// Don't loop this logic forever just do it once
+							initialized = true;
+							SaveManager.Load(mostRecentlyLoadedSave);
+						}
+						else {
+							SwitchActiveScene(startingScene, true, false, false, false);
+							initialized = true;
+						}
+					});
 				}
 				else {
 					SwitchActiveScene(startingScene, true, false, false, false);

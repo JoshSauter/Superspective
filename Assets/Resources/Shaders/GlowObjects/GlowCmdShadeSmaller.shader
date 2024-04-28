@@ -27,7 +27,7 @@
 			v2f vert (appdata v)
 			{
 				v2f o;
-				o.vertex = UnityObjectToClipPos(v.vertex - v.normal * .005);//* sign(v.vertex));
+				o.vertex = UnityObjectToClipPos(v.vertex);//* sign(v.vertex));
 				return o;
 			}
 			

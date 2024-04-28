@@ -9,6 +9,7 @@ using Saving;
 using PoweredObjects;
 using StateUtils;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using static Audio.AudioManager;
 
 namespace PowerTrailMechanics {
@@ -53,15 +54,17 @@ namespace PowerTrailMechanics {
 		int[] endNodeIndex;
 		int[] startNodeIndex;
 		float[] interpolationValues;    // [0-1] interpolation value between startPosition and endPosition for each trail. Only GPU data that changes at runtime
-		public bool reverseVisibility = false;
-		const string nodePositionsKey = "_NodePositions";
-		const string startPositionIDsKey = "_StartPositionIDs";
-		const string endPositionIDsKey = "_EndPositionIDs";
-		const string interpolationValuesKey = "_InterpolationValues";
-		const string sdfCapsuleRadiusKey = "_CapsuleRadius";
-		const string hiddenPowerTrailKey = "_HiddenPowerTrail";
-		const string reverseVisibilityKey = "_ReverseVisibility";
-		const string powerTrailKeyword = "POWER_TRAIL_OBJECT";
+		[FormerlySerializedAs("reverseVisibility")]
+		public bool reverseDirection = false;
+		const string NODE_POSITIONS_KEY = "_NodePositions";
+		const string START_POSITION_IDS_KEY = "_StartPositionIDs";
+		const string END_POSITION_IDS_KEY = "_EndPositionIDs";
+		const string INTERPOLATION_VALUES_KEY = "_InterpolationValues";
+		const string SDF_CAPSULE_RADIUS_KEY = "_CapsuleRadius";
+		const string HIDDEN_POWER_TRAIL_KEY = "_HiddenPowerTrail";
+		const string USE_CYLINDER_KEY = "_UseCylinder";
+		const string REVERSE_VISIBILITY_KEY = "_ReverseVisibility";
+		const string POWER_TRAIL_KEYWORD = "POWER_TRAIL_OBJECT";
 
 		public bool useDurationInsteadOfSpeed = false;
 		public bool useSeparateSpeedsForPowerOnOff = false;
@@ -79,8 +82,27 @@ namespace PowerTrailMechanics {
 		public bool skipStartupShutdownSounds = false;
 		public bool objectMoves = false;
 		public bool hiddenPowerTrail = false;
+		[Header("Cylinders can look better for straight-line segments, but worse on staircases or other complex paths")]
+		public bool useCylinderInsteadOfCapsule = false;
 		[ShowIf(nameof(hiddenPowerTrail))]
 		public bool revealAfterPowering = false;
+
+		private bool _pauseRendering = false;
+		public bool PauseRendering {
+			get => _pauseRendering;
+			set {
+				foreach (var material in materials) {
+					if (!material.IsKeywordEnabled(POWER_TRAIL_KEYWORD) && !value) {
+						material.EnableKeyword(POWER_TRAIL_KEYWORD);
+					}
+					else if (material.IsKeywordEnabled(POWER_TRAIL_KEYWORD) && value) {
+						material.DisableKeyword(POWER_TRAIL_KEYWORD);
+					}
+				}
+
+				_pauseRendering = value;
+			}
+		}
 
 		///////////
 		// State //
@@ -123,6 +145,10 @@ namespace PowerTrailMechanics {
 			}
 
 			thisDimensionObject = gameObject.FindDimensionObjectRecursively<DimensionObject>();
+			
+			if (renderers == null || renderers.Length == 0) {
+				renderers = GetComponents<Renderer>();
+			}
 		}
 
 		protected override void Start() {
@@ -131,9 +157,6 @@ namespace PowerTrailMechanics {
 				Debug.LogError($"{this.FullPath()}: pwr is null. Disabling PowerTrail");
 				enabled = false;
 				return;
-			}
-			if (renderers == null || renderers.Length == 0) {
-				renderers = GetComponents<Renderer>();
 			}
 			if (colliders == null || colliders.Length == 0) {
 				colliders = renderers.Select(r => r.GetComponent<Collider>()).Where(c => c != null).ToArray();
@@ -234,16 +257,16 @@ namespace PowerTrailMechanics {
 			if (nextDistance == prevDistance && isInitialized) return;
 			isInitialized = true;
 
-			if (hiddenPowerTrail && pwr.PowerIsOn && gameObject.layer != LayerMask.NameToLayer("VisibleButNoPlayerCollision")) {
+			if (hiddenPowerTrail && pwr.PowerIsOn && gameObject.layer != SuperspectivePhysics.VisibleButNoPlayerCollisionLayer) {
 				foreach (var renderer in renderers) {
-					renderer.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+					renderer.gameObject.layer = SuperspectivePhysics.VisibleButNoPlayerCollisionLayer;
 				}
 			}
 
 			if (hiddenPowerTrail && revealAfterPowering && IsFullyPowered) {
 				hiddenPowerTrail = false;
 				foreach (var material in materials) {
-					material.SetInt(hiddenPowerTrailKey, 0);
+					material.SetInt(HIDDEN_POWER_TRAIL_KEY, 0);
 				}
 			}
 
@@ -273,10 +296,11 @@ namespace PowerTrailMechanics {
 			}
 
 			foreach (var material in materials) {
-				material.SetFloatArray(startPositionIDsKey, startNodeIndex.Select(i => (float)i).ToArray());
-				material.SetFloatArray(endPositionIDsKey, endNodeIndex.Select(i => (float)i).ToArray());
-				material.SetFloat(sdfCapsuleRadiusKey, powerTrailRadius);
-				material.SetInt(hiddenPowerTrailKey, hiddenPowerTrail ? 1 : 0);
+				material.SetFloatArray(START_POSITION_IDS_KEY, startNodeIndex.Select(i => (float)i).ToArray());
+				material.SetFloatArray(END_POSITION_IDS_KEY, endNodeIndex.Select(i => (float)i).ToArray());
+				material.SetFloat(SDF_CAPSULE_RADIUS_KEY, powerTrailRadius);
+				material.SetInt(HIDDEN_POWER_TRAIL_KEY, hiddenPowerTrail ? 1 : 0);
+				material.SetInt(USE_CYLINDER_KEY, useCylinderInsteadOfCapsule ? 1 : 0);
 			}
 		}
 
@@ -288,7 +312,7 @@ namespace PowerTrailMechanics {
 				nodePositions[i] = transform.TransformPoint(nodeAtIndex.pos);
 			}
 			foreach (var material in materials) {
-				material.SetVectorArray(nodePositionsKey, nodePositions);
+				material.SetVectorArray(NODE_POSITIONS_KEY, nodePositions);
 			}
 		}
 
@@ -394,7 +418,7 @@ namespace PowerTrailMechanics {
 		}
 
 		void UpdateInterpolationValues(float newDistance) {
-			if (reverseVisibility) {
+			if (reverseDirection) {
 				newDistance = maxDistance - newDistance;
 			}
 			for (int i = 0; i < MAX_NODES && i < trailInfo.Count; i++) {
@@ -402,13 +426,16 @@ namespace PowerTrailMechanics {
 				interpolationValues[i] = Mathf.Clamp01(Mathf.InverseLerp(infoAtIndex.startDistance, infoAtIndex.endDistance, newDistance));
 			}
 			foreach (var material in materials) {
-				material.SetInt(reverseVisibilityKey, reverseVisibility ? 1 : 0);
-				material.SetFloatArray(interpolationValuesKey, interpolationValues);
-				if (!material.IsKeywordEnabled(powerTrailKeyword) && !IsFullyPowered) {
-					material.EnableKeyword(powerTrailKeyword);
+				material.SetInt(REVERSE_VISIBILITY_KEY, reverseDirection ? 1 : 0);
+				material.SetFloatArray(INTERPOLATION_VALUES_KEY, interpolationValues);
+				if (PauseRendering) {
+					material.DisableKeyword(POWER_TRAIL_KEYWORD);
 				}
-				else if (material.IsKeywordEnabled(powerTrailKeyword) && IsFullyPowered) {
-					material.DisableKeyword(powerTrailKeyword);
+				else if (!material.IsKeywordEnabled(POWER_TRAIL_KEYWORD) && !IsFullyPowered) {
+					material.EnableKeyword(POWER_TRAIL_KEYWORD);
+				}
+				else if (material.IsKeywordEnabled(POWER_TRAIL_KEYWORD) && IsFullyPowered) {
+					material.DisableKeyword(POWER_TRAIL_KEYWORD);
 				}
 			}
 		}
@@ -452,24 +479,22 @@ namespace PowerTrailMechanics {
 			}
 
 			const float maxSoundDistance = 30f;
-			List<Tuple<NodeTrailInfo, Vector3, float>> simplePathSegmentsByDistance = simplePath.Select(NearestPointOnSegment)
+			List<(NodeTrailInfo, Vector3, float)> simplePathSegmentsByDistance = simplePath.Select(NearestPointOnSegment)
 				.Where(tuple => tuple.Item3 < maxSoundDistance) // Filter out segments where closest point is too far
 				.OrderBy(tuple => tuple.Item3) // Order by how close a segment is to player cam
 				.Take(numAudioSources) // get numAudioSources closest segments
 				.ToList();
 			// If this audio source is already being used in an audio segment
 			if (audioSegments.ContainsValue(audioJob.uniqueIdentifier)) {
-				Tuple<NodeTrailInfo, Vector3, float> audioSegment = simplePathSegmentsByDistance.Find(tuple =>
+				(NodeTrailInfo nodeTrailInfo, Vector3 closestPoint, float distanceToCam) = simplePathSegmentsByDistance.Find(tuple =>
 					tuple.Item1 == audioSegments[audioJob.uniqueIdentifier]);
 				// If that segment is one of the closest segments, keep it along the same segment
-				if (audioSegment != null) {
+				if (nodeTrailInfo != null) {
 					if (!audioJob.audio.isPlaying) {
 						audioJob.Play();
 					}
 					
-					Vector3 audioPos = audioSegment.Item2;
-					float distanceToCam = audioSegment.Item3;
-					audioJob.audio.transform.position = audioPos;
+					audioJob.audio.transform.position = closestPoint;
 					audioJob.audio.volume = distance / maxDistance * (1-(distanceToCam / maxSoundDistance));
 					audioJob.basePitch = 0.25f + 0.25f * (distance / maxDistance);
 				}
@@ -484,14 +509,12 @@ namespace PowerTrailMechanics {
 				// This audio source is free to be moved to a new segment
 				if (simplePathSegmentsByDistance.Count > 0) {
 					// Find the closest segment that doesn't already have an audio source and use that
-					Tuple<NodeTrailInfo, Vector3, float> desiredAudioSegment = simplePathSegmentsByDistance.Find(
+					(NodeTrailInfo nodeTrailInfo, Vector3 closestPoint, float distanceToCam) = simplePathSegmentsByDistance.Find(
 						tuple => !audioSegments.ContainsKey(tuple.Item1));
-					if (desiredAudioSegment != null) {
-						audioSegments.Add(desiredAudioSegment.Item1, audioJob.uniqueIdentifier);
+					if (nodeTrailInfo != null) {
+						audioSegments.Add(nodeTrailInfo, audioJob.uniqueIdentifier);
 
-						Vector3 audioPos = desiredAudioSegment.Item2;
-						float distanceToCam = desiredAudioSegment.Item3;
-						audioJob.audio.transform.position = audioPos;
+						audioJob.audio.transform.position = closestPoint;
 						audioJob.audio.volume = distance / maxDistance * (1 - (distanceToCam / maxSoundDistance));
 						audioJob.basePitch = 0.25f + 0.25f * (distance / maxDistance);
 					}
@@ -501,8 +524,8 @@ namespace PowerTrailMechanics {
 				}
 			}
 
-			// <Segment, ClosestPoint, Distance from player cam to closest point>
-			Tuple<NodeTrailInfo, Vector3, float> NearestPointOnSegment(NodeTrailInfo segment) {
+			// (Segment, ClosestPoint, Distance from player cam to closest point)
+			(NodeTrailInfo, Vector3, float) NearestPointOnSegment(NodeTrailInfo segment) {
 				Vector3 cameraPos = SuperspectiveScreen.instance.playerCamera.transform.position;
 				
 				Vector3 start = transform.TransformPoint(segment.parent.pos);
@@ -523,7 +546,7 @@ namespace PowerTrailMechanics {
 				
 				float distanceToCam = (cameraPos - closestPoint).magnitude;
 
-				return new Tuple<NodeTrailInfo, Vector3, float>(segment, closestPoint, distanceToCam);
+				return (segment, closestPoint, distanceToCam);
 			}
 		}
 
@@ -557,7 +580,7 @@ namespace PowerTrailMechanics {
 			public float maxDistance;
 
 			public PowerTrailSave(PowerTrail powerTrail) : base(powerTrail) {
-				this.reverseVisibility = powerTrail.reverseVisibility;
+				this.reverseVisibility = powerTrail.reverseDirection;
 				this.useDurationInsteadOfSpeed = powerTrail.useDurationInsteadOfSpeed;
 				this.useSeparateSpeedsForPowerOnOff = powerTrail.useSeparateSpeedsForPowerOnOff;
 				this.targetDuration = powerTrail.targetDuration;
@@ -570,7 +593,7 @@ namespace PowerTrailMechanics {
 			}
 
 			public override void LoadSave(PowerTrail powerTrail) {
-				powerTrail.reverseVisibility = this.reverseVisibility;
+				powerTrail.reverseDirection = this.reverseVisibility;
 				powerTrail.useDurationInsteadOfSpeed = this.useDurationInsteadOfSpeed;
 				powerTrail.useSeparateSpeedsForPowerOnOff = this.useSeparateSpeedsForPowerOnOff;
 				powerTrail.targetDuration = this.targetDuration;

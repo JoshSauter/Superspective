@@ -9,6 +9,8 @@ struct MenuFadeAnimation : IAnimation {
     public float targetZ;
         
     public void Update(float percentDone) {
+        if (menuToAnimate == null) return;
+
         float t = Easing.EaseInOut(percentDone);
         float alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
         menuToAnimate.Tint = menuToAnimate.Tint.WithAlpha(alpha);

@@ -89,9 +89,7 @@ namespace PortalMechanics {
 		public List<RenderTexture> portalMaskTextures = new List<RenderTexture>();
 
 		Shader depthNormalsReplacementShader;
-		private Shader visibilityMaskReplacementShader;
 		const string depthNormalsReplacementTag = "RenderType";
-		const string visibilityMaskReplacementTag = "RenderType";
 
 		static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
@@ -103,7 +101,6 @@ namespace PortalMechanics {
 			portalCameraEdgeDetection = GetComponent<BladeEdgeDetection>();
 
 			depthNormalsReplacementShader = Shader.Find("Custom/CustomDepthNormalsTexture");
-			visibilityMaskReplacementShader = Shader.Find("Hidden/VisibilityMask");
 
 			SuperspectiveScreen.instance.OnPlayerCamPreRender += RenderPortals;
 			SuperspectiveScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();

@@ -10,6 +10,8 @@ using SuperspectiveUtils;
 using LevelManagement;
 using Library.Functional;
 using Newtonsoft.Json;
+using Unity.Collections;
+using Unity.Jobs;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 using UnityEditor;
@@ -45,10 +47,10 @@ namespace Saving {
 
         private static string SettingsFilePath => $"{Application.persistentDataPath}/settings.ini";
 
-        public static void Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
+        public static JobHandle Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
             Debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
             BeforeSave?.Invoke();
-            SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
+            return SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
         }
 
         public static async void Load(SaveMetadataWithScreenshot saveMetadata) {

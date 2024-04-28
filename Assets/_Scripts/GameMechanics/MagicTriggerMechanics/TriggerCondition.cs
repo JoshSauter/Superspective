@@ -61,17 +61,17 @@ namespace MagicTriggerMechanics {
 					return insideTargetObject ? -1 : Vector3.Dot(cameraTransform.forward, playerToObjectVector);
 				}
 				case TriggerConditionType.PlayerFacingPosition: {
-					Vector3 positionToPlayerVector = (targetPosition - cameraTransform.position).normalized;
-					return Vector3.Dot(cameraTransform.forward, positionToPlayerVector);
+					Vector3 playerToPosition = (targetPosition - cameraTransform.position).normalized;
+					return Vector3.Dot(cameraTransform.forward, playerToPosition);
 				}
 				case TriggerConditionType.PlayerFacingAwayFromPosition: {
-					Vector3 playerToPositionVector = (cameraTransform.position - targetPosition).normalized;
-					return Vector3.Dot(cameraTransform.forward, playerToPositionVector);
+					Vector3 positionToPlayer = (cameraTransform.position - targetPosition).normalized;
+					return Vector3.Dot(cameraTransform.forward, positionToPlayer);
 				}
 				case TriggerConditionType.PlayerMovingDirection: {
 					realTargetDirection = (useLocalCoordinates) ? triggerTransform.TransformDirection(targetDirection) : targetDirection;
 					PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
-					return Vector3.Dot(playerMovement.curVelocity.normalized, realTargetDirection.normalized);
+					return Vector3.Dot(playerMovement.CurVelocity.normalized, realTargetDirection.normalized);
 				}
 				case TriggerConditionType.RendererVisible:
 					return targetRenderer.IsVisibleFrom(SuperspectiveScreen.instance.playerCamera) ? 1 : -1;

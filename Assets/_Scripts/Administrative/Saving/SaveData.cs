@@ -4,11 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using LevelManagement;
-using UnityEngine;
 
 namespace Saving {
+
     [Serializable]
-    public class SaveData {
+    public struct SaveData {
+        
         public SaveDataForScene managerScene;
         public Dictionary<string, SaveDataForScene> scenes;
         public DynamicObjectManager.DynamicObjectsSaveFile dynamicObjects;
@@ -38,19 +39,8 @@ namespace Saving {
                 return save;
             }
 
-            return null;
-        }
-
-        public SaveData WriteToDisk(string saveFileName) {
-            string saveDataFile = $"{SaveFileUtils.SaveDataPath}/{saveFileName}.save";
-            
-            BinaryFormatter bf = new BinaryFormatter();
-            Directory.CreateDirectory(SaveFileUtils.SaveDataPath);
-            FileStream file = File.Create(saveDataFile);
-            bf.Serialize(file, this);
-            file.Close();
-
-            return this;
+            return default;
         }
     }
+
 }

@@ -21,6 +21,9 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public JumpMovement jumpMovement;
     public GroundMovement groundMovement;
     public AirMovement airMovement;
+    public AFKDetectionComponent afkDetectionComponent;
+    
+    public bool PlayerIsAFK => afkDetectionComponent.state == AFKDetectionComponent.AFKState.AFK;
     
     // Inspector properties, ShowNativeProperty only works on Monobehaviour classes
     [ShowNativeProperty]
@@ -37,14 +40,14 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     public bool snapToGroundEnabled = true;
 
-    const float accelerationLerpSpeed = 15f;
-    const float airspeedControlFactor = 0.4f;
-    const float decelerationLerpSpeed = 12f;
-    const float backwardsSpeed = 1f;
-    const float _walkSpeed = 9f;
-    const float _runSpeed = 14f;
-    const float desiredMovespeedLerpSpeed = 10;
-    public const float windResistanceMultiplier = 0.4f;
+    const float ACCELERATION_LERP_SPEED = 15f;
+    const float AIRSPEED_CONTROL_FACTOR = 0.4f;
+    const float DECELERATION_LERP_SPEED = 12f;
+    const float BACKWARDS_SPEED = 1f;
+    const float WALK_SPEED = 9f;
+    const float RUN_SPEED = 14f;
+    const float DESIRED_MOVEMENT_LERP_SPEED = 10;
+    public const float WIND_RESISTANCE_MULTIPLIER = 0.4f;
 
     private bool SprintByDefault => Settings.Gameplay.SprintByDefault.value;
     public bool ToggleSprint => ((SprintBehaviorMode)Settings.Gameplay.SprintBehavior.dropdownSelection.selection.Datum) == SprintBehaviorMode.Toggle;
@@ -58,7 +61,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     readonly List<ContactPoint> allContactThisFrame = new List<ContactPoint>();
     PlayerButtonInput input;
 
-    private bool stopped =>
+    private bool Stopped =>
         PlayerLook.instance.state != PlayerLook.ViewLockState.ViewUnlocked ||
         CameraFlythrough.instance.isPlayingFlythrough ||
         !GameManager.instance.gameHasLoaded;
@@ -66,18 +69,18 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public CapsuleCollider thisCollider;
     MeshRenderer thisRenderer;
 
-    private float scale => Player.instance.Scale;
+    private float Scale => Player.instance.Scale;
 
     [ShowNativeProperty]
-    public Vector3 curVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
+    public Vector3 CurVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
 
     public float movespeedMultiplier = 1;
 
     private float movespeed;
-    protected float effectiveMovespeed => movespeed * scale;
-    public float walkSpeed => _walkSpeed * scale * movespeedMultiplier;
-    public float runSpeed => _runSpeed * scale * movespeedMultiplier;
-    public Vector3 bottomOfPlayer => transform.position - (transform.up * 2.5f * scale);
+    protected float EffectiveMovespeed => movespeed * Scale;
+    public float WalkSpeed => WALK_SPEED * Scale * movespeedMultiplier;
+    public float RunSpeed => RUN_SPEED * Scale * movespeedMultiplier;
+    public Vector3 BottomOfPlayer => transform.position - (transform.up * 2.5f * Scale);
     
     // End-game mechanics
     public enum EndGameMovement {
@@ -101,7 +104,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     public List<TimeSlice> timeSlices = new List<TimeSlice>();
 
-    public Vector3 averageVelocityRecently {
+    public Vector3 AverageVelocityRecently {
         get {
             if (timeSlices.Count == 0) return Vector3.zero;
 
@@ -121,7 +124,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     [ShowNativeProperty]
     bool StandingOnHeldObject => Grounded.StandingOnHeldObject;
 
-    bool moveDirectionHeld => Mathf.Abs(input.LeftStick.y) > 0  || Mathf.Abs(input.LeftStick.x) > 0;
+    bool MoveDirectionHeld => Mathf.Abs(input.LeftStick.y) > 0  || Mathf.Abs(input.LeftStick.x) > 0;
 
     bool Jumping => jumpMovement.jumpState == JumpMovement.JumpState.Jumping;
     bool MoveDirectionHeldRecently => moveDirectionHeldRecentlyState == MoveDirectionInputState.HeldRecently;
@@ -132,8 +135,8 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     }
     
     private StateMachine<MoveDirectionInputState> moveDirectionHeldRecentlyState;
-    private const float snapToGroundDistance = 0.5f;
-    private const float resetMoveDirectionHeldStateTime = .25f;
+    private const float SNAP_TO_GROUND_DISTANCE = 0.5f;
+    private const float RESET_MOVE_DIRECTION_HELD_STATE_TIME = .25f;
     public bool pauseSnapToGround = false; // Hack fix to turn off snapping to ground when player is in a StaircaseRotate
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
@@ -142,7 +145,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         base.Awake();
         
         moveDirectionHeldRecentlyState = this.StateMachine(MoveDirectionInputState.NotHeldRecently, true);
-        moveDirectionHeldRecentlyState.AddStateTransition(MoveDirectionInputState.HeldRecently, MoveDirectionInputState.NotHeldRecently, resetMoveDirectionHeldStateTime);
+        moveDirectionHeldRecentlyState.AddStateTransition(MoveDirectionInputState.HeldRecently, MoveDirectionInputState.NotHeldRecently, RESET_MOVE_DIRECTION_HELD_STATE_TIME);
 
         input = PlayerButtonInput.instance;
         thisRigidbody = GetComponent<Rigidbody>();
@@ -154,10 +157,12 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         jumpMovement = new JumpMovement(this);
         groundMovement = new GroundMovement(this);
         airMovement = new AirMovement(this);
+        afkDetectionComponent = new AFKDetectionComponent(this);
         components.Add(stairMovement);
         components.Add(jumpMovement);
         components.Add(groundMovement);
         components.Add(airMovement);
+        components.Add(afkDetectionComponent);
         
         components.ForEach(c => c.Init());
     }
@@ -165,7 +170,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     // Use this for initialization
     new IEnumerator Start() {
         base.Start();
-        movespeed = SprintByDefault ? runSpeed : walkSpeed;
+        movespeed = SprintByDefault ? RunSpeed : WalkSpeed;
         sprintIsToggled = SprintByDefault;
 
         thisRigidbody.isKinematic = true;
@@ -185,10 +190,10 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         Settings.Gameplay.SprintByDefault.OnValueChanged += (sprintByDefault) => {
             if (sprintByDefault) {
                 sprintIsToggled = true;
-                movespeed = runSpeed;
+                movespeed = RunSpeed;
             } else {
                 sprintIsToggled = false;
-                movespeed = walkSpeed;
+                movespeed = WalkSpeed;
             }
         };
     }
@@ -224,17 +229,17 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
             }
         }
         if (ShouldUseSprintSpeed()) {
-            movespeed = Mathf.Lerp(movespeed, runSpeed / scale, desiredMovespeedLerpSpeed * Time.deltaTime);
+            movespeed = Mathf.Lerp(movespeed, RunSpeed / Scale, DESIRED_MOVEMENT_LERP_SPEED * Time.deltaTime);
         }
         else {
-            movespeed = Mathf.Lerp(movespeed, walkSpeed / scale, desiredMovespeedLerpSpeed * Time.deltaTime);
+            movespeed = Mathf.Lerp(movespeed, WalkSpeed / Scale, DESIRED_MOVEMENT_LERP_SPEED * Time.deltaTime);
         }
     }
 
     void FixedUpdate() {
         if (!GameManager.instance.gameHasLoaded) return;
         
-        if (moveDirectionHeld) {
+        if (MoveDirectionHeld) {
             moveDirectionHeldRecentlyState.Set(MoveDirectionInputState.HeldRecently, true);
         }
         
@@ -248,14 +253,14 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         
         bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && Grounded.IsGrounded && !stairMovement.RecentlySteppedUp && !MoveDirectionHeldRecently;
 
-        thisRigidbody.isKinematic = (stopped || stairMovement.stepState != StairMovement.StepState.StepReady || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
+        thisRigidbody.isKinematic = (Stopped || stairMovement.stepState != StairMovement.StepState.StepReady || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
 
         if (timeSlices.Count >= 10) {
             timeSlices.RemoveAt(0);
         }
         timeSlices.Add(new TimeSlice(Time.time, transform.position));
 
-        if (stopped || Grounded.StandingOnHeldObject) {
+        if (Stopped || Grounded.StandingOnHeldObject) {
             allContactThisFrame.Clear();
             return;
         }
@@ -276,8 +281,8 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         );
         if (movingBackward < -0.5f) {
             float slowdownAmount = Mathf.InverseLerp(-.5f, -1, movingBackward);
-            desiredVelocity.x *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
-            desiredVelocity.z *= Mathf.Lerp(1, backwardsSpeed, slowdownAmount);
+            desiredVelocity.x *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
+            desiredVelocity.z *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
         }
 
         if (!input.LeftStickHeld && !input.JumpHeld && Grounded.Ground != null && Grounded.Ground.CompareTag("Staircase")) {
@@ -298,17 +303,17 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         Vector3 projectedVertVelocity = ProjectedVerticalVelocity();
         if (!IsGrounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0)
             thisRigidbody.AddForce(
-                transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * windResistanceMultiplier
+                transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * WIND_RESISTANCE_MULTIPLIER
             );
 
         // We don't collide with other objects while kinematic, so keep the contactThisFrame data while we remain kinematic
         CapsuleCollider capsuleCollider = thisCollider;
         Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
-        float capsuleHeight = capsuleCollider.height * scale;
-        float capsuleRadius = capsuleCollider.radius * scale;
+        float capsuleHeight = capsuleCollider.height * Scale;
+        float capsuleRadius = capsuleCollider.radius * Scale;
 
         Vector3 capsuleAxis = transform.up;
-        Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius)) - capsuleAxis.normalized * 0.01f * scale;
+        Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius)) - capsuleAxis.normalized * 0.01f * Scale;
         Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
         if (!thisRigidbody.isKinematic || !Physics.CheckCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore)) {
             allContactThisFrame.Clear();
@@ -336,9 +341,6 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         if (thisRigidbody.isKinematic) return;
         thisRigidbody.velocity = Vector3.zero;
     }
-
-#region IsGrounded characteristics
-#endregion
 
 #region events
     public delegate void PlayerMovementAction();

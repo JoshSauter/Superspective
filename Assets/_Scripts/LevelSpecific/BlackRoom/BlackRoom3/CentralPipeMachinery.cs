@@ -20,7 +20,7 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
         const int NUM_SHUTTERS = 32;
         public Transform shutter;
         // Tuple to pair inner and outer shutters to move together
-        List<Tuple<Transform, Transform>> shutters = new List<Tuple<Transform, Transform>>();
+        List<(Transform, Transform)> shutters = new List<(Transform, Transform)>();
         float[] shutterGPUBuffer = new float[NUM_SHUTTERS];
         public enum ShutterState {
             Shuttered,
@@ -59,7 +59,7 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
             Transform outerShutter = shutter.GetChild(0);
             Transform innerShutter = shutter.GetChild(1);
             for (int i = 0; i < outerShutter.childCount; i++) {
-                shutters.Add(new Tuple<Transform, Transform>(outerShutter.GetChild(i), innerShutter.GetChild(i)));
+                shutters.Add((outerShutter.GetChild(i), innerShutter.GetChild(i)));
             }
         }
 

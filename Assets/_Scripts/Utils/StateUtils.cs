@@ -386,7 +386,9 @@ namespace StateUtils {
                 try {
                     GlobalUpdate.instance.UpdateGlobal -= Update;
                 }
-                catch { }
+                catch {
+                    // Sometimes this can throw errors when we clean up due to leaving play mode, we don't really care about these errors
+                }
             }
         }
 

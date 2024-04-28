@@ -5705,7 +5705,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 368950477549591830}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -5716,6 +5716,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0

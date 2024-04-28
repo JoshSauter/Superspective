@@ -115,6 +115,7 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Video.TargetFramerate);
                 AddSettingCopy(Settings.Video.VSync);
                 AddSettingCopy(Settings.Video.AntiAliasingEnabled);
+                AddSettingCopy(Settings.Video.LetterboxingEnabled);
                 AddSettingCopy(Settings.Video.PortalDownsampleAmount);
                 AddSettingCopy(Settings.Gameplay.CameraShake);
                 break;
@@ -133,6 +134,7 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Gameplay.YSensitivity);
                 settingsItems.Add(UIStyle.NewSpacer());
                 settingsItems.Add(UIStyle.NewHeader("UI"));
+                AddSettingCopy(Settings.Video.LetterboxingEnabled);
                 AddSettingCopy(Settings.Gameplay.ShowInteractionHelp);
                 AddSettingCopy(Settings.Gameplay.ShowDisabledReason);
                 settingsItems.Add(UIStyle.NewSpacer());

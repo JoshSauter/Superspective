@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Audio;
 using PowerTrailMechanics;
 using Saving;
+using SerializableClasses;
 using StateUtils;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -11,7 +12,8 @@ using UnityEngine.Serialization;
 namespace LevelSpecific.WhiteRoom {
     [RequireComponent(typeof(UniqueId))]
     public class RaiseLowerPlatform : SaveableObject<RaiseLowerPlatform, RaiseLowerPlatformSave>, AudioJobOnGameObject {
-        public PowerTrail triggeredByPowerTrail;
+        public SerializableReference<PowerTrail, PowerTrail.PowerTrailSave> triggeredByPowerTrailRef;
+        private PowerTrail triggeredByPowerTrail => triggeredByPowerTrailRef.GetOrNull(); // Assumes the power trail is loaded
         public CubeReceptacle cubeReceptacle;
         
         public float raiseLowerSpeed = 1f;

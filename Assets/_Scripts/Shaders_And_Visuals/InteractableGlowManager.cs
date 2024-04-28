@@ -59,7 +59,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 	/// <summary>
 	/// Adds all the commands, in order, we want our command buffer to execute.
-	/// Similar to calling sequential rendering methods insde of OnRenderImage().
+	/// Similar to calling sequential rendering methods inside of OnRenderImage().
 	/// </summary>
 	int RebuildCommandBuffer() {
 		commandBuffer.Clear();

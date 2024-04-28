@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ScreenshotCompanionFramework;
 
 // ScreenshotCompanion
@@ -310,8 +311,8 @@ public class ScreenshotCompanion : MonoBehaviour
     }
 
     // create a sharp screenshot for a single Camera
-    public void CaptureRenderTexture(Camera attachedCam, int id)
-    {
+    public void CaptureRenderTexture(Camera attachedCam, int id) {
+        List<bool> camActive = list.Select(x => x.cam.activeSelf).ToList();
         for (int i = 0; i < list.Count; i++)
         {
             if (list[i].cam != null)
@@ -339,6 +340,11 @@ public class ScreenshotCompanion : MonoBehaviour
 
         System.IO.File.WriteAllBytes(fileName, bytes);
         Debug.Log("Screenshot saved to: " + fileName);
+        
+        for (int i = 0; i < list.Count; i++) {
+            if (list[i].cam != null)
+                list[i].cam.SetActive(camActive[i]);
+        }
 
         postCapture();
     }

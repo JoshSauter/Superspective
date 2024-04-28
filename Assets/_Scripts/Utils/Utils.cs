@@ -80,14 +80,7 @@ namespace SuperspectiveUtils {
     }
 
     public static class ICollectionExt {
-        public static T RandomElementFrom<T>(this ICollection<T> collection) {
-            int count = collection.Count;
-            T[] array = new T[count];
-            collection.CopyTo(array, 0);
-            return array[UnityEngine.Random.Range(0, count)];
-        }
-
-        private static readonly Dictionary<int, object> _lastSelectedElements = new Dictionary<int, object>();
+        private static readonly Dictionary<int, int> _lastSelectedIndices = new Dictionary<int, int>();
         
         /// <summary>
         /// Remembers the last randomly selected element from a collection and generates a different element
@@ -96,19 +89,46 @@ namespace SuperspectiveUtils {
         /// <typeparam name="T">Type of the element of the collection</typeparam>
         /// <returns>A different random value from a collection than what was last randomly generated</returns>
         public static T DifferentRandomElementFrom<T>(this ICollection<T> collection) {
-            T lastSelectedElement = default;
-            bool IsNotLastSelectedElement(T element) {
-                return !EqualityComparer<T>.Default.Equals(element, lastSelectedElement);
+            return collection.ElementAt(DifferentRandomIndexFrom(collection));
+        }
+        
+        public static int DifferentRandomIndexFrom<T>(this ICollection<T> collection) {
+            if (collection == null || collection.Count == 0) {
+                throw new ArgumentException("Collection is null or empty");
             }
 
-            int hash = collection.GetHashCode();
-            if (collection.Count > 1 && _lastSelectedElements.ContainsKey(hash)) {
-                lastSelectedElement = (T)_lastSelectedElements[hash];
+            int collectionHashCode = collection.GetHashCode();
+            int count = collection.Count;
+
+            // Get the last selected index for this collection
+            int newIndex;
+            if (_lastSelectedIndices.TryGetValue(collectionHashCode, out int lastIndex)) {
+                // Generate a random index different from the last one
+                newIndex = UnityEngine.Random.Range(0, count - 1);
+                // We adjusted the range to be one less than the count, so we need to increment the index if it is greater than or equal to the last selected index
+                if (newIndex >= lastIndex) {
+                    newIndex++;
+                }
+            } else {
+                // If no last index is stored for this collection, generate a random one
+                newIndex = UnityEngine.Random.Range(0, count);
             }
-            
-            T nextSelectedElement = collection.Where(IsNotLastSelectedElement).ToList().RandomElementFrom();
-            _lastSelectedElements[hash] = nextSelectedElement;
-            return nextSelectedElement;
+
+            // Update the last selected index for this collection
+            _lastSelectedIndices[collectionHashCode] = newIndex;
+            return newIndex;
+        }
+        
+        public static int RandomIndexFrom<T>(this ICollection<T> collection) {
+            return UnityEngine.Random.Range(0, collection.Count);
+        }
+        
+        public static T RandomElementFrom<T>(this ICollection<T> collection) {
+            if (collection == null || collection.Count == 0) {
+                throw new ArgumentException("Collection is null or empty");
+            }
+
+            return collection.ElementAt(RandomIndexFrom(collection));
         }
     }
 
@@ -230,6 +250,10 @@ namespace SuperspectiveUtils {
 
         public static Color WithAlpha(this Color self, float alpha) {
             return new Color(self.r, self.g, self.b, alpha);
+        }
+
+        public static float Distance(this Color a, Color b) {
+            return new Vector3(a.r - b.r, a.g - b.g, a.b - b.b).magnitude;
         }
     }
     

@@ -207,34 +207,41 @@ namespace MagicTriggerMechanics {
 					List<bool> objectsToDisableState = new List<bool>();
 					List<bool> scriptsToEnableState = new List<bool>();
 					List<bool> scriptsToDisableState = new List<bool>();
-					if (action.objectsToEnable != null) {
-						foreach (var objToEnable in action.objectsToEnable) {
-							if (objToEnable != null) {
-								objectsToEnableState.Add(objToEnable.activeSelf);
+					if (action.action is TriggerActionType.EnableDisableGameObjects or TriggerActionType.ToggleGameObjects) {
+						if (action.objectsToEnable != null) {
+							foreach (var objToEnable in action.objectsToEnable) {
+								if (objToEnable != null) {
+									objectsToEnableState.Add(objToEnable.activeSelf);
+								}
+							}
+						}
+
+						if (action.objectsToDisable != null) {
+							foreach (var objToDisable in action.objectsToDisable) {
+								if (objToDisable != null) {
+									objectsToDisableState.Add(objToDisable.activeSelf);
+								}
 							}
 						}
 					}
-					if (action.objectsToDisable != null) {
-						foreach (var objToDisable in action.objectsToDisable) {
-							if (objToDisable != null) {
-								objectsToDisableState.Add(objToDisable.activeSelf);
+					else if (action.action is TriggerActionType.EnableDisableScripts or TriggerActionType.ToggleScripts) {
+						if (action.scriptsToEnable != null) {
+							foreach (var scriptToEnable in action.scriptsToEnable) {
+								if (scriptToEnable != null) {
+									scriptsToEnableState.Add(scriptToEnable.enabled);
+								}
+							}
+						}
+
+						if (action.scriptsToDisable != null) {
+							foreach (var scriptToDisable in action.scriptsToDisable) {
+								if (scriptToDisable != null) {
+									scriptsToDisableState.Add(scriptToDisable.enabled);
+								}
 							}
 						}
 					}
-					if (action.scriptsToEnable != null) {
-						foreach (var scriptToEnable in action.scriptsToEnable) {
-							if (scriptToEnable != null) {
-								scriptsToEnableState.Add(scriptToEnable.enabled);
-							}
-						}
-					}
-					if (action.scriptsToDisable != null) {
-						foreach (var scriptToDisable in action.scriptsToDisable) {
-							if (scriptToDisable != null) {
-								scriptsToDisableState.Add(scriptToDisable.enabled);
-							}
-						}
-					}
+
 					this.gameObjectsToEnableState.Add(objectsToEnableState);
 					this.gameObjectsToDisableState.Add(objectsToDisableState);
 					this.scriptsToEnableStatePerAction.Add(scriptsToEnableState);
@@ -248,28 +255,33 @@ namespace MagicTriggerMechanics {
 				for (int i = 0; i < magicTrigger.actionsToTrigger.Count; i++) {
 					TriggerAction action = magicTrigger.actionsToTrigger[i];
 
-					if (action.objectsToEnable != null) {
-						for (int j = 0; j < action.objectsToEnable.Length; j++) {
-							if (action.objectsToEnable[j] == null) continue;
-							action.objectsToEnable[j].SetActive(this.gameObjectsToEnableState[i][j]);
+					if (action.action is TriggerActionType.EnableDisableGameObjects or TriggerActionType.ToggleGameObjects) {
+						if (action.objectsToEnable != null) {
+							for (int j = 0; j < action.objectsToEnable.Length; j++) {
+								if (action.objectsToEnable[j] == null) continue;
+								action.objectsToEnable[j].SetActive(this.gameObjectsToEnableState[i][j]);
+							}
+						}
+
+						if (action.objectsToDisable != null) {
+							for (int j = 0; j < action.objectsToDisable.Length; j++) {
+								if (action.objectsToDisable[j] == null) continue;
+								action.objectsToDisable[j].SetActive(this.gameObjectsToDisableState[i][j]);
+							}
 						}
 					}
-					if (action.objectsToDisable != null) {
-						for (int j = 0; j < action.objectsToDisable.Length; j++) {
-							if (action.objectsToDisable[j] == null) continue;
-							action.objectsToDisable[j].SetActive(this.gameObjectsToDisableState[i][j]);
+					else if (action.action is TriggerActionType.EnableDisableScripts or TriggerActionType.ToggleScripts) {
+						if (action.scriptsToEnable != null) {
+							for (int j = 0; j < action.scriptsToEnable.Length; j++) {
+								if (action.scriptsToEnable[j] == null) continue;
+								action.scriptsToEnable[j].enabled = this.scriptsToEnableStatePerAction[i][j];
+							}
 						}
-					}
-					if (action.scriptsToEnable != null) {
-						for (int j = 0; j < action.scriptsToEnable.Length; j++) {
-							if (action.scriptsToEnable[j] == null) continue;
-							action.scriptsToEnable[j].enabled = this.scriptsToEnableStatePerAction[i][j];
-						}
-					}
-					if (action.scriptsToDisable != null) {
-						for (int j = 0; j < action.scriptsToDisable.Length; j++) {
-							if (action.scriptsToDisable[j] == null) continue;
-							action.scriptsToDisable[j].enabled = this.scriptsToDisableStatePerAction[i][j];
+						if (action.scriptsToDisable != null) {
+							for (int j = 0; j < action.scriptsToDisable.Length; j++) {
+								if (action.scriptsToDisable[j] == null) continue;
+								action.scriptsToDisable[j].enabled = this.scriptsToDisableStatePerAction[i][j];
+							}
 						}
 					}
 				}

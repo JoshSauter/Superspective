@@ -21,7 +21,9 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
 
     public StateMachine<State> state;
 
-    private static float StartDelay => LevelChangeBanner.displayTime + LevelChangeBanner.fadeTime + 2f;
+    private static float StartDelay => (Letterboxing.instance.LetterboxingEnabled ? Letterboxing.LETTERBOX_APPEAR_TIME : 0) +
+                                       LevelChangeBanner.DISPLAY_TIME +
+                                       LevelChangeBanner.FADE_TIME + 2f;
 
     public TMP_Text label;
     // TODO: Handle controller prompts separately?
@@ -73,9 +75,9 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
     private bool InputIsBeingProvided => keyboardPrompts.Any(prompt => prompt.keybind.Held);
     private bool MinTimeAfterInputHasElapsed => state.timeSinceStateChanged > (alphaLerpTimeIn + minTimeAfterInputAccepted);
     private bool MaxTimeAfterInputHasElapsed => state.timeSinceStateChanged > (alphaLerpTimeIn + maxTimeAfterInputAccepted);
-    private bool CanStopDisplaying => hasProvidedInput && (MaxTimeAfterInputHasElapsed || (MinTimeAfterInputHasElapsed && !InputIsBeingProvided));
+    protected virtual bool CanStopDisplaying => hasProvidedInput && (MaxTimeAfterInputHasElapsed || (MinTimeAfterInputHasElapsed && !InputIsBeingProvided));
 
-    void Update() {
+    protected virtual void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
         
         switch (state.state) {

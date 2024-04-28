@@ -543,7 +543,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -2916,7 +2916,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -3061,7 +3061,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -8626,6 +8626,12 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!4 &227160483 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4000012850680594, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
+    type: 3}
+  m_PrefabInstance: {fileID: 1362220596}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &228048545
 GameObject:
   m_ObjectHideFlags: 0
@@ -9408,8 +9414,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4280098077
+  m_fontColor: {r: 0.11372549, g: 0.11372549, b: 0.11372549, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -9426,7 +9432,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.2
+  m_fontSize: 20.55
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -12008,7 +12014,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25.25
+  m_fontSize: 25.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -13884,7 +13890,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -14848,7 +14854,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -15167,7 +15173,7 @@ MonoBehaviour:
     unityEvent:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1208848656}
+        - m_Target: {fileID: 1208848658}
           m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
           m_MethodName: Display
           m_Mode: 1
@@ -15240,6 +15246,171 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 10, z: 36}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!43 &446283133
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: pb_Mesh41112
+  serializedVersion: 11
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 36
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 24
+    localAABB:
+      m_Center: {x: 0, y: -0.5, z: 0}
+      m_Extent: {x: 3000, y: 0.5, z: 3000}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000001000200010003000200040005000600050007000600080009000a0009000b000a000c000d000e000d000f000e00100011001200110013001200140015001600150017001600
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 24
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 24
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 40
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 1152
+    _typelessdata: 00803bc5000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803b45000080bf00803b45000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc5000080bf00803bc50000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803b450000000000803b450000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc50000000000803b45000080bf00803b450000803f000000000000000000000000000000000000803f000080bf00803b45000080bf00803b45000080bf00803bc50000803f000000000000000000000000000000000000803f000080bf00803bc5000080bf00803b450000000000803b450000803f000000000000000000000000000000000000803f000080bf00803b450000000000803b450000000000803bc50000803f000000000000000000000000000000000000803f000080bf00803bc50000000000803b45000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b45000080bf00803bc5000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc5000080bf00803b450000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b450000000000803bc50000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc50000000000803bc5000080bf00803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b45000080bf00803bc5000080bf00803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc5000080bf00803bc50000000000803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b450000000000803bc50000000000803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc50000000000803bc50000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803bc500803b4500803b450000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803b4500803b4500803bc50000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803bc500803bc500803b450000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803b4500803bc500803bc5000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803bc500803b45000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803bc500803bc5000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803b4500803b45000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803b45
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: -0.5, z: 0}
+    m_Extent: {x: 3000, y: 0.5, z: 3000}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  m_MeshMetrics[0]: 1
+  m_MeshMetrics[1]: 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &447830609
 GameObject:
   m_ObjectHideFlags: 0
@@ -16319,7 +16490,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.501
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -17128,7 +17299,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 41.25
+  m_fontSize: 39.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17476,7 +17647,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -21290,7 +21461,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 58.8
+  m_fontSize: 56.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21381,7 +21552,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 907242378}
+  m_Mesh: {fileID: 446283133}
 --- !u!33 &610806467
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -21389,7 +21560,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 610806465}
-  m_Mesh: {fileID: 907242378}
+  m_Mesh: {fileID: 446283133}
 --- !u!23 &610806468
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -21643,8 +21814,8 @@ MonoBehaviour:
     m_AreaError: 15
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
-  m_Mesh: {fileID: 907242378}
-  m_VersionIndex: 2559
+  m_Mesh: {fileID: 446283133}
+  m_VersionIndex: 2562
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -22045,6 +22216,12 @@ MonoBehaviour:
     grounded:
       framesWaitedAfterLeavingGround: 0
     lastGroundVelocity: {x: 0, y: 0, z: 0}
+  afkDetectionComponent:
+    state:
+      _state: 0
+      _prevState: 0
+      _timeSinceStateChanged: 0
+      onStateChange: []
   timeScale: 1
   snapToGroundEnabled: 1
   autoRun: 0
@@ -22171,7 +22348,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.5, z: 35}
+  m_LocalPosition: {x: 0.10573147, y: -395.21072, z: 31.94942}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -24730,7 +24907,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -26085,7 +26262,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -26967,7 +27144,7 @@ RectTransform:
   m_Children:
   - {fileID: 1304909844}
   m_Father: {fileID: 1038374369}
-  m_RootOrder: 0
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.2, y: 0.725}
   m_AnchorMax: {x: 0.8, y: 0.875}
@@ -26987,7 +27164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.7607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -27003,7 +27180,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!222 &841803767
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -27077,7 +27254,7 @@ AudioSource:
   m_Pitch: 0.5
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -27249,7 +27426,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 126
   DopplerLevel: 1
@@ -27966,7 +28143,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -28064,171 +28241,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!43 &907242378
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh7974544
-  serializedVersion: 11
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 36
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 24
-    localAABB:
-      m_Center: {x: 0, y: -0.5, z: 0}
-      m_Extent: {x: 3000, y: 0.5, z: 3000}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 000001000200010003000200040005000600050007000600080009000a0009000b000a000c000d000e000d000f000e00100011001200110013001200140015001600150017001600
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 24
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 24
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 40
-      format: 0
-      dimension: 2
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 1152
-    _typelessdata: 00803bc5000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803b45000080bf00803b45000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc5000080bf00803bc50000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803b450000000000803b450000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc50000000000803b45000080bf00803b450000803f000000000000000000000000000000000000803f000080bf00803b45000080bf00803b45000080bf00803bc50000803f000000000000000000000000000000000000803f000080bf00803bc5000080bf00803b450000000000803b450000803f000000000000000000000000000000000000803f000080bf00803b450000000000803b450000000000803bc50000803f000000000000000000000000000000000000803f000080bf00803bc50000000000803b45000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b45000080bf00803bc5000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc5000080bf00803b450000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b450000000000803bc50000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc50000000000803bc5000080bf00803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b45000080bf00803bc5000080bf00803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc5000080bf00803bc50000000000803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b450000000000803bc50000000000803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc50000000000803bc50000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803bc500803b4500803b450000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803b4500803b4500803bc50000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803bc500803bc500803b450000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803b4500803bc500803bc5000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803bc500803b45000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803bc500803bc5000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803b4500803b45000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803b45
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: 0, y: -0.5, z: 0}
-    m_Extent: {x: 3000, y: 0.5, z: 3000}
-  m_MeshUsageFlags: 0
-  m_CookingOptions: 30
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &909691396
 GameObject:
   m_ObjectHideFlags: 0
@@ -30855,7 +30867,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 978358504}
-  DEBUG: 1
+  DEBUG: 0
   triggerConditions:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -32605,7 +32617,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1038374368}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bde97680eb164824999c6226800d2377, type: 3}
   m_Name: 
@@ -32721,7 +32733,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.2
+  m_fontSize: 20.55
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -35575,7 +35587,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -36241,7 +36253,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1195260048
 RectTransform:
   m_ObjectHideFlags: 0
@@ -36280,6 +36292,7 @@ MonoBehaviour:
   DEBUG: 0
   topLetterboxBar: {fileID: 1274354492}
   bottomLetterboxBar: {fileID: 1540861680}
+  LETTERBOX_DISAPPEAR_TIME: 2.5
   state:
     _state: 0
     _prevState: 0
@@ -36363,7 +36376,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -36453,7 +36466,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1208848655}
   - component: {fileID: 1208848657}
-  - component: {fileID: 1208848656}
+  - component: {fileID: 1208848658}
   m_Layer: 5
   m_Name: Interact
   m_TagString: Untagged
@@ -36483,28 +36496,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1208848656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208848654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 658c4254e644b214c9714935b086d550, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _id: {fileID: 1208848657}
-  DEBUG: 0
-  state:
-    _state: 1
-    _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
-  label: {fileID: 522338435}
-  keyboardPrompts:
-  - {fileID: 2117937477}
 --- !u!114 &1208848657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36518,6 +36509,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: 9562c0a0-ac19-407c-add2-9f4e27abc958
+--- !u!114 &1208848658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208848654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9986c059ada1ec447893ba4f408b51fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: {fileID: 1208848657}
+  DEBUG: 0
+  state:
+    _state: 1
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  label: {fileID: 522338435}
+  keyboardPrompts:
+  - {fileID: 2117937477}
+  cubeToBePickedUp:
+    referencedObjId: PickupObject_6ef56823-88d6-4c94-a62b-b60f138f9040
 --- !u!1 &1217615880
 GameObject:
   m_ObjectHideFlags: 0
@@ -37279,7 +37294,7 @@ RectTransform:
   m_Children:
   - {fileID: 344949586}
   m_Father: {fileID: 1038374369}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.2, y: 0.725}
   m_AnchorMax: {x: 0.8, y: 0.875}
@@ -37299,7 +37314,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.7607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -37315,7 +37330,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!222 &1232568249
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -37646,7 +37661,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!222 &1265665702
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -38240,7 +38255,7 @@ AudioSource:
   m_Pitch: 0.45
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -39353,8 +39368,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4280098077
-  m_fontColor: {r: 0.11320752, g: 0.11320752, b: 0.11320752, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -39371,7 +39386,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25.25
+  m_fontSize: 25.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -40224,7 +40239,7 @@ AudioSource:
   m_Pitch: 0.5
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -40369,7 +40384,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0
@@ -40514,7 +40529,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0
@@ -40679,7 +40694,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.85
+  m_fontSize: 20.55
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -40794,7 +40809,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -41411,6 +41426,11 @@ PrefabInstance:
       objectReference: {fileID: 1809741064}
     - target: {fileID: 114000010742529126, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
         type: 3}
+      propertyPath: list.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000010742529126, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
+        type: 3}
       propertyPath: settings.includeDate
       value: 1
       objectReference: {fileID: 0}
@@ -41419,6 +41439,11 @@ PrefabInstance:
       propertyPath: list.Array.data[0].cam
       value: 
       objectReference: {fileID: 1809741056}
+    - target: {fileID: 114000010742529126, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
+        type: 3}
+      propertyPath: list.Array.data[1].cam
+      value: 
+      objectReference: {fileID: 1827351812}
     - target: {fileID: 114000010742529126, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
         type: 3}
       propertyPath: settings.captureMethod
@@ -41466,7 +41491,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4000012850680594, guid: 3e8cdb2d9a3264041936d8a30d8be2af,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827351813}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e8cdb2d9a3264041936d8a30d8be2af, type: 3}
 --- !u!1 &1362336984
@@ -42187,7 +42216,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -42332,7 +42361,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -43032,7 +43061,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.5
@@ -44161,7 +44190,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.5
@@ -44306,7 +44335,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 1
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -44469,7 +44498,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -44779,7 +44808,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -48939,7 +48968,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.54901963}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.7607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -48955,7 +48984,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!222 &1593681516
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -50015,7 +50044,7 @@ AudioSource:
   m_Pitch: 0.9
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -51241,7 +51270,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -52196,7 +52225,7 @@ RectTransform:
   m_Children:
   - {fileID: 232894754}
   m_Father: {fileID: 1038374369}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.2, y: 0.725}
   m_AnchorMax: {x: 0.8, y: 0.875}
@@ -52216,7 +52245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.54901963}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.7607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -52232,7 +52261,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!222 &1659195839
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -52987,7 +53016,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -53132,7 +53161,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
@@ -53369,7 +53398,7 @@ AudioSource:
   m_Pitch: 2
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -54090,7 +54119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 1734990132}
-  DEBUG: 1
+  DEBUG: 0
   triggerConditions:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -54688,7 +54717,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.15
+  m_fontSize: 27.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -55107,7 +55136,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -55907,7 +55936,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -56381,14 +56410,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57060,6 +57089,89 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812564557}
   m_CullTransparentMesh: 0
+--- !u!1 &1827351812
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1827351813}
+  - component: {fileID: 1827351815}
+  m_Layer: 0
+  m_Name: Camera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1827351813
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827351812}
+  m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
+  m_LocalPosition: {x: 881.5, y: 58.84375, z: -51}
+  m_LocalScale: {x: 1, y: 0.707107, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 227160483}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
+--- !u!20 &1827351815
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827351812}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 1
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
 --- !u!1 &1830144478
 GameObject:
   m_ObjectHideFlags: 0
@@ -59555,7 +59667,7 @@ AudioSource:
   m_Pitch: 1.1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0.125
@@ -59930,7 +60042,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -63231,7 +63343,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 125
   DopplerLevel: 1
@@ -66306,7 +66418,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 126
   DopplerLevel: 1
@@ -66451,7 +66563,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
-  Spatialize: 0
+  Spatialize: 1
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1

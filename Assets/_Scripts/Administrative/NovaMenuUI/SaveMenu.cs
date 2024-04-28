@@ -172,7 +172,7 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
 
     private void PopulatePlayerSaves() {
         playerSaves.Clear();
-        playerSaves.AddRange(SaveFileUtils.playerSaveMetadataCache.Values
+        playerSaves.AddRange(SaveFileUtils.playerSaveScreenshotCache.Values
             .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
             .OrderByDescending(m => m.metadata.saveTimestamp)
             .Select(Option<SaveMetadataWithScreenshot>.Of));
@@ -180,7 +180,7 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     
     private void PopulateAllSaves() {
         allSaves.Clear();
-        allSaves.AddRange(SaveFileUtils.allSavesMetadataCache.Values
+        allSaves.AddRange(SaveFileUtils.allSavesScreenshotCache.Values
             .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
             .OrderByDescending(m => m.metadata.saveTimestamp)
             .Select(Option<SaveMetadataWithScreenshot>.Of));
@@ -193,28 +193,29 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         playerSaves.Clear();
         allSaves.Clear();
 
-        SaveFileUtils.ReadAllSavedMetadata();
-        PopulatePlayerSaves();
-        PopulateAllSaves();
+        SaveFileUtils.ReadAllSavedMetadataWithScreenshot((saveMetadata) => {
+            PopulatePlayerSaves();
+            PopulateAllSaves();
 
-        // If we are writing saves, add a "New Save" box before the existing saves
-        if (saveMenuState == SaveMenuState.WriteSave) {
-            playerSaves.Add(new None<SaveMetadataWithScreenshot>());
-        }
-
-        NoSavesLabel.gameObject.SetActive(false);
-        
-        if (saveMenuState == SaveMenuState.LoadSave) {
-            // Display a "No saves found" message if there are no saves
-            bool noSaveLabelActive = (includeAutosaves && allSaves.Count == 0) || (!includeAutosaves && playerSaves.Count == 0);
-            if (noSaveLabelActive) {
-                NoSavesLabel.gameObject.SetActive(true);
+            // If we are writing saves, add a "New Save" box before the existing saves
+            if (saveMenuState == SaveMenuState.WriteSave) {
+                playerSaves.Add(new None<SaveMetadataWithScreenshot>());
             }
-        }
 
-        if (refresh) {
-            SavesListView.SetDataSource(includeAutosaves ? allSaves : playerSaves);
-            SavesListView.Refresh();
-        }
+            NoSavesLabel.gameObject.SetActive(false);
+        
+            if (saveMenuState == SaveMenuState.LoadSave) {
+                // Display a "No saves found" message if there are no saves
+                bool noSaveLabelActive = (includeAutosaves && allSaves.Count == 0) || (!includeAutosaves && playerSaves.Count == 0);
+                if (noSaveLabelActive) {
+                    NoSavesLabel.gameObject.SetActive(true);
+                }
+            }
+
+            if (refresh) {
+                SavesListView.SetDataSource(includeAutosaves ? allSaves : playerSaves);
+                SavesListView.Refresh();
+            }
+        });
     }
 }

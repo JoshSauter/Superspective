@@ -432,7 +432,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	}
 
 	// Call once to mark start of staircase, again to mark end of staircase
-	[MenuItem("Custom/Power Trails/Mark Staircase Segment _F5")]
+	[MenuItem("Custom/Power Trails/Mark Staircase _F5")]
 	public static void MarkStaircaseSegment() {
 		foreach (var selected in Selection.gameObjects) {
 			NodeSystem ns = selected.GetComponent<NodeSystem>();
@@ -449,7 +449,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	}
 	
 	// Call to mark selected node as part of staircase
-	[MenuItem("Custom/Power Trails/Mark Staircase _F6")]
+	[MenuItem("Custom/Power Trails/Mark Staircase Segment _F6")]
 	public static void MarkStaircase() {
 		foreach (var selected in Selection.gameObjects) {
 			NodeSystem ns = selected.GetComponent<NodeSystem>();

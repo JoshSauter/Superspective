@@ -43,7 +43,7 @@ public class CameraFlythrough : Singleton<CameraFlythrough> {
             flythroughCameraAnimator.enabled = true;
             flythroughCameraAnimator.SetBool(level.ToName(), true);
             
-            Letterboxing.instance.state.Set(Letterboxing.State.On);
+            Letterboxing.instance.TurnOnLetterboxing();
         }
         else {
             Debug.LogWarning($"Attempting to play for scene with no CameraFlythrough set: {level}");
@@ -59,7 +59,7 @@ public class CameraFlythrough : Singleton<CameraFlythrough> {
             currentlyPlayingLevel = Levels.ManagerScene;
             initialCameraTransform.ApplyToTransform(flythroughCamera.transform);
             
-            Letterboxing.instance.state.Set(Letterboxing.State.Off);
+            Letterboxing.instance.TurnOffLetterboxing();
         }
     }
 }

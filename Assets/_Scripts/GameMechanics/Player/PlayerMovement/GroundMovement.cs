@@ -102,11 +102,14 @@ partial class PlayerMovement {
                 
                 // For snap-to-ground, we use the contact point that is least ground-like to make sure we don't apply snap-to-ground when player is on a sloped surface
                 float leastGroundNormalDotUp = m.allContactThisFrame.Select(c => Vector3.Dot(c.normal, transform.up)).Min();
-                if (leastGroundNormalDotUp > SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD && grounded.Ground.Raycast(new Ray(m.bottomOfPlayer, -transform.up), out RaycastHit hit, snapToGroundDistance * m.scale)) {
-                    Vector3 beforePos = m.bottomOfPlayer;
+                if (leastGroundNormalDotUp > SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD && Physics.Raycast(new Ray(m.BottomOfPlayer + transform.up, -transform.up), out RaycastHit hit, 1 + SNAP_TO_GROUND_DISTANCE * m.Scale) && hit.collider == grounded.Ground) {
+                    Vector3 beforePos = m.BottomOfPlayer;
                     // Snap the player to the ground
-                    transform.Translate(-(m.bottomOfPlayer - hit.point), Space.World);
-                    Vector3 afterPos = m.bottomOfPlayer;
+                    Vector3 offset = -(m.BottomOfPlayer - hit.point);
+                    transform.Translate(offset, Space.World);
+                    Vector3 afterPos = m.BottomOfPlayer;
+                    
+                    m.debug.Log($"Before position: {beforePos}\nAfter position: {afterPos}\nOffset: {offset}");
                 
                     m.debug.LogWarning($"NormalDotUp: {leastGroundNormalDotUp}");
                     Debug.DrawRay(hit.point, hit.normal, Color.green, 0.15f);
@@ -166,16 +169,16 @@ partial class PlayerMovement {
                 Vector3 desiredHorizontalVelocity = Vector3.Lerp(
                     horizontalVelocity,
                     Vector3.zero,
-                    decelerationLerpSpeed * Time.fixedDeltaTime
+                    DECELERATION_LERP_SPEED * Time.fixedDeltaTime
                 );
                 return desiredHorizontalVelocity + (m.thisRigidbody.velocity - horizontalVelocity);
             }
 
-            float adjustedMovespeed = ground.otherCollider.CompareTag("Staircase") ? m.walkSpeed : m.effectiveMovespeed;
+            float adjustedMovespeed = ground.otherCollider.CompareTag("Staircase") ? m.WalkSpeed : m.EffectiveMovespeed;
             return Vector3.Lerp(
                 m.thisRigidbody.velocity,
                 moveDirection * adjustedMovespeed,
-                accelerationLerpSpeed * Time.fixedDeltaTime
+                ACCELERATION_LERP_SPEED * Time.fixedDeltaTime
             );
         }
 

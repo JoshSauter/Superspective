@@ -9,7 +9,7 @@ float _DissolveEmissionAmount;
 
 // Returns the dissolve test value
 half ClipDissolve(float2 uv, float disabled = 0.0) {
-    half test = tex2D(_DissolveTex, uv.xy).rgb - _DissolveValue - 0.01;
+    half test = tex2D(_DissolveTex, uv.xy).rgb - _DissolveValue;
     if (_DissolveValue == 0) {
         test = 0;
     }

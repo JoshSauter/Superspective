@@ -22,7 +22,7 @@ partial class PlayerMovement {
         const float DESIRED_JUMP_HEIGHT = 2.672f;
         
         // Properties
-        float JumpForce => CalculatedJumpForce(DESIRED_JUMP_HEIGHT * m.scale, m.thisRigidbody.mass, Physics.gravity.magnitude);
+        float JumpForce => CalculatedJumpForce(DESIRED_JUMP_HEIGHT * m.Scale, m.thisRigidbody.mass, Physics.gravity.magnitude);
         public bool UnderMinJumpTime => jumpState == JumpState.Jumping && jumpState.timeSinceStateChanged < MIN_JUMP_TIME;
         
         float jumpCooldownRemaining; // Prevents player from jumping again while > 0

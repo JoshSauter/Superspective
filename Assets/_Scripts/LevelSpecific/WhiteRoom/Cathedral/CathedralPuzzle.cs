@@ -174,7 +174,7 @@ namespace LevelSpecific.WhiteRoom {
             else if (currentValueDisplay.actualValue == target) {
                 hexState = HexState.CorrectValue;
                 if (!hasBeenSolvedBefore) {
-                    AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
+                    AudioManager.instance.Play(AudioName.CorrectAnswer);
                     hasBeenSolvedBefore = true;
                 }
 			}
@@ -291,20 +291,18 @@ namespace LevelSpecific.WhiteRoom {
             innerHex.localRotation = Quaternion.Slerp(innerHex.localRotation, Quaternion.Euler(desiredInnerHexRotation), trackSpeed * Time.deltaTime);
         }
 
-        Tuple<Color, Color> GetCurrentGradientColors() {
+        (Color, Color) GetCurrentGradientColors() {
             if (solved) {
-                return new Tuple<Color, Color>(Color.green * 0.6f, Color.green);
+                return (Color.green * 0.6f, Color.green);
             }
             else {
                 float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.displayedValue);
-                return new Tuple<Color, Color>(baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
+                return (baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
             }
         }
 
         void UpdateParticleSystems() {
-            Tuple<Color, Color> minMaxGradientColors = GetCurrentGradientColors();
-            Color minColor = minMaxGradientColors.Item1;
-            Color maxColor = minMaxGradientColors.Item2;
+            (Color minColor, Color maxColor) = GetCurrentGradientColors();
             
             ParticleSystem.MainModule outerParticlesMain = outerParticles.main;
             outerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);

@@ -355,7 +355,7 @@ namespace Audio {
 			job.Play();
 		}
 
-		public AudioJob GetAudioJob(AudioName audioName, string uniqueIdentifier) {
+		public AudioJob GetAudioJob(AudioName audioName, string uniqueIdentifier = "") {
 			return GetAudioJob(Id(audioName, uniqueIdentifier));
 		}
 
@@ -364,7 +364,7 @@ namespace Audio {
 		}
 
 		private static string Id(AudioName audioName, string uniqueIdentifier) {
-			return $"{uniqueIdentifier}/{audioName}";
+			return string.IsNullOrEmpty(uniqueIdentifier) ? audioName.ToString() : $"{uniqueIdentifier}/{audioName}";
 		}
 
 		public AudioJob GetOrCreateJob(AudioName audioName, string uniqueIdentifier, Action<AudioJob> settingsOverride = null) {

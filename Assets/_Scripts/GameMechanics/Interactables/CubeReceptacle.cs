@@ -159,7 +159,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     onCubeHoldEnd?.Invoke();
                     if (AcceptedColor(cubeInReceptacle.gameObject)) {
                         if (playPuzzleCompleteSound) {
-                            AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
+                            AudioManager.instance.Play(AudioName.CorrectAnswer);
                         }
 
                         pwr.state.Set(PowerState.Powered);

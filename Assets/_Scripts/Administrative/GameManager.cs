@@ -35,6 +35,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     // There are lots of ways the game can be in a loading state, this aggregates all of them into one
+    [ShowNativeProperty]
     public bool IsCurrentlyLoading =>
         !gameHasLoaded ||
         LevelManager.instance.IsCurrentlySwitchingScenes ||

@@ -16,10 +16,10 @@ public class MainCanvas : Singleton<MainCanvas> {
 
 	BlackOverlayState _blackOverlayState = BlackOverlayState.Off;
 	public BlackOverlayState blackOverlayState {
-		get { return _blackOverlayState; }
+		get => _blackOverlayState;
 		set {
 			if (value != BlackOverlayState.Off) {
-				blackOverlayAlpha = 1f;
+				BlackOverlayAlpha = 1f;
 				timeElapsedSinceStateChange = 0f;
 			}
 			_blackOverlayState = value;
@@ -29,7 +29,7 @@ public class MainCanvas : Singleton<MainCanvas> {
 	float timeElapsedSinceStateChange = 0f;
 	float blackOverlayFadeTime = 2f;
 
-	public float blackOverlayAlpha {
+	public float BlackOverlayAlpha {
 		get => blackOverlay.color.a;
 		set {
 			Color col = blackOverlay.color;
@@ -44,9 +44,9 @@ public class MainCanvas : Singleton<MainCanvas> {
 			float t = timeElapsedSinceStateChange / blackOverlayFadeTime;
 			float nextAlpha = Mathf.Lerp(1.0f, 0.0f, t * t);
 			if (nextAlpha < 0.001f) nextAlpha = 0f;
-			blackOverlayAlpha = nextAlpha;
+			BlackOverlayAlpha = nextAlpha;
 
-			if (blackOverlayAlpha == 0) {
+			if (BlackOverlayAlpha == 0) {
 				blackOverlayState = BlackOverlayState.Off;
 			}
 		}

@@ -19,7 +19,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public delegate void PickupObjectSimpleAction();
 
     public const float pickupDropCooldown = 0.2f;
-    public const float holdDistance = 1.5f;
+    public const float holdDistance = 3f;
     const float minDistanceFromPlayer = 0.25f;
     const float followSpeed = 15;
     const float followLerpSpeed = 15;
@@ -59,6 +59,10 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     Transform player;
     Transform playerCam;
 
+    private PhysicMaterial defaultPickupObjectPhysicsMaterial;
+    public PhysicMaterial heldPickupObjectPhysicsMaterial;
+    private PhysicMaterial EffectivePhysicsMaterial => isHeld ? heldPickupObjectPhysicsMaterial : defaultPickupObjectPhysicsMaterial;
+
     Vector3 playerCamPosLastFrame;
 
     readonly float rotateToRightAngleTime = 0.35f;
@@ -72,6 +76,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     protected override void Awake() {
         base.Awake();
         AssignReferences();
+        
+        defaultPickupObjectPhysicsMaterial = thisCollider.material;
     }
 
     void AssignReferences() {
@@ -152,6 +158,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     void FixedUpdate() {
+        if (thisCollider.material != EffectivePhysicsMaterial) thisCollider.material = EffectivePhysicsMaterial;
+        
         if (isHeld && shouldFollow) {
             Vector3 playerCamPositionalDiff = Player.instance.cameraFollow.transform.position - playerCamPosLastFrame;
             if (portalableObject != null && portalableObject.grabbedThroughPortal != null)
@@ -221,15 +229,19 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         }
 
         transform.rotation = destinationRotation;
+        // An attempt to fix an esoteric bug causing a cube to reset its rotation. I don't know why the rotation resets sometimes
+        yield return new WaitForFixedUpdate();
+        transform.rotation = destinationRotation;
     }
 
+    const float ROOT_3_ON_2 = 0.86602540378f;
     Vector3 TargetHoldPosition(float holdDistance, out SuperspectiveRaycast raycastHits) {
         int ignoreRaycastLayer = SuperspectivePhysics.IgnoreRaycastLayer;
         int layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
         int tempLayer = gameObject.layer;
         gameObject.layer = ignoreRaycastLayer;
 
-        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance, layerMask);
+        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance + transform.lossyScale.x * ROOT_3_ON_2, layerMask);
         
         Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
         gameObject.layer = tempLayer;
@@ -240,7 +252,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     Vector3 PositionAtFirstObjectOrEndOfRaycast(SuperspectiveRaycast raycast) {
         if (raycast.hitObject) {
             // Assumes a transform scale of 1,1,1 corresponds to 1 unit^3 volume
-            return raycast.firstObjectHit.point - transform.lossyScale.x * raycast.firstObjectHit.normal;
+            return raycast.firstObjectHit.point - transform.lossyScale.x * ROOT_3_ON_2 * playerCam.forward;
         }
         else {
             SuperspectiveRaycastPart lastPart = raycast.raycastParts.Last();
@@ -261,7 +273,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             portalableObject.fakeCopyInstance.gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
         }
 
-        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance, layerMask);
+        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance + transform.lossyScale.x * ROOT_3_ON_2, layerMask);
         Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
 
         gameObject.layer = tempLayer;
@@ -350,7 +362,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         Drop();
         interactable = false;
         // Trick to get the cube to not interact with the player anymore but still collide with ground
-        gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+        gameObject.layer = SuperspectivePhysics.VisibleButNoPlayerCollisionLayer;
 
         if (dissolve.state == DissolveObject.State.Materialized) {
             dissolve.Dematerialize();

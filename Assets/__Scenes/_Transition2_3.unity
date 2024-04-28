@@ -254,6 +254,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -18183,6 +18184,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -31858,6 +31860,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -35274,6 +35277,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -35298,6 +35302,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -35321,6 +35326,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -45174,6 +45180,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -45512,6 +45519,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -45660,6 +45668,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -45877,6 +45886,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -45900,6 +45910,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:

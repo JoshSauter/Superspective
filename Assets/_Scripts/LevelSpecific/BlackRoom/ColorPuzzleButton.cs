@@ -68,7 +68,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         state.AddStateTransition(State.Incorrect, State.On, incorrectFlashDuration);
         
         state.AddTrigger(State.Correct, () => {
-	        AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
+	        AudioManager.instance.Play(AudioName.CorrectAnswer);
 	        interact.SetAsHidden();
 	        
 	        if (isLastPuzzle) {
@@ -83,7 +83,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         // Incorrect SFX
         for (int i = 0; i < incorrectFlashTimes; i++) {
 	        state.AddTrigger(State.Incorrect, (incorrectFlashDuration/incorrectFlashTimes) * i, () =>
-		        AudioManager.instance.Play(AudioName.IncorrectAnswer, "IncorrectAnswer"));
+		        AudioManager.instance.Play(AudioName.IncorrectAnswer));
         }
         
         // After showing correct for a short time, fire the laser (or just move the active puzzle to next)

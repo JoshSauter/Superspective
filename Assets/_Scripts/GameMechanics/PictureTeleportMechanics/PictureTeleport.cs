@@ -109,7 +109,9 @@ namespace PictureTeleportMechanics {
             }
             else {
                 bigFrameToTeleportTo.TurnOnFrame();
-                LevelManager.instance.SwitchActiveScene(bigFrameLevel);
+                // Rose Room title card is delayed until the player moves from the initial position
+                bool playLevelChangeBanner = bigFrameLevel != Levels.ForkWhiteRoom3;
+                LevelManager.instance.SwitchActiveScene(bigFrameLevel, playLevelChangeBanner);
             }
             Transform player = Player.instance.transform;
             Transform camContainer = SuperspectiveScreen.instance.playerCamera.transform.parent;

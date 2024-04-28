@@ -353,7 +353,7 @@ namespace Saving {
                             saveableObject.RestoreStateFromSave(currentSaveData.serializedSaveObjects[id]);
                         }
                         catch (Exception e) {
-                            Debug.LogError(e);
+                            Debug.LogError($"Error loading ID {id}, cause: " + e);
                         }
                     }
                 }

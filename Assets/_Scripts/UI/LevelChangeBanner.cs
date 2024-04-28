@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using LevelManagement;
+using SuperspectiveUtils;
 using UnityEngine.UI;
 
 public class LevelChangeBanner : Singleton<LevelChangeBanner> {
@@ -16,10 +17,11 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     public Dictionary<Levels, Image> levelToBanner = new Dictionary<Levels, Image>();
     public Levels lastBannerLoaded = Levels.ManagerScene;
     public Levels queuedBanner = Levels.ManagerScene;
+    public bool HasQueuedBanner => queuedBanner != Levels.ManagerScene;
     public bool isPlayingBanner;
 
-    public const float fadeTime = 2.5f;
-    public const float displayTime = 4f;
+    public const float FADE_TIME = 2.5f;
+    public const float DISPLAY_TIME = 4f;
 
     void Awake() {
         bannerGroup = GetComponent<CanvasGroup>();
@@ -30,7 +32,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     }
 
     void Update() {
-        if (!isPlayingBanner && queuedBanner != lastBannerLoaded && queuedBanner != Levels.ManagerScene) {
+        if (!isPlayingBanner && HasQueuedBanner && queuedBanner != lastBannerLoaded) {
             PlayBanner(queuedBanner);
             queuedBanner = Levels.ManagerScene;
         }
@@ -66,71 +68,75 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
 
         lastBannerLoaded = level;
 
+        Letterboxing.instance.TurnOnLetterboxing();
         isPlayingBanner = true;
         float timeElapsed = 0f;
         float lerpToMatchFlythroughCamSpeed = 2f;
         Color originalColor = bannerImage.color;
-        float defaultBannerYMidpoint = (banner.anchorMax.y + banner.anchorMin.y) / 2f;
+        float defaultBannerYMidpoint = .8f; // Height of non-raised, non-letterboxed level change banner
         float bannerYMidpoint = defaultBannerYMidpoint;
         Vector2 halfBannerSize = (banner.anchorMax - banner.anchorMin) / 2f;
 
-        while (timeElapsed < fadeTime) {
-            // Hold the LevelChangeBanner up if we're doing a CameraFlythrough
+        bool placeBannerAtTopOfScreen = Letterboxing.instance.LetterboxingEnabled || CameraFlythrough.instance.isPlayingFlythrough;
+        bannerYMidpoint = placeBannerAtTopOfScreen ? 1 - halfBannerSize.y : defaultBannerYMidpoint;
+        banner.anchorMin = new Vector2(0.5f - halfBannerSize.x, bannerYMidpoint - halfBannerSize.y);
+        banner.anchorMax = new Vector2(0.5f + halfBannerSize.x, bannerYMidpoint + halfBannerSize.y);
+
+        if (placeBannerAtTopOfScreen && originalColor.WithAlpha(1).Distance(Color.black) < .1f) {
+            // Black-on-black text is unreadable, so we'll make it white
+            bannerImage.color = Color.white.WithAlphaFrom(bannerImage.color);
+        }
+
+        // Wait for letterbox to appear before showing the banner
+        while (Letterboxing.instance.LetterboxingEnabled && Letterboxing.instance.state.timeSinceStateChanged < Letterboxing.LETTERBOX_APPEAR_TIME) {
+            yield return null;
+        }
+
+        while (timeElapsed < FADE_TIME) {
             if (!CameraFlythrough.instance.isPlayingFlythrough) {
                 float timeElapsedThisFrame = Time.deltaTime;
                 // If another banner is queued up, speed up the animation
-                if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
+                if (HasQueuedBanner && queuedBanner != level) {
                     timeElapsedThisFrame += 2 * Time.deltaTime;
                 }
 
                 timeElapsed += timeElapsedThisFrame;
-                float t = timeElapsed / fadeTime;
-                
-                bannerImage.color = Color.Lerp(bannerImage.color, originalColor, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
-                bannerYMidpoint = Mathf.Lerp(bannerYMidpoint, defaultBannerYMidpoint, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
+                float t = timeElapsed / FADE_TIME;
 
                 bannerGroup.alpha = t*t;
             }
-            else {
-                bannerImage.color = Color.Lerp(bannerImage.color, Color.clear, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
-                bannerYMidpoint = Mathf.Lerp(bannerYMidpoint, 1 - halfBannerSize.y, lerpToMatchFlythroughCamSpeed * Time.deltaTime);
-                // bannerYMidpoint = 1 - halfBannerSize.y;
-            }
 
-            banner.anchorMin = new Vector2(0.5f - halfBannerSize.x, bannerYMidpoint - halfBannerSize.y);
-            banner.anchorMax = new Vector2(0.5f + halfBannerSize.x, bannerYMidpoint + halfBannerSize.y);
             yield return null;
         }
 
         timeElapsed = 0f;
-        while (timeElapsed < displayTime) {
+        while (timeElapsed < DISPLAY_TIME) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
+            if (HasQueuedBanner && queuedBanner != level) {
                 timeElapsed += 2 * Time.deltaTime;
             }
 
             yield return null;
         }
 
+        Letterboxing.instance.TurnOffLetterboxing();
         timeElapsed = 0f;
-        while (timeElapsed < fadeTime) {
+        while (timeElapsed < FADE_TIME) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
             if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
                 timeElapsed += 2 * Time.deltaTime;
             }
-            float t = timeElapsed / fadeTime;
+            float t = timeElapsed / FADE_TIME;
 
             bannerGroup.alpha = 1-Mathf.Sqrt(t);
 
             yield return null;
         }
-
+        
+        bannerImage.color = originalColor;
+        
         isPlayingBanner = false;
     }
-
-    // IEnumerator BannerColorAndPositionTracker(Levels level) {
-    //     
-    // }
 }

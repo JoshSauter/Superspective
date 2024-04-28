@@ -1559,6 +1559,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -2148,6 +2149,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -29901,6 +29903,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -30922,6 +30925,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -37100,6 +37104,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -37824,6 +37829,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -39765,6 +39771,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -62557,6 +62564,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -64089,6 +64097,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -65353,6 +65362,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101

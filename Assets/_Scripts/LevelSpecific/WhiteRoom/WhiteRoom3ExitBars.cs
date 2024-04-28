@@ -38,7 +38,7 @@ namespace LevelSpecific.WhiteRoom {
             }
             
             if (solved && !wasSolvedLastFrame) {
-                AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true);
+                AudioManager.instance.Play(AudioName.CorrectAnswer);
                 AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
 
                 foreach (var receptacle in puzzleReceptacles) {

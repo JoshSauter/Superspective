@@ -26,7 +26,8 @@ namespace MagicTriggerMechanics {
 		PlayCameraFlythrough = 10,
 		EnablePortalRendering = 11,		// Enables Portal rendering when triggered forward, disable when triggered negatively
 		UnityEvent = 12,
-		ToggleColliders = 13
+		ToggleColliders = 13,
+		PlayLevelChangeBanner = 14
 	}
 
 	[Flags]
@@ -96,6 +97,11 @@ namespace MagicTriggerMechanics {
 						objectToDisable.SetActive(false);
 					}
 					return;
+				case TriggerActionType.PlayLevelChangeBanner:
+					if (levelForward != Levels.ManagerScene) {
+						LevelChangeBanner.instance.PlayBanner(levelForward);
+					}
+					return;
 				case TriggerActionType.ChangeLevel:
 					// ManagerScene is a flag that we don't want to change level in this direction
 					if (levelForward != Levels.ManagerScene && LevelManager.instance.ActiveScene != levelForward) {
@@ -147,6 +153,12 @@ namespace MagicTriggerMechanics {
 					}
 					foreach (var objectToDisable in objectsToDisable) {
 						objectToDisable.SetActive(true);
+					}
+					return;
+				case TriggerActionType.PlayLevelChangeBanner:
+					// ManagerScene is a flag that we don't want to play level banner in this direction
+					if (levelBackward != Levels.ManagerScene) {
+						LevelChangeBanner.instance.PlayBanner(levelBackward);
 					}
 					return;
 				case TriggerActionType.ChangeLevel:
@@ -305,6 +317,7 @@ namespace MagicTriggerMechanics {
 					EditorGUILayout.PropertyField(objectsToEnable, objectsToEnableLabel, true);
 					EditorGUILayout.PropertyField(objectsToDisable, objectsToDisableLabel, true);
 					break;
+				case TriggerActionType.PlayLevelChangeBanner:
 				case TriggerActionType.ChangeLevel:
 					EditorGUILayout.PropertyField(onlyTriggerForward, onlyTriggerForwardLabel);
 					EditorGUILayout.PropertyField(levelForward, forwardLevelLabel);

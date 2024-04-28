@@ -39,7 +39,7 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     }
 
     void FixedUpdate() {
-        Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.averageVelocityRecently) / Player.instance.Scale;
+        Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.AverageVelocityRecently) / Player.instance.Scale;
         // Don't bob faster when we artificially speed up the player
         float playerSpeed = playerVelocity.magnitude / playerMovement.movespeedMultiplier;
         if (playerMovement.IsGrounded && playerSpeed > 0.2f && !NoClipMode.instance.noClipOn) {

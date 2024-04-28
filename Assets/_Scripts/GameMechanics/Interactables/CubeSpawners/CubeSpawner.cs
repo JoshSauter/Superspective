@@ -330,7 +330,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             // Don't allow shrinking cubes to be picked up
             cubeDespawning.interactable = false;
             // Trick to get the cubeDespawning to not interact with the player anymore but still collide with ground
-            cubeDespawning.gameObject.layer = LayerMask.NameToLayer("VisibleButNoPlayerCollision");
+            cubeDespawning.gameObject.layer = SuperspectivePhysics.VisibleButNoPlayerCollisionLayer;
             cubeDespawning.thisRigidbody.isKinematic = true;
             foreach (Collider collider in cubeDespawning.GetComponentsInChildren<Collider>()) {
                 if (collider.isTrigger) collider.enabled = false;

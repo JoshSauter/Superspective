@@ -43,16 +43,16 @@ public partial class PlayerMovement {
         private Vector3 CurrentStepUp => currentStep?.StepOffsetVertical + (transform.up * 0.01f) ?? Vector3.zero;
         [ShowNativeProperty]
         // Move in the direction of player desired movement, with the distance == the radius of the player
-        private Vector3 CurrentStepForward => m.ProjectHorizontalVelocity(m.groundMovement.lastGroundVelocity.normalized) * (m.thisCollider == null ? 0 : m.thisCollider.radius * m.scale);
+        private Vector3 CurrentStepForward => m.ProjectHorizontalVelocity(m.groundMovement.lastGroundVelocity.normalized) * (m.thisCollider == null ? 0 : m.thisCollider.radius * m.Scale);
         [ShowNativeProperty]
         private Vector3 CurrentStepDiagonal => (CurrentStepUp + CurrentStepForward);
         
-        private float StepSpeed => m.effectiveMovespeed * STEP_SPEED_MULTIPLIER; // _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
+        private float StepSpeed => m.EffectiveMovespeed * STEP_SPEED_MULTIPLIER; // _stepSpeed * (1 + Mathf.InverseLerp(movespeed, walkSpeed, runSpeed));
 
         // How far do we move into the step before raycasting down?
-        float StepOverbiteMagnitude => m.effectiveMovespeed * Time.fixedDeltaTime;
-        float MaxStepHeight => MAX_STEP_HEIGHT * m.scale;
-        float MinStepHeight => MIN_STEP_HEIGHT * m.scale;
+        float StepOverbiteMagnitude => m.EffectiveMovespeed * Time.fixedDeltaTime;
+        float MaxStepHeight => MAX_STEP_HEIGHT * m.Scale;
+        float MinStepHeight => MIN_STEP_HEIGHT * m.Scale;
 
         // State
         [ShowNonSerializedField]
@@ -78,7 +78,7 @@ public partial class PlayerMovement {
                 distanceMovedForStaircaseOffset >= CurrentStepDiagonal.magnitude
             );
         
-            stepState.AddTrigger(StepState.SteppingDiagonal, () => Debug.DrawRay(m.bottomOfPlayer, CurrentStepDiagonal, Color.yellow));
+            stepState.AddTrigger(StepState.SteppingDiagonal, () => Debug.DrawRay(m.BottomOfPlayer, CurrentStepDiagonal, Color.yellow));
         
             // Reset distance moved whenever we change state
             stepState.OnStateChangeSimple += () => distanceMovedForStaircaseOffset = 0f;
@@ -91,8 +91,8 @@ public partial class PlayerMovement {
             bool CheckCapsule(CapsuleCollider capsuleCollider) {
                 // Get the relevant properties from the CapsuleCollider
                 Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
-                float capsuleHeight = capsuleCollider.height * m.scale;
-                float capsuleRadius = capsuleCollider.radius * m.scale;
+                float capsuleHeight = capsuleCollider.height * m.Scale;
+                float capsuleRadius = capsuleCollider.radius * m.Scale;
 
                 Vector3 capsuleAxis = transform.up;
                 Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius));
@@ -102,7 +102,7 @@ public partial class PlayerMovement {
                 float distanceFromCapsuleCenterToP1 = Vector3.Dot(capsuleCenter - p1, capsuleAxis);
 
                 float distanceFromCapsuleCenterToOffsetStartPoint = Mathf.Min(distanceFromCapsuleCenterToStepPoint, distanceFromCapsuleCenterToP1);
-                p1 = capsuleCenter - capsuleAxis * (distanceFromCapsuleCenterToOffsetStartPoint - CAPSULE_CHECK_OFFSET_FROM_BOTTOM * m.scale);
+                p1 = capsuleCenter - capsuleAxis * (distanceFromCapsuleCenterToOffsetStartPoint - CAPSULE_CHECK_OFFSET_FROM_BOTTOM * m.Scale);
                 
                 var result = Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore);
 
@@ -178,8 +178,8 @@ public partial class PlayerMovement {
                 bool rayHit = false;
                 Vector3 contactNormal = contact.normal;
                 if (isBelowMaxStepHeight) {
-                    Vector3 rayLowStartPos = m.bottomOfPlayer + transform.up * 0.01f;
-                    Vector3 bottomOfPlayerToContactPoint = contact.point - m.bottomOfPlayer;
+                    Vector3 rayLowStartPos = m.BottomOfPlayer + transform.up * 0.01f;
+                    Vector3 bottomOfPlayerToContactPoint = contact.point - m.BottomOfPlayer;
                     Vector3 rayDirection = Vector3.ProjectOnPlane(bottomOfPlayerToContactPoint, transform.up).normalized;
                     if (rayDirection.magnitude > 0) {
                         Debug.DrawRay(rayLowStartPos, rayDirection * (m.thisCollider.radius * 2), Color.blue);
@@ -222,7 +222,7 @@ public partial class PlayerMovement {
 
             // Start the raycast position directly above the contact point with the step, at the vertical position of the bottom of the player
             // According to my shitty vector math, this is equivalent to Proj(contact point onto up) + up * Dot(up, bottomOfPlayer)
-            Vector3 smarterRaycastStartPos = Vector3.ProjectOnPlane(contact.point, transform.up) + transform.up * Vector3.Dot(transform.up, m.bottomOfPlayer);
+            Vector3 smarterRaycastStartPos = Vector3.ProjectOnPlane(contact.point, transform.up) + transform.up * Vector3.Dot(transform.up, m.BottomOfPlayer);
             Debug.DrawRay(smarterRaycastStartPos, transform.up * MaxStepHeight, Color.magenta, 10);
             
             // Old way of calculating raycastStartPos above contact point
@@ -245,7 +245,7 @@ public partial class PlayerMovement {
                 bool stepIsGround = Vector3.Dot(stepTest.normal, transform.up) > GroundMovement.IS_GROUND_THRESHOLD;
                 if (!stepIsGround) return false;
                 
-                float stepHeight = Vector3.Dot(transform.up, stepTest.point - m.bottomOfPlayer);
+                float stepHeight = Vector3.Dot(transform.up, stepTest.point - m.BottomOfPlayer);
 
                 if (stepHeight < MinStepHeight) return false;
 

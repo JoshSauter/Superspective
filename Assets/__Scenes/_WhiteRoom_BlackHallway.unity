@@ -692,6 +692,7 @@ MonoBehaviour:
     dimensionObjects: []
     visibilityState: 0
     flythroughCameraLevel: 0
+    logicAndRendering: 0
     portalsToEnable: []
     portalsToDisable: []
     unityEvent:
@@ -5851,11 +5852,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1229604684}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &1229604679
@@ -6019,6 +6024,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
@@ -7345,11 +7351,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1401322221}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &1401322215
@@ -7526,6 +7536,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101

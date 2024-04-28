@@ -16,7 +16,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 	private bool allowGodModeInNonDevBuild = true;
 	public bool noClipOn = false;
 	private const float MIN_SPEED = 0.01f;
-	private const float BASE_SPEED = 10;
+	private const float BASE_SPEED = 25;
 	private const float MAX_SPEED = 300;
 	private const float SPEED_MULTIPLIER_DELTA = 1.02f; // Multiplier (or divisor) per frame to the speed
 	float speed;
@@ -65,7 +65,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 			
 			
 			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed) * (speed / BASE_SPEED);
+			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed) * (speed / BASE_SPEED) * Player.instance.Scale;
 			transform.position += verticalScroll;
 		}
 	}

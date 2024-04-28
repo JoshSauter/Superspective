@@ -2839,11 +2839,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 175725435}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &175725430
@@ -14023,11 +14027,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 428743998}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &428743997
@@ -14560,11 +14568,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 474960404}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &474960399
@@ -23902,6 +23914,7 @@ GameObject:
   - component: {fileID: 815745588}
   - component: {fileID: 815745587}
   - component: {fileID: 815745586}
+  - component: {fileID: 815745590}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -24014,6 +24027,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 815745584}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &815745590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815745584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &832660788
 GameObject:
   m_ObjectHideFlags: 0
@@ -24027,6 +24052,7 @@ GameObject:
   - component: {fileID: 832660792}
   - component: {fileID: 832660791}
   - component: {fileID: 832660790}
+  - component: {fileID: 832660794}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -24139,6 +24165,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 832660788}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &832660794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832660788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!43 &836201366
 Mesh:
   m_ObjectHideFlags: 0
@@ -27961,11 +27999,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 995013540}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &995013534
@@ -28614,11 +28656,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1006212442}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &1006212436
@@ -31032,11 +31078,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1279202370}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &1279202365
@@ -34306,11 +34356,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1419587144}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1419587143
@@ -37521,6 +37575,7 @@ GameObject:
   - component: {fileID: 1674390122}
   - component: {fileID: 1674390121}
   - component: {fileID: 1674390120}
+  - component: {fileID: 1674390124}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -37633,6 +37688,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1674390118}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1674390124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674390118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1678716810
 GameObject:
   m_ObjectHideFlags: 0
@@ -40275,6 +40342,7 @@ GameObject:
   - component: {fileID: 1786183346}
   - component: {fileID: 1786183345}
   - component: {fileID: 1786183344}
+  - component: {fileID: 1786183348}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -40387,6 +40455,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1786183342}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1786183348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1786183342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1799005307
 GameObject:
   m_ObjectHideFlags: 0
@@ -41262,6 +41342,7 @@ GameObject:
   - component: {fileID: 1837936610}
   - component: {fileID: 1837936609}
   - component: {fileID: 1837936608}
+  - component: {fileID: 1837936612}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -41374,6 +41455,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1837936606}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1837936612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837936606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!43 &1838299225
 Mesh:
   m_ObjectHideFlags: 0
@@ -49361,6 +49454,7 @@ GameObject:
   - component: {fileID: 2003204250}
   - component: {fileID: 2003204249}
   - component: {fileID: 2003204248}
+  - component: {fileID: 2003204252}
   m_Layer: 2
   m_Name: StaircaseRotate Zone
   m_TagString: Untagged
@@ -49473,6 +49567,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2003204246}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2003204252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003204246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2010368877
 GameObject:
   m_ObjectHideFlags: 0
@@ -49921,11 +50027,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 2026189901}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!65 &2026189896

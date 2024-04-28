@@ -373,7 +373,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 					renderer.gameObject.layer = reverseVisibilityStates
 						? (ignorePartiallyVisibleLayerChanges
 							? startingLayers[renderer]
-							: LayerMask.NameToLayer("VisibleButNoPlayerCollision"))
+							: SuperspectivePhysics.VisibleButNoPlayerCollisionLayer)
 						: startingLayers[renderer];
 					break;
 			}

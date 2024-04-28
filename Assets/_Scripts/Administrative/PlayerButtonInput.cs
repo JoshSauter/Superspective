@@ -262,13 +262,13 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool JumpHeld => Settings.Keybinds.Jump.Held;
 	
 	public bool SprintHeld => Settings.Keybinds.Sprint.Held;
-	
 
 	// While stick held
 	public bool LeftStickHeld => LeftStick.magnitude > 0;
 	
 	public bool RightStickHeld => RightStick.magnitude > 0;
 	
+	public bool AnyInputHeld => LeftStickHeld || RightStickHeld || UpHeld || DownHeld || RightHeld || LeftHeld || InteractHeld || ZoomHeld || AlignObjectHeld || PauseHeld || JumpHeld || SprintHeld;
 
 	public Vector2 LeftStick {
 		get {

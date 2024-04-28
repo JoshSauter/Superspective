@@ -10,6 +10,7 @@ using UnityEngine;
 public static class SuperspectivePhysics {
 	private static readonly Vector3 originalGravity = Physics.gravity;
 
+	private static int _visibleButNoPlayerCollisionLayer = -1;
 	private static int _ignoreRaycastLayer = -1;
 	private static int _playerLayer = -1;
 	private static int _invisibleLayer = -1;
@@ -20,6 +21,7 @@ public static class SuperspectivePhysics {
 	private static int LazyLayer(ref int layer, string layerName) {
 		return layer < 0 ? layer = LayerMask.NameToLayer(layerName) : layer;
 	}
+	public static int VisibleButNoPlayerCollisionLayer => LazyLayer(ref _visibleButNoPlayerCollisionLayer, "VisibleButNoPlayerCollision");
 	public static int IgnoreRaycastLayer => LazyLayer(ref _ignoreRaycastLayer, "Ignore Raycast");
 	public static int PlayerLayer => LazyLayer(ref _playerLayer, "Player");
 	public static int InvisibleLayer => LazyLayer(ref _invisibleLayer,"Invisible");

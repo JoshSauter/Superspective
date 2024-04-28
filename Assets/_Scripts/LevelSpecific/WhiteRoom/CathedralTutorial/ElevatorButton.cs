@@ -102,7 +102,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 	    buttonState.AddStateTransition(ButtonState.Incorrect, ButtonState.Idle, incorrectFlashDuration);
 	    buttonState.AddStateTransition(ButtonState.Correct, ButtonState.Idle, ElevatorTime(floorState));
 	    
-	    buttonState.AddTrigger(ButtonState.Correct, 0, () => AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer", true));
+	    buttonState.AddTrigger(ButtonState.Correct, 0, () => AudioManager.instance.Play(AudioName.CorrectAnswer));
 	    buttonState.AddTrigger(ButtonState.Correct, elevatorDelay, () => elevatorState.Set(ElevatorState.MovingDown));
     }
 

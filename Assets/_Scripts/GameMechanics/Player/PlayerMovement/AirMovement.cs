@@ -19,7 +19,7 @@ partial class PlayerMovement {
             Debug.DrawRay(transform.position, moveDirection.normalized * 3, Color.green, 0.1f);
 
             // Handle mid-air collision with obstacles
-            moveDirection = AirCollisionMovementAdjustment(moveDirection * m.effectiveMovespeed);
+            moveDirection = AirCollisionMovementAdjustment(moveDirection * m.EffectiveMovespeed);
 
             // If no keys are pressed, decelerate to a horizontal stop
             if (!m.input.LeftStickHeld && !m.autoRun) {
@@ -27,7 +27,7 @@ partial class PlayerMovement {
                 Vector3 desiredHorizontalVelocity = Vector3.Lerp(
                     horizontalVelocity,
                     Vector3.zero,
-                    decelerationLerpSpeed * Time.fixedDeltaTime
+                    DECELERATION_LERP_SPEED * Time.fixedDeltaTime
                 );
                 return desiredHorizontalVelocity + (m.thisRigidbody.velocity - horizontalVelocity);
             }
@@ -36,7 +36,7 @@ partial class PlayerMovement {
                 Vector3 desiredHorizontalVelocity = Vector3.Lerp(
                     horizontalVelocity,
                     moveDirection,
-                    airspeedControlFactor * accelerationLerpSpeed * Time.fixedDeltaTime
+                    AIRSPEED_CONTROL_FACTOR * ACCELERATION_LERP_SPEED * Time.fixedDeltaTime
                 );
                 return desiredHorizontalVelocity + (m.thisRigidbody.velocity - horizontalVelocity);
             }
@@ -49,7 +49,7 @@ partial class PlayerMovement {
         /// <param name="movementVector"></param>
         /// <returns>True if there is something in the way of the player's desired movement vector, false otherwise.</returns>
         Vector3 AirCollisionMovementAdjustment(Vector3 movementVector) {
-            float rayDistance = m.effectiveMovespeed * Time.fixedDeltaTime + m.thisCollider.radius;
+            float rayDistance = m.EffectiveMovespeed * Time.fixedDeltaTime + m.thisCollider.radius * m.Scale;
             RaycastHit obstacle = new RaycastHit();
             Physics.Raycast(transform.position, movementVector, out obstacle, rayDistance, Player.instance.interactsWithPlayerLayerMask);
             

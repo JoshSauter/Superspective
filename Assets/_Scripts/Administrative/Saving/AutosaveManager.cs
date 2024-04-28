@@ -1,30 +1,44 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using LevelManagement;
 using SuperspectiveUtils;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Saving {
     public class AutosaveManager : Singleton<AutosaveManager> {
-        public float autosaveInterval => Convert.ToSingle((Settings.Autosave.AutosaveInterval.dropdownSelection.selection.Datum));
-        public int maxNumberOfAutosaves => (int)Settings.Autosave.NumAutosaves;
+        public float AutosaveInterval => Convert.ToSingle(Settings.Autosave.AutosaveInterval.dropdownSelection.selection.Datum);
+        public int MaxNumberOfAutosaves => (int)Settings.Autosave.NumAutosaves;
 
 #if UNITY_EDITOR
-        public bool canMakeTimedAutosave => false;
-        public bool canMakeAutosaveOnLevelLoad => false;
+        public bool CanMakeTimedAutosave => false;
+        public bool CanMakeAutosaveOnLevelLoad => false;
 #else
-        private const float minTimeBetweenAutosavesSec = 10f;
-        private const float autosaveDisabledAfterLoadDelay = 30f;
+        private const float MIN_TIME_BETWEEN_AUTOSAVES_SEC = 10f;
+        private const float AUTOSAVE_DISABLED_AFTER_LOAD_DELAY = 30f;
 
-        private bool timedAutosaveEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnTimer;
-        private bool autosaveOnLevelLoadEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnLevelChange;
-        public bool canMakeTimedAutosave => timedAutosaveEnabled && timeSinceLastAutosave > minTimeBetweenAutosavesSec;
-        public bool canMakeAutosaveOnLevelLoad => autosaveOnLevelLoadEnabled && SaveManager.realtimeSinceLastLoad > autosaveDisabledAfterLoadDelay && timeSinceLastAutosave > minTimeBetweenAutosavesSec;
+        private HashSet<Levels> levelsToSkipAutosaveOnLoad = new HashSet<Levels>() {
+            Levels.GrowShrinkIntroBetweenWorlds,
+            Levels.GrowShrinkIntroDarkSide
+        };
+
+        private bool TimedAutosaveEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnTimer;
+        private bool AutosaveOnLevelLoadEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnLevelChange;
+        
+        private bool CanMakeAutosave => !isAutosaving && timeSinceLastAutosave > MIN_TIME_BETWEEN_AUTOSAVES_SEC && !PlayerMovement.instance.PlayerIsAFK;
+        public bool CanMakeTimedAutosave => TimedAutosaveEnabled && CanMakeAutosave;
+        public bool CanMakeAutosaveOnLevelLoad => AutosaveOnLevelLoadEnabled &&
+                                                  CanMakeAutosave &&
+                                                  SaveManager.realtimeSinceLastLoad > AUTOSAVE_DISABLED_AFTER_LOAD_DELAY &&
+                                                  !levelsToSkipAutosaveOnLoad.Contains(LevelManager.instance.ActiveScene);
 #endif
 
         public float timeSinceLastAutosave = 0f;
+        bool isAutosaving = false;
 
         private const float delayAfterLevelLoadToSave = 1f;
 
@@ -32,7 +46,7 @@ namespace Saving {
             StartCoroutine(RegularAutosave());
 
             LevelManager.instance.OnActiveSceneChange += () => {
-                if (canMakeAutosaveOnLevelLoad) {
+                if (CanMakeAutosaveOnLevelLoad) {
                     StartCoroutine(DoAutosaveDelayed(delayAfterLevelLoadToSave));
                 }
             };
@@ -45,34 +59,47 @@ namespace Saving {
         }
 
         IEnumerator RegularAutosave() {
-            yield return new WaitForSeconds(autosaveInterval);
+            yield return new WaitForSeconds(AutosaveInterval);
             
             while (true) {
-                if (canMakeTimedAutosave) {
+                if (CanMakeTimedAutosave) {
                     DoAutosave();
                 }
 
-                yield return new WaitForSeconds(autosaveInterval);
+                yield return new WaitForSeconds(AutosaveInterval);
             }
         }
 
         public void DoAutosave() {
+            isAutosaving = true;
             LoadingIcon.instance.ShowLoadingIcon();
-            SaveManager.Save(CreateAutosave());
+            JobHandle saveJob = SaveManager.Save(CreateAutosave());
             timeSinceLastAutosave = 0;
 
-            // Delete autosaves until we're at maxNumberOfAutosaves
-            SaveFileUtils.ReadAllSavedMetadata();
-            Stack<SaveMetadataWithScreenshot> autosaves = new Stack<SaveMetadataWithScreenshot>(SaveFileUtils.allSavesMetadataCache
-                .Where(kv => !SaveFileUtils.playerSaveMetadataCache.ContainsKey(kv.Key))
-                .ToDictionary()
-                .Values
-                .OrderByDescending(m => m.metadata.saveTimestamp)
-                .ToList());
-            int initialCount = autosaves.Count;
-            for (int i = maxNumberOfAutosaves; i < initialCount; i++) {
-                SaveFileUtils.DeleteSave(autosaves.Pop().metadata.saveFilename);
-            }
+            DeleteExtraAutosaves(saveJob);
+        }
+
+        // Delete autosaves until we're at maxNumberOfAutosaves
+        public void DeleteExtraAutosaves(JobHandle dependsOn) {
+            JobHandle readAllSavedMetadataJob = SaveFileUtils.ReadAllSavedMetadata(dependsOn, (allMetadata => {
+                NativeArray<JobHandle> deleteJobHandles = new NativeArray<JobHandle>(allMetadata
+                    .OrderByDescending(m => m.saveTimestamp)
+                    .TakeLast((allMetadata.Count > MaxNumberOfAutosaves) ? allMetadata.Count - MaxNumberOfAutosaves : 0)
+                    .Select(m => SaveFileUtils.DeleteSave(m.saveFilename))
+                    .ToArray(),
+                    Allocator.Persistent);
+                
+                JobHandle combinedJobHandle = JobHandle.CombineDependencies(deleteJobHandles);
+                
+                StartCoroutine(JobCompleteCallback(combinedJobHandle));
+            }));
+        }
+        
+        IEnumerator JobCompleteCallback(JobHandle jobHandle) {
+            yield return new WaitUntil(() => jobHandle.IsCompleted);
+            
+            jobHandle.Complete();
+            isAutosaving = false;
         }
 
         public SaveMetadataWithScreenshot CreateAutosave() {

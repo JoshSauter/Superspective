@@ -107,7 +107,6 @@ public class Settings : Singleton<Settings> {
 	}
 
 	public static class Video {
-
 		public static readonly DropdownSetting Resolution = DropdownSetting.Of(
 			key: "Resolution",
 			name: "Resolution",
@@ -198,6 +197,13 @@ public class Settings : Singleton<Settings> {
 			value = false,
 			defaultValue = false,
 		};
+
+		public static readonly ToggleSetting LetterboxingEnabled = new ToggleSetting() {
+			key = "LetterboxingEnabled",
+			name = "Enable Letterboxing (Black Bars) When Changing Levels",
+			value = true,
+			defaultValue = true
+		};
 	}
 
 	public static class Gameplay {
@@ -270,11 +276,11 @@ public class Settings : Singleton<Settings> {
 			key = "ShowInteractionHelp",
 			name = "Show interaction help",
 			value = false,
-			defaultValue = false
+			defaultValue = true
 		};
 		public static readonly ToggleSetting ShowDisabledReason = new ToggleSetting {
 			key = "ShowDisabledReason",
-			name = "Show reason for disabled actions",
+			name = "Show reason for disabled interactions",
 			value = true,
 			defaultValue = true
 		};
@@ -396,6 +402,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Video.TargetFramerate);
 	    AddSetting(Video.VSync);
 	    AddSetting(Video.AntiAliasingEnabled);
+	    AddSetting(Video.LetterboxingEnabled);
 	    AddSetting(Video.PortalDownsampleAmount);
 	    
 	    // Gameplay Settings

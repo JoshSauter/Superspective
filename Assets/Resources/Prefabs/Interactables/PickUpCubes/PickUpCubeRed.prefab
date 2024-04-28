@@ -251,6 +251,8 @@ MonoBehaviour:
   growShrinkObject: {fileID: 0}
   spawnedFrom:
     referencedObjId: 
+  heldPickupObjectPhysicsMaterial: {fileID: 13400000, guid: e6f28b2263385da42a121b7f7daf4426,
+    type: 2}
   interactable: 1
 --- !u!114 &5694432929352241937
 MonoBehaviour:
@@ -367,5 +369,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabPath: 
+  prefabPath: Prefabs/Interactables/PickUpCubes/PickUpCubeRed
   isGlobal: 1

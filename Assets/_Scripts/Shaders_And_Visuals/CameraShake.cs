@@ -5,11 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO: Refactor this to allow for a source point or collider for the shake, scaling intensity dynamically based on player distance
 public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.CameraShakeSave> {
 	bool isUsingCurve;
 	bool _isShaking = false;
-	bool isShaking {
-		get { return _isShaking; }
+	bool IsShaking {
+		get => _isShaking;
 		set {
 			if (value && !_isShaking) {
 				timeShaking = 0f;
@@ -19,7 +20,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 		}
 	}
 
-	private float settingsIntensityMultiplier => Settings.Gameplay.CameraShake / 100f;
+	private float SettingsIntensityMultiplier => Settings.Gameplay.CameraShake / 100f;
 
 	Vector2 appliedOffset;
 	float duration;
@@ -40,7 +41,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 
 #if UNITY_EDITOR
 		if (DEBUG && DebugInput.GetKeyDown("c")) {
-			if (!isShaking) {
+			if (!IsShaking) {
 				Shake(2, 1, 0);
 			}
 			else {
@@ -49,7 +50,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 		}
 #endif
 
-		if (!isShaking) {
+		if (!IsShaking) {
 			if (totalOffsetApplied.magnitude > 0.001f) {
 				Vector2 nextTotalOffsetApplied = Vector2.Lerp(totalOffsetApplied, Vector2.zero, returnToCenterLerpSpeed * Time.deltaTime);
 				Vector2 offset = nextTotalOffsetApplied - totalOffsetApplied;
@@ -67,7 +68,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 
 				intensity = isUsingCurve ? curve.Evaluate(t) * intensityMultiplier : Mathf.Lerp(startIntensity, endIntensity, t);
 				intensity = isWorldShake ? 1f / Player.instance.Scale : 1f;
-				intensity *= settingsIntensityMultiplier;
+				intensity *= SettingsIntensityMultiplier;
 				Vector2 random = UnityEngine.Random.insideUnitCircle * intensity / 10f;
 				Vector2 offset = Vector2.Lerp(Vector2.zero, -appliedOffset, t) + random;
 
@@ -81,36 +82,36 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 				transform.localPosition -= new Vector3(appliedOffset.x, appliedOffset.y, 0);
 				totalOffsetApplied -= appliedOffset;
 
-				isShaking = false;
+				IsShaking = false;
 			}
 		}
 	}
 
 	public void Shake(float duration, float intensityMultiplier, AnimationCurve curve) {
-		if (!isShaking) {
+		if (!IsShaking) {
 			this.duration = duration;
 			this.intensityMultiplier = intensityMultiplier;
 			this.curve = curve;
 
 			isUsingCurve = true;
-			isShaking = true;
+			IsShaking = true;
 		}
 	}
 
 	public void Shake(float duration, float startIntensity, float endIntensity) {
-		if (!isShaking) {
+		if (!IsShaking) {
 			this.duration = duration;
 			this.startIntensity = startIntensity;
 			this.endIntensity = endIntensity;
 
 			isUsingCurve = false;
-			isShaking = true;
+			IsShaking = true;
 		}
 	}
 
 	public void CancelShake() {
 		isUsingCurve = false;
-		isShaking = false;
+		IsShaking = false;
 	}
 
 	#region Saving
@@ -135,7 +136,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 
 		public CameraShakeSave(CameraShake cameraShake) : base(cameraShake) {
 			this.isUsingCurve = cameraShake.isUsingCurve;
-			this.isShaking = cameraShake.isShaking;
+			this.isShaking = cameraShake.IsShaking;
 			this.appliedOffset = cameraShake.appliedOffset;
 			this.duration = cameraShake.duration;
 			this.startIntensity = cameraShake.startIntensity;

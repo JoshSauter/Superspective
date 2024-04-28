@@ -127,29 +127,39 @@ namespace Saving {
         }
 
         IEnumerator InitCoroutine() {
-            yield return new WaitWhile(() => GameManager.instance.IsCurrentlyLoading);
+            yield return new WaitUntil(() => GameManager.instance?.gameHasLoaded ?? false);
+            DoInitIdempotent();
+        }
+
+        void InitAfterSceneRestoreState(string sceneName) {
+            if (sceneName == SceneName) {
+                DoInitIdempotent();
+
+                LevelManager.instance.AfterSceneRestoreState -= InitAfterSceneRestoreState;
+            }
+        }
+
+        private void DoInitIdempotent() {
             if (!hasInitialized) {
                 Init();
                 hasInitialized = true;
             }
         }
 
-        void InitAfterSceneRestoreState(string sceneName) {
-            if (sceneName == SceneName) {
-                if (!hasInitialized) {
-                    Init();
-                    hasInitialized = true;
-                }
-
-                LevelManager.instance.AfterSceneRestoreState -= InitAfterSceneRestoreState;
-            }
+        protected virtual void OnEnable() {
+            StartCoroutine(InitCoroutine());
         }
 
+        /// <summary>
+        /// Register this SaveableObject with the SaveManagerForScene when the scene changes, then stop listening for scene changes
+        /// </summary>
+        /// <param name="scene">Scene switched to, compared against this.SceneName to know when to trigger</param>
         void RegisterOnLevelChangeEvents(string scene) {
             if (hasRegistered) return;
             
             if (scene == SceneName) {
                 Register();
+                // Only do this once
                 LevelManager.instance.BeforeSceneRestoreState -= RegisterOnLevelChangeEvents;
                 LevelManager.instance.BeforeSceneSerializeState -= RegisterOnLevelChangeEvents;
             }
@@ -176,6 +186,7 @@ namespace Saving {
 
         protected virtual void OnValidate() {
             if (id == null) {
+                // If T has a RequireComponent attribute for UniqueId, add it if it doesn't exist
                 var requireUniqueIdAttribute = typeof(T).GetCustomAttributes(typeof(RequireComponent), true).Select(att => att as RequireComponent);
                 var uniqueIdType = typeof(UniqueId);
                 bool requiresUniqueId = requireUniqueIdAttribute.Any(att => att?.m_Type0 == uniqueIdType || att?.m_Type1 == uniqueIdType || att?.m_Type2 == uniqueIdType);

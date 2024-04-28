@@ -13,11 +13,13 @@ public class #SCRIPTNAME# : SaveableObject<#SCRIPTNAME#, #SCRIPTNAME#.#SCRIPTNAM
         Off,
         On
     }
-    public StateMachine<State> state = new StateMachine<State>(State.Off);
+    public StateMachine<State> state;
 
     protected override void Awake() {
         base.Awake();
         #NOTRIM#
+        
+        state = this.StateMachine(State.Off);
     }
 
     protected override void Start() {
@@ -40,7 +42,7 @@ public class #SCRIPTNAME# : SaveableObject<#SCRIPTNAME#, #SCRIPTNAME#.#SCRIPTNAM
 			}
 
 			public override void LoadSave(#SCRIPTNAME# script) {
-                script.state.FromSave(this.stateSave);
+                script.state.LoadFromSave(this.stateSave);
 			}
 		}
 #endregion

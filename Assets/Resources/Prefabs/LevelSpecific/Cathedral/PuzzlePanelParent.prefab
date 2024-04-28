@@ -4749,7 +4749,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1505295270675203196}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -4760,6 +4760,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -16157,7 +16158,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1834143664506403155}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -16168,6 +16169,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0

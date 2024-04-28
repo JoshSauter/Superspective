@@ -17,7 +17,7 @@ namespace Editor {
         }
 
         private static Dictionary<string, CachedReference> cachedReferences = new Dictionary<string, CachedReference>();
-        private bool viewAsReference = false;
+        private bool viewAsReference = true;
 
         public override void OnGUI(
             Rect position,

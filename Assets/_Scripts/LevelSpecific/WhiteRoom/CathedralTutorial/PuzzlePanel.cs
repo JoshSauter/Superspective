@@ -79,7 +79,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             // Incorrect SFX
             for (int i = 0; i < incorrectFlashTimes; i++) {
                 state.AddTrigger(PuzzleState.Incorrect, (incorrectFlashDuration/incorrectFlashTimes) * i, () =>
-                    AudioManager.instance.PlayOnGameObject(AudioName.IncorrectAnswer, "IncorrectAnswer", this));
+                    AudioManager.instance.PlayOnGameObject(AudioName.IncorrectAnswer, "", this));
             }
 
             // Depowering power trails
@@ -121,7 +121,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
             // Colors of value display
             state.AddTrigger(PuzzleState.Correct, 0f, () => {
-                AudioManager.instance.Play(AudioName.CorrectAnswer, "CorrectAnswer");
+                AudioManager.instance.Play(AudioName.CorrectAnswer);
                 valueIcon.desiredColor = correctColor;
                 floorPuzzle.currentValue.desiredColor = correctColor;
             });
@@ -202,7 +202,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                     break;
                 case PuzzleState.Incorrect:
                     if (Evaluate()) {
-                        AudioManager.instance.GetAudioJob(AudioName.IncorrectAnswer, "IncorrectAnswer").Stop();
+                        AudioManager.instance.GetAudioJob(AudioName.IncorrectAnswer).Stop();
                         state.Set(PuzzleState.Correct);
                         break;
                     }

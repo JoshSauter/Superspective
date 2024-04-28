@@ -16,6 +16,8 @@ namespace Saving {
     public abstract class SingletonSaveableObject<T, S> : SaveableObject
         where S : SerializableSaveObject<T>
         where T : SaveableObject {
+        
+        public override string ID => typeof(T).Name;
         static T _instance = null;
 
         public static T instance {

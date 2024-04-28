@@ -3986,11 +3986,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 491816012}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &491816016
@@ -19430,11 +19434,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1016995195}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1016995199
@@ -20290,7 +20298,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1100334105}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -20301,6 +20309,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -22132,7 +22141,7 @@ MonoBehaviour:
   - {fileID: 3069937}
   powerNodes: {fileID: 1121270042}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -22143,6 +22152,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -23635,6 +23645,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 3
   visibilityState: 3
   collisionMatrix: 000000010000000000010000000000010000010101010101
@@ -25547,7 +25558,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1315186209}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -25558,6 +25569,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -26625,11 +26637,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 1411538284}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1411538288
@@ -27886,6 +27902,7 @@ MonoBehaviour:
   disableColliderWhileInvisible: 1
   renderers: []
   colliders: []
+  ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 3
   visibilityState: 3
   collisionMatrix: 000000010000000000010000000000010000010101010101
@@ -28400,7 +28417,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1583444905}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -28411,6 +28428,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -32291,7 +32309,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1716652305}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -32302,6 +32320,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -33324,7 +33343,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1833302164}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -33335,6 +33354,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -35397,7 +35417,7 @@ MonoBehaviour:
   renderers: []
   powerNodes: {fileID: 1977453006}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -35408,6 +35428,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -38973,7 +38994,7 @@ MonoBehaviour:
   - {fileID: 2099894380}
   powerNodes: {fileID: 1996799288}
   numAudioSources: 4
-  reverseVisibility: 0
+  reverseDirection: 0
   useDurationInsteadOfSpeed: 0
   useSeparateSpeedsForPowerOnOff: 0
   targetDuration: 3
@@ -38984,6 +39005,7 @@ MonoBehaviour:
   skipStartupShutdownSounds: 0
   objectMoves: 0
   hiddenPowerTrail: 0
+  useCylinderInsteadOfCapsule: 0
   revealAfterPowering: 0
   distance: 0
   maxDistance: 0
@@ -40818,11 +40840,15 @@ MonoBehaviour:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
+  disableColliderWhilePaused: 0
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
   trigger: {fileID: 2086538052}
   onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &2086538056

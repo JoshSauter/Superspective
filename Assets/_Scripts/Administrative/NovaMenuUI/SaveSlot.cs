@@ -132,15 +132,15 @@ public class SaveSlot : MonoBehaviour {
 
     public struct DeleteSaveAnimation : IAnimation {
         public UIBlock Background;
-        public Tuple<Color, Color> bgColors; // Tuple<startColor, endColor>
+        public (Color, Color) bgColors; // (startColor, endColor)
         public UIBlock2D DeleteIcon;
-        public Tuple<Color, Color> deleteIconColors;
+        public (Color, Color) deleteIconColors;
         public TextBlock DeleteLabel;
-        public Tuple<Color, Color> deleteLabelColors;
+        public (Color, Color) deleteLabelColors;
         public UIBlock DeleteConfirm;
-        public Tuple<Color, Color> deleteConfirmColors;
+        public (Color, Color) deleteConfirmColors;
         public UIBlock DeleteCancel;
-        public Tuple<Color, Color> deleteCancelColors;
+        public (Color, Color) deleteCancelColors;
         
         public void Update(float percentDone) {
             float t = Easing.EaseInOut(percentDone);
@@ -152,7 +152,7 @@ public class SaveSlot : MonoBehaviour {
             AnimateColors(Background, bgColors, t);
         }
 
-        void AnimateColors(UIBlock uiBlock, Tuple<Color, Color> startEndColors, float t) {
+        void AnimateColors(UIBlock uiBlock, (Color, Color) startEndColors, float t) {
             Color startColor = startEndColors.Item1;
             Color endColor = startEndColors.Item2;
 
@@ -290,15 +290,15 @@ public class SaveSlot : MonoBehaviour {
 
         DeleteSaveAnimation animation = new DeleteSaveAnimation {
             Background = DeleteSaveArea,
-            bgColors = new Tuple<Color, Color>(bgStartColor, bgEndColor),
+            bgColors = (bgStartColor, bgEndColor),
             DeleteIcon = DeleteSaveIcon,
-            deleteIconColors = new Tuple<Color, Color>(deleteIconStartColor, deleteIconEndColor),
+            deleteIconColors = (deleteIconStartColor, deleteIconEndColor),
             DeleteLabel = DeleteSaveLabel,
-            deleteLabelColors = new Tuple<Color, Color>(deleteLabelStartColor, deleteLabelEndColor),
+            deleteLabelColors = (deleteLabelStartColor, deleteLabelEndColor),
             DeleteConfirm = DeleteSaveConfirm,
-            deleteConfirmColors = new Tuple<Color, Color>(deleteConfirmStartColor, deleteConfirmEndColor),
+            deleteConfirmColors = (deleteConfirmStartColor, deleteConfirmEndColor),
             DeleteCancel = DeleteSaveCancel,
-            deleteCancelColors = new Tuple<Color, Color>(deleteCancelStartColor, deleteCancelEndColor)
+            deleteCancelColors = (deleteCancelStartColor, deleteCancelEndColor)
         };
 
         debug.LogWarning($"Running animation for Delete Area: {state}");
