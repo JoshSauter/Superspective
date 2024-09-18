@@ -141,8 +141,8 @@ public class InteractJuice : MonoBehaviour {
             }
         }
         
-        if (bloomState.state == BloomState.Blooming) {
-            float t = bloomState.timeSinceStateChanged / bloomTime;
+        if (bloomState.State == BloomState.Blooming) {
+            float t = bloomState.Time / bloomTime;
             reticleOutside.rectTransform.localScale = Vector3.one * Mathf.Lerp(newInteractableObjHoveredReticleBloom, 1, t*t);
         }
     }

@@ -13,13 +13,6 @@ using UnityEngine.Serialization;
 using static Audio.AudioManager;
 
 namespace PowerTrailMechanics {
-	public class NodeTrailInfo {
-		public Node parent;
-		public Node thisNode;
-		public float startDistance;
-		public float endDistance;
-	}
-
 	[RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
 	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
 		[Label("Power")]
@@ -44,7 +37,9 @@ namespace PowerTrailMechanics {
 		[ShowNativeProperty]
 		public int simplePathNodes => simplePath.Count;
 
-		public int numAudioSources = 4; // Max one per simplePath segment
+		public int numAudioSources = 2; // Max one per simplePath segment
+
+		private int NUM_AUDIO_SOURCES_HARDCODED = 2; // 4 seems like too many, and there are a lot that are using 4 for numAudioSources. It's very expensive to have 4 audio sources per power trail
 		// trail segment -> audioJob.uniqueIdentifier
 		private readonly TwoWayDictionary<NodeTrailInfo, string> audioSegments = new TwoWayDictionary<NodeTrailInfo, string>();
 
@@ -122,20 +117,18 @@ namespace PowerTrailMechanics {
 
 		private DimensionObject thisDimensionObject;
 		// If there's no parent dimension object, set the layer dynamically based on the player's size
-		private int EffectiveLayer {
-			get {
-				// Don't change the layer if there is a parent dimension object
-				if (thisDimensionObject != null) {
-					return gameObject.layer;
-				}
-
-				// UI only layer that doesn't collide w/ anything right now
-				if (hiddenPowerTrail) {
-					return LayerMask.NameToLayer("UI");
-				}
-				
-				return LayerMask.NameToLayer(Player.instance.Scale < 1 ? "Default" : "VisibleButNoPlayerCollision");
+		private int EffectiveLayer(Renderer r) {
+			// Don't change the layer if there is a parent dimension object
+			if (thisDimensionObject != null) {
+				return r.gameObject.layer;
 			}
+
+			// UI only layer that doesn't collide w/ anything right now
+			if (hiddenPowerTrail) {
+				return LayerMask.NameToLayer("UI");
+			}
+
+			return Player.instance.Scale < 1 ? SuperspectivePhysics.DefaultLayer : SuperspectivePhysics.VisibleButNoPlayerCollisionLayer;
 		}
 
 		protected override void Awake() {
@@ -196,7 +189,8 @@ namespace PowerTrailMechanics {
 
 		void SetLayers() {
 			foreach (var renderer in renderers) {
-				renderer.gameObject.layer = EffectiveLayer;
+				// debug.Log($"Setting layer of {renderer.name} to {LayerMask.LayerToName(EffectiveLayer)}");
+				renderer.gameObject.layer = EffectiveLayer(renderer);
 			}
 		}
 
@@ -225,8 +219,7 @@ namespace PowerTrailMechanics {
 		}
 
 		void InitializeAudioSegments() {
-			// TODO: Revert iterator to numAudioSources after debugging slow performance
-			for (int i = 0; i < 1/*numAudioSources*/; i++) {
+			for (int i = 0; i < NUM_AUDIO_SOURCES_HARDCODED; i++) {
 				// Axiom: Audio job's uniqueIdentifier ends with "_<0 to numAudioSources>"
 				string audioId = $"{ID}_{i}";
 				AudioManager.instance.PlayWithUpdate(AudioName.PowerTrailHum, audioId, this);
@@ -317,104 +310,8 @@ namespace PowerTrailMechanics {
 		}
 
 		void PopulateTrailInfo() {
-			PopulateTrailInfoRecursively(powerNodes.rootNode, 0);
-		}
-
-		void PopulateTrailInfoRecursively(Node curNode, float curDistance) {
-			if (!curNode.isRootNode) {
-				Node parentNode = curNode.parent;
-				float endDistance = parentNode.zeroDistanceToChildren ? curDistance : curDistance + (curNode.pos - parentNode.pos).magnitude;
-				// If there is a parent node, add trail info here
-				NodeTrailInfo info = new NodeTrailInfo {
-					parent = parentNode,
-					thisNode = curNode,
-					startDistance = curDistance,
-					endDistance = endDistance
-				};
-				trailInfo.Add(info);
-
-				// Create the simple path as we traverse the nodes
-				if (!parentNode.zeroDistanceToChildren) {
-					if (parentNode.staircaseSegment) {
-						if (curNode.isLeafNode) {
-							// End of staircase segment, find start and add segment
-							Node end = curNode;
-							Node start = parentNode;
-							float startDistance = curDistance;
-							while (start.parent?.staircaseSegment ?? false) {
-								startDistance -= (start.pos - start.parent.pos).magnitude;
-								start = start.parent;
-							}
-							
-							// Add just the staircase segment
-							NodeTrailInfo staircaseSegment = new NodeTrailInfo {
-								parent = start,
-								thisNode = end,
-								startDistance = startDistance,
-								endDistance = curDistance
-							};
-							simplePath.Add(staircaseSegment);
-						}
-						else if (!curNode.staircaseSegment) {
-							// End of staircase segment, find start and add segment
-							Node end = parentNode;
-							Node start = parentNode;
-							float startDistance = curDistance;
-							while (start.parent?.staircaseSegment ?? false) {
-								startDistance -= (start.pos - start.parent.pos).magnitude;
-								start = start.parent;
-							}
-
-							// Add the staircase segment first
-							NodeTrailInfo staircaseSegment = new NodeTrailInfo {
-								parent = start,
-								thisNode = end,
-								startDistance = startDistance,
-								endDistance = curDistance
-							};
-							simplePath.Add(staircaseSegment);
-							
-							// Add this segment as normal as well
-							NodeTrailInfo segment = new NodeTrailInfo {
-								parent = parentNode,
-								thisNode = curNode,
-								startDistance = curDistance,
-								endDistance = endDistance
-							};
-							simplePath.Add(segment);
-						}
-					}
-					// parent is not a staircase segment
-					else {
-						// Add line segment as normal
-						NodeTrailInfo segment = new NodeTrailInfo {
-							parent = parentNode,
-							thisNode = curNode,
-							startDistance = curDistance,
-							endDistance = endDistance
-						};
-						simplePath.Add(segment);
-					}
-				}
-
-				// Update maxDistance as you add new trail infos
-				if (info.endDistance > maxDistance) {
-					maxDistance = info.endDistance;
-				}
-
-				// Recurse for each child
-				if (!curNode.isLeafNode) {
-					foreach (Node child in curNode.children) {
-						PopulateTrailInfoRecursively(child, info.endDistance);
-					}
-				}
-			}
-			// Base case of root parent node
-			else {
-				foreach (Node child in curNode.children) {
-					PopulateTrailInfoRecursively(child, curDistance);
-				}
-			}
+			(trailInfo, simplePath) = powerNodes.GenerateTrailInfoAndSimplePath();
+			maxDistance = trailInfo.Select(n => n.endDistance).Max();
 		}
 
 		void UpdateInterpolationValues(float newDistance) {
@@ -482,7 +379,7 @@ namespace PowerTrailMechanics {
 			List<(NodeTrailInfo, Vector3, float)> simplePathSegmentsByDistance = simplePath.Select(NearestPointOnSegment)
 				.Where(tuple => tuple.Item3 < maxSoundDistance) // Filter out segments where closest point is too far
 				.OrderBy(tuple => tuple.Item3) // Order by how close a segment is to player cam
-				.Take(numAudioSources) // get numAudioSources closest segments
+				.Take(NUM_AUDIO_SOURCES_HARDCODED) // get numAudioSources closest segments
 				.ToList();
 			// If this audio source is already being used in an audio segment
 			if (audioSegments.ContainsValue(audioJob.uniqueIdentifier)) {
@@ -643,7 +540,7 @@ namespace PowerTrailMechanics {
 		Color unselectedColor = new Color(.15f, .85f, .25f);
 		Color selectedColor = new Color(.95f, .95f, .15f);
 		void DrawGizmosRecursively(Node curNode) {
-			Gizmos.color = (curNode == powerNodes.selectedNode) ? selectedColor : unselectedColor;
+			Gizmos.color = powerNodes.selectedNodes.Contains(curNode) ? selectedColor : unselectedColor;
 
 			foreach (Node child in curNode.children) {
 				if (child != null) {

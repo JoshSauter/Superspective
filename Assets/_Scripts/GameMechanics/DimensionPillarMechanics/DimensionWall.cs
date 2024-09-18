@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using PortalMechanics;
+using UnityEngine;
 using SuperspectiveUtils;
 
 public class DimensionWall : MonoBehaviour {
@@ -21,14 +23,10 @@ public class DimensionWall : MonoBehaviour {
 
 	Vector3 PlayerCamWorldPos => SuperspectiveScreen.instance.playerCamera.transform.position;
 
-	public float PillarHeight {
-		get {
-			return TopOfPillar.y - BottomOfPillar.y;
-		}
-	}
+	public float PillarHeight => TopOfPillar.y - BottomOfPillar.y;
 
-	readonly float radsOffsetForDimensionWall = -0.1f;
-	readonly float dimensionWallWidth = 0.01f;
+	public const float RADS_OFFSET_FOR_DIMENSION_WALL = -0.1f;
+	const float DIMENSION_WALL_WIDTH = 0.01f;
 	LayerMask roomBoundsMask;
 
 	void Awake() {
@@ -41,9 +39,27 @@ public class DimensionWall : MonoBehaviour {
 		InitializeWallTransform();
     }
 
+	void OnEnable() {
+		SubscribeToEvents();
+	}
+
+	private void OnDisable() {
+		UnsubscribeFromEvents();
+	}
+
+	private void SubscribeToEvents() {
+		VirtualPortalCamera.OnPreRenderPortal += OnPreRenderPortal;
+		VirtualPortalCamera.OnPostRenderPortal += OnPostRenderPortal;
+	}
+
+	private void UnsubscribeFromEvents() {
+		VirtualPortalCamera.OnPreRenderPortal -= OnPreRenderPortal;
+		VirtualPortalCamera.OnPostRenderPortal -= OnPostRenderPortal;
+	}
+
 	void InitializeWallTransform() {
 		//transform.SetParent(transform);
-		transform.localScale = new Vector3(dimensionWallWidth / transform.localScale.x, PillarHeight / transform.localScale.y, 1 / transform.localScale.z);
+		transform.localScale = new Vector3(DIMENSION_WALL_WIDTH / transform.localScale.x, PillarHeight / transform.localScale.y, 1 / transform.localScale.z);
 		transform.localPosition = new Vector3(0, 0, 0);
 	}
 
@@ -51,11 +67,21 @@ public class DimensionWall : MonoBehaviour {
 		UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
 	}
 
-	public void UpdateStateForCamera(Camera cam) {
+	void OnPreRenderPortal(Portal _) {
+		// Offset the wall angle by more when rendering for portals,
+		// since the DimensionWall can get cut off by the oblique projection matrix of the virtual portal camera
+		UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, 4 * RADS_OFFSET_FOR_DIMENSION_WALL);
+	}
+
+	void OnPostRenderPortal(Portal _) {
+		UpdateStateForCamera(Player.instance.PlayerCam);
+	}
+
+	public void UpdateStateForCamera(Camera cam, float offset = RADS_OFFSET_FOR_DIMENSION_WALL) {
 		thisRenderer.enabled = pillar.enabled;
 		if (!pillar.enabled) return;
 
-		UpdateWallRotation(cam);
+		UpdateWallRotation(cam, offset);
 		UpdateWallSize();
 	}
 
@@ -66,8 +92,8 @@ public class DimensionWall : MonoBehaviour {
 		return dimensionShiftPolar.angle - polar.angle;
 	}
 
-	void UpdateWallRotation(Camera cam) {
-		transform.localEulerAngles = new Vector3(0, AngleOfCamera(cam).degrees - radsOffsetForDimensionWall * Mathf.Rad2Deg, 0);
+	void UpdateWallRotation(Camera cam, float offset) {
+		transform.localEulerAngles = new Vector3(0, AngleOfCamera(cam).degrees - offset * Mathf.Rad2Deg, 0);
 	}
 
 	void UpdateWallSize() {

@@ -107,9 +107,14 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     void InitElevatorStateMachine() {
-	    elevatorState.AddStateTransition(ElevatorState.MovingDown, ElevatorState.Idle, () => elevatorState.timeSinceStateChanged >= ElevatorTime(floorState));
+	    elevatorState.AddStateTransition(ElevatorState.MovingDown, ElevatorState.Idle, () => elevatorState.Time >= ElevatorTime(floorState));
 	    
-	    elevatorState.AddTrigger(ElevatorState.MovingDown, 0f, () => CameraShake.instance.Shake(ElevatorTime(floorState), elevatorShakeMaxIntensity, elevatorCameraShakeIntensity));
+	    elevatorState.AddTrigger(ElevatorState.MovingDown, 0f, () => CameraShake.instance.Shake(new CameraShake.CameraShakeEvent {
+		    intensity = elevatorShakeMaxIntensity,
+		    duration = ElevatorTime(floorState),
+		    intensityCurve = elevatorCameraShakeIntensity,
+		    spatial = 0
+	    }));
 	    elevatorState.AddTrigger(ElevatorState.MovingDown, teleportTime, () => {
 		    if (floorState == FloorState.TopFloor && elevatorState == ElevatorState.MovingDown) {
 			    // Teleport the player and change the level
@@ -121,8 +126,8 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 		    }
 	    });
 	    elevatorState.AddTrigger(ElevatorState.Idle, 0f, () => {
-		    if (elevatorState.prevState != ElevatorState.MovingDown) return;
-		    switch (floorState.state) {
+		    if (elevatorState.PrevState != ElevatorState.MovingDown) return;
+		    switch (floorState.State) {
 			    case FloorState.TopFloor:
 				    floorState.Set(FloorState.PuzzleFloor);
 				    break;
@@ -139,7 +144,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     void OnButtonPress(Button b) {
-	    if (buttonState.state != ButtonState.Idle) return;
+	    if (buttonState.State != ButtonState.Idle) return;
 
 	    buttonState.Set(CheckAnswer() ? ButtonState.Correct : ButtonState.Incorrect);
     }
@@ -152,7 +157,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     private bool CheckAnswer() {
-	    switch (floorState.state) {
+	    switch (floorState.State) {
 		    case FloorState.TopFloor:
 			    return buttonValue.actualValue == TopFloorValue();
 		    case FloorState.PuzzleFloor:
@@ -175,9 +180,9 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 	    bool wallsUp = elevatorState == ElevatorState.MovingDown || buttonState == ButtonState.Correct;
 	    invisibleWalls.SetActive(wallsUp);
 
-	    switch (elevatorState.state) {
+	    switch (elevatorState.State) {
 		    case ElevatorState.Idle:
-			    switch (floorState.state) {
+			    switch (floorState.State) {
 				    case FloorState.TopFloor:
 					    elevator.position = topFloorWaypoint.position;
 					    break;
@@ -192,14 +197,14 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 			    }
 			    break;
 		    case ElevatorState.MovingDown:
-			    float t = elevatorState.timeSinceStateChanged / ElevatorTime(floorState);
+			    float t = elevatorState.Time / ElevatorTime(floorState);
 			    Vector3 nextPos = elevator.position;
-			    switch (floorState.state) {
+			    switch (floorState.State) {
 				    case FloorState.TopFloor:
-					    t = (elevatorState.timeSinceStateChanged < teleportTime) ?
-						    elevatorState.timeSinceStateChanged / teleportTime :
-						    (elevatorState.timeSinceStateChanged - teleportTime) / (ElevatorTime(floorState) - teleportTime);
-					    nextPos = (elevatorState.timeSinceStateChanged < teleportTime)
+					    t = (elevatorState.Time < teleportTime) ?
+						    elevatorState.Time / teleportTime :
+						    (elevatorState.Time - teleportTime) / (ElevatorTime(floorState) - teleportTime);
+					    nextPos = (elevatorState.Time < teleportTime)
 						    ? Vector3.Lerp(topFloorWaypoint.position, teleportPointEnterWaypoint.position, t)
 						    : Vector3.Lerp(teleportPointExitWaypoint.position, puzzleFloorWaypoint.position, t);
 					    break;
@@ -221,17 +226,17 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     void UpdateButton() {
-	    switch (buttonState.state) {
+	    switch (buttonState.State) {
 		    case ButtonState.Idle:
 			    // Disable the button while moving down (or just after)
-			    if (elevatorState == ElevatorState.MovingDown || (elevatorState.prevState == ElevatorState.MovingDown && elevatorState.timeSinceStateChanged < .5f)) {
+			    if (elevatorState == ElevatorState.MovingDown || (elevatorState.PrevState == ElevatorState.MovingDown && elevatorState.Time < .5f)) {
 				    interactableObject.SetAsDisabled("(Already moving)");
 			    }
 			    // Hide it when we enter the puzzle room
 			    else if (FloorManager.instance.currentValue == 0 && floorState != FloorState.TopFloor) {
 				    interactableObject.SetAsHidden();
 			    }
-			    else if (floorState.timeSinceStateChanged > 1.25f) {
+			    else if (floorState.Time > 1.25f) {
 				    interactableObject.SetAsInteractable("Operate elevator");
 			    }
 
@@ -243,7 +248,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
 		    case ButtonState.Incorrect:
 			    interactableObject.SetAsDisabled();
 			    
-			    float t = 0.5f + 0.5f*Mathf.Cos(buttonState.timeSinceStateChanged * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
+			    float t = 0.5f + 0.5f*Mathf.Cos(buttonState.Time * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
 			    buttonValue.SetColorImmediately(Color.Lerp(buttonValue.defaultColor, incorrectColor, t));
 			    break;
 		    case ButtonState.Correct:
@@ -262,7 +267,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     void ResetCompareAgainstColor() {
-	    switch (floorState.state) {
+	    switch (floorState.State) {
 		    case FloorState.TopFloor:
 			    ResetTopFloorValueDisplayDesiredColor();
 			    break;
@@ -284,7 +289,7 @@ public class ElevatorButton : SaveableObject<ElevatorButton, ElevatorButton.Elev
     }
 
     void SetCompareAgainstColor(Color color) {
-	    switch (floorState.state) {
+	    switch (floorState.State) {
 		    case FloorState.TopFloor:
 			    SetTopFloorValueDisplayDesiredColor(color);
 			    break;

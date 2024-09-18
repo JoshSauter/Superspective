@@ -493,7 +493,10 @@ namespace Saving {
         public void DeleteAllDynamicObjectsInScene() {
             foreach (var dynamicObj in dynamicObjects.Values) {
                 if (dynamicObj != null && dynamicObj.gameObject != null) {
-                    Object.Destroy(dynamicObj.gameObject);
+                    // Don't destroy objects that are just part of the scene
+                    if (dynamicObj.instantiatedAtRuntime) {
+                        Object.Destroy(dynamicObj.gameObject);
+                    }
                 }
             }
             dynamicObjects.Clear();
@@ -514,13 +517,13 @@ namespace Saving {
                     return false;
                 }
             }
-            
+
             List<T> matches = Resources.FindObjectsOfTypeAll<T>()
                 .Where(s => HasValidId(s) && s.ID == id && IsObjectInThisScene(s))
                 .ToList();
 
             if (matches.Count == 0) {
-                debug.LogWarning($"No saveableObject with id {id} found anywhere in scene {sceneName}");
+                debug.LogWarning($"No saveableObject with id {id} found anywhere in scene {sceneName}", true);
                 return null;
             }
 

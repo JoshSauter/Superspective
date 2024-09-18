@@ -40,10 +40,10 @@ namespace LevelSpecific.Fork {
 		public Transform lockBeam;
 		public GameObject invisibleElevatorWall;
 		public Button elevatorButton;
-		const float height = 21.5f;
 		float raisedHeight;
 		float loweredHeight;
 
+		const float height = 21.5f;
 		const float lockBarDelayTime = 0.25f;
 		const float unlockBarDelayTime = 0.125f;
 		const float timeToLockDoors = 2f;
@@ -51,6 +51,8 @@ namespace LevelSpecific.Fork {
 		const float lockBeamMinSize = 0.125f;
 		float curSpeed = 0f;
 		const float maxSpeed = 6f;
+
+		private CameraShake.CameraShakeEvent cameraShake;
 
 		List<PickupObject> otherObjectsInElevator = new List<PickupObject>();
 		bool playerStandingInElevator = false;
@@ -140,7 +142,7 @@ namespace LevelSpecific.Fork {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				invisibleElevatorWall.SetActive(true);
 				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, ID, this, true);
-				CameraShake.instance.Shake(timeToLockDoors, 0.25f, 0f);
+				cameraShake = CameraShake.instance.Shake(5f, timeToLockDoors);
 			}
 
 			float totalAnimationTime = timeToLockDoors + (lockBars.Length / 2) * lockBarDelayTime;
@@ -161,7 +163,13 @@ namespace LevelSpecific.Fork {
 				// Transition state to ElevatorMoving after waiting .1 additional seconds
 				if (timeElapsedSinceStateChange >= totalAnimationTime + 0.1f) {
 					if (initialPowerTrail.pwr.PowerIsOn) {
-						CameraShake.instance.Shake(5f, 0.0625f, 0.0625f);
+						CameraShake.CameraShakeEvent shakeEvent = new CameraShake.CameraShakeEvent() {
+							duration = 5f,
+							intensity = 1.25f,
+							intensityCurve = AnimationCurve.Constant(0, 1, 1),
+							spatial = 0
+						};
+						cameraShake = CameraShake.instance.Shake(shakeEvent);
 						AudioManager.instance.PlayOnGameObject(AudioName.ElevatorMove, ID, this, true);
 					}
 
@@ -173,7 +181,7 @@ namespace LevelSpecific.Fork {
 		void UpdateDoorOpeningAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, ID, this, true);
-				CameraShake.instance.Shake(timeToUnlockDoors, 0.25f, 0f);
+				cameraShake = CameraShake.instance.Shake(5f, timeToUnlockDoors);
 			}
 
 			float totalAnimationTime = timeToUnlockDoors + (lockBars.Length / 2) * unlockBarDelayTime;
@@ -220,7 +228,7 @@ namespace LevelSpecific.Fork {
 				otherObjectsInElevator.Clear();
 			}
 			else {
-				CameraShake.instance.CancelShake();
+				CameraShake.instance.CancelShake(cameraShake);
 				elevator.position = new Vector3(elevator.position.x, (goingDown ? loweredHeight : raisedHeight), elevator.position.z);
 
 				curSpeed = 0f;

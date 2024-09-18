@@ -43,6 +43,8 @@ public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSa
                     r.SetHDRColorForRenderer(startEmissions[r], emissionColorProperty);
                 }
             }
+            startColors = null;
+            startEmissions = null;
         });
     }
     
@@ -65,16 +67,16 @@ public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSa
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
 
-        switch (state.state) {
+        switch (state.State) {
             case State.Idle:
                 break;
             case State.Flashing:
-                if (flashTimes > 0 && state.timeSinceStateChanged > flashTimes * interval) {
+                if (flashTimes > 0 && state.Time > flashTimes * interval) {
                     state.Set(State.Idle);
                     break;
                 }
                 
-                float t = 0.5f + 0.5f * Mathf.Cos(state.timeSinceStateChanged * 2 * Mathf.PI / interval + Mathf.PI);
+                float t = 0.5f + 0.5f * Mathf.Cos(state.Time * 2 * Mathf.PI / interval + Mathf.PI);
                 foreach (Renderer r in renderers) {
                     r.SetColorForRenderer(Color.Lerp(startColors[r], flashColor, t));
                     if (startEmissions.ContainsKey(r)) {
@@ -112,14 +114,17 @@ public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSa
             }
 
 			public override void LoadSave(FlashColors script) {
+                script.CancelFlash();
                 script.state.LoadFromSave(this.stateSave);
                 
                 script.startColors = new Dictionary<Renderer, Color>();
                 script.startEmissions = new Dictionary<Renderer, Color>();
-                for (int i = 0; i < script.renderers.Count; i++) {
-                    script.startColors[script.renderers[i]] = this.startColors[i];
-                    if (this.startEmissions[i] != Color.clear) {
-                        script.startEmissions[script.renderers[i]] = this.startEmissions[i];
+                if (this.startColors != null && this.startColors.Count > 0) {
+                    for (int i = 0; i < script.renderers.Count; i++) {
+                        script.startColors[script.renderers[i]] = this.startColors[i];
+                        if (this.startEmissions[i] != Color.clear) {
+                            script.startEmissions[script.renderers[i]] = this.startEmissions[i];
+                        }
                     }
                 }
 			}

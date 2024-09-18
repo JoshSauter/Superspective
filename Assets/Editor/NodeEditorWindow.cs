@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,10 +26,13 @@ public class NodeEditorWindow : EditorWindow {
     private void OnGUI() {
         foreach (var selected in Selection.transforms) {
             if (selected.TryGetComponent<NodeSystem>(out NodeSystem ns)) {
-                Node node = ns.selectedNode;
+                // Only allow editing one node at a time
+                if (ns.selectedNodes.Count != 1) return;
+                
+                Node node = ns.selectedNodes.First();
 
                 float GetDistanceToRoot(Node from, float acc) {
-                    if (from.isRootNode) return acc;
+                    if (from.IsRootNode) return acc;
 
                     return GetDistanceToRoot(from.parent, acc + Vector3.Distance(from.pos, from.parent.pos));
                 }
@@ -54,7 +58,7 @@ public class NodeEditorWindow : EditorWindow {
                     AddSeparator();
 
                     if (GUILayout.Button("Select Parent")) {
-                        ns.selectedNode = node.parent;
+                        ns.selectedNodes = new HashSet<Node>() {node.parent};
                         return;
                     }
                 }
@@ -65,7 +69,7 @@ public class NodeEditorWindow : EditorWindow {
                 if (node.children != null && node.children.Count > 0) {
                     foreach (var child in node.children) {
                         if (GUILayout.Button($"Select Child: {child.pos - node.pos:F3}")) {
-                            ns.selectedNode = child;
+                            ns.selectedNodes = new HashSet<Node>() {child};
                             return;
                         }
                     }

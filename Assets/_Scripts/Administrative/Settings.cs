@@ -204,6 +204,13 @@ public class Settings : Singleton<Settings> {
 			value = true,
 			defaultValue = true
 		};
+		
+		public static readonly ToggleSetting DoubleThickEdges = new ToggleSetting() {
+			key = "DoubleThickEdges",
+			name = "Thicker Outlines",
+			value = false,
+			defaultValue = false
+		};
 	}
 
 	public static class Gameplay {
@@ -404,6 +411,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Video.AntiAliasingEnabled);
 	    AddSetting(Video.LetterboxingEnabled);
 	    AddSetting(Video.PortalDownsampleAmount);
+	    AddSetting(Video.DoubleThickEdges);
 	    
 	    // Gameplay Settings
 	    AddSetting(Gameplay.SprintByDefault);

@@ -66,7 +66,8 @@ namespace PoweredObjects {
             PowerIsOn = ParentsFullyPowered;
         }
         
-        private void InitDaisyChainEvents() {
+        private void InitEvents() {
+            state.OnStateChange += OnPowerStateChange;
             switch (parentMultiMode) {
                 case MultiMode.Single:
                     if (source == null) return;
@@ -98,7 +99,8 @@ namespace PoweredObjects {
             }
         }
 
-        private void TeardownDaisyChainEvents() {
+        private void TeardownEvents() {
+            state.OnStateChange -= OnPowerStateChange;
             switch (parentMultiMode) {
                 case MultiMode.Single:
                     if (source == null) return;
@@ -155,7 +157,7 @@ namespace PoweredObjects {
             set {
                 if (value == PowerIsOn) return;
 
-                switch (state.state) {
+                switch (state.State) {
                     case PowerState.PartiallyDepowered:
                     case PowerState.Depowered:
                         if (value) {
@@ -183,14 +185,15 @@ namespace PoweredObjects {
             InitializeStateEvents();
         }
 
-        private void OnEnable() {
+        protected override void OnEnable() {
+            base.OnEnable();
             state = this.StateMachine(PowerState.Depowered);
             
-            InitDaisyChainEvents();
+            InitEvents();
         }
 
         private void OnDisable() {
-            TeardownDaisyChainEvents();
+            TeardownEvents();
         }
 
         private void InitializeStateEvents() {
@@ -200,63 +203,63 @@ namespace PoweredObjects {
             if (automaticallyFinishDepowering) {
                 state.AddStateTransition(PowerState.PartiallyDepowered, PowerState.Depowered, automaticFinishDepoweringTime);
             }
-            
-            state.OnStateChange += (prevState, prevTime) => {
-                switch (prevState) {
-                    case PowerState.Depowered:
-                        if (state == PowerState.PartiallyPowered) {
-                            OnPowerBegin?.Invoke();
-                            onPowerBegin?.Invoke();
-                            OnPowerBeginRef?.Invoke(this);
-                        }
-                        else if (state == PowerState.Powered) {
-                            // Trigger both OnPowerBegin and OnPowerFinish events
-                            OnPowerBegin?.Invoke();
-                            onPowerBegin?.Invoke();
-                            OnPowerBeginRef?.Invoke(this);
-                            
-                            OnPowerFinish?.Invoke();
-                            onPowerFinish?.Invoke();
-                            OnPowerFinishRef?.Invoke(this);
-                        }
-                        break;
-                    case PowerState.PartiallyPowered:
-                        if (state == PowerState.Powered) {
-                            OnPowerFinish?.Invoke();
-                            onPowerFinish?.Invoke();
-                            OnPowerFinishRef?.Invoke(this);
-                        }
-                        break;
-                    case PowerState.Powered:
-                        if (state == PowerState.PartiallyDepowered) {
-                            OnDepowerBegin?.Invoke();
-                            onDepowerBegin?.Invoke();
-                            OnDepowerBeginRef?.Invoke(this);
-                        }
-                        else if (state == PowerState.Depowered) {
-                            // Trigger both OnDepowerBegin and OnDepowerFinish events
-                            OnDepowerBegin?.Invoke();
-                            onDepowerBegin?.Invoke();
-                            OnDepowerBeginRef?.Invoke(this);
-                            
-                            OnDepowerFinish?.Invoke();
-                            onDepowerFinish?.Invoke();
-                            OnDepowerFinishRef?.Invoke(this);
-                        }
-                        break;
-                    case PowerState.PartiallyDepowered:
-                        if (state == PowerState.Depowered) {
-                            OnDepowerFinish?.Invoke();
-                            onDepowerFinish?.Invoke();
-                            OnDepowerFinishRef?.Invoke(this);
-                        }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(prevState), prevState, null);
-                }
-            };
         }
-    
+
+        private void OnPowerStateChange(PowerState prevState, float prevTime) {
+            switch (prevState) {
+                case PowerState.Depowered:
+                    if (state == PowerState.PartiallyPowered) {
+                        OnPowerBegin?.Invoke();
+                        onPowerBegin?.Invoke();
+                        OnPowerBeginRef?.Invoke(this);
+                    }
+                    else if (state == PowerState.Powered) {
+                        // Trigger both OnPowerBegin and OnPowerFinish events
+                        OnPowerBegin?.Invoke();
+                        onPowerBegin?.Invoke();
+                        OnPowerBeginRef?.Invoke(this);
+                        
+                        OnPowerFinish?.Invoke();
+                        onPowerFinish?.Invoke();
+                        OnPowerFinishRef?.Invoke(this);
+                    }
+                    break;
+                case PowerState.PartiallyPowered:
+                    if (state == PowerState.Powered) {
+                        OnPowerFinish?.Invoke();
+                        onPowerFinish?.Invoke();
+                        OnPowerFinishRef?.Invoke(this);
+                    }
+                    break;
+                case PowerState.Powered:
+                    if (state == PowerState.PartiallyDepowered) {
+                        OnDepowerBegin?.Invoke();
+                        onDepowerBegin?.Invoke();
+                        OnDepowerBeginRef?.Invoke(this);
+                    }
+                    else if (state == PowerState.Depowered) {
+                        // Trigger both OnDepowerBegin and OnDepowerFinish events
+                        OnDepowerBegin?.Invoke();
+                        onDepowerBegin?.Invoke();
+                        OnDepowerBeginRef?.Invoke(this);
+                        
+                        OnDepowerFinish?.Invoke();
+                        onDepowerFinish?.Invoke();
+                        OnDepowerFinishRef?.Invoke(this);
+                    }
+                    break;
+                case PowerState.PartiallyDepowered:
+                    if (state == PowerState.Depowered) {
+                        OnDepowerFinish?.Invoke();
+                        onDepowerFinish?.Invoke();
+                        OnDepowerFinishRef?.Invoke(this);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(prevState), prevState, null);
+            }
+        }
+
 #region Saving
         [Serializable]
         public class PoweredObjectSave : SerializableSaveObject<PoweredObject> {

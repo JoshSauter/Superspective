@@ -65,7 +65,7 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
         endPosition = pivotPoint -
                       startGravityDirection * Mathf.Abs(Vector3.Dot(initialBounds.size, startGravityDirection));
 
-        gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
+        gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
     }
 
     public void OnBetterTriggerEnter(Collider other) {
@@ -77,7 +77,7 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
         }
         else if (other.TryGetComponent(out GravityObject gravity)) {
             float testLerpValue = GetLerpPositionOfPoint(other.transform.position);
-            bool treatedAsDownStair = TreatedAsDownStair(testLerpValue, gravity.gravityDirection);
+            bool treatedAsDownStair = TreatedAsDownStair(testLerpValue, gravity.GravityDirection);
             
             objectsInStaircase.Add(gravity, treatedAsDownStair);
         }
@@ -110,19 +110,19 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
                 playerMovement.transform.rotation;
 
             PlayerLook playerLook = PlayerLook.instance;
-            playerLook.rotationY -= angleBetween * Vector3.Dot(
+            playerLook.RotationY -= angleBetween * Vector3.Dot(
                 playerMovement.transform.forward,
                 playerMovement.ProjectedHorizontalVelocity().normalized
             );
-            playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
+            playerLook.RotationY = Mathf.Clamp(playerLook.RotationY, -playerLook.yClamp, playerLook.yClamp);
         }
         else if (other.TryGetComponent(out GravityObject gravityObj)) {
-            float angleToStartDirection = Vector3.Angle(startGravityDirection, gravityObj.gravityDirection.normalized);
-            float angleToEndDirection = Vector3.Angle(endGravityDirection, gravityObj.gravityDirection.normalized);
+            float angleToStartDirection = Vector3.Angle(startGravityDirection, gravityObj.GravityDirection.normalized);
+            float angleToEndDirection = Vector3.Angle(endGravityDirection, gravityObj.GravityDirection.normalized);
 
             Vector3 exitGravity = angleToStartDirection < angleToEndDirection ? startGravityDirection : endGravityDirection;
             
-            gravityObj.gravityDirection = exitGravity;
+            gravityObj.GravityDirection = exitGravity;
             if (objectsInStaircase.ContainsKey(gravityObj)) {
                 objectsInStaircase.Remove(gravityObj);
             }
@@ -138,10 +138,9 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
 
             float gravAmplificationFactor = 1;
             if (treatedAsADownStairForPlayer) {
-                Vector3 projectedPlayerPos = Vector3.ProjectOnPlane(ClosestPointOnLine(
+                Vector3 projectedPlayerPos = Vector3.ProjectOnPlane(playerMovement.BottomOfPlayer.GetClosestPointOnFiniteLine(
                     effectiveStartPosition,
-                    effectiveEndPosition,
-                    playerMovement.BottomOfPlayer
+                    effectiveEndPosition
                 ), pivot);
                 // TODO: Fix so that displacement perpendicular to the axis isn't counted
                 Vector3 playerPositionOnPlane = Vector3.ProjectOnPlane(playerMovement.BottomOfPlayer, pivot);
@@ -163,46 +162,26 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
                 playerMovement.transform.rotation;
 
             PlayerLook playerLook = PlayerLook.instance;
-            playerLook.rotationY -= angleBetween * Vector3.Dot(
+            playerLook.RotationY -= angleBetween * Vector3.Dot(
                 playerMovement.transform.forward,
                 playerMovement.ProjectedHorizontalVelocity().normalized
             );
-            playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
+            playerLook.RotationY = Mathf.Clamp(playerLook.RotationY, -playerLook.yClamp, playerLook.yClamp);
         }
         else if (other.gameObject.TryGetComponent(out GravityObject gravityObj)) {
             float objT = GetLerpPositionOfPoint(other.transform.position);
             if (objectsInStaircase.ContainsKey(gravityObj)) {
                 if (objectsInStaircase[gravityObj]) objT = 1 - objT;
             }
-            gravityObj.gravityDirection = Vector3.Lerp(startGravityDirection, endGravityDirection, objT).normalized;
+            gravityObj.GravityDirection = Vector3.Lerp(startGravityDirection, endGravityDirection, objT).normalized;
         }
     }
 
     float GetLerpPositionOfPoint(Vector3 point) {
-        Vector3 closestPointOnLine = ClosestPointOnLine(effectiveStartPosition, effectiveEndPosition, point);
+        Vector3 closestPointOnLine = point.GetClosestPointOnFiniteLine(effectiveStartPosition, effectiveEndPosition);
         float t = Utils.Vector3InverseLerp(effectiveStartPosition, effectiveEndPosition, closestPointOnLine);
 
         return t;
-    }
-
-    Vector3 ClosestPointOnLine(Vector3 vA, Vector3 vB, Vector3 vPoint) {
-        Vector3 vVector1 = vPoint - vA;
-        Vector3 vVector2 = (vB - vA).normalized;
-
-        float d = Vector3.Distance(vA, vB);
-        float t = Vector3.Dot(vVector2, vVector1);
-
-        if (t <= 0)
-            return vA;
-
-        if (t >= d)
-            return vB;
-
-        Vector3 vVector3 = vVector2 * t;
-
-        Vector3 vClosestPoint = vA + vVector3;
-
-        return vClosestPoint;
     }
 
     private void OnDrawGizmos() {

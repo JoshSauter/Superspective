@@ -81,6 +81,7 @@ public class SuperspectiveScreen : Singleton<SuperspectiveScreen> {
 			//return;
 		}
 #endif
+		
 		OnPlayerCamPreRender?.Invoke();
 	}
 

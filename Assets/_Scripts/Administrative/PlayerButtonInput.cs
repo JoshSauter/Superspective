@@ -1,6 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Telemetry;
 using UnityEngine;
+
+public enum InputType {
+	Up,
+	Down,
+	Right,
+	Left,
+	Interact,
+	Zoom,
+	AlignObject,
+	Pause,
+	Jump,
+	Sprint,
+	LeftStick,
+	RightStick
+}
 
 /// <summary>
 /// Single place for all HCI to be processed and output as events.
@@ -23,6 +39,13 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public delegate void ButtonPressEvent();
 	public delegate void ButtonReleaseEvent();
 	public delegate void ButtonHeldEvent(float durationHeld);
+	public delegate void ButtonPressEventWithInput(InputType inputType);
+	public delegate void ButtonReleaseEventWithInput(InputType inputType);
+	public delegate void ButtonHeldEventWithInput(InputType inputType, float durationHeld);
+
+	public event ButtonPressEventWithInput OnAnyPress;
+	public event ButtonReleaseEventWithInput OnAnyRelease;
+	public event ButtonHeldEventWithInput OnAnyHeld;
 
 	public event ButtonPressEvent OnUpPress;
 	public event ButtonPressEvent OnDownPress;
@@ -83,6 +106,7 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 				StartCoroutine(LeftStickHeldCoroutine());
 			}
 		}
+		else if (!LeftStickHeld)
 		// Right stick
 		if (RightStickHeld) {
 			if (!inRightStickHeldCoroutine) {
@@ -91,177 +115,202 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		}
 
 		// Up button
-		if (UpPressed && OnUpPress != null) {
-			OnUpPress();
+		if (UpPressed) {
+			OnUpPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Up);
 			if (!inUpHoldCoroutine) {
 				StartCoroutine(UpHoldCoroutine());
 			}
 		}
-		else if (UpReleased && OnUpRelease != null) {
-			OnUpRelease();
+		else if (UpReleased) {
+			OnUpRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Up);
 		}
+		
 		// Down button
-		if (DownPressed && OnDownPress != null) {
-			OnDownPress();
+		if (DownPressed) {
+			OnDownPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Down);
 			if (!inDownHoldCoroutine) {
 				StartCoroutine(DownHoldCoroutine());
 			}
 		}
-		else if (DownReleased && OnDownRelease != null) {
-			OnDownRelease();
+		else if (DownReleased) {
+			OnDownRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Down);
 		}
+		
 		// Right button
-		if (RightPressed && OnRightPress != null) {
-			OnRightPress();
+		if (RightPressed) {
+			OnRightPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Right);
 			if (!inRightHoldCoroutine) {
 				StartCoroutine(RightHoldCoroutine());
 			}
 		}
-		else if (RightReleased && OnRightRelease != null) {
-			OnRightRelease();
+		else if (RightReleased) {
+			OnRightRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Right);
 		}
+		
 		// Left button
-		if (LeftPressed && OnLeftPress != null) {
-			OnLeftPress();
+		if (LeftPressed) {
+			OnLeftPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Left);
 			if (!inLeftHoldCoroutine) {
 				StartCoroutine(LeftHoldCoroutine());
 			}
 		}
-		else if (LeftReleased && OnLeftRelease != null) {
-			OnLeftRelease();
+		else if (LeftReleased) {
+			OnLeftRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Left);
 		}
 
 		// Interact button (Also maps to mouse left-click)
-		if (InteractPressed && OnInteractPress != null) {
-			OnInteractPress();
+		if (InteractPressed) {
+			OnInteractPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Interact);
 			if (!inInteractHoldCoroutine) {
 				StartCoroutine(InteractHoldCoroutine());
 			}
 		}
-		else if (InteractReleased && OnInteractRelease != null) {
-			OnInteractRelease();
+		else if (InteractReleased) {
+			OnInteractRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Interact);
 		}
 
 		// Zoom button (Also maps to mouse right-click)
-		if (ZoomPressed && OnZoomPress != null) {
-			OnZoomPress();
+		if (ZoomPressed) {
+			OnZoomPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Zoom);
 			if (!inZoomHoldCoroutine) {
 				StartCoroutine(ZoomHoldCoroutine());
 			}
 		}
-		else if (ZoomReleased && OnZoomRelease != null) {
-			OnZoomRelease();
+		else if (ZoomReleased) {
+			OnZoomRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Zoom);
 		}
 
 		// AlignObject button (also maps to mouse middle-click)
-		if (AlignObjectPressed && OnAlignObjectPress != null) {
-			OnAlignObjectPress();
+		if (AlignObjectPressed) {
+			OnAlignObjectPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.AlignObject);
 			if (!inAlignObjectHoldCoroutine) {
 				StartCoroutine(AlignObjectHoldCoroutine());
 			}
 		}
-		else if (AlignObjectReleased && OnAlignObjectRelease != null) {
-			OnAlignObjectRelease();
+		else if (AlignObjectReleased) {
+			OnAlignObjectRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.AlignObject);
 		}
 
 		// Pause button
-		if (PausePressed && OnPausePress != null) {
-			OnPausePress();
+		if (PausePressed) {
+			OnPausePress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Pause);
 			if (!inPauseHoldCoroutine) {
 				StartCoroutine(PauseHoldCoroutine());
 			}
 		}
-		else if (PauseReleased && OnPauseRelease != null) {
-			OnPauseRelease();
+		else if (PauseReleased) {
+			OnPauseRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Pause);
 		}
+		
 		// Jump button
-		if (JumpPressed && OnJumpPress != null) {
-			OnJumpPress();
+		if (JumpPressed) {
+			OnJumpPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Jump);
 			if (!inJumpHoldCoroutine) {
 				StartCoroutine(JumpHoldCoroutine());
 			}
 		}
-		else if (JumpReleased && OnJumpRelease != null) {
-			OnJumpRelease();
+		else if (JumpReleased) {
+			OnJumpRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Jump);
 		}
+		
 		// Sprint button
-		if (SprintPressed && OnSprintPress != null) {
-			OnSprintPress();
+		if (SprintPressed) {
+			OnSprintPress?.Invoke();
+			OnAnyPress?.Invoke(InputType.Sprint);
 			if (!inSprintHoldCoroutine) {
 				StartCoroutine(SprintHoldCoroutine());
 			}
 		}
-		else if (SprintReleased && OnSprintRelease != null) {
-			OnSprintRelease();
+		else if (SprintReleased) {
+			OnSprintRelease?.Invoke();
+			OnAnyRelease?.Invoke(InputType.Sprint);
 		}
 
 	}
 
 #region Combined inputs
 	// On first press
-	public bool UpPressed => Settings.Keybinds.Forward.Pressed;
+	public bool UpPressed => Settings.Keybinds.Forward.Pressed || InputTelemetry.KeyPressSimulated(InputType.Up);
 	
-	public bool DownPressed => Settings.Keybinds.Backward.Pressed;
+	public bool DownPressed => Settings.Keybinds.Backward.Pressed || InputTelemetry.KeyPressSimulated(InputType.Down);
 	
-	public bool RightPressed => Settings.Keybinds.Right.Pressed;
+	public bool RightPressed => Settings.Keybinds.Right.Pressed || InputTelemetry.KeyPressSimulated(InputType.Right);
 	
-	public bool LeftPressed => Settings.Keybinds.Left.Pressed;
+	public bool LeftPressed => Settings.Keybinds.Left.Pressed || InputTelemetry.KeyPressSimulated(InputType.Left);
 	
-	public bool InteractPressed => Settings.Keybinds.Interact.Pressed;
+	public bool InteractPressed => Settings.Keybinds.Interact.Pressed || InputTelemetry.KeyPressSimulated(InputType.Interact);
 
-	public bool ZoomPressed => Settings.Keybinds.Zoom.Pressed;
+	public bool ZoomPressed => Settings.Keybinds.Zoom.Pressed || InputTelemetry.KeyPressSimulated(InputType.Zoom);
 
-	public bool AlignObjectPressed => Settings.Keybinds.AlignObject.Pressed;
+	public bool AlignObjectPressed => Settings.Keybinds.AlignObject.Pressed || InputTelemetry.KeyPressSimulated(InputType.AlignObject);
 	
-	public bool PausePressed => Settings.Keybinds.Pause.Pressed;
+	public bool PausePressed => Settings.Keybinds.Pause.Pressed || InputTelemetry.KeyPressSimulated(InputType.Pause);
 	
-	public bool JumpPressed => Settings.Keybinds.Jump.Pressed;
+	public bool JumpPressed => Settings.Keybinds.Jump.Pressed || InputTelemetry.KeyPressSimulated(InputType.Jump);
 	
-	public bool SprintPressed => Settings.Keybinds.Sprint.Pressed;
+	public bool SprintPressed => Settings.Keybinds.Sprint.Pressed || InputTelemetry.KeyPressSimulated(InputType.Sprint);
 	
 
 	// On button release
-	public bool UpReleased => Settings.Keybinds.Forward.Released;
+	public bool UpReleased => Settings.Keybinds.Forward.Released || InputTelemetry.KeyReleaseSimulated(InputType.Up);
 	
-	public bool DownReleased => Settings.Keybinds.Backward.Released;
+	public bool DownReleased => Settings.Keybinds.Backward.Released || InputTelemetry.KeyReleaseSimulated(InputType.Down);
 	
-	public bool RightReleased => Settings.Keybinds.Right.Released;
+	public bool RightReleased => Settings.Keybinds.Right.Released || InputTelemetry.KeyReleaseSimulated(InputType.Right);
 	
-	public bool LeftReleased => Settings.Keybinds.Left.Released;
+	public bool LeftReleased => Settings.Keybinds.Left.Released || InputTelemetry.KeyReleaseSimulated(InputType.Left);
 	
-	public bool InteractReleased => Settings.Keybinds.Interact.Released;
+	public bool InteractReleased => Settings.Keybinds.Interact.Released || InputTelemetry.KeyReleaseSimulated(InputType.Interact);
 
-	public bool ZoomReleased => Settings.Keybinds.Zoom.Released;
+	public bool ZoomReleased => Settings.Keybinds.Zoom.Released || InputTelemetry.KeyReleaseSimulated(InputType.Zoom);
 
-	public bool AlignObjectReleased => Settings.Keybinds.AlignObject.Released;
+	public bool AlignObjectReleased => Settings.Keybinds.AlignObject.Released || InputTelemetry.KeyReleaseSimulated(InputType.AlignObject);
 
-	public bool PauseReleased => Settings.Keybinds.Pause.Released;
+	public bool PauseReleased => Settings.Keybinds.Pause.Released || InputTelemetry.KeyReleaseSimulated(InputType.Pause);
 	
-	public bool JumpReleased => Settings.Keybinds.Jump.Released;
+	public bool JumpReleased => Settings.Keybinds.Jump.Released || InputTelemetry.KeyReleaseSimulated(InputType.Jump);
 	
-	public bool SprintReleased => Settings.Keybinds.Sprint.Released;
+	public bool SprintReleased => Settings.Keybinds.Sprint.Released || InputTelemetry.KeyReleaseSimulated(InputType.Sprint);
 	
 
 	// While button held
-	public bool UpHeld => Settings.Keybinds.Forward.Held;
+	public bool UpHeld => Settings.Keybinds.Forward.Held || InputTelemetry.KeyHeldSimulated(InputType.Up);
 	
-	public bool DownHeld => Settings.Keybinds.Backward.Held;
+	public bool DownHeld => Settings.Keybinds.Backward.Held || InputTelemetry.KeyHeldSimulated(InputType.Down);
 	
-	public bool RightHeld => Settings.Keybinds.Right.Held;
+	public bool RightHeld => Settings.Keybinds.Right.Held || InputTelemetry.KeyHeldSimulated(InputType.Right);
 	
-	public bool LeftHeld => Settings.Keybinds.Left.Held;
+	public bool LeftHeld => Settings.Keybinds.Left.Held || InputTelemetry.KeyHeldSimulated(InputType.Left);
 	
-	public bool InteractHeld => Settings.Keybinds.Interact.Held;
+	public bool InteractHeld => Settings.Keybinds.Interact.Held || InputTelemetry.KeyHeldSimulated(InputType.Interact);
 	
-	public bool ZoomHeld => Settings.Keybinds.Zoom.Held;
+	public bool ZoomHeld => Settings.Keybinds.Zoom.Held || InputTelemetry.KeyHeldSimulated(InputType.Zoom);
 
-	public bool AlignObjectHeld => Settings.Keybinds.AlignObject.Held;
+	public bool AlignObjectHeld => Settings.Keybinds.AlignObject.Held || InputTelemetry.KeyHeldSimulated(InputType.AlignObject);
 	
-	public bool PauseHeld => Settings.Keybinds.Pause.Held;
+	public bool PauseHeld => Settings.Keybinds.Pause.Held || InputTelemetry.KeyHeldSimulated(InputType.Pause);
 	
-	public bool JumpHeld => Settings.Keybinds.Jump.Held;
+	public bool JumpHeld => Settings.Keybinds.Jump.Held || InputTelemetry.KeyHeldSimulated(InputType.Jump);
 	
-	public bool SprintHeld => Settings.Keybinds.Sprint.Held;
+	public bool SprintHeld => Settings.Keybinds.Sprint.Held || InputTelemetry.KeyHeldSimulated(InputType.Sprint);
 
 	// While stick held
 	public bool LeftStickHeld => LeftStick.magnitude > 0;
@@ -272,6 +321,11 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 	public Vector2 LeftStick {
 		get {
+			Vector2 leftStickSimulated = InputTelemetry.StickSimulated(InputType.LeftStick);
+			if (leftStickSimulated.magnitude > 0) {
+				return leftStickSimulated;
+			}
+			
 			// TODO: Add controller input here
 			Vector2 keyboardInput = Vector2.zero;
 			if (UpHeld) keyboardInput += Vector2.up;
@@ -286,6 +340,11 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	}
 	public Vector2 RightStick {
 		get {
+			Vector2 rightStickSimulated = InputTelemetry.StickSimulated(InputType.RightStick);
+			if (rightStickSimulated.magnitude > 0) {
+				return rightStickSimulated;
+			}
+			
 			// TODO: Add controller input here
 			Vector2 mouseInput = Vector2.zero;
 			mouseInput += Input.GetAxis("Mouse Y") * Vector2.up;
@@ -303,39 +362,37 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	IEnumerator LeftStickHeldCoroutine() {
 		inLeftStickHeldCoroutine = true;
 
+		OnAnyPress?.Invoke(InputType.LeftStick);
 		float timeHeld = 0;
 		while (LeftStickHeld) {
 			Vector2 leftStick = LeftStick;
-			if (OnLeftStickHeld != null) {
-				OnLeftStickHeld(leftStick);
-			}
-			if (OnLeftStickHeldWithDuration != null) {
-				OnLeftStickHeldWithDuration(leftStick, timeHeld);
-			}
+			OnLeftStickHeld?.Invoke(leftStick);
+			OnLeftStickHeldWithDuration?.Invoke(leftStick, timeHeld);
+			OnAnyHeld?.Invoke(InputType.LeftStick, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
+		OnAnyRelease?.Invoke(InputType.LeftStick);
 		inLeftStickHeldCoroutine = false;
 	}
 	IEnumerator RightStickHeldCoroutine() {
 		inRightStickHeldCoroutine = true;
 
+		OnAnyPress?.Invoke(InputType.RightStick);
 		float timeHeld = 0;
 		while (RightStickHeld) {
 			Vector2 rightStick = RightStick;
-			if (OnRightStickHeld != null) {
-				OnRightStickHeld(RightStick);
-			}
-			if (OnRightStickHeldWithDuration != null) {
-				OnRightStickHeldWithDuration(RightStick, timeHeld);
-			}
-
+			OnRightStickHeld?.Invoke(rightStick);
+			OnRightStickHeldWithDuration?.Invoke(rightStick, timeHeld);
+			OnAnyHeld?.Invoke(InputType.RightStick, timeHeld);
+			
 			timeHeld += Time.deltaTime;
 			yield return null;
 		}
 
+		OnAnyRelease?.Invoke(InputType.RightStick);
 		inRightStickHeldCoroutine = false;
 	}
 
@@ -344,9 +401,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 		
 		float timeHeld = 0;
 		while (UpHeld) {
-			if (OnUpHeld != null) {
-				OnUpHeld(timeHeld);
-			}
+			OnUpHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Up, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -359,9 +415,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (DownHeld) {
-			if (OnDownHeld != null) {
-				OnDownHeld(timeHeld);
-			}
+			OnDownHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Down, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -374,9 +429,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (RightHeld) {
-			if (OnRightHeld != null) {
-				OnRightHeld(timeHeld);
-			}
+			OnRightHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Right, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -389,9 +443,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (LeftHeld) {
-			if (OnLeftHeld != null) {
-				OnLeftHeld(timeHeld);
-			}
+			OnLeftHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Left, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -404,9 +457,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (InteractHeld) {
-			if (OnInteractHeld != null) {
-				OnInteractHeld(timeHeld);
-			}
+			OnInteractHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Interact, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -419,9 +471,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (ZoomHeld) {
-			if (OnZoomHeld != null) {
-				OnZoomHeld(timeHeld);
-			}
+			OnZoomHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Zoom, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -434,9 +485,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (AlignObjectHeld) {
-			if (OnAlignObjectHeld != null) {
-				OnAlignObjectHeld(timeHeld);
-			}
+			OnAlignObjectHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.AlignObject, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -449,9 +499,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (PauseHeld) {
-			if (OnPauseHeld != null) {
-				OnPauseHeld(timeHeld);
-			}
+			OnPauseHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Pause, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -464,9 +513,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (JumpHeld) {
-			if (OnJumpHeld != null) {
-				OnJumpHeld(timeHeld);
-			}
+			OnJumpHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Jump, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;
@@ -479,9 +527,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 
 		float timeHeld = 0;
 		while (SprintHeld) {
-			if (OnSprintHeld != null) {
-				OnSprintHeld(timeHeld);
-			}
+			OnSprintHeld?.Invoke(timeHeld);
+			OnAnyHeld?.Invoke(InputType.Sprint, timeHeld);
 
 			timeHeld += Time.deltaTime;
 			yield return null;

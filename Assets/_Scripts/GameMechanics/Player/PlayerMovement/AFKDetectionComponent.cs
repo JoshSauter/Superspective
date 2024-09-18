@@ -29,7 +29,7 @@ partial class PlayerMovement {
             // Reset the timer if any input is detected
             state.WithUpdate(AFKState.Active, (_) => {
                 if (AnyInputThisFrame) {
-                    state.timeSinceStateChanged = 0;
+                    state.Time = 0;
                 }
             });
             

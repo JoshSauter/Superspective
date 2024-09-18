@@ -82,7 +82,8 @@ namespace PictureTeleportMechanics {
 			}
 		}
 
-		void OnEnable() {
+		protected override void OnEnable() {
+			base.OnEnable();
 			PictureTeleport.bigFrames[PictureTeleport.BigFrameKey(gameObject.scene.name, gameObject.name)] = this;
 			TurnOffFrame();
 		}

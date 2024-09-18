@@ -100,7 +100,6 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
         Debug.Log($"{Selection.count} objects found of type {typeName}.");
     }
 
-
     /// <summary>
     ///     Gets a all Type instances matching the specified class name with just non-namespace qualified class name.
     /// </summary>

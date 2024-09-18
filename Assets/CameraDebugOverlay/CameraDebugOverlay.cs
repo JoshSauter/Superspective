@@ -12,15 +12,16 @@ public class CameraDebugOverlay : MonoBehaviour {
 	KeyCode modeSwitchKey = KeyCode.N;
 
 	public enum DebugMode {
-		depth,
-		normals,
-		obliqueness,
+		Depth,
+		Normals,
+		Obliqueness,
+		PortalMask,
 		//stencilBuffer,
-		off
+		Off
 	}
-	public DebugMode debugMode = DebugMode.off;
+	public DebugMode debugMode = DebugMode.Off;
 
-	const int NUM_MODES = (int)DebugMode.off + 1;
+	const int NUM_MODES = (int)DebugMode.Off + 1;
 	int mode {
 		get {
 			return (int)debugMode;
@@ -44,16 +45,16 @@ public class CameraDebugOverlay : MonoBehaviour {
 	}
 
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
-		if (mode < NUM_MODES - 1) {
-			//if (debugMode == DebugMode.stencilBuffer) {
-			//	Graphics.Blit(source, destination, stencilBufferDebugMat);
-			//}
-			//else {
+		switch ((DebugMode)mode) {
+			case DebugMode.PortalMask:
+				Graphics.Blit(MaskBufferRenderTextures.instance.portalMaskTexture, destination);
+				break;
+			case DebugMode.Off:
+				Graphics.Blit(source, destination);
+				return;
+			default:
 				Graphics.Blit(source, destination, mat, mode);
-			//}
-		}
-		else {
-			Graphics.Blit(source, destination);
+				return;
 		}
 	}
 }

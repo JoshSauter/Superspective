@@ -55,7 +55,9 @@ namespace DeveloperConsole {
                 new ToggleDebugModeCommand("toggleDebug"),
                 new ToggleUICommand("toggleUI"),
                 new ChangeScaleCommand("changeScale"),
-                new HideCullEverythingLayer("hideCullMask")
+                new HideCullEverythingLayer("hideCullMask"),
+                new ShowTriggers("showTriggers"),
+                new SetFarClipPlaneCommand("setFarClipPlane"),
             };
             
             inputField.onSubmit.AddListener(ProcessCommand);

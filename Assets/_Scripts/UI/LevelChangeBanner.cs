@@ -64,6 +64,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         }
         RectTransform banner = levelToBanner[level].rectTransform;
         Image bannerImage = levelToBanner[level];
+        bannerGroup.alpha = 0;
         banner.gameObject.SetActive(true);
 
         lastBannerLoaded = level;
@@ -88,7 +89,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         }
 
         // Wait for letterbox to appear before showing the banner
-        while (Letterboxing.instance.LetterboxingEnabled && Letterboxing.instance.state.timeSinceStateChanged < Letterboxing.LETTERBOX_APPEAR_TIME) {
+        while (Letterboxing.instance.LetterboxingEnabled && Letterboxing.instance.state.Time < Letterboxing.LETTERBOX_APPEAR_TIME) {
             yield return null;
         }
 

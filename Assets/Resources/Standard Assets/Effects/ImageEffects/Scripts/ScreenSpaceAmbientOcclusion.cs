@@ -87,7 +87,8 @@ namespace UnityStandardAssets.ImageEffects
             m_Supported = true;
         }
 
-        void OnEnable () {
+        protected override void OnEnable () {
+	        base.OnEnable();
             GetComponent<Camera>().depthTextureMode |= DepthTextureMode.DepthNormals;
         }
 

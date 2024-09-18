@@ -1,374 +1,291 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using SuperspectiveUtils;
-using SuperspectiveUtils.ShaderUtils;
 using System.Linq;
 using NaughtyAttributes;
+using PortalMechanics;
+using UnityEngine;
 using Saving;
-using System;
-using GrowShrink;
 using SerializableClasses;
 using StateUtils;
-using UnityEngine.Rendering;
+using SuperspectiveUtils;
 
 namespace PortalMechanics {
-	[RequireComponent(typeof(UniqueId))]
-	public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
-		float fudgeDistance {
-			get {
-				if (fakeCopyInstance != null) {
-					return fakeCopyInstance.fudgeDistance;
-				}
+    [RequireComponent(typeof(UniqueId))]
+    public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
+        public delegate void PortalObjectAction(Portal inPortal);
+        public event PortalObjectAction OnObjectTeleported;
+        
+        public PortalCopy portalCopyPrefab;
+        [ShowNonSerializedField]
+        private PortalCopy _portalCopy;
+        public PortalCopy PortalCopy {
+            get {
+                if (!_portalCopy && portalCopyPrefab) {
+                    _portalCopy = Instantiate(portalCopyPrefab, transform.position, transform.rotation);
+                    _portalCopy.originalPortalableObj = this;
+                }
 
-				return 0;
-			}
-		}
+                return _portalCopy;
+            }
+        }
+        
+        public bool IsPortaled => IsInPortal || IsHeldThroughPortal;
 
-		[SerializeField, ReadOnly]
-		Portal _sittingInPortal;
-		[SerializeField, ReadOnly]
-		Portal _hoveredThroughPortal;
-		[SerializeField, ReadOnly]
-		Portal _grabbedThroughPortal;
-		private bool resetSittingInPortal = false;
-		public Portal sittingInPortal {
-			get => _sittingInPortal;
-			set {
-				_sittingInPortal = value;
-				if (value != null) {
-					resetSittingInPortal = false;
-				}
-				
-				if (copyShouldBeEnabled && portalInteractingWith != null) {
-					if (fakeCopyInstance == null) {
-						CreateFakeCopyInstance();
-					}
-					SetMaterials(true);
-					UpdateMaterialProperties(portalInteractingWith);
-				}
-			}
-		}
-		public Portal hoveredThroughPortal {
-			get => _hoveredThroughPortal;
-			set {
-				_hoveredThroughPortal = value;
-				if (copyShouldBeEnabled && portalInteractingWith != null) {
-					if (fakeCopyInstance == null) {
-						CreateFakeCopyInstance();
-					}
-					SetMaterials(true);
-					UpdateMaterialProperties(portalInteractingWith);
-				}
-			}
-		}
-		public Portal grabbedThroughPortal {
-			get => _grabbedThroughPortal;
-			private set {
-				_grabbedThroughPortal = value;
-				if (copyShouldBeEnabled && portalInteractingWith != null) {
-					if (fakeCopyInstance == null) {
-						CreateFakeCopyInstance();
-					}
-					SetMaterials(true);
-					UpdateMaterialProperties(portalInteractingWith);
-				}
-			}
-		}
+        // This is the portal the object is currently in the trigger zone of
+        private Portal _portal;
+        public bool IsInPortal => _portal != null;
+        
+        // This is the portal the object is currently held through
+        private Portal _portalHeldThrough = null;
+        public bool IsHeldThroughPortal => _portalHeldThrough != null;
 
-		// This state machine only tracks when the player should be forced to drop the cube because it's being moved
-		// on the other side of a portal without a portal between the player and cube
-		public enum HoldState {
-			NoPortalBetweenCubeAndPlayer,
-			PortalBetweenCubeAndPlayer
-		}
-		private StateMachine<HoldState> holdState;
+        [ShowNativeProperty]
+        public Portal Portal => _portal;
+        [ShowNativeProperty]
+        public Portal PortalHeldThrough => _portalHeldThrough;
 
-		InteractableObject interact;
-		PickupObject pickupObject;
+        public Collider[] colliders;
+        private HashSet<Collider> collidersHash = new HashSet<Collider>();
+        public Renderer[] renderers;
+        
+        private InteractableObject _interactObject;
+        public InteractableObject InteractObject {
+            get {
+                if (!_interactObject) {
+                    _interactObject = GetComponent<InteractableObject>();
+                }
+                
+                return _interactObject;
+            }
+        }
 
-		[HideInInspector]
-		public Collider[] colliders;
-		Renderer[] renderers;
+        private GravityObject _gravityObject;
+        private GravityObject GravityObject {
+            get {
+                if (!_gravityObject) {
+                    _gravityObject = GetComponent<GravityObject>();
+                }
 
-		public Portal portalInteractingWith {
-			get {
-				// This long-form code is necessary because C# null propagation does not work properly with Unity Objects
-				bool useOtherPortal = false;
-				Portal portal = sittingInPortal;
-				if (portal == null) {
-					portal = hoveredThroughPortal;
-					useOtherPortal = true;
-				}
-				if (portal == null) {
-					portal = grabbedThroughPortal;
-					useOtherPortal = true;
-				}
+                return _gravityObject;
+            }
+        }
+        
+        private PickupObject _pickupObject;
+        public PickupObject PickupObject {
+            get {
+                if (!_pickupObject) {
+                    _pickupObject = GetComponent<PickupObject>();
+                }
 
-				if (portal == null) {
-					return null;
-				}
-				
-				return useOtherPortal ? portal.otherPortal : portal;
-			}
-		}
-		[ShowNativeProperty]
-		public bool copyShouldBeEnabled => sittingInPortal != null || hoveredThroughPortal != null || grabbedThroughPortal != null;
-		[ShowNativeProperty]
-		public bool copyIsEnabled => fakeCopyInstance != null && fakeCopyInstance.copyEnabled;
+                return _pickupObject;
+            }
+        }
+        
+        private PillarDimensionObject[] _pillarDimensionObjects;
+        private PillarDimensionObject[] PillarDimensionObjects {
+            get {
+                if (_pillarDimensionObjects == null || _pillarDimensionObjects.Length == 0) {
+                    _pillarDimensionObjects = transform.GetComponentsInChildren<PillarDimensionObject>();
+                }
 
-		public PortalCopy fakeCopyPrefab;
-		public PortalCopy fakeCopyInstance;
+                return _pillarDimensionObjects;
+            }
+        }
 
-		public delegate void PortalObjectAction(Portal inPortal);
-		public PortalObjectAction BeforeObjectTeleported;
-		public PortalObjectAction OnObjectTeleported;
+        // Prevents ExitPortal from being called when the object is teleported through a portal
+        public bool teleportedThisFixedUpdate = false;
 
-		SuperspectiveRaycast thisFrameRaycastHits;
+        private enum HeldThroughPortalResetState {
+            Idle,
+            RaycastGoesThroughPortal,
+            RaycastDoesNotGoThroughPortal
+        }
+        private StateMachine<HeldThroughPortalResetState> heldThroughPortalResetState;
+        // Time that a cube should be held NOT through a portal before resetting the held through portal
+        // As determined by the player's raycast hits
+        private const float HELD_THROUGH_PORTAL_RESET_TIME = 0.5f;
 
-		protected override void Awake() {
-			base.Awake();
+        protected override void Awake() {
+            base.Awake();
 
-			holdState = this.StateMachine(HoldState.NoPortalBetweenCubeAndPlayer);
-			
-			interact = GetComponent<InteractableObject>();
-			pickupObject = GetComponent<PickupObject>();
+            InitializeHeldThroughPortalResetStateMachine();
 
-			renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
-			colliders = transform.GetComponentsInChildrenRecursively<Collider>();
+            if (PickupObject) {
+                PickupObject.OnDropSimple += () => _portalHeldThrough = null;
+            }
+            
+            colliders = transform.GetComponentsInChildrenRecursively<Collider>();
+            renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
+            collidersHash = new HashSet<Collider>(colliders);
+        }
 
-			pickupObject.OnPickupSimple += RecalculateGrabbedThroughPortal;
-			pickupObject.OnDropSimple += HandleDrop;
-		}
+        private void InitializeHeldThroughPortalResetStateMachine() {
+            heldThroughPortalResetState = this.StateMachine(HeldThroughPortalResetState.Idle);
 
-		protected override void Start() {
-			base.Start();
-			OnObjectTeleported += UpdateGrabbedThroughPortalAfterObjectTeleports;
-			Portal.BeforeAnyPortalTeleport += UpdateGrabbedThroughPortalAfterTeleports;
-			InitializeHoldStateMachine();
-		}
+            void StateUpdate(float _) {
+                // Cube is held and IsHeldThroughPortal is true, check whether or not the player's raycast goes through a portal
+                if (PickupObject && PickupObject.isHeld && IsHeldThroughPortal) {
+                    bool raycastHitPortal = Interact.instance.GetRaycastHits().DidHitAnyPortal;
+                    if (raycastHitPortal) {
+                        heldThroughPortalResetState.Set(HeldThroughPortalResetState.RaycastGoesThroughPortal);
+                    }
+                    else {
+                        heldThroughPortalResetState.Set(HeldThroughPortalResetState.RaycastDoesNotGoThroughPortal);
+                    }
+                }
+                // Cube not held, don't do anything
+                else {
+                    heldThroughPortalResetState.Set(HeldThroughPortalResetState.Idle);
+                }
+            }
+            
+            // All states should operate the same (for simplicity)
+            heldThroughPortalResetState.WithUpdate(StateUpdate);
+            
+            // If the cube has continuously been not held through a portal while portalHeldThrough is not null, reset the portalHeldThrough
+            heldThroughPortalResetState.AddTrigger(HeldThroughPortalResetState.RaycastDoesNotGoThroughPortal, HELD_THROUGH_PORTAL_RESET_TIME, () => {
+                _portalHeldThrough = null;
+                heldThroughPortalResetState.Set(HeldThroughPortalResetState.Idle);
+            });
+        }
 
-		private void FixedUpdate() {
-			if (resetSittingInPortal) {
-				_sittingInPortal = null;
-			}
-			else {
-				resetSittingInPortal = true;
-			}
-		}
+        private void FixedUpdate() {
+            // Is executed after the portal teleportation event, so we can reset the flag here
+            teleportedThisFixedUpdate = false;
+        }
 
-		void Update() {
+        protected override void Start() {
+            base.Start();
+            
+            Portal.OnAnyPortalPlayerTeleport += OnPlayerTeleport;
+        }
 
-			thisFrameRaycastHits = Interact.instance.GetRaycastHits();
+        private void OnDisable() {
+            Portal.OnAnyPortalPlayerTeleport -= OnPlayerTeleport;
+        }
 
-			RecalculateHoveredThroughPortal();
-			PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal();
+        void Update() {
+            if (GameManager.instance.IsCurrentlyLoading) return;
 
-			if (copyShouldBeEnabled && fakeCopyInstance == null) {
-				CreateFakeCopyInstance();
-			}
+            PortalCopy.SetPortalCopyEnabled(IsPortaled);
+            InteractObject.glow.renderers = IsPortaled ?
+                (PortalCopy.renderers.Concat(renderers).ToList()) :
+                renderers.ToList();
+        }
+        
+        void LateUpdate() {
+            if (GameManager.instance.IsCurrentlyLoading) return;
 
-			if (copyShouldBeEnabled) {
-				UpdateMaterialProperties(portalInteractingWith);
-			}
-			if (sittingInPortal != null) {
-				foreach (var r in renderers) {
-					r.enabled = sittingInPortal.PortalRenderingIsEnabled;
-				}
-			}
-			else {
-				foreach (var r in renderers) {
-					r.enabled = true;
-				}
-			}
+            if (IsInPortal) {
+                // Consider the case where a cube moves through a portal very quickly. It may be in the trigger collider for one portal,
+                // get teleported, then immediately be outside of the trigger collider for the other portal, without ever triggering the
+                // exit condition for the other portal. This checks if the object is still in the trigger collider for the other portal.
+                // If it is not, manually and immediately trigger the exit condition.
+                // NOTE: Only using the first collider for this check, which may not be a correct assumption but is more performant
+                if (!_portal.triggerColliders.Any(c => SuperspectivePhysics.CollidersOverlap(c, colliders[0]))) {
+                    ExitPortal(_portal);
+                }
+            }
+        }
 
-			if (!thisFrameRaycastHits.hitPortal && grabbedThroughPortal != null) {
-				//pickupObject.Drop();
-			}
-		}
+        public void EnterPortal(Portal portalEntered) {
+            if (_portal == portalEntered) {
+                debug.LogWarning("Already in portal, not entering again");
+                return;
+            };
+            
+            debug.Log($"{gameObject.FullPath()} entering portal {portalEntered.name}");
 
-		void CreateFakeCopyInstance() {
-			if (copyShouldBeEnabled && fakeCopyInstance == null) {
-				fakeCopyInstance = Instantiate(fakeCopyPrefab);
-				fakeCopyInstance.original = gameObject;
-				fakeCopyInstance.originalPortalableObj = this;
-				fakeCopyInstance.transform.localScale = transform.localScale;
+            _portal = portalEntered;
+            portalEntered.objectsInPortal.Add(this);
+            PortalCopy.SetPortalCopyEnabled(true);
+            
+            portalEntered.OnPortalTeleport += OnPortalTeleport;
+        }
 
-				fakeCopyInstance.OnPortalCopyEnabled += () => SetMaterials(true);
-				fakeCopyInstance.OnPortalCopyDisabled += () => SetMaterials(false);
-			}
-		}
+        public void ExitPortal(Portal portalExited) {
+            debug.Log($"{gameObject.FullPath()} exiting portal {portalExited.name}");
 
-		void UpdateGrabbedThroughPortalAfterObjectTeleports(Portal inPortal) {
-			if (pickupObject.isHeld) {
-				// Teleporting the object from the "out" side of the portal to the "in" side of the portal means we are no longer holding the object through a portal
-				if (grabbedThroughPortal == inPortal.otherPortal) {
-					grabbedThroughPortal = null;
-				}
-				else {
-					grabbedThroughPortal = inPortal;
-				}
-			}
-		}
+            portalExited.OnPortalTeleport -= OnPortalTeleport;
+            _portal = null;
+            portalExited.objectsInPortal.Remove(this);
+            PortalCopy.SetPortalCopyEnabled(false);
+        }
 
-		void UpdateGrabbedThroughPortalAfterTeleports(Portal inPortal, Collider objBeingTeleported) {
-			if (objBeingTeleported.TaggedAsPlayer()) {
-				if (pickupObject.isHeld) {
-					if (grabbedThroughPortal == inPortal) {
-						grabbedThroughPortal = null;
-					}
-					else {
-						grabbedThroughPortal = inPortal.otherPortal;
-					}
-				}
-			}
-		}
+        /// <summary>
+        /// Handles the teleportation of this object through a portal, then stops listening for the event
+        /// </summary>
+        /// <param name="inPortal"></param>
+        /// <param name="objectTeleported"></param>
+        private void OnPortalTeleport(Portal inPortal, Collider objectTeleported) {
+            if (!collidersHash.Contains(objectTeleported)) return;
+            
+            teleportedThisFixedUpdate = true;
+            EnterPortal(inPortal.otherPortal);
+            OnObjectTeleported?.Invoke(inPortal);
 
-		void RecalculateGrabbedThroughPortal() {
-			if (pickupObject.isHeld) {
-				grabbedThroughPortal = InteractedThroughPortal();
-			}
-			else {
-				grabbedThroughPortal = null;
-			}
-		}
+            if (PickupObject && PickupObject.isHeld) {
+                // Player pushed a cube through a portal, now holding through that portal
+                if (!IsHeldThroughPortal) {
+                    SetPortalHeldThrough(inPortal);
+                }
+                // Player pulled a cube back through a portal it was held through, now no longer holding through a portal
+                else if (inPortal.otherPortal == PortalHeldThrough) {
+                    SetPortalHeldThrough(null);
+                }
+                else {
+                    Debug.LogWarning($"Not sure if this is the right thing to do here, but setting portal held through to {inPortal.name}");
+                    SetPortalHeldThrough(inPortal);
+                }
+            }
 
-		void RecalculateHoveredThroughPortal() {
-			if (grabbedThroughPortal != null) {
-				hoveredThroughPortal = grabbedThroughPortal;
-				return;
-			}
-			bool hoveredOnPickupObj = thisFrameRaycastHits.hitObject && thisFrameRaycastHits.firstObjectHit.collider.gameObject == this.gameObject;
-			bool hoveredOnPortalCopy = thisFrameRaycastHits.hitObject && copyIsEnabled && thisFrameRaycastHits.firstObjectHit.collider.gameObject == fakeCopyInstance.gameObject;
-			hoveredThroughPortal = (hoveredOnPickupObj || hoveredOnPortalCopy) ? InteractedThroughPortal() : null;
-		}
+            if (inPortal.otherPortal.pillarDimensionObject) {
+                foreach (PillarDimensionObject pillarDimensionObject in PillarDimensionObjects) {
+                    pillarDimensionObject.Dimension = inPortal.otherPortal.pillarDimensionObject.Dimension;
+                }
+            }
+                
+            inPortal.OnPortalTeleport -= OnPortalTeleport;
+        }
 
-		// Being held illegally means the cube is being carried on the other side of the portal without the last frame raycast hitting that portal
-		// (or the player standing inside of that portal)
-		void PreventCubeFromBeingDroppedIfHeldIllegallyThroughPortal() {
-			// The actual dropping happens through a StateMachine trigger, we just reset the timer here if the cube is being held legally
-			if (hoveredThroughPortal != null &&
-			    (thisFrameRaycastHits.hitPortal == hoveredThroughPortal || hoveredThroughPortal.PlayerRemainsInPortal)) {
-				
-				holdState.Set(HoldState.PortalBetweenCubeAndPlayer);
-				holdState.timeSinceStateChanged = 0f;
-			}
-		}
+        private void OnPlayerTeleport(Portal inPortal) {
+            if (PickupObject && PickupObject.isHeld) {
+                // Player walked forward into a portal that the cube is held through, no longer holding through a portal
+                if (IsHeldThroughPortal && PortalHeldThrough == inPortal) {
+                    SetPortalHeldThrough(null);
+                }
+                // Player walked backward into a portal, now holding the cube through the out portal
+                else if (!IsHeldThroughPortal) {
+                    SetPortalHeldThrough(inPortal.otherPortal);
+                }
+                else {
+                    Debug.LogWarning($"Not sure if this is the right thing to do here, but setting portal held through to {inPortal.otherPortal.name}");
+                    SetPortalHeldThrough(inPortal.otherPortal);
+                }
+            }
+        }
 
-		void HandleDrop() {
-			grabbedThroughPortal = null;
-		}
+        public void SetPortalHeldThrough(Portal heldThrough) {
+            _portalHeldThrough = heldThrough;
+        }
+#region Saving
 
-		Portal InteractedThroughPortal() {
-			bool hoveredOnPortalCopy = copyIsEnabled && thisFrameRaycastHits.hitObject && thisFrameRaycastHits.firstObjectHit.collider.gameObject == fakeCopyInstance.gameObject;
-			Portal hoveredThroughPortal = thisFrameRaycastHits.firstValidPortalHit;
-			if (sittingInPortal == hoveredThroughPortal) {
-				hoveredThroughPortal = null;
-			}
-			else if (hoveredOnPortalCopy) {
-				hoveredThroughPortal = sittingInPortal?.otherPortal;
-			}
+        [Serializable]
+        public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {
+            SerializableReference<Portal, Portal.PortalSave> portalSittingInRef;
 
-			return hoveredThroughPortal;
-		}
+            public PortalableObjectSave(PortalableObject script) : base(script) {
+                portalSittingInRef = script._portal;
+            }
 
-		void UpdateMaterialProperties(Portal inPortal) {
-			foreach (var r in renderers) {
-				foreach (var m in r.materials) {
-					m.SetVector("_PortalPos", inPortal.transform.position + inPortal.transform.forward * 0.00001f);
-					m.SetVector("_PortalNormal", inPortal.transform.forward);
-					m.SetFloat("_FudgeDistance", fudgeDistance);
-				}
-			}
-		}
+            public override void LoadSave(PortalableObject script) {
+                if (portalSittingInRef != null && portalSittingInRef.TryGet(out Portal portalSittingIn)) {
+                    script.EnterPortal(portalSittingIn);
+                }
+            }
+        }
 
-		void SetMaterials(bool usePortalCopyMaterials) {
-			SetMaterialsForRenderers(renderers, usePortalCopyMaterials);
-			if (usePortalCopyMaterials) {
-				SetMaterialsForRenderers(fakeCopyInstance.renderers, usePortalCopyMaterials);
-				SetRenderQueueToJustAfterGeometry(fakeCopyInstance.renderers);
-				UpdateMaterialProperties(portalInteractingWith);
-			}
-		}
-
-		void SetRenderQueueToJustAfterGeometry(Renderer[] renderersToChangeMaterialsOf) {
-			foreach (Renderer renderer in renderersToChangeMaterialsOf) {
-				bool isTransparent = renderer.material.GetInt("__SuberspectiveBlendMode") ==
-				                     (int)ShaderUtils.SuberspectiveBlendMode.Transparent;
-				if (isTransparent) {
-					renderer.material.renderQueue = (int)RenderQueue.Geometry + 1;
-				}
-			}
-		}
-
-		void SetMaterialsForRenderers(Renderer[] renderersToChangeMaterialsOf, bool usePortalCopyMaterials) {
-			const string portalCopyKeyword = "PORTAL_COPY_OBJECT";
-			for (int i = 0; i < renderers.Length; i++) {
-				Renderer rendererToUseAsKey = renderers[i];
-				Renderer rendererToModify = renderersToChangeMaterialsOf[i];
-
-				rendererToModify.material = rendererToUseAsKey.material;
-			}
-			foreach (Renderer renderer in renderersToChangeMaterialsOf) {
-				if (usePortalCopyMaterials) {
-					renderer.material.EnableKeyword(portalCopyKeyword);
-				}
-				else {
-					renderer.material.DisableKeyword(portalCopyKeyword);
-				}
-			}
-		}
-
-		void InitializeHoldStateMachine() {
-			const float timeBeforeForcedToDropCube = 0.15f;
-			holdState.AddStateTransition(HoldState.PortalBetweenCubeAndPlayer, HoldState.NoPortalBetweenCubeAndPlayer, timeBeforeForcedToDropCube);
-			holdState.AddTrigger(HoldState.NoPortalBetweenCubeAndPlayer, 0f, () => {
-				if (pickupObject != null && hoveredThroughPortal != null) {
-					pickupObject.Drop();
-				}
-			});
-		}
-
-		#region Saving
-
-		[Serializable]
-		public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {
-			SerializableReference<Portal, Portal.PortalSave> sittingInPortal;
-			SerializableReference<Portal, Portal.PortalSave> hoveredThroughPortal;
-			SerializableReference<Portal, Portal.PortalSave> grabbedThroughPortal;
-			StateMachine<HoldState>.StateMachineSave holdStateSave;
-
-			public PortalableObjectSave(PortalableObject obj) : base(obj) {
-				sittingInPortal = null;
-				hoveredThroughPortal = null;
-				grabbedThroughPortal = null;
-				if (obj.sittingInPortal != null) {
-					this.sittingInPortal = obj.sittingInPortal;
-				}
-				if (obj.hoveredThroughPortal != null) {
-					this.hoveredThroughPortal = obj.hoveredThroughPortal;
-				}
-				if (obj.grabbedThroughPortal != null) {
-					this.grabbedThroughPortal = obj.grabbedThroughPortal;
-				}
-
-				holdStateSave = obj.holdState.ToSave();
-			}
-
-			public override void LoadSave(PortalableObject obj) {
-				// GetOrNull valid here because if this saved value is set, it should have to be loaded
-				if (this.sittingInPortal != null) {
-					obj.sittingInPortal = this.sittingInPortal.GetOrNull();
-				}
-				if (this.hoveredThroughPortal != null) {
-					obj.hoveredThroughPortal = this.hoveredThroughPortal.GetOrNull();
-				}
-				if (this.grabbedThroughPortal != null) {
-					obj.grabbedThroughPortal = this.grabbedThroughPortal.GetOrNull();
-				}
-
-				obj.holdState.LoadFromSave(holdStateSave);
-			}
-		}
-		#endregion
-	}
+#endregion
+    }
 }

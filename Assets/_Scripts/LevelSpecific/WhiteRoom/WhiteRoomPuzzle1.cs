@@ -31,7 +31,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	public bool hideButtonPedestalAtFirst = true;
 	public GameObject buttonPedestal;
 	public DissolveObject dissolveBridge;
-	private bool ShouldRevealButtonPedestal => dissolveBridge.state != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.visible;
+	private bool ShouldRevealButtonPedestal => dissolveBridge.state != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.Visible;
 
 	// Fake portal plane needs to temporarily disappear if the player walks backwards through it
 	public GameObject fakePortalPlane;
@@ -66,34 +66,34 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 					fakePortalTargetPos = fakePortalUnsolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedDown;
 					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.invisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.invisible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Invisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.Invisible
 					);
 					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.invisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.invisible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Invisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.Invisible
 					);
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
 					fakePortalLerpSpeed = fakePortalLerpSpeedUp;
 					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.partiallyVisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.partiallyVisible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.PartiallyVisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.PartiallyVisible
 					);
 					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.partiallyVisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.partiallyVisible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.PartiallyVisible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.PartiallyVisible
 					);
 					break;
 				case State.WalkedThroughFakePortal:
 					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.visible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.visible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Visible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.Visible
 					);
 					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.visible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.visible
+						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Visible, true),
+						saveObject => saveObject.visibilityState = (int) VisibilityState.Visible
 					);
 					break;
 				default:
@@ -110,10 +110,6 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 		fakePortalSolvedPos = fakePortal.transform.position;
 
 		fakePortal.transform.position = fakePortalUnsolvedPos;
-
-		if (hideButtonPedestalAtFirst) {
-			buttonPedestal.SetActive(false);
-		}
 	}
 
 	protected override void Start() {
@@ -122,6 +118,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	}
 
 	IEnumerator Initialize() {
+		yield return new WaitWhile(() => !GameManager.instance.gameHasLoaded);
 		yield return new WaitUntil(() => gameObject.IsInActiveScene());
 		state = State.Unsolved;
 
@@ -140,6 +137,29 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 				restoreFakePortalPlaneTrigger.SetActive(true);
 			}
 		};
+
+		yield return null;
+		
+		if (hideButtonPedestalAtFirst) {
+			SetButtonPedestalActive(false);
+		}
+	}
+
+	private Renderer[] _buttonPedestalRenderers;
+	private Renderer[] ButtonPedestalRenderers => _buttonPedestalRenderers ??= buttonPedestal.GetComponentsInChildrenRecursively<Renderer>();
+	private Collider[] _buttonPedestalColliders;
+	private Collider[] ButtonPedestalColliders => _buttonPedestalColliders ??= buttonPedestal.GetComponentsInChildrenRecursively<Collider>();
+	private bool buttonPedestalEnabled = false;
+	private void SetButtonPedestalActive(bool active) {
+		foreach (Renderer buttonPedestalRenderer in ButtonPedestalRenderers) {
+			buttonPedestalRenderer.enabled = active;
+		}
+
+		foreach (Collider buttonPedestalCollider in ButtonPedestalColliders) {
+			buttonPedestalCollider.enabled = active;
+		}
+
+		buttonPedestalEnabled = active;
 	}
 
     void Update() {
@@ -153,8 +173,8 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 
 		fakePortal.transform.position = Vector3.Lerp(fakePortal.transform.position, fakePortalTargetPos, Time.deltaTime * fakePortalLerpSpeed);
 		if (hideButtonPedestalAtFirst) {
-			if (!buttonPedestal.activeSelf && ShouldRevealButtonPedestal) {
-				buttonPedestal.SetActive(true);
+			if (!buttonPedestalEnabled && ShouldRevealButtonPedestal) {
+				SetButtonPedestalActive(true);
 			}
 		}
 

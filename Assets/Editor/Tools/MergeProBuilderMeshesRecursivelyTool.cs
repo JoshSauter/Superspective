@@ -58,7 +58,7 @@ public static class MergeProBuilderMeshesRecursivelyTool {
             foreach (Transform child in root) {
                 UnmergeProBuilderMeshesInRoot(child);
             }
-            if (!IsRootOfMergeableObject(root) || !root.gameObject.activeSelf) return;
+            if (!IsRootOfMergeableObject(root, false) || !root.gameObject.activeSelf) return;
             
             Transform unmergedRoot = root.transform.Find(UNMERGED_ROOT_NAME);
             Transform mergedRoot = root.transform.Find(MERGED_ROOT_NAME);
@@ -83,7 +83,7 @@ public static class MergeProBuilderMeshesRecursivelyTool {
         }
     }
 
-    private static bool IsRootOfMergeableObject(Transform objectInQuestion) {
+    private static bool IsRootOfMergeableObject(Transform objectInQuestion, bool onlyConsiderUnmergedRoots = true) {
         // Cannot merge prefabs since they don't allow children moving around
         if (PrefabUtility.GetPrefabAssetType(objectInQuestion.gameObject) != PrefabAssetType.NotAPrefab) return false;
         
@@ -93,8 +93,10 @@ public static class MergeProBuilderMeshesRecursivelyTool {
         bool hasPbMeshesInChildren = objectInQuestion.GetComponentsInChildrenRecursively<PBMesh>().Length > 0;
         // Don't treat "Unmerged" and "Merged" objects created by this tool as root objects (their parent would be though)
         bool isNotNamedUnmergedOrMerged = objectInQuestion.name != MERGED_ROOT_NAME && objectInQuestion.name != UNMERGED_ROOT_NAME;
+        
+        bool isNotAlreadyMerged = !hasMergedRoot;
 
-        return isNotNamedUnmergedOrMerged && hasPbMeshesInChildren && (isJustEmptyTransform || hasMergedRoot || hasUnmergedRoot);
+        return isNotNamedUnmergedOrMerged && hasPbMeshesInChildren && (isJustEmptyTransform || hasMergedRoot || hasUnmergedRoot) && (!onlyConsiderUnmergedRoots || isNotAlreadyMerged);
     }
 
     private static Transform GetOrCreateChild(Transform t, string name) {
@@ -111,9 +113,16 @@ public static class MergeProBuilderMeshesRecursivelyTool {
         if (!IsRootOfMergeableObject(root) || !root.gameObject.activeSelf) {
             Debug.LogError($"Cannot merge {root.gameObject.FullPath()}, not a valid root!");
             return;
-        };
+        }
 
         Dictionary<Material, List<PBMesh>> allPbMeshesByMaterial = GetPBMeshesByMaterialInSelection(root, true);
+        
+        // If the object already has an "Unmerged" root, use that as the root instead
+        Transform rootToFindChildren = root;
+        Transform maybeExistingUnmergedRoot = root.Find(UNMERGED_ROOT_NAME);
+        if (maybeExistingUnmergedRoot != null && maybeExistingUnmergedRoot.gameObject.activeSelf) {
+            rootToFindChildren = maybeExistingUnmergedRoot;
+        }
 
         Transform unmergedRoot = GetOrCreateChild(root, UNMERGED_ROOT_NAME);
         Transform mergedRoot = GetOrCreateChild(root, MERGED_ROOT_NAME);
@@ -124,7 +133,8 @@ public static class MergeProBuilderMeshesRecursivelyTool {
             duplicatesRoot.SetSiblingIndex(2);
 
             List<Transform> childrenToMove = new List<Transform>();
-            foreach (Transform child in root) {
+            foreach (Transform child in rootToFindChildren.GetComponentsInChildrenOnly<Transform>()) {
+                Debug.Log("root.name: " + rootToFindChildren.name + ", child.name: " + child.name);
                 if (child.name is UNMERGED_ROOT_NAME or MERGED_ROOT_NAME or DUPLICATES_ROOT_NAME) continue;
                 var duplicate = GameObject.Instantiate(child, duplicatesRoot).gameObject;
 
@@ -194,7 +204,7 @@ public static class MergeProBuilderMeshesRecursivelyTool {
                 }
 
                 bool parentIsUnmergedRoot = pbMeshParent != null && pbMeshParent.name == UNMERGED_ROOT_NAME && pbMeshParent.parent == selection;
-                return pbMesh.gameObject.activeInHierarchy || (parentIsUnmergedRoot && !pbMeshParent.gameObject.activeSelf && pbMesh.gameObject.activeSelf);
+                return pbMesh.gameObject.activeInHierarchy || (parentIsUnmergedRoot && pbMesh.gameObject.activeSelf);
             })
             .ToList();
 

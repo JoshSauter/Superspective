@@ -1,4 +1,6 @@
-﻿using PowerTrailMechanics;
+﻿using System.Collections.Generic;
+using System.Linq;
+using PowerTrailMechanics;
 using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine;
@@ -24,22 +26,36 @@ public class NodeEditor : UnityEditor.Editor {
         if (t == null || t.rootNode == null) return;
 
         Event current = Event.current;
+        bool isMultiSelect = current.shift || current.control;
         int controlID = GUIUtility.GetControlID(t.GetHashCode(), FocusType.Passive);
         Node nodeToSelect = NodeToSelect(t);
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0) {
             if (nodeToSelect != null) {
                 // Same Node selected, either ignore or double-click to open modal
-                if (t.selectedNode == nodeToSelect) {
+                if (t.selectedNodes.Contains(nodeToSelect)) {
                     if (timeSinceLastNodeSelected < doubleClickTime) {
+                        // If we double-clicked a Node, deselect all other Nodes and open the NodeEditorWindow
+                        t.selectedNodes = new HashSet<Node>() {nodeToSelect};
                         NodeEditorWindow.ShowNodeEditorWindow();
                     }
                     else {
+                        if (isMultiSelect) {
+                            t.selectedNodes.Remove(nodeToSelect);
+                        }
+                        else {
+                            t.selectedNodes = new HashSet<Node>() {nodeToSelect};
+                        }
                         timeWhenLastNodeSelected = Time.realtimeSinceStartup;
                     }
                 }
                 // Different Node selected, select it
                 else {
-                    t.selectedNode = nodeToSelect;
+                    if (isMultiSelect) {
+                        t.selectedNodes.Add(nodeToSelect);
+                    }
+                    else {
+                        t.selectedNodes = new HashSet<Node>() {nodeToSelect};
+                    }
                     timeWhenLastNodeSelected = Time.realtimeSinceStartup;
                     Event.current.Use();
                 }
@@ -51,17 +67,23 @@ public class NodeEditor : UnityEditor.Editor {
         }
 
         DrawLinesRecursively(t, t.rootNode);
+        
         EditorGUI.BeginChangeCheck();
-        Vector3 newPosition = t.transform.TransformPoint(t.selectedNode.pos);
-        if (t.selectedNode != null) {
-            Quaternion rotation = Tools.pivotRotation == PivotRotation.Global || t.selectedNode.isRootNode ?
-                t.transform.rotation :
-                Quaternion.LookRotation(t.selectedNode.parent.pos-t.selectedNode.pos);
-            newPosition = Handles.PositionHandle(t.transform.TransformPoint(t.selectedNode.pos), rotation);
-        }
-        if (EditorGUI.EndChangeCheck()) {
-            Undo.RecordObject(t, "Change node position");
-            t.selectedNode.pos = t.transform.InverseTransformPoint(newPosition);
+        foreach (Node selectedNode in t.selectedNodes) {
+            Vector3 newPosition = t.transform.TransformPoint(selectedNode.pos);
+            if (selectedNode != null) {
+                Quaternion rotation = Tools.pivotRotation == PivotRotation.Global || selectedNode.IsRootNode ?
+                    t.transform.rotation :
+                    Quaternion.LookRotation(selectedNode.parent.pos-selectedNode.pos);
+                newPosition = Handles.PositionHandle(t.transform.TransformPoint(selectedNode.pos), rotation);
+            }
+            if (EditorGUI.EndChangeCheck()) {
+                Undo.RecordObject(t, "Change node position");
+                Vector3 offset = t.transform.InverseTransformPoint(newPosition) - selectedNode.pos;
+                foreach (Node allSelectedNodes in t.selectedNodes) {
+                    allSelectedNodes.pos += offset;
+                }
+            }
         }
         
         /*

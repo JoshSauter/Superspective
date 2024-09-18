@@ -7,15 +7,22 @@ using Audio;
 using DissolveObjects;
 using Interactables;
 using NaughtyAttributes;
+using PortalMechanics;
 using PowerTrailMechanics;
 using UnityEngine;
 using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 
+// TODO: Loading while MazeFailed back to a save that's outside the maze doesn't seem to reset the nodes properly, they're all on. EDIT: Recheck this, it might be working now
 public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaze.MiniatureMazeSave> {
     public override string ID => "GrowShrinkIntro_MiniatureMaze";
 
+    private const float NOISE_OVERLAY_FADE_IN_TIME = 4f;
+    private const float NOISE_OVERLAY_FADE_OUT_DELAY = 1f;
+    private const float NOISE_OVERLAY_FADE_OUT_TIME = 2.5f;
+
+    public Portal portalToBetweenWorlds;
     public DissolveObject mazeExitDoorwayBlocker;
     public Transform powerTrailsRoot;
     public Transform mazeNodesRoot;
@@ -50,7 +57,8 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         ShowingSolution,
         PlayerInMaze,
         MazeSolved,
-        MazeFailed
+        MazeFailed,
+        ResettingMaze
     }
     public StateMachine<State> state;
 
@@ -118,7 +126,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
     private void InitializeStateMachine() {
         // Reset the puzzle nodes when the player enters the maze
         state.AddTrigger(State.PlayerInMaze, () => {
-            if (state.prevState == State.ShowingSolution) {
+            if (state.PrevState == State.ShowingSolution) {
                 ResetPuzzleNodes();
                 solutionCheckButton.interactableObject.SetAsInteractable();
             }
@@ -126,10 +134,8 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         
         // If the player leaves the maze, select and show a new solution
         state.AddTrigger(State.ShowingSolution, () => {
-            if (state.prevState is State.PlayerInMaze or State.MazeFailed) {
+            if (state.PrevState is State.PlayerInMaze or State.MazeFailed) {
                 SelectNewSolution();
-                flashColors.CancelFlash();
-                mazeEdges.Values.ToList().ForEach(e => e.powerTrailEdge.PauseRendering = false);
             }
         });
         
@@ -144,6 +150,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
 
         // Dissolve the exit doorway blocker when the player solves the maze
         state.AddTrigger(State.MazeSolved, () => {
+            portalToBetweenWorlds.SetPauseLogic(false);
             AudioManager.instance.Play(AudioName.CorrectAnswer);
             mazeExitDoorwayBlocker.Dematerialize();
             solutionCheckButton.interactableObject.SetAsHidden();
@@ -151,6 +158,55 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         
         // Materialize the exit doorway blocker when the player enters the maze
         state.AddTrigger((e) => e != State.MazeSolved, () => mazeExitDoorwayBlocker.Materialize());
+        
+        // Fade in the noise scramble overlay when the player fails the maze, and reset them to outside the maze if they don't leave
+        state.WithUpdate(State.MazeFailed, time => {
+            if (state == State.MazeFailed) {
+                float t = time / NOISE_OVERLAY_FADE_IN_TIME;
+            
+                // Fade in the noise scramble overlay
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(t);
+
+                if (t >= 1) {
+                    state.Set(State.ResettingMaze);
+                }
+            }
+        });
+        
+        // Reset player position and maze state when the player leaves the maze
+        state.AddTrigger(State.ResettingMaze, () => {
+            // Transport the player outside of the maze
+            Player.instance.transform.position = new Vector3(888.5f, 58.34f, -51f);
+            Player.instance.transform.rotation = Quaternion.Euler(0, -90, 0f);
+            Player.instance.growShrink.SetScaleDirectly(.125f);
+            Player.instance.cameraFollow.RecalculateWorldPositionLastFrame();
+            
+            PlayerMovement.instance.thisRigidbody.isKinematic = true;
+            PlayerMovement.instance.StopMovement();
+            PlayerLook.instance.RotationY = 0f;
+            PlayerLook.instance.Frozen = true;
+            PlayerMovement.instance.movementEnabledState = PlayerMovement.MovementEnabledState.Disabled;
+            
+            SelectNewSolution();
+            flashColors.CancelFlash();
+            solutionCheckButton.TurnButtonOff();
+            mazeEdges.Values.ToList().ForEach(e => e.powerTrailEdge.PauseRendering = false);
+        });
+        state.AddTrigger(State.ShowingSolution, () => {
+            PlayerLook.instance.Frozen = false;
+            PlayerMovement.instance.thisRigidbody.isKinematic = false;
+            PlayerMovement.instance.movementEnabledState = PlayerMovement.MovementEnabledState.Enabled;
+        });
+        state.AddStateTransition(State.ResettingMaze, State.ShowingSolution, NOISE_OVERLAY_FADE_OUT_DELAY + NOISE_OVERLAY_FADE_OUT_TIME);
+        state.WithUpdate(State.ResettingMaze, time => {
+            if (time < NOISE_OVERLAY_FADE_OUT_DELAY) {
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(1);
+            }
+            else {
+                float t = (time - NOISE_OVERLAY_FADE_OUT_DELAY) / NOISE_OVERLAY_FADE_OUT_TIME;
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(1 - t);
+            }
+        });
     }
 
     private enum CheckSolutionResult {
@@ -167,7 +223,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         if (!allNodesOnAreInSolution) return CheckSolutionResult.Invalid;
         
         // If the player has not turned on all the nodes in the solution, the solution is incomplete
-        bool allNodesInSolutionAreOn = Solution.All(n => n.state.state == MiniatureMazeNode.State.On);
+        bool allNodesInSolutionAreOn = Solution.All(n => n.state.State == MiniatureMazeNode.State.On);
         if (!allNodesInSolutionAreOn) return CheckSolutionResult.Incomplete;
         
         return CheckSolutionResult.Correct;
@@ -200,10 +256,16 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
     }
 
     private void SelectNewSolution() {
+        SelectSolution(solutions.DifferentRandomIndexFrom());
+    }
+
+    private void SelectSolution(int solutionIndex) {
         ResetPuzzleNodes();
-        currentSolutionIndex = solutions.DifferentRandomIndexFrom();
+        currentSolutionIndex = solutionIndex;
         solutionRenderers.ToList().ForEach(r => r.sprite = solutionImages[currentSolutionIndex]);
         Solution.ToList().ForEach(n => n.state.Set(MiniatureMazeNode.State.On));
+        flashColors.CancelFlash();
+        mazeEdges.Values.ToList().ForEach(e => e.powerTrailEdge.PauseRendering = false);
     }
     
     public void PlayerEnteredMaze() {
@@ -226,6 +288,10 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         }
         if (currentSolutionIndex < 0) {
             SelectNewSolution();
+        }
+
+        if (this.InstaSolvePuzzle()) {
+            state.Set(State.MazeSolved);
         }
     }
 
@@ -335,14 +401,17 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
 		[Serializable]
 		public class MiniatureMazeSave : SerializableSaveObject<MiniatureMaze> {
             private StateMachine<State>.StateMachineSave stateSave;
+            private int currentSolutionIndex;
             
 			public MiniatureMazeSave(MiniatureMaze script) : base(script) {
                 this.stateSave = script.state.ToSave();
-			}
+                this.currentSolutionIndex = script.currentSolutionIndex;
+            }
 
 			public override void LoadSave(MiniatureMaze script) {
+                script.SelectSolution(this.currentSolutionIndex);
                 script.state.LoadFromSave(this.stateSave);
-			}
+            }
 		}
 #endregion
 }

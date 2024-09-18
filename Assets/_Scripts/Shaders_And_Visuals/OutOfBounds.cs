@@ -132,7 +132,7 @@ public class OutOfBounds : MonoBehaviour {
 		UnityEngine.Transform player = GameObject.FindGameObjectWithTag("Player").transform;
 		player.position = new Vector3(0, 10, -15);
 		player.rotation = new Quaternion(0, 0, 0, 1);
-		player.GetComponent<PlayerLook>().rotationY = -45;
+		player.GetComponent<PlayerLook>().RotationY = -45;
 
 		float fadeTime = 2f;
 		float timeElapsed = 0;

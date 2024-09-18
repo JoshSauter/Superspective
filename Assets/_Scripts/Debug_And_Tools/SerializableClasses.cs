@@ -419,6 +419,11 @@ namespace SerializableClasses {
 				}
 			}
 		}
+		
+		public bool TryGet(out T obj) {
+			obj = GetOrNull();
+			return obj != null;
+		}
 
 		public T GetOrNull() {
 			return Reference?.Match(

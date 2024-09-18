@@ -27,7 +27,15 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
     public float sensitivityY => 2f * Settings.Gameplay.YSensitivity / 100f;
 
-    public float rotationY;
+    private float rotationY;
+    public float RotationY {
+        get => rotationY;
+        set {
+            rotationY = value;
+            LookVertical(rotationY);
+        }
+    }
+
     public float yClamp = 85;
 
     public float outsideMultiplier = 1f;
@@ -53,12 +61,17 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         }
     }
 
-    public bool frozen => NovaPauseMenu.instance.PauseMenuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
+    private bool _frozenOverride;
+
+    public bool Frozen {
+        get => _frozenOverride || NovaPauseMenu.instance.PauseMenuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
+        set => _frozenOverride = value;
+    } 
 
     /// <summary>
     ///     Returns the rotationY normalized to the range (-1, 1)
     /// </summary>
-    public float normalizedY => rotationY / yClamp;
+    public float NormalizedY => rotationY / yClamp;
 
     protected override void Awake() {
         base.Awake();
@@ -77,7 +90,7 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
     }
 
     void Update() {
-        if (frozen || !GameManager.instance.gameHasLoaded || GameManager.instance.IsCurrentlyPaused) return;
+        if (Frozen || !GameManager.instance.gameHasLoaded || GameManager.instance.IsCurrentlyPaused) return;
 
         if (state == ViewLockState.ViewLocked && GameManager.instance.IsCurrentlyLoading) return;
 
@@ -326,6 +339,8 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
         float viewUnlockTime;
         float yClamp;
 
+        private bool frozenOverride;
+
         public PlayerLookSave(PlayerLook playerLook) : base(playerLook) {
             cameraLocalPosition = playerLook.cameraContainerTransform.localPosition;
             cameraLocalRotation = playerLook.cameraContainerTransform.localRotation;
@@ -354,6 +369,8 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
                 lockState = (int) Cursor.lockState;
                 cursorVisible = Cursor.visible;
             }
+
+            frozenOverride = playerLook._frozenOverride;
         }
 
         public override void LoadSave(PlayerLook playerLook) {
@@ -378,6 +395,8 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             
             Cursor.lockState = (CursorLockMode) lockState;
             Cursor.visible = cursorVisible;
+
+            playerLook.Frozen = frozenOverride;
         }
     }
 #endregion

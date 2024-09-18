@@ -133,7 +133,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         });
 
         stateMachine.OnStateChangeSimple += () => {
-            switch (stateMachine.state) {
+            switch (stateMachine.State) {
                 case State.Empty:
                     OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
                     OnCubeReleaseEndSimple?.Invoke();
@@ -240,9 +240,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         }
 
         // Skip first frame to avoid weird bugs where the cube snaps into a weird position for a frame
-        if (stateMachine.timeSinceStateChanged == 0) return;
+        if (stateMachine.Time == 0) return;
         float t;
-        switch (stateMachine.state) {
+        switch (stateMachine.State) {
             case State.Empty:
                 break;
             case State.CubeInReceptacle:
@@ -265,7 +265,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     break;
                 }
 
-                t = stateMachine.timeSinceStateChanged / rotateTime;
+                t = stateMachine.Time / rotateTime;
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 cubeInReceptacle.transform.rotation = Quaternion.Lerp(startRot, endRot, t);
                 break;
@@ -277,7 +277,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     break;
                 }
 
-                t = stateMachine.timeSinceStateChanged / translateTime;
+                t = stateMachine.Time / translateTime;
 
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 break;
@@ -287,7 +287,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                     break;
                 }
 
-                t = stateMachine.timeSinceStateChanged / timeToRelease;
+                t = stateMachine.Time / timeToRelease;
 
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 cubeInReceptacle.transform.rotation = startRot;
@@ -302,6 +302,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         cube.Drop();
         cube.interactable = false;
         cubeInReceptacle = cube;
+        cube.thisGravity.useGravity = false;
         cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
 
         startRot = cubeInReceptacle.transform.rotation;
@@ -338,6 +339,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         cubeThatWasInReceptacle.shouldFollow = true;
         cubeThatWasInReceptacle.interactable = true;
         cubeThatWasInReceptacle.isReplaceable = true;
+        cubeThatWasInReceptacle.thisGravity.useGravity = !cubeThatWasInReceptacle.isHeld;
         triggerZone.enabled = false;
 
         stateMachine.Set(State.Empty);

@@ -1,168 +1,189 @@
-﻿using Saving;
-using SerializableClasses;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Saving;
+using StateUtils;
 
-// TODO: Refactor this to allow for a source point or collider for the shake, scaling intensity dynamically based on player distance
+// TODO: Make saveable? Not that important tho
+[RequireComponent(typeof(UniqueId))]
 public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.CameraShakeSave> {
-	bool isUsingCurve;
-	bool _isShaking = false;
-	bool IsShaking {
-		get => _isShaking;
-		set {
-			if (value && !_isShaking) {
-				timeShaking = 0f;
-				appliedOffset = Vector2.zero;
+    private const float FULL_SHAKE_DISTANCE = 10f; // Distance within which the player will feel the full intensity of the shake
+    private const float NO_SHAKE_DISTANCE = 150f; // Distance beyond which the player will feel no shake
+    private const float RETURN_TO_CENTER_LERP_SPEED = 2f; // Speed at which we lerp the camera back to its original position after shaking
+    private const float INTENSITY_TO_OFFSET_MULTPLIER = 0.02f; // Arbitrary "unit" conversion from intensity to offset (I like specifying values like 2.5f instead of .05f for shake intensity)
+    
+    public Vector2 totalOffsetApplied = Vector2.zero;
+    
+    private float SettingsIntensityMultiplier => Settings.Gameplay.CameraShake / 100f;
+
+    private Transform PlayerCam => Player.instance.PlayerCam.transform;
+
+    public class CameraShakeEvent {
+        public float time = 0;
+        public Func<Vector3> locationProvider = () => Vector3.zero;
+        public float intensity = 1;
+        public float duration = 1;
+        public float spatial = 1; // 0 is 2D, 1 is 3D, between is partial 3D
+        public AnimationCurve intensityCurve = AnimationCurve.Linear(0, 1, 1, 0);
+    }
+    private readonly HashSet<CameraShakeEvent> cameraShakeEvents = new HashSet<CameraShakeEvent>();
+
+    /// <summary>
+    /// Triggers a camera shake with the vibration originating from the value of locationProvider
+    /// </summary>
+    /// <param name="locationProvider">Evaluates each frame to determine the current location of the vibration</param>
+    /// <param name="intensity">Intensity when the player is at the location of the vibration</param>
+    /// <param name="duration">How long the vibration should last for</param>
+    public CameraShakeEvent Shake(Func<Vector3> locationProvider, float intensity, float duration) {
+        CameraShakeEvent shakeEvent = new CameraShakeEvent {
+            time = 0,
+            locationProvider = locationProvider,
+            intensity = intensity,
+            duration = duration,
+            spatial = 1,
+        };
+        return AddShake(shakeEvent);
+    }
+    
+    /// <summary>
+    /// Triggers a camera shake with the vibration originating from the given location
+    /// </summary>
+    /// <param name="location">Location of the vibration</param>
+    /// <param name="intensity">Intensity when the player is at the location of the vibration</param>
+    /// <param name="duration">How long the vibration should last for</param>
+    public CameraShakeEvent Shake(Vector3 location, float intensity, float duration) {
+        CameraShakeEvent shakeEvent = new CameraShakeEvent {
+            time = 0,
+            locationProvider = () => location,
+            intensity = intensity,
+            duration = duration,
+            spatial = 1
+        };
+        return AddShake(shakeEvent);
+    }
+
+    public CameraShakeEvent Shake(CameraShakeEvent shakeConfig) {
+        return AddShake(shakeConfig);
+    }
+
+    /// <summary>
+    /// Triggers a 2D camera shake that is the same no matter where the player is
+    /// </summary>
+    /// <param name="intensity">Intensity of the camera shake</param>
+    /// <param name="duration">How long the camera shake should last for</param>
+    public CameraShakeEvent Shake(float intensity, float duration) {
+        CameraShakeEvent shakeEvent = new CameraShakeEvent() {
+            time = 0,
+            locationProvider = () => Vector3.zero,
+            intensity = intensity,
+            duration = duration,
+            spatial = 0
+        };
+        return AddShake(shakeEvent);
+    }
+
+    private CameraShakeEvent AddShake(CameraShakeEvent shakeEvent) {
+        cameraShakeEvents.Add(shakeEvent);
+        return shakeEvent;
+    }
+
+    public void CancelShake(CameraShakeEvent shakeEvent) {
+        cameraShakeEvents.Remove(shakeEvent);
+    }
+
+    void Update() {
+        if (GameManager.instance.IsCurrentlyLoading) return;
+
+        ShakeCamera(GetCurrentShakeIntensity());
+    }
+
+    /// <summary>
+    /// Finds the maximum intensity of all of the camera shake events and returns it.
+    /// Also takes care of updating the camera shake events and removing those that have expired.
+    /// </summary>
+    /// <returns>Maximum camera shake intensity among all of the events</returns>
+    private float GetCurrentShakeIntensity() {
+        float maxIntensity = 0f;
+        
+        // Evaluate all of the camera shake events, removing those that have expired
+        List<CameraShakeEvent> eventsToRemove = new List<CameraShakeEvent>();
+        foreach (CameraShakeEvent cameraShakeEvent in cameraShakeEvents) {
+            float intensity = UpdateCameraShakeEvent(cameraShakeEvent);
+
+            if (intensity < 0) {
+                eventsToRemove.Add(cameraShakeEvent);
+                continue;
+            }
+            
+            maxIntensity = Mathf.Max(maxIntensity, intensity);
+        }
+        
+        foreach (CameraShakeEvent cameraShakeEvent in eventsToRemove) {
+            cameraShakeEvents.Remove(cameraShakeEvent);
+        }
+        
+        return maxIntensity;
+    }
+
+    private void ShakeCamera(float curIntensity) {
+        // Apply the settings intensity multiplier
+        curIntensity *= SettingsIntensityMultiplier;
+
+        // Generate a random offset based on the adjusted intensity
+        Vector2 randomOffset = UnityEngine.Random.insideUnitCircle.normalized * (curIntensity * INTENSITY_TO_OFFSET_MULTPLIER);
+    
+        // Apply the random offset to the total offset applied
+        Vector2 newTotalOffset = totalOffsetApplied + randomOffset;
+    
+        // Gradually return the camera to its original position
+        newTotalOffset = Vector2.Lerp(newTotalOffset, Vector2.zero, RETURN_TO_CENTER_LERP_SPEED * Time.deltaTime);
+    
+        // Apply the final offset to the camera's position
+        PlayerCam.localPosition += new Vector3(newTotalOffset.x, newTotalOffset.y, 0f);
+        
+        if (curIntensity > 0) {
+            debug.Log($"Shake: {curIntensity}\nOffset before: {totalOffsetApplied}\nOffset after: {newTotalOffset}");
+        }
+    
+        // Update the totalOffsetApplied to the final offset value
+        totalOffsetApplied = newTotalOffset;
+    }
+
+    /// <summary>
+    /// Helper function to update the CameraShakeEvents' timeShaking value and
+    /// return the current intensity of the shake given the player's distance from the event's location and the event's intensity and duration
+    /// </summary>
+    /// <returns>The amount of shake that this event contributes to the overall camera shake, or -1 if this shake has concluded</returns>
+    float UpdateCameraShakeEvent(CameraShakeEvent shakeEvent) {
+        shakeEvent.time += Time.deltaTime;
+        
+        if (shakeEvent.time >= shakeEvent.duration) {
+            return -1;
+        }
+
+        // Don't bother computing distance if the spatial is set to 2D
+        if (shakeEvent.spatial == 0) {
+            return shakeEvent.intensity * (1 - Mathf.InverseLerp(0, shakeEvent.duration, shakeEvent.time));
+        }
+        
+        float distance = SuperspectivePhysics.ShortestDistance(Player.instance.transform.position, shakeEvent.locationProvider.Invoke());
+        float rawDistanceMultiplier = Easing.EaseInOut(1 - Mathf.InverseLerp(FULL_SHAKE_DISTANCE, NO_SHAKE_DISTANCE, distance));
+        float distanceMultiplier = Mathf.Lerp(1, rawDistanceMultiplier, shakeEvent.spatial);
+        float intensity = shakeEvent.intensity * distanceMultiplier * shakeEvent.intensityCurve.Evaluate(shakeEvent.time / shakeEvent.duration);
+        
+        return intensity;
+    }
+    
+#region Saving
+		[Serializable]
+		public class CameraShakeSave : SerializableSaveObject<CameraShake> {
+            
+			public CameraShakeSave(CameraShake script) : base(script) {
 			}
-			_isShaking = value;
-		}
-	}
 
-	private float SettingsIntensityMultiplier => Settings.Gameplay.CameraShake / 100f;
-
-	Vector2 appliedOffset;
-	float duration;
-	float startIntensity;
-	float endIntensity;
-	AnimationCurve curve;
-	float intensityMultiplier;
-	// TODO: See if this is really annoying to have camera shake amplified by Player being small
-	bool isWorldShake = true;
-
-	float intensity;
-	float timeShaking = 0f;
-	const float returnToCenterLerpSpeed = 2f;
-	public Vector2 totalOffsetApplied = Vector2.zero;
-
-	void Update() {
-		if (Time.timeScale == 0) return;
-
-#if UNITY_EDITOR
-		if (DEBUG && DebugInput.GetKeyDown("c")) {
-			if (!IsShaking) {
-				Shake(2, 1, 0);
-			}
-			else {
-				CancelShake();
+			public override void LoadSave(CameraShake script) {
 			}
 		}
-#endif
-
-		if (!IsShaking) {
-			if (totalOffsetApplied.magnitude > 0.001f) {
-				Vector2 nextTotalOffsetApplied = Vector2.Lerp(totalOffsetApplied, Vector2.zero, returnToCenterLerpSpeed * Time.deltaTime);
-				Vector2 offset = nextTotalOffsetApplied - totalOffsetApplied;
-				transform.localPosition += new Vector3(offset.x, offset.y, 0);
-				totalOffsetApplied = nextTotalOffsetApplied;
-			}
-			else if (totalOffsetApplied.magnitude > 0f) {
-				transform.localPosition -= new Vector3(totalOffsetApplied.x, totalOffsetApplied.y, 0);
-				totalOffsetApplied = Vector2.zero;
-			}
-		}
-		else {
-			if (timeShaking < duration) {
-				float t = timeShaking / duration;
-
-				intensity = isUsingCurve ? curve.Evaluate(t) * intensityMultiplier : Mathf.Lerp(startIntensity, endIntensity, t);
-				intensity = isWorldShake ? 1f / Player.instance.Scale : 1f;
-				intensity *= SettingsIntensityMultiplier;
-				Vector2 random = UnityEngine.Random.insideUnitCircle * intensity / 10f;
-				Vector2 offset = Vector2.Lerp(Vector2.zero, -appliedOffset, t) + random;
-
-				appliedOffset += offset;
-				transform.localPosition += new Vector3(offset.x, offset.y, 0);
-				totalOffsetApplied += offset;
-
-				timeShaking += Time.deltaTime;
-			}
-			else {
-				transform.localPosition -= new Vector3(appliedOffset.x, appliedOffset.y, 0);
-				totalOffsetApplied -= appliedOffset;
-
-				IsShaking = false;
-			}
-		}
-	}
-
-	public void Shake(float duration, float intensityMultiplier, AnimationCurve curve) {
-		if (!IsShaking) {
-			this.duration = duration;
-			this.intensityMultiplier = intensityMultiplier;
-			this.curve = curve;
-
-			isUsingCurve = true;
-			IsShaking = true;
-		}
-	}
-
-	public void Shake(float duration, float startIntensity, float endIntensity) {
-		if (!IsShaking) {
-			this.duration = duration;
-			this.startIntensity = startIntensity;
-			this.endIntensity = endIntensity;
-
-			isUsingCurve = false;
-			IsShaking = true;
-		}
-	}
-
-	public void CancelShake() {
-		isUsingCurve = false;
-		IsShaking = false;
-	}
-
-	#region Saving
-	// There's only one player so we don't need a UniqueId here
-	public override string ID => "CameraShake";
-
-	[Serializable]
-	public class CameraShakeSave : SerializableSaveObject<CameraShake> {
-		bool isUsingCurve;
-		bool isShaking;
-
-		SerializableVector2 appliedOffset;
-		float duration;
-		float startIntensity;
-		float endIntensity;
-		SerializableAnimationCurve curve;
-		float intensityMultiplier;
-
-		float intensity;
-		float timeShaking;
-		SerializableVector2 totalOffsetApplied;
-
-		public CameraShakeSave(CameraShake cameraShake) : base(cameraShake) {
-			this.isUsingCurve = cameraShake.isUsingCurve;
-			this.isShaking = cameraShake.IsShaking;
-			this.appliedOffset = cameraShake.appliedOffset;
-			this.duration = cameraShake.duration;
-			this.startIntensity = cameraShake.startIntensity;
-			this.endIntensity = cameraShake.endIntensity;
-			if (cameraShake.curve != null) {
-				this.curve = cameraShake.curve;
-			}
-			this.intensityMultiplier = cameraShake.intensityMultiplier;
-			this.intensity = cameraShake.intensity;
-			this.timeShaking = cameraShake.timeShaking;
-			this.totalOffsetApplied = cameraShake.totalOffsetApplied;
-		}
-
-		public override void LoadSave(CameraShake cameraShake) {
-			cameraShake.isUsingCurve = this.isUsingCurve;
-			cameraShake._isShaking = this.isShaking;
-			cameraShake.appliedOffset = this.appliedOffset;
-			cameraShake.duration = this.duration;
-			cameraShake.startIntensity = this.startIntensity;
-			cameraShake.endIntensity = this.endIntensity;
-			cameraShake.curve = this.curve;
-			cameraShake.intensityMultiplier = this.intensityMultiplier;
-			cameraShake.intensity = this.intensity;
-			cameraShake.timeShaking = this.timeShaking;
-			cameraShake.totalOffsetApplied = this.totalOffsetApplied;
-		}
-	}
-	#endregion
+#endregion
 }

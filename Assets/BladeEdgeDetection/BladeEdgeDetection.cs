@@ -23,7 +23,7 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	// In debug mode, red indicates a depth-detected edge, green indicates a normal-detected edge, and yellow indicates that both checks detected an edge
 	public bool debugMode = false;
 
-	public bool doubleSidedEdges = false;
+	public bool doubleSidedEdges => Settings.Video.DoubleThickEdges;
 	public bool checkPortalDepth = false;
 	public float depthSensitivity = 1;
 	public float normalSensitivity = 1;
@@ -83,7 +83,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	public static readonly int GradientModeID = Shader.PropertyToID("_GradientMode");
 	public static readonly int FrustumCorners = Shader.PropertyToID("_FrustumCorners");
 
-	void OnEnable () {
+	protected override void OnEnable () {
+		base.OnEnable();
 		SetDepthNormalTextureFlag();
 		frustumCorners = new Vector3[4];
 		frustumCornersOrdered = new Vector4[4];
@@ -239,7 +240,6 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 	[Serializable]
 	public class BladeEdgeDetectionSave : SerializableSaveObject<BladeEdgeDetection> {
 		bool debugMode;
-		bool doubleSidedEdges;
 		bool checkPortalDepth;
 		float depthSensitivity;
 		float normalSensitivity;
@@ -257,7 +257,6 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 
 		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) : base(edgeDetection) {
 			this.debugMode = edgeDetection.debugMode;
-			this.doubleSidedEdges = edgeDetection.doubleSidedEdges;
 			this.checkPortalDepth = edgeDetection.checkPortalDepth;
 			this.depthSensitivity = edgeDetection.depthSensitivity;
 			this.normalSensitivity = edgeDetection.normalSensitivity;
@@ -274,7 +273,6 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 
 		public override void LoadSave(BladeEdgeDetection edgeDetection) {
 			edgeDetection.debugMode = this.debugMode;
-			edgeDetection.doubleSidedEdges = this.doubleSidedEdges;
 			edgeDetection.checkPortalDepth = this.checkPortalDepth;
 			edgeDetection.depthSensitivity = this.depthSensitivity;
 			edgeDetection.normalSensitivity = this.normalSensitivity;

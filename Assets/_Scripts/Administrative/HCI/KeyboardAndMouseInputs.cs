@@ -89,10 +89,3 @@ public class KeyboardAndMouseInput {
 		}
 	}
 }
-
-public static class KeyboardAndMouseInputs {
-	static KeyboardAndMouseInput AZERTYUp = new KeyboardAndMouseInput(KeyCode.Z);
-	static KeyboardAndMouseInput AZERTY = new KeyboardAndMouseInput(KeyCode.S);
-	static KeyboardAndMouseInput AZERTYLeft = new KeyboardAndMouseInput(KeyCode.Q);
-	static KeyboardAndMouseInput AZERTYRight = new KeyboardAndMouseInput(KeyCode.D);
-}

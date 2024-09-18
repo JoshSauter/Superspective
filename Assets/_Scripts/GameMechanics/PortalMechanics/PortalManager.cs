@@ -8,7 +8,6 @@ using UnityStandardAssets.ImageEffects;
 namespace PortalMechanics {
 	public class PortalManager : Singleton<PortalManager> {
 		public bool DEBUG = false;
-		public LayerMask hideFromPortalCamera;
 		DebugLogger debug;
 		Dictionary<string, HashSet<Portal>> portalsByChannel = new Dictionary<string, HashSet<Portal>>();
 		public List<Portal> activePortals = new List<Portal>();
@@ -103,8 +102,9 @@ namespace PortalMechanics {
 
 			// Copy main camera component from player's camera
 			portalCamera.CopyFrom(playerCam);
-			portalCamera.cullingMask &= ~hideFromPortalCamera;
-			portalCamera.backgroundColor = Color.white;
+			portalCamera.cullingMask &= ~SuperspectivePhysics.HideFromPortalLayer;
+			portalCamera.cullingMask &= ~SuperspectivePhysics.VolumetricPortalLayer;
+			portalCamera.backgroundColor = Color.white; 
 
 			VirtualPortalCamera virtualPortalCam = portalCamera.gameObject.AddComponent<VirtualPortalCamera>();
 			virtualPortalCam.DEBUG = DEBUG;
@@ -112,12 +112,14 @@ namespace PortalMechanics {
 			// Copy post-process effects from player's camera
 			// Order of components here matters; it affects the rendering order of the postprocess effects
 			//portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BloomOptimized>());											 // Copy Bloom
-			virtualPortalCam.playerFog = playerCam.GetComponent<ColorfulFog>();
-			virtualPortalCam.fog = portalCamera.gameObject.PasteComponent(virtualPortalCam.playerFog);									 // Copy Fog
+			ColorfulFog playerFog = playerCam.GetComponent<ColorfulFog>();
+			ColorfulFog fog = portalCamera.gameObject.PasteComponent(playerFog);									 // Copy Fog
+			//virtualPortalCam.interactableGlowManager = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<InteractableGlowManager>());
+			//virtualPortalCam.glowComposite = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<GlowComposite>());       // Copy Interact Glow
 			//BladeEdgeDetection edgeDetection = portalCamera.gameObject.PasteComponent(playerCam.GetComponent<BladeEdgeDetection>());   // Copy Edge Detection (maybe change color)
 			//edgeDetection.enabled = false;
 			//edgeDetection.checkPortalDepth = false;
-			virtualPortalCam.postProcessEffects.Add(virtualPortalCam.fog);
+			virtualPortalCam.postProcessEffects.Add(fog);
 			//virtualPortalCam.postProcessEffects.Add(edgeDetection);
 
 			portalCamera.gameObject.name = "VirtualPortalCamera";

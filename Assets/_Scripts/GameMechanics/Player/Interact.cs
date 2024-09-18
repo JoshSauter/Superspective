@@ -10,7 +10,9 @@ public class Interact : Singleton<Interact> {
     public const float defaultInteractionDistance = 6.5f;
     public bool DEBUG;
     // For debug GUI
-    string nameOfFirstObjectHit = "";
+    private string nameOfFirstObjectHit = "";
+    private string nameOfPortalHit = "";
+    
     readonly GUIStyle style = new GUIStyle();
     [NonSerialized]
     private LayerMask layerMask;
@@ -23,14 +25,15 @@ public class Interact : Singleton<Interact> {
     Camera cam;
     DebugLogger debug;
 
-    private SuperspectiveRaycast debugRaycast;
+    // The raycast last used for interaction
+    public SuperspectiveRaycast raycast;
 
     private void OnDrawGizmos() {
-        if (!DEBUG || debugRaycast == null || !Debug.isDebugBuild) return;
+        if (!DEBUG || raycast == null || !Debug.isDebugBuild) return;
 
         Color defaultColor = Gizmos.color;
-        for (int i = 0; i < debugRaycast.raycastParts.Count; i++) {
-            var part = debugRaycast.raycastParts[i];
+        for (int i = 0; i < raycast.raycastParts.Count; i++) {
+            var part = raycast.raycastParts[i];
             Gizmos.color = Color.Lerp(Color.yellow, Color.red, (float)i / RaycastUtils.MAX_RAYCASTS);
             Gizmos.DrawSphere(part.ray.origin, 0.05f);
             Gizmos.DrawSphere(part.ray.origin + part.ray.direction * part.distance, 0.025f);
@@ -130,14 +133,8 @@ public class Interact : Singleton<Interact> {
         );
     }
 
-    public SuperspectiveRaycast GetRaycastHits(bool disableDebug = true) {
-        // Vector2 screenPos = PixelPositionOfReticle();
-
+    public SuperspectiveRaycast GetRaycastHits() {
         Ray ray = AdjustedRay(Reticle.instance.thisTransformPos);
-        if (!disableDebug && DEBUG) {
-            debugRaycast = RaycastUtils.Raycast(ray.origin, ray.direction, effectiveInteractionDistance, layerMask);
-            return debugRaycast;
-        }
         return RaycastUtils.Raycast(ray.origin, ray.direction, effectiveInteractionDistance, layerMask);
     }
 
@@ -161,17 +158,23 @@ public class Interact : Singleton<Interact> {
     }
 
     InteractableObject FindInteractableObjectHovered() {
-        SuperspectiveRaycast raycastResult = GetRaycastHits(false);
+        SuperspectiveRaycast raycastResult = GetRaycastHits();
+        raycast = raycastResult;
 
         InteractableObject interactable = null;
-        if (raycastResult.hitObject) {
-            nameOfFirstObjectHit = raycastResult.firstObjectHit.collider.name;
-            GameObject firstObjHit = raycastResult.firstObjectHit.collider.gameObject;
+        if (raycastResult.DidHitObject) {
+            nameOfFirstObjectHit = raycastResult.FirstObjectHit.collider.name;
+            GameObject firstObjHit = raycastResult.FirstObjectHit.collider.gameObject;
             interactable = firstObjHit.FindInParentsRecursively<InteractableObject>();
+            if (interactable == null) {
+                interactable = firstObjHit.FindInParentsRecursively<PortalCopy>()?.originalPortalableObj.InteractObject;
+            }
         }
         else {
             nameOfFirstObjectHit = "";
         }
+
+        nameOfPortalHit = raycastResult.DidHitPortal ? raycastResult.FirstValidPortalHit.name : "";
 
         return interactable;
     }
@@ -180,8 +183,34 @@ public class Interact : Singleton<Interact> {
         if (!DEBUG || !DebugInput.IsDebugBuild) return;
         
         GUI.depth = 2;
-        style.normal.textColor = nameOfFirstObjectHit == "" ? Color.red : (interactableObjectHovered == null) ? Color.green : Color.blue;
-        GUI.Label(new Rect(5, 80, 200, 25), $"Object Hovered: {nameOfFirstObjectHit}", style);
+        Color textColor;
+        string text;
+        switch (nameOfFirstObjectHit != "", nameOfPortalHit != "") {
+            // Didn't hit an object nor a portal
+            case (false, false):
+                textColor = Color.red;
+                text = "Object Hovered: None";
+                break;
+            // Hit a portal but not an object
+            case (false, true):
+                textColor = Color.blue;
+                text = "Object Hovered: None, Portal Hit: " + nameOfPortalHit;
+                break;
+            // Hit an object but not a portal
+            case (true, false):
+                textColor = Color.green;
+                text = "Object Hovered: " + nameOfFirstObjectHit;
+                break;
+            // Hit both an object and a portal
+            default:
+                textColor = Color.cyan;
+                text = "Object Hovered: " + nameOfFirstObjectHit + ", through Portal: " + nameOfPortalHit;
+                break;
+        }
+
+        style.normal.textColor = textColor;
+        
+        GUI.Label(new Rect(5, 80, 200, 25), text, style);
 
         String binaryMask = Convert.ToString(MaskBufferRenderTextures.instance.visibilityMaskValue, 2);
         String maskPrintStatement = "";

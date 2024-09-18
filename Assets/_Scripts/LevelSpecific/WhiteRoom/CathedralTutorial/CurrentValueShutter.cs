@@ -53,7 +53,7 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
 
-        switch (state.state) {
+        switch (state.State) {
             case State.Open:
                 lerpTime = 1;
                 break;

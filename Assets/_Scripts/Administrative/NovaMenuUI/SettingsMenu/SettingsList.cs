@@ -118,6 +118,7 @@ public class SettingsList : MonoBehaviour {
                 AddSettingCopy(Settings.Video.LetterboxingEnabled);
                 AddSettingCopy(Settings.Video.PortalDownsampleAmount);
                 AddSettingCopy(Settings.Gameplay.CameraShake);
+                AddSettingCopy(Settings.Video.DoubleThickEdges);
                 break;
             case MenuType.Gameplay:
                 settingsItems.Add(UIStyle.NewHeader("Movement"));

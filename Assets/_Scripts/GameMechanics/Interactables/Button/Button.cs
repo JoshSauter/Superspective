@@ -81,23 +81,22 @@ namespace Interactables {
 
         float distanceCurrentlyPressed = 0f;
 
-        public bool buttonPressed => stateMachine.state == State.ButtonPressed;
+        public bool ButtonPressed => stateMachine.State == State.ButtonPressed;
 
         protected override void Awake() {
             base.Awake();
 
             stateMachine = this.StateMachine(State.ButtonUnpressed);
 
-            interactableObject = GetComponent<InteractableObject>();
-            if (interactableObject == null) interactableObject = gameObject.AddComponent<InteractableObject>();
+            interactableObject = this.GetOrAddComponent<InteractableObject>();
             interactableObject.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
 
-            if (stateMachine.state == State.ButtonPressed) {
+            if (stateMachine.State == State.ButtonPressed) {
                 distanceCurrentlyPressed = pressDistance;
             }
 
             if (automaticallySetHelpText) {
-                interactableObject.enabledHelpText = stateMachine.state == State.ButtonPressed ? buttonOnHelpText : buttonOffHelpText;
+                interactableObject.enabledHelpText = stateMachine.State == State.ButtonPressed ? buttonOnHelpText : buttonOffHelpText;
             }
         }
 
@@ -119,8 +118,8 @@ namespace Interactables {
             stateMachine.AddStateTransition(State.ButtonUnpressing, State.ButtonUnpressed, timeToUnpressButton);
 
             stateMachine.OnStateChange += (prevState, _) => {
-                debug.Log($"Button state set to {stateMachine.state} from {prevState}");
-                switch (stateMachine.state) {
+                debug.Log($"Button state set to {stateMachine.State} from {prevState}");
+                switch (stateMachine.State) {
                     case State.ButtonUnpressed:
                         transform.position -= (distanceCurrentlyPressed) * transform.up;
                         distanceCurrentlyPressed = 0f;
@@ -175,13 +174,13 @@ namespace Interactables {
 
         protected virtual void UpdateButtonPosition() {
             // if (pressDistance <= 0) return;
-            float t = stateMachine.timeSinceStateChanged / timeToPressButton;
-            switch (stateMachine.state) {
+            float t = stateMachine.Time / timeToPressButton;
+            switch (stateMachine.State) {
                 case State.ButtonUnpressed:
                 case State.ButtonPressed:
                     break;
                 case State.ButtonPressing:
-                    if (stateMachine.timeSinceStateChanged < timeToPressButton) {
+                    if (stateMachine.Time < timeToPressButton) {
                         float delta = Time.deltaTime * (pressDistance / timeToPressButton);
                         distanceCurrentlyPressed += delta;
                         transform.position += delta * transform.up;
@@ -189,7 +188,7 @@ namespace Interactables {
 
                     break;
                 case State.ButtonUnpressing:
-                    if (stateMachine.timeSinceStateChanged < timeToUnpressButton) {
+                    if (stateMachine.Time < timeToUnpressButton) {
                         float delta = Time.deltaTime * (pressDistance / timeToUnpressButton);
                         distanceCurrentlyPressed -= delta;
                         transform.position -= delta * transform.up;

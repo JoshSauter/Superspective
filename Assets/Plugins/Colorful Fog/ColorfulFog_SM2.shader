@@ -188,9 +188,28 @@ Shader "Hidden/JG/ColorfulFog"
 		float portalDepthValue;
 		float3 portalNormalValue;
 		DecodeDepthNormal(portalMaskSample, portalDepthValue, portalNormalValue);
+		// TODO: Need to figure out how to handle portals which are occluded by other objects
+		bool allSamplesBehindPortal = portalMaskSample < 1;
+		if (portalMaskSample < 1) {
+			float2 texelSize = float2(1.0 / _ScreenParams.x, 1.0 / _ScreenParams.y); // Assuming _PortalMaskWithScale is screen-sized
 
-		half sampleIsBehindPortal = rawDepth > portalDepthValue-0.00373 && portalDepthValue < 1;
-		if (sampleIsBehindPortal && portalDepthValue != .998) {
+			// Sample the adjacent pixels
+			float portalMaskSampleLeft    = tex2D(_PortalMask, i.uv_depth + float2(-texelSize.x, 0));
+			float portalMaskSampleRight   = tex2D(_PortalMask, i.uv_depth + float2(texelSize.x, 0));
+			float portalMaskSampleTop     = tex2D(_PortalMask, i.uv_depth + float2(0, texelSize.y));
+			float portalMaskSampleBottom  = tex2D(_PortalMask, i.uv_depth + float2(0, -texelSize.y));
+
+			// Optional: Sample diagonal neighbors if needed
+			float portalMaskSampleTopLeft     = tex2D(_PortalMask, i.uv_depth + float2(-texelSize.x, texelSize.y));
+			float portalMaskSampleTopRight    = tex2D(_PortalMask, i.uv_depth + float2(texelSize.x, texelSize.y));
+			float portalMaskSampleBottomLeft  = tex2D(_PortalMask, i.uv_depth + float2(-texelSize.x, -texelSize.y));
+			float portalMaskSampleBottomRight = tex2D(_PortalMask, i.uv_depth + float2(texelSize.x, -texelSize.y));
+
+			allSamplesBehindPortal = portalMaskSampleLeft < 1 && portalMaskSampleRight < 1 && portalMaskSampleTop < 1 && portalMaskSampleBottom < 1 &&
+				portalMaskSampleTopLeft < 1 && portalMaskSampleTopRight < 1 && portalMaskSampleBottomLeft < 1 && portalMaskSampleBottomRight < 1;
+		}
+		if (allSamplesBehindPortal && rawDepth > .999)
+		{
 			return sceneColor;
 		}
 #endif

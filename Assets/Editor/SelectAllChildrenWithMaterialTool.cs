@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine;
 
@@ -45,26 +47,6 @@ namespace Editor {
             foreach (Transform child in curNode.transform.GetComponentsInChildren<Transform>(selectInactive)) {
                 if (child.gameObject != curNode) SelectAllChildrenRecusivelyWithMaterial(child.gameObject, ref selectionSoFar);
             }
-        }
-    }
-
-    public static class StringExt {
-        public static string StripSuffix(this string s, string suffix) {
-            if (s.EndsWith(suffix)) {
-                return s.Substring(0, s.Length - suffix.Length);
-            }
-            else {
-                return s;
-            }
-        }
-        
-        // Shamelessly stolen from: https://stackoverflow.com/questions/5796383/insert-spaces-between-words-on-a-camel-cased-token
-        public static string SplitCamelCase(this string str) {
-            return Regex.Replace( 
-                Regex.Replace(str, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2"), 
-                @"(\p{Ll})(\P{Ll})", 
-                "$1 $2" 
-            );
         }
     }
 }

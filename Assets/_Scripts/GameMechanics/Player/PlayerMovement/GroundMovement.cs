@@ -92,7 +92,7 @@ partial class PlayerMovement {
             if (m.pauseSnapToGround) return;
             if (!grounded.IsGrounded) return;
             
-            bool recentlySteppedUp = m.stairMovement.RecentlySteppedUp;
+            bool recentlySteppedUp = m.staircaseMovement.RecentlySteppedUp;
 
             if (m.Jumping) return;
             if (recentlySteppedUp) return;
@@ -108,11 +108,13 @@ partial class PlayerMovement {
                     Vector3 offset = -(m.BottomOfPlayer - hit.point);
                     transform.Translate(offset, Space.World);
                     Vector3 afterPos = m.BottomOfPlayer;
+
+                    if (offset.magnitude < 0.0001f) return;
                     
                     m.debug.Log($"Before position: {beforePos}\nAfter position: {afterPos}\nOffset: {offset}");
                 
                     m.debug.LogWarning($"NormalDotUp: {leastGroundNormalDotUp}");
-                    Debug.DrawRay(hit.point, hit.normal, Color.green, 0.15f);
+                    Debug.DrawRay(hit.point, hit.normal, Color.cyan, 0.15f);
                 }
             }
             // No input, freeze the player movement after a short delay
@@ -122,7 +124,7 @@ partial class PlayerMovement {
         }
 
         public void UpdateLastGroundVelocity(Vector3 desiredVelocity) {
-            if (grounded.IsGrounded && m.stairMovement.stepState == StairMovement.StepState.StepReady) {
+            if (grounded.IsGrounded && m.staircaseMovement.stepState == StaircaseMovement.StepState.Idle) {
                 lastGroundVelocity = desiredVelocity;
             }
         }

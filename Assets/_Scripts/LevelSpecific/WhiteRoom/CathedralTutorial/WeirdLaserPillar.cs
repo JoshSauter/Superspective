@@ -44,7 +44,7 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
         state.AddTrigger(State.On, initialDelay, () => AudioManager.instance.PlayAtLocation(AudioName.AirWhoosh, ID, transform.position));
         state.AddTrigger(State.On, initialDelay + airWhooshCrescendoTime, () => {
 	        // Debug.Log($"Multiple: {cameraShakeMultiplier}, Distance: {distanceFromPlayer}");
-	        CameraShake.instance.Shake(cameraShakeTime, cameraShakeStartIntensity*cameraShakeMultiplier, 0f);
+	        CameraShake.instance.Shake(transform.position, cameraShakeStartIntensity, cameraShakeTime);
 	        AudioManager.instance.PlayAtLocation(AudioName.LaserLoopStart, ID, transform.position);
 	        ps.Play();
         });
@@ -52,7 +52,7 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
     }
 
     private void Update() {
-	    switch (state.state) {
+	    switch (state.State) {
 		    case State.Off:
 			    if (ps.isPlaying) {
 				    ps.Stop();

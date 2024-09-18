@@ -63,15 +63,15 @@ public class TimedMessage : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        switch (state.state) {
+        switch (state.State) {
             case State.Off:
             case State.Displayed:
                 break;
             case State.FadingIn:
-                alpha = Mathf.Lerp(0f, 1f, state.timeSinceStateChanged / fadeInTime);
+                alpha = Mathf.Lerp(0f, 1f, state.Time / fadeInTime);
                 break;
             case State.FadingOut:
-                alpha = Mathf.Lerp(1, 0, state.timeSinceStateChanged / fadeOutTime);
+                alpha = Mathf.Lerp(1, 0, state.Time / fadeOutTime);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

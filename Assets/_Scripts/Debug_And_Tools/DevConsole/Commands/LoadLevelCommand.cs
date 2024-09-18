@@ -42,7 +42,6 @@ namespace DeveloperConsole {
         private CommandResponse LoadLevel(Levels level, bool resetPlayerPosition = true) {
             if (level.IsTestingLevel()) return new FailureResponse($"Cannot load testing level {level} in build.");
             
-            DevConsoleBehaviour.instance.Toggle();
             LevelManager.instance.SwitchActiveScene(
                 level,
                 true,

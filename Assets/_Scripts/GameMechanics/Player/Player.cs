@@ -14,7 +14,7 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
 
-	public float Scale => growShrink != null ? growShrink.currentScale : 1f;
+	public float Scale => growShrink != null ? growShrink.CurrentScale : 1f;
 	public GrowShrinkObject growShrink;
 	public bool IsHoldingSomething => heldObject != null;
 
@@ -29,7 +29,8 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 		if (objDropped == heldObject) heldObject = null;
 	};
 
-	protected void OnEnable() {
+	protected override void OnEnable() {
+		base.OnEnable();
 		renderer = GetComponentInChildren<Renderer>();
 		collider = GetComponentInChildren<Collider>();
 		look = GetComponent<PlayerLook>();
@@ -64,20 +65,27 @@ public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 
 	[Serializable]
 	public class PlayerSave : SerializableSaveObject<Player> {
-		SerializableVector3 position;
-		SerializableQuaternion rotation;
-		SerializableVector3 localScale;
+		public SerializableVector3 position;
+		public SerializableQuaternion rotation;
+		public SerializableVector3 localScale;
+		
+		// I'm also saving Physics.gravity here because it's basically the Player's GravityObject
+		private SerializableVector3 gravity;
 
 		public PlayerSave(Player player) : base(player) {
 			this.position = player.transform.position;
 			this.rotation = player.transform.rotation;
 			this.localScale = player.transform.localScale;
+
+			gravity = Physics.gravity;
 		}
 
 		public override void LoadSave(Player player) {
 			player.transform.position = this.position;
 			player.transform.rotation = this.rotation;
 			player.transform.localScale = this.localScale;
+			
+			Physics.gravity = gravity;
 		}
 	}
 	#endregion

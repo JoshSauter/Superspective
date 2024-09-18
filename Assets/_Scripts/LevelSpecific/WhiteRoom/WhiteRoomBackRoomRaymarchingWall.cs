@@ -16,10 +16,10 @@ public class WhiteRoomBackRoomRaymarchingWall : MonoBehaviour {
         bool isActiveNow = gameObject.IsInActiveScene();
 
         if (isActive != isActiveNow) {
-            backRoomDimensionWallLeft.SwitchVisibilityState(isActiveNow ? VisibilityState.partiallyVisible : VisibilityState.invisible);
-            backRoomDimensionWallRight.SwitchVisibilityState(isActiveNow ? VisibilityState.partiallyVisible : VisibilityState.invisible);
-            backRoomCullEverythingWallLeft.SwitchVisibilityState(isActiveNow ? VisibilityState.partiallyInvisible : VisibilityState.invisible);
-            backRoomCullEverythingWallRight.SwitchVisibilityState(isActiveNow ? VisibilityState.partiallyInvisible : VisibilityState.invisible);
+            backRoomDimensionWallLeft.SwitchVisibilityState(isActiveNow ? VisibilityState.PartiallyVisible : VisibilityState.Invisible);
+            backRoomDimensionWallRight.SwitchVisibilityState(isActiveNow ? VisibilityState.PartiallyVisible : VisibilityState.Invisible);
+            backRoomCullEverythingWallLeft.SwitchVisibilityState(isActiveNow ? VisibilityState.PartiallyInvisible : VisibilityState.Invisible);
+            backRoomCullEverythingWallRight.SwitchVisibilityState(isActiveNow ? VisibilityState.PartiallyInvisible : VisibilityState.Invisible);
             backRoomMiddleGlassDimensionWall.enabled = isActiveNow;
             isActive = isActiveNow;
         }

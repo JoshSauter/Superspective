@@ -10,23 +10,23 @@ using NaughtyAttributes;
 using PortalMechanics;
 
 public enum VisibilityState {
-	invisible,
-	partiallyVisible,
-	visible,
-	partiallyInvisible,
+	Invisible,
+	PartiallyVisible,
+	Visible,
+	PartiallyInvisible,
 };
 
 public static class VisibilityStateExt {
 	public static VisibilityState Opposite(this VisibilityState visibilityState) {
 		switch (visibilityState) {
-			case VisibilityState.invisible:
-				return VisibilityState.visible;
-			case VisibilityState.partiallyVisible:
-				return VisibilityState.partiallyInvisible;
-			case VisibilityState.visible:
-				return VisibilityState.invisible;
-			case VisibilityState.partiallyInvisible:
-				return VisibilityState.partiallyVisible;
+			case VisibilityState.Invisible:
+				return VisibilityState.Visible;
+			case VisibilityState.PartiallyVisible:
+				return VisibilityState.PartiallyInvisible;
+			case VisibilityState.Visible:
+				return VisibilityState.Invisible;
+			case VisibilityState.PartiallyInvisible:
+				return VisibilityState.PartiallyVisible;
 			default:
 				throw new ArgumentOutOfRangeException(nameof(visibilityState), visibilityState, null);
 		}
@@ -38,9 +38,13 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	public override string ID => $"{gameObject.name}_{base.ID}";
 
 	public static HashSet<DimensionObject> allDimensionObjects = new HashSet<DimensionObject>();
+	const string DIMENSION_OBJECT_KEYWORD = "DIMENSION_OBJECT";
 	public const int NUM_CHANNELS = 8;
 	public bool treatChildrenAsOneObjectRecursively = false;
+	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
 	public bool ignoreChildrenWithDimensionObject = true;
+	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
+	public bool includeInactiveGameObjects = false;
 
 	protected bool initialized = false;
 	[Range(0, NUM_CHANNELS-1)]
@@ -57,16 +61,18 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	Dictionary<SuperspectiveRenderer, int> startingLayers;
 	public SphereCollider ignoreCollisionsTriggerZone;
 
-	public VisibilityState startingVisibilityState = VisibilityState.visible;
-	public VisibilityState visibilityState = VisibilityState.visible;
-	public VisibilityState effectiveVisibilityState => reverseVisibilityStates
-		? visibilityState.Opposite()
-		: visibilityState;
+	public VisibilityState startingVisibilityState = VisibilityState.Visible;
+	public VisibilityState visibilityState = VisibilityState.Visible;
+
+	public VisibilityState EffectiveVisibilityState {
+		get => reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+		set => visibilityState = reverseVisibilityStates ? value.Opposite() : value;
+	} 
 	static Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
-		{ VisibilityState.invisible, new HashSet<VisibilityState> { VisibilityState.partiallyVisible, VisibilityState.partiallyInvisible } },
-		{ VisibilityState.partiallyVisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } },
-		{ VisibilityState.visible, new HashSet<VisibilityState> { VisibilityState.partiallyVisible, VisibilityState.partiallyInvisible } },
-		{ VisibilityState.partiallyInvisible, new HashSet<VisibilityState> { VisibilityState.invisible, VisibilityState.visible } }
+		{ VisibilityState.Invisible, new HashSet<VisibilityState> { VisibilityState.PartiallyVisible, VisibilityState.PartiallyInvisible } },
+		{ VisibilityState.PartiallyVisible, new HashSet<VisibilityState> { VisibilityState.Invisible, VisibilityState.Visible } },
+		{ VisibilityState.Visible, new HashSet<VisibilityState> { VisibilityState.PartiallyVisible, VisibilityState.PartiallyInvisible } },
+		{ VisibilityState.PartiallyInvisible, new HashSet<VisibilityState> { VisibilityState.Invisible, VisibilityState.Visible } }
 	};
 
 	public bool[] collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
@@ -106,13 +112,15 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 	}
 
-	protected override void Awake() {
-		base.Awake();
+	protected override void Start() {
+		base.Start();
 
 		InitializeRenderersAndLayers();
 	}
 
 	protected override void Init() {
+		base.Init();
+		
 		foreach (var r in renderers) {
 			SetShaderProperties(r);
 		}
@@ -133,9 +141,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	}
 	
 	void OnDisable() {
+		Destroy(collisionLogic);
 		allDimensionObjects.Remove(this);
 		isBeingDestroyed = true;
-		visibilityState = VisibilityState.visible;
+		visibilityState = VisibilityState.Visible;
 		OnStateChangeImmediate?.Invoke(this);
 		OnStateChange?.Invoke(this);
 		OnStateChangeSimple?.Invoke();
@@ -144,8 +153,15 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		} catch {}
 	}
 
-	void OnEnable() {
+	protected override void OnEnable() {
+		base.OnEnable();
 		allDimensionObjects.Add(this);
+		StartCoroutine(SetChannelsWhenReady());
+	}
+
+	IEnumerator SetChannelsWhenReady() {
+		yield return new WaitWhile(() => renderers == null || renderers.Length == 0);
+		
 		SetChannelValuesInMaterials();
 	}
 	
@@ -175,8 +191,11 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		Vector3 min = float.MaxValue * Vector3.one;
 		Vector3 max = float.MinValue * Vector3.one;
 		foreach (var c in colliders) {
+			bool wasEnabled = c.enabled;
+			c.enabled = true; // Bounds.min/max are zero if the collider is disabled :(
 			Vector3 thisMin = c.bounds.min;
 			Vector3 thisMax = c.bounds.max;
+			c.enabled = wasEnabled;
 
 			min = MinOfTwoVectors(min, thisMin);
 			max = MaxOfTwoVectors(max, thisMax);
@@ -212,14 +231,14 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			}
 		}
 
-		switch (effectiveVisibilityState) {
-			case VisibilityState.invisible:
+		switch (EffectiveVisibilityState) {
+			case VisibilityState.Invisible:
 				return false;
-			case VisibilityState.partiallyVisible:
+			case VisibilityState.PartiallyVisible:
 				return ChannelOverlap();
-			case VisibilityState.partiallyInvisible:
+			case VisibilityState.PartiallyInvisible:
 				return !ChannelOverlap();
-			case VisibilityState.visible:
+			case VisibilityState.Visible:
 				return true;
 			default:
 				throw new ArgumentOutOfRangeException();
@@ -289,29 +308,34 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// State Change Logic //
 	////////////////////////
 #region State Change
+	public void SwitchEffectiveVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
+		SwitchVisibilityState(reverseVisibilityStates ? nextState.Opposite() : nextState, ignoreTransitionRules, sendEvents, suppressLogs);
+	}
 
-	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true) {
+	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
 		if (!(ignoreTransitionRules || IsValidNextState(nextState))) return;
 
-		debug.Log("State transition: " + visibilityState + " --> " + nextState);
+		if (!suppressLogs) {
+			debug.Log("State transition: " + visibilityState + " --> " + nextState);
+		}
 
 		switch (nextState) {
-			case VisibilityState.invisible:
-				visibilityState = VisibilityState.invisible;
+			case VisibilityState.Invisible:
+				visibilityState = VisibilityState.Invisible;
 				break;
-			case VisibilityState.partiallyVisible:
-				visibilityState = VisibilityState.partiallyVisible;
+			case VisibilityState.PartiallyVisible:
+				visibilityState = VisibilityState.PartiallyVisible;
 				break;
-			case VisibilityState.visible:
-				visibilityState = VisibilityState.visible;
+			case VisibilityState.Visible:
+				visibilityState = VisibilityState.Visible;
 				break;
-			case VisibilityState.partiallyInvisible:
-				visibilityState = VisibilityState.partiallyInvisible;
+			case VisibilityState.PartiallyInvisible:
+				visibilityState = VisibilityState.PartiallyInvisible;
 				break;
 		}
 		
 		foreach (var r in renderers) {
-			SetShaderProperties(r);
+			SetShaderProperties(r, suppressLogs);
 		}
 		SetChannelValuesInMaterials();
 
@@ -351,45 +375,52 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		startingLayers = GetAllStartingLayers(renderers);
 	}
 
-	void SetShaderProperties(SuperspectiveRenderer renderer) {
+	void SetShaderProperties(SuperspectiveRenderer renderer, bool suppressLogs = false) {
 		void SetLayers() {
 			if (!startingLayers.ContainsKey(renderer)) {
 				startingLayers.Add(renderer, renderer.gameObject.layer);
 			}
-			
+
+			int targetLayer = -1;
 			switch (visibilityState) {
-				case VisibilityState.invisible:
-					renderer.gameObject.layer = reverseVisibilityStates
+				case VisibilityState.Invisible:
+					targetLayer = reverseVisibilityStates
 						? startingLayers[renderer]
 						: SuperspectivePhysics.InvisibleLayer;
 					break;
-				case VisibilityState.visible:
-					renderer.gameObject.layer = reverseVisibilityStates
+				case VisibilityState.Visible:
+					targetLayer = reverseVisibilityStates
 						? SuperspectivePhysics.InvisibleLayer
 						: startingLayers[renderer];
 					break;
-				case VisibilityState.partiallyVisible:
-				case VisibilityState.partiallyInvisible:
-					renderer.gameObject.layer = reverseVisibilityStates
+				case VisibilityState.PartiallyVisible:
+				case VisibilityState.PartiallyInvisible:
+					targetLayer = reverseVisibilityStates
 						? (ignorePartiallyVisibleLayerChanges
 							? startingLayers[renderer]
 							: SuperspectivePhysics.VisibleButNoPlayerCollisionLayer)
 						: startingLayers[renderer];
 					break;
 			}
+
+			// Since this is in the call chain for portal rendering, it will spam the console with logs, making it harder to debug
+			if (!suppressLogs) {
+				debug.Log($"Setting target layer for renderer {renderer.gameObject.name} to {LayerMask.LayerToName(targetLayer)}");
+			}
+			renderer.gameObject.layer = targetLayer;
 		}
 
 		bool DetermineInverse() {
 			bool inverseShader = false;
 			switch (visibilityState) {
-				case VisibilityState.invisible:
+				case VisibilityState.Invisible:
 					break;
-				case VisibilityState.partiallyVisible:
+				case VisibilityState.PartiallyVisible:
 					inverseShader = reverseVisibilityStates;
 					break;
-				case VisibilityState.visible:
+				case VisibilityState.Visible:
 					break;
-				case VisibilityState.partiallyInvisible:
+				case VisibilityState.PartiallyInvisible:
 					inverseShader = !reverseVisibilityStates;
 					break;
 				default:
@@ -404,23 +435,22 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		
 		// Disable colliders while invisible
 		if (disableColliderWhileInvisible && renderer.TryGetComponent(out Collider c)) {
-			c.enabled = (!reverseVisibilityStates && visibilityState != VisibilityState.invisible) ||
-			            (reverseVisibilityStates && visibilityState != VisibilityState.visible);
+			c.enabled = (!reverseVisibilityStates && visibilityState != VisibilityState.Invisible) ||
+			            (reverseVisibilityStates && visibilityState != VisibilityState.Visible);
 		}
 
 		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
-		SetDimensionKeyword(renderer, effectiveVisibilityState != VisibilityState.visible);
+		SetDimensionKeyword(renderer, EffectiveVisibilityState != VisibilityState.Visible);
 	}
-
+	
 	void SetDimensionKeyword(SuperspectiveRenderer renderer, bool value) {
-		const string keyword = "DIMENSION_OBJECT";
 		foreach (Material material in renderer.r.materials) {
-			if (material.IsKeywordEnabled(keyword) != value) {
+			if (material.IsKeywordEnabled(DIMENSION_OBJECT_KEYWORD) != value) {
 				if (value) {
-					material.EnableKeyword(keyword);
+					material.EnableKeyword(DIMENSION_OBJECT_KEYWORD);
 				}
 				else {
-					material.DisableKeyword(keyword);
+					material.DisableKeyword(DIMENSION_OBJECT_KEYWORD);
 				}
 			}
 		}
@@ -430,6 +460,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		List<Collider> result = new List<Collider>();
 
 		void GetCollidersRecursively(Transform parent) {
+			// Don't set renderers for inactive objects unless we really want to
+			if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
+			
 			// Children who have DimensionObject scripts are treated on only by their own settings
 			if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
 
@@ -468,6 +501,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	}
 
 	void SetSuperspectiveRenderersRecursively(Transform parent, ref List<SuperspectiveRenderer> renderersSoFar) {
+		// Don't set renderers for inactive objects unless we really want to
+		if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
+		
 		// Children who have DimensionObject scripts are treated on only by their own settings
 		if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
 

@@ -33,12 +33,14 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
     public NovaButton NewGameButton;
     public NovaButton SettingsButton;
     public NovaButton ExitGameButton;
+    public NovaButton BugReportButton;
 
     [Header("Other Menus")]
     private readonly List<INovaMenu> allSubMenus = new List<INovaMenu>();
     public ClipMask MenuBackground;
     private ClipMask PauseMenu;
     public DialogWindow ExitGameDialogWindow;
+    public DialogWindow BugReportDialogWindow;
 
     private void Awake() {
         currentMenuState = this.StateMachine(MenuState.Off, false, true);
@@ -89,22 +91,27 @@ public class NovaPauseMenu : NovaMenu<NovaPauseMenu> {
         NovaUIBackground.instance.BackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnHover>(HandleBackgroundHoverEvent);
         
         // My events
-        ResumeButton.OnClick += (_) => ClosePauseMenu();
-        SaveButton.OnClick += (_) => OpenSaveMenu();
-        LoadButton.OnClick += (_) => OpenLoadMenu();
-        NewGameButton.OnClick += (_) => NewGame();
-        SettingsButton.OnClick += (_) => OpenSettingsMenu();
-        ExitGameButton.OnClick += (_) => GameManager.instance.QuitGame();
+        ResumeButton.OnClick += _ => ClosePauseMenu();
+        SaveButton.OnClick += _ => OpenSaveMenu();
+        LoadButton.OnClick += _ => OpenLoadMenu();
+        NewGameButton.OnClick += _ => NewGame();
+        SettingsButton.OnClick += _ => OpenSettingsMenu();
+        ExitGameButton.OnClick += _ => GameManager.instance.QuitGame();
+        BugReportButton.OnClick += _ => OpenBugReportDialog();
+    }
+
+    private void OpenBugReportDialog() {
+        BugReportDialogWindow.Open();
     }
 
     private void HandleBackgroundHoverEvent(Gesture.OnHover evt) {
         // When background is hovered, unhighlight the buttons (unless they're being clicked)
         HashSet<NovaButton> allButtons = children.ToHashSet();
         foreach (var button in allButtons) {
-            if (button.clickState.state is NovaButton.ClickState.ClickHeld or NovaButton.ClickState.Clicked) continue;
+            if (button.clickState.State is NovaButton.ClickState.ClickHeld or NovaButton.ClickState.Clicked) continue;
 
             // Don't unhover things that just got hovered
-            if (button.hoverState.timeSinceStateChanged < 0.1f) continue;
+            if (button.hoverState.Time < 0.1f) continue;
             
             button.hoverState.Set(NovaButton.HoverState.NotHovered);
         }

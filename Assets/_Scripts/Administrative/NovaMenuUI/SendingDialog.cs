@@ -36,13 +36,13 @@ public class SendingDialog : DialogWindow {
     }
     
     private void Update() {
-        switch (dialogWindowState.state) {
+        switch (dialogWindowState.State) {
             case DialogWindowState.Closed:
                 break;
             case DialogWindowState.Open:
-                switch (sendingState.state) {
+                switch (sendingState.State) {
                     case SendingState.Sending:
-                        int index = ((int)(dialogWindowState.timeSinceStateChanged / animationTime)) % 4;
+                        int index = ((int)(dialogWindowState.Time / animationTime)) % 4;
                         sendingText.Text = Sending[index];
                         break;
                     case SendingState.SentSuccessfully:

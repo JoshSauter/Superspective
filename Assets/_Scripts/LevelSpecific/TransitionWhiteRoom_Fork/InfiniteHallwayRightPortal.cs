@@ -1,36 +1,61 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using Audio;
 using MagicTriggerMechanics;
 using PortalMechanics;
+using Saving;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-// TODO: Make saveable
 namespace LevelSpecific.TransitionWhiteRoom_Fork {
-    public class InfiniteHallwayRightPortal : MonoBehaviour {
+    public class InfiniteHallwayRightPortal : SaveableObject<InfiniteHallwayRightPortal, InfiniteHallwayRightPortal.Save> {
+        public enum RightHallwayState {
+            Inactive,
+            PlayerInHallway,
+            ExitsConnected,
+            Solved
+        }
+        public StateMachine<RightHallwayState> rightHallwayState;
+        
         public MagicTrigger enterInfiniteHallwayTrigger;
         public Portal upperPlatformPortal;
         public Portal lowerPlatformPortal;
-        public TeleportEnter teleportFacingForward;
-        public TeleportEnter teleportFacingBackward;
-        bool exitsAreConnected = false;
-        bool playerIsInInfiniteHallway = false;
-        public bool hasBeenSolved = false;
-        public AnimationCurve wallsShiftingCameraShakeAnimCurve;
+        public TeleportEnter turnAroundTeleport;
+        public TeleportEnter turnAroundTeleportBackwards;
+        bool ExitsAreConnected => rightHallwayState.State is RightHallwayState.Solved or RightHallwayState.ExitsConnected;
         public GameObject inCirclesText;
 
-        private void Awake() {
-            lowerPlatformPortal.pauseRendering = !exitsAreConnected;
-            lowerPlatformPortal.pauseLogic = !exitsAreConnected;
+        protected override void Awake() {
+            base.Awake();
+            
+            lowerPlatformPortal.pauseRendering = !ExitsAreConnected;
+            lowerPlatformPortal.pauseLogic = !ExitsAreConnected;
+
+            InitializeStateMachine();
         }
 
-        void Start() {
+        private void InitializeStateMachine() {
+            rightHallwayState = this.StateMachine(RightHallwayState.Inactive);
+            
+            rightHallwayState.AddTrigger(RightHallwayState.ExitsConnected, () => {
+                float intensity = 12f;
+                float duration = 1.5f;
+                CameraShake.instance.Shake(intensity, duration);
+                AudioManager.instance.PlayAtLocation(AudioName.WallsShifting, "InfiniteHallwayRight", turnAroundTeleport.transform.position);
+                inCirclesText.gameObject.SetActive(true);
+            });
+        }
+
+        protected override void Start() {
+            base.Start();
+            
             SubscribeToEvents();
         }
 
-        void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
+            
             UnsubscribeFromEvents();
         }
 
@@ -41,8 +66,8 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
             upperPlatformPortal.OnPortalTeleportSimple += EnterInfiniteHallwayOnPortalEnter;
             lowerPlatformPortal.OnPortalTeleportSimple += ExitInfiniteHallwayOnPortalEnter;
 
-            teleportFacingForward.OnTeleportSimple += ConnectExits;
-            teleportFacingBackward.OnTeleportSimple += ConnectExits;
+            turnAroundTeleport.OnTeleportSimple += ConnectExits;
+            turnAroundTeleportBackwards.OnTeleportSimple += ConnectExits;
         }
 
         void UnsubscribeFromEvents() {
@@ -52,43 +77,30 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
             upperPlatformPortal.OnPortalTeleportSimple -= EnterInfiniteHallwayOnPortalEnter;
             lowerPlatformPortal.OnPortalTeleportSimple -= ExitInfiniteHallwayOnPortalEnter;
 
-            teleportFacingForward.OnTeleportSimple -= ConnectExits;
-            teleportFacingBackward.OnTeleportSimple -= ConnectExits;
+            turnAroundTeleport.OnTeleportSimple -= ConnectExits;
+            turnAroundTeleportBackwards.OnTeleportSimple -= ConnectExits;
         }
 
         void Update() {
-            if (exitsAreConnected && !playerIsInInfiniteHallway) {
-                exitsAreConnected = false;
-            }
+            bool shouldPause = !ExitsAreConnected;
 
-            if (lowerPlatformPortal.pauseRendering && exitsAreConnected) {
-                lowerPlatformPortal.pauseRendering = false;
-                lowerPlatformPortal.pauseLogic = false;
-            }
-            else if (!lowerPlatformPortal.pauseRendering && !exitsAreConnected) {
-                lowerPlatformPortal.pauseRendering = true;
-                lowerPlatformPortal.pauseLogic = true;
-            }
+            lowerPlatformPortal.pauseRendering = shouldPause;
+            lowerPlatformPortal.pauseLogic = shouldPause;
+
             lowerPlatformPortal.SetMaterialsToEffectiveMaterial();
-            lowerPlatformPortal.pauseRendering = !exitsAreConnected;
-            lowerPlatformPortal.pauseLogic = !exitsAreConnected;
 
-            teleportFacingBackward.teleportEnter.enabled = !exitsAreConnected;
-            teleportFacingForward.teleportEnter.enabled = !exitsAreConnected;
+            turnAroundTeleport.teleportEnter.enabled = !ExitsAreConnected;
         }
 
         // Called in a UnityEvent from the puzzle solved trigger zones
         public void MarkAsSolved() {
-            hasBeenSolved = true;
+            rightHallwayState.Set(RightHallwayState.Solved);
         }
 
         void ConnectExits() {
-            if (!exitsAreConnected && !hasBeenSolved) {
-                CameraShake.instance.Shake(1.5f, 3f, wallsShiftingCameraShakeAnimCurve);
-                AudioManager.instance.PlayAtLocation(AudioName.WallsShifting, "InfiniteHallwayRight", teleportFacingForward.transform.position);
-                inCirclesText.gameObject.SetActive(true);
+            if (rightHallwayState.State is RightHallwayState.PlayerInHallway) {
+                rightHallwayState.Set(RightHallwayState.ExitsConnected);
             }
-            exitsAreConnected = true;
         }
         
         void EnterInfiniteHallwayOnPortalEnter(Collider objPortaled) {
@@ -105,12 +117,33 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         }
 
         void EnterInfiniteHallway() {
-            playerIsInInfiniteHallway = true;
+            if (rightHallwayState == RightHallwayState.Inactive) {
+                rightHallwayState.Set(RightHallwayState.PlayerInHallway);
+            }
         }
 
         void ExitInfiniteHallway() {
-            playerIsInInfiniteHallway = false;
-            exitsAreConnected = false;
+            if (rightHallwayState.State is RightHallwayState.PlayerInHallway or RightHallwayState.ExitsConnected) {
+                rightHallwayState.Set(RightHallwayState.Inactive);
+            }
         }
+    
+#region Saving
+        public override string ID => "InfiniteHallwayRightPortal";
+        
+        [Serializable]
+        public class Save : SerializableSaveObject<InfiniteHallwayRightPortal> {
+            public StateMachine<RightHallwayState>.StateMachineSave stateSave;
+            
+            public Save(InfiniteHallwayRightPortal script) : base(script) {
+                stateSave = script.rightHallwayState.ToSave();
+            }
+            
+            public override void LoadSave(InfiniteHallwayRightPortal script) {
+                script.rightHallwayState.LoadFromSave(this.stateSave);
+            }
+        }
+
+#endregion
     }
 }

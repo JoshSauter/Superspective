@@ -23,6 +23,9 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
 
     private Vector3 lastCubeSpawnedPosition;
 
+    // MultiDimension cubes interacting with the dimension object parent used in the non-euclidean cube spawner don't interact in predictable ways
+    // Instead, we should instantiate a simpler cube prefab, and then swap it out with a real one when the player removes it from the spawner
+    public DynamicObject cubeInSpawnerPrefab;
     public DynamicObject cubePrefab;
     public PickupObject cubeSpawned;
     [Header("Cube grabbed from spawner:")]
@@ -166,7 +169,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         despawnState.AddStateTransition(DespawnState.CubeBeingDestroyed, DespawnState.Idle, despawnTime);
 
         despawnState.OnStateChangeSimple += () => {
-            switch (despawnState.state) {
+            switch (despawnState.State) {
                 case DespawnState.Idle:
                     if (cubeDespawning != null) {
                         cubeDespawning.transform.FindInParentsRecursively<DynamicObject>().Destroy();
@@ -174,7 +177,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                     cubeDespawning = null;
                     break;
                 case DespawnState.CubeBeingDestroyed:
-                    if (spawnState.state is SpawnState.CubeSpawnedButNotTaken or SpawnState.CubeTaken) {
+                    if (spawnState.State is SpawnState.CubeSpawnedButNotTaken or SpawnState.CubeTaken) {
                         spawnState.Set(SpawnState.InRespawnDelay);
                     }
                     break;
@@ -197,7 +200,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         if (spawnState == SpawnState.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
             button.interactableObject.SetAsDisabled("(Spawned cube locked in receptacle)");
         }
-        else if ((spawnState == SpawnState.CubeSpawnedButNotTaken && spawnState.timeSinceStateChanged < glassMoveTime + glassLowerDelay) || spawnState == SpawnState.InRespawnDelay) {
+        else if ((spawnState == SpawnState.CubeSpawnedButNotTaken && spawnState.Time < glassMoveTime + glassLowerDelay) || spawnState == SpawnState.InRespawnDelay) {
             button.interactableObject.SetAsHidden();
         }
         else {
@@ -216,18 +219,18 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     void SpawnNewCube() {
         if (spawnState != SpawnState.NoCubeSpawned) return;
 
-        DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
+        DynamicObject newCubeDynamicObj = Instantiate(cubeInSpawnerPrefab, transform);
         newCubeDynamicObj.isGlobal = false; // Not global until retrieved from cube spawner
         PickupObject newCube = newCubeDynamicObj.GetComponent<PickupObject>();
         GravityObject newCubeGravity = newCubeDynamicObj.GetComponent<GravityObject>();
         Rigidbody newCubeRigidbody = newCube.thisRigidbody;
         newCube.transform.SetParent(null);
-        newCube.transform.localScale = cubePrefab.transform.localScale;
+        newCube.transform.localScale = cubeInSpawnerPrefab.transform.localScale;
         newCube.transform.position = transform.position + transform.up * spawnOffset;
         newCubeRigidbody.MovePosition(newCube.transform.position);
         newCube.transform.Rotate(Random.insideUnitSphere.normalized, Random.Range(0, 20f));
         newCubeRigidbody.MoveRotation(newCube.transform.rotation);
-        newCubeGravity.gravityDirection = -transform.up;
+        newCubeGravity.GravityDirection = -transform.up;
         newCube.spawnedFrom = this;
         SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
@@ -256,7 +259,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         DimensionObject parentDimensionObj = cubeParent.AddComponent<DimensionObject>();
         //parentDimensionObj.colliders = new Collider[] {cubeParent.AddComponent<BoxCollider>()};
         //parentDimensionObj.DEBUG = DEBUG;
-        parentDimensionObj.startingVisibilityState = VisibilityState.partiallyVisible;
+        parentDimensionObj.startingVisibilityState = VisibilityState.PartiallyVisible;
         parentDimensionObj.treatChildrenAsOneObjectRecursively = true;
         parentDimensionObj.ignoreChildrenWithDimensionObject = false;
         parentDimensionObj.channel = backWall.channel;
@@ -269,11 +272,11 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         
         newCube.transform.SetParent(cubeParent.transform);
         parentDimensionObj.InitializeRenderersAndLayers();
-        parentDimensionObj.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
-        parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyVisible, true);
-        parentDimensionObj.SetCollision(VisibilityState.visible, VisibilityState.partiallyInvisible, true);
-        parentDimensionObj.SetCollisionForPlayer(VisibilityState.partiallyVisible, false);
-        parentDimensionObj.SetCollisionForPlayer(VisibilityState.partiallyInvisible, false);
+        parentDimensionObj.SwitchVisibilityState(VisibilityState.PartiallyVisible, true);
+        parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyVisible, true);
+        parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyInvisible, true);
+        parentDimensionObj.SetCollisionForPlayer(VisibilityState.PartiallyVisible, false);
+        parentDimensionObj.SetCollisionForPlayer(VisibilityState.PartiallyInvisible, false);
         
         foreach (Collider c in parentDimensionObj.colliders) {
             // Collision disabled for first half of fall
@@ -367,7 +370,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         cubeDespawning = null;
         spawnState.Set(SpawnState.NoCubeSpawned);
         
-        if (button.stateMachine.state == Button.State.ButtonUnpressed) {
+        if (button.stateMachine.State == Button.State.ButtonUnpressed) {
             button.PressButton();
         }
     }
@@ -382,6 +385,26 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             SuperspectivePhysics.RestoreCollision(roofCollider, cube.GetComponent<Collider>());
             cube.GetComponent<DynamicObject>().isGlobal = true; // Restore isGlobal behavior when retrieved from spawner
 
+            // When the cube is removed from the spawner, swap it out with the real cube prefab
+            DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
+            PickupObject newCube = newCubeDynamicObj.GetComponent<PickupObject>();
+            GravityObject newCubeGravity = newCubeDynamicObj.GetComponent<GravityObject>();
+            Rigidbody newCubeRigidbody = newCube.thisRigidbody;
+            newCube.transform.SetParent(null);
+            newCube.transform.localScale = cubePrefab.transform.localScale;
+            newCube.transform.position = cubeSpawned.transform.position;
+            newCubeRigidbody.MovePosition(newCube.transform.position);
+            newCube.transform.rotation = cubeSpawned.transform.rotation;
+            newCubeRigidbody.MoveRotation(newCube.transform.rotation);
+            newCubeGravity.GravityDirection = cubeSpawned.GetComponent<GravityObject>().GravityDirection;
+            newCube.spawnedFrom = this;
+            SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
+
+            newCube.isHeld = cubeSpawned.isHeld;
+            
+            // Delete the temp cube from the spawner
+            cubeSpawned.GetComponent<DynamicObject>().Destroy();
+            
             // When the cube is removed from the spawner, reset its DimensionObject channel to their default
             DimensionObject originalDimensionObj = cubePrefab.GetComponentInChildren<DimensionObject>();
             if (originalDimensionObj != null) {
@@ -394,21 +417,14 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             
             // Also remove the dimension parent object
             DimensionObject dimensionParent = cube.transform.parent?.GetComponent<DimensionObject>();
-            dimensionParent.SwitchVisibilityState(VisibilityState.visible, true);
-            dimensionParent.collisionLogic.RestoreAllCollisions();
-            dimensionParent.collisionLogic.pleaseStopIgnoringCollisionsForASecond = true;
-            foreach (var childDimensionObj in cube.gameObject.GetComponentsInChildrenRecursively<DimensionObject>()) {
-                childDimensionObj.collisionLogic.RestoreAllCollisions();
-                childDimensionObj.collisionLogic.pleaseStopIgnoringCollisionsForASecond = true;
-            }
             dimensionParent.Unregister();
             Transform parent = cube.transform.parent;
             cube.transform.SetParent(null);
             Destroy(parent.gameObject);
 
             cubeSpawned = null;
-            cubeGrabbedFromSpawner = cube;
-            cube.gameObject.layer = LayerMask.NameToLayer("Default");
+            cubeGrabbedFromSpawner = newCube;
+            newCube.gameObject.layer = SuperspectivePhysics.DefaultLayer;
         }
     }
     public void OnBetterTriggerEnter(Collider other) { }

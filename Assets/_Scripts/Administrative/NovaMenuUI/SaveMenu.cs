@@ -75,7 +75,7 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         saveListAnimationHandle.Cancel();
 
         float endAlpha, startAlpha = SaveMenuClipMask.Tint.a;
-        switch (saveMenuState.state) {
+        switch (saveMenuState.State) {
             case SaveMenuState.Off:
                 endAlpha = 0f;
                 break;

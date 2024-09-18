@@ -25,7 +25,7 @@ public class LoadingIcon : Singleton<LoadingIcon> {
     public bool IsDisplayed => stateMachine != State.Idle;
 
     public void ShowLoadingIcon() {
-        if (stateMachine.state is State.Idle or State.FadingOut) {
+        if (stateMachine.State is State.Idle or State.FadingOut) {
             stateMachine.Set(State.FadingIn);
         }
     }
@@ -42,7 +42,7 @@ public class LoadingIcon : Singleton<LoadingIcon> {
         stateMachine.AddStateTransition(
             State.IconPresent,
             State.FadingOut,
-            () => stateMachine.timeSinceStateChanged >= minIconPresentTime && !GameManager.instance.IsCurrentlyLoading
+            () => stateMachine.Time >= minIconPresentTime && !GameManager.instance.IsCurrentlyLoading
         );
         stateMachine.AddStateTransition(State.FadingOut, State.Idle, iconFadeInOutTime);
         
@@ -58,14 +58,14 @@ public class LoadingIcon : Singleton<LoadingIcon> {
     }
 
     void Update() {
-        switch (stateMachine.state) {
+        switch (stateMachine.State) {
             case State.Idle:
                 break;
             case State.FadingOut:
-                icon.color = Color.Lerp(icon.color, clear, fadeInOutCurve.Evaluate(stateMachine.timeSinceStateChanged / iconFadeInOutTime));
+                icon.color = Color.Lerp(icon.color, clear, fadeInOutCurve.Evaluate(stateMachine.Time / iconFadeInOutTime));
                 break;
             case State.FadingIn:
-                icon.color = Color.Lerp(icon.color, Color.white, fadeInOutCurve.Evaluate(stateMachine.timeSinceStateChanged / iconFadeInOutTime));
+                icon.color = Color.Lerp(icon.color, Color.white, fadeInOutCurve.Evaluate(stateMachine.Time / iconFadeInOutTime));
                 break;
             case State.IconPresent:
                 icon.color = Color.white;

@@ -58,7 +58,7 @@ namespace DeveloperConsole {
             }
 
             if (spawnedObj.TryGetComponent(out GravityObject gravity)) {
-                gravity.gravityDirection = -Player.instance.transform.up;
+                gravity.GravityDirection = -Player.instance.transform.up;
             }
             return new SuccessResponse($"Spawned {type.ToString()}");
         }

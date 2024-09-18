@@ -19,11 +19,12 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
         transform.localScale = startScale.normalized * (startScale.magnitude * Mathf.Lerp(
             minSize,
             maxSize,
-            Mathf.Cos(timeElapsed * 2 * Mathf.PI / period) * 0.5f + 0.5f
+            Mathf.Cos(Time.time * 2 * Mathf.PI / period) * 0.5f + 0.5f
         ));
     }
 
-    void OnEnable() {
+    protected override void OnEnable() {
+        base.OnEnable();
         startScale = transform.localScale;
     }
 

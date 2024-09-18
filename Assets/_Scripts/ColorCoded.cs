@@ -5,7 +5,9 @@ public class ColorCoded : MonoBehaviour {
         AnyColor,
         Red,
         Green,
-        Blue
+        Blue,
+        Purple,
+        Orange
     }
 
     public Colors color = Colors.AnyColor;

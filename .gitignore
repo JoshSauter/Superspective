@@ -39,3 +39,6 @@ sysinfo.txt
 *.unitypackage
 *.7z
 *.log
+
+# Backups
+*.bak/

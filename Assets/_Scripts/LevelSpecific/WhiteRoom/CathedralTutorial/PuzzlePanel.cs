@@ -105,7 +105,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             
             // Turning off PowerButtons that are disabled for this puzzle
             state.AddTrigger(PuzzleState.Idle, 0f, () => {
-                if (state.prevState == PuzzleState.Off) {
+                if (state.PrevState == PuzzleState.Off) {
                     valueIcon.spriteAlpha = 1f;
                     valueIcon.desiredColor = Color.white;
                 }
@@ -188,7 +188,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             
             float targetAlpha = state == PuzzleState.Off ? 0f : 1f;
             valueIcon.spriteAlpha = targetAlpha;
-            switch (state.state) {
+            switch (state.State) {
                 case PuzzleState.Off:
                     valueIcon.SetColorImmediately(Color.black);
                     break;
@@ -207,7 +207,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                         break;
                     }
                     
-                    float t = 0.5f + 0.5f*Mathf.Cos(state.timeSinceStateChanged * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
+                    float t = 0.5f + 0.5f*Mathf.Cos(state.Time * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
                     floorPuzzle.currentValue.SetColorImmediately(Color.Lerp(floorPuzzle.currentValue.defaultColor, incorrectColor, t));
                     valueIcon.SetColorImmediately(Color.Lerp(valueIcon.defaultColor, incorrectColor, t).WithAlpha(targetAlpha));
                     break;

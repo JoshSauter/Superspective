@@ -34,8 +34,8 @@ public class CubeSpawnerGrabZone : MonoBehaviour {
                 cubeSpawner.cubeSpawned.FindDimensionObjectRecursively<DimensionObject>();
             if (cubeDimensionObj != null) {
                 VisibilityState desiredVisibility = cubeSpawner.cubeSpawned.isHeld
-                    ? VisibilityState.visible
-                    : VisibilityState.partiallyVisible;
+                    ? VisibilityState.Visible
+                    : VisibilityState.PartiallyVisible;
 
                 if (cubeDimensionObj.visibilityState != desiredVisibility) {
                     cubeDimensionObj.SwitchVisibilityState(desiredVisibility);

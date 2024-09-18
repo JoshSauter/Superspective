@@ -10,7 +10,7 @@ public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
     public AudioName audioToPlay = AudioName.LoopingMachinery;
     public float maxShakeDistance = 32f;
     public float minShakeDistance = 8f;
-    float shakeIntensity = 0.4f;
+    float shakeIntensity = 4f;
     public float shakeDuration = 0.75f;
     public float shakePeriod = 4f;
     
@@ -39,8 +39,7 @@ public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
 
         float distance = Vector3.Distance(audioTransform.position, playerPos);
         if (distance < maxShakeDistance && job.audio.time % shakePeriod < 0.5f) {
-            float intensity = shakeIntensity * Mathf.InverseLerp(maxShakeDistance, minShakeDistance, distance);
-            CameraShake.instance.Shake(shakeDuration, intensity, 0f);
+            CameraShake.instance.Shake(() => audioTransform.position, shakeIntensity, shakeDuration);
         }
     }
 }

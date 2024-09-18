@@ -27,8 +27,8 @@ public partial class PlayerMovement {
     }
     
     [Serializable]
-    public class StairMovement : PlayerMovementComponent {
-        public StairMovement(PlayerMovement movement) : base(movement) { }
+    public class StaircaseMovement : PlayerMovementComponent {
+        public StaircaseMovement(PlayerMovement movement) : base(movement) { }
 
         // Staircase handling characteristics
         private const float RECENTLY_STEPPED_UP_TIME = 0.25f;
@@ -38,7 +38,7 @@ public partial class PlayerMovement {
         private const float CAPSULE_CHECK_OFFSET_FROM_BOTTOM = 0.5f;
 
         // Properties
-        public bool RecentlySteppedUp => stepState.state == StepState.SteppingDiagonal || stepState.timeSinceStateChanged < RECENTLY_STEPPED_UP_TIME;
+        public bool RecentlySteppedUp => stepState.State == StepState.SteppingDiagonal || stepState.Time < RECENTLY_STEPPED_UP_TIME;
         [ShowNativeProperty]
         private Vector3 CurrentStepUp => currentStep?.StepOffsetVertical + (transform.up * 0.01f) ?? Vector3.zero;
         [ShowNativeProperty]
@@ -59,7 +59,7 @@ public partial class PlayerMovement {
         private float distanceMovedForStaircaseOffset = 0;
 
         public enum StepState {
-            StepReady,
+            Idle,
             SteppingDiagonal
         }
 
@@ -71,10 +71,10 @@ public partial class PlayerMovement {
         }
         
         void InitStaircaseStateMachine() {
-            stepState = m.StateMachine(StepState.StepReady, true);
+            stepState = m.StateMachine(StepState.Idle, true);
             
             // Transition from moving diagonally to being ready to find a new step once we've moved far enough
-            stepState.AddStateTransition(StepState.SteppingDiagonal, StepState.StepReady, () =>
+            stepState.AddStateTransition(StepState.SteppingDiagonal, StepState.Idle, () =>
                 distanceMovedForStaircaseOffset >= CurrentStepDiagonal.magnitude
             );
         
@@ -129,18 +129,17 @@ public partial class PlayerMovement {
                 // If we move into colliding w/ something else undo it
                 if (CheckCapsule(m.thisCollider)) {
                     transform.Translate(-diff, Space.World);
-                    
                 }
                 distanceMovedForStaircaseOffset += distanceToMove;
 
                 if (distanceRemaining == distanceToMove) {
-                    stepState.Set(StepState.StepReady);
+                    stepState.Set(StepState.Idle);
                     LookForStep(desiredVelocity);
                 }
             }
             
-            switch (stepState.state) {
-                case StepState.StepReady:
+            switch (stepState.State) {
+                case StepState.Idle:
                     LookForStep(desiredVelocity);
                     break;
                 case StepState.SteppingDiagonal:

@@ -108,7 +108,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         });
         
         state.AddTrigger(State.Off, () => {
-	        if (state.prevState == State.Correct) {
+	        if (state.PrevState == State.Correct) {
 		        interact.SetAsInteractable("Switch puzzle");
 	        }
         });
@@ -127,7 +127,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 	    Color curColor = renderer.GetColorFromRenderer();
 	    Color curEmission = renderer.GetHDRColorFromRenderer(emissionProp);
 	    
-	    switch (state.state) {
+	    switch (state.State) {
 		    case State.Off:
 			    renderer.SetColorForRenderer(Color.Lerp(curColor, offColor, Time.deltaTime * lerpSpeed));
 			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, Color.clear, Time.deltaTime * lerpSpeed), emissionProp);
@@ -140,7 +140,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 			    }
 			    break;
 		    case State.Incorrect:
-			    float t = 0.5f + 0.5f*Mathf.Cos(state.timeSinceStateChanged * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
+			    float t = 0.5f + 0.5f*Mathf.Cos(state.Time * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
 			    renderer.SetColorForRenderer(Color.Lerp(onColor, incorrectColor, t));
 			    renderer.SetHDRColorForRenderer(Color.Lerp(onEmission, incorrectEmission, t), emissionProp);
 			    break;

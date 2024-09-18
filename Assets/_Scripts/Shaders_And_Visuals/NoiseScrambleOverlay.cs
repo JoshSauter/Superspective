@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Audio;
@@ -7,7 +8,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 using ScramblerReference = SerializableClasses.SerializableReference<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave>;
 
-public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
+public class NoiseScrambleOverlay : SingletonSaveableObject<NoiseScrambleOverlay, NoiseScrambleOverlay.NoiseScrambleOverlaySave>, CustomAudioJob {
     public static Dictionary<string, ScramblerReference> scramblers = new Dictionary<string, ScramblerReference>();
     [SerializeField]
     Shader noiseShader;
@@ -16,21 +17,36 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     
     public override string ID => "NoiseScrambleOverlay";
 
-    private float maxVolumeDistance = 2f;
-    private float zeroVolumeDistance = 15;
+    public const float MAX_VOLUME_DISTANCE = 10f;
+    public const float ZERO_VOLUME_DISTANCE = 75;
+
+    private float timeWhenOverrideValueSet = -1;
+    private float _globalValue = -1;
+    private float GlobalValue {
+        get => _globalValue;
+        set {
+            if (value < 0) {
+                timeWhenOverrideValueSet = -1;
+            }
+            else {
+                timeWhenOverrideValueSet = Time.time;
+            }
+            _globalValue = value;
+        }
+    }
     
     [ShowNativeProperty]
-    float minDistance {
+    float MinDistance {
         get {
             if (GameManager.instance.IsCurrentlyLoading) return float.MaxValue;
             
             if (scramblers.Count > 0) {
                 var validScramblersByDistance = scramblers.Values
-                    // Only consider scramblers which are loaded and enabled
-                    .Where(scramblerRef => scramblerRef.GetOrNull()?.enabled ?? false)
                     .Select(scramblerRef => scramblerRef.GetOrNull())
+                    // Only consider scramblers which are loaded and enabled
+                    .Where(scramblerRef => scramblerRef?.enabled ?? false)
                     .Where(scrambler => scrambler.scramblerState == NoiseScrambleOverlayObject.ScramblerState.On)
-                    .Select(scrambler => RaycastUtils.MinDistanceBetweenPoints(scrambler.transform.position, Player.instance.PlayerCam.transform.position))
+                    .Select(scrambler => SuperspectivePhysics.ShortestDistance(Player.instance.PlayerCam.transform.position, scrambler.transform.position))
                     // Find the closest scrambler
                     .OrderBy(distance => distance)
                     .ToList();
@@ -48,12 +64,12 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
     }
 
     [ShowNativeProperty]
-    private float intensity => Mathf.Pow(1-Mathf.InverseLerp(maxVolumeDistance, zeroVolumeDistance, minDistance), 2);
+    private float Intensity => Mathf.Max(GlobalValue, Mathf.Pow(1 - Mathf.InverseLerp(MAX_VOLUME_DISTANCE, ZERO_VOLUME_DISTANCE, MinDistance / Player.instance.Scale), 2));
 
     protected override void Awake() {
         base.Awake();
         if (noiseShader == null) {
-            // Debug.LogWarning($"Noise shader is null on {gameObject.FullPath()}, disabling noise scramble overlay");
+            Debug.LogError($"Noise shader is null on {gameObject.FullPath()}, disabling noise scramble overlay");
             enabled = false;
             return;
         }
@@ -67,7 +83,13 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
 
         SaveManager.BeforeLoad += () => scramblers.Clear();
     }
-    
+
+    private void LateUpdate() {
+        if (timeWhenOverrideValueSet > 0 && Time.time - timeWhenOverrideValueSet > 0.15f) {
+            GlobalValue = -1;
+        }
+    }
+
     void OnRenderImage(RenderTexture source, RenderTexture destination) {
         if (GameManager.instance.IsCurrentlyLoading) {
             Graphics.Blit(source, destination);
@@ -80,9 +102,9 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
         #endif
         
         
-        mat.SetFloat("_Intensity", intensity);
+        debug.Log($"Intensity: {Intensity}");
+        mat.SetFloat("_Intensity", Intensity);
         Graphics.Blit(source, destination, mat);
-        
     }
 
     public void UpdateAudioJob(AudioManager.AudioJob job) {
@@ -95,6 +117,25 @@ public class NoiseScrambleOverlay : SaveableObject, CustomAudioJob {
             job.audio.volume = 0f;
             job.Play();
         }
+
+        float intensity = Intensity;
         job.audio.volume = intensity*intensity;
+    }
+    
+    // Used to override the noise scramble overlay value with some value. Needs to be called every frame to keep the override
+    public void SetNoiseScrambleOverlayValue(float overrideValue) {
+        this.GlobalValue = overrideValue;
+    }
+
+    [Serializable]
+    public class NoiseScrambleOverlaySave : SerializableSaveObject<NoiseScrambleOverlay> {
+        private readonly float overrideValue;
+
+        public NoiseScrambleOverlaySave(NoiseScrambleOverlay script) : base(script) {
+            this.overrideValue = script.GlobalValue;
+        }
+        public override void LoadSave(NoiseScrambleOverlay script) {
+            script.GlobalValue = this.overrideValue;
+        }
     }
 }

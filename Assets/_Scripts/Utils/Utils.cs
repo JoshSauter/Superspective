@@ -166,7 +166,7 @@ namespace SuperspectiveUtils {
         }
         
         public static V GetOrNull<K, V>(this Dictionary<K, V> source, K key) {
-            return source.ContainsKey(key) ? source[key] : default(V);
+            return source.TryGetValue(key, out V value) ? value : default(V);
         }
     }
 
@@ -174,7 +174,35 @@ namespace SuperspectiveUtils {
         public static bool IsApproximately(this float f, float other) {
             return Math.Abs(f - other) < float.Epsilon;
         }
+        
+        public static float CloserOfTwo(this float f, float a, float b) {
+            return Math.Abs(f - a) < Math.Abs(f - b) ? a : b;
+        }
     }
+    
+    public static class AnimationCurveExtensions {
+        public static AnimationCurve Reverse(this AnimationCurve originalCurve) {
+            Keyframe[] originalKeyframes = originalCurve.keys;
+            int keyframeCount = originalKeyframes.Length;
+            Keyframe[] reversedKeyframes = new Keyframe[keyframeCount];
+    
+            float firstTime = originalKeyframes[0].time;
+            float lastTime = originalKeyframes[keyframeCount - 1].time;
+    
+            for (int i = 0; i < keyframeCount; i++) {
+                Keyframe originalKeyframe = originalKeyframes[i];
+                reversedKeyframes[keyframeCount - 1 - i] = new Keyframe(
+                    lastTime - (originalKeyframe.time - firstTime),
+                    originalKeyframe.value,
+                    -originalKeyframe.outTangent,
+                    -originalKeyframe.inTangent
+                );
+            }
+    
+            return new AnimationCurve(reversedKeyframes);
+        }
+    }
+
 
     public static class Vector3Ext {
         
@@ -184,8 +212,6 @@ namespace SuperspectiveUtils {
             Vector3 lineDirection = end - start;
             float lineLength = lineDirection.magnitude;
             lineDirection.Normalize();
-            Debug.DrawLine(point, start, Color.green, 3f);
-            Debug.DrawLine(point, end, Color.red, 3f);
             float projectedLength = Mathf.Clamp(Vector3.Dot(point - start, lineDirection), 0f, lineLength);
             return start + lineDirection * projectedLength;
         }
@@ -258,6 +284,20 @@ namespace SuperspectiveUtils {
     }
     
     public static class StringExt {
+        public static string ReplaceAt(this string str, int index, char newChar) {
+            if (str == null) {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            if (index < 0 || index >= str.Length) {
+                throw new ArgumentOutOfRangeException(nameof(index), "Index must be within the bounds of the string.");
+            }
+
+            char[] chars = str.ToCharArray();
+            chars[index] = newChar;
+            return new string(chars);
+        }
+            
         public static string StripWhitespace(this string s) {
             return new string(s.ToCharArray()
                 .Where(c => !char.IsWhiteSpace(c))
@@ -430,7 +470,7 @@ namespace SuperspectiveUtils {
             return dict.TryGetValue(key, out V value) ? value : defaultValue;
         }
         
-        public static T GetCopyOf<T>(this Component comp, T other) where T : Component {
+        public static T CopyFrom<T>(this Component comp, T other) where T : Component {
             Type type = comp.GetType();
             if (type != other.GetType()) return null; // type mis-match
             BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
@@ -439,7 +479,8 @@ namespace SuperspectiveUtils {
             foreach (PropertyInfo pinfo in pinfos) {
                 object[] attributes = pinfo.GetCustomAttributes(false);
                 bool isObsolete = attributes.OfType<ObsoleteAttribute>().Any();
-                if (pinfo.CanWrite && !isObsolete) {
+                // Don't copy obsolete properties or the name field
+                if (pinfo.CanWrite && !isObsolete && pinfo.Name != "name") {
                     try {
                         pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
                     }
@@ -450,6 +491,9 @@ namespace SuperspectiveUtils {
 
             FieldInfo[] finfos = type.GetFields(flags);
             foreach (FieldInfo finfo in finfos) {
+                // Don't copy the name field
+                if (finfo.Name == "name") continue;
+                
                 finfo.SetValue(comp, finfo.GetValue(other));
             }
 
@@ -509,7 +553,7 @@ namespace SuperspectiveUtils {
         }
 
         public static T PasteComponent<T>(this GameObject go, T toAdd) where T : Component {
-            return go.AddComponent<T>().GetCopyOf(toAdd);
+            return go.AddComponent<T>().CopyFrom(toAdd);
         }
 
         public static T GetOrAddComponent<T>(this GameObject go) where T : Component {
@@ -1392,39 +1436,52 @@ namespace SuperspectiveUtils {
         public void ForceDebugLog(object message) {
             string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             Debug.Log(
-                $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
+                $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}\n───────",
                 context
             );
         }
-
-        public void Log(object message) {
-            if (enabled.Invoke()) {
-                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-                Debug.Log(
-                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
-                    context
-                );
+        
+        public void LogWithContext(object message, Object context, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.Log(MessageWithContext(message), context);
             }
         }
 
-        public void LogWarning(object message) {
-            if (enabled.Invoke()) {
-                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-                Debug.LogWarning(
-                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
-                    context
-                );
+        public void Log(object message, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.Log(MessageWithContext(message), context);
             }
         }
 
-        public void LogError(object message) {
-            if (enabled.Invoke()) {
-                string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
-                Debug.LogError(
-                    $"{message}\n───────\nGameObject: {name}\nFrame: {Time.frameCount}{(idSet ? $"\nId: {id}" : "")}",
-                    context
-                );
+        public void LogWarning(object message, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.LogWarning(MessageWithContext(message), context);
             }
+        }
+
+        public void LogError(object message, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.LogError(MessageWithContext(message), context);
+            }
+        }
+        
+        private string MessageWithContext(object message) {
+            string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
+            
+            string gameObjectLabel = $"<color=#6a9fb5>GameObject:</color>   ";
+            string frameLabel = $"<color=#b59f6a>Frame:</color>        ";
+            string idLabel = idSet ? $"\n<color=#6ab597>Id:</color>           " : "";
+            
+            string gameObjectLine = $"{gameObjectLabel}{name}";
+            string frameLine = $"{frameLabel}{Time.frameCount}";
+            string idLine = idSet ? $"{idLabel}{id}" : "";
+            
+            int charCount = 14 + Math.Max(name.Length, Math.Max(Time.frameCount.ToString().Length, id.Length));
+            const char M_DASH = '─';
+
+            string SPACER = $"\n<color=white>{new string('\u2550', charCount)}</color>\n";
+            
+            return $"{message}{SPACER}{gameObjectLine}\n{frameLine}{idLine}{SPACER}";
         }
     }
 

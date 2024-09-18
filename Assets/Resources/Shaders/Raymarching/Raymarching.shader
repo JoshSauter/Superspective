@@ -6,6 +6,7 @@ Shader "Hidden/Raymarching"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+		_Color("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
     }
     SubShader
     {
@@ -16,6 +17,8 @@ Shader "Hidden/Raymarching"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+
+            uniform float4 _Color;
 
             #include "UnityCG.cginc"
             #include "RaymarchingUtils.cginc"
@@ -82,7 +85,7 @@ Shader "Hidden/Raymarching"
                         float col = 1.0 - (x / (float)MAX_STEPS);
                         //return col * normalize(noised(position/256));
                         //return col * fixed4(position.x,position.y,(-position.x - position.y) / 2.0,1);
-                    	col = smoothstep(0.0,1.0,col);
+                    	col = smoothstep(0.0,1.0,col) * _Color;
                         return 1-fixed4(col, col, col, 1);
                     }
                     

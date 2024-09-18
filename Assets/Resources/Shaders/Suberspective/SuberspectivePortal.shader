@@ -83,7 +83,7 @@
 					float2 uv = i.screenPos.xy / i.screenPos.w;
 					
 		            #ifdef DISSOLVE_OBJECT
-		            SuberspectiveClipOnly(i.clipPos, i.dissolveUV, i.worldPos);
+		            SuberspectiveClipOnly(i.clipPos, i.uv_DissolveTex, i.worldPos);
 		            #else
 		            SuberspectiveClipOnly(i);
 		            #endif

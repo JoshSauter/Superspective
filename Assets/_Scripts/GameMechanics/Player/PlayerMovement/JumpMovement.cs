@@ -16,14 +16,13 @@ partial class PlayerMovement {
             Jumping,
             JumpOnCooldown
         }
-        const float JUMP_FORCE = 936;
         const float JUMP_COOLDOWN = 0.2f; // Time after landing before jumping is available again
         const float MIN_JUMP_TIME = 0.5f; // as long as underMinJumpTime
-        const float DESIRED_JUMP_HEIGHT = 2.672f;
+        const float DESIRED_JUMP_HEIGHT = 2.672f; // TODO: Slightly lower jump height in GrowShrink2
         
         // Properties
         float JumpForce => CalculatedJumpForce(DESIRED_JUMP_HEIGHT * m.Scale, m.thisRigidbody.mass, Physics.gravity.magnitude);
-        public bool UnderMinJumpTime => jumpState == JumpState.Jumping && jumpState.timeSinceStateChanged < MIN_JUMP_TIME;
+        public bool UnderMinJumpTime => jumpState == JumpState.Jumping && jumpState.Time < MIN_JUMP_TIME;
         
         float jumpCooldownRemaining; // Prevents player from jumping again while > 0
         public StateMachine<JumpState> jumpState;
@@ -39,7 +38,7 @@ partial class PlayerMovement {
         }
 
         public void UpdateJumping() {
-            switch (jumpState.state) {
+            switch (jumpState.State) {
                 case JumpState.JumpReady:
                     if (m.input.JumpHeld && m.IsGrounded && !m.Grounded.StandingOnHeldObject) {
                         Jump();
@@ -69,8 +68,8 @@ partial class PlayerMovement {
 
             Vector3 jumpVector = -Physics.gravity.normalized * JumpForce;
             
-            if (m.stairMovement.stepState != StairMovement.StepState.StepReady) {
-                m.stairMovement.stepState.Set(StairMovement.StepState.StepReady);
+            if (m.staircaseMovement.stepState != StaircaseMovement.StepState.Idle) {
+                m.staircaseMovement.stepState.Set(StaircaseMovement.StepState.Idle);
             }
             m.thisRigidbody.isKinematic = false;
             

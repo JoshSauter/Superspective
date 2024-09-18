@@ -23,9 +23,11 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
     private const float targetHighWindVolumeLerpSpeed = 10f;
 
     private Collider nearbyCollider;
-    private Vector3 cameraPos => Player.instance.PlayerCam.transform.position;
+    private Vector3 CameraPos => Player.instance.PlayerCam.transform.position;
 
-    private float distanceToNearbyCollider => nearbyCollider == null
+    private float PlayerScale => Player.instance.Scale;
+
+    private float DistanceToNearbyCollider => nearbyCollider == null
         ? lowWindSoundMaxDistance
         : GetDistance(nearbyCollider);
 
@@ -34,15 +36,15 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
         if (c.transform.rotation != Quaternion.identity) {
             Quaternion rotation = c.transform.rotation;
             c.transform.rotation = Quaternion.identity;
-            Vector3 point = c.ClosestPointOnBounds(cameraPos);
+            Vector3 point = c.ClosestPointOnBounds(CameraPos);
             c.transform.rotation = rotation;
             return point;
         }
-        return c.ClosestPointOnBounds(cameraPos);
+        return c.ClosestPointOnBounds(CameraPos);
     }
     
     float GetDistance(Collider c) {
-        return Vector3.Distance(cameraPos, GetClosestPosition(c));
+        return Vector3.Distance(CameraPos, GetClosestPosition(c)) / PlayerScale;
     }
 
     protected override void Init() {
@@ -54,7 +56,7 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
     }
 
     private void Update() {
-        curFallingSpeed = Vector3.Dot(player.ProjectedVerticalVelocity(), Physics.gravity.normalized);
+        curFallingSpeed = Vector3.Dot(player.ProjectedVerticalVelocity() / PlayerScale, Physics.gravity.normalized);
     }
 
     private void FixedUpdate() {
@@ -79,7 +81,7 @@ public class PlayerFallingSound : SaveableObject, CustomAudioJob {
         else {
             if (nearbyCollider != null) {
                 float speedT = Mathf.InverseLerp(windSpeedThreshold, terminalVelocity, curFallingSpeed);
-                float distanceT = 1-Mathf.InverseLerp(lowWindSoundMinDistance, lowWindSoundMaxDistance, distanceToNearbyCollider);
+                float distanceT = 1-Mathf.InverseLerp(lowWindSoundMinDistance, lowWindSoundMaxDistance, DistanceToNearbyCollider);
 
                 targetLowWindVolume = speedT * distanceT;
             }

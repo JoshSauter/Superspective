@@ -116,7 +116,7 @@ Material:
     - __SuberspectiveBlendMode: 0
     - __ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
+    - _Color: {r: 0.7176471, g: 0.20000002, b: 1, a: 1}
     - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
     - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}

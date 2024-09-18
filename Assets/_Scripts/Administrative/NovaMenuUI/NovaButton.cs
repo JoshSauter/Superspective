@@ -135,7 +135,7 @@ public class NovaButton : MonoBehaviour {
         // Delayed hover SFX
         hoverState.AddTrigger(HoverState.Hovered, 0.05f, () => {
             if (!GameManager.instance.gameHasLoaded) return;
-            if (hoverState.prevState == HoverState.NotHovered) {
+            if (hoverState.PrevState == HoverState.NotHovered) {
                 AudioManager.instance.Play(AudioName.UI_HoverBlip, shouldForcePlay: true);
             }
         });
@@ -156,7 +156,7 @@ public class NovaButton : MonoBehaviour {
         });
         
         clickState.OnStateChangeSimple += () => {
-            BackgroundUIBlock.Shadow.Direction = (clickState.state is ClickState.Clicked or ClickState.ClickHeld) ?
+            BackgroundUIBlock.Shadow.Direction = (clickState.State is ClickState.Clicked or ClickState.ClickHeld) ?
                 ShadowDirection.In :
                 ShadowDirection.Out;
         };
@@ -179,7 +179,7 @@ public class NovaButton : MonoBehaviour {
         clickState.OnStateChange += (prevState, _) => {
             buttonColorAnimationHandle.Cancel();
             Color endBgColor, endTextColor;
-            switch (clickState.state) {
+            switch (clickState.State) {
                 case ClickState.Idle:
                     bool hovered = hoverState == HoverState.Hovered;
                     endBgColor = hovered ? UIStyle.NovaButton.HoverBgColor : UIStyle.NovaButton.DefaultBgColor;
@@ -204,7 +204,7 @@ public class NovaButton : MonoBehaviour {
             buttonColorAnimationHandle.Cancel();
             Color endBgColor, endTextColor;
             if (clickState != ClickState.Idle) return;
-            switch (hoverState.state) {
+            switch (hoverState.State) {
                 case HoverState.NotHovered:
                     endBgColor = UIStyle.NovaButton.DefaultBgColor;
                     endTextColor = UIStyle.NovaButton.DefaultComponentColor;
@@ -267,9 +267,9 @@ public class NovaButton : MonoBehaviour {
         // Mouse is over button
         if (evt.Hovering) {
             // Button was already in ClickHeld state
-            if (clickState.state == ClickState.ClickHeld) {
+            if (clickState.State == ClickState.ClickHeld) {
                 // Button used to be Clicked, toggle it to Idle
-                if (clickState.prevState == ClickState.Clicked) {
+                if (clickState.PrevState == ClickState.Clicked) {
                     clickState.Set(ClickState.Idle);
                 }
                 // Button used to be not Clicked, toggle it to Clicked
@@ -280,14 +280,14 @@ public class NovaButton : MonoBehaviour {
         }
         // Not hovering button, set click state to prevState
         else {
-            clickState.Set(clickState.prevState);
+            clickState.Set(clickState.PrevState);
         }
 
         evt.Consume();
     }
 
     public void Click() {
-        switch (clickState.state) {
+        switch (clickState.State) {
             case ClickState.Idle:
                 clickState.Set(ClickState.Clicked);
                 break;

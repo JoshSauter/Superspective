@@ -22,7 +22,7 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
 
     Headbob headbob;
 
-    bool shouldFollow =>
+    bool ShouldFollow =>
         Player.instance.look.state == PlayerLook.ViewLockState.ViewUnlocked && !CameraFlythrough.instance.isPlayingFlythrough;
 
     float timeSinceCurrentLerpSpeedWasModified;
@@ -34,7 +34,8 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         worldPositionLastFrame = transform.position;
     }
 
-    private void OnEnable() {
+    protected override void OnEnable() {
+        base.OnEnable();
         TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
         Portal.OnAnyPortalTeleportSimple += RecalculateWorldPositionLastFrameForPlayer;
         Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
@@ -47,7 +48,7 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
     }
 
     void FixedUpdate() {
-        if (!shouldFollow) return;
+        if (!ShouldFollow) return;
 
         Vector3 destination = transform.parent.TransformPoint(relativeStartPosition);
 
@@ -111,14 +112,16 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
 
     [Serializable]
     public class CameraFollowSave : SerializableSaveObject<CameraFollow> {
-        float currentLerpSpeed;
-        SerializableVector3 relativePositionLastFrame;
-        SerializableVector3 relativeStartPosition;
-
-        float timeSinceCurrentLerpSpeedWasModified;
-        SerializableVector3 worldPositionLastFrame;
+        public float currentLerpSpeed;
+        public float timeSinceCurrentLerpSpeedWasModified;
+        public SerializableVector3 relativePositionLastFrame;
+        public SerializableVector3 relativeStartPosition;
+        public SerializableVector3 worldPositionLastFrame;
 
         public CameraFollowSave(CameraFollow cam) : base(cam) {
+            // Hack to allow parameterless constructor for interpolation function
+            if (cam == null) return;
+            
             currentLerpSpeed = cam.currentLerpSpeed;
             relativeStartPosition = cam.relativeStartPosition;
             relativePositionLastFrame = cam.relativePositionLastFrame;

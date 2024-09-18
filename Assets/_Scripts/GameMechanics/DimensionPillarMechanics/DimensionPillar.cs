@@ -109,7 +109,16 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 		dimensionWall = dimensionWallGO.GetComponent<DimensionWall>();
 	}
 
-	#region Saving
+	private void OnDrawGizmosSelected() {
+		if (DEBUG) {
+			// Draw the dimension shift vector
+			float width = 30;
+			float height = dimensionWall ? dimensionWall.PillarHeight : 10;
+			ExtDebug.DrawPlane(transform.position + transform.forward * width * .5f, -transform.right, height, width, Color.green);
+		}
+	}
+
+#region Saving
 	[Serializable]
 	public class DimensionPillarSave : SerializableSaveObject<DimensionPillar> {
 		bool initialized;

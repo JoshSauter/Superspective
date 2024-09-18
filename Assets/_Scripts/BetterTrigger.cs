@@ -13,6 +13,7 @@ public class BetterTrigger : MonoBehaviour {
 
     public List<BetterTriggers> listeners = new List<BetterTriggers>();
 
+    private int SkipLayerChangeBitmask => (1 << SuperspectivePhysics.PortalLayer) | (1 << SuperspectivePhysics.CollideWithPlayerOnlyLayer);
     // Start is called before the first frame update
     void Start() {
         trigger = GetComponent<Collider>();
@@ -21,8 +22,9 @@ public class BetterTrigger : MonoBehaviour {
             listeners = GetComponents<MonoBehaviour>().OfType<BetterTriggers>().ToList();
         }
 
-        if (trigger.gameObject.layer != LayerMask.NameToLayer("Portal")) {
-            trigger.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        // Convert the layer to a bitmask and check to make sure it's not in the SkipLayerChangeBitmask
+        if ((SkipLayerChangeBitmask & (1 << trigger.gameObject.layer)) == 0) {
+            trigger.gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
         }
     }
     
@@ -102,7 +104,10 @@ public class BetterTrigger : MonoBehaviour {
     }
 }
 
-// Anything that wants better triggers simply inherits this interface and implements the methods as though they were Unity Event Functions
+/// <summary>
+/// Simply inherit this interface and implements the methods as though they were Unity Event Functions.
+/// Also use RequireComponent(typeof(BetterTrigger)) on any MonoBehaviour that need to use this interface.
+/// </summary>
 public interface BetterTriggers {
     void OnBetterTriggerEnter(Collider c);
     void OnBetterTriggerExit(Collider c);

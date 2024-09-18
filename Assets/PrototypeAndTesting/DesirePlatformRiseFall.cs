@@ -39,7 +39,7 @@ public class DesirePlatformRiseFall : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (playerLook != null) {
-			HandlePlayerLook(playerLook.normalizedY);
+			HandlePlayerLook(playerLook.NormalizedY);
 		}
 		else {
 			curLook = Mathf.Lerp(curLook, 0, 0.1f);

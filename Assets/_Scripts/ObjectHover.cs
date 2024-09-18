@@ -1,6 +1,8 @@
 ﻿using System;
+using GrowShrink;
 using Saving;
 using SerializableClasses;
+using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -16,6 +18,11 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
     public float zAmplitude;
     [FormerlySerializedAs("maxDisplacementRight")]
     public float xAmplitude;
+
+    private GrowShrinkObject _growShrink;
+    private GrowShrinkObject GrowShrink => _growShrink ??= this.GetComponent<GrowShrinkObject>();
+    private float Scale => hasGrowShrink ? GrowShrink.CurrentScale : 1;
+    private bool hasGrowShrink;
 
     public enum LoopMode {
         SinWave,    // Smoothly goes up and down on a period
@@ -42,6 +49,10 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
         right = useLocalCoordinates ? transform.right : Vector3.right;
 
         timeElapsed = periodOffset;
+        
+        if (GrowShrink != null) {
+            hasGrowShrink = true;
+        }
     }
 
     // Update is called once per frame
@@ -62,9 +73,9 @@ public class ObjectHover : SaveableObject<ObjectHover, ObjectHover.ObjectHoverSa
                 throw new ArgumentOutOfRangeException();
         }
         
-        Vector3 nextOffsetUp = yAmplitude * t * up;
-        Vector3 nextOffsetForward = zAmplitude * t * forward;
-        Vector3 nextOffsetRight = xAmplitude * t * right;
+        Vector3 nextOffsetUp = yAmplitude * t * Scale * up;
+        Vector3 nextOffsetForward = zAmplitude * t * Scale * forward;
+        Vector3 nextOffsetRight = xAmplitude * t * Scale * right;
         Vector3 nextOffset = nextOffsetUp + nextOffsetForward + nextOffsetRight;
 
         Vector3 thisDisplacement = (nextOffset - currentOffset);

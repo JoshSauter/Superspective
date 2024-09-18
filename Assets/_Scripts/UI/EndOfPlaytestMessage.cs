@@ -58,28 +58,28 @@ public class EndOfPlaytestMessage : Singleton<EndOfPlaytestMessage> {
 
     void Update() {
 	    float t = 0f;
-	    switch (state.state) {
+	    switch (state.State) {
 		    case State.Off:
 			    break;
 		    case State.BackgroundFadingIn:
-			    t = state.timeSinceStateChanged / timeForBackgroundFadeIn;
+			    t = state.Time / timeForBackgroundFadeIn;
 			    background.enabled = true;
 			    background.color = background.color.WithAlpha(Easing.EaseInOut(t));
 			    break;
 		    case State.GameNameFadingIn:
 			    gameNameText.enabled = true;
-			    t = state.timeSinceStateChanged / timeForGameNameFadeIn;
+			    t = state.Time / timeForGameNameFadeIn;
 			    gameNameText.color = gameNameText.color.WithAlpha(Easing.EaseInOut(t));
 			    break;
 		    case State.ThankYouTextFadingIn:
-			    t = state.timeSinceStateChanged / timeForThankYouFadeIn;
+			    t = state.Time / timeForThankYouFadeIn;
 			    foreach (var text in thankYouText) {
 				    text.enabled = true;
 				    text.color = text.color.WithAlpha(Easing.EaseInOut(t));
 			    }
 			    break;
 		    case State.DiscordLinkFadingIn:
-			    t = state.timeSinceStateChanged / timeForDiscordLinkFadeIn;
+			    t = state.Time / timeForDiscordLinkFadeIn;
 			    foreach (var text in discordText) {
 				    text.enabled = true;
 				    text.color = text.color.WithAlpha(Easing.EaseInOut(t));

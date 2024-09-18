@@ -36,7 +36,8 @@ namespace SuperspectiveUtils {
 
         public static SuperspectiveRaycast Raycast(Ray ray, float maxDistance, int layerMask) {
             SuperspectiveRaycast result = new SuperspectiveRaycast {
-                distance = maxDistance
+                distance = maxDistance,
+                ray = ray
             };
 
             Ray currentRay = ray;
@@ -96,41 +97,32 @@ namespace SuperspectiveUtils {
             return Raycast(new Ray(origin, direction), maxDistance, layerMask);
         }
     }
-        
+    
+    [Serializable]
     public class SuperspectiveRaycast {
+        public Ray ray;
         public float distance;
         public List<SuperspectiveRaycastPart> raycastParts = new List<SuperspectiveRaycastPart>();
-        public bool hitPortal => allPortalsHit.Count > 0;
-        public bool hitObject => allObjectHits.Count > 0;
+        // Only counts portals that are not occluded by another object
+        public bool DidHitPortal => effectivePortalsHit.Count > 0;
+        public bool DidHitAnyPortal => allPortalsHit.Count > 0;
+        public bool DidHitObject => allObjectHits.Count > 0;
 
-        public RaycastHit firstObjectHit => allObjectHits.First();
+        public RaycastHit FirstObjectHit => allObjectHits.First();
 
         // A "Valid" Portal is a Portal hit in the first raycast, without any object in front of it
-        public Portal firstValidPortalHit {
+        public Portal FirstValidPortalHit {
             get {
                 try {
                     // We never hit a portal, don't bother checking
-                    if (!hitPortal) return null;
-                    SuperspectiveRaycastPart firstPart = raycastParts[0];
-                    if (firstPart.hitPortal) {
-                        // if hitObject is true, that means there was an object in front of the portal
-                        if (firstPart.hitObject) {
-                            return null;
-                        }
-                        else {
-                            return firstPart.portalHit;
-                        }
-                    }
-                    else {
-                        return null;
-                    }
+                    return !DidHitPortal ? null : effectivePortalsHit.First();
                 }
                 catch {
                     return null;
                 }
             }
         }
-        public Portal firstAnyPortalHit {
+        public Portal FirstAnyPortalHit {
             get {
                 try {
                     return allPortalsHit.First();
@@ -142,8 +134,9 @@ namespace SuperspectiveUtils {
         }
         public List<RaycastHit> allObjectHits = new List<RaycastHit>();
         public List<Portal> allPortalsHit = new List<Portal>();
+        public List<Portal> effectivePortalsHit = new List<Portal>(); // Portals that are not blocked by objects
 
-        public Vector3 finalPosition {
+        public Vector3 FinalPosition {
             get {
                 SuperspectiveRaycastPart lastPart = raycastParts.Last();
                 return lastPart.ray.origin + lastPart.ray.direction * lastPart.distance;
@@ -151,12 +144,21 @@ namespace SuperspectiveUtils {
         }
 
         public void AddPart(SuperspectiveRaycastPart part) {
+            float portalHitDistance = float.MaxValue;
             if (part.portalHit != null) {
                 allPortalsHit.Add(part.portalHit);
+                portalHitDistance = part.distance;
             }
 
+            bool hitPortalFirst = part.hitPortal;
             if (part.objectsHit != null && part.objectsHit.Length > 0) {
                 allObjectHits.AddRange(part.objectsHit);
+                float minDistance = part.objectsHit.Select(hit => hit.distance).Min();
+                hitPortalFirst = part.hitPortal && minDistance > portalHitDistance;
+            }
+            
+            if (part.portalHit != null && hitPortalFirst) {
+                effectivePortalsHit.Add(part.portalHit);
             }
 
             raycastParts.Add(part);
@@ -178,43 +180,28 @@ namespace SuperspectiveUtils {
         public Portal portalHit;
         readonly public int portalHitIndex;
 
-        public SuperspectiveRaycastPart(Ray ray, float fullRaycastDistance, RaycastHit[] raycastHits) {
+        public SuperspectiveRaycastPart(Ray ray, float raycastDistance, RaycastHit[] raycastHits) {
             // Make sure we sort the results into distance-based order
             raycastHits = raycastHits.OrderBy(hit => hit.distance).ToArray();
-            
-            Portal HitPortal(RaycastHit hit) {
-                GameObject hitObject = hit.collider.gameObject;
-                Portal result = hitObject.GetComponent<Portal>();
-                // If we didn't hit the portal itself, see if we hit the PortalCollider
-                if (result == null) {
-                    PortalCollider portalCollider = hitObject.GetComponent<PortalCollider>();
-                    if (portalCollider != null) {
-                        result = portalCollider.portal;
-                    }
-                }
-
-                // If we didn't hit either of those, check if it's the VolumetricPortal
-                if (result == null && hitObject.name.Contains("VolumetricPortal")) {
-                    result = hitObject.transform.parent?.GetComponent<Portal>();
-                }
-
-                return result;
-            }
 
             portalHit = null;
             portalHitIndex = -1;
             for (int i = 0; i < raycastHits.Length; i++) {
-                portalHit = HitPortal(raycastHits[i]);
+                raycastHits[i] = AdjustedHit(ray, raycastHits[i], raycastDistance, out Portal portalActuallyHit);
 
-                if (portalHit != null) {
+                if (portalActuallyHit != null) {
+                    portalHit = portalActuallyHit;
                     portalHitIndex = i;
                     break;
                 }
             }
             
-            float distanceOfPortal = portalHit != null ? raycastHits[portalHitIndex].distance : float.MaxValue;
+            float distanceOfPortal = portalHit != null ?
+                raycastHits[portalHitIndex].distance :
+                float.MaxValue;
             this.ray = ray;
-            this.distance = portalHit ? distanceOfPortal : fullRaycastDistance;
+            this.distance = portalHit ? distanceOfPortal : raycastDistance;
+            
             this.rawHitInfos = raycastHits;
 
             bool VisibilityMaskCheck(RaycastHit hit) {
@@ -235,9 +222,21 @@ namespace SuperspectiveUtils {
                 return hit.distance < distanceOfPortal;
             }
 
+            bool IsValidRaycastHit(RaycastHit hit) {
+                // Make sure the raycast hit was not set to a new RaycastHit by AdjustedHit
+                return hit.collider != null;
+            }
+            
+            bool IsNotPortal(RaycastHit hit) {
+                // Don't count the portal itself as an object hit
+                return hit.collider.gameObject.layer != SuperspectivePhysics.PortalLayer;
+            }
+
             objectsHit = rawHitInfos
+                .Where(IsValidRaycastHit)
                 .Where(VisibilityMaskCheck)
                 .Where(InFrontOfPortalCheck)
+                .Where(IsNotPortal)
                 .ToArray();
         }
 
@@ -256,6 +255,75 @@ namespace SuperspectiveUtils {
             else {
                 return new Ray();
             }
+        }
+        
+        private static Portal HitPortalTrigger(RaycastHit hit) {
+            GameObject hitObject = hit.collider.gameObject;
+            Portal result = hitObject.GetComponent<Portal>();
+            // If we didn't hit the portal itself, see if we hit the PortalCollider
+            if (result == null) {
+                NonPlayerPortalTriggerZone nonPlayerPortalTriggerZone = hitObject.GetComponent<NonPlayerPortalTriggerZone>();
+                if (nonPlayerPortalTriggerZone != null) {
+                    result = nonPlayerPortalTriggerZone.portal;
+                }
+            }
+
+            // If we didn't hit either of those, check if it's the VolumetricPortal
+            if (result == null && hitObject.name.Contains("VolumetricPortal")) {
+                result = hitObject.transform.parent?.GetComponent<Portal>();
+            }
+
+            return result;
+        }
+
+        // Just because a Portal trigger was hit doesn't mean the raycast actually hit the portal, this adjusts for that
+        private static RaycastHit AdjustedHit(Ray ray, RaycastHit hit, float distanceRemaining, out Portal portalHit) {
+            portalHit = null;
+            RaycastHit newHit = hit;
+
+            Portal portalWhoseTriggerWasHit = HitPortalTrigger(hit);
+            if (portalWhoseTriggerWasHit != null) {
+                // First check if we hit the backside of the portal, if we did, we can skip all the calculations
+                if (Vector3.Dot(portalWhoseTriggerWasHit.IntoPortalVector, ray.direction) < 0) {
+                    return new RaycastHit();
+                }
+                
+                bool didWeActuallyHitPortal = false;
+                Vector3 finalHitPosition = hit.point;
+                float finalDistance = hit.distance;
+                
+                // Okay, so we hit the portal trigger zone, but did we actually hit the Portal?
+                // First we construct a plane for the Portal plane
+                Plane portalPlane = new Plane(portalWhoseTriggerWasHit.IntoPortalVector, portalWhoseTriggerWasHit.transform.position);
+                // Then we see if the original raycast actually hits the plane
+                if (portalPlane.Raycast(ray, out float distanceToIntersect) && distanceToIntersect <= distanceRemaining) {
+                    // Okay so the raycast hit the infinitely extending plane, but did it hit the Portal?
+                    Vector3 hitPosition = ray.GetPoint(distanceToIntersect);
+                    // Find the closest point on the Portal to the hit position
+                    Vector3 testPosition = portalWhoseTriggerWasHit.ClosestPoint(hitPosition, true, true);
+                    
+                    // If they're basically the same point, then we hit the Portal
+                    if (Vector3.Distance(testPosition, hitPosition) < 0.001f) {
+                        didWeActuallyHitPortal = true;
+                        finalHitPosition = testPosition;
+                        finalDistance = distanceToIntersect;
+                    }
+                }
+
+                if (didWeActuallyHitPortal) {
+                    // We actually did hit the portal, here is the actual hit information
+                    newHit.point = finalHitPosition;
+                    newHit.distance = finalDistance;
+                    portalHit = portalWhoseTriggerWasHit;
+                    return newHit;
+                }
+                else {
+                    // We thought we hit a portal, but we did not
+                    return new RaycastHit();
+                }
+            }
+            
+            return newHit;
         }
     }
 }

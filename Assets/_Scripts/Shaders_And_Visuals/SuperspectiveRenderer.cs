@@ -167,6 +167,12 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		r.SetPropertyBlock(propBlock);
 	}
 
+	public void SetMatrix(string propName, Matrix4x4 m) {
+		r.GetPropertyBlock(propBlock);
+		propBlock.SetMatrix(propName, m);
+		r.SetPropertyBlock(propBlock);
+	}
+
 	public Bounds GetRendererBounds() {
 		return r.bounds;
 	}

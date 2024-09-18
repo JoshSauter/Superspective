@@ -17,7 +17,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         private void Update() {
             StateMachine<FloorManager.Floor> currentFloorState = FloorManager.instance.floor;
-            float desiredAlpha = currentFloorState == floor && currentFloorState.timeSinceStateChanged > revealDelay ? 1 : 0;
+            float desiredAlpha = currentFloorState == floor && currentFloorState.Time > revealDelay ? 1 : 0;
             foreach (var icon in icons) {
                 Color curColor = icon.color;
                 curColor.a = Mathf.Lerp(curColor.a, desiredAlpha, colorLerpSpeed * Time.deltaTime);

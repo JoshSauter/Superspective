@@ -13,14 +13,14 @@ namespace LevelSpecific.WhiteRoom {
     [RequireComponent(typeof(UniqueId))]
     public class RaiseLowerPlatform : SaveableObject<RaiseLowerPlatform, RaiseLowerPlatformSave>, AudioJobOnGameObject {
         public SerializableReference<PowerTrail, PowerTrail.PowerTrailSave> triggeredByPowerTrailRef;
-        private PowerTrail triggeredByPowerTrail => triggeredByPowerTrailRef.GetOrNull(); // Assumes the power trail is loaded
+        public PowerTrail TriggeredByPowerTrail => triggeredByPowerTrailRef.GetOrNull(); // Assumes the power trail is loaded
         public CubeReceptacle cubeReceptacle;
         
         public float raiseLowerSpeed = 1f;
         public float maxHeight = -19.5f;
         public float minHeight = -29f;
-        private float height => Mathf.Abs(maxHeight - minHeight);
-        private float timeToMove => height / raiseLowerSpeed;
+        private float Height => Mathf.Abs(maxHeight - minHeight);
+        private float TimeToMove => Height / raiseLowerSpeed;
 
         const float juiceTime = 1.2f;
         const float juiceFrequency = 8;
@@ -47,7 +47,7 @@ namespace LevelSpecific.WhiteRoom {
 
         protected override void OnValidate() {
             base.OnValidate();
-            if (state.state is State.Lowered or State.Raising) {
+            if (state.State is State.Lowered or State.Raising) {
                 SetHeight(minHeight);
             }
             else {
@@ -59,8 +59,8 @@ namespace LevelSpecific.WhiteRoom {
             yield return new WaitWhile(() => !GameManager.instance.gameHasLoaded);
             if (gameObject == null) yield break;
             
-            state.AddStateTransition(State.Raising, State.Raised, timeToMove);
-            state.AddStateTransition(State.Lowering, State.Lowered, timeToMove);
+            state.AddStateTransition(State.Raising, State.Raised, TimeToMove);
+            state.AddStateTransition(State.Lowering, State.Lowered, TimeToMove);
             state.AddTrigger(State.Raised, 0f, () => SetHeight(maxHeight));
             state.AddTrigger(State.Lowered, 0f, () => SetHeight(minHeight));
             
@@ -85,23 +85,28 @@ namespace LevelSpecific.WhiteRoom {
                     }
                 }
             );
+        }
 
-            if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.pwr.OnPowerFinish += Raise;
-                triggeredByPowerTrail.pwr.OnDepowerBegin += Lower;
+        protected override void OnEnable() {
+            base.OnEnable();
+
+            var powerTrail = TriggeredByPowerTrail;
+            if (powerTrail && powerTrail.pwr) {
+                powerTrail.pwr.OnPowerFinish += Raise;
+                powerTrail.pwr.OnDepowerBegin += Lower;
             }
         }
 
-        protected override void OnDestroy() {
-            base.OnDestroy();
-            if (triggeredByPowerTrail) {
-                triggeredByPowerTrail.pwr.OnPowerFinish -= Raise;
-                triggeredByPowerTrail.pwr.OnDepowerBegin -= Lower;
+        protected void OnDisable() {
+            var powerTrail = TriggeredByPowerTrail;
+            if (powerTrail && powerTrail.pwr) {
+                powerTrail.pwr.OnPowerFinish -= Raise;
+                powerTrail.pwr.OnDepowerBegin -= Lower;
             }
         }
 
         public void Raise() {
-            switch (state.state) {
+            switch (state.State) {
                 case State.Lowered:
                     state.Set(State.Raising);
                     break;
@@ -110,7 +115,7 @@ namespace LevelSpecific.WhiteRoom {
                 case State.Lowering:
                     float t = Mathf.InverseLerp(minHeight, maxHeight, transform.localPosition.y);
                     state.Set(State.Raising);
-                    state.timeSinceStateChanged = t * timeToMove;
+                    state.Time = t * TimeToMove;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -118,13 +123,13 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         public void Lower() {
-            switch (state.state) {
+            switch (state.State) {
                 case State.Lowering:
                 case State.Lowered:
                 case State.Raising:
                     float t = 1-Mathf.InverseLerp(minHeight, maxHeight, transform.localPosition.y);
                     state.Set(State.Lowering);
-                    state.timeSinceStateChanged = t * timeToMove;
+                    state.Time = t * TimeToMove;
                     break;
                 case State.Raised:
                     state.Set(State.Lowering);
@@ -136,10 +141,10 @@ namespace LevelSpecific.WhiteRoom {
 
         // Update is called once per frame
         void Update() {
-            switch (state.state) {
+            switch (state.State) {
                 case State.Lowered:
-                    if (state.timeSinceStateChanged < juiceTime) {
-                        float t = state.timeSinceStateChanged / juiceTime;
+                    if (state.Time < juiceTime) {
+                        float t = state.Time / juiceTime;
                         float target = minHeight - juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
                         float delta = SetHeight(target);
                         if (cubeReceptacle?.isCubeInReceptacle ?? false) {
@@ -151,8 +156,8 @@ namespace LevelSpecific.WhiteRoom {
                     }
                     break;
                 case State.Raised:
-                    if (state.timeSinceStateChanged < juiceTime) {
-                        float t = state.timeSinceStateChanged / juiceTime;
+                    if (state.Time < juiceTime) {
+                        float t = state.Time / juiceTime;
                         float target = maxHeight + juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
                         float delta = SetHeight(target);
                         if (cubeReceptacle?.isCubeInReceptacle ?? false) {
@@ -164,7 +169,7 @@ namespace LevelSpecific.WhiteRoom {
                     }
                     break;
                 case State.Raising: {
-                    float t = state.timeSinceStateChanged / timeToMove;
+                    float t = state.Time / TimeToMove;
                     float targetHeight = Mathf.Lerp(minHeight, maxHeight, t);
                     float delta = SetHeight(targetHeight);
                     if (cubeReceptacle?.isCubeInReceptacle ?? false) {
@@ -173,7 +178,7 @@ namespace LevelSpecific.WhiteRoom {
                     break;
                 }
                 case State.Lowering: {
-                    float t = state.timeSinceStateChanged / timeToMove;
+                    float t = state.Time / TimeToMove;
                     float targetHeight = Mathf.Lerp(maxHeight, minHeight, t);
                     float delta = SetHeight(targetHeight);
                     if (cubeReceptacle?.isCubeInReceptacle ?? false) {

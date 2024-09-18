@@ -12,7 +12,7 @@ namespace DissolveObjects {
     
     [RequireComponent(typeof(UniqueId))]
     public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.DissolveObjectSave> {
-        private const string dissolveObjectKeyword = "DISSOLVE_OBJECT";
+        private const string DISSOLVE_OBJECT_KEYWORD = "DISSOLVE_OBJECT";
         
         public enum State {
             Materialized,
@@ -60,7 +60,7 @@ namespace DissolveObjects {
             }
         }
 
-        private bool IsInvisibleDimensionObj => thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.invisible;
+        private bool IsInvisibleDimensionObj => thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.Invisible;
         private bool hasSubscribedToResetLayers = false;
         private bool SubscribedToResetLayers {
             get => thisDimensionObj != null && hasSubscribedToResetLayers;
@@ -92,13 +92,13 @@ namespace DissolveObjects {
         [ReadOnly]
         public float timeSinceStateChanged = 0f;
 
-        private const float materializedColliderThreshold = 0.25f;
-        private const string dissolveValueProp = "_DissolveValue";
-        private const string dissolveBurnSizeProp = "_DissolveBurnSize";
-        private const string dissolveBurnColorProp = "_DissolveBurnColor";
-        private const string dissolveBurnEmissionAmountProp = "_DissolveEmissionAmount";
-        private const string dissolveTexProp = "_DissolveTex";
-        private const string dissolveBurnRampProp = "_DissolveBurnRamp";
+        private const float MATERIALIZE_COLLIDER_THRESHOLD = 0.25f;
+        private const string DISSOLVE_VALUE_PROP = "_DissolveValue";
+        private const string DISSOLVE_BURN_SIZE_PROP = "_DissolveBurnSize";
+        private const string DISSOLVE_BURN_COLOR_PROP = "_DissolveBurnColor";
+        private const string DISSOLVE_BURN_EMISSION_AMOUNT_PROP = "_DissolveEmissionAmount";
+        private const string DISSOLVE_TEX_PROP = "_DissolveTex";
+        private const string DISSOLVE_BURN_RAMP_PROP = "_DissolveBurnRamp";
         
         [Range(0f, 1f)]
         public float dissolveAmount = 0.25f;
@@ -222,7 +222,7 @@ namespace DissolveObjects {
                         break;
                     case State.Dematerializing:
                     case State.Materializing:
-                        isOverMaterializedThreshold = 1-dissolveAmount > materializedColliderThreshold;
+                        isOverMaterializedThreshold = 1-dissolveAmount > MATERIALIZE_COLLIDER_THRESHOLD;
                         break;
                     case State.Dematerialized:
                         isOverMaterializedThreshold = false;
@@ -250,17 +250,17 @@ namespace DissolveObjects {
             foreach (var renderer in renderers) {
                 Material material = renderer.material;
                 if (state == State.Materialized) {
-                    material.DisableKeyword(dissolveObjectKeyword);
+                    material.DisableKeyword(DISSOLVE_OBJECT_KEYWORD);
                 }
                 else {
-                    material.EnableKeyword(dissolveObjectKeyword);
+                    material.EnableKeyword(DISSOLVE_OBJECT_KEYWORD);
                 }
-                material.SetFloat(dissolveValueProp, dissolveAmount);
-                material.SetFloat(dissolveBurnSizeProp, burnSize);
-                material.SetColor(dissolveBurnColorProp, burnColor);
-                material.SetFloat(dissolveBurnEmissionAmountProp, burnEmissionBrightness);
-                material.SetTexture(dissolveTexProp, dissolveTexture);
-                material.SetTexture(dissolveBurnRampProp, dissolveBurnRamp);
+                material.SetFloat(DISSOLVE_VALUE_PROP, dissolveAmount);
+                material.SetFloat(DISSOLVE_BURN_SIZE_PROP, burnSize);
+                material.SetColor(DISSOLVE_BURN_COLOR_PROP, burnColor);
+                material.SetFloat(DISSOLVE_BURN_EMISSION_AMOUNT_PROP, burnEmissionBrightness);
+                material.SetTexture(DISSOLVE_TEX_PROP, dissolveTexture);
+                material.SetTexture(DISSOLVE_BURN_RAMP_PROP, dissolveBurnRamp);
             }
         }
         

@@ -123,7 +123,7 @@ namespace PictureTeleportMechanics {
             if (enabledSsaoBlending) {
                 ssao.m_OcclusionIntensity = startSsaoIntensity;
             }
-            PlayerLook.instance.rotationY = targetLookY;
+            PlayerLook.instance.RotationY = targetLookY;
             PlayerLook.instance.rotationBeforeViewLock = camContainer.rotation;
             Physics.gravity = Physics.gravity.magnitude * -Player.instance.transform.up;
             

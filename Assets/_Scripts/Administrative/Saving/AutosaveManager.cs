@@ -70,13 +70,15 @@ namespace Saving {
             }
         }
 
-        public void DoAutosave() {
+        public SaveMetadataWithScreenshot DoAutosave(string nameOverride = "") {
             isAutosaving = true;
             LoadingIcon.instance.ShowLoadingIcon();
-            JobHandle saveJob = SaveManager.Save(CreateAutosave());
+            SaveMetadataWithScreenshot saveMetadata = CreateAutosave(nameOverride);
+            JobHandle saveJob = SaveManager.Save(saveMetadata);
             timeSinceLastAutosave = 0;
 
             DeleteExtraAutosaves(saveJob);
+            return saveMetadata;
         }
 
         // Delete autosaves until we're at maxNumberOfAutosaves
@@ -102,13 +104,14 @@ namespace Saving {
             isAutosaving = false;
         }
 
-        public SaveMetadataWithScreenshot CreateAutosave() {
+        public SaveMetadataWithScreenshot CreateAutosave(string nameOverride = "") {
+            bool hasNameOverride = !string.IsNullOrEmpty(nameOverride);
             // Fills in the lowest available # that's not already taken by a save
             string GetNewAutosaveFileDisplayName() {
                 DateTime now = DateTime.Now;
                 string date = now.ToShortDateString();
                 string time = now.ToShortTimeString();
-                string desiredSaveFileDisplayName = $"Autosave {date} {time}";
+                string desiredSaveFileDisplayName = hasNameOverride ? nameOverride : $"Autosave {date} {time}";
                 string desiredSaveFileName = SaveFileUtils.SanitizeString(desiredSaveFileDisplayName);
 
                 int incrementor = 1;

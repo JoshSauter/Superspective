@@ -78,16 +78,16 @@ public class ButtonColorChange : MonoBehaviour {
 
     void UpdateColor() {
         float t;
-        switch (buttonToReactTo.stateMachine.state) {
+        switch (buttonToReactTo.stateMachine.State) {
             case Button.State.ButtonPressing:
-                t = buttonToReactTo.stateMachine.timeSinceStateChanged / buttonToReactTo.timeToPressButton;
+                t = buttonToReactTo.stateMachine.Time / buttonToReactTo.timeToPressButton;
 
                 SetColor(Color.Lerp(startColor, pressColor, buttonToReactTo.buttonPressCurve.Evaluate(t)));
                 SetEmission(Color.Lerp(startEmission, pressEmission, buttonToReactTo.buttonPressCurve.Evaluate(t)));
 
                 break;
             case Button.State.ButtonUnpressing:
-                t = buttonToReactTo.stateMachine.timeSinceStateChanged / buttonToReactTo.timeToUnpressButton;
+                t = buttonToReactTo.stateMachine.Time / buttonToReactTo.timeToUnpressButton;
 
                 SetColor(Color.Lerp(pressColor, startColor, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));
                 SetEmission(Color.Lerp(pressEmission, startEmission, buttonToReactTo.buttonUnpressCurve.Evaluate(t)));

@@ -13,7 +13,7 @@ namespace LevelSpecific.BlackRoom {
 			Solved
 		}
 		public bool isSolved {
-			get => state.state == PuzzleNodeState.Solved;
+			get => state.State == PuzzleNodeState.Solved;
 			private set {
 				if (isSolved == value) return;
 
@@ -62,7 +62,7 @@ namespace LevelSpecific.BlackRoom {
 
 		void Update() {
 			isSolved = solution == GetColor();
-			float t = state.timeSinceStateChanged / scaleChangeTime;
+			float t = state.Time / scaleChangeTime;
 			if (isSolved) {
 				if (t < 1) {
 					float size = Mathf.LerpUnclamped(scaleWhenStateChanged, maxScale, scaleCurve.Evaluate(t));

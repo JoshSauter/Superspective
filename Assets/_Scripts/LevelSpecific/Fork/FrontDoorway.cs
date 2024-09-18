@@ -46,21 +46,21 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
 	    bool edgesAreBlack = edgeDetection.EdgesAreBlack();
 	    visibilityMask.enabled = state != State.Open && edgesAreBlack && portalEdgeColors.portalEdgesAreWhite;
 	    if (edgesAreWhite) {
-		    movingDoorway.SwitchVisibilityState(VisibilityState.invisible, true);
-		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.visible, true);
+		    movingDoorway.SwitchVisibilityState(VisibilityState.Invisible, true);
+		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.Visible, true);
 	    }
 	    else {
-		    movingDoorway.SwitchVisibilityState(VisibilityState.partiallyInvisible, true);
-		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.partiallyVisible, true);
+		    movingDoorway.SwitchVisibilityState(VisibilityState.PartiallyInvisible, true);
+		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.PartiallyVisible, true);
 	    }
 
 	    float t;
-	    switch (state.state) {
+	    switch (state.State) {
 		    case State.Open:
 			    t = 0;
 			    break;
 		    case State.Closing:
-			    t = state.timeSinceStateChanged / timeToMove;
+			    t = state.Time / timeToMove;
 			    break;
 		    case State.Closed:
 			    t = 1;

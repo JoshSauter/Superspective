@@ -11,13 +11,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - BlockRaycastOnly
   - Water
   - UI
   - CullEverythingLayer
+  - TriggerZone
+  - HideFromPortalRendering
   - 
-  - ObscureShader1
-  - ObscureShader2
   - GlowObject
   - PortalCopy
   - Scenery
@@ -38,7 +38,7 @@ TagManager:
   - CollideWithPlayerOnly
   - 
   - VisibleButNoPlayerCollision
-  - 
+  - TheEntity
   - 
   m_SortingLayers:
   - name: Default

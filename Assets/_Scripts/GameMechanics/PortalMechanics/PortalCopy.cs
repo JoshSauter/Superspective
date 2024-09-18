@@ -1,50 +1,49 @@
-﻿using PortalMechanics;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using PortalMechanics;
+using NaughtyAttributes;
 using UnityEngine;
 using SuperspectiveUtils;
-using UnityEngine.Rendering;
+using UnityEngine.Assertions;
 
 // Creates a copy of an object that is partially through a portal on the other side of the portal
 public class PortalCopy : MonoBehaviour {
     public float fudgeDistance = 0.001f;
     public bool DEBUG = false;
     DebugLogger debug;
-    public GameObject original;
     public PortalableObject originalPortalableObj;
-    InteractableGlow maybeOriginalGlow;
-    InteractableGlow glow;
 
-    bool _copyEnabled = false;
-    public bool copyEnabled {
-        get => _copyEnabled;
-        private set {
-            if (_copyEnabled && !value) {
-                OnPortalCopyDisabled?.Invoke();
-            }
-            if (!_copyEnabled && value) {
-                OnPortalCopyEnabled?.Invoke();
-            }
-            _copyEnabled = value;
-        }
-    }
+    [ShowNativeProperty]
+    private bool CopyEnabled { get; set; } = true;
+    [ShowNativeProperty]
+    private Portal RelevantPortal => originalPortalableObj == null ? null : originalPortalableObj.IsInPortal ?
+        originalPortalableObj.Portal :
+        originalPortalableObj.IsHeldThroughPortal ?
+            originalPortalableObj.PortalHeldThrough.otherPortal :
+            null;
 
     public Renderer[] renderers;
-    Collider[] colliders;
-
-    public delegate void PortalCopyAction();
-    public PortalCopyAction OnPortalCopyEnabled;
-    public PortalCopyAction OnPortalCopyDisabled;
+    public Collider[] colliders;
 
     void Awake() {
         renderers = transform.GetComponentsInChildrenRecursively<Renderer>();
+        
         colliders = transform.GetComponentsInChildrenRecursively<Collider>();
     }
 
-	IEnumerator Start() {
+	void Start() {
         debug = new DebugLogger(gameObject, () => DEBUG);
 
-        originalPortalableObj = original.GetComponent<PortalableObject>();
+        // copyToOriginalMaterialMap = renderers.SelectMany(r => {
+        //     List<Material> originalMaterials = originalPortalableObj.renderers.ToList().Find(r2 => r.name == r2.name).sharedMaterials.ToList();
+        //     Assert.IsTrue(originalMaterials.Count == r.sharedMaterials.Length, "Original renderer not found for copy renderer: " + r.name);
+        //
+        //     return originalMaterials.Select(m => {
+        //         Material copyMaterial = r.sharedMaterials.ToList().Find(m2 => m2.name == m.name);
+        //         Assert.IsNotNull(copyMaterial, "Copy material not found for original material: " + m.name);
+        //         return new { original = m, copy = copyMaterial };
+        //     });
+        // }).ToDictionary(pair => pair.copy, pair => pair.original);
 
         // Disallow collisions between a portal object and its copy
         foreach (var c1 in colliders) {
@@ -52,33 +51,13 @@ public class PortalCopy : MonoBehaviour {
                 SuperspectivePhysics.IgnoreCollision(c1, c2);
             }
         }
-
-        InteractableObject maybeInteract = original.GetComponent<InteractableObject>();
-        maybeOriginalGlow = original.GetComponent<InteractableGlow>();
-
-        if (maybeInteract != null) {
-            InteractableObject interact = gameObject.AddComponent<InteractableObject>();
-            interact.SkipSave = true; // PortalCopies aren't saved
-            interact.glowColor = maybeInteract.glowColor;
-            interact.overrideGlowColor = maybeInteract.overrideGlowColor;
-
-            interact.OnLeftMouseButton += maybeInteract.OnLeftMouseButton;
-            interact.OnLeftMouseButtonDown += maybeInteract.OnLeftMouseButtonDown;
-            interact.OnLeftMouseButtonUp += maybeInteract.OnLeftMouseButtonUp;
-
-            interact.OnMouseHover += maybeInteract.OnMouseHover;
-            interact.OnMouseHoverEnter += maybeInteract.OnMouseHoverEnter;
-            interact.OnMouseHoverExit += maybeInteract.OnMouseHoverExit;
-        }
-
-        TransformCopy();
-
-        yield return null;
-
-        glow = GetComponent<InteractableGlow>();
+        
+        SetPortalCopyEnabled(false);
     }
 
     public void SetPortalCopyEnabled(bool enabled) {
+        if (CopyEnabled == enabled) return;
+        
         foreach (var r in renderers) {
             r.enabled = enabled;
         }
@@ -86,44 +65,51 @@ public class PortalCopy : MonoBehaviour {
             c.enabled = enabled;
         }
 
-        copyEnabled = enabled;
-        if (copyEnabled) {
+        CopyEnabled = enabled;
+        if (CopyEnabled) {
             TransformCopy();
         }
     }
 
     void LateUpdate() {
-        if (originalPortalableObj.copyShouldBeEnabled != copyEnabled) {
-            SetPortalCopyEnabled(originalPortalableObj.copyShouldBeEnabled);
+        if (!originalPortalableObj) {
+            Destroy(gameObject);
+            return;
         }
-
-        if (copyEnabled) {
+        
+        UpdateOriginalAndPortalCopyMaterials(CopyEnabled);
+        if (CopyEnabled || originalPortalableObj.IsPortaled) {
             TransformCopy();
-            if (maybeOriginalGlow != null && glow != null) {
-                glow.enabled = maybeOriginalGlow.enabled;
-                glow.glowAmount = maybeOriginalGlow.glowAmount;
-            }
         }
     }
 
-	void UpdateMaterials() {
-        Portal portal = originalPortalableObj.portalInteractingWith.otherPortal;
+    void UpdateOriginalAndPortalCopyMaterials(bool portalCopyEnabled) {
+        UpdateMaterialsForRenderers(portalCopyEnabled, RelevantPortal?.otherPortal, renderers);
+        UpdateMaterialsForRenderers(portalCopyEnabled, RelevantPortal, originalPortalableObj.renderers);
+    }
 
+    void UpdateMaterialsForRenderers(bool portalCopyEnabled, Portal portal, Renderer[] renderers) {
         foreach (var r in renderers) {
             foreach (var m in r.materials) {
-                m.SetVector("_PortalPos", portal.transform.position - portal.transform.forward * 0.00001f);
-                m.SetVector("_PortalNormal", portal.transform.forward);
-                m.SetFloat("_FudgeDistance", fudgeDistance);
+                if (portalCopyEnabled && portal) {
+                    m.EnableKeyword("PORTAL_COPY_OBJECT");
+                
+                    m.SetVector("_PortalPos", portal.transform.position - portal.transform.forward * 0.00001f);
+                    m.SetVector("_PortalNormal", portal.transform.forward);
+                    m.SetFloat("_FudgeDistance", fudgeDistance);
+                }
+                else {
+                    m.DisableKeyword("PORTAL_COPY_OBJECT");
+                }
             }
         }
     }
 
-    public void TransformCopy() {
-        Portal relevantPortal = originalPortalableObj.portalInteractingWith;
-        debug.Log("Portal: " + relevantPortal + "\nBefore position: " + transform.position);
-        TransformCopy(relevantPortal);
+    void TransformCopy() {
+        debug.Log("Portal: " + RelevantPortal + "\nBefore position: " + transform.position);
+        TransformCopy(RelevantPortal);
         debug.Log("After position: " + transform.position);
-        UpdateMaterials();
+        UpdateOriginalAndPortalCopyMaterials(true);
     }
 
     void TransformCopy(Portal inPortal) {
@@ -132,12 +118,12 @@ public class PortalCopy : MonoBehaviour {
         }
         
         // Position
-        transform.position = inPortal.TransformPoint(original.transform.position);
+        transform.position = inPortal.TransformPoint(originalPortalableObj.transform.position);
 
         // Rotation
-        transform.rotation = inPortal.TransformRotation(original.transform.rotation);
+        transform.rotation = inPortal.TransformRotation(originalPortalableObj.transform.rotation);
         
         // Scale
-        transform.localScale = original.transform.localScale * inPortal.ScaleFactor;
+        transform.localScale = originalPortalableObj.transform.localScale * inPortal.ScaleFactor;
     }
 }

@@ -14,6 +14,7 @@ struct SuberspectiveV2F {
 	float4 screenPos : TEXCOORD1;
 	float2 uv_MainTex : TEXCOORD2;
 	float2 uv_EmissionMap : TEXCOORD3;
+	float4 color : COLOR; // vertex color
 #ifdef DISSOLVE_OBJECT
 	float2 uv_DissolveTex : TEXCOORD4;
 #endif
@@ -27,6 +28,7 @@ SuberspectiveV2F SuberspectiveVert(appdata_full v) {
 	o.worldPos = mul(unity_ObjectToWorld, float4(vertex.xyz, 1.0)).xyz;
 	o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
     o.uv_EmissionMap = TRANSFORM_TEX(v.texcoord, _EmissionMap);
+	o.color = v.color;
 #ifdef DISSOLVE_OBJECT
 	o.uv_DissolveTex = TRANSFORM_TEX(v.texcoord, _DissolveTex);
 #endif
@@ -74,6 +76,11 @@ inline void SuberspectiveRender(SuberspectiveV2F i, inout float4 color, inout ha
 	#ifdef DISSOLVE_OBJECT
 	uv_DissolveTex = i.uv_DissolveTex;
 	#endif
+
+	if (length(i.color) > 0) {
+		color.rgb *= i.color.rgb;
+		color.a *= i.color.a;
+	}
 
 	SuberspectiveRender(uv_DimensionMask, uv_DissolveTex, i.worldPos, color, emissionEnabled);
 	//color = DepthColor(i.screenPos.xy / i.screenPos.w);

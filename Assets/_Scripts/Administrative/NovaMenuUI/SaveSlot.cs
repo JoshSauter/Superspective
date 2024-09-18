@@ -194,17 +194,17 @@ public class SaveSlot : MonoBehaviour {
     }
 
     void InitDeleteButtonStateMachine() {
-        deleteButtonState.OnStateChangeSimple += () => RunDeleteSaveAnimation(deleteButtonState.state, saveSlotDeleteAnimationTime);
+        deleteButtonState.OnStateChangeSimple += () => RunDeleteSaveAnimation(deleteButtonState.State, saveSlotDeleteAnimationTime);
     }
 
     void InitDeleteConfirmStateMachine() {
-        deleteConfirmButtonState.OnStateChangeSimple += () => RunDeleteConfirmAnimation(deleteConfirmButtonState.state, deleteConfirmCancelAnimationTime);
+        deleteConfirmButtonState.OnStateChangeSimple += () => RunDeleteConfirmAnimation(deleteConfirmButtonState.State, deleteConfirmCancelAnimationTime);
         
         deleteConfirmButtonState.AddTrigger(ButtonState.Clicked, () => saveMetadata.ForEach(sm => SaveFileUtils.DeleteSave(sm.metadata.saveFilename)));
     }
 
     void InitDeleteCancelStateMachine() {
-        deleteCancelButtonState.OnStateChangeSimple += () => RunDeleteCancelAnimation(deleteCancelButtonState.state, deleteConfirmCancelAnimationTime);
+        deleteCancelButtonState.OnStateChangeSimple += () => RunDeleteCancelAnimation(deleteCancelButtonState.State, deleteConfirmCancelAnimationTime);
         
         deleteCancelButtonState.AddTrigger(ButtonState.Clicked, () => deleteButtonState.Set(DeleteButtonState.Hovered));
     }
@@ -485,7 +485,7 @@ public class SaveSlot : MonoBehaviour {
         if (evt.Hovering) {
             debug.Log($"Setting {LevelName.Text} to Clicked (because hovered)");
             // Double-click on existing save, or single click on new one
-            if (saveSlotButtonState.prevState == ButtonState.Clicked || saveMetadata.IsEmpty()) {
+            if (saveSlotButtonState.PrevState == ButtonState.Clicked || saveMetadata.IsEmpty()) {
                 SaveSlotDoubleClicked();
             }
             saveSlotButtonState.Set(ButtonState.Clicked);
@@ -503,7 +503,7 @@ public class SaveSlot : MonoBehaviour {
             }
             evt.Consume();
         }
-        else if (saveSlotButtonState.prevState == ButtonState.Clicked) {
+        else if (saveSlotButtonState.PrevState == ButtonState.Clicked) {
             debug.Log($"Setting {LevelName.Text} to Clicked (because prevState)");
             saveSlotButtonState.Set(ButtonState.Clicked);
             evt.Consume();
@@ -575,7 +575,7 @@ public class SaveSlot : MonoBehaviour {
             deleteButtonState.Set(DeleteButtonState.DeleteConfirmation);
             evt.Consume();
         }
-        else if (deleteButtonState.prevState == DeleteButtonState.DeleteConfirmation) {
+        else if (deleteButtonState.PrevState == DeleteButtonState.DeleteConfirmation) {
             deleteButtonState.Set(DeleteButtonState.DeleteConfirmation);
             evt.Consume();
         }

@@ -34,7 +34,7 @@ public class GravityFlipTrigger : MonoBehaviour {
             playerMovement.transform.rotation;
 
         PlayerLook playerLook = PlayerLook.instance;
-        playerLook.rotationY -= angleBetween;
+        playerLook.RotationY -= angleBetween;
         // playerLook.rotationY = Mathf.Clamp(playerLook.rotationY, -playerLook.yClamp, playerLook.yClamp);
     }
 }

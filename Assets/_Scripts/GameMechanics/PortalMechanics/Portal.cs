@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
+using GrowShrink;
 using LevelManagement;
 using MagicTriggerMechanics;
 using Saving;
@@ -82,7 +83,15 @@ namespace PortalMechanics {
 		[ShowIf("changeCameraEdgeDetection")]
 		public Texture2D edgeColorGradientTexture;
 
-		public bool renderRecursivePortals = false;
+		[SerializeField]
+		private bool renderRecursivePortals = false;
+		public bool RenderRecursivePortals =>
+#if UNITY_EDITOR
+			// Never render recursive portals in editor, the slowdown is too much
+			false;
+#else
+			renderRecursivePortals;
+#endif
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
 
@@ -108,6 +117,10 @@ namespace PortalMechanics {
 		private float scaleFactor = 1;
 		public float ScaleFactor => changeScale ? scaleFactor : 1f;
 
+		[Tooltip("Largest size GrowShrinkObject that is allowed to pass through this portal")]
+		public float maxScaleAllowed = 6f;
+		private float MaxScaleAllowed => otherPortal != null ? Mathf.Max(maxScaleAllowed, otherPortal.maxScaleAllowed) : maxScaleAllowed;
+
 		private readonly string VOLUMETRIC_PORTAL_NAME = "Volumetric Portal";
 		[SerializeField]
 		SuperspectiveRenderer[] volumetricPortals;
@@ -117,45 +130,36 @@ namespace PortalMechanics {
 		private float volumetricPortalThickness = 1f;
 		public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
 
-		private bool VolumetricPortalsShouldBeEnabled {
+		private bool VolumetricPortalsShouldBeEnabled => PlayerRemainsInPortal;
+
+		public Vector3 IntoPortalVector {
 			get {
-				return PlayerRemainsInPortal;
-				if (!hasInitialized || !PortalRenderingIsEnabled || !PlayerCamIsCloseEnoughToInFrontOfPortal || dimensionObject || IsInvisible) return false;
-				Vector3 playerCamPos = playerCamera.position;
-				Vector3 playerCamToPortal = playerCamPos - ClosestPoint(playerCamPos, true);
-				float dotProduct = Vector3.Dot(playerCamToPortal.normalized, -IntoPortalVector().normalized);
-				if (playerCamToPortal.magnitude > 0.1f && dotProduct < 0.75f) return false;
-				
-				float playerCamToPortalDist = playerCamToPortal.magnitude;
-				float playerCamToOtherPortalDist = Vector3.Distance(playerCamPos, otherPortal.ClosestPoint(playerCamPos, true));
-				return playerCamToPortalDist <= volumetricPortalEnableDistance && playerCamToPortalDist <= playerCamToOtherPortalDist;
+				if (renderers == null || renderers.Length == 0) {
+					return transform.forward;
+				}
+				else {
+					return renderers[0].transform.forward;
+				}
 			}
 		}
 
 		private bool IsInvisible {
 			get {
 				if (dimensionObject != null) {
-					return dimensionObject.effectiveVisibilityState == VisibilityState.invisible;
+					return dimensionObject.EffectiveVisibilityState == VisibilityState.Invisible;
 				}
 
 				return false;
-			}
-		}
-
-		private bool PlayerCamIsCloseEnoughToInFrontOfPortal {
-			get {
-				Vector3 playerCamPos = playerCamera.position;
-				Vector3 portalPos = transform.position;
-				Vector3 outOfPortal = -IntoPortalVector();
-				Vector3 adjustedPortalPos = portalPos - outOfPortal * PORTAL_THICKNESS * transform.lossyScale.z;
-				return Vector3.Dot(playerCamPos - adjustedPortalPos, outOfPortal) > 0;
 			}
 		}
 		Material portalMaterial;
 		
 		public Material fallbackMaterial;
 		public SuperspectiveRenderer[] renderers;
+		// Colliders are the infinitely thin planes on the Portal layer that interact with raycasts
 		public Collider[] colliders;
+		// Trigger colliders are the trigger zones that the CompositeMagicTriggers operate within to teleport the player/objects
+		public Collider[] triggerColliders;
 		Transform playerCamera;
 		CameraFollow playerCameraFollow;
 		bool teleportingPlayer = false;
@@ -170,6 +174,9 @@ namespace PortalMechanics {
 		RecursiveTextures internalRenderTexturesCopy;
 
 		public bool disableColliderWhilePaused = false;
+		public bool pauseRenderingWhenNotInActiveScene = false;
+		private bool ThisPortalIsInActiveScene => LevelManager.instance.activeSceneName == gameObject.scene.name;
+		private bool IsInActiveScene => ThisPortalIsInActiveScene || otherPortal.ThisPortalIsInActiveScene;
 		public bool pauseRendering = false;
 		public bool pauseLogic = false;
 
@@ -183,7 +190,7 @@ namespace PortalMechanics {
 		private Material effectiveMaterial => PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-		public bool PortalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf && allowPortalRendering;
+		public bool PortalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf && allowPortalRendering && (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
 		public bool PortalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
 
 		public bool PlayerRemainsInPortal => PlayerIsInThisPortal || (otherPortal != null && otherPortal.PlayerIsInThisPortal);
@@ -193,9 +200,12 @@ namespace PortalMechanics {
 
 		// May or may not exist on a Portal, affects what the PortalMaterial is
 		public DimensionObject dimensionObject;
+		// May or may not exist on a Portal, affects PortalableObjects that are also PillarDimensionObjects by setting their dimension to the outPortal's dimension
+		public PillarDimensionObject pillarDimensionObject;
 		public CompositeMagicTrigger trigger;
 
-		private const float PORTAL_THICKNESS = 0.55f;
+		private const float PORTAL_THICKNESS = 1.55f;
+		private float PortalThickness => PORTAL_THICKNESS / (changeScale ? ScaleFactor : 1f);
 
 #region Events
 		// Type declarations
@@ -313,6 +323,7 @@ namespace PortalMechanics {
 			base.Awake();
 			
 			dimensionObject = gameObject.FindDimensionObjectRecursively<DimensionObject>();
+			pillarDimensionObject = dimensionObject as PillarDimensionObject;
 			string shaderPath = "Shaders/Suberspective/SuberspectivePortal";
 			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
 			if (fallbackMaterial == null) {
@@ -320,8 +331,9 @@ namespace PortalMechanics {
 			}
 
 			InitializeRenderers();
+			gameObject.layer = SuperspectivePhysics.PortalLayer;
 			foreach (var r in renderers) {
-				r.gameObject.layer = LayerMask.NameToLayer("Portal");
+				r.gameObject.layer = SuperspectivePhysics.PortalLayer;
 				r.SetMaterial(PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
 				if (changeScale) {
 					r.SetFloat("_PortalScaleFactor", scaleFactor);
@@ -341,19 +353,52 @@ namespace PortalMechanics {
 				enabled = false;
 				return;
 			}
+
+			triggerColliders = colliders.Select(c => {
+				string triggerName = $"{c.name} Trigger";
+				GameObject triggerColliderGO = new GameObject(triggerName);
+				triggerColliderGO.transform.SetParent(c.transform, false);
+				Collider triggerCollider = null;
+				// Make the original collider --infinitely thin-- // Future me: WHY? Infinite thinness just leads to players phasing through the portal with lag
+				switch (c) {
+					case BoxCollider boxCollider:
+						// Copy the collider's properties to the trigger collider
+						triggerCollider = triggerColliderGO.PasteComponent(boxCollider);
+						triggerCollider.isTrigger = true;
+
+						boxCollider.size = boxCollider.size.WithZ(PortalThickness);
+						break;
+					case MeshCollider meshCollider:
+						// Copy the collider's properties to the trigger collider
+						triggerCollider = triggerColliderGO.PasteComponent(meshCollider);
+						triggerCollider.isTrigger = true;
+						
+						meshCollider.convex = false;
+						break;
+					default:
+						Debug.LogError("Unsupported collider type for portal trigger collider, only BoxCollider and MeshCollider are supported!");
+						break;
+				}
+
+				triggerColliderGO.name = triggerName;
+
+				return triggerCollider;
+			}).Where(c => c != null).ToArray();
 			
 			CreateCompositeTrigger();
 			InitializeCompositeTrigger();
 
-			foreach (var c in colliders) {
+			foreach (var c in triggerColliders) {
+				c.gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
 				if (c.gameObject != this.gameObject) {
 					// PortalColliders handle non-player objects passing through portals
-					c.gameObject.AddComponent<PortalCollider>().portal = this;
-					if (c is BoxCollider boxCollider) {
-						var size = boxCollider.size;
-						size = new Vector3(size.x, size.y, PORTAL_THICKNESS);
-						boxCollider.size = size;
-					}
+					c.gameObject.AddComponent<NonPlayerPortalTriggerZone>().portal = this;
+				}
+				
+				// Give the trigger colliders some thickness so the player can't phase through them with lag
+				if (c is BoxCollider boxCollider) {
+					var size = boxCollider.size;
+					boxCollider.size = size.WithZ(PortalThickness);
 				}
 			}
 
@@ -385,8 +430,15 @@ namespace PortalMechanics {
 				
 				DestroyImmediate(existingVolumetricPortal.gameObject);
 			}
-			
-			if (!(volumetricPortals == null || volumetricPortals.Length == 0)) return;
+
+			volumetricPortals = volumetricPortals?.Where(vp => vp != null).ToArray();
+
+			if (volumetricPortals != null && volumetricPortals.Length > 0) {
+				foreach (var vp in volumetricPortals){
+					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
+				}
+				return;
+			}
 
 			List<SuperspectiveRenderer> volumetricPortalsList = new List<SuperspectiveRenderer>();
 			foreach (SuperspectiveRenderer r in renderers) {
@@ -396,6 +448,7 @@ namespace PortalMechanics {
 
 					vp.enabled = false;
 					vp.SetMaterial(r.r.sharedMaterial);
+					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
 					volumetricPortalsList.Add(vp);
 				}
 				catch (Exception e) {
@@ -422,7 +475,7 @@ namespace PortalMechanics {
 					triggerCondition = TriggerConditionType.PlayerMovingDirection,
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
-					triggerThreshold = 0.01f
+					triggerThreshold = 0f
 				};
 				trigger.triggerConditions = new List<TriggerCondition>() {
 					positionCondition,
@@ -432,7 +485,7 @@ namespace PortalMechanics {
 		}
 
 		private void InitializeCompositeTrigger() {
-			trigger.colliders = colliders;
+			trigger.colliders = triggerColliders;
 			trigger.OnMagicTriggerStayOneTime += () => {
 				playerCameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
 				if (!teleportingPlayer) {
@@ -495,27 +548,15 @@ namespace PortalMechanics {
 			SetPropertiesOnMaterial();
 		}
 
-		bool test = false;
 		void FixedUpdate() {
 			foreach (Collider c in colliders) {
 				c.isTrigger = PortalLogicIsEnabled;
 				if (disableColliderWhilePaused) {
 					c.enabled = PortalLogicIsEnabled;
 				}
-				
 			}
-			
-			bool playerIsCloseToPortal = Vector3.Distance(Player.instance.transform.position, ClosestPoint(Player.instance.transform.position, true)) < 0.99f;
-			if (playerIsCloseToPortal && !test) {
-				test = true;
-				//Debug.Break();
-			}
-			else if (!playerIsCloseToPortal) {
-				test = false;
-			}
-			
+
 			// If the player moves to the backside of a double-sided portal, rotate the portals to match
-			Quaternion portalOriginalRotation = transform.rotation;
 			transform.rotation = !isFlipped ? flippedRotation : startRotation; // Pretend the Portal were already flipped
 			bool wouldTeleportPlayersIfPortalWereFlipped = ShouldTeleportPlayer; // If the Portal were flipped, would we be teleporting the player?
 			transform.rotation = isFlipped ? flippedRotation : startRotation; // Restore rotation
@@ -527,7 +568,7 @@ namespace PortalMechanics {
 				Vector3 otherPortalToPlayer = playerCamera.position - closestPointOtherPortal;
 				
 				if (portalToPlayer.magnitude <= otherPortalToPlayer.magnitude) {
-					Vector3 intoPortal = IntoPortalVector();
+					Vector3 intoPortal = IntoPortalVector;
 					Vector3 outOfPortal = -intoPortal;
 					float outDot = Vector3.Dot(outOfPortal, portalToPlayer);
 					float inDot = Vector3.Dot(intoPortal, portalToPlayer);
@@ -543,7 +584,8 @@ namespace PortalMechanics {
 			}
 		}
 
-		void OnEnable() {
+		protected override void OnEnable() {
+			base.OnEnable();
 			StartCoroutine(AddPortalCoroutine());
 			
 			if (dimensionObject != null) {
@@ -562,59 +604,79 @@ namespace PortalMechanics {
 			}
 		}
 
-		public void OnTriggerEnter(Collider other) {
+		public void OnPortalTriggerEnter(Collider other) {
+			if (!PortalLogicIsEnabled || other.isTrigger) return;
+			
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
 			if (other.TaggedAsPlayer()) return;
 			
+			// Don't deal with objects that are over the max scale allowed
+			GrowShrinkObject growShrinkObject = other.gameObject.FindInParentsRecursively<GrowShrinkObject>();
+			if (growShrinkObject != null && growShrinkObject.CurrentScale > MaxScaleAllowed) {
+				return;
+			}
+			
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
-			if (portalableObj != null) {
-				objectsInPortal.Add(portalableObj);
-				portalableObj.sittingInPortal = this;
+			if (portalableObj != null && (!portalableObj.IsInPortal || portalableObj.Portal != this)) {
+				portalableObj.EnterPortal(this);
 			}
 		}
 
-		public void OnTriggerExit(Collider other) {
+		public void OnPortalTriggerExit(Collider other) {
+			if (!PortalLogicIsEnabled || other.isTrigger) return;
+			
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
 			if (other.TaggedAsPlayer()) return;
 			
+			// Don't deal with objects that are over the max scale allowed
+			GrowShrinkObject growShrinkObject = other.gameObject.FindInParentsRecursively<GrowShrinkObject>();
+			if (growShrinkObject != null && growShrinkObject.CurrentScale > MaxScaleAllowed) {
+				return;
+			}
+			
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
-			if (portalableObj != null) {
+			if (portalableObj != null && !portalableObj.teleportedThisFixedUpdate) {
 				if (objectsInPortal.Contains(portalableObj)) {
-					objectsInPortal.Remove(portalableObj);
-					portalableObj.sittingInPortal = null;
+					portalableObj.ExitPortal(this);
 				}
 			}
 		}
 
-		public void OnTriggerStay(Collider other) {
+		public void OnPortalTriggerStay(Collider other) {
 			if (!PortalLogicIsEnabled || other.isTrigger) return;
 
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
 			if (other.TaggedAsPlayer()) return;
 			
+			// Don't teleport objects that are over the max scale allowed
+			GrowShrinkObject growShrinkObject = other.gameObject.FindInParentsRecursively<GrowShrinkObject>();
+			if (growShrinkObject != null && growShrinkObject.CurrentScale > MaxScaleAllowed) {
+				return;
+			}
+			
 			Vector3 closestPoint = ClosestPoint(other.transform.position, true, true);
-			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(IntoPortalVector(), (other.transform.position - closestPoint).normalized)) > 0;
+			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(IntoPortalVector, (other.transform.position - closestPoint).normalized)) > 0;
 			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
 
 			if (!objectShouldBeTeleported) {
-				if (portalableObj != null) {
-					portalableObj.sittingInPortal = this;
+				if (portalableObj != null && portalableObj.IsInPortal && portalableObj.Portal != this) {
+					portalableObj.EnterPortal(this);
 				}
 
 				return;
 			}
-				
+			
 			if (portalableObj != null && objectsInPortal.Contains(portalableObj)) {
-				// Debug.LogWarning($"{ID} teleporting object {portalableObj.ID}");
+				debug.Log($"{ID} teleporting object {portalableObj.ID}");
 				TeleportObject(portalableObj);
 
 				// Swap state to the other portal
+				// The PortalableObject itself takes care of its own state by listening for a teleport event
 				objectsInPortal.Remove(portalableObj);
 				otherPortal.objectsInPortal.Add(portalableObj);
-				portalableObj.sittingInPortal = otherPortal;
 			}
 		}
 
@@ -625,20 +687,6 @@ namespace PortalMechanics {
 			if (VolumetricPortalsShouldBeEnabled) {
 				EnableVolumetricPortal();
 				
-				// Experimental code for moving around a smaller volumetric portal that tracks the player:
-				// for (int i = 0; i < volumetricPortals.Length; i++) {
-				// 	var volumetricPortal = volumetricPortals[i];
-				// 	var portal = colliders[i];
-				// 	Transform vpTransform = volumetricPortal.transform;
-				// 	Vector3 camPos = playerCamera.position;
-				//
-				// 	Vector3 vpSize = new Vector3(.5f, .5f, .5f);
-				// 	Bounds portalBounds = portal.bounds;
-				// 	portalBounds.size -= vpSize;
-				//
-				// 	Vector3 targetPos = portalBounds.ClosestPoint(camPos);
-				// 	vpTransform.position = targetPos;
-				// }
 				consecutiveFramesVPShouldBeDisabled = 0;
 			}
 			else {
@@ -685,7 +733,14 @@ namespace PortalMechanics {
 		}
 
 		public bool IsVolumetricPortalEnabled() {
-			return volumetricPortals.Any(vp => vp.enabled);
+			return volumetricPortals.Any(vp => vp.enabled && vp.gameObject.layer != SuperspectivePhysics.InvisibleLayer);
+		}
+
+		public void SetVolumetricHiddenForPortalRendering(bool hidden) {
+			int targetLayer = hidden ? SuperspectivePhysics.InvisibleLayer : SuperspectivePhysics.VolumetricPortalLayer;
+			foreach (SuperspectiveRenderer vp in volumetricPortals) {
+				vp.gameObject.layer = targetLayer;
+			}
 		}
 
 		public void SetTexture(RenderTexture tex) {
@@ -736,25 +791,19 @@ namespace PortalMechanics {
 		}
 
 		public bool IsVisibleFrom(Camera cam) {
-			if (skipIsVisibleCheck) return true;
+			if (skipIsVisibleCheck) {
+				// Still don't render portals that are very far away
+				Vector3 closestPoint = ClosestPoint(Player.instance.PlayerCam.transform.position, true, true);
+				return Vector3.Distance(closestPoint, Player.instance.PlayerCam.transform.position) < Player.instance.PlayerCam.farClipPlane;
+			}
 			
 			return renderers.Any(r => r.r.IsVisibleFrom(cam)) || volumetricPortals.Any(vp => vp.r.IsVisibleFrom(cam));
-		}
-
-		public Vector3 IntoPortalVector() {
-			if (renderers == null || renderers.Length == 0) {
-				return transform.forward;
-			}
-			else {
-				return renderers[0].transform.forward;
-			}
 		}
 
 		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false, bool useInfinitelyThinBounds = false) {
 			float minDistance = float.MaxValue;
 			Vector3 closestPoint = point + Vector3.up * minDistance;
 
-			Plane portalPlane = new Plane(IntoPortalVector(), transform.position);
 			foreach (var c in colliders) {
 				bool colliderActive = c.gameObject.activeSelf;
 				bool colliderEnabled = c.enabled;
@@ -765,15 +814,7 @@ namespace PortalMechanics {
 
 				Vector3 thisClosestPoint;
 				if (useInfinitelyThinBounds) {
-					// Treat the collider bounds as being infinitely thin in the Z direction (portal normal direction)
-					// Bounds b = c.bounds;
-					// Vector3 effectiveNormal = PortalNormal();
-					// effectiveNormal.x = Mathf.Abs(effectiveNormal.x);
-					// effectiveNormal.y = Mathf.Abs(effectiveNormal.y);
-					// effectiveNormal.z = Mathf.Abs(effectiveNormal.z);
-					// Vector3Int scaleFactor = Vector3Int.RoundToInt(Vector3.one - effectiveNormal);
-					// b.size = Vector3.Scale(b.size, scaleFactor);
-					// thisClosestPoint = b.ClosestPoint(point);
+					Plane portalPlane = new Plane(IntoPortalVector, transform.position);
 					thisClosestPoint = portalPlane.ClosestPointOnPlane(c.ClosestPoint(point));
 				}
 				else {
@@ -851,15 +892,12 @@ namespace PortalMechanics {
 
 		public void TeleportObject(PortalableObject portalableObject, bool transformVelocity = true) {
 			debug.Log($"Teleporting {portalableObject.FullPath()}");
-			portalableObject.BeforeObjectTeleported?.Invoke(this);
 			
 			TriggerEventsBeforeTeleport(portalableObject.colliders[0]);
 
 			TransformObject(portalableObject.transform, transformVelocity);
 			
 			TriggerEventsAfterTeleport(portalableObject.colliders[0]);
-
-			portalableObject.OnObjectTeleported?.Invoke(this);
 		}
 
 		/// <summary>
@@ -951,10 +989,10 @@ namespace PortalMechanics {
 			}
 
 			// If the out portal is also a PillarDimensionObject, update the active pillar's curDimension to match the out portal's Dimension
-			if (otherPortal.dimensionObject != null && otherPortal.dimensionObject is PillarDimensionObject pillarDimensionObject) {
-				DimensionPillar activePillar = pillarDimensionObject.activePillar;
+			if (otherPortal.pillarDimensionObject) {
+				DimensionPillar activePillar = otherPortal.pillarDimensionObject.activePillar;
 				if (activePillar != null) {
-					activePillar.curDimension = pillarDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible);
+					activePillar.curDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible);
 					activePillar.dimensionWall.UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
 				}
 			}
@@ -1006,7 +1044,7 @@ namespace PortalMechanics {
 
 		#region Volumetric Portal
 
-		void EnableVolumetricPortal() {
+		public void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
 			if (anyVolumetricPortalIsDisabled) {
 				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
@@ -1019,7 +1057,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		void DisableVolumetricPortal() {
+		public void DisableVolumetricPortal() {
 			bool anyVolumetricPortalIsEnabled = volumetricPortals.Any(vp => vp.enabled);
 			if (anyVolumetricPortalIsEnabled) {
 				debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);

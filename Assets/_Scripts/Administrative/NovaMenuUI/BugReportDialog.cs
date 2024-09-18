@@ -102,7 +102,7 @@ public class BugReportDialog : DialogWindow {
 
     private ReportType currentReportType;
 
-    private string reportSheetsURL = "https://script.google.com/macros/s/AKfycbxXeKkjCUzoY1ATyCimGRAfaf1_GbSKsZBSFYXZpSHm17guOvtb_fHF38d39uPtHnvxsQ/exec";
+    private readonly string REPORT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxXeKkjCUzoY1ATyCimGRAfaf1_GbSKsZBSFYXZpSHm17guOvtb_fHF38d39uPtHnvxsQ/exec";
 
     protected override void Start() {
         base.Start();
@@ -140,7 +140,7 @@ public class BugReportDialog : DialogWindow {
 
     public void OnConfirm() {
         sendingDialog.sendingState.Set(SendingDialog.SendingState.Sending);
-        POST(reportSheetsURL, CreateWWWFormFromCurrentState(), (result, response) => {
+        POST(REPORT_SHEETS_URL, CreateWWWFormFromCurrentState(), (result, response) => {
             if (result) {
                 sendingDialog.sendingState.Set(SendingDialog.SendingState.SentSuccessfully);
                 Debug.Log($"Sent feedback, received response: {response}");

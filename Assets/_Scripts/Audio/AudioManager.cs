@@ -300,7 +300,7 @@ namespace Audio {
 		}
 
 		// Plays an AudioClip as a child of the given GameObject
-		public void PlayOnGameObject<T>(
+		public AudioJob PlayOnGameObject<T>(
 			AudioName audioName,
 			string uniqueIdentifier,
 			T audioJobOnGameObject,
@@ -318,6 +318,8 @@ namespace Audio {
 
 				PlayWithSettings(audioJob, settingsOverride);
 			}
+
+			return audioJob;
 		}
 
 		// Play an AudioClip with an arbitrary function modifying the source
@@ -340,14 +342,16 @@ namespace Audio {
 			}
 		}
 
-		private void PlayWithSettings(AudioJob job, Action<AudioJob> settingsOverride) {
+		private AudioJob PlayWithSettings(AudioJob job, Action<AudioJob> settingsOverride) {
 			if (Time.time < timeElapsedBeforeAudioAllowedToPlay) {
 				Debug.LogError("Not allowed to play audio job: not initialized yet");
-				return;
+				return job;
 			}
 			
 			Play(job);
 			settingsOverride?.Invoke(job);
+
+			return job;
 		}
 
 		private void Play(AudioJob job) {

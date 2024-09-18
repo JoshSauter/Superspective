@@ -51,7 +51,7 @@ public class EdgeOfAUniverseTeleportTriggers : SaveableObject<EdgeOfAUniverseTel
 
         state.OnStateChangeSimple += () => {
             PlayerMovement.EndGameMovement endgameMovementState;
-            switch (state.state) {
+            switch (state.State) {
                 case State.NotStarted:
                     endgameMovementState = PlayerMovement.EndGameMovement.NotStarted;
                     break;
@@ -95,7 +95,7 @@ public class EdgeOfAUniverseTeleportTriggers : SaveableObject<EdgeOfAUniverseTel
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
 
-        switch (state.state) {
+        switch (state.State) {
             case State.NotStarted:
             case State.EnteredEndgameWalkway:
                 break;

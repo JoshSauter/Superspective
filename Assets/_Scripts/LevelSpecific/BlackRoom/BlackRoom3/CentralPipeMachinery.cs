@@ -12,7 +12,7 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
     public class CentralPipeMachinery : SaveableObject, CustomAudioJob, AudioJobOnGameObject {
         float maxShakeDistance = 32f;
         float minShakeDistance = 8f;
-        float shakeIntensity = 0.4f;
+        float shakeIntensity = 4f;
         float shakeDuration = 0.75f;
         float shakePeriod = 4f;
 
@@ -197,8 +197,7 @@ namespace LevelSpecific.BlackRoom.BlackRoom3 {
 
             float distance = Vector3.Distance(job.audio.transform.position, Player.instance.transform.position);
             if (distance < maxShakeDistance && job.audio.time % shakePeriod < 0.5f) {
-                float intensity = shakeIntensity * Mathf.InverseLerp(maxShakeDistance, minShakeDistance, distance);
-                CameraShake.instance.Shake(shakeDuration, intensity, 0f);
+                CameraShake.instance.Shake(() => job.audio.transform.position, shakeIntensity, shakeDuration);
             }
         }
 

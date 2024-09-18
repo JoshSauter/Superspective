@@ -66,7 +66,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             
             floor.AddTrigger((enumValue) => enumValue != Floor.None, () => {
                 TurnOffAllPortals();
-                TurnOnPortalsForFloor(floor.state);
+                TurnOnPortalsForFloor(floor.State);
             });
         }
 

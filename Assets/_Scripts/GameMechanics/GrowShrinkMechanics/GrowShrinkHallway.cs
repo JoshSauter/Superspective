@@ -23,6 +23,8 @@ namespace GrowShrink {
         [ReadOnly]
         public GrowShrinkTransitionTrigger shrunkTriggerZone;
 
+        private bool PbMeshesNeedToBeSet => true || pbMeshes == null || pbMeshes.Length == 0 || pbMeshes.Any(m => m == null);
+
         // Objects that are or were in the tunnel at some point
         private Dictionary<string, SerializableReference<GrowShrinkObject>> growShrinkObjects = new Dictionary<string, SerializableReference<GrowShrinkObject>>();
 
@@ -77,13 +79,14 @@ namespace GrowShrink {
                 // debug.Log($"InverseLerp({largeSidePointWorld.x}, {smallSidePointWorld.x}, {pivot.x:F2}) = {t}");
 
                 // Integral of some math I did who knows if it's actually right
-                float distanceToBringIn = (largeSidePointWorld-smallSidePointWorld).magnitude * ((t * t) * (t - scaleFactor * (t - 3)) / (6.0f * scaleFactor));
+                float scalar = ((t * t) * (t - scaleFactor * (t - 3)) / (6.0f * scaleFactor));
+                float distanceToBringIn = (largeSidePointWorld-smallSidePointWorld).magnitude * scalar;
 
                 Vector3 vertexWorldPos = worldPos + distanceToBringIn * pivotAxis;
 
                 Vector3 result = transform.InverseTransformPoint(vertexWorldPos);
 
-                debug.Log($"{worldPos:F2} -> {vertexWorldPos:F2}, brought in {distanceToBringIn:F3}");
+                debug.Log($"{worldPos:F2} -> {vertexWorldPos:F2}, brought in {distanceToBringIn:F3} with scalar {scalar:F3}");
                 return vertexWorldPos;
             }
 #endregion
@@ -102,10 +105,10 @@ namespace GrowShrink {
             targetPbMesh.transform.SetSiblingIndex(0);
             targetPbMesh.gameObject.name = $"{gameObject.name}_CombinedMesh";
             
-            if (pbMeshes == null || pbMeshes.Length == 0) {
+            if (PbMeshesNeedToBeSet) {
                 // Get all mesh renderers from children recursively, skipping this gameObject and the triggerZone gameObject
                 pbMeshes = gameObject.GetComponentsInChildrenRecursively<ProBuilderMesh>()
-                    .Where(mf => mf.gameObject.activeSelf
+                    .Where(mf => mf.gameObject.activeInHierarchy
                                  && mf.gameObject != this.gameObject
                                  && mf.gameObject != originalTriggerZone.gameObject
                                  && mf.gameObject != targetPbMesh.gameObject)
@@ -195,15 +198,18 @@ namespace GrowShrink {
                 shrunkTriggerZone = null;
             }
             
-            if (pbMeshes == null || pbMeshes.Length == 0) {
+            if (PbMeshesNeedToBeSet) {
                 // Get all meshes from children recursively, skipping this gameObject and the triggerZone gameObject
                 pbMeshes = gameObject.GetComponentsInChildrenRecursively<ProBuilderMesh>()
                     .Where(mf => mf.gameObject != this.gameObject && mf.gameObject != originalTriggerZone.gameObject)
                     .ToArray();
             }
-        
-            foreach (var mesh in pbMeshes) {
-                mesh.gameObject.SetActive(true);
+
+            if (pbMeshes != null) {
+                foreach (var mesh in pbMeshes) {
+                    if (mesh == null) continue;
+                    mesh.gameObject.SetActive(true);
+                }
             }
             originalTriggerZone.gameObject.SetActive(true);
         }

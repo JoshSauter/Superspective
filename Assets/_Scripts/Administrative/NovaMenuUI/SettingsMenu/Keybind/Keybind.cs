@@ -18,7 +18,7 @@ public class Keybind : UIControl<KeybindVisuals> {
 
     // Disable inputs for a short time after state goes back to Idle to prevent input fallthrough
     public static bool isListeningForNewKeybind => state == ListeningForKeybindState.ListeningForKeybind ||
-                                                   (state.prevState == ListeningForKeybindState.ListeningForKeybind && state.timeSinceStateChanged < 0.05f);
+                                                   (state.PrevState == ListeningForKeybindState.ListeningForKeybind && state.Time < 0.05f);
     public NovaButton ResetButton;
     public KeybindSetting setting;
 

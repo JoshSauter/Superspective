@@ -52,8 +52,8 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected virtual void UpdateLayers() {
-			if (gameObject.layer != LayerMask.NameToLayer("Portal")) {
-				gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+			if (gameObject.layer != SuperspectivePhysics.PortalLayer) {
+				gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
 			}
 		}
 

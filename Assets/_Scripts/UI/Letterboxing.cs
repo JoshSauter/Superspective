@@ -46,14 +46,14 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 		    state.Set(State.Off);
 	    }
 	    
-	    if (!IsDisplaying && state.timeSinceStateChanged >= LETTERBOX_DISAPPEAR_TIME) {
+	    if (!IsDisplaying && state.Time >= LETTERBOX_DISAPPEAR_TIME) {
 		    topLetterboxBar.enabled = bottomLetterboxBar.enabled = LetterboxingEnabled;
 	    }
 	    
-	    float t = Easing.EaseInOut(state.timeSinceStateChanged / (IsDisplaying ? LETTERBOX_APPEAR_TIME : LETTERBOX_DISAPPEAR_TIME));
+	    float t = Easing.EaseInOut(state.Time / (IsDisplaying ? LETTERBOX_APPEAR_TIME : LETTERBOX_DISAPPEAR_TIME));
 
 	    if (IsDisplaying) {
-		    if (state.timeSinceStateChanged < LETTERBOX_APPEAR_TIME) {
+		    if (state.Time < LETTERBOX_APPEAR_TIME) {
 			    Color targetColor = Color.black;
 			    targetColor.a = MAX_ALPHA;
 			    Color startColor = targetColor;
@@ -76,7 +76,7 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 		    }
 	    }
 	    else {
-		    if (state.timeSinceStateChanged < LETTERBOX_DISAPPEAR_TIME) {
+		    if (state.Time < LETTERBOX_DISAPPEAR_TIME) {
 			    Color targetColor = Color.black;
 			    targetColor.a = 0;
 			    Color startColor = targetColor;

@@ -78,7 +78,7 @@ namespace LevelSpecific.BlackRoom {
             }
             
             if (DebugInput.GetKeyDown(KeyCode.Alpha0)) {
-                state.Set((State) (2 - (int) state.state));
+                state.Set((State) (2 - (int) state.State));
             }
 
             UpdateMiniSpotlights();
@@ -91,11 +91,11 @@ namespace LevelSpecific.BlackRoom {
         private void UpdateGridColors() {
             Color color = Color.clear;
             Color endColor = Color.white;
-            switch (state.state) {
+            switch (state.State) {
                 case State.Depowered:
                     break;
                 case State.Powering:
-                    float t = state.timeSinceStateChanged / totalTimeToTurnOnSpotlights;
+                    float t = state.Time / totalTimeToTurnOnSpotlights;
                     color = Color.Lerp(Color.clear, endColor, t);
                     break;
                 case State.Powered:
@@ -114,7 +114,7 @@ namespace LevelSpecific.BlackRoom {
         float totalTimeToTurnOnSpotlights => miniSpotlights.Length * timeBetweenMiniSpotlights;
         
         void UpdateMiniSpotlights() {
-            switch (state.state) {
+            switch (state.State) {
                 case State.Depowered:
                     TurnLightsOff();
                     break;
@@ -153,7 +153,7 @@ namespace LevelSpecific.BlackRoom {
 
         void UpdatePuzzleIsSolvedIndicator() {
             const float lerpSpeed = .5f;
-            switch (state.state) {
+            switch (state.State) {
                 case State.Depowered: {
                     Color curColor = puzzleIsSolvedIndicator.material.color;
                     curColor.a = Mathf.Lerp(curColor.a, 1f/255f, Time.deltaTime * lerpSpeed);
@@ -161,7 +161,7 @@ namespace LevelSpecific.BlackRoom {
                     break;
                 }
                 case State.Powering: {
-                    float timeSinceFirstLightOn = state.timeSinceStateChanged;
+                    float timeSinceFirstLightOn = state.Time;
                     float t = (timeSinceFirstLightOn % timeBetweenMiniSpotlights) / timeBetweenMiniSpotlights;
 
                     float[] keyframes = new[] {7f / 255f, 43f / 255f, 1};
@@ -213,7 +213,7 @@ namespace LevelSpecific.BlackRoom {
         }
             
         void UpdateDissolveLaser() {
-            switch (state.state) {
+            switch (state.State) {
                 case State.Depowered:
                 case State.Powering:
                     dissolveLaser.Stop();

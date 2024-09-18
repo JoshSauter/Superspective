@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using Interactables;
 using PortalMechanics;
 using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     [RequireComponent(typeof(UniqueId))]
@@ -29,14 +31,15 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         private Renderer[] renderers;
         public bool renderersCanMove = false;
 
-        private float openDistance = 3.75f;
         private Vector3 closed = Vector3.zero;
-        private Vector3 open => Vector3.right * openDistance;
-
-        private const float timeToOpen = 3.75f;
+        private Vector3 open => Vector3.right * OPEN_DISTANCE;
 
         public PortalDoor portalPartnerDoor;
 
+        public StateMachine<DoorState> state;
+
+
+        // Define the different states the door can be in
         public enum DoorState {
             Closed,
             Opening,
@@ -44,59 +47,19 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             Closing
         }
 
-        public StateMachine<DoorState> state;
-        
         // Config
-        private const float cameraShakeIntensity = .125f;
-        private const float cameraLongShakeIntensity = .03125f;
-        private const float cameraShakeDuration = .25f;
-        private const float portalMovingSoundDelay = .35f;
+        private const float OPEN_CLOSE_TIME = 3.75f;
+        private const float OPEN_DISTANCE = 3.75f;
+        private const float CAMERA_SHAKE_INTENSITY = .125f;
+        private const float CAMERA_LONG_SHAKE_INTENSITY = .03125f;
+        private const float CAMERA_SHAKE_DURATION = .25f;
+        private const float DOOR_MOVING_SOUND_DELAY = .35f;
         
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
 
-            state = this.StateMachine(DoorState.Closed);
-            
-            state.AddStateTransition(DoorState.Opening, DoorState.Open, timeToOpen);
-            state.AddStateTransition(DoorState.Closing, DoorState.Closed, timeToOpen);
-            
-            state.AddTrigger(DoorState.Closed, 0f, () => {
-                if (state.prevState == DoorState.Closing) {
-                    CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
-                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
-                }
-
-                SetDoors(0f);
-            });
-            state.AddTrigger(DoorState.Open, 0f, () => {
-                if (transform == null) return;
-                
-                if (state.prevState == DoorState.Opening) {
-                    CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
-                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
-                }
-                SetDoors(1f);
-            });
-            
-            state.AddTrigger(DoorState.Closing, 0f, () => {
-                if (transform == null) return;
-                
-                if (state.prevState == DoorState.Open) {
-                    CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
-                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
-                }
-            });
-            state.AddTrigger(DoorState.Opening, 0f, () => {
-                if (state.prevState == DoorState.Closed) {
-                    CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
-                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
-                }
-            });
-            state.AddTrigger((enumValue) => enumValue is DoorState.Closing or DoorState.Opening, portalMovingSoundDelay, () => {
-                CameraShake.instance.Shake(timeToOpen - portalMovingSoundDelay, cameraLongShakeIntensity, cameraLongShakeIntensity);
-                AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMoving, ID, transform.position);
-            });
+            InitializeStateMachine();
 
             renderers = transform.GetComponentsInChildren<Renderer>();
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) {
@@ -104,6 +67,55 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
                 m.SetVector("_MinRenderZone", renderZone.bounds.min);
                 m.SetVector("_MaxRenderZone", renderZone.bounds.max);
             }
+        }
+
+        private PortalDoor portalDoor;
+        private Portal portal;
+
+        private void InitializeStateMachine() {
+            // Set initial state
+            state = this.StateMachine(DoorState.Closed);
+            
+            // Set up timed state transitions
+            state.AddStateTransition(DoorState.Opening, DoorState.Open, OPEN_CLOSE_TIME);
+            state.AddStateTransition(DoorState.Closing, DoorState.Closed, OPEN_CLOSE_TIME);
+            
+            // Add triggers that happen when a state is entered:
+            state.AddTrigger(DoorState.Closed, () => SetDoorsOpenAmount(0f));
+            state.AddTrigger(DoorState.Open, () => SetDoorsOpenAmount(1f));
+            
+            // Define code that should run every frame for a given state:
+            state.WithUpdate(DoorState.Opening, time => SetDoorsOpenAmount(time / OPEN_CLOSE_TIME));
+            state.WithUpdate(DoorState.Closing, time => SetDoorsOpenAmount(1 - time / OPEN_CLOSE_TIME));
+            
+            state.AddTrigger(DoorState.Closing, () => {
+                if (state.PrevState == DoorState.Open) {
+                    CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
+                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
+                }
+            });
+            state.AddTrigger(DoorState.Opening, () => {
+                if (state.PrevState == DoorState.Closed) {
+                    CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
+                    AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
+                }
+            });
+            // Add trigger that happens at a certain time after entering a given state
+            state.AddTrigger(
+                enumValue => enumValue is DoorState.Closing or DoorState.Opening, 
+                DOOR_MOVING_SOUND_DELAY, 
+                () => {
+                    CameraShake.CameraShakeEvent shake = new CameraShake.CameraShakeEvent() {
+                        duration = CAMERA_SHAKE_DURATION,
+                        intensity = CAMERA_LONG_SHAKE_INTENSITY,
+                        intensityCurve = AnimationCurve.Constant(0, 1, 1),
+                        locationProvider = () => transform.position,
+                        spatial = .75f
+                    };
+                CameraShake.instance.Shake(shake);
+                AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMoving, ID, transform.position);
+            });
+            
         }
 
         // Update is called once per frame
@@ -121,23 +133,6 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             if (DebugInput.GetKeyDown("o")) {
                 TriggerDoors();
             }
-            
-            switch (state.state) {
-                case DoorState.Open:
-                    SetDoors(1);
-                    break;
-                case DoorState.Closed:
-                    SetDoors(0);
-                    break;
-                case DoorState.Opening:
-                    SetDoors(state.timeSinceStateChanged / timeToOpen);
-                    break;
-                case DoorState.Closing:
-                    SetDoors(1 - (state.timeSinceStateChanged / timeToOpen));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         public void TriggerDoors() {
@@ -149,23 +144,23 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         void UpdateStateFromTriggerDoors() {
-            switch (state.state) {
+            switch (state.State) {
                 case DoorState.Closed:
                     state.Set(DoorState.Opening, true);
                     break;
                 case DoorState.Opening: {
-                    float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
+                    float timeSinceStateChanged = OPEN_CLOSE_TIME - state.Time;
                     state.Set(DoorState.Closing);
-                    state.timeSinceStateChanged = timeSinceStateChanged;
+                    state.Time = timeSinceStateChanged;
                     break;
                 }
                 case DoorState.Open:
                     state.Set(DoorState.Closing, true);
                     break;
                 case DoorState.Closing: {
-                    float timeSinceStateChanged = timeToOpen - state.timeSinceStateChanged;
+                    float timeSinceStateChanged = OPEN_CLOSE_TIME - state.Time;
                     state.Set(DoorState.Opening);
-                    state.timeSinceStateChanged = timeSinceStateChanged;
+                    state.Time = timeSinceStateChanged;
                     break;
                 }
                 default:
@@ -174,10 +169,10 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
 
         // Interpolation value t 0-1
-        void SetDoors(float t) {
+        void SetDoorsOpenAmount(float t) {
             t = Easing.EaseInOut(t);
             Vector3 curPos = doorRight.localPosition;
-            curPos.z = t * openDistance;
+            curPos.z = t * OPEN_DISTANCE;
             doorRight.localPosition = curPos;
             curPos.z *= -1;
             doorLeft.localPosition = curPos;

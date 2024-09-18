@@ -50,6 +50,7 @@
 
 			sampler2D _BumpMap;
 			float _EmissionAmount;
+            uniform float4 _Color;
 
             #define MAX_STEPS 50
             
@@ -167,7 +168,7 @@
                         //return col * normalize(noised(position/256));
                         //return col * fixed4(position.x,position.y,(-position.x - position.y) / 2.0,1);
                     	col = smoothstep(0.0,1.0,col);
-                        return 1-fixed4(col, col, col, 1);
+                        return (1-fixed4(col, col, col, 1));// * (1-_Color);
                     }
                     
                     depth += sdfValue + .001;

@@ -38,7 +38,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 34
+	// Next level: 35
 	[Serializable]
 	public enum Levels {
 		TitleCard = 29,
@@ -74,6 +74,7 @@ namespace LevelManagement {
 		GrowShrinkIntroBetweenWorlds = 30,
 		GrowShrinkIntroDarkSide = 31,
 		TransitionWhiteRoom3GrowShrinkIntro = 32,
+		GrowShrink2 = 34,
 		EdgeOfAUniverse = 33,
 	}
 
@@ -94,9 +95,9 @@ namespace LevelManagement {
 #region PlayerDefaultLocations
 		private DefaultPlayerSettings _defaultPlayerSettings;
 
-		private DefaultPlayerSettings defaultPlayerSettings {
+		private DefaultPlayerSettings DefaultPlayerSettings {
 			get {
-				if (_defaultPlayerSettings == null) {
+				if (_defaultPlayerSettings == null || _defaultPlayerSettings.IsEmpty) {
 					_defaultPlayerSettings = DefaultPlayerSettings.LoadFromDisk();
 				}
 				
@@ -111,13 +112,13 @@ namespace LevelManagement {
 
 		[Button("Set default player position")]
 		void SetDefaultPlayerPositionForScene() {
-			defaultPlayerSettings.SetDefaultPlayerPositionForScene(Application.isPlaying ? activeSceneName.ToLevel() : startingScene);
+			DefaultPlayerSettings.SetDefaultPlayerPositionForScene(Application.isPlaying ? activeSceneName.ToLevel() : startingScene);
 		}
 
 		public void LoadDefaultPlayerPosition(Levels level) {
 			_defaultPlayerSettings = DefaultPlayerSettings.LoadFromDisk();
-			if (defaultPlayerSettings.playerSettingsByLevel.ContainsKey(level)) {
-				defaultPlayerSettings.playerSettingsByLevel[level].Apply();
+			if (DefaultPlayerSettings.PlayerSettingsByLevel.ContainsKey(level)) {
+				DefaultPlayerSettings.PlayerSettingsByLevel[level].Apply();
 				// ReSharper disable once Unity.NoNullPropagation (Player is never deleted)
 				Player.instance.cameraFollow?.RecalculateWorldPositionLastFrame();
 			}
@@ -233,6 +234,7 @@ namespace LevelManagement {
 			{ Levels.GrowShrinkIntroBetweenWorlds, "_GrowShrinkIntroBetweenWorlds" },
 			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" },
 			{ Levels.TransitionWhiteRoom3GrowShrinkIntro, "_TransitionWhiteRoom3GrowShrinkIntro" },
+			{ Levels.GrowShrink2, "_GrowShrink2" },
 			{ Levels.EdgeOfAUniverse, "_EdgeOfAUniverse" }
 		};
 		public string activeSceneName;

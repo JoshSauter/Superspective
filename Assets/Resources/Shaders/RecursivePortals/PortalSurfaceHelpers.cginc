@@ -2,6 +2,7 @@
 
 uniform float4x4 _PortalScalingMatrix;
 sampler2D_float _PortalMask;
+sampler2D_float _PortalMaskWithScale;
 
 #ifndef DEPTH_NORMALS_TEXTURE
 #define DEPTH_NORMALS_TEXTURE

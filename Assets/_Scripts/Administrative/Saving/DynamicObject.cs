@@ -2,8 +2,10 @@
 using System.Collections;
 using SuperspectiveUtils;
 using LevelManagement;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -44,7 +46,10 @@ namespace Saving {
 				else return LastKnownID;
 			}
 		}
-
+		
+		[FormerlySerializedAs("wasInstantiatedAtRuntime")]
+		[ReadOnly]
+		public bool instantiatedAtRuntime = true;
 		private string LastKnownID = "";
 		public bool isGlobal = true;
 		bool hasRegistered = false;
@@ -55,13 +60,18 @@ namespace Saving {
 		PickupObject pickup;
 
 		void OnValidate() {
-			if ((gameObject.scene == null || string.IsNullOrEmpty(SceneName)) && string.IsNullOrEmpty(prefabPath)) {
+			bool noScene = gameObject.scene == null || string.IsNullOrEmpty(SceneName);
+			if (noScene && string.IsNullOrEmpty(prefabPath)) {
 #if UNITY_EDITOR
 				prefabPath = AssetDatabase.GetAssetPath(this)
 					// Strip prefix and suffix to get the Resources-relative path
 					.Replace("Assets/Resources/", "")
 					.Replace(".prefab", "");
 #endif
+			}
+
+			if (!Application.isPlaying) {
+				instantiatedAtRuntime = noScene;
 			}
 		}
 		
@@ -112,7 +122,7 @@ namespace Saving {
 				hasRegistered = true;
 			}
 			else {
-				debug.LogError($"Registration failed. DynamicObjectManager registration result: {dynamicObjectManagerRegistered}");
+				debug.LogError($"Registration failed. DynamicObjectManager registration result: {dynamicObjectManagerRegistered}", true);
 				Destroy(gameObject);
 			}
 		}
@@ -130,10 +140,10 @@ namespace Saving {
 			bool markedAsDestroyed = DynamicObjectManager.MarkDynamicObjectAsDestroyed(this, SceneName);
 
 			if (unregistered && markedAsDestroyed) {
-				debug.Log($"Marked as Destroyed in scene {SceneName}");
+				debug.Log($"Marked as Destroyed in scene {SceneName}", true);
 			}
 			else {
-				debug.LogError($"Failed in Destroy. Unregistration successful: {unregistered}, Marked as destroyed successful: {markedAsDestroyed}");
+				debug.LogError($"Failed in Destroy. Unregistration successful: {unregistered}, Marked as destroyed successful: {markedAsDestroyed}", true);
 			}
 			
 			// Unregister any other SaveableObject scripts that may have existed on this object

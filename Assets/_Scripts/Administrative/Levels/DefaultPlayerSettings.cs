@@ -10,11 +10,14 @@ namespace LevelManagement {
     [Serializable]
     public class DefaultPlayerSettings {
         public const string FILE_PATH = "Assets/Resources/DefaultLevelSettings.json";
+
+        public bool IsEmpty => playerSettings.Count == 0 || PlayerSettingsByLevel.Count == 0;
+        
         public List<DefaultPlayerSettingsForScene> playerSettings;
 
         [NonSerialized]
         private Dictionary<Levels, DefaultPlayerSettingsForScene> _playerSettingsByLevel;
-        public Dictionary<Levels, DefaultPlayerSettingsForScene> playerSettingsByLevel {
+        public Dictionary<Levels, DefaultPlayerSettingsForScene> PlayerSettingsByLevel {
             get {
                 if (_playerSettingsByLevel == null) {
                     _playerSettingsByLevel = playerSettings.ToDictionary(s => s.level);
@@ -42,7 +45,7 @@ namespace LevelManagement {
             }
             playerSettings.Add(curSettings);
 
-            playerSettingsByLevel[level] = curSettings;
+            PlayerSettingsByLevel[level] = curSettings;
             
             SaveToDisk();
         }

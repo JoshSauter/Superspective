@@ -254,6 +254,16 @@ MonoBehaviour:
   heldPickupObjectPhysicsMaterial: {fileID: 13400000, guid: e6f28b2263385da42a121b7f7daf4426,
     type: 2}
   interactable: 1
+  rigidbodySleepingStateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
+  freezeRotationStateMachine:
+    _state: 0
+    _prevState: 0
+    _timeSinceStateChanged: 0
+    onStateChange: []
 --- !u!114 &5694432929352241937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,13 +278,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: -1455407386897224382}
   DEBUG: 0
-  _sittingInPortal: {fileID: 0}
-  _hoveredThroughPortal: {fileID: 0}
-  _grabbedThroughPortal: {fileID: 0}
-  colliders: []
-  fakeCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
+  portalCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
-  fakeCopyInstance: {fileID: 0}
+  portal: {fileID: 0}
+  colliders: []
+  renderers: []
 --- !u!114 &5678607679450239003
 MonoBehaviour:
   m_ObjectHideFlags: 0

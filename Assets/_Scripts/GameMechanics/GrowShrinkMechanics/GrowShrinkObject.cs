@@ -23,7 +23,7 @@ namespace GrowShrink {
         // SSAO will automatically clamp the intensity to >= 0.5,
         // so we need to keep track of what the value actually is separately from what it is in the SSAO script
         float ssaoActualIntensity;
-        ScreenSpaceAmbientOcclusion ssao {
+        ScreenSpaceAmbientOcclusion SSAO {
             get {
                 if (_ssao == null) {
                     _ssao = SuperspectiveScreen.instance?.playerCamera?.GetComponent<ScreenSpaceAmbientOcclusion>();
@@ -38,15 +38,15 @@ namespace GrowShrink {
         }
 
         [ShowNativeProperty]
-        public float currentScale {
+        public float CurrentScale {
             get => _currentScale;
-            set {
+            private set {
                 debug.Log($"Setting currentScale to {value}");
                 _currentScale = value;
             }
         }
         // Version of currentScale which never goes above 1 (for tracking effects that should only happen when smaller and not larger)
-        public float currentScaleClamped => Mathf.Clamp01(currentScale);
+        public float CurrentScaleClamped => Mathf.Clamp01(CurrentScale);
 
         public enum State {
             NotInHallway,
@@ -64,18 +64,19 @@ namespace GrowShrink {
             if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
 
-            state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.state}");
+            state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.State}");
         }
 
         protected override void Start() {
             base.Start();
 
-            if (Math.Abs(startingScale - currentScale) > float.Epsilon) {
+            if (Math.Abs(startingScale - CurrentScale) > float.Epsilon) {
                 SetScaleDirectly(startingScale);
             }
         }
 
-        private void OnEnable() {
+        protected override void OnEnable() {
+            base.OnEnable();
             Portal.BeforeAnyPortalTeleport += HandlePortalTeleport;
         }
 
@@ -87,14 +88,14 @@ namespace GrowShrink {
             if (!inPortal.changeScale) return;
             
             if (objTeleported == thisRigidbody.GetComponent<Collider>()) {
-                SetScaleDirectly(currentScale * inPortal.ScaleFactor);
+                SetScaleDirectly(CurrentScale * inPortal.ScaleFactor);
                 minScale *= inPortal.ScaleFactor;
                 maxScale *= inPortal.ScaleFactor;
             }
         }
 
         private float MinScale(float scaleFactor) {
-            switch (state.state) {
+            switch (state.State) {
                 case State.NotInHallway:
                 case State.EnteredSmallSide:
                     return 1f;
@@ -106,7 +107,7 @@ namespace GrowShrink {
         }
 
         private float MaxScale(float scaleFactor) {
-            switch (state.state) {
+            switch (state.State) {
                 case State.NotInHallway:
                 case State.EnteredLargeSide:
                     return 1f;
@@ -119,9 +120,9 @@ namespace GrowShrink {
 
         public void EnteredHallway(GrowShrinkHallway hallway, bool enteredSmallSide) {
             state.Set(enteredSmallSide ? State.EnteredSmallSide : State.EnteredLargeSide);
-            minScale = currentScale * MinScale(hallway.scaleFactor);
-            debug.Log($"minScale = {currentScale} * {MinScale(hallway.scaleFactor)}");
-            maxScale = currentScale * MaxScale(hallway.scaleFactor);
+            minScale = CurrentScale * MinScale(hallway.scaleFactor);
+            debug.Log($"minScale = {CurrentScale} * {MinScale(hallway.scaleFactor)}");
+            maxScale = CurrentScale * MaxScale(hallway.scaleFactor);
         }
 
         public void ExitedHallway(GrowShrinkHallway hallway, bool exitedSmallSide) {
@@ -139,51 +140,33 @@ namespace GrowShrink {
         public void SetScaleDirectly(float targetScale) {
             // Debug.LogWarning($"{ID}: SetScaleDirectly: setting scale to {targetScale} from {currentScale}");
             float targetScaleClamped = Mathf.Clamp01(targetScale);
-            Vector3 scaleWithoutMultiplier = transform.localScale / currentScale;
+            Vector3 scaleWithoutMultiplier = transform.localScale / CurrentScale;
             transform.localScale = scaleWithoutMultiplier * targetScale;
 
             if (thisRigidbody != null) {
-                float massWithoutMultiplier = thisRigidbody.mass / currentScale;
+                // Technically square-cube law should apply but we're not going to worry about that
+                float massWithoutMultiplier = thisRigidbody.mass / CurrentScale;
                 thisRigidbody.mass = massWithoutMultiplier * targetScale;
 
                 if (!thisRigidbody.isKinematic) {
-                    Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / currentScale;
+                    Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / CurrentScale;
                     thisRigidbody.velocity = velocityWithoutMultiplier * targetScale;
                 }
             }
 
             if (this.TaggedAsPlayer()) {
-                Vector3 gravityWithoutMultiplier = Physics.gravity / currentScale;
+                Vector3 gravityWithoutMultiplier = Physics.gravity / CurrentScale;
                 Physics.gravity = gravityWithoutMultiplier * targetScale;
 
-                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.groundMovement.lastGroundVelocity / currentScale;
+                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.groundMovement.lastGroundVelocity / CurrentScale;
                 PlayerMovement.instance.groundMovement.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
-
-                if (targetScale < 1f || currentScale < 1f) {
-                    ColorfulFog fog = Player.instance.PlayerCam.GetComponent<ColorfulFog>();
-                    float fogStartWithoutMultiplier = fog.startDistance / currentScaleClamped;
-                    fog.startDistance = fogStartWithoutMultiplier * targetScaleClamped;
-
-                    // Camera cam = Player.instance.playerCam;
-                    BladeEdgeDetection edges = MaskBufferRenderTextures.instance.edgeDetection;
-                    float depthSensWithoutMultiplier = edges.depthSensitivity * currentScaleClamped;
-                    // edges.depthSensitivity = depthSensWithoutMultiplier / targetScaleClamped;
-
-                    float ssaoIntensityWithoutMultiplier = ssaoActualIntensity / currentScaleClamped;
-                    ssaoActualIntensity = ssaoIntensityWithoutMultiplier * targetScale;
-                    // ssao.m_OcclusionIntensity = ssaoActualIntensity;
-                }
-                // float nearClipPlaneWithoutMultiplier = cam.nearClipPlane / currentScale;
-                // float farClipPlaneWithoutMultiplier = cam.farClipPlane / currentScale;
-                // cam.nearClipPlane = nearClipPlaneWithoutMultiplier * targetScale;
-                // cam.farClipPlane = farClipPlaneWithoutMultiplier * targetScale;
             }
             else if (thisGravityObj != null) {
-                float gravityMagnitudeWithoutMultiplier = thisGravityObj.gravityMagnitude / currentScale;
+                float gravityMagnitudeWithoutMultiplier = thisGravityObj.gravityMagnitude / CurrentScale;
                 thisGravityObj.gravityMagnitude = gravityMagnitudeWithoutMultiplier * targetScale;
             }
 
-            currentScale = targetScale;
+            CurrentScale = targetScale;
         }
 
 #region Saving
@@ -198,14 +181,14 @@ namespace GrowShrink {
             public GrowShrinkObjectSave(GrowShrinkObject script) : base(script) {
                 this.minScale = script.minScale;
                 this.maxScale = script.maxScale;
-                this.currentScale = script.currentScale;
+                this.currentScale = script.CurrentScale;
                 this.stateSave = script.state.ToSave();
             }
 
             public override void LoadSave(GrowShrinkObject script) {
                 script.minScale = this.minScale;
                 script.maxScale = this.maxScale;
-                script.currentScale = this.currentScale;
+                script.CurrentScale = this.currentScale;
                 script.state.LoadFromSave(this.stateSave);
             }
         }

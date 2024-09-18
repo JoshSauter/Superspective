@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
+using Saving;
 using UnityEngine;
 using SuperspectiveUtils;
 
-public class DimensionObjectCollisions : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class DimensionObjectCollisions : SaveableObject {
 
 	public DimensionObject dimensionObject;
 
@@ -28,7 +30,13 @@ public class DimensionObjectCollisions : MonoBehaviour {
 		Debug.Log($"Colliders Ignored:\n{string.Join("\n", collidersIgnored)}");
 	}
 
-	IEnumerator Start() {
+	protected override void Start() {
+		base.Start();
+
+		StartCoroutine(StartCoro());
+	}
+	
+	IEnumerator StartCoro() {
 		yield return new WaitWhile(() => GameManager.instance.IsCurrentlyLoading);
 		dimensionObject.OnStateChangeSimple += OnThisDimensionObjectVisibilityStateChange;
 	}
@@ -47,6 +55,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 
 	void Update() {
 		if (dimensionObject == null) {
+			debug.LogError("DimensionObjectCollisions script is missing a DimensionObject reference, self-destructing.", true);
 			Destroy(gameObject);
 		}
 	}
@@ -157,6 +166,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 	}
 
 	void OnDisable() {
+		RestoreAllCollisions();
 		if (dimensionObject != null) {
 			dimensionObject.OnStateChangeSimple -= OnThisDimensionObjectVisibilityStateChange;
 		}
@@ -164,6 +174,7 @@ public class DimensionObjectCollisions : MonoBehaviour {
 
 	[ContextMenu("Restore All Collisions")]
 	public void RestoreAllCollisions() {
+		debug.Log("Restoring all collisions!");
 		List<DimensionObject> copyListOfDimensionObjectsIgnored = new List<DimensionObject>(dimensionObjectsIgnored);
 		foreach (var otherDimensionObject in copyListOfDimensionObjectsIgnored) {
 			RestoreCollisionWithDimensionObject(otherDimensionObject);

@@ -41,6 +41,14 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 	void ToggleOnOff() {
 		scramblerState.Set((ScramblerState)(1 - scramblerState));
 	}
+
+	public void TurnOn() {
+		scramblerState.Set(ScramblerState.On);
+	}
+	
+	public void TurnOff() {
+		scramblerState.Set(ScramblerState.Off);
+	}
     
 #region Saving
 		[Serializable]
@@ -53,6 +61,8 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 
 			public override void LoadSave(NoiseScrambleOverlayObject script) {
 				script.scramblerState.LoadFromSave(stateSave);
+
+				script.RegisterScrambler();
 			}
 		}
 #endregion

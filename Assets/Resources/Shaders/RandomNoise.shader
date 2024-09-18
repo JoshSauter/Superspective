@@ -1,16 +1,12 @@
-Shader "Unlit/RandomNoise"
-{
-    Properties
-    {
+Shader "Unlit/RandomNoise" {
+    Properties {
         _MainTex ("Texture", 2D) = "white" {}
     }
-    SubShader
-    {
+    SubShader {
         Tags { "RenderType"="Opaque" }
         LOD 100
 
-        Pass
-        {
+        Pass {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag

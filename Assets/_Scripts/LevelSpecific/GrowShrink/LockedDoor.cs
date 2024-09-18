@@ -19,20 +19,20 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
         Closing
     }
 
-    public bool ClosingOrClosed => state.state is State.Closing or State.Closed;
-    public bool OpeningOrOpen => state.state is State.Opening or State.Open;
+    public bool ClosingOrClosed => state.State is State.Closing or State.Closed;
+    public bool OpeningOrOpen => state.State is State.Opening or State.Open;
     public StateMachine<State> state;
     public Collider invisibleCollider;
     public Transform doorLeft, doorRight;
 
     // Config
-    private const float cameraShakeIntensity = .125f;
-    private const float cameraLongShakeIntensity = .03125f;
+    private const float cameraShakeIntensity = 1.25f;
+    private const float cameraLongShakeIntensity = .3125f;
     private const float cameraShakeDuration = .25f;
     private const float portalMovingSoundDelay = .35f;
-    private float OpenCloseSpeed => MAX_OFFSET / OPEN_CLOSE_TIME;
+    private float OPEN_CLOSE_SPEED = MAX_OFFSET / OPEN_CLOSE_TIME;
     private const float MAX_OFFSET = 3f; // Max distance for doors to open (total opening width is this value * 2)
-    private float OPEN_CLOSE_TIME = 3.75f;
+    private const float OPEN_CLOSE_TIME = 3.75f;
 
     public SerializableReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredFrom;
 
@@ -55,34 +55,41 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
         state.AddStateTransition(State.Closing, State.Closed, () => DoorOffset <= 0);
         
         state.AddTrigger(State.Closed, () => {
-            if (state.prevState != State.Closing) return;
+            if (state.PrevState != State.Closing) return;
             
-            CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
+            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
         });
         
         state.AddTrigger(State.Open, () => {
-            if (state.prevState != State.Opening) return;
+            if (state.PrevState != State.Opening) return;
             
-            CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
+            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
         });
         
         state.AddTrigger(State.Closing, () => {
-            if (state.prevState != State.Open) return;
+            if (state.PrevState != State.Open) return;
             
-            CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
+            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
         });
         
         state.AddTrigger(State.Opening, () => {
-            if (state.prevState != State.Closed) return;
+            if (state.PrevState != State.Closed) return;
             
-            CameraShake.instance.Shake(cameraShakeDuration, cameraShakeIntensity, 0f);
+            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
         });
         state.AddTrigger((enumValue) => enumValue is State.Closing or State.Opening, portalMovingSoundDelay, () => {
-            CameraShake.instance.Shake(OPEN_CLOSE_TIME - portalMovingSoundDelay, cameraLongShakeIntensity, cameraLongShakeIntensity);
+            CameraShake.CameraShakeEvent shake = new CameraShake.CameraShakeEvent() {
+                duration = OPEN_CLOSE_TIME - portalMovingSoundDelay,
+                intensity = cameraLongShakeIntensity,
+                intensityCurve = AnimationCurve.Constant(0, 1, 1),
+                spatial = 1,
+                locationProvider = () => transform.position
+            };
+            CameraShake.instance.Shake(shake);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMoving, ID, transform.position);
         });
         
@@ -112,18 +119,18 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
 
-        switch (state.state) {
+        switch (state.State) {
             case State.Closed:
                 DoorOffset = 0;
                 break;
             case State.Opening:
-                DoorOffset += Time.deltaTime * OpenCloseSpeed;
+                DoorOffset += Time.deltaTime * OPEN_CLOSE_SPEED;
                 break;
             case State.Open:
                 DoorOffset = MAX_OFFSET;
                 break;
             case State.Closing:
-                DoorOffset -= Time.deltaTime * OpenCloseSpeed;
+                DoorOffset -= Time.deltaTime * OPEN_CLOSE_SPEED;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

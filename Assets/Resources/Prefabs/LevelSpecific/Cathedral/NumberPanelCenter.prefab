@@ -424,7 +424,7 @@ MonoBehaviour:
   stateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
 --- !u!114 &8522727232292851517
 MonoBehaviour:
@@ -466,7 +466,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -5635,7 +5635,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: 0, z: 0}
@@ -5738,7 +5738,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0

@@ -12,13 +12,32 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     public GrowShrinkObject growShrink;
     public Rigidbody thisRigidbody;
     public bool useGravity = true;
-    public Vector3 gravityDirection = Physics.gravity.normalized;
+    [SerializeField]
+    private Vector3 startingGravityDirection = Vector3.down;
+
+    public Quaternion GravityRotation { get; private set; } = Quaternion.identity;
+    [ShowNativeProperty]
+    public Vector3 GravityDirection {
+        get => GravityRotation * Vector3.down;
+        set => GravityRotation = Quaternion.FromToRotation(Vector3.down, value.normalized);
+    }
     public float gravityMagnitude = Physics.gravity.magnitude;
 
-    private int raycastLayermask => ~LayerMask.GetMask("Player");
+    private int RaycastLayermask => ~SuperspectivePhysics.PlayerLayer;
+
+    private PickupObject _pickupObject;
+    private PickupObject PickupObject {
+        get {
+            if (!_pickupObject) {
+                _pickupObject = GetComponent<PickupObject>();
+            }
+
+            return _pickupObject;
+        }
+    }
 
     [ShowNativeProperty]
-    private Vector3 currentVelocity {
+    private Vector3 CurrentVelocity {
         get {
             if (thisRigidbody == null) return Vector3.zero;
             return thisRigidbody.velocity;
@@ -28,6 +47,7 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     protected override void Awake() {
         base.Awake();
         thisRigidbody = GetComponent<Rigidbody>();
+        GravityDirection = startingGravityDirection;
     }
 
     protected override void Start() {
@@ -40,18 +60,20 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     }
 
     void FixedUpdate() {
+        if (GameManager.instance.IsCurrentlyLoading) return;
+        
         if (useGravity) {
-            Vector3 rayDirection = gravityDirection * (0.5f * transform.localScale.x);
-            rayDirection += gravityDirection * (0.05f * transform.localScale.x);
+            Vector3 rayDirection = GravityDirection * (0.5f * transform.localScale.x);
+            rayDirection += GravityDirection * (0.05f * transform.localScale.x);
             Ray groundRaycast = new Ray(transform.position, rayDirection);
-            bool onGround = Physics.Raycast(groundRaycast, rayDirection.magnitude, raycastLayermask);
+            bool onGround = Physics.Raycast(groundRaycast, rayDirection.magnitude, RaycastLayermask);
             Debug.DrawRay(groundRaycast.origin, rayDirection, onGround ? Color.green : Color.yellow);
-            thisRigidbody.AddForce(gravityDirection * gravityMagnitude / (onGround && growShrink != null ? growShrink.currentScale : 1f), ForceMode.Acceleration);
+            thisRigidbody.AddForce(GravityDirection * gravityMagnitude / (onGround && growShrink != null ? growShrink.CurrentScale : 1f), ForceMode.Acceleration);
         }
     }
 
-    public void ReorientGravityAfterPortaling(Portal inPortal) {
-        gravityDirection = inPortal.TransformDirection(gravityDirection);
+    void ReorientGravityAfterPortaling(Portal inPortal) {
+        GravityRotation = inPortal.TransformRotation(GravityRotation);
     }
 
 #region Saving
@@ -64,13 +86,13 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
 
         public GravityObjectSave(GravityObject obj) : base(obj) {
             useGravity = obj.useGravity;
-            gravityDirection = obj.gravityDirection;
+            gravityDirection = obj.GravityDirection;
             gravityMagnitude = obj.gravityMagnitude;
         }
 
         public override void LoadSave(GravityObject obj) {
             obj.useGravity = useGravity;
-            obj.gravityDirection = gravityDirection;
+            obj.GravityDirection = gravityDirection;
             obj.gravityMagnitude = gravityMagnitude;
         }
     }

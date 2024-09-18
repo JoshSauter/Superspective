@@ -17,7 +17,7 @@ using SprintBehaviorMode = Settings.Gameplay.SprintBehaviorMode;
 [RequireComponent(typeof(Rigidbody))]
 public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
     private List<PlayerMovementComponent> components = new List<PlayerMovementComponent>();
-    public StairMovement stairMovement;
+    public StaircaseMovement staircaseMovement;
     public JumpMovement jumpMovement;
     public GroundMovement groundMovement;
     public AirMovement airMovement;
@@ -81,6 +81,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public float WalkSpeed => WALK_SPEED * Scale * movespeedMultiplier;
     public float RunSpeed => RUN_SPEED * Scale * movespeedMultiplier;
     public Vector3 BottomOfPlayer => transform.position - (transform.up * 2.5f * Scale);
+    public Vector3 TopOfPlayer => transform.position + (transform.up * 0.5f * Scale);
     
     // End-game mechanics
     public enum EndGameMovement {
@@ -102,10 +103,13 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         }
     }
 
+    private const int MAX_TIME_SLICES = 10;
     public List<TimeSlice> timeSlices = new List<TimeSlice>();
 
+    public Vector3 LastPlayerPosition => timeSlices.Count > 0 ? timeSlices[timeSlices.Count - 1].position : transform.position;
     public Vector3 AverageVelocityRecently {
         get {
+            if (thisRigidbody.isKinematic) return Vector3.zero;
             if (timeSlices.Count == 0) return Vector3.zero;
 
             Vector3 avgDelta = Vector3.zero;
@@ -141,6 +145,12 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
+    public enum MovementEnabledState {
+        Enabled,
+        Disabled
+    }
+    public MovementEnabledState movementEnabledState = MovementEnabledState.Enabled;
+
     protected override void Awake() {
         base.Awake();
         
@@ -153,12 +163,12 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         thisRenderer = GetComponentInChildren<MeshRenderer>();
 
         components = new List<PlayerMovementComponent>();
-        stairMovement = new StairMovement(this);
+        staircaseMovement = new StaircaseMovement(this);
         jumpMovement = new JumpMovement(this);
         groundMovement = new GroundMovement(this);
         airMovement = new AirMovement(this);
         afkDetectionComponent = new AFKDetectionComponent(this);
-        components.Add(stairMovement);
+        components.Add(staircaseMovement);
         components.Add(jumpMovement);
         components.Add(groundMovement);
         components.Add(airMovement);
@@ -213,10 +223,9 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         if (!GameManager.instance.gameHasLoaded) return;
         // if (Settings.Keybinds.AutoRun.Pressed) autoRun = !autoRun;
 
-
         bool ShouldUseSprintSpeed() {
             if (endGameMovement != EndGameMovement.NotStarted) return false;
-            if (stairMovement.RecentlySteppedUp) return false;
+            if (staircaseMovement.RecentlySteppedUp) return false;
             if (autoRun) return true;
 
             if (ToggleSprint) {
@@ -238,6 +247,10 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     void FixedUpdate() {
         if (!GameManager.instance.gameHasLoaded) return;
+        if (movementEnabledState == MovementEnabledState.Disabled) {
+            thisRigidbody.velocity = Vector3.zero;
+            return;
+        }
         
         if (MoveDirectionHeld) {
             moveDirectionHeldRecentlyState.Set(MoveDirectionInputState.HeldRecently, true);
@@ -251,14 +264,14 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
             groundMovement.UpdateSnapToGround();
         }
         
-        bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && Grounded.IsGrounded && !stairMovement.RecentlySteppedUp && !MoveDirectionHeldRecently;
+        bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && Grounded.IsGrounded && !staircaseMovement.RecentlySteppedUp && !MoveDirectionHeldRecently;
 
-        thisRigidbody.isKinematic = (Stopped || stairMovement.stepState != StairMovement.StepState.StepReady || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
+        thisRigidbody.isKinematic = (Stopped || staircaseMovement.stepState != StaircaseMovement.StepState.Idle || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
 
-        if (timeSlices.Count >= 10) {
+        if (timeSlices.Count >= MAX_TIME_SLICES) {
             timeSlices.RemoveAt(0);
         }
-        timeSlices.Add(new TimeSlice(Time.time, transform.position));
+        timeSlices.Add(new TimeSlice(Time.time, thisRigidbody.position));
 
         if (Stopped || Grounded.StandingOnHeldObject) {
             allContactThisFrame.Clear();
@@ -272,7 +285,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         // Prevent player from floating around on cubes they're holding...
         if (Grounded.StandingOnHeldObject) desiredVelocity += 5 * Physics.gravity * Time.fixedDeltaTime;
 
-        stairMovement.UpdateStaircase(desiredVelocity);
+        staircaseMovement.UpdateStaircase(desiredVelocity);
 
         // TODO: Check if all this is bugged in warped gravity
         float movingBackward = Vector2.Dot(
@@ -294,17 +307,29 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
         thisRigidbody.useGravity = !IsGrounded;
 
-        if (!thisRigidbody.isKinematic && stairMovement.stepState == StairMovement.StepState.StepReady) {
+        if (!thisRigidbody.isKinematic && staircaseMovement.stepState == StaircaseMovement.StepState.Idle) {
             // debug.Log($"Player velocity: {thisRigidbody.velocity:F2}\nSetting it to: {desiredVelocity}");
             thisRigidbody.velocity = desiredVelocity;
+
+            // Test for collisions next frame by simulating one frame of movement and checking the capsule for collisions
+            // If we find a collision, change the velocity so we end up next to the wall instead of inside it
+            Vector3 positionBeforeCollisionResolution = transform.position;
+            Vector3 thisFrameOffset = thisRigidbody.velocity * Time.fixedDeltaTime;
+            transform.position += thisFrameOffset;
+            if (ResolveCollisions()) {
+                Vector3 offsetFromCollisionResolution = transform.position - positionBeforeCollisionResolution;
+                thisRigidbody.velocity = offsetFromCollisionResolution / Time.fixedDeltaTime;
+            }
+            transform.position = positionBeforeCollisionResolution;
         }
 
         // Apply wind resistance
         Vector3 projectedVertVelocity = ProjectedVerticalVelocity();
-        if (!IsGrounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0)
+        if (!IsGrounded && Vector3.Dot(Physics.gravity.normalized, projectedVertVelocity.normalized) > 0) {
             thisRigidbody.AddForce(
                 transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * WIND_RESISTANCE_MULTIPLIER
             );
+        }
 
         // We don't collide with other objects while kinematic, so keep the contactThisFrame data while we remain kinematic
         CapsuleCollider capsuleCollider = thisCollider;
@@ -341,6 +366,58 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         if (thisRigidbody.isKinematic) return;
         thisRigidbody.velocity = Vector3.zero;
     }
+    
+    private Collider[] CheckCapsule() {
+        // Get the relevant properties from the CapsuleCollider
+        Vector3 capsuleCenter = transform.TransformPoint(thisCollider.center);
+        float capsuleHeight = thisCollider.height * Scale;
+        float capsuleRadius = thisCollider.radius * Scale;
+
+        Vector3 capsuleAxis = transform.up;
+        Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius));
+        Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
+                
+        var result = Physics.OverlapCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore);
+
+        bool FilterOutHeldObjects(Collider c) {
+            if (Player.instance.IsHoldingSomething) {
+                return c != Player.instance.heldObject.thisCollider;
+            }
+
+            return true;
+        }
+        return result.Where(FilterOutHeldObjects).ToArray();
+    }
+
+    // Returns true if a collision was resolved
+    bool ResolveCollisions() {
+        Collider[] neighbors = CheckCapsule();
+
+        for (int i = 0; i < neighbors.Length; i++) {
+            Collider neighbor = neighbors[i];
+            if (neighbor == thisCollider ||
+                Physics.GetIgnoreLayerCollision(SuperspectivePhysics.PlayerLayer, neighbor.gameObject.layer) ||
+                SuperspectivePhysics.CollisionsAreIgnored(thisCollider, neighbor)) continue;
+
+            Vector3 neighborPosition = neighbor.transform.position;
+            Quaternion neighborRotation = neighbor.transform.rotation;
+
+            Vector3 resolveDirection;
+            float resolveDistance;
+
+            if (Physics.ComputePenetration(
+                thisCollider, transform.position, transform.rotation,
+                neighbor, neighborPosition, neighborRotation,
+                out resolveDirection, out resolveDistance)) {
+                Debug.DrawRay(transform.position, resolveDirection * resolveDistance, new Color(8f, .15f, .10f));
+                transform.position += resolveDirection * resolveDistance;
+                Physics.SyncTransforms();
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
 #region events
     public delegate void PlayerMovementAction();
@@ -359,7 +436,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         bool autoRun;
 
         StateMachine<JumpMovement.JumpState>.StateMachineSave jumpStateSave;
-        StateMachine<StairMovement.StepState>.StateMachineSave stepStateSave;
+        StateMachine<StaircaseMovement.StepState>.StateMachineSave stepStateSave;
         float movespeed;
         float movespeedMultiplier;
 
@@ -369,11 +446,13 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         float thisRigidbodyMass;
         bool thisRigidbodyUseGravity;
         SerializableVector3 thisRigidbodyVelocity;
+        int movementEnabledState;
 
         public PlayerMovementSave(PlayerMovement playerMovement) : base(playerMovement) {
             autoRun = playerMovement.autoRun;
             jumpStateSave = playerMovement.jumpMovement.jumpState.ToSave();
-            stepStateSave = playerMovement.stairMovement.stepState.ToSave();
+            stepStateSave = playerMovement.staircaseMovement.stepState.ToSave();
+            movementEnabledState = (int)playerMovement.movementEnabledState;
             
             movespeed = playerMovement.movespeed;
             movespeedMultiplier = playerMovement.movespeedMultiplier;
@@ -388,7 +467,8 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
         public override void LoadSave(PlayerMovement playerMovement) {
             playerMovement.autoRun = autoRun;
             playerMovement.jumpMovement.jumpState.LoadFromSave(jumpStateSave);
-            playerMovement.stairMovement.stepState.LoadFromSave(stepStateSave);
+            playerMovement.staircaseMovement.stepState.LoadFromSave(stepStateSave);
+            playerMovement.movementEnabledState = (MovementEnabledState)movementEnabledState;
             
             playerMovement.movespeed = movespeed;
             playerMovement.movespeedMultiplier = movespeedMultiplier;

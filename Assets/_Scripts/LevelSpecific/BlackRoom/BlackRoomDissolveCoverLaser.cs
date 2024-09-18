@@ -50,7 +50,7 @@ namespace LevelSpecific.BlackRoom {
                 timeBeforeLaserParticlesStart + laser.main.startLifetime.constant, 
                 () => AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, coverFiringAt.transform.position));
             state.AddTrigger(LaserState.Idle, 0f, () => {
-                if (state.prevState == LaserState.FiringAtCover) {
+                if (state.PrevState == LaserState.FiringAtCover) {
                     // Turn the next puzzle on and last puzzle off automatically
                     if (!colorPuzzleManager.isLastPuzzle) {
                         mainConsole.puzzleSelectButtons[colorPuzzleManager.activePuzzle+1].state.Set(ColorPuzzleButton.State.On);
@@ -95,9 +95,9 @@ namespace LevelSpecific.BlackRoom {
         }
 
         private void UpdateEmission() {
-            if (state.state != LaserState.FiringAtCover) return;
+            if (state.State != LaserState.FiringAtCover) return;
             
-            float t = state.timeSinceStateChanged / laser.main.duration;
+            float t = state.Time / laser.main.duration;
             Color emission = Color.Lerp(startingEmission, Color.black, t);
             puzzleIsSolvedIndicator.material.SetColor(EmissionProperty, emission);
         }
@@ -112,7 +112,7 @@ namespace LevelSpecific.BlackRoom {
             main.startLifetime = distance / main.startSpeed.constant;
             
             // Fade out the laser over time
-            float t = state.timeSinceStateChanged / main.duration;
+            float t = state.Time / main.duration;
             ParticleSystem.MinMaxGradient startGradient = main.startColor;
             Color startColor = startGradient.color;
             startColor.a = 1-(t*t);

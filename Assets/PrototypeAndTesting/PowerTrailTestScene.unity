@@ -562,7 +562,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1464396891}
-  m_VersionIndex: 1187
+  m_VersionIndex: 1193
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -573,7 +573,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289700
+  m_Name: pb_Mesh2045000
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -724,7 +724,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000001
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -738,7 +738,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh290054
+  m_Name: pb_Mesh2045354
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1646,7 +1646,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2106966424}
-  m_VersionIndex: 27
+  m_VersionIndex: 33
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2450,7 +2450,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1537974543}
-  m_VersionIndex: 27
+  m_VersionIndex: 33
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2511,7 +2511,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289944
+  m_Name: pb_Mesh2045244
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2676,7 +2676,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289630
+  m_Name: pb_Mesh2044930
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2827,7 +2827,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.000017
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -2841,7 +2841,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289650
+  m_Name: pb_Mesh2044950
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3006,7 +3006,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289720
+  m_Name: pb_Mesh2045020
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3157,7 +3157,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000039
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -3255,7 +3255,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289924
+  m_Name: pb_Mesh2045224
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3406,7 +3406,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000086
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -3798,7 +3798,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 973087285}
-  m_VersionIndex: 418
+  m_VersionIndex: 424
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3974,6 +3974,7 @@ MonoBehaviour:
   skipIsVisibleCheck: 0
   changeScale: 0
   scaleFactor: 1
+  maxScaleAllowed: 6
   volumetricPortals:
   - {fileID: 864216612}
   volumetricPortalThickness: 1
@@ -3981,6 +3982,7 @@ MonoBehaviour:
   renderers:
   - {fileID: 491816019}
   colliders: []
+  triggerColliders: []
   otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
@@ -3990,6 +3992,7 @@ MonoBehaviour:
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
   trigger: {fileID: 491816012}
   onPortalTeleport:
     m_PersistentCalls:
@@ -4060,7 +4063,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2098893028}
-  m_VersionIndex: 30
+  m_VersionIndex: 36
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4477,7 +4480,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 916593539}
-  m_VersionIndex: 55
+  m_VersionIndex: 61
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4602,7 +4605,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 760719490}
-  m_VersionIndex: 24
+  m_VersionIndex: 30
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4663,7 +4666,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289908
+  m_Name: pb_Mesh2045208
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4993,7 +4996,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289886
+  m_Name: pb_Mesh2045186
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5144,7 +5147,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.000017
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -5158,7 +5161,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289588
+  m_Name: pb_Mesh2044888
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5488,7 +5491,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh290070
+  m_Name: pb_Mesh2045370
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5663,7 +5666,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289810
+  m_Name: pb_Mesh2045110
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5814,7 +5817,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000001
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -5942,7 +5945,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2063820073}
-  m_VersionIndex: 27
+  m_VersionIndex: 33
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -6118,7 +6121,7 @@ MonoBehaviour:
   stateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
 --- !u!114 &705201490
 MonoBehaviour:
@@ -17453,7 +17456,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1402129831}
-  m_VersionIndex: 1005
+  m_VersionIndex: 1011
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -17475,7 +17478,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -17567,7 +17570,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289490
+  m_Name: pb_Mesh2044790
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18322,7 +18325,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1267680049}
-  m_VersionIndex: 967
+  m_VersionIndex: 973
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -18432,7 +18435,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289670
+  m_Name: pb_Mesh2044970
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18597,7 +18600,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289682
+  m_Name: pb_Mesh2044982
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18748,7 +18751,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000039
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -18762,7 +18765,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289476
+  m_Name: pb_Mesh2044776
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18927,7 +18930,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289744
+  m_Name: pb_Mesh2045044
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -19092,7 +19095,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289442
+  m_Name: pb_Mesh2044742
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -19422,6 +19425,7 @@ MonoBehaviour:
   skipIsVisibleCheck: 0
   changeScale: 0
   scaleFactor: 1
+  maxScaleAllowed: 6
   volumetricPortals:
   - {fileID: 1075861071}
   volumetricPortalThickness: 1
@@ -19429,6 +19433,7 @@ MonoBehaviour:
   renderers:
   - {fileID: 1016995202}
   colliders: []
+  triggerColliders: []
   otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
@@ -19438,6 +19443,7 @@ MonoBehaviour:
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
   trigger: {fileID: 1016995195}
   onPortalTeleport:
     m_PersistentCalls:
@@ -19508,7 +19514,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 565154225}
-  m_VersionIndex: 33
+  m_VersionIndex: 39
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -20137,7 +20143,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1695804582}
-  m_VersionIndex: 964
+  m_VersionIndex: 970
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -20343,7 +20349,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -21626,7 +21632,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 168355950}
-  m_VersionIndex: 2413
+  m_VersionIndex: 2419
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -21648,7 +21654,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -22116,7 +22122,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 173617720}
-  m_VersionIndex: 1130
+  m_VersionIndex: 1136
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -22186,7 +22192,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: 0, z: 0}
@@ -22230,7 +22236,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -22571,7 +22577,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 866991357}
-  m_VersionIndex: 1256
+  m_VersionIndex: 1262
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -23325,7 +23331,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 887297355}
-  m_VersionIndex: 30
+  m_VersionIndex: 36
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -23386,7 +23392,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289826
+  m_Name: pb_Mesh2045126
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -23537,7 +23543,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000086
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -23639,6 +23645,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
+  includeInactiveGameObjects: 0
   channel: 1
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
@@ -24098,7 +24105,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 21686815}
-  m_VersionIndex: 444
+  m_VersionIndex: 450
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -24109,7 +24116,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289872
+  m_Name: pb_Mesh2045172
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -24274,7 +24281,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289556
+  m_Name: pb_Mesh2044856
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -25182,7 +25189,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 216866664}
-  m_VersionIndex: 24
+  m_VersionIndex: 30
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -25243,7 +25250,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289956
+  m_Name: pb_Mesh2045256
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -25590,7 +25597,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -26148,7 +26155,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 930801073}
-  m_VersionIndex: 1451
+  m_VersionIndex: 1457
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -26170,7 +26177,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 1
@@ -26285,7 +26292,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289528
+  m_Name: pb_Mesh2044828
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26625,6 +26632,7 @@ MonoBehaviour:
   skipIsVisibleCheck: 0
   changeScale: 0
   scaleFactor: 1
+  maxScaleAllowed: 6
   volumetricPortals:
   - {fileID: 2086800309}
   volumetricPortalThickness: 1
@@ -26632,6 +26640,7 @@ MonoBehaviour:
   renderers:
   - {fileID: 1411538291}
   colliders: []
+  triggerColliders: []
   otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
@@ -26641,6 +26650,7 @@ MonoBehaviour:
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
   trigger: {fileID: 1411538284}
   onPortalTeleport:
     m_PersistentCalls:
@@ -26711,7 +26721,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2107013818}
-  m_VersionIndex: 27
+  m_VersionIndex: 33
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -26787,7 +26797,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289382
+  m_Name: pb_Mesh2044682
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26952,7 +26962,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289852
+  m_Name: pb_Mesh2045152
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27117,7 +27127,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289410
+  m_Name: pb_Mesh2044710
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27268,7 +27278,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000039
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -27835,7 +27845,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1791099934}
-  m_VersionIndex: 967
+  m_VersionIndex: 973
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -27896,6 +27906,7 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
+  includeInactiveGameObjects: 0
   channel: 1
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
@@ -28355,7 +28366,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 617283821}
-  m_VersionIndex: 441
+  m_VersionIndex: 447
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -28462,7 +28473,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -31713,7 +31724,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1173786483}
-  m_VersionIndex: 3984
+  m_VersionIndex: 3990
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -31735,7 +31746,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -31763,7 +31774,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh290006
+  m_Name: pb_Mesh2045306
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31928,7 +31939,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh290090
+  m_Name: pb_Mesh2045390
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -32093,7 +32104,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289608
+  m_Name: pb_Mesh2044908
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -32341,7 +32352,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -32899,7 +32910,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1467308094}
-  m_VersionIndex: 1454
+  m_VersionIndex: 1460
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -32921,7 +32932,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 2
@@ -33066,7 +33077,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1248666524}
-  m_VersionIndex: 27
+  m_VersionIndex: 33
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -33127,7 +33138,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289798
+  m_Name: pb_Mesh2045098
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -33388,7 +33399,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -34671,7 +34682,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 533582329}
-  m_VersionIndex: 2416
+  m_VersionIndex: 2422
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -34693,7 +34704,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -35190,7 +35201,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 512637384}
-  m_VersionIndex: 1043
+  m_VersionIndex: 1049
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -35462,7 +35473,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: -0.0625, z: 0}
@@ -38713,7 +38724,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 307658642}
-  m_VersionIndex: 3981
+  m_VersionIndex: 3987
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -38735,7 +38746,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -38877,7 +38888,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 118704124}
-  m_VersionIndex: 30
+  m_VersionIndex: 36
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -39039,7 +39050,7 @@ MonoBehaviour:
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
   showNodes: 1
-  selectedNodeIndex: 0
+  selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
   serializedNodes:
   - pos: {x: 0, y: 0, z: 0}
@@ -39470,7 +39481,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1300667715}
-  m_VersionIndex: 1093
+  m_VersionIndex: 1099
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -39492,7 +39503,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -40009,7 +40020,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289516
+  m_Name: pb_Mesh2044816
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -40174,7 +40185,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh290038
+  m_Name: pb_Mesh2045338
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -40652,7 +40663,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2117365880}
-  m_VersionIndex: 1259
+  m_VersionIndex: 1265
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -40828,6 +40839,7 @@ MonoBehaviour:
   skipIsVisibleCheck: 0
   changeScale: 0
   scaleFactor: 1
+  maxScaleAllowed: 6
   volumetricPortals:
   - {fileID: 1303915699}
   volumetricPortalThickness: 1
@@ -40835,6 +40847,7 @@ MonoBehaviour:
   renderers:
   - {fileID: 2086538059}
   colliders: []
+  triggerColliders: []
   otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
@@ -40844,6 +40857,7 @@ MonoBehaviour:
   pauseRendering: 0
   pauseLogic: 0
   dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
   trigger: {fileID: 2086538052}
   onPortalTeleport:
     m_PersistentCalls:
@@ -40914,7 +40928,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1603057302}
-  m_VersionIndex: 30
+  m_VersionIndex: 36
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -41089,7 +41103,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289456
+  m_Name: pb_Mesh2044756
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41687,7 +41701,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2072816923}
-  m_VersionIndex: 1190
+  m_VersionIndex: 1196
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -41698,7 +41712,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289398
+  m_Name: pb_Mesh2044698
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41849,7 +41863,7 @@ Mesh:
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
+  m_MeshMetrics[0]: 1.0000039
   m_MeshMetrics[1]: 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
@@ -41863,7 +41877,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289772
+  m_Name: pb_Mesh2045072
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -42332,7 +42346,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 26248494}
-  m_VersionIndex: 1037
+  m_VersionIndex: 1043
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -42343,7 +42357,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh289994
+  m_Name: pb_Mesh2045294
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -42607,7 +42621,7 @@ MonoBehaviour:
   stateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
 --- !u!114 &2117780537
 MonoBehaviour:
@@ -53942,7 +53956,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 604691968}
-  m_VersionIndex: 1008
+  m_VersionIndex: 1014
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -53980,7 +53994,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
+    _time: 0
     onStateChange: []
   powerMode: 3
   parentMultiMode: 0
@@ -54561,7 +54575,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1621457062}
-  m_VersionIndex: 970
+  m_VersionIndex: 976
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

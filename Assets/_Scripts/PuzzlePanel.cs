@@ -69,7 +69,7 @@ public class PuzzlePanel : MonoBehaviour {
         int row = index / gridSize.y;
         int col = index % gridSize.y;
 
-        currentState[row, col] = b.buttonPressed;
+        currentState[row, col] = b.ButtonPressed;
         state.currentStateStr = currentState.Serialize();
 
         CheckIfSolved();

@@ -73,14 +73,14 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
     }
 
     private bool InputIsBeingProvided => keyboardPrompts.Any(prompt => prompt.keybind.Held);
-    private bool MinTimeAfterInputHasElapsed => state.timeSinceStateChanged > (alphaLerpTimeIn + minTimeAfterInputAccepted);
-    private bool MaxTimeAfterInputHasElapsed => state.timeSinceStateChanged > (alphaLerpTimeIn + maxTimeAfterInputAccepted);
+    private bool MinTimeAfterInputHasElapsed => state.Time > (alphaLerpTimeIn + minTimeAfterInputAccepted);
+    private bool MaxTimeAfterInputHasElapsed => state.Time > (alphaLerpTimeIn + maxTimeAfterInputAccepted);
     protected virtual bool CanStopDisplaying => hasProvidedInput && (MaxTimeAfterInputHasElapsed || (MinTimeAfterInputHasElapsed && !InputIsBeingProvided));
 
     protected virtual void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
         
-        switch (state.state) {
+        switch (state.State) {
             case State.DelayedStart:
             case State.NotYetDisplayed:
                 if (imagesAlpha != 0) {
@@ -93,7 +93,7 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
                 }
                 
                 if (imagesAlpha < 1) {
-                    imagesAlpha = Mathf.Lerp(0f, 1f, state.timeSinceStateChanged / alphaLerpTimeIn);
+                    imagesAlpha = Mathf.Lerp(0f, 1f, state.Time / alphaLerpTimeIn);
                 }
                 else if (CanStopDisplaying) {
                     state.Set(State.FinishedDisplaying);
@@ -101,7 +101,7 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
                 break;
             case State.FinishedDisplaying:
                 if (imagesAlpha > 0) {
-                    imagesAlpha = Mathf.Lerp(1f, 0f, state.timeSinceStateChanged / alphaLerpTimeOut);
+                    imagesAlpha = Mathf.Lerp(1f, 0f, state.Time / alphaLerpTimeOut);
                 }
                 break;
             default:

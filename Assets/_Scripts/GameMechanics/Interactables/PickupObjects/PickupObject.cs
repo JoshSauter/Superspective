@@ -4,10 +4,12 @@ using System.Linq;
 using Audio;
 using DissolveObjects;
 using GrowShrink;
+using NaughtyAttributes;
 using SuperspectiveUtils;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
+using StateUtils;
 using UnityEngine;
 using static Audio.AudioManager;
 using CubeSpawnerReference = SerializableClasses.SerializableReference<CubeSpawner, CubeSpawner.CubeSpawnerSave>;
@@ -18,11 +20,16 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public delegate void PickupObjectSimpleAction();
 
-    public const float pickupDropCooldown = 0.2f;
-    public const float holdDistance = 3f;
-    const float minDistanceFromPlayer = 0.25f;
-    const float followSpeed = 15;
-    const float followLerpSpeed = 15;
+    const float SLEEP_THRESHOLD = 0.005f;
+    const float MAX_SCALE_DIFFERENCE_BETWEEN_PLAYER_CUBE = 6f;
+    const float ROOT_3_ON_2 = 0.86602540378f;
+    const float PICKUP_DROP_COOLDOWN = 0.2f;
+    const float HOLD_DISTANCE = 2.25f;
+    const float MIN_DISTANCE_FROM_PLAYER = 0.25f;
+    const float FOLLOW_SPEED = 15;
+    const float FOLLOW_LERP_SPEED = 15;
+    const float RIGIDBODY_SLEEP_TIME = 0.25f;
+    
     public static PickupObjectSimpleAction OnAnyPickupSimple;
     public static PickupObjectSimpleAction OnAnyDropSimple;
     public static PickupObjectAction OnAnyPickup;
@@ -38,15 +45,30 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public GravityObject thisGravity;
     public bool freezeRigidbodyDueToNearbyPlayer = false;
 
-    private bool RigidbodyShouldBeFrozen => GameManager.instance.IsCurrentlyLoading || freezeRigidbodyDueToNearbyPlayer || IsHeldInReceptacle;
+    private bool RigidbodyShouldBeFrozen => GameManager.instance.IsCurrentlyLoading ||
+                                            freezeRigidbodyDueToNearbyPlayer ||
+                                            IsHeldInReceptacle ||
+                                            (CubeIsTooBigToPickUp && rigidbodySleepingStateMachine == RigidbodySleepingState.Sleeping);
     public Rigidbody thisRigidbody;
     public Collider thisCollider;
 
     public PortalableObject portalableObject;
     public GrowShrinkObject growShrinkObject;
     public CubeSpawnerReference spawnedFrom;
+    
+    // Assumes a transform scale of 1,1,1 corresponds to 1 unit^3 volume
+    private float RadiusOfCircumscribedSphere => transform.lossyScale.x * ROOT_3_ON_2;
 
-    public float scale => Mathf.Min(Player.instance.Scale, (growShrinkObject != null ? growShrinkObject.currentScale : 1f));
+    public float HoldDistance => HOLD_DISTANCE * Scale;
+
+    [SerializeField]
+    private SuperspectiveRaycast lastRaycast;
+
+    public float Scale => (growShrinkObject != null ? growShrinkObject.CurrentScale : 1f);
+    public float MinOfPlayerCubeScales => Mathf.Min(Player.instance.Scale, Scale);
+    
+    public bool CubeIsTooBigToPickUp => Scale > MAX_SCALE_DIFFERENCE_BETWEEN_PLAYER_CUBE * Player.instance.Scale;
+    
     const float scaleMultiplier = 1.5f;
     float currentCooldown;
     InteractableGlow interactableGlow;
@@ -55,14 +77,14 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     public PickupObjectSimpleAction OnDropSimple;
     public PickupObjectAction OnPickup;
     public PickupObjectSimpleAction OnPickupSimple;
-    AudioJob pickupSound => AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
-    Transform player;
+    AudioJob PickupSound => AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
     Transform playerCam;
 
     private PhysicMaterial defaultPickupObjectPhysicsMaterial;
     public PhysicMaterial heldPickupObjectPhysicsMaterial;
     private PhysicMaterial EffectivePhysicsMaterial => isHeld ? heldPickupObjectPhysicsMaterial : defaultPickupObjectPhysicsMaterial;
 
+    Vector3 playerLastPos;
     Vector3 playerCamPosLastFrame;
 
     readonly float rotateToRightAngleTime = 0.35f;
@@ -71,13 +93,66 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     public bool interactable = true;
 
-    bool onCooldown => currentCooldown > 0;
+    bool OnCooldown => currentCooldown > 0;
+
+    // For some reason, Unit's Rigidbody is not sleeping when it should be. This is a workaround.
+    public enum RigidbodySleepingState {
+        Moving, // Rigidbody is moving
+        Steady, // Rigidbody is not moving but not yet sleeping
+        Sleeping // Rigidbody has been not moving for long enough to be considered sleeping
+    }
+    [SerializeField, ReadOnly]
+    private StateMachine<RigidbodySleepingState> rigidbodySleepingStateMachine;
+
+    // Lock the cube into 90 degree angles when the player presses the button for it
+    public enum FreezeRotationState {
+        FreelyRotating,
+        RotatingToRightAngle,
+        Frozen
+    }
+    [SerializeField, ReadOnly]
+    private StateMachine<FreezeRotationState> freezeRotationStateMachine;
+
+    private void OnDisable() {
+        PlayerButtonInput.instance.OnInteractPress -= Drop;
+        Portal.OnAnyPortalPlayerTeleport -= UpdatePlayerPositionLastFrameAfterPortal;
+        TeleportEnter.OnAnyTeleportSimple -= UpdatePlayerPositionLastFrameAfterTeleport;
+    }
 
     protected override void Awake() {
         base.Awake();
         AssignReferences();
         
+        rigidbodySleepingStateMachine = this.StateMachine(RigidbodySleepingState.Moving);
+        freezeRotationStateMachine = this.StateMachine(FreezeRotationState.FreelyRotating);
+        
         defaultPickupObjectPhysicsMaterial = thisCollider.material;
+    }
+
+    private void SetUpRigidbodySleepingStateMachine() {
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Moving, RigidbodySleepingState.Steady, () => thisRigidbody.GetMassNormalizedKineticEnergy() < thisRigidbody.sleepThreshold);
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Steady, RigidbodySleepingState.Sleeping, RIGIDBODY_SLEEP_TIME);
+        
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Steady, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold);
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Sleeping, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold);
+    }
+    
+    private void SetupFreezeRotationStateMachine() {
+        freezeRotationStateMachine.AddStateTransition(FreezeRotationState.FreelyRotating, FreezeRotationState.RotatingToRightAngle, () => isHeld && PlayerButtonInput.instance.AlignObjectPressed);
+        // State transition from RotatingToRightAngle to Frozen is handled in the coroutine RotateToRightAngleAndFreezeRotation
+        freezeRotationStateMachine.AddStateTransition(FreezeRotationState.Frozen, FreezeRotationState.FreelyRotating, () => isHeld && PlayerButtonInput.instance.AlignObjectPressed);
+        
+        freezeRotationStateMachine.AddTrigger(FreezeRotationState.RotatingToRightAngle, () => {
+            StartCoroutine(RotateToRightAngleAndFreezeRotation(RightAngleRotations.GetNearest(transform.rotation)));
+        });
+        
+        freezeRotationStateMachine.AddTrigger(FreezeRotationState.Frozen, () => {
+            thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+        });
+        
+        freezeRotationStateMachine.AddTrigger(FreezeRotationState.FreelyRotating, () => {
+            thisRigidbody.constraints = RigidbodyConstraints.None;
+        });
     }
 
     void AssignReferences() {
@@ -97,30 +172,38 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     protected override void Start() {
         base.Start();
-        player = Player.instance.transform;
         playerCam = SuperspectiveScreen.instance.playerCamera.transform;
 
         PlayerButtonInput.instance.OnInteractPress += Drop;
-
-        PillarDimensionObject thisDimensionObject = Utils.FindDimensionObjectRecursively<PillarDimensionObject>(transform);
+        
+        PillarDimensionObject thisDimensionObject = transform.FindDimensionObjectRecursively<PillarDimensionObject>();
         if (thisDimensionObject != null) thisDimensionObject.OnStateChange += HandleDimensionObjectStateChange;
 
         playerCamPosLastFrame = playerCam.transform.position;
 
-        Portal.OnAnyPortalTeleport += UpdatePlayerPositionLastFrameAfterPortal;
+        Portal.OnAnyPortalPlayerTeleport += UpdatePlayerPositionLastFrameAfterPortal;
         TeleportEnter.OnAnyTeleportSimple += UpdatePlayerPositionLastFrameAfterTeleport;
 
         AudioManager.instance.GetOrCreateJob(AudioName.CubePickup, ID);
         
         // TODO: Remove this; temp for testing rolling sphere
         thisRigidbody.maxAngularVelocity = 120;
+
+        SetUpRigidbodySleepingStateMachine();
+        SetupFreezeRotationStateMachine();
+    }
+
+    protected override void Init() {
+        base.Init();
+        // This line is important to get the state machine to Init its events properly :/
+        freezeRotationStateMachine.Set(freezeRotationStateMachine.State, true);
     }
 
     void Update() {
         RecalculateRigidbodyKinematics();
         
         if (interactable) {
-            if (scale > 6f * Player.instance.Scale) {
+            if (CubeIsTooBigToPickUp) {
                 interactableObject.SetAsDisabled("(Too large)");
             }
             else {
@@ -134,13 +217,13 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (currentCooldown > 0) currentCooldown -= Time.deltaTime;
 
         // Don't allow clicks in the menu to propagate to picking up/dropping the cube
-        if (NovaPauseMenu.instance.PauseMenuIsOpen) currentCooldown = pickupDropCooldown;
+        if (NovaPauseMenu.instance.PauseMenuIsOpen) currentCooldown = PICKUP_DROP_COOLDOWN;
 
         if (isHeld) {
             interactableGlow.TurnOnGlow();
-
-            if (PlayerButtonInput.instance.AlignObjectPressed)
-                StartCoroutine(RotateToRightAngle(RightAngleRotations.GetNearest(transform.rotation)));
+        }
+        else {
+            thisRigidbody.sleepThreshold = SLEEP_THRESHOLD * Scale;
         }
     }
 
@@ -157,37 +240,49 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         return _objectWidthTowardsCamera;
     }
 
+    void OffsetByCameraMovement() {
+        // Move the cube by the same amount the player's camera moved
+        Vector3 playerCamPositionalDiff = Player.instance.cameraFollow.transform.position - playerCamPosLastFrame;
+        // Calculate the positional difference relative to the player's gravity direction
+        if (portalableObject && portalableObject.IsHeldThroughPortal) {
+            playerCamPositionalDiff = portalableObject.PortalHeldThrough.TransformDirection(playerCamPositionalDiff);
+        }
+
+        debug.Log($"Positional diff: {playerCamPositionalDiff:F3}");
+        Vector3 positionBefore = thisRigidbody.position;
+        thisRigidbody.MovePosition(transform.position + playerCamPositionalDiff);
+        Vector3 positionAfter = thisRigidbody.position;
+        debug.Log($"Position before: {positionBefore:F3}\nPosition after: {positionAfter:F3}\nActual positional diff: {(positionAfter - positionBefore):F3}");
+    }
+
+    private Vector3 debugTargetPos = Vector3.zero;
     void FixedUpdate() {
         if (thisCollider.material != EffectivePhysicsMaterial) thisCollider.material = EffectivePhysicsMaterial;
         
         if (isHeld && shouldFollow) {
-            Vector3 playerCamPositionalDiff = Player.instance.cameraFollow.transform.position - playerCamPosLastFrame;
-            if (portalableObject != null && portalableObject.grabbedThroughPortal != null)
-                playerCamPositionalDiff =
-                    portalableObject.grabbedThroughPortal.TransformDirection(playerCamPositionalDiff);
-            //debug.Log($"Positional diff: {playerCamPositionalDiff:F3}");
-            thisRigidbody.MovePosition(transform.position + playerCamPositionalDiff);
-            if (portalableObject != null && portalableObject.copyIsEnabled && portalableObject.copyShouldBeEnabled)
-                portalableObject.fakeCopyInstance.TransformCopy();
+            OffsetByCameraMovement();
 
             float pickupObjRadiusSpacer = GetObjectWidthTowardsCamera();
-            //float holdDistanceToUse = pickupObjRadiusSpacer + holdDistance + playerRadiusSpacer;
-            float holdDistanceToUse = pickupObjRadiusSpacer + holdDistance * Mathf.Max(scale, Mathf.Pow(scale, scaleMultiplier));
-            debug.Log($"Final hold distance: {holdDistanceToUse}\nPickupObjRadiusSpacer: {pickupObjRadiusSpacer}\nScaled hold distance: {holdDistance * Mathf.Pow(scale, scaleMultiplier)}");
-            Vector3 targetPos = portalableObject == null
-                ? TargetHoldPosition(holdDistanceToUse, out SuperspectiveRaycast raycastHits)
-                : TargetHoldPositionThroughPortal(holdDistanceToUse, out raycastHits);
+            debug.Log($"Pickup object radius spacer: {pickupObjRadiusSpacer:F3}, circumscribed radius: {RadiusOfCircumscribedSphere:F3}");
 
-            Vector3 diff = targetPos - thisRigidbody.position;
+            Vector3 targetPos = !portalableObject
+                ? TargetHoldPosition(out SuperspectiveRaycast raycastHits)
+                : TargetHoldPositionThroughPortal(out raycastHits);
+            
+            debugTargetPos = targetPos;
+
+            Vector3 cubeToTarget = SuperspectivePhysics.ShortestVectorPointToPoint(thisRigidbody.position,  targetPos);
             Vector3 newVelocity = Vector3.Lerp(
                 thisRigidbody.velocity,
-                followSpeed * diff,
-                followLerpSpeed * Time.fixedDeltaTime
+                // Slow down the cube if it's larger than the player (since it's large, it takes more force to move around)
+                cubeToTarget * (FOLLOW_SPEED * Mathf.Min(1f, Player.instance.Scale / Scale)),
+                FOLLOW_LERP_SPEED * Time.fixedDeltaTime
             );
             bool movingTowardsPlayer =
                 Vector3.Dot(newVelocity.normalized, -raycastHits.raycastParts.Last().ray.direction) > 0.5f;
-            if (raycastHits.distance < minDistanceFromPlayer && movingTowardsPlayer)
+            if (raycastHits.distance < MIN_DISTANCE_FROM_PLAYER && movingTowardsPlayer) {
                 newVelocity = Vector3.ProjectOnPlane(newVelocity, raycastHits.raycastParts.Last().ray.direction);
+            }
 
             //Vector3 velBefore = thisRigidbody.velocity;
             thisRigidbody.AddForce(newVelocity - thisRigidbody.velocity, ForceMode.VelocityChange);
@@ -197,22 +292,22 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         ResolveCollision();
 
         playerCamPosLastFrame = playerCam.transform.position;
+        playerLastPos = PlayerMovement.instance.LastPlayerPosition;
     }
-
+    
     public void OnLeftMouseButtonDown() {
         Pickup();
     }
 
-    void UpdatePlayerPositionLastFrameAfterPortal(Portal inPortal, Collider objPortaled) {
-        if (objPortaled.gameObject == Player.instance.gameObject)
-            playerCamPosLastFrame = inPortal.TransformPoint(playerCamPosLastFrame);
+    void UpdatePlayerPositionLastFrameAfterPortal(Portal inPortal) {
+        playerCamPosLastFrame = inPortal.TransformPoint(playerCamPosLastFrame);
     }
 
     void UpdatePlayerPositionLastFrameAfterTeleport() {
         // TODO:
     }
 
-    IEnumerator RotateToRightAngle(Quaternion destinationRotation) {
+    IEnumerator RotateToRightAngleAndFreezeRotation(Quaternion destinationRotation) {
         thisRigidbody.angularVelocity = Vector3.zero;
 
         float timeElapsed = 0f;
@@ -232,16 +327,16 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         // An attempt to fix an esoteric bug causing a cube to reset its rotation. I don't know why the rotation resets sometimes
         yield return new WaitForFixedUpdate();
         transform.rotation = destinationRotation;
+        freezeRotationStateMachine.Set(FreezeRotationState.Frozen);
     }
 
-    const float ROOT_3_ON_2 = 0.86602540378f;
-    Vector3 TargetHoldPosition(float holdDistance, out SuperspectiveRaycast raycastHits) {
+    Vector3 TargetHoldPosition(out SuperspectiveRaycast raycastHits) {
         int ignoreRaycastLayer = SuperspectivePhysics.IgnoreRaycastLayer;
         int layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
         int tempLayer = gameObject.layer;
         gameObject.layer = ignoreRaycastLayer;
 
-        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance + transform.lossyScale.x * ROOT_3_ON_2, layerMask);
+        raycastHits = DoRaycast();
         
         Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
         gameObject.layer = tempLayer;
@@ -249,54 +344,54 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         return targetPos;
     }
     
-    Vector3 PositionAtFirstObjectOrEndOfRaycast(SuperspectiveRaycast raycast) {
-        if (raycast.hitObject) {
-            // Assumes a transform scale of 1,1,1 corresponds to 1 unit^3 volume
-            return raycast.firstObjectHit.point - transform.lossyScale.x * ROOT_3_ON_2 * playerCam.forward;
+    // Sets the layer mask for the object and its portal copy (if relevant), and returns the previous layer mask for the object and its portal copy
+    (int, int) SetLayerMasks(int layer, int portalCopyLayer = -1) {
+        if (portalCopyLayer < 0) portalCopyLayer = layer; // Default to the same layer as the object
+            
+        int prevLayer = gameObject.layer;
+        gameObject.layer = layer;
+
+        int prevLayerPortalCopy = -1;
+        if (portalCopyLayer >= 0) {
+            if (portalCopyLayer != portalableObject.PortalCopy.gameObject.layer) {
+                prevLayerPortalCopy = portalableObject.PortalCopy.gameObject.layer;
+                foreach (Collider portalCopyCollider in portalableObject.PortalCopy.colliders) {
+                    portalCopyCollider.gameObject.layer = portalCopyLayer;
+                }
+            }
+            else {
+                prevLayerPortalCopy = prevLayer;
+            }
         }
-        else {
-            SuperspectiveRaycastPart lastPart = raycast.raycastParts.Last();
-            return lastPart.ray.origin + lastPart.ray.direction * lastPart.distance;
-        }
+
+        return (prevLayer, prevLayerPortalCopy);
+    }
+    
+    Vector3 TargetHoldPositionThroughPortal(out SuperspectiveRaycast raycastHits) {
+        // Temporarily sets the layer mask for the object and its portal copy (if relevant) to the IgnoreRaycast layer
+        (int prevLayer, int prevLayerPortalCopy) = SetLayerMasks(SuperspectivePhysics.IgnoreRaycastLayer);
+
+        raycastHits = DoRaycast();
+        
+        // Restores the layer mask for the object and its portal copy
+        SetLayerMasks(prevLayer, prevLayerPortalCopy);
+        
+        return PositionAtFirstObjectOrEndOfRaycast(raycastHits);
     }
 
-    Vector3 TargetHoldPositionThroughPortal(float holdDistance, out SuperspectiveRaycast raycastHits) {
-        int layerMask = ~((1 << SuperspectivePhysics.IgnoreRaycastLayer) | (1 << LayerMask.NameToLayer("Player")) |
-                          (1 << SuperspectivePhysics.InvisibleLayer) |
-                          (1 << SuperspectivePhysics.CollideWithPlayerOnlyLayer));
-        int tempLayer = gameObject.layer;
-        gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
+    SuperspectiveRaycast DoRaycast() {
+        Vector3 raycastStartPos = playerCam.position.GetClosestPointOnFiniteLine(Player.instance.movement.BottomOfPlayer, Player.instance.movement.TopOfPlayer);
+        lastRaycast = RaycastUtils.Raycast(raycastStartPos, playerCam.forward, HoldDistance + RadiusOfCircumscribedSphere, SuperspectivePhysics.PhysicsRaycastLayerMask);
+        return lastRaycast;
+    }
 
-        int tempLayerPortalCopy = 0;
-        if (portalableObject.copyIsEnabled) {
-            tempLayerPortalCopy = portalableObject.fakeCopyInstance.gameObject.layer;
-            portalableObject.fakeCopyInstance.gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
-        }
-
-        raycastHits = RaycastUtils.Raycast(playerCam.position, playerCam.forward, holdDistance + transform.lossyScale.x * ROOT_3_ON_2, layerMask);
-        Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
-
-        gameObject.layer = tempLayer;
-        if (portalableObject.copyIsEnabled) portalableObject.fakeCopyInstance.gameObject.layer = tempLayerPortalCopy;
-
-        bool throughOutPortalToInPortal = portalableObject.grabbedThroughPortal != null &&
-                                          portalableObject.grabbedThroughPortal.PortalRenderingIsEnabled &&
-                                          !raycastHits.hitPortal;
-        bool throughInPortalToOutPortal =
-            portalableObject.grabbedThroughPortal == null && raycastHits.hitPortal;
-        if (throughOutPortalToInPortal || throughInPortalToOutPortal) {
-            Portal inPortal = throughOutPortalToInPortal
-                ? portalableObject.grabbedThroughPortal
-                : raycastHits.firstValidPortalHit.otherPortal;
-
-            targetPos = inPortal.TransformPoint(targetPos);
-        }
-
-        return targetPos;
+    // TODO: Investigate this, doesn't seem like it places the targetPos where I want it to. Edit: it might be fine, just need to retest it
+    Vector3 PositionAtFirstObjectOrEndOfRaycast(SuperspectiveRaycast raycast) {
+        return raycast.DidHitObject ? raycast.FirstObjectHit.point : raycast.FinalPosition;
     }
 
     void HandleDimensionObjectStateChange(DimensionObject dimObj) {
-        if (dimObj.visibilityState == VisibilityState.invisible && isHeld) Drop();
+        if (dimObj.visibilityState == VisibilityState.Invisible && isHeld) Drop();
     }
 
     // Singular place to set isKinematic so I can track it in one place when debugging
@@ -307,16 +402,63 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         }
     }
 
+    void SetHeldThroughPortal() {
+        if (!portalableObject) return;
+        // Three possible conditions:
+        // 1) The cube is all the way through a portal (not sitting in it), and the player is interacting with it through that portal
+        // 2) The cube is sitting in the portal closer to the player, and
+
+        SuperspectiveRaycast interactRaycast = Interact.instance.raycast;
+
+        // The cube is sitting all the way through a portal:
+        if (!portalableObject.IsInPortal && interactRaycast.DidHitPortal) {
+            portalableObject.SetPortalHeldThrough(interactRaycast.FirstValidPortalHit);
+        }
+        else if (portalableObject.IsInPortal) {
+            bool interactedWithPortalCopy = interactRaycast.DidHitObject && portalableObject.PortalCopy.colliders.Contains(interactRaycast.FirstObjectHit.collider);
+            if (interactedWithPortalCopy == interactRaycast.DidHitPortal) {
+                portalableObject.SetPortalHeldThrough(null);
+            }
+            else {
+                portalableObject.SetPortalHeldThrough(portalableObject.Portal.otherPortal);
+            }
+            // This code is simplified to the above ^
+            // (interactedWithPortalCopy, interactRaycast.DidHitPortal) switch {
+            //     // Interacted with the PortalCopy through a portal, the cube is thus not held through a portal
+            //     (true, true) => portalableObject.SetPortalHeldThrough(null),
+            //     // Interacted with the PortalCopy, the cube is on the other side of the portal
+            //     (true, false) => portalableObject.SetPortalHeldThrough(portalableObject.Portal.otherPortal),
+            //     // Interacted with the real cube through a portal, the cube is held through that portal
+            //     (false, true) => portalableObject.SetPortalHeldThrough(portalableObject.Portal.otherPortal),
+            //     // Interacted with the cube with no portal hit, the cube is not held through a portal
+            //     (false, false) => portalableObject.SetPortalHeldThrough(null)
+            // };
+        }
+        else {
+            portalableObject.SetPortalHeldThrough(null);
+        }
+    }
+
+    private void UpdateGravity() {
+        Vector3 targetGravityDirection = Physics.gravity.normalized;
+        if (portalableObject && portalableObject.IsHeldThroughPortal) {
+            targetGravityDirection = portalableObject.PortalHeldThrough.TransformDirection(Physics.gravity.normalized);
+        }
+        thisGravity.GravityDirection = targetGravityDirection;
+    }
+
     public void Pickup() {
-        if (!isHeld && !onCooldown && interactable) {
+        if (!isHeld && !OnCooldown && interactable) {
             thisGravity.useGravity = false;
+            SetHeldThroughPortal();
+            UpdateGravity();
             SetRigidbodyIsKinematic(false);
             isHeld = true;
-            currentCooldown = pickupDropCooldown;
+            currentCooldown = PICKUP_DROP_COOLDOWN;
 
             // Pitch goes 1 -> 1.25 -> 1.5 -> 1
             currentPitch = (currentPitch - .75f) % .75f + 1f;
-            pickupSound.basePitch = currentPitch;
+            PickupSound.basePitch = currentPitch;
             AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, this, true);
             
             SuperspectivePhysics.IgnoreCollision(thisCollider, Player.instance.collider);
@@ -329,20 +471,24 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     public void Drop() {
-        if (isHeld && !onCooldown && interactable) {
-            thisGravity.gravityDirection = Physics.gravity.normalized;
-            if (portalableObject?.grabbedThroughPortal != null)
-                thisGravity.ReorientGravityAfterPortaling(portalableObject.grabbedThroughPortal);
-
-            //transform.parent = originalParent;
+        if (isHeld && !OnCooldown && interactable) {
             thisGravity.useGravity = true;
-            thisRigidbody.velocity += PlayerMovement.instance.thisRigidbody.velocity;
+            thisRigidbody.velocity += (portalableObject && portalableObject.IsHeldThroughPortal) ?
+                portalableObject.PortalHeldThrough.TransformDirection(PlayerMovement.instance.thisRigidbody.velocity) :
+                PlayerMovement.instance.thisRigidbody.velocity;
+
             isHeld = false;
-            currentCooldown = pickupDropCooldown;
+            currentCooldown = PICKUP_DROP_COOLDOWN;
+
+            UpdateGravity();
+            
+            debug.Log("Dropping cube!");
 
             AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, this, true);
             
             SuperspectivePhysics.RestoreCollision(thisCollider, Player.instance.collider);
+            
+            freezeRotationStateMachine.Set(FreezeRotationState.FreelyRotating);
 
             OnDropSimple?.Invoke();
             OnDrop?.Invoke(this);
@@ -356,7 +502,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         DissolveObject dissolve = gameObject.GetOrAddComponent<DissolveObject>();
         const float dematerializeTime = 2f;
         dissolve.materializeTime = dematerializeTime;
-        
         
         // Don't allow shrinking cubes to be picked up
         Drop();
@@ -390,7 +535,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 #region Custom Collision Logic
 
     void ResolveCollision() {
-        Collider[] neighbors = Physics.OverlapSphere(transform.position, transform.localScale.x * scale);
+        // TODO: Assumes a Cube shape, if not Cube shape, will need to change this
+        Collider[] neighbors = Physics.OverlapBox(transform.position, transform.lossyScale / 2f);
 
         for (int i = 0; i < neighbors.Length; i++) {
             Collider neighbor = neighbors[i];
@@ -417,7 +563,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     public bool IsGrounded() {
-        Collider[] neighborsBelow = Physics.OverlapSphere(transform.position + thisGravity.gravityDirection * 0.125f * scale, transform.localScale.x * scale * .5f);
+        Collider[] neighborsBelow = Physics.OverlapSphere(transform.position + thisGravity.GravityDirection * 0.125f * Scale, transform.localScale.x * Scale * .5f);
 
         return neighborsBelow.Where(c => c.gameObject != this.gameObject && !c.TaggedAsPlayer()).ToList().Count > 0;
     }
@@ -427,6 +573,13 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
     
 #endregion
+
+    private void OnDrawGizmosSelected() {
+        Color prevColor = Gizmos.color;
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(debugTargetPos, 0.1f);
+        Gizmos.color = prevColor;
+    }
 
 #region Saving
 
@@ -449,6 +602,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
         bool kinematicRigidbody;
         SerializableVector3 velocity;
+        
+        StateMachine<RigidbodySleepingState>.StateMachineSave rigidbodySleepingStateMachineSave;
 
         public PickupObjectSave(PickupObject obj) : base(obj) {
             position = obj.transform.position;
@@ -467,6 +622,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             isHeld = obj.isHeld;
             receptacleHeldIn = obj.receptacleHeldIn;
             currentCooldown = obj.currentCooldown;
+
+            rigidbodySleepingStateMachineSave = obj.rigidbodySleepingStateMachine.ToSave();
         }
 
         public override void LoadSave(PickupObject obj) {
@@ -477,6 +634,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             obj.transform.localScale = localScale;
 
             if (obj.thisRigidbody != null) {
+                obj.thisRigidbody.position = obj.transform.position;
                 obj.thisRigidbody.velocity = velocity;
                 obj.thisRigidbody.angularVelocity = angularVelocity;
                 obj.thisRigidbody.mass = mass;
@@ -488,6 +646,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             obj.isHeld = isHeld;
             obj.receptacleHeldIn = receptacleHeldIn?.GetOrNull();
             obj.currentCooldown = currentCooldown;
+            
+            obj.rigidbodySleepingStateMachine.LoadFromSave(rigidbodySleepingStateMachineSave);
         }
     }
 #endregion

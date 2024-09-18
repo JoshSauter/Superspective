@@ -51,7 +51,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             if (GameManager.instance.IsCurrentlyLoading) return;
             
             if (entranceDoor != null) {
-                if ((int)FloorManager.instance.floor.state > (int)floor &&
+                if ((int)FloorManager.instance.floor.State > (int)floor &&
                     entranceDoor.state == PortalDoor.DoorState.Closed) {
                     entranceDoor.TriggerDoors();
                 }

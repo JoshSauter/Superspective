@@ -5,6 +5,7 @@ using NaughtyAttributes;
 using SuperspectiveUtils;
 using System;
 using LevelManagement;
+using PortalMechanics;
 using Saving;
 using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
@@ -20,7 +21,13 @@ public class PillarDimensionObject : DimensionObject {
 	int _dimension = 0;
 	public int Dimension {
 		get => _dimension;
-		set => _dimension = value;
+		set {
+			if (_dimension != value) {
+				debug.Log($"Dimension changing from {_dimension} to {value}");
+			}
+			_dimension = value;
+			
+		}
 	}
 
 	public enum Quadrant {
@@ -65,17 +72,26 @@ public class PillarDimensionObject : DimensionObject {
 
 	// For context about rest of current state
 	public Camera camSetUpFor;
+	
 
-	void OnEnable() {
+	protected override void OnEnable() {
+		base.OnEnable();
 		allPillarDimensionObjects.Add(this);
+
+		VirtualPortalCamera.OnPreRenderPortal += OnPreRenderPortal;
+		VirtualPortalCamera.OnPostRenderPortal += OnPostRenderPortal;
 	}
 
 	void OnDisable() {
 		allPillarDimensionObjects.Remove(this);
+		
+		VirtualPortalCamera.OnPreRenderPortal -= OnPreRenderPortal;
+		VirtualPortalCamera.OnPostRenderPortal -= OnPostRenderPortal;
 	}
 
 	protected override void Awake() {
 		base.Awake();
+		
 		// PillarDimensionObjects continue to interact with other objects even while in other dimensions
 		disableColliderWhileInvisible = false;
 		if (thisObjectMoves) {
@@ -112,7 +128,7 @@ public class PillarDimensionObject : DimensionObject {
 	public override bool ShouldCollideWithPlayer() {
 		if (collideWithPlayerWhileInvisible) return true;
 		
-		return effectiveVisibilityState != VisibilityState.invisible;
+		return EffectiveVisibilityState != VisibilityState.Invisible;
 	}
 
 	public override bool ShouldCollideWithNonDimensionObject() {
@@ -121,7 +137,7 @@ public class PillarDimensionObject : DimensionObject {
 
 	public override bool ShouldCollideWith(DimensionObject other) {
 		if (other is PillarDimensionObject otherPillarDimensionObj) {
-			int testDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.visible || v == VisibilityState.partiallyVisible);
+			int testDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible || v == VisibilityState.PartiallyVisible);
 			if (testDimension == -1) {
 				return false;
 			}
@@ -134,7 +150,7 @@ public class PillarDimensionObject : DimensionObject {
 		}
 		else {
 			VisibilityState effectiveVisibilityState = reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
-			return effectiveVisibilityState != VisibilityState.invisible;
+			return effectiveVisibilityState != VisibilityState.Invisible;
 		}
 	}
 
@@ -210,20 +226,51 @@ public class PillarDimensionObject : DimensionObject {
 		
 		UpdateStateForCamera(playerCam, activePillar.curDimension, true);
 	}
+	
+	/////////////////////////////
+	/// Portal Rendering Logic //
+    /////////////////////////////
+    #region Portal Logic
+	void OnPreRenderPortal(Portal portal) {
+		bool isSeenByPortalCam = false;
+		foreach (SuperspectiveRenderer renderer in renderers) {
+			if (renderer.r.IsVisibleFrom(VirtualPortalCamera.instance.portalCamera)) {
+				isSeenByPortalCam = true;
+				break;
+			}
+		}
+		if (!isSeenByPortalCam) return;
+		
+		PillarDimensionObject portalDimensionObj = portal?.otherPortal?.pillarDimensionObject;
+		DimensionPillar activePillar = portalDimensionObj?.activePillar;
+		if (portalDimensionObj != null && activePillar != null) {
+			if (this == portalDimensionObj) return; // Don't update the state for the Portal being rendered
+			
+			// Assumes the out portal's activePillar is the same as this object's activePillar
+			// TODO: Add support for different activePillars
+			UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, portalDimensionObj.Dimension, false, true);
+		}
+	}
 
-	public void UpdateStateForCamera(Camera cam, int pillarDimension, bool sendEvents = false) {
+	void OnPostRenderPortal(Portal _) {
+		if (activePillar == null) return;
+		UpdateStateForCamera(playerCam, activePillar.curDimension, false, true);
+	}
+	#endregion
+	
+	public void UpdateStateForCamera(Camera cam, int pillarDimension, bool sendEvents = false, bool suppressLogs = false) {
 		camSetUpFor = cam;
 		camQuadrant = DetermineQuadrant(cam.transform.position);
 		
 		// Don't trigger state change events when we're just doing it for the rendering
-		UpdateState(pillarDimension, false, sendEvents);
+		UpdateState(pillarDimension, false, sendEvents, suppressLogs);
 	}
 
-	void UpdateState(int pillarDimension, bool forceUpdate = false, bool sendEvents = true) {
+	void UpdateState(int pillarDimension, bool forceUpdate = false, bool sendEvents = true, bool suppressLogs = false) {
 		VisibilityState nextState = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, pillarDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
-			SwitchVisibilityState(nextState, true, sendEvents);
+			SwitchVisibilityState(nextState, true, sendEvents, suppressLogs);
 		}
 	}
 
@@ -304,31 +351,31 @@ public class PillarDimensionObject : DimensionObject {
 		switch (playerQuadrant) {
 			case Quadrant.Opposite:
 				if (dimension == Dimension) {
-					return VisibilityState.partiallyVisible;
+					return VisibilityState.PartiallyVisible;
 				}
 				else if (dimension == activePillar.NextDimension(Dimension)) {
-					return VisibilityState.partiallyInvisible;
+					return VisibilityState.PartiallyInvisible;
 				}
 				else {
-					return VisibilityState.invisible;
+					return VisibilityState.Invisible;
 				}
 			case Quadrant.Left:
 			case Quadrant.SameSide:
 			case Quadrant.Right:
 				if ((int)dimensionShiftQuadrant < (int)playerQuadrant) {
 					if (dimension == activePillar.NextDimension(Dimension)) {
-						return VisibilityState.visible;
+						return VisibilityState.Visible;
 					}
 					else {
-						return VisibilityState.invisible;
+						return VisibilityState.Invisible;
 					}
 				}
 				else {
 					if (dimension == Dimension) {
-						return VisibilityState.visible;
+						return VisibilityState.Visible;
 					}
 					else {
-						return VisibilityState.invisible;
+						return VisibilityState.Invisible;
 					}
 				}
 			default:
