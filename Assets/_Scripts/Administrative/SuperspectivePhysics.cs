@@ -14,6 +14,7 @@ public static class SuperspectivePhysics {
 	private static int _defaultLayer = -1;
 	private static int _visibleButNoPlayerCollisionLayer = -1;
 	private static int _ignoreRaycastLayer = -1;
+	private static int _blockRaycastOnlyLayer = -1;
 	private static int _triggerZoneLayer = -1;
 	private static int _playerLayer = -1;
 	private static int _invisibleLayer = -1;
@@ -31,6 +32,7 @@ public static class SuperspectivePhysics {
 	public static int DefaultLayer => LazyLayer(ref _defaultLayer, "Default");
 	public static int VisibleButNoPlayerCollisionLayer => LazyLayer(ref _visibleButNoPlayerCollisionLayer, "VisibleButNoPlayerCollision");
 	public static int IgnoreRaycastLayer => LazyLayer(ref _ignoreRaycastLayer, "Ignore Raycast");
+	public static int BlockRaycastOnlyLayer => LazyLayer(ref _blockRaycastOnlyLayer, "BlockRaycastOnly");
 	public static int TriggerZoneLayer => LazyLayer(ref _triggerZoneLayer, "TriggerZone");
 	public static int PlayerLayer => LazyLayer(ref _playerLayer, "Player");
 	public static int InvisibleLayer => LazyLayer(ref _invisibleLayer,"Invisible");

@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
 using System.Linq;
+using System.Text;
 using UnityStandardAssets.ImageEffects;
 
 namespace PortalMechanics {
@@ -102,8 +104,8 @@ namespace PortalMechanics {
 
 			// Copy main camera component from player's camera
 			portalCamera.CopyFrom(playerCam);
-			portalCamera.cullingMask &= ~SuperspectivePhysics.HideFromPortalLayer;
-			portalCamera.cullingMask &= ~SuperspectivePhysics.VolumetricPortalLayer;
+			portalCamera.cullingMask &= ~(1 << SuperspectivePhysics.HideFromPortalLayer);
+			portalCamera.cullingMask &= ~(1 << SuperspectivePhysics.VolumetricPortalLayer);
 			portalCamera.backgroundColor = Color.white; 
 
 			VirtualPortalCamera virtualPortalCam = portalCamera.gameObject.AddComponent<VirtualPortalCamera>();
@@ -123,6 +125,34 @@ namespace PortalMechanics {
 			//virtualPortalCam.postProcessEffects.Add(edgeDetection);
 
 			portalCamera.gameObject.name = "VirtualPortalCamera";
+		}
+	}
+
+	public static class LayerMaskExt {
+		public static string DebugLayerMask(this int layerMask) {
+			StringBuilder sb = new StringBuilder("Layers included in layermask: (");
+			bool hasLayer = false;
+
+			for (int i = 0; i < 32; i++) {
+				if ((layerMask & (1 << i)) != 0) {  // Check if the i-th bit is set
+					string layerName = LayerMask.LayerToName(i);
+					if (!string.IsNullOrEmpty(layerName)) {
+						sb.Append(layerName + ", ");
+						hasLayer = true;
+					} else {
+						sb.Append($"Layer {i}, ");  // Handle unnamed layers
+						hasLayer = true;
+					}
+				}
+			}
+
+			if (hasLayer) {
+				// Remove the last ", " and close the parentheses
+				sb.Length -= 2;
+			}
+
+			sb.Append(")");
+			return sb.ToString();
 		}
 	}
 }

@@ -7,6 +7,7 @@ using SuperspectiveUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.Remoting.Messaging;
 using GrowShrink;
 using LevelManagement;
@@ -14,6 +15,11 @@ using MagicTriggerMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine.Events;
+using Matrix4x4 = UnityEngine.Matrix4x4;
+using Plane = UnityEngine.Plane;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace PortalMechanics {
 	/// <summary>
@@ -359,7 +365,6 @@ namespace PortalMechanics {
 				GameObject triggerColliderGO = new GameObject(triggerName);
 				triggerColliderGO.transform.SetParent(c.transform, false);
 				Collider triggerCollider = null;
-				// Make the original collider --infinitely thin-- // Future me: WHY? Infinite thinness just leads to players phasing through the portal with lag
 				switch (c) {
 					case BoxCollider boxCollider:
 						// Copy the collider's properties to the trigger collider
@@ -384,6 +389,37 @@ namespace PortalMechanics {
 
 				return triggerCollider;
 			}).Where(c => c != null).ToArray();
+
+			colliders.ToList().ForEach(c => {
+				string raycastBlockerName = $"{c.name} Raycast Blocker";
+				GameObject raycastBlockerGO = new GameObject(raycastBlockerName);
+				raycastBlockerGO.transform.SetParent(c.transform, false);
+				Collider raycastBlocker = null;
+				// Make the raycast blocker collider --infinitely thin-- to work with raycasts starting inside the portal
+				switch (c) {
+					case BoxCollider boxCollider:
+						// Copy the collider's properties to the trigger collider
+						raycastBlocker = raycastBlockerGO.PasteComponent(boxCollider);
+						raycastBlocker.isTrigger = true;
+						break;
+					case MeshCollider meshCollider:
+						// Copy the collider's properties to the trigger collider
+						raycastBlocker = raycastBlockerGO.PasteComponent(meshCollider);
+						raycastBlocker.isTrigger = true;
+
+						meshCollider.convex = true;
+						break;
+					default:
+						Debug.LogError("Unsupported collider type for portal trigger collider, only BoxCollider and MeshCollider are supported!");
+						break;
+				}
+				raycastBlockerGO.transform.localScale = raycastBlockerGO.transform.localScale.WithZ(0f);
+				// Move it just so slightly back to avoid player being slightly past the portal plane
+				raycastBlockerGO.transform.position += IntoPortalVector * 0.1f;
+
+				raycastBlockerGO.name = raycastBlockerName;
+				raycastBlockerGO.layer = SuperspectivePhysics.PortalLayer;
+			});
 			
 			CreateCompositeTrigger();
 			InitializeCompositeTrigger();
@@ -980,6 +1016,8 @@ namespace PortalMechanics {
 			}
 
 			if (changeActiveSceneOnTeleport) {
+				// TODO: Investigate crash that happens when switching scenes rapidly without the following check
+				//LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
 				if (LevelManager.instance.IsCurrentlySwitchingScenes) {
 					Debug.LogError($"Tried to switch scenes due to {ID} teleport but LevelManager is still loading!");
 				}

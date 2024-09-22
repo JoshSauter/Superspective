@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace SuperspectiveUtils {
     public static class RaycastUtils {
+        public delegate void RaycastEvent();
+
+        public static event RaycastEvent BeforeRaycast;
+        public static event RaycastEvent AfterRaycast;
+        
         private static int portalLayer => LayerMask.NameToLayer("Portal");
         public const int MAX_RAYCASTS = 8;
 
@@ -39,6 +44,8 @@ namespace SuperspectiveUtils {
                 distance = maxDistance,
                 ray = ray
             };
+            
+            BeforeRaycast?.Invoke();
 
             Ray currentRay = ray;
             float distanceRemaining = maxDistance;
@@ -46,7 +53,8 @@ namespace SuperspectiveUtils {
             Portal lastPortalHit = null;
             while (distanceRemaining > 0 && raycastsMade < MAX_RAYCASTS) {
                 // Temporarily ignore the out portal of the last portal hit
-                if (lastPortalHit != null && lastPortalHit.otherPortal != null) {
+                bool shouldDisableOtherPortal = lastPortalHit != null && lastPortalHit.otherPortal != null && lastPortalHit != lastPortalHit.otherPortal;
+                if (shouldDisableOtherPortal) {
                     foreach (Collider otherPortalCollider in lastPortalHit.otherPortal.colliders) {
                         otherPortalCollider.enabled = false;
                     }
@@ -64,7 +72,7 @@ namespace SuperspectiveUtils {
                     QueryTriggerInteraction.Collide
                 );
                 raycastsMade++;
-                if (lastPortalHit != null && lastPortalHit.otherPortal != null) {
+                if (shouldDisableOtherPortal) {
                     foreach (Collider otherPortalCollider in lastPortalHit.otherPortal.colliders) {
                         otherPortalCollider.enabled = true;
                     }
@@ -84,6 +92,8 @@ namespace SuperspectiveUtils {
             if (raycastsMade == MAX_RAYCASTS) {
                 Debug.LogWarning($"Max steps for raycast {MAX_RAYCASTS} exceeded, raycast shorted early");
             }
+            
+            AfterRaycast?.Invoke();
 
             return result;
         }
@@ -268,8 +278,8 @@ namespace SuperspectiveUtils {
                 }
             }
 
-            // If we didn't hit either of those, check if it's the VolumetricPortal
-            if (result == null && hitObject.name.Contains("VolumetricPortal")) {
+            // If we didn't hit either of those, check if it's the VolumetricPortal or the raycast blocker
+            if (result == null && hitObject.name.Contains("VolumetricPortal") || hitObject.name.Contains("Raycast Blocker")) {
                 result = hitObject.transform.parent?.GetComponent<Portal>();
             }
 
@@ -293,12 +303,13 @@ namespace SuperspectiveUtils {
                 float finalDistance = hit.distance;
                 
                 // Okay, so we hit the portal trigger zone, but did we actually hit the Portal?
-                // First we construct a plane for the Portal plane
-                Plane portalPlane = new Plane(portalWhoseTriggerWasHit.IntoPortalVector, portalWhoseTriggerWasHit.transform.position);
+                // First we construct a plane for the Portal plane, slightly pushed into the portal to allow for the case where the player is standing just slightly past the actual portal plane
+                Vector3 planeOffset = portalWhoseTriggerWasHit.IntoPortalVector.normalized * 0.1f;
+                Plane portalPlane = new Plane(portalWhoseTriggerWasHit.IntoPortalVector, portalWhoseTriggerWasHit.transform.position + planeOffset);
                 // Then we see if the original raycast actually hits the plane
                 if (portalPlane.Raycast(ray, out float distanceToIntersect) && distanceToIntersect <= distanceRemaining) {
                     // Okay so the raycast hit the infinitely extending plane, but did it hit the Portal?
-                    Vector3 hitPosition = ray.GetPoint(distanceToIntersect);
+                    Vector3 hitPosition = ray.GetPoint(distanceToIntersect) - planeOffset;
                     // Find the closest point on the Portal to the hit position
                     Vector3 testPosition = portalWhoseTriggerWasHit.ClosestPoint(hitPosition, true, true);
                     
