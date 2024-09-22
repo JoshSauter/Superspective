@@ -29,6 +29,8 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 	    base.Awake();
 	    
 	    state = this.StateMachine(State.Off);
+	    
+	    state.AddStateTransition(State.On, State.Off, () => !LevelChangeBanner.instance.isPlayingBanner && !LevelChangeBanner.instance.HasQueuedBanner);
     }
 
     public void TurnOnLetterboxing() {
