@@ -46718,7 +46718,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
-  DEBUG: 1
+  DEBUG: 0
   totalOffsetApplied: {x: 0, y: 0}
 --- !u!114 &1554336844
 MonoBehaviour:
@@ -56355,11 +56355,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   portalMaskReplacementShader: {fileID: 0}
-  portalMaskScaledReplacementShader: {fileID: 0}
   edgeDetection: {fileID: 1809741071}
   visibilityMaskTexture: {fileID: 0}
   portalMaskTexture: {fileID: 0}
-  portalMaskTextureScaled: {fileID: 0}
   edgeDetectionColorsThroughPortals: {fileID: 0}
   visibilityMaskValue: 0
   edgeDetectionColorsThroughPortalShader: {fileID: 4800000, guid: 0cd89f9924b34578819334fe771da8b2,
@@ -56685,14 +56683,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65003,7 +65001,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2798176
+  m_Name: pb_Mesh1100084
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
