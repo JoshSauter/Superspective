@@ -32706,19 +32706,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   banners:
   - level: 18
+    overrideKey: 
     banner: {fileID: 1232568248}
   - level: 14
+    overrideKey: 
     banner: {fileID: 1659195838}
   - level: 13
+    overrideKey: 
     banner: {fileID: 841803766}
   - level: 12
+    overrideKey: 
     banner: {fileID: 1593681515}
   - level: 20
+    overrideKey: 
     banner: {fileID: 1265665701}
   - level: 0
+    overrideKey: ItFollows_GrowShrink
     banner: {fileID: 696710690}
-  lastBannerLoaded: 0
-  queuedBanner: 0
+  lastBannerLoaded: 
+  queuedBanner: 
   isPlayingBanner: 0
 --- !u!225 &1038374371
 CanvasGroup:
@@ -56690,7 +56696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 0
+  cachedEnableState: 1
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65001,7 +65007,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh560046
+  m_Name: pb_Mesh35328
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

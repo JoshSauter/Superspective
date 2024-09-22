@@ -66,6 +66,7 @@ namespace TheEntity {
         }
         public StateMachine<ResetPlayerState> resetPlayerState;
 
+        private const string LEVEL_CHANGE_BANNER_KEY = "ItFollows_GrowShrink";
         private const float WATCHING_DESPAWN_DELAY = 5f;
         private const float RESET_PLAYER_DISTANCE = 9f;
         private const float RESET_PLAYER_TIME = 1f;
@@ -114,9 +115,8 @@ namespace TheEntity {
 
         private void PlayBanner() {
             if (hasPlayedBanner) return;
-            
-            // This banner doesn't actually belong to a level but I'm too lazy to refactor it so we're just using ManagerScene as the key
-            LevelChangeBanner.instance.PlayBanner(Levels.ManagerScene);
+
+            LevelChangeBanner.instance.PlayBanner(LEVEL_CHANGE_BANNER_KEY);
             hasPlayedBanner = true;
         }
 
@@ -137,11 +137,6 @@ namespace TheEntity {
             
             // Disable collider and renderer when not spawned
             state.OnStateChangeSimple += SetActive;
-            
-            state.AddTrigger(State.NotSpawned, () => {
-                transform.position = startPos;
-                staticWall.position = staticWall.position.WithX(staticWallStartX);
-            });
             
             // Play the banner the first time it starts following
             state.AddTrigger(State.Following, PlayBanner);
@@ -213,6 +208,14 @@ namespace TheEntity {
                 debug.Log($"Desired Position: {desiredPos}");
 
                 transform.position = desiredPos; // Vector3.MoveTowards(transform.position, desiredPos, MoveSpeed * Time.deltaTime);
+            });
+            
+            // Reset state when not spawned
+            state.AddTrigger(State.NotSpawned, () => {
+                distanceTraveled = 0;
+                currentIndex = 0;
+                transform.position = startPos;
+                staticWall.position = staticWall.position.WithX(staticWallStartX);
             });
             
             state.WithUpdate(_ => {

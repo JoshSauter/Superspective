@@ -38,6 +38,18 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 		RegisterScrambler();
 	}
 
+	void Update() {
+		bool shouldBeInteractable = DEBUG && DebugInput.IsDebugBuild;
+		if (interactableObject.state == InteractableObject.InteractableState.Interactable != shouldBeInteractable) {
+			if (shouldBeInteractable) {
+				interactableObject.SetAsInteractable();
+			}
+			else {
+				interactableObject.SetAsHidden();
+			}
+		}
+	}
+
 	void ToggleOnOff() {
 		scramblerState.Set((ScramblerState)(1 - scramblerState));
 	}

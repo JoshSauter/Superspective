@@ -11,13 +11,14 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     [Serializable]
     public struct Banner {
         public Levels level;
+        public string overrideKey; // If this is set, this banner will be used instead of the level name
         public Image banner;
     }
     public Banner[] banners;
-    public Dictionary<Levels, Image> levelToBanner = new Dictionary<Levels, Image>();
-    public Levels lastBannerLoaded = Levels.ManagerScene;
-    public Levels queuedBanner = Levels.ManagerScene;
-    public bool HasQueuedBanner => queuedBanner != Levels.ManagerScene;
+    public Dictionary<string, Image> levelToBanner = new Dictionary<string, Image>();
+    public string lastBannerLoaded = "";
+    public string queuedBanner = "";
+    public bool HasQueuedBanner => !string.IsNullOrEmpty(queuedBanner);
     public bool isPlayingBanner;
 
     public const float FADE_TIME = 2.5f;
@@ -27,47 +28,49 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         bannerGroup = GetComponent<CanvasGroup>();
 
         foreach (var banner in banners) {
-            levelToBanner[banner.level] = banner.banner;
+            string key = banner.overrideKey != "" ? banner.overrideKey : banner.level.ToString();
+            levelToBanner[key] = banner.banner;
         }
     }
 
     void Update() {
         if (!isPlayingBanner && HasQueuedBanner && queuedBanner != lastBannerLoaded) {
             PlayBanner(queuedBanner);
-            queuedBanner = Levels.ManagerScene;
+            queuedBanner = "";
         }
     }
 
-    public void PlayBanner(Levels level) {
+    public void PlayBanner(string key) {
         // If we're not already playing a banner
         if (!isPlayingBanner) {
             // If we have a banner prepared for this level
-            if (levelToBanner.ContainsKey(level)) {
-                StartCoroutine(PlayBannerCoroutine(level));
+            if (levelToBanner.ContainsKey(key)) {
+                StartCoroutine(PlayBannerCoroutine(key));
             }
         }
         // If we're playing a banner and attempting to queue up a different banner
-        else if (level != lastBannerLoaded && levelToBanner.ContainsKey(level)){
-            queuedBanner = level;
+        else if (key != lastBannerLoaded && levelToBanner.ContainsKey(key)){
+            queuedBanner = key;
         }
         // If we're playing a banner and attempt to queue up the same banner
         else {
-            queuedBanner = Levels.ManagerScene;
+            queuedBanner = "";
         }
     }
 
+    public void PlayBanner(Levels level) => PlayBanner(level.ToString());
+
     // TODO: Make separate coroutine to track banner position and color state each frame. EDIT: Why though?
-    IEnumerator PlayBannerCoroutine(Levels level) {
-        // managerScene acts as a flag value for "not set"
-        if (lastBannerLoaded != Levels.ManagerScene) {
+    IEnumerator PlayBannerCoroutine(string key) {
+        if (lastBannerLoaded != "") {
             levelToBanner[lastBannerLoaded].gameObject.SetActive(false);
         }
-        RectTransform banner = levelToBanner[level].rectTransform;
-        Image bannerImage = levelToBanner[level];
+        RectTransform banner = levelToBanner[key].rectTransform;
+        Image bannerImage = levelToBanner[key];
         bannerGroup.alpha = 0;
         banner.gameObject.SetActive(true);
 
-        lastBannerLoaded = level;
+        lastBannerLoaded = key;
 
         Letterboxing.instance.TurnOnLetterboxing();
         isPlayingBanner = true;
@@ -97,7 +100,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
             if (!CameraFlythrough.instance.isPlayingFlythrough) {
                 float timeElapsedThisFrame = Time.deltaTime;
                 // If another banner is queued up, speed up the animation
-                if (HasQueuedBanner && queuedBanner != level) {
+                if (HasQueuedBanner && queuedBanner != key) {
                     timeElapsedThisFrame += 2 * Time.deltaTime;
                 }
 
@@ -114,7 +117,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         while (timeElapsed < DISPLAY_TIME) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (HasQueuedBanner && queuedBanner != level) {
+            if (HasQueuedBanner && queuedBanner != key) {
                 timeElapsed += 2 * Time.deltaTime;
             }
 
@@ -126,7 +129,7 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
         while (timeElapsed < FADE_TIME) {
             timeElapsed += Time.deltaTime;
             // If another banner is queued up, speed up the animation
-            if (queuedBanner != Levels.ManagerScene && queuedBanner != level) {
+            if (HasQueuedBanner && queuedBanner != key) {
                 timeElapsed += 2 * Time.deltaTime;
             }
             float t = timeElapsed / FADE_TIME;

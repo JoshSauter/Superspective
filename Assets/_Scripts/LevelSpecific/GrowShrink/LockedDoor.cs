@@ -26,8 +26,8 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     public Transform doorLeft, doorRight;
 
     // Config
-    private const float cameraShakeIntensity = 1.25f;
-    private const float cameraLongShakeIntensity = .3125f;
+    private const float cameraShakeIntensity = 5f;
+    private const float cameraLongShakeIntensity = 1.25f;
     private const float cameraShakeDuration = .25f;
     private const float portalMovingSoundDelay = .35f;
     private float OPEN_CLOSE_SPEED = MAX_OFFSET / OPEN_CLOSE_TIME;
