@@ -28,13 +28,13 @@ namespace Telemetry {
         private void Update() {
             // Check for key presses in Update
             if (DebugInput.GetKey(KeyCode.LeftShift) || DebugInput.GetKey(KeyCode.RightShift)) {
-                if (Input.GetKeyDown(recordKey)) {
+                if (DebugInput.GetKeyDown(recordKey)) {
                     Record();
                 }
-                else if (Input.GetKeyDown(playKey)) {
+                else if (DebugInput.GetKeyDown(playKey)) {
                     Play();
                 }
-                else if (Input.GetKeyDown(stopKey)) {
+                else if (DebugInput.GetKeyDown(stopKey)) {
                     Stop();
                 }
             }

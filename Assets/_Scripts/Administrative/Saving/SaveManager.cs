@@ -170,6 +170,29 @@ namespace Saving {
             return associatedIds;
         }
 
+        public static List<SaveableObject> GetAllAssociatedSaveableObjects(string associationId) {
+            List<SaveableObject> associatedIds = new List<SaveableObject>();
+            foreach (string id in sceneLookupForId.Keys) {
+                string lastPart = id.Split('_').Last();
+                string curAssociationId = lastPart.IsGuid() ? lastPart : id;
+
+                if (curAssociationId == associationId) {
+                    SaveManagerForScene saveManagerForScene = GetOrCreateSaveManagerForScene(sceneLookupForId[id]);
+                    var saveableObject = saveManagerForScene.GetSaveableObject(id)?.LeftOrDefault();
+                    if (saveableObject == null) {
+                        if (id != associationId) {
+                            Debug.LogError($"SaveableObject with id {id} not found in scene {sceneLookupForId[id]} when getting all associated saveableObjects for {associationId}");
+                        }
+                    }
+                    else {
+                        associatedIds.Add(saveableObject);
+                    }
+                }
+            }
+
+            return associatedIds;
+        }
+
         public static Either<DynamicObject, DynamicObject.DynamicObjectSave> GetDynamicObjectById(string id) {
             if (!Application.isPlaying) {
                 return FindObjectById<DynamicObject>(id);

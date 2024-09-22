@@ -132,7 +132,7 @@ namespace Saving {
 			return true;
 		}
 
-		public static bool ChangeDynamicObjectScene(DynamicObject dynamicObject, string newScene) {
+		public static bool ChangeDynamicObjectScene(DynamicObject dynamicObject, string oldScene, string newScene) {
 			string id = dynamicObject.ID;
 			if (!allDynamicObjectRecords.ContainsKey(id)) {
 				Debug.LogError($"Trying to change scene for DynamicObject {dynamicObject}, but there is no entry for id {id}");
@@ -145,7 +145,16 @@ namespace Saving {
 			}
 			
 			// Update all associated SaveableObject IDs' scenes
-			SaveManager.GetAllAssociatedIds(dynamicObject.ID).ForEach(associatedId => SaveManager.sceneLookupForId[associatedId] = newScene);
+			SaveManagerForScene oldSceneSaveManager = SaveManager.GetOrCreateSaveManagerForScene(oldScene);
+			SaveManagerForScene newSceneSaveManager = SaveManager.GetOrCreateSaveManagerForScene(newScene);
+			oldSceneSaveManager.UnregisterDynamicObject(id);
+			newSceneSaveManager.RegisterDynamicObject(dynamicObject);
+			SaveManager.GetAllAssociatedSaveableObjects(dynamicObject.ID).ForEach(associatedSO => {
+				string associatedId = associatedSO.ID;
+				oldSceneSaveManager.UnregisterSaveableObject(associatedId);
+				SaveManager.sceneLookupForId[associatedId] = newScene;
+				newSceneSaveManager.RegisterSaveableObject(associatedSO);
+			});
 
 			DynamicObjectRecord record = allDynamicObjectRecords[id];
 			record.sceneName = newScene;

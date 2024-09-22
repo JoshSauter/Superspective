@@ -189,15 +189,12 @@ namespace Saving {
 
 		public void ChangeScene(Scene newScene) {
 			if (isGlobal && gameObject.scene != newScene) {
-				// Deregister the DynamicObject in the old SaveManagerForScene
-				SaveForScene.UnregisterDynamicObject(ID);
+				string oldScene = SceneName;
 				gameObject.transform.SetParent(null);
 				// Move the GameObject to the new scene
 				SceneManager.MoveGameObjectToScene(gameObject, newScene);
 				// Update the record of the DynamicObject in DynamicObjectManager
-				DynamicObjectManager.ChangeDynamicObjectScene(this, SceneName);
-				// Re-register the DynamicObject in the new SaveManagerForScene
-				SaveForScene.RegisterDynamicObject(this);
+				DynamicObjectManager.ChangeDynamicObjectScene(this, oldScene, newScene.name);
 			}
 		}
 
