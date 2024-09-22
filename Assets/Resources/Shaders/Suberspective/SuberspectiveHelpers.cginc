@@ -80,6 +80,7 @@ inline void SuberspectiveRender(SuberspectiveV2F i, inout float4 color, inout ha
 	if (length(i.color) > 0) {
 		color.rgb *= i.color.rgb;
 		color.a *= i.color.a;
+		color = saturate(color);
 	}
 
 	SuberspectiveRender(uv_DimensionMask, uv_DissolveTex, i.worldPos, color, emissionEnabled);

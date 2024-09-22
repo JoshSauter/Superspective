@@ -9,7 +9,6 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 	SerializedProperty debugMode;
 
 	bool thicknessHelp = false;
-	SerializedProperty doubleSidedEdges;
 	SerializedProperty checkPortalDepth;
 	SerializedProperty depthSensitivity;
 	SerializedProperty normalSensitivity;
@@ -31,7 +30,6 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 	void OnEnable() {
 		debugMode = serializedObject.FindProperty("debugMode");
 
-		doubleSidedEdges = serializedObject.FindProperty("doubleSidedEdges");
 		checkPortalDepth = serializedObject.FindProperty("checkPortalDepth");
 		depthSensitivity = serializedObject.FindProperty("depthSensitivity");
 		normalSensitivity = serializedObject.FindProperty("normalSensitivity");
@@ -65,10 +63,6 @@ public class BladeEdgeDetectionInspector : UnityEditor.Editor {
 		EditorGUILayout.Space();
 
 		LabelWithHelpButton(ref thicknessHelp, "Thickness:");
-		doubleSidedEdges.boolValue = EditorGUILayout.Toggle("Double-sided edges?", doubleSidedEdges.boolValue);
-		OptionalHelpBox(thicknessHelp, doubleSidedEdges.boolValue ?
-			"Edges will be rendered on both sides of a detected depth or normal difference" :
-			"Edges will be rendered on one side of a detected depth or normal difference");
 		checkPortalDepth.boolValue = EditorGUILayout.Toggle("Avoid drawing on top of portals?", checkPortalDepth.boolValue);
 		sampleDistance.intValue = EditorGUILayout.IntField("Sample distance: ", sampleDistance.intValue);
 		string pixelPlural = (sampleDistance.intValue == 1) ? " pixel " : " pixels ";
