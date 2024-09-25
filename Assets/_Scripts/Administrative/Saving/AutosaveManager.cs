@@ -13,6 +13,7 @@ namespace Saving {
     public class AutosaveManager : Singleton<AutosaveManager> {
         public float AutosaveInterval => Convert.ToSingle(Settings.Autosave.AutosaveInterval.dropdownSelection.selection.Datum);
         public int MaxNumberOfAutosaves => (int)Settings.Autosave.NumAutosaves;
+        private bool IsLoading => GameManager.instance.IsCurrentlyLoading;
 
 #if UNITY_EDITOR
         public bool CanMakeTimedAutosave => false;
@@ -54,6 +55,7 @@ namespace Saving {
 
         IEnumerator DoAutosaveDelayed(float delay) {
             yield return new WaitForSeconds(delay);
+            yield return new WaitUntil(() => !IsLoading && CanMakeAutosaveOnLevelLoad);
             
             DoAutosave();
         }

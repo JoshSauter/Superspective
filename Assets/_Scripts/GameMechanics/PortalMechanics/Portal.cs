@@ -1017,13 +1017,14 @@ namespace PortalMechanics {
 
 			if (changeActiveSceneOnTeleport) {
 				// TODO: Investigate crash that happens when switching scenes rapidly without the following check
-				//LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
-				if (LevelManager.instance.IsCurrentlySwitchingScenes) {
-					Debug.LogError($"Tried to switch scenes due to {ID} teleport but LevelManager is still loading!");
-				}
-				else {
-					LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
-				}
+				LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
+				// TODO: Can't reproduce the crash anymore, but if it starts happening, uncomment the following lines
+				// if (LevelManager.instance.IsCurrentlySwitchingScenes) {
+				// 	Debug.LogError($"Tried to switch scenes due to {ID} teleport but LevelManager is still loading!");
+				// }
+				// else {
+				// 	LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
+				// }
 			}
 
 			// If the out portal is also a PillarDimensionObject, update the active pillar's curDimension to match the out portal's Dimension
