@@ -30,7 +30,7 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 	    
 	    state = this.StateMachine(State.Off);
 	    
-	    state.AddStateTransition(State.On, State.Off, () => !LevelChangeBanner.instance.isPlayingBanner && !LevelChangeBanner.instance.HasQueuedBanner);
+	    state.AddStateTransition(State.On, State.Off, () => !LevelChangeBanner.instance.IsPlayingBanner && !LevelChangeBanner.instance.HasQueuedBanner);
     }
 
     public void TurnOnLetterboxing() {
@@ -76,6 +76,10 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 			    botAnchorMax.y = botTarget;
 			    bottomLetterboxBar.rectTransform.anchorMax = botAnchorMax;
 		    }
+		    else {
+			    topLetterboxBar.color = Color.black.WithAlpha(MAX_ALPHA);
+			    bottomLetterboxBar.color = Color.black.WithAlpha(MAX_ALPHA);
+		    }
 	    }
 	    else {
 		    if (state.Time < LETTERBOX_DISAPPEAR_TIME) {
@@ -89,6 +93,11 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 
 			    float botTarget = Mathf.Lerp(LETTERBOX_HEIGHT, 0, t);
 			    float topTarget = 1 - botTarget;
+		    }
+		    else {
+			    Color targetColor = Color.black.WithAlpha(0);
+			    topLetterboxBar.color = targetColor;
+			    bottomLetterboxBar.color = targetColor;
 		    }
 	    }
     }

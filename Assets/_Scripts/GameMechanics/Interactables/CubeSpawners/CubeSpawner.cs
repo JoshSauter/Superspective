@@ -19,7 +19,8 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public DimensionObject backWall;
     public Button button;
     public float tDistanceBeforeEnablingNewCubeColliders = 0.5f;
-    const float spawnOffset = 12;
+    const float SPAWN_OFFSET = 12;
+    private float SpawnOffset => SPAWN_OFFSET * CurScale;
 
     private Vector3 lastCubeSpawnedPosition;
 
@@ -33,11 +34,13 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public Collider roofCollider;
     public Transform glass;
     public Transform glassHitbox;
-    const float glassLowerDelay = 1.75f;
-    const float glassRaiseDelay = 0.25f;
-    const float glassOffset = 1.5f;
-    const float glassMoveTime = 1.2f;
+    const float GLASS_LOWER_DELAY = 1.75f;
+    const float GLASS_RAISE_DELAY = 0.25f;
+    const float GLASS_OFFSET = 1.5f;
+    const float GLASS_MOVE_TIME = 1.2f;
     float startHeight;
+
+    private float CurScale => transform.lossyScale.y;
 
     public enum SpawnState {
         // Initial state
@@ -60,7 +63,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public StateMachine<DespawnState> despawnState;
 
     PickupObject cubeDespawning;
-    private const float respawnDelay = glassRaiseDelay + glassMoveTime;
+    private const float respawnDelay = GLASS_RAISE_DELAY + GLASS_MOVE_TIME;
     const float despawnTime = 4f;
     Vector3 despawnStartSize = Vector3.one;
     private const float despawnEndSizeMultiplier = 4;
@@ -73,6 +76,8 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         
         button.OnButtonPressBegin += (_) => SpawnNewCube();
         button.OnButtonUnpressBegin += (_) => DestroyCubeAlreadyGrabbedFromSpawner();
+
+        button.pressDistance *= CurScale;
 
         startHeight = glass.transform.localPosition.y;
     }
@@ -123,7 +128,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             }
 
             float distanceFallen = Vector3.Distance(lastCubeSpawnedPosition, cubeSpawned.transform.position);
-            float distanceThreshold = spawnOffset * tDistanceBeforeEnablingNewCubeColliders;
+            float distanceThreshold = SpawnOffset * tDistanceBeforeEnablingNewCubeColliders;
             
             // Disable new cube's colliders for the first part of the fall
             if (distanceFallen <= distanceThreshold) {
@@ -138,26 +143,26 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                 }
             }
 
-            if (timeSinceStateChanged > glassLowerDelay && timeSinceStateChanged < glassMoveTime + glassLowerDelay) {
-                float time = timeSinceStateChanged - glassLowerDelay;
-                float t = time / glassMoveTime;
+            if (timeSinceStateChanged > GLASS_LOWER_DELAY && timeSinceStateChanged < GLASS_MOVE_TIME + GLASS_LOWER_DELAY) {
+                float time = timeSinceStateChanged - GLASS_LOWER_DELAY;
+                float t = time / GLASS_MOVE_TIME;
                     
                 Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
-                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
+                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight-GLASS_OFFSET, glass.localPosition.z);
                 glass.localPosition = Vector3.Lerp(startPos, endPos, t*t);
             }
-            else if (timeSinceStateChanged >= glassMoveTime + glassLowerDelay) {
-                glass.localPosition = new Vector3(glass.localPosition.x, startHeight-glassOffset, glass.localPosition.z);
+            else if (timeSinceStateChanged >= GLASS_MOVE_TIME + GLASS_LOWER_DELAY) {
+                glass.localPosition = new Vector3(glass.localPosition.x, startHeight-GLASS_OFFSET, glass.localPosition.z);
             }
         });
 
         Action<float> respawnDelayAndTakenUpdate = (timeSinceStateChanged) => {
-            if (timeSinceStateChanged > glassRaiseDelay && timeSinceStateChanged < glassMoveTime + glassRaiseDelay) {
-                float time = timeSinceStateChanged - glassRaiseDelay;
-                float t = time / glassMoveTime;
+            if (timeSinceStateChanged > GLASS_RAISE_DELAY && timeSinceStateChanged < GLASS_MOVE_TIME + GLASS_RAISE_DELAY) {
+                float time = timeSinceStateChanged - GLASS_RAISE_DELAY;
+                float t = time / GLASS_MOVE_TIME;
 
                 Vector3 startPos = new Vector3(glass.localPosition.x, startHeight, glass.localPosition.z);
-                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight - glassOffset, glass.localPosition.z);
+                Vector3 endPos = new Vector3(glass.localPosition.x, startHeight - GLASS_OFFSET, glass.localPosition.z);
                 glass.localPosition = Vector3.Lerp(endPos, startPos, t * t);
             }
         };
@@ -200,7 +205,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         if (spawnState == SpawnState.CubeTaken && !ReferenceIsReplaceable(cubeGrabbedFromSpawner)) {
             button.interactableObject.SetAsDisabled("(Spawned cube locked in receptacle)");
         }
-        else if ((spawnState == SpawnState.CubeSpawnedButNotTaken && spawnState.Time < glassMoveTime + glassLowerDelay) || spawnState == SpawnState.InRespawnDelay) {
+        else if ((spawnState == SpawnState.CubeSpawnedButNotTaken && spawnState.Time < GLASS_MOVE_TIME + GLASS_LOWER_DELAY) || spawnState == SpawnState.InRespawnDelay) {
             button.interactableObject.SetAsHidden();
         }
         else {
@@ -226,7 +231,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         Rigidbody newCubeRigidbody = newCube.thisRigidbody;
         newCube.transform.SetParent(null);
         newCube.transform.localScale = cubeInSpawnerPrefab.transform.localScale;
-        newCube.transform.position = transform.position + transform.up * spawnOffset;
+        newCube.transform.position = transform.position + transform.up * SpawnOffset;
         newCubeRigidbody.MovePosition(newCube.transform.position);
         newCube.transform.Rotate(Random.insideUnitSphere.normalized, Random.Range(0, 20f));
         newCubeRigidbody.MoveRotation(newCube.transform.rotation);

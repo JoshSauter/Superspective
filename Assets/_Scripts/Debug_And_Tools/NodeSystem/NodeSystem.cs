@@ -577,6 +577,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			NodeSystem s = selected.GetComponent<NodeSystem>();
 			if (s != null) {
 				s.selectedNodes = new HashSet<Node>(s.allNodes);
+				s.selectedNodesIndices = Enumerable.Range(0, s.allNodes.Count).ToList();
 			}
 		}
 	}

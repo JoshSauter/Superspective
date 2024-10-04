@@ -385,7 +385,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         return lastRaycast;
     }
 
-    // TODO: Investigate this, doesn't seem like it places the targetPos where I want it to. Edit: it might be fine, just need to retest it
     Vector3 PositionAtFirstObjectOrEndOfRaycast(SuperspectiveRaycast raycast) {
         Vector3 result = raycast.DidHitObject ? raycast.FirstObjectHit.point : raycast.FinalPosition;
         if (DEBUG) {

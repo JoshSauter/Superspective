@@ -346,17 +346,19 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         cubeInReceptacle = null;
     }
 
-    public void ExpelCube() {
+    public void ExpelCubeWithForce(float forceMultiplier) {
         PickupObject cubeToEject = cubeInReceptacle;
         if (cubeToEject == null) {
             return;
         }
         ReleaseCubeFromReceptacleInstantly();
         Vector2 randomDirection = UnityEngine.Random.insideUnitCircle.normalized;
-        float forceMagnitude = UnityEngine.Random.Range(240f, 350f);
+        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(240f, 350f);
         Vector3 ejectionDirection = transform.TransformDirection(new Vector3(-Mathf.Abs(randomDirection.x), 4, randomDirection.y));
         cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
     }
+
+    public void ExpelCube() => ExpelCubeWithForce(1);
 
     void ReleaseFromReceptacle() {
         cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;

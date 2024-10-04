@@ -33,15 +33,6 @@ namespace StateUtils {
         public delegate void OnStateChangeEventSimple();
         public event OnStateChangeEvent OnStateChange;
         public event OnStateChangeEventSimple OnStateChangeSimple;
-        public Dictionary<T, UnityEvent> onStateChangeDict;
-
-        [Serializable]
-        public struct StateMachineUnityEvent {
-            public T state;
-            public UnityEvent onStateChange;
-        }
-
-        public List<StateMachineUnityEvent> onStateChange;
 
         public T State {
             get {
@@ -65,9 +56,6 @@ namespace StateUtils {
             _state = newState;
 
             OnStateChange?.Invoke(PrevState, prevTimeSinceStateChanged);
-            if (onStateChangeDict.ContainsKey(newState)) {
-                onStateChangeDict[newState]?.Invoke();
-            }
             OnStateChangeSimple?.Invoke();
         }
 
@@ -466,8 +454,6 @@ namespace StateUtils {
 
         private void DoInit() {
             if (hasSubscribedToUpdate || GlobalUpdate.instance == null) return;
-            
-            onStateChangeDict = onStateChange?.ToDictionary(unityEvent => unityEvent.state, unityEvent => unityEvent.onStateChange) ?? new Dictionary<T, UnityEvent>();
 
             if (useFixedUpdateInstead) {
                 GlobalUpdate.instance.FixedUpdateGlobal += Update;

@@ -1,6 +1,7 @@
 ﻿using PowerTrailMechanics;
 using System.Collections;
 using System.Collections.Generic;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
@@ -20,10 +21,7 @@ namespace LevelSpecific.WhiteRoom {
         bool powered => powerTrail.distance > turnOnAtDistance;
 
         IEnumerator Start() {
-            r = GetComponent<SuperspectiveRenderer>();
-            if (r == null) {
-                r = gameObject.AddComponent<SuperspectiveRenderer>();
-            }
+            r = this.GetOrAddComponent<SuperspectiveRenderer>();
 
             yield return null;
             startEmission = r.GetColor(emissionColorKey);

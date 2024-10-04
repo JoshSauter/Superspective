@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using LevelManagement;
+using Saving;
+using StateUtils;
 using SuperspectiveUtils;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class LevelChangeBanner : Singleton<LevelChangeBanner> {
+public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, LevelChangeBanner.LevelChangeBannerSave> {
     CanvasGroup bannerGroup;
     [Serializable]
     public struct Banner {
@@ -16,36 +19,166 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     }
     public Banner[] banners;
     public Dictionary<string, Image> levelToBanner = new Dictionary<string, Image>();
-    public string lastBannerLoaded = "";
-    public string queuedBanner = "";
+    
     public bool HasQueuedBanner => !string.IsNullOrEmpty(queuedBanner);
-    public bool isPlayingBanner;
-
+    public bool IsPlayingBanner => state == State.Playing || state == State.WaitingForLetterbox;
+    
     public const float FADE_TIME = 2.5f;
     public const float DISPLAY_TIME = 4f;
+    const float DEFAULT_BANNER_Y_MIDPOINT = .8f; // Height of non-raised, non-letterboxed level change banner
 
-    void Awake() {
+    public enum State {
+        NotPlaying,
+        WaitingForLetterbox,
+        Playing
+    }
+    public StateMachine<State> state;
+    public string lastBannerLoaded = "";
+    public string queuedBanner = "";
+    public string currentlyPlayingBanner = "";
+
+    protected override void Awake() {
+        base.Awake();
         bannerGroup = GetComponent<CanvasGroup>();
 
         foreach (var banner in banners) {
             string key = banner.overrideKey != "" ? banner.overrideKey : banner.level.ToString();
             levelToBanner[key] = banner.banner;
         }
+
+        InitializeStateMachine();
+    }
+
+    private void InitializeStateMachine() {
+        state = this.StateMachine(State.NotPlaying);
+        
+        Color originalColor = Color.clear;
+        
+        // Wait for letterboxing to appear, if necessary
+        state.AddStateTransition(State.WaitingForLetterbox, State.Playing, () => !Letterboxing.instance.LetterboxingEnabled || Letterboxing.instance.state.Time >= Letterboxing.LETTERBOX_APPEAR_TIME);
+        
+        // When we start playing a banner, hide the last banner that was shown and show the new one
+        void EnterPlayingState() {
+            if (lastBannerLoaded != "" && lastBannerLoaded != currentlyPlayingBanner) {
+                levelToBanner[lastBannerLoaded].gameObject.SetActive(false);
+            }
+            lastBannerLoaded = currentlyPlayingBanner;
+            
+            // Trigger letterboxing, if needed
+            Letterboxing.instance.TurnOnLetterboxing();
+            if (Letterboxing.instance.LetterboxingEnabled && Letterboxing.instance.state.Time < Letterboxing.LETTERBOX_APPEAR_TIME) {
+                // If we need to wait for the letterbox to appear, temporarily enter the waiting state
+                // When the letterbox appears, we'll transition to back to the playing state but this condition will fail
+                // thus allowing the actual playing to begin
+                state.Set(State.WaitingForLetterbox);
+                return;
+            }
+
+            bannerGroup.alpha = 0;
+            Image bannerImage = levelToBanner[currentlyPlayingBanner];
+            bannerImage.gameObject.SetActive(true);
+            RectTransform bannerRect = bannerImage.rectTransform;
+            
+            originalColor = bannerImage.color;
+
+            // Position the banner in the appropriate position
+            float bannerYMidpoint = DEFAULT_BANNER_Y_MIDPOINT;
+            Vector2 halfBannerSize = (bannerRect.anchorMax - bannerRect.anchorMin) / 2f;
+            bool placeBannerAtTopOfScreen = Letterboxing.instance.LetterboxingEnabled || CameraFlythrough.instance.isPlayingFlythrough;
+            if (placeBannerAtTopOfScreen) {
+                bannerYMidpoint = 1 - halfBannerSize.y;
+            }
+            bannerRect.anchorMin = new Vector2(0.5f - halfBannerSize.x, bannerYMidpoint - halfBannerSize.y);
+            bannerRect.anchorMax = new Vector2(0.5f + halfBannerSize.x, bannerYMidpoint + halfBannerSize.y);
+            
+            if (placeBannerAtTopOfScreen && originalColor.WithAlpha(1).Distance(Color.black) < .1f) {
+                // Black text on black letterboxing is unreadable, so we'll make it white
+                bannerImage.color = Color.white.WithAlphaFrom(bannerImage.color);
+            }
+        }
+        state.AddTrigger(State.Playing, EnterPlayingState);
+        state.AddTrigger(State.Playing, FADE_TIME + DISPLAY_TIME, () => Letterboxing.instance.TurnOffLetterboxing());
+        
+        state.AddTrigger(State.NotPlaying, () => {
+            currentlyPlayingBanner = "";
+        });
+        
+        state.WithUpdate(State.Playing, time => {
+            float timeElapsed = time;
+
+            // Fade the banner in
+            if (timeElapsed < FADE_TIME) {
+                if (!CameraFlythrough.instance.isPlayingFlythrough) {
+                    // If another banner is queued up, speed up the fade-in animation
+                    if (HasQueuedBanner && queuedBanner != currentlyPlayingBanner) {
+                        state.Time += 2 * Time.deltaTime;
+                        timeElapsed = state.Time;
+                    }
+
+                    float t = timeElapsed / FADE_TIME;
+
+                    bannerGroup.alpha = t*t;
+                }
+
+                return;
+            }
+            
+            // Display the banner
+            timeElapsed -= FADE_TIME;
+            if (timeElapsed < DISPLAY_TIME) {
+                // If another banner is queued up, speed up the animation
+                if (HasQueuedBanner && queuedBanner != currentlyPlayingBanner) {
+                    state.Time += 2 * Time.deltaTime;
+                }
+
+                return;
+            }
+            
+            // Fade the banner out
+            timeElapsed -= DISPLAY_TIME;
+            if (timeElapsed < FADE_TIME) {
+                // If another banner is queued up, speed up the animation
+                if (HasQueuedBanner && queuedBanner != currentlyPlayingBanner) {
+                    state.Time += 2 * Time.deltaTime;
+                    timeElapsed = state.Time - FADE_TIME - DISPLAY_TIME;
+                }
+
+                float t = timeElapsed / FADE_TIME;
+
+                bannerGroup.alpha = 1 - Mathf.Sqrt(t);
+                return;
+            }
+            
+            // Transition to next state
+            bannerGroup.alpha = 0;
+            levelToBanner[currentlyPlayingBanner].color = originalColor;
+            if (HasQueuedBanner && queuedBanner != currentlyPlayingBanner) {
+                currentlyPlayingBanner = queuedBanner;
+                queuedBanner = "";
+                state.Set(State.Playing, true);
+                EnterPlayingState();
+            }
+            else {
+                state.Set(State.NotPlaying);
+            }
+        });
     }
 
     void Update() {
-        if (!isPlayingBanner && HasQueuedBanner && queuedBanner != lastBannerLoaded) {
+        if (!IsPlayingBanner && HasQueuedBanner && queuedBanner != lastBannerLoaded) {
             PlayBanner(queuedBanner);
             queuedBanner = "";
         }
     }
 
     public void PlayBanner(string key) {
+        debug.Log("Playing banner for " + key);
         // If we're not already playing a banner
-        if (!isPlayingBanner) {
+        if (!IsPlayingBanner) {
             // If we have a banner prepared for this level
             if (levelToBanner.ContainsKey(key)) {
-                StartCoroutine(PlayBannerCoroutine(key));
+                currentlyPlayingBanner = key;
+                state.Set(State.Playing);
             }
         }
         // If we're playing a banner and attempting to queue up a different banner
@@ -59,88 +192,29 @@ public class LevelChangeBanner : Singleton<LevelChangeBanner> {
     }
 
     public void PlayBanner(Levels level) => PlayBanner(level.ToString());
+    
+    #region Saving
 
-    // TODO: Make separate coroutine to track banner position and color state each frame. EDIT: Why though?
-    IEnumerator PlayBannerCoroutine(string key) {
-        if (lastBannerLoaded != "") {
-            levelToBanner[lastBannerLoaded].gameObject.SetActive(false);
-        }
-        RectTransform banner = levelToBanner[key].rectTransform;
-        Image bannerImage = levelToBanner[key];
-        bannerGroup.alpha = 0;
-        banner.gameObject.SetActive(true);
-
-        lastBannerLoaded = key;
-
-        Letterboxing.instance.TurnOnLetterboxing();
-        isPlayingBanner = true;
-        float timeElapsed = 0f;
-        float lerpToMatchFlythroughCamSpeed = 2f;
-        Color originalColor = bannerImage.color;
-        float defaultBannerYMidpoint = .8f; // Height of non-raised, non-letterboxed level change banner
-        float bannerYMidpoint = defaultBannerYMidpoint;
-        Vector2 halfBannerSize = (banner.anchorMax - banner.anchorMin) / 2f;
-
-        bool placeBannerAtTopOfScreen = Letterboxing.instance.LetterboxingEnabled || CameraFlythrough.instance.isPlayingFlythrough;
-        bannerYMidpoint = placeBannerAtTopOfScreen ? 1 - halfBannerSize.y : defaultBannerYMidpoint;
-        banner.anchorMin = new Vector2(0.5f - halfBannerSize.x, bannerYMidpoint - halfBannerSize.y);
-        banner.anchorMax = new Vector2(0.5f + halfBannerSize.x, bannerYMidpoint + halfBannerSize.y);
-
-        if (placeBannerAtTopOfScreen && originalColor.WithAlpha(1).Distance(Color.black) < .1f) {
-            // Black-on-black text is unreadable, so we'll make it white
-            bannerImage.color = Color.white.WithAlphaFrom(bannerImage.color);
-        }
-
-        // Wait for letterbox to appear before showing the banner
-        while (Letterboxing.instance.LetterboxingEnabled && Letterboxing.instance.state.Time < Letterboxing.LETTERBOX_APPEAR_TIME) {
-            yield return null;
-        }
-
-        while (timeElapsed < FADE_TIME) {
-            if (!CameraFlythrough.instance.isPlayingFlythrough) {
-                float timeElapsedThisFrame = Time.deltaTime;
-                // If another banner is queued up, speed up the animation
-                if (HasQueuedBanner && queuedBanner != key) {
-                    timeElapsedThisFrame += 2 * Time.deltaTime;
-                }
-
-                timeElapsed += timeElapsedThisFrame;
-                float t = timeElapsed / FADE_TIME;
-
-                bannerGroup.alpha = t*t;
-            }
-
-            yield return null;
-        }
-
-        timeElapsed = 0f;
-        while (timeElapsed < DISPLAY_TIME) {
-            timeElapsed += Time.deltaTime;
-            // If another banner is queued up, speed up the animation
-            if (HasQueuedBanner && queuedBanner != key) {
-                timeElapsed += 2 * Time.deltaTime;
-            }
-
-            yield return null;
-        }
-
-        Letterboxing.instance.TurnOffLetterboxing();
-        timeElapsed = 0f;
-        while (timeElapsed < FADE_TIME) {
-            timeElapsed += Time.deltaTime;
-            // If another banner is queued up, speed up the animation
-            if (HasQueuedBanner && queuedBanner != key) {
-                timeElapsed += 2 * Time.deltaTime;
-            }
-            float t = timeElapsed / FADE_TIME;
-
-            bannerGroup.alpha = 1-Mathf.Sqrt(t);
-
-            yield return null;
-        }
+    [Serializable]
+    public class LevelChangeBannerSave : SerializableSaveObject<LevelChangeBanner> {
+        private string lastBannerLoaded;
+        private string queuedBanner;
+        private string currentlyPlayingBanner;
+        private StateMachine<State>.StateMachineSave state;
         
-        bannerImage.color = originalColor;
-        
-        isPlayingBanner = false;
+        public LevelChangeBannerSave(LevelChangeBanner script) : base(script) {
+            this.lastBannerLoaded = script.lastBannerLoaded;
+            this.queuedBanner = script.queuedBanner;
+            this.currentlyPlayingBanner = script.currentlyPlayingBanner;
+            this.state = script.state.ToSave();
+        }
+        public override void LoadSave(LevelChangeBanner script) {
+            script.lastBannerLoaded = this.lastBannerLoaded;
+            script.queuedBanner = this.queuedBanner;
+            script.currentlyPlayingBanner = this.currentlyPlayingBanner;
+            script.state.LoadFromSave(this.state);
+        }
     }
+
+    #endregion
 }
