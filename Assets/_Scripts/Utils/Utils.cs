@@ -447,6 +447,15 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class ColliderExt {
+        public static bool PlayerIsInCollider(this Collider collider) {
+            Vector3 playerPosition = Player.instance.PlayerCam.transform.position;
+            Vector3 closestPoint = collider.ClosestPoint(playerPosition);
+
+            return closestPoint == playerPosition;
+        }
+    }
+
     public static class Utils {
         public static void Clear(this RenderTexture renderTexture) {
             RenderTexture rt = RenderTexture.active;

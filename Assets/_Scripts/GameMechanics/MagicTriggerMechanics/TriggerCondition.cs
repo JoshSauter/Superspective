@@ -20,7 +20,9 @@ namespace MagicTriggerMechanics {
 		RendererNotVisible,
 		PlayerInDirectionFromPoint,
 		LevelsAreActive,
-		PlayerScaleWithinRange
+		PlayerScaleWithinRange,
+		PlayerWithinCollider,
+		PlayerOutsideOfCollider
 	}
 
 	[Serializable]
@@ -86,6 +88,10 @@ namespace MagicTriggerMechanics {
 					return targetLevels.Contains(LevelManager.instance.ActiveScene) ? 1 : -1;
 				case TriggerConditionType.PlayerScaleWithinRange:
 					return Player.instance.Scale >= targetPlayerScaleRange.x && Player.instance.Scale <= targetPlayerScaleRange.y ? 1 : -1;
+				case TriggerConditionType.PlayerWithinCollider:
+					return targetObject.PlayerIsInCollider() ? 1 : 0;
+				case TriggerConditionType.PlayerOutsideOfCollider:
+					return targetObject.PlayerIsInCollider() ? 0 : 1;
 				default:
 					throw new Exception($"TriggerCondition: {triggerCondition} not handled!");
 			}
@@ -122,6 +128,10 @@ namespace MagicTriggerMechanics {
 				case TriggerConditionType.LevelsAreActive:
 					break;
 				case TriggerConditionType.PlayerScaleWithinRange:
+					break;
+				case TriggerConditionType.PlayerWithinCollider:
+				case TriggerConditionType.PlayerOutsideOfCollider:
+					debugString += $"Player in collider {targetObject.FullPath()}? {targetObject.PlayerIsInCollider()}\n";
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -223,6 +233,10 @@ namespace MagicTriggerMechanics {
 					break;
 				case TriggerConditionType.PlayerScaleWithinRange:
 					EditorGUILayout.PropertyField(targetPlayerScaleRange, targetPlayerScaleRangeLabel);
+					break;
+				case TriggerConditionType.PlayerWithinCollider:
+				case TriggerConditionType.PlayerOutsideOfCollider:
+					EditorGUILayout.PropertyField(targetObject, objectLabel);
 					break;
 			}
 
