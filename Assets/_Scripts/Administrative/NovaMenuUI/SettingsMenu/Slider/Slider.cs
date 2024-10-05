@@ -22,6 +22,10 @@ public class Slider : UIControl<SliderVisual> {
     private float prevValue;
 
     public bool handleIsHeld;
+
+    // Clicking the far left of the slider yields a value above minValue, and clicking on the far right yields a value below maxValue. This adjusts the slider's length to account for that.
+    // Basically a hack.
+    public const float SLIDER_LENGTH_MULTIPLIER = 0.875f;
     
     private void Start() {
         sliderBackgroundInteractable.UIBlock.AddGestureHandler<Gesture.OnHover>(HandleFillHover);
@@ -110,7 +114,7 @@ public class Slider : UIControl<SliderVisual> {
         Vector3 worldSpacePos = worldSpaceRay.GetPoint(hitDistance);
         Vector3 localSpace = sliderBackground.transform.InverseTransformPoint(worldSpacePos);
 
-        float lengthOfSlider = sliderBackground.CalculatedSize.Value.x;
+        float lengthOfSlider = sliderBackground.CalculatedSize.Value.x * SLIDER_LENGTH_MULTIPLIER;
         float t = Mathf.InverseLerp(0, lengthOfSlider, localSpace.x + (lengthOfSlider / 2f));
         
         return Mathf.Lerp(setting.minValue, setting.maxValue, t);

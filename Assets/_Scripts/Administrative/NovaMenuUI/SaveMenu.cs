@@ -109,8 +109,7 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
 
     void InitSaveMenuStateMachine() {
         saveMenuState.OnStateChangeSimple += () => {
-            PopulateSaveSlots();
-            SavesListView.Refresh();
+            PopulateSaveSlots(true);
         };
         
         saveMenuState.AddTrigger(enumValue => true, RunAnimationAndUpdateState);
@@ -171,7 +170,6 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     }
 
     private void PopulatePlayerSaves() {
-        playerSaves.Clear();
         playerSaves.AddRange(SaveFileUtils.playerSaveScreenshotCache.Values
             .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
             .OrderByDescending(m => m.metadata.saveTimestamp)
@@ -179,7 +177,6 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     }
     
     private void PopulateAllSaves() {
-        allSaves.Clear();
         allSaves.AddRange(SaveFileUtils.allSavesScreenshotCache.Values
             .Where(m => SaveFileUtils.IsCompatibleWith(m.metadata.version, Application.version))
             .OrderByDescending(m => m.metadata.saveTimestamp)
@@ -194,13 +191,13 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         allSaves.Clear();
 
         SaveFileUtils.ReadAllSavedMetadataWithScreenshot((saveMetadata) => {
-            PopulatePlayerSaves();
-            PopulateAllSaves();
-
             // If we are writing saves, add a "New Save" box before the existing saves
             if (saveMenuState == SaveMenuState.WriteSave) {
                 playerSaves.Add(new None<SaveMetadataWithScreenshot>());
             }
+            
+            PopulatePlayerSaves();
+            PopulateAllSaves();
 
             NoSavesLabel.gameObject.SetActive(false);
         
