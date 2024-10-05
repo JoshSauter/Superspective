@@ -118,7 +118,7 @@ namespace Saving {
             };
         }
         
-        private static Texture2D ScreenshotOfPlayerCameraView() {
+        public static Texture2D ScreenshotOfPlayerCameraView() {
             Camera cam = Player.instance.PlayerCam;
             int width = 600;
             int height = 400;
@@ -129,6 +129,7 @@ namespace Saving {
             cam.Render();
             Texture2D renderedTexture = new Texture2D(width, height);
             renderedTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            renderedTexture.Apply();
             RenderTexture.active = null;
             cam.targetTexture = prevCamTexture;
 

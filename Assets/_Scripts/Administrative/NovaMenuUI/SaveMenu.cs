@@ -31,6 +31,8 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
     public ClipMask SaveMenuClipMask;
     public ClipMask SaveListClipMask;
 
+    private Texture2D newSaveScreenshot;
+
     private AnimationHandle saveMenuAnimationHandle;
     private AnimationHandle saveListAnimationHandle;
     private const float fadeAnimationDuration = .5f;
@@ -57,6 +59,9 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         SaveFileUtils.OnSavesChanged += () => {
             PopulateSaveSlots(true);
         };
+
+        // When the player enters the save menu, take a screenshot of the player's view to use as the new save screenshot
+        saveMenuState.AddTrigger(SaveMenuState.WriteSave, () => newSaveScreenshot = SaveFileUtils.ScreenshotOfPlayerCameraView());
 
         InitSaveMenuStateMachine();
         saveMenuState.Set(SaveMenuState.Off, true);
@@ -160,9 +165,9 @@ public class SaveMenu : NovaSubMenu<SaveMenu> {
         visuals.saveSlotScript.saveMetadata = new None<SaveMetadataWithScreenshot>();
         visuals.saveSlotScript.ResetSaveSlot();
         
-        visuals.Screenshot.SetImage((Sprite)null);
-        visuals.Screenshot.Color = visuals.Background.Color;
-        visuals.SaveName.Text = $"New Save...";
+        visuals.Screenshot.SetImage(newSaveScreenshot);
+        visuals.Screenshot.Color = Color.white.WithAlphaFrom(visuals.Background.Color);
+        visuals.SaveName.Text = $"Create new save...";
         visuals.DateSaved.Text = "";
         visuals.TimeSaved.Text = "";
         visuals.LevelName.Text = "";
