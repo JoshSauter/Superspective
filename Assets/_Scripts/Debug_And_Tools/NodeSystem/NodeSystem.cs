@@ -12,6 +12,7 @@ using UnityEditor;
 
 [Serializable]
 public struct SerializableNode {
+	public Guid id;
 	public Vector3 pos;
 	public int indexOfParent;
 	public int childCount;
@@ -20,13 +21,15 @@ public struct SerializableNode {
 	public bool staircaseSegment;
 }
 public class Node {
+	public Guid id;
 	public Node parent;
 	public List<Node> children = new List<Node>();
 	public Vector3 pos;
 	public bool zeroDistanceToChildren = false;
 	public bool staircaseSegment = false;
 
-	public Node(Vector3 pos, bool zeroDistanceToChildren, bool staircaseSegment) {
+	public Node(Guid id, Vector3 pos, bool zeroDistanceToChildren, bool staircaseSegment) {
+		this.id = id;
 		this.children = new List<Node>();
 		this.pos = pos;
 		this.zeroDistanceToChildren = zeroDistanceToChildren;
@@ -34,7 +37,7 @@ public class Node {
 	}
 
 	public Node AddNewChild(Vector3 offset) {
-		Node newNode = new Node(pos + offset, false, false);
+		Node newNode = new Node(Guid.NewGuid(), pos + offset, false, false);
 		newNode.parent = this;
 		this.children.Add(newNode);
 
@@ -47,10 +50,25 @@ public class Node {
 
 [ExecuteInEditMode]
 public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
-	const float distanceToSpawnNewNodeAt = 0.25f;
+	public enum NodeBuildMode {
+		StraightLine,
+		Staircase,
+		BuildDirections
+	}
+
+	public NodeBuildMode buildMode = NodeBuildMode.Staircase;
+	public bool BuildAsStaircase => buildMode == NodeBuildMode.Staircase;
+	public bool BuildWithDirections => buildMode == NodeBuildMode.BuildDirections;
+	
+	public const float DISTANCE_TO_SPAWN_NEW_NODE_AT = 0.25f;
 	// Used for special logic around repositioning nodes/placing new nodes
-	public bool buildAsStaircase = true;
+	[ShowIf(nameof(BuildAsStaircase))]
 	public Vector3 staircaseDirection1 = Vector3.right, staircaseDirection2 = Vector3.up;
+	[ShowIf(nameof(BuildWithDirections))]
+	public int buildDirectionIndex = 0;
+	[ShowIf(nameof(BuildWithDirections))]
+	public Vector3[] buildDirections;
+	
 	public bool showNodes = true;
 	public List<Node> allNodes;
 	[HideInInspector]
@@ -58,6 +76,14 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	public List<int> selectedNodesIndices = new List<int>();
 	public int startOfStaircaseIndex = -1;
 	public List<SerializableNode> serializedNodes;
+	
+	[Button]
+	[ContextMenu("Toggle Root Selected")]
+	public void ToggleRootSelected() {
+		if (!selectedNodes.Add(rootNode)) {
+			selectedNodes.Remove(rootNode);
+		}
+	}
 
 	[ShowNativeProperty]
 	public bool NodeSelected => selectedNodesIndices.Count > 0;
@@ -70,7 +96,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		// Unity is about to read the serializedNodes field's contents.
 		// The correct data must now be written into that field "just in time".
 		if (serializedNodes == null) serializedNodes = new List<SerializableNode>();
-		if (rootNode == null) rootNode = new Node(Vector3.up * 0.0625f, false, false);
+		if (rootNode == null) rootNode = new Node(Guid.NewGuid(), Vector3.up * 0.0625f, false, false);
 		serializedNodes.Clear();
 		selectedNodesIndices.Clear();
 		AddNodeToSerializedNodesRecursively(rootNode, -1);
@@ -81,7 +107,11 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	void AddNodeToSerializedNodesRecursively(Node n, int parentId) {
 		Vector3 pos = n.pos;
 		int thisIndex = serializedNodes.Count;
+
+		Guid id = n.id == Guid.Empty ? Guid.NewGuid() : n.id;
+		
 		var serializedNode = new SerializableNode() {
+			id = id,
 			indexOfParent = parentId,
 			pos = pos,
 			childCount = n.children.Count,
@@ -90,7 +120,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			staircaseSegment = n.staircaseSegment
 		};
 		serializedNodes.Add(serializedNode);
-		if (selectedNodes.Select(n => n.pos).Any(p => p == serializedNode.pos)) {
+		if (selectedNodes.Select(n => n.id).Any(id => id == serializedNode.id)) {
 			selectedNodesIndices.Add(thisIndex);
 		}
 		foreach (var child in n.children) {
@@ -105,14 +135,16 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 			ReadNodeFromSerializedNodesRecursively(0, out rootNode);
 		}
 		else {
-			rootNode = new Node(Vector3.down * 0.0625f, false, false);
+			rootNode = new Node(Guid.NewGuid(), Vector3.down * 0.0625f, false, false);
 		}
 	}
 
 	int ReadNodeFromSerializedNodesRecursively(int index, out Node node) {
 		var serializedNode = serializedNodes[index];
+		Guid id = serializedNode.id == Guid.Empty ? Guid.NewGuid() : serializedNode.id;
+		
 		// Transfer the deserialized data into the internal Node class
-		Node newNode = new Node(serializedNode.pos, serializedNode.zeroDistanceToChildren, serializedNode.staircaseSegment);
+		Node newNode = new Node(id, serializedNode.pos, serializedNode.zeroDistanceToChildren, serializedNode.staircaseSegment);
 
 		// The tree needs to be read in depth-first, since that's how we wrote it out.
 		for (int i = 0; i != serializedNode.childCount; i++) {
@@ -153,35 +185,21 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}
 		if (rootNode == null) {
 			// Spawn at not-the-origin so it can be selected with the handle
-			rootNode = new Node(Vector3.down * 0.0625f, false, false);
+			rootNode = new Node(Guid.NewGuid(), Vector3.down * 0.0625f, false, false);
 			allNodes.Add(rootNode);
 			selectedNodes = new HashSet<Node> {rootNode};
 		}
 	}
 
-	private Node AddNewChildToNode(Node parent, bool useOffset = true) {
-		Vector3 grandparentToParent = Vector3.forward;
-
-		if (buildAsStaircase) {
-			grandparentToParent = Vector3.zero;
-		}
-		else if (parent.parent != null) {
-			grandparentToParent = (parent.pos - parent.parent.pos).normalized;
-		}
-
-		Vector3 offset = Vector3.zero;
-		if (useOffset) {
-			offset = grandparentToParent * distanceToSpawnNewNodeAt;
-		}
-
-		Node newNode = parent.AddNewChild(offset);
+	private Node AddNewChildToNode(Node parent) {
+		Node newNode = parent.AddNewChild(Vector3.zero);
 		allNodes.Add(newNode);
 
 		return newNode;
 	}
 
-	public HashSet<Node> AddNewChildToSelected(bool useOffset = true) {
-		selectedNodes = selectedNodes.Select(selectedNode => AddNewChildToNode(selectedNode, useOffset)).ToHashSet();
+	public HashSet<Node> AddNewChildToSelected() {
+		selectedNodes = selectedNodes.Select(selectedNode => AddNewChildToNode(selectedNode)).ToHashSet();
 
 		return selectedNodes;
 	}
@@ -228,20 +246,37 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}).ToHashSet();
 	}
 
-	void RemoveNodeRecursively(Node curNode) {
+	private void MarkSelectedNodeAsRoot() {
+		selectedNodes = selectedNodes.Select(selectedNode => {
+			HashSet<Node> nodesToRemain = GetAllNodes(selectedNode).ToHashSet();
+			RemoveNodeRecursively(rootNode, nodesToRemain.Contains);
+			rootNode = selectedNode;
+			return selectedNode;
+		}).ToHashSet();
+	}
+
+	void RemoveNodeRecursively(Node curNode, Predicate<Node> unless = null) {
+		if (unless != null && unless.Invoke(curNode)) {
+			return;
+		}
+		
 		// When multi-selecting nodes, don't want to try to remove a node that was already removed as a result of removing its parent
 		// if (!allNodes.Contains(curNode)) return;
 		
 		curNode.parent?.children.Remove(curNode);
 		allNodes.Remove(curNode);
-		foreach (var child in curNode.children) {
-			RemoveNodeRecursively(child);
+		Node[] children = new Node[curNode.children.Count];
+		curNode.children.CopyTo(children);
+		foreach (var child in children) {
+			RemoveNodeRecursively(child, unless);
 		}
 	}
 
-	public List<Node> GetAllNodes() {
+	public List<Node> GetAllNodes() => GetAllNodes(rootNode);
+
+	private List<Node> GetAllNodes(Node root) {
 		List<Node> nodes = new List<Node>();
-		GetAllNodesRecursively(rootNode, ref nodes);
+		GetAllNodesRecursively(root, ref nodes);
 		return nodes;
 	}
 
@@ -436,7 +471,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		HashSet<Node> newNodes = new HashSet<Node>();
 
 		Node DuplicateBranch(Node root, Node curNode) {
-			Node newNode = new Node(curNode.pos, curNode.zeroDistanceToChildren, curNode.staircaseSegment);
+			Node newNode = new Node(Guid.NewGuid(), curNode.pos, curNode.zeroDistanceToChildren, curNode.staircaseSegment);
 
 			// We've made our way back to the root, add the new node to the root's children
 			if (curNode.parent == root) {
@@ -465,134 +500,107 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	
 	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across X")]
 	public static void DuplicateAcrossX() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				Dictionary<Node, HashSet<Node>> rootsAndLeafs = s.FindRelativeRootsAndLeafsOfSelected(s.selectedNodes);
+		RunForAllSelectedNodeSystems(ns => {
+			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
 				
-				HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
+			HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
 
-				foreach (Node newNode in newNodes) {
-					newNode.pos.x *= -1f;
-				}
-				
-				Debug.Log($"Duplicated {newNodes.Count} nodes across X-axis");
+			foreach (Node newNode in newNodes) {
+				newNode.pos.x *= -1f;
 			}
-		}
+				
+			Debug.Log($"Duplicated {newNodes.Count} nodes across X-axis");
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across Y")]
 	public static void DuplicateAcrossY() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				Dictionary<Node, HashSet<Node>> rootsAndLeafs = s.FindRelativeRootsAndLeafsOfSelected(s.selectedNodes);
-
-				HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
-
-				foreach (Node newNode in newNodes) {
-					newNode.pos.y *= -1f;
-				}
+		RunForAllSelectedNodeSystems(ns => {
+			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
 				
-				Debug.Log($"Duplicated {newNodes.Count} nodes across Y-axis");
+			HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
+
+			foreach (Node newNode in newNodes) {
+				newNode.pos.y *= -1f;
 			}
-		}
+				
+			Debug.Log($"Duplicated {newNodes.Count} nodes across Y-axis");
+		});
 	}
 	
 	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across Z")]
 	public static void DuplicateAcrossZ() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				Dictionary<Node, HashSet<Node>> rootsAndLeafs = s.FindRelativeRootsAndLeafsOfSelected(s.selectedNodes);
-
-				HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
-
-				foreach (Node newNode in newNodes) {
-					newNode.pos.z *= -1f;
-				}
+		RunForAllSelectedNodeSystems(ns => {
+			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
 				
-				Debug.Log($"Duplicated {newNodes.Count} nodes across Z-axis");
+			HashSet<Node> newNodes = DuplicateBranches(rootsAndLeafs);
+
+			foreach (Node newNode in newNodes) {
+				newNode.pos.z *= -1f;
 			}
-		}
+				
+			Debug.Log($"Duplicated {newNodes.Count} nodes across Z-axis");
+		});
 	}
 	
 	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across X")]
 	public static void MirrorAcrossX() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				for (int i = 0; i < s.serializedNodes.Count; i++) {
-					SerializableNode thisNode = s.serializedNodes[i];
-					thisNode.pos.x *= -1;
-					s.serializedNodes[i] = thisNode;
-				}
-
-				for (int i = 0; i < s.allNodes.Count; i++) {
-					s.allNodes[i].pos.x *= -1f;
-				}
+		RunForAllSelectedNodeSystems(ns => {
+			for (int i = 0; i < ns.serializedNodes.Count; i++) {
+				SerializableNode thisNode = ns.serializedNodes[i];
+				thisNode.pos.x *= -1;
+				ns.serializedNodes[i] = thisNode;
 			}
-		}
+
+			foreach (Node n in ns.allNodes) {
+				n.pos.x *= -1f;
+			}
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across Y")]
 	public static void MirrorAcrossY() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				for (int i = 0; i < s.serializedNodes.Count; i++) {
-					SerializableNode thisNode = s.serializedNodes[i];
-					thisNode.pos.y *= -1;
-					s.serializedNodes[i] = thisNode;
-				}
-
-				for (int i = 0; i < s.allNodes.Count; i++) {
-					s.allNodes[i].pos.y *= -1f;
-				}
+		RunForAllSelectedNodeSystems(ns => {
+			for (int i = 0; i < ns.serializedNodes.Count; i++) {
+				SerializableNode thisNode = ns.serializedNodes[i];
+				thisNode.pos.y *= -1f;
+				ns.serializedNodes[i] = thisNode;
 			}
-		}
+
+			foreach (Node n in ns.allNodes) {
+				n.pos.y *= -1f;
+			}
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across Z")]
 	public static void MirrorAcrossZ() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				for (int i = 0; i < s.serializedNodes.Count; i++) {
-					SerializableNode thisNode = s.serializedNodes[i];
-					thisNode.pos.z *= -1f;
-					s.serializedNodes[i] = thisNode;
-				}
-
-				for (int i = 0; i < s.allNodes.Count; i++) {
-					s.allNodes[i].pos.z *= -1f;
-				}
+		RunForAllSelectedNodeSystems(ns => {
+			for (int i = 0; i < ns.serializedNodes.Count; i++) {
+				SerializableNode thisNode = ns.serializedNodes[i];
+				thisNode.pos.z *= -1f;
+				ns.serializedNodes[i] = thisNode;
 			}
-		}
+
+			foreach (Node n in ns.allNodes) {
+				n.pos.z *= -1f;
+			}
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Select All Nodes")]
 	public static void SelectAllNodes() {
-		foreach (GameObject selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				s.selectedNodes = new HashSet<Node>(s.allNodes);
-				s.selectedNodesIndices = Enumerable.Range(0, s.allNodes.Count).ToList();
-			}
-		}
+		RunForAllSelectedNodeSystems(ns => {
+			ns.selectedNodes = new HashSet<Node>(ns.allNodes);
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Reset Transform")]
 	public static void ResetTransform() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem s = selected.GetComponent<NodeSystem>();
-			if (s != null) {
-				ResetTransformRecursively(s, s.rootNode);
-			}
-		}
+		RunForAllSelectedNodeSystems(ns => ResetTransformRecursively(ns, ns.rootNode));
 	}
 
-	static void ResetTransformRecursively(NodeSystem nodeSystem, Node curNode) {
+	private static void ResetTransformRecursively(NodeSystem nodeSystem, Node curNode) {
 		curNode.pos = nodeSystem.transform.InverseTransformPoint(curNode.pos);
 
 		foreach (Node child in curNode.children) {
@@ -604,66 +612,74 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 
 	[MenuItem("Custom/Power Trails/Clear Nodes")]
 	public static void ClearNodes() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem nodeSystem = selected.GetComponent<NodeSystem>();
-			if (nodeSystem != null) {
-				nodeSystem.allNodes = new List<Node>();
-				nodeSystem.rootNode = null;
-				nodeSystem.Initialize();
-			}
-		}
+		RunForAllSelectedNodeSystems(ns => {
+			ns.allNodes = new List<Node>();
+			ns.rootNode = null;
+			ns.Initialize();
+		});
 	}
 
 	static bool temp = false;
 	[MenuItem("Custom/Power Trails/Add Child _F2")]
 	public static void AddChild() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem ns = selected.GetComponent<NodeSystem>();
-			if (ns != null && ns.selectedNodes.Count > 0) {
-				HashSet<Node> newNodes = ns.AddNewChildToSelected();
-				// Make it easy to do staircases:
-				if (ns.buildAsStaircase) {
-					foreach (Node newNode in newNodes) {
-						newNode.pos += 0.5f * (temp ? ns.staircaseDirection1 : ns.staircaseDirection2);
-					}
-				}
-				temp = !temp;
+		RunForAllSelectedNodes((ns, node) => {
+			Node newNode = ns.AddNewChildToNode(node);
+			Vector3 offset;
+			switch (ns.buildMode) {
+				case NodeBuildMode.StraightLine:
+					offset = (newNode.pos - node.pos).normalized * DISTANCE_TO_SPAWN_NEW_NODE_AT;
+					break;
+				case NodeBuildMode.Staircase:
+					offset = temp ? ns.staircaseDirection1 : ns.staircaseDirection2;
+					temp = !temp;
+					break;
+				case NodeBuildMode.BuildDirections:
+					ns.buildDirectionIndex = (ns.buildDirectionIndex + 1) % ns.buildDirections.Length;
+					offset = ns.buildDirections[ns.buildDirectionIndex];
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
-		}
+
+			newNode.pos += offset;
+			return newNode;
+		});
 	}
 
 	[MenuItem("Custom/Power Trails/Remove Child _F3")]
 	public static void RemoveNode() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem ns = selected.GetComponent<NodeSystem>();
-			if (ns != null) {
-				ns.RemoveSelected();
-			}
-		}
+		RunForAllSelectedNodeSystems(ns => ns.RemoveSelected());
 	}
 	
 	[MenuItem("Custom/Power Trails/Insert Child _F4")]
 	public static void InsertChild() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem ns = selected.GetComponent<NodeSystem>();
-			if (ns != null) {
-				ns.InsertNewChildAfterSelected();
+		RunForAllSelectedNodeSystems(ns => ns.InsertNewChildAfterSelected());
+	}
+
+	[MenuItem("Custom/Power Trails/Mark Node As Root _F7")]
+	public static void MarkNodeAsRoot() {
+		RunForAllSelectedNodeSystems(ns => {
+			if (ns.selectedNodesIndices.Count > 1) {
+				Debug.LogWarning("Cannot mark multiple nodes as part of a staircase segment. Please select only one node.");
+				return;
 			}
-		}
+
+			if (ns.selectedNodesIndices.Count == 1) {
+				ns.MarkSelectedNodeAsRoot();
+			}
+		});
 	}
 
 	// Call once to mark start of staircase, again to mark end of staircase
 	[MenuItem("Custom/Power Trails/Mark Staircase _F5")]
 	public static void MarkStaircaseSegment() {
-		foreach (var selected in Selection.gameObjects) {
-			NodeSystem ns = selected.GetComponent<NodeSystem>();
-
+		RunForAllSelectedNodeSystems(ns => {
 			if (ns.selectedNodesIndices.Count > 1) {
 				Debug.LogWarning("Cannot mark multiple nodes as part of a staircase segment. Please select only one node.");
 				return;
 			}
 			
-			if (ns != null && ns.selectedNodesIndices.Count == 1) {
+			if (ns.selectedNodesIndices.Count == 1) {
 				int selectedNodeIndex = ns.selectedNodesIndices[0];
 				if (ns.startOfStaircaseIndex >= 0) {
 					MarkStaircase(ns, selectedNodeIndex, ns.startOfStaircaseIndex);
@@ -673,21 +689,52 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 					ns.startOfStaircaseIndex = selectedNodeIndex;
 				}
 			}
-		}
+		});
 	}
 	
 	// Call to mark selected node as part of staircase
 	[MenuItem("Custom/Power Trails/Mark Staircase Segment _F6")]
 	public static void MarkStaircase() {
-		foreach (var selected in Selection.gameObjects) {
+		RunForAllSelectedNodes((_, selectedNode) => {
+			selectedNode.staircaseSegment = !selectedNode.staircaseSegment;
+			return selectedNode;
+		});
+	}
+	
+	private static void RunForAllSelectedNodes(Func<NodeSystem, Node, Node> toRun) {
+		RunForAllSelectedNodeSystems(ns => ns.selectedNodes = ns.selectedNodes
+			.Select(node => toRun.Invoke(ns, node))
+			.ToHashSet());
+	}
+
+	private static void RunForAllSelectedNodeSystems(Action<NodeSystem> toRun) {
+		// Start an undo group to group all changes as one operation
+		Undo.SetCurrentGroupName("Modify Node System Group");
+		int undoGroup = Undo.GetCurrentGroup();
+
+		foreach (GameObject selected in Selection.gameObjects) {
 			NodeSystem ns = selected.GetComponent<NodeSystem>();
 			if (ns != null) {
-				foreach (Node selectedNode in ns.selectedNodes) {
-					selectedNode.staircaseSegment = !selectedNode.staircaseSegment;
+				// Register undo for the NodeSystem object
+				Undo.RecordObject(ns, "Modify Node System");
+
+				// Register undo for the node list (if modifying)
+				if (ns.allNodes != null) {
+					Undo.RecordObject(ns, "Modify Node System Nodes");
 				}
+
+				// Invoke the passed action on the NodeSystem
+				toRun.Invoke(ns);
+
+				// Mark the object as dirty so the Editor knows it has changed
+				EditorUtility.SetDirty(ns);
 			}
 		}
+
+		// Collapse all undo operations into one
+		Undo.CollapseUndoOperations(undoGroup);
 	}
+
 
 	// Works its way from end to start index by navigating through parents, marking each node as part of staircase
 	private static void MarkStaircase(NodeSystem ns, int curIndex, int startIndex) {

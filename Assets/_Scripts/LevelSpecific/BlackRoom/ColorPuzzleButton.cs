@@ -96,7 +96,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 			        hasBeenSolvedBefore = true;
 		        }
 
-		        if (mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1].state == DissolveObject.State.Materialized) {
+		        if (mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1].stateMachine == DissolveObject.State.Materialized) {
 			        mainConsole.dissolveLaser.FireAt(
 				        mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1]);
 		        }

@@ -355,13 +355,13 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
                     despawnStartSize*despawnEndSizeMultiplier,
                     cubeDespawnSizeCurve.Evaluate(t)
                 );
-                propBlock.SetFloat("_DissolveValue", t);
+                propBlock.SetFloat("_DissolveAmount", t);
                 foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
                     cubeRenderer.SetPropertyBlock(propBlock);
                 }
             }
             else {
-                propBlock.SetFloat("_DissolveValue", 1);
+                propBlock.SetFloat("_DissolveAmount", 1);
                 foreach (var cubeRenderer in cubeDespawning.GetComponentsInChildren<Renderer>()) {
                     cubeRenderer.SetPropertyBlock(propBlock);
                 }

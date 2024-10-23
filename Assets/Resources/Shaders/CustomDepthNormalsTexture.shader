@@ -9,6 +9,7 @@ Properties {
 
 CGINCLUDE
 #include "UnityCG.cginc"
+#define UNITY_BUILT_IN_COLOR
 #include "Suberspective/SuberspectiveHelpers.cginc"
 
 uniform float4x4 _PortalScalingMatrix;
@@ -179,6 +180,7 @@ CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
 #include "UnityCG.cginc"
+fixed4 _Color;
 struct v2f {
     float4 pos : SV_POSITION;
     float2 uv : TEXCOORD0;
@@ -196,7 +198,6 @@ v2f vert( appdata_base v ) {
     return o;
 }
 uniform fixed _Cutoff;
-uniform float4 _Color;
 float4 frag(v2f i) : SV_Target {
     float4 texcol = tex2D( _MainTex, i.uv );
     clip( texcol.a*_Color.a - _Cutoff );
@@ -232,7 +233,6 @@ v2f vert(appdata_base v) {
 	return o;
 }
 uniform fixed _Cutoff;
-uniform float4 _Color;
 float4 frag(v2f i) : SV_Target {
 	float3 worldScale = float3(
         length(float3(unity_ObjectToWorld[0].x, unity_ObjectToWorld[1].x, unity_ObjectToWorld[2].x)), // scale x axis

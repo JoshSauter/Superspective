@@ -267,6 +267,14 @@ namespace SuperspectiveUtils {
             }
             else return 2;
         }
+        
+        public static Vector3 ComponentDivide(this Vector3 a, Vector3 b) {
+            return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+        }
+        
+        public static Vector3 ComponentMultiply(this Vector3 a, Vector3 b) {
+            return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+        }
     }
 
     public static class ColorExt {
@@ -456,6 +464,38 @@ namespace SuperspectiveUtils {
         }
     }
 
+    public static class TransformExt {
+        public static int GetDepth(this Transform transform) {
+            int depth = 0;
+            Transform current = transform;
+            while (current.parent != null) {
+                depth++;
+                current = current.parent;
+            }
+
+            return depth;
+        }
+        
+        // Returns a Vector3 localScale that mimics the desired lossyScale for this Transform
+        public static Vector3 LossyToLocalScale(this Transform transform, Vector3 targetLossyScale) {
+            if (transform.parent != null) {
+                // Calculate the local scale based on the lossyScale and parent's lossyScale
+                Vector3 parentLossyScale = transform.parent.lossyScale;
+                return new Vector3(
+                    targetLossyScale.x / parentLossyScale.x,
+                    targetLossyScale.y / parentLossyScale.y,
+                    targetLossyScale.z / parentLossyScale.z
+                );
+            }
+            else {
+                // If there is no parent, localScale is the same as lossyScale
+                return targetLossyScale;
+            }
+        }
+        
+        public static List<Transform> GetChildren(this Transform t) => t.Cast<Transform>().ToList();
+    }
+
     public static class Utils {
         public static void Clear(this RenderTexture renderTexture) {
             RenderTexture rt = RenderTexture.active;
@@ -642,10 +682,6 @@ namespace SuperspectiveUtils {
 
         public static T FindDimensionObjectRecursively<T>(this GameObject o) where T : DimensionObject =>
             FindDimensionObjectRecursively<T>(o.transform);
-
-        public static Transform[] GetChildren(this Transform parent) {
-            return parent.GetComponentsInChildrenOnly<Transform>();
-        }
 
         public static Transform[] GetChildrenMatchingNameRecursively(this Transform transform, string nameToMatch, bool selectInactive = false) {
             void FindChildrenRecursivelyWithName(Transform curNode, ref List<Transform> selectionSoFar) {
@@ -1474,6 +1510,12 @@ namespace SuperspectiveUtils {
             }
         }
         
+        public void LogErrorWithContext(object message, Object context, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.LogError(MessageWithContext(message), context);
+            }
+        }
+        
         private string MessageWithContext(object message) {
             string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             
@@ -1546,7 +1588,7 @@ namespace SuperspectiveUtils {
                     {"_Metallic", ShaderPropertyType.Range},
                     // Dissolve shader properties
                     {"_Color2", ShaderPropertyType.Color},
-                    {"_DissolveValue", ShaderPropertyType.Range},
+                    {"_DissolveAmount", ShaderPropertyType.Range},
                     {"_BurnSize", ShaderPropertyType.Range},
                     {"_BurnRamp", ShaderPropertyType.Texture},
                     {"_BurnColor", ShaderPropertyType.Color},

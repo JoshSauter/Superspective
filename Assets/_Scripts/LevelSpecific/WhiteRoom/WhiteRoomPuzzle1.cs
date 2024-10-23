@@ -31,7 +31,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	public bool hideButtonPedestalAtFirst = true;
 	public GameObject buttonPedestal;
 	public DissolveObject dissolveBridge;
-	private bool ShouldRevealButtonPedestal => dissolveBridge.state != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.Visible;
+	private bool ShouldRevealButtonPedestal => dissolveBridge.stateMachine != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.Visible;
 
 	// Fake portal plane needs to temporarily disappear if the player walks backwards through it
 	public GameObject fakePortalPlane;

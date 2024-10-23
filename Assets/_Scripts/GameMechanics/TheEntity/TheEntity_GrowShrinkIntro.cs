@@ -73,9 +73,6 @@ namespace TheEntity {
         private const float MAX_VERTICAL_LOOK_ANGLE = 75f;
         private const float HEIGHT_OFF_GROUND = 1f;
         private const float MOVE_SPEED = 5f;
-        private const float BLINK_TIME = .125f;
-        private const float MIN_TIME_BETWEEN_BLINKS = 2.5f;
-        private const float MAX_TIME_BETWEEN_BLINKS = 9f;
         private const float CLOSE_ENOUGH_DISTANCE = .125f; // To transition from GoingToSetPath -> SetPath, SetPath -> Watching
 
         private float ResetPlayerDistance => RESET_PLAYER_DISTANCE * Player.instance.Scale;
@@ -110,7 +107,7 @@ namespace TheEntity {
             state.Set(State.NotSpawned);
             MiniatureMaze.instance.state.AddTrigger(MiniatureMaze.State.MazeSolved, () => state.Set(State.Following));
 
-            StartCoroutine(BlinkController());
+            StartCoroutine(TheEntity.BlinkController(this, eyeTransform));
         }
 
         private void PlayBanner() {
@@ -275,39 +272,6 @@ namespace TheEntity {
 
             // Clamp the pitch (vertical rotation) to the specified range
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.WithX(ClampAngle(transform.rotation.eulerAngles.x, -MAX_VERTICAL_LOOK_ANGLE, MAX_VERTICAL_LOOK_ANGLE)));
-        }
-
-        private IEnumerator BlinkController() {
-            while (true) {
-                StartCoroutine(BlinkCoroutine());
-                
-                yield return new WaitForSeconds(Random.Range(MIN_TIME_BETWEEN_BLINKS, MAX_TIME_BETWEEN_BLINKS));
-            }
-        }
-
-        private IEnumerator BlinkCoroutine() {
-            float time = 0;
-
-            // Blink closed
-            while (time < BLINK_TIME) {
-                time += Time.deltaTime;
-
-                eyeTransform.localScale = eyeTransform.localScale.WithY(1 - Easing.EaseInOut(time / BLINK_TIME));
-                
-                yield return null;
-            }
-            eyeTransform.localScale = eyeTransform.localScale.WithY(0);
-            
-            // Blink open
-            time = 0f;
-            while (time < BLINK_TIME) {
-                time += Time.deltaTime;
-
-                eyeTransform.localScale = eyeTransform.localScale.WithY(Easing.EaseInOut(time / BLINK_TIME));
-                
-                yield return null;
-            }
-            eyeTransform.localScale = eyeTransform.localScale.WithY(1);
         }
 
         void Update() {

@@ -20,13 +20,15 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     public ActivationTiming timing = ActivationTiming.OnPowerFinish;
     public bool useMaterialAsStartColor = false;
     public bool useMaterialAsEndColor = false;
+    
+    [HideIf(nameof(useMaterialAsStartColor))]
     public Color depoweredColor;
-
+    [HideIf(nameof(useMaterialAsStartColor))]
     [ColorUsage(true, true)]
     public Color depoweredEmission;
-
+    [HideIf(nameof(useMaterialAsEndColor))]
     public Color poweredColor;
-
+    [HideIf(nameof(useMaterialAsEndColor))]
     [ColorUsage(true, true)]
     public Color poweredEmission;
 
@@ -62,22 +64,6 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
         if (renderers == null || renderers.Length == 0) {
             renderers = new SuperspectiveRenderer[1];
             renderers[0] = gameObject.AddComponent<SuperspectiveRenderer>();
-        }
-
-        foreach (SuperspectiveRenderer r in renderers) {
-            if (useMaterialAsEndColor) {
-                poweredColor = r.GetMainColor();
-                poweredEmission = r.GetColor("_EmissionColor");
-            }
-
-            if (useMaterialAsStartColor) {
-                depoweredColor = r.GetMainColor();
-                depoweredEmission = r.GetColor("_EmissionColor");
-            }
-            else {
-                r.SetMainColor(depoweredColor);
-                r.SetColor("_EmissionColor", depoweredEmission);
-            }
         }
 
         if (!IsMulti()) {
@@ -135,6 +121,26 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
                     }
 
                     break;
+            }
+        }
+    }
+
+    protected override void Start() {
+        base.Start();
+
+        foreach (SuperspectiveRenderer r in renderers) {
+            if (useMaterialAsEndColor) {
+                poweredColor = r.GetMainColor();
+                poweredEmission = r.GetColor("_EmissionColor");
+            }
+
+            if (useMaterialAsStartColor) {
+                depoweredColor = r.GetMainColor();
+                depoweredEmission = r.GetColor("_EmissionColor");
+            }
+            else {
+                r.SetMainColor(depoweredColor);
+                r.SetColor("_EmissionColor", depoweredEmission);
             }
         }
     }

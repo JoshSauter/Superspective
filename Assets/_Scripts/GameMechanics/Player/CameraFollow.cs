@@ -22,8 +22,11 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
 
     Headbob headbob;
 
-    bool ShouldFollow =>
-        Player.instance.look.state == PlayerLook.ViewLockState.ViewUnlocked && !CameraFlythrough.instance.isPlayingFlythrough;
+    [SerializeField]
+    private bool shouldFollow = true;
+    bool ShouldFollow => shouldFollow &&
+        Player.instance.look.state == PlayerLook.ViewLockState.ViewUnlocked &&
+        !CameraFlythrough.instance.isPlayingFlythrough;
 
     float timeSinceCurrentLerpSpeedWasModified;
 

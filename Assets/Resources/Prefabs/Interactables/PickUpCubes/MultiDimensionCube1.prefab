@@ -4625,7 +4625,7 @@ MonoBehaviour:
   corporealDimensionBeforeMaterialize: -1
   corporealVisibilityStateBeforeRenderPortal: 0
   invertedVisibilityStateBeforeRenderPortal: 0
-  materializeMultiplier: 5
+  materializeMultiplier: 1
 --- !u!114 &6900713704842532631
 MonoBehaviour:
   m_ObjectHideFlags: 0

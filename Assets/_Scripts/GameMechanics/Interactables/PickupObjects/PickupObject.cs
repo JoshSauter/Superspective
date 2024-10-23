@@ -130,11 +130,11 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     private void SetUpRigidbodySleepingStateMachine() {
-        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Moving, RigidbodySleepingState.Steady, () => thisRigidbody.GetMassNormalizedKineticEnergy() < thisRigidbody.sleepThreshold);
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Moving, RigidbodySleepingState.Steady, () => thisRigidbody.GetMassNormalizedKineticEnergy() < thisRigidbody.sleepThreshold * Scale);
         rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Steady, RigidbodySleepingState.Sleeping, RIGIDBODY_SLEEP_TIME);
         
-        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Steady, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold);
-        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Sleeping, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold);
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Steady, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold * Scale);
+        rigidbodySleepingStateMachine.AddStateTransition(RigidbodySleepingState.Sleeping, RigidbodySleepingState.Moving, () => thisRigidbody.GetMassNormalizedKineticEnergy() >= thisRigidbody.sleepThreshold * Scale);
     }
     
     private void SetupFreezeRotationStateMachine() {
@@ -513,7 +513,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         // Trick to get the cube to not interact with the player anymore but still collide with ground
         gameObject.layer = SuperspectivePhysics.VisibleButNoPlayerCollisionLayer;
 
-        if (dissolve.state == DissolveObject.State.Materialized) {
+        if (dissolve.stateMachine == DissolveObject.State.Materialized) {
             dissolve.Dematerialize();
             AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerDespawn, ID, transform.position);
             AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, transform.position);
@@ -522,7 +522,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     private IEnumerator DestroyObjectAfterDissolve(DissolveObject dissolve, SerializableDynamicReference dynamicObjRef) {
-        yield return new WaitUntil(() => dissolve.state == DissolveObject.State.Dematerialized);
+        yield return new WaitUntil(() => dissolve.stateMachine == DissolveObject.State.Dematerialized);
 
         if (spawnedFrom != null) {
             spawnedFrom.Reference.MatchAction(

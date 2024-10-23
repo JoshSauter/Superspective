@@ -1031,8 +1031,12 @@ namespace PortalMechanics {
 			if (otherPortal.pillarDimensionObject) {
 				DimensionPillar activePillar = otherPortal.pillarDimensionObject.activePillar;
 				if (activePillar != null) {
+					// Need to recalculate the camQuadrant of the PillarDimensionObject after teleporting the player
+					var originalQuadrant = otherPortal.pillarDimensionObject.camQuadrant;
+					otherPortal.pillarDimensionObject.DetermineQuadrantForPlayerCam();
 					activePillar.curDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible);
 					activePillar.dimensionWall.UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
+					otherPortal.pillarDimensionObject.camQuadrant = originalQuadrant;
 				}
 			}
 

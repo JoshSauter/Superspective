@@ -10,8 +10,10 @@ using UnityObject = UnityEngine.Object;
 namespace StateUtils {
     [Serializable]
     public class StateMachine<T> where T : Enum, IConvertible {
-        private bool hasUnityObjectOwner;
-        private UnityObject _owner;
+        private bool hasMonoBehaviourOwner;
+        private MonoBehaviour _owner;
+        public bool HasDisabledOwner => hasMonoBehaviourOwner && !_owner.enabled;
+        
         [SerializeField, Label("State")]
         private T _state;
         [SerializeField, Label("Previous State")]
@@ -91,7 +93,7 @@ namespace StateUtils {
             return new StateMachine<T>(startingState, useFixedUpdateInstead, useRealTime);
         }
         private StateMachine(T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
-            this.hasUnityObjectOwner = false;
+            this.hasMonoBehaviourOwner = false;
             this._state = startingState;
             this._prevState = _state;
             this._time = 0f;
@@ -106,8 +108,8 @@ namespace StateUtils {
         /// </summary>
         /// <param name="owner">Unity Object that this StateMachine is associated with</param>
         /// <param name="startingState">Which state to begin in</param>
-        public StateMachine(UnityObject owner, T startingState) {
-            this.hasUnityObjectOwner = true;
+        public StateMachine(MonoBehaviour owner, T startingState) {
+            this.hasMonoBehaviourOwner = true;
             this._owner = owner;
             this._state = startingState;
             this._prevState = _state;
@@ -123,8 +125,8 @@ namespace StateUtils {
         /// <param name="startingState">Which state to begin in</param>
         /// <param name="useFixedUpdateInstead">Whether we should use FixedUpdate instead of Update</param>
         /// <param name="useRealTime">Whether we should use real time or in-game scaled time</param>
-        public StateMachine(UnityObject owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
-            this.hasUnityObjectOwner = true;
+        public StateMachine(MonoBehaviour owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) {
+            this.hasMonoBehaviourOwner = true;
             this._owner = owner;
             this._state = startingState;
             this._prevState = _state;
@@ -284,6 +286,9 @@ namespace StateUtils {
         
         private void AddTriggerImmediatelyForStates(Func<T, bool> forStates, Action whatToDo) {
             this.OnStateChangeSimple += () => {
+                // Don't activate triggers if the owner MonoBehaviour is disabled
+                if (HasDisabledOwner) return;
+                
                 if (forStates(State)) {
                     whatToDo.Invoke();
                 }
@@ -472,10 +477,11 @@ namespace StateUtils {
         // Does either Update or FixedUpdate based on config
         private void Update() {
             // If the Unity Object that was using this StateMachine is destroyed, cleanup event subscriptions
-            if (hasUnityObjectOwner && _owner == null) {
+            if (hasMonoBehaviourOwner && _owner == null) {
                 CleanUp();
                 return;
             }
+            if (HasDisabledOwner) return;
             
             float prevTime = _time;
 
@@ -540,12 +546,12 @@ namespace StateUtils {
     }
 
     public static class StateMachineExt {
-        // Allows creation of StateMachine with a UnityObject owner, which ensures proper event cleanup when the owner is destroyed
-        public static StateMachine<T> StateMachine<T>(this UnityObject owner, T startingState) where T : Enum {
+        // Allows creation of StateMachine with a MonoBehaviour owner, which ensures proper event cleanup when the owner is destroyed
+        public static StateMachine<T> StateMachine<T>(this MonoBehaviour owner, T startingState) where T : Enum {
             return new StateMachine<T>(owner, startingState);
         }
 
-        public static StateMachine<T> StateMachine<T>(this UnityObject owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) where T : Enum {
+        public static StateMachine<T> StateMachine<T>(this MonoBehaviour owner, T startingState, bool useFixedUpdateInstead = false, bool useRealTime = false) where T : Enum {
             return new StateMachine<T>(owner, startingState, useFixedUpdateInstead, useRealTime);
         }
     }

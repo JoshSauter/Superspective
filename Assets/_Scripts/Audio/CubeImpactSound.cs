@@ -47,7 +47,7 @@ namespace Audio {
 			string otherObjectName = collision.collider.gameObject.FullPath();
 			string otherObjectLayer = LayerMask.LayerToName(collision.collider.gameObject.layer);
 			string speed = $"{impactSpeed:F1}";
-			debug.LogWarning($"({gameObjectName}, {gameObjectLayer}) collided with ({otherObjectName}, {otherObjectLayer}) at speed {impactSpeed}");
+			debug.LogWithContext($"({gameObjectName}, {gameObjectLayer}) collided with ({otherObjectName}, {otherObjectLayer}) at speed {impactSpeed}", collision.collider.gameObject);
 		}
 
 		void Update() {

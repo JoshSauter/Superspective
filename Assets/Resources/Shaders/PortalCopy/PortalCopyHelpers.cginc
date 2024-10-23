@@ -1,6 +1,4 @@
-﻿float3 _PortalPos;
-float3 _PortalNormal;
-float _FudgeDistance;
+﻿#include "../Suberspective/SuberspectiveUniforms.cginc"
 
 void ClipPortalCopy(float3 worldPos) {
     float3 adjustedCenter = _PortalPos + _PortalNormal * _FudgeDistance;

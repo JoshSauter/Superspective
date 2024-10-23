@@ -425,7 +425,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
 --- !u!114 &8522727232292851517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,7 +466,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
@@ -5739,7 +5737,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}

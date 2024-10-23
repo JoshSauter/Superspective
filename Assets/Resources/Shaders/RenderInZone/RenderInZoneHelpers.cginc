@@ -1,5 +1,4 @@
-﻿float3 _MinRenderZone;
-float3 _MaxRenderZone;
+﻿#include "../Suberspective/SuberspectiveUniforms.cginc"
 
 void ClipRenderZone(float3 worldPos) {
     float3 zeroSizeBox = step(_MaxRenderZone, _MinRenderZone);

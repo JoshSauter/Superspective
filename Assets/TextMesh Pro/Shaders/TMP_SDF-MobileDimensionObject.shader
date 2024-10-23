@@ -94,6 +94,7 @@ SubShader {
 		#include "UnityCG.cginc"
 		#include "UnityUI.cginc"
 		#include "TMPro_Properties.cginc"
+		#define UNITY_BUILT_IN_TEXTURE
 		#include "../../Resources/Shaders/DimensionShaders/DimensionShaderHelpers.cginc"
 
 		struct vertex_t {

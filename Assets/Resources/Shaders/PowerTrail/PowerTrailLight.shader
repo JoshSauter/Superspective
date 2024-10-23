@@ -15,8 +15,6 @@
 		
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
-		
-        sampler2D _MainTex;
 
         struct Input
         {
@@ -26,9 +24,14 @@
 
         half _Glossiness;
         half _Metallic;
-        fixed4 _Color;
+	    sampler2D _MainTex;
+		fixed4 _Color;
 	    fixed4 _EmissionColor;
 
+	    #define UNITY_BUILT_IN_COLOR
+	    #define UNITY_BUILT_IN_EMISSION_COLOR
+	    #define UNITY_BUILT_IN_TEXTURE
+	    #define UNITY_BUILT_IN_TEXTURE_ST
 	    #include "PowerTrailHelpers.cginc"
 
         void surf (Input IN, inout SurfaceOutput o) {

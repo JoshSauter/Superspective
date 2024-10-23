@@ -1,8 +1,4 @@
 Shader "Suberspective/SuberspectiveUnlit" {
-	CGINCLUDE
-	#include "SuberspectiveHelpers.cginc"
-	ENDCG
-	
     Properties {
     	// These are my internal cached values for the inspector enum
     	[HideInInspector] __SuberspectiveBlendMode("InternalBlendModeCache", Int) = 0
@@ -24,7 +20,8 @@ Shader "Suberspective/SuberspectiveUnlit" {
     	_Channel("Channel", Range(0, 8)) = 0
     	// DissolveObject
         _DissolveTex("Dissolve Texture", 2D) = "white" {}
-        _DissolveValue("Dissolve Amount", Range(0.0, 1.0)) = 0
+        _DissolveAmount("Dissolve Amount", Float) = 0
+        _DissolveValue("Dissolve Value", Float) = 0
         _DissolveBurnSize("Burn Size", Range(0.0, 1.0)) = 0.15
         _DissolveBurnRamp("Burn Ramp (RGB)", 2D) = "white" {}
         _DissolveBurnColor("Burn Color", Color) = (.3,.6,1,1)
@@ -54,6 +51,7 @@ Shader "Suberspective/SuberspectiveUnlit" {
 
         Pass {
             CGPROGRAM
+            #include "SuberspectiveHelpers.cginc"
             #pragma vertex SuberspectiveVert
             #pragma fragment frag
             // make fog work
@@ -71,10 +69,10 @@ Shader "Suberspective/SuberspectiveUnlit" {
             	float2 emissionUV : TEXCOORD1;
                 float3 worldPos : TEXCOORD2;
             };
-            
-			float4 _Color;
-            float _EmissionEnabled;
-			float4 _EmissionColor;
+
+            // All uniforms. Note that they MUST be declared within a CGPROGRAM block (not a CGINCLUDE block),
+            // so we have to include every single uniform here, and in every shader which uses SuberspectiveHelpers.cginc
+            // Ugh.
 
             fixed4 frag (SuberspectiveV2F i) : SV_Target {
                 // sample the texture
@@ -103,6 +101,7 @@ Shader "Suberspective/SuberspectiveUnlit" {
 			ZWrite On ZTest LEqual Cull Off
 
 			CGPROGRAM
+            #include "SuberspectiveHelpers.cginc"
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 3.0

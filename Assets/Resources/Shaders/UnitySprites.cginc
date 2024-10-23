@@ -29,7 +29,10 @@ CBUFFER_START(UnityPerDrawSprite)
 CBUFFER_END
 
 // Material Color.
+#ifndef UNITY_BUILT_IN_COLOR
+#define UNITY_BUILT_IN_COLOR
 fixed4 _Color;
+#endif
 
 struct appdata_t {
     float4 vertex   : POSITION;
@@ -61,7 +64,10 @@ v2f SpriteVert(appdata_t IN) {
     return OUT;
 }
 
+#ifndef UNITY_BUILT_IN_TEXTURE
+#define UNITY_BUILT_IN_TEXTURE
 sampler2D _MainTex;
+#endif
 sampler2D _AlphaTex;
 
 fixed4 SampleSpriteTexture (float2 uv) {

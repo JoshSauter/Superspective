@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Audio;
+using NaughtyAttributes;
 using PoweredObjects;
+using PowerTrailMechanics;
 using UnityEngine;
 using Saving;
 using SerializableClasses;
@@ -11,6 +13,13 @@ using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
 public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> {
+    public enum TriggerCondition {
+        PoweredObject,
+        PowerTrailDistance
+    }
+    public TriggerCondition triggerCondition = TriggerCondition.PoweredObject;
+    public bool TriggeredByPowerObj => triggerCondition == TriggerCondition.PoweredObject;
+    public bool TriggeredByPowerTrailDistance => triggerCondition == TriggerCondition.PowerTrailDistance;
     
     public enum State {
         Closed,
@@ -30,11 +39,16 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     private const float cameraLongShakeIntensity = 1.25f;
     private const float cameraShakeDuration = .25f;
     private const float portalMovingSoundDelay = .35f;
-    private float OPEN_CLOSE_SPEED = MAX_OFFSET / OPEN_CLOSE_TIME;
-    private const float MAX_OFFSET = 3f; // Max distance for doors to open (total opening width is this value * 2)
+    public float maxOffset = 3f; // Max distance for doors to open (total opening width is this value * 2)
+    private float OpenCloseSpeed => maxOffset / OPEN_CLOSE_TIME;
     private const float OPEN_CLOSE_TIME = 3.75f;
 
+    [ShowIf(nameof(TriggeredByPowerObj))]
     public SerializableReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredFrom;
+    [ShowIf(nameof(TriggeredByPowerTrailDistance))]
+    public SerializableReference<PowerTrail, PowerTrail.PowerTrailSave> powerTrail;
+    [ShowIf(nameof(TriggeredByPowerTrailDistance))]
+    public float powerTrailDistance;
 
     protected override void Awake() {
         base.Awake();
@@ -45,13 +59,35 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     protected override void Init() {
         base.Init();
 
-        poweredFrom.GetOrNull().OnPowerFinish += OpenDoor;
-        poweredFrom.GetOrNull().OnDepowerBegin += CloseDoor;
+        switch (triggerCondition) {
+            case TriggerCondition.PoweredObject:
+                PoweredObject powerFrom = poweredFrom.GetOrNull();
+                if (powerFrom) {
+                    powerFrom.OnPowerFinish += OpenDoor;
+                    powerFrom.OnDepowerBegin += CloseDoor;
+                }
+                break;
+            case TriggerCondition.PowerTrailDistance:
+                PowerTrail pwrTrail = powerTrail.GetOrNull();
+                if (pwrTrail) {
+                    pwrTrail.OnPowerTrailUpdate += (prevDistance, newDistance) => {
+                        if (prevDistance < powerTrailDistance && newDistance >= powerTrailDistance) {
+                            OpenDoor();
+                        }
+                        else if (prevDistance >= powerTrailDistance && newDistance < powerTrailDistance) {
+                            CloseDoor();
+                        }
+                    };
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
         InitializeStateMachine();
     }
 
     void InitializeStateMachine() {
-        state.AddStateTransition(State.Opening, State.Open, () => DoorOffset >= MAX_OFFSET);
+        state.AddStateTransition(State.Opening, State.Open, () => DoorOffset >= maxOffset);
         state.AddStateTransition(State.Closing, State.Closed, () => DoorOffset <= 0);
         
         state.AddTrigger(State.Closed, () => {
@@ -111,8 +147,8 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     public float DoorOffset {
         get => doorRight.localPosition.x;
         set {
-            doorLeft.localPosition = doorLeft.localPosition.WithX(Mathf.Clamp(-value, -MAX_OFFSET, 0));
-            doorRight.localPosition = doorRight.localPosition.WithX(Mathf.Clamp(value, 0, MAX_OFFSET));
+            doorLeft.localPosition = doorLeft.localPosition.WithX(Mathf.Clamp(-value, -maxOffset, 0));
+            doorRight.localPosition = doorRight.localPosition.WithX(Mathf.Clamp(value, 0, maxOffset));
         }
     }
 
@@ -124,13 +160,13 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
                 DoorOffset = 0;
                 break;
             case State.Opening:
-                DoorOffset += Time.deltaTime * OPEN_CLOSE_SPEED;
+                DoorOffset += Time.deltaTime * OpenCloseSpeed;
                 break;
             case State.Open:
-                DoorOffset = MAX_OFFSET;
+                DoorOffset = maxOffset;
                 break;
             case State.Closing:
-                DoorOffset -= Time.deltaTime * OPEN_CLOSE_SPEED;
+                DoorOffset -= Time.deltaTime * OpenCloseSpeed;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

@@ -13,10 +13,10 @@ namespace LevelSpecific.WhiteRoom {
         bool powered => powerTrail.distance > turnOnAtDistance;
 
         void Update() {
-            if (powered && dissolveObject.state == DissolveObject.State.Dematerialized) {
+            if (powered && dissolveObject.stateMachine == DissolveObject.State.Dematerialized) {
                 dissolveObject.Materialize();
             }
-            else if (!powered && dissolveObject.state == DissolveObject.State.Materialized) {
+            else if (!powered && dissolveObject.stateMachine == DissolveObject.State.Materialized) {
                 dissolveObject.Dematerialize();
             }
         }

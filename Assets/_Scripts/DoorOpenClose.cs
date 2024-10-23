@@ -14,7 +14,7 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
         Closing
     }
 
-    const float targetLocalXScale = 0;
+    public float targetLocalXScale = 0;
     public AnimationCurve doorOpenCurve;
     public AnimationCurve doorCloseCurve;
 
@@ -33,6 +33,8 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
     bool playerWasInTriggerZoneLastFrame;
     bool queueDoorClose;
     float timeSinceStateChange;
+
+    public bool useZInstead = false;
 
     public DoorState state {
         get => _state;
@@ -62,7 +64,7 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
         base.Awake();
         doorPieces = transform.GetComponentsInChildrenOnly<Transform>();
         closedScale = doorPieces[0].localScale;
-        openedScale = new Vector3(targetLocalXScale, closedScale.y, closedScale.z);
+        openedScale = useZInstead ? closedScale.WithZ(targetLocalXScale) : closedScale.WithX(targetLocalXScale);
     }
 
     // Update is called once per frame

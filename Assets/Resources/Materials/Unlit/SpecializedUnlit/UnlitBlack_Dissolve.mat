@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - DISSOLVE_OBJECT
+  - PORTAL_COPY_OBJECT
   m_InvalidKeywords:
   - _ALPHATEST_ON
   m_LightmapFlags: 4
@@ -77,6 +78,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SuberspectiveEmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SuberspectiveMainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
@@ -84,9 +93,12 @@ Material:
     - _Channel: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DissolveAmount: -0.06
+    - _DissolveAmount2: 0
     - _DissolveBurnSize: 0.145
     - _DissolveEmissionAmount: 2
-    - _DissolveValue: 0.088
+    - _DissolveValue: 0.05
+    - _DissolveValue2: 0
     - _DstBlend: 0
     - _EmissionEnabled: 1
     - _FudgeDistance: 0
@@ -103,6 +115,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _SuberspectiveEmissionEnabled: 1
     - _UVSec: 0
     - _ZWrite: 1
     - __BlendOp: 0
@@ -121,4 +134,6 @@ Material:
     - _MinRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _PortalNormal: {r: 0, g: 0, b: 1, a: 1}
     - _PortalPos: {r: 0, g: 0, b: 0, a: 1}
+    - _SuberspectiveColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SuberspectiveEmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

@@ -85,7 +85,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 	public BoxCollider kinematicCollider;
 	BoxCollider detectWhenPlayerIsNearCollider;
 
-	public const string DISSOLVE_PROPERTY_NAME = "_DissolveValue";
+	public const string DISSOLVE_PROPERTY_NAME = "_DissolveAmount";
 	const float OUTLINE_FADE_IN_TIME = .5f;
 	const float INVERT_COLORS_DELAY = 0.4f; // Should be less than OUTLINE_FADE_IN_TIME for state machine purposes
 	const float INVERT_COLORS_FADE_OUT_TIME = .5f;

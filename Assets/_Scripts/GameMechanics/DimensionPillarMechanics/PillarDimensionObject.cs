@@ -72,7 +72,6 @@ public class PillarDimensionObject : DimensionObject {
 
 	// For context about rest of current state
 	public Camera camSetUpFor;
-	
 
 	protected override void OnEnable() {
 		base.OnEnable();
@@ -119,7 +118,7 @@ public class PillarDimensionObject : DimensionObject {
 	void HandlePillarChanged() {
 		if (activePillar != null) {
 			camSetUpFor = playerCam;
-			camQuadrant = DetermineQuadrant(playerCam.transform.position);
+			DetermineQuadrantForPlayerCam();
 			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
 			UpdateState(activePillar.curDimension, true);
 		}
@@ -248,7 +247,8 @@ public class PillarDimensionObject : DimensionObject {
 			
 			// Assumes the out portal's activePillar is the same as this object's activePillar
 			// TODO: Add support for different activePillars
-			UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, portalDimensionObj.Dimension, false, true);
+			int outOfPortalDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible);
+			UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, outOfPortalDimension, false, true);
 		}
 	}
 
@@ -383,7 +383,15 @@ public class PillarDimensionObject : DimensionObject {
 		}
 	}
 
-	Quadrant DetermineQuadrant(Vector3 position) {
+	/// <summary>
+	/// Recalculates camQuadrant based on the playerCam's position.
+	/// Can be called by anyone who needs this state to be updated before further logic is run.
+	/// </summary>
+	public void DetermineQuadrantForPlayerCam() {
+		camQuadrant = DetermineQuadrant(playerCam.transform.position);
+	}
+
+	public Quadrant DetermineQuadrant(Vector3 position) {
 		bool leftPlaneTest = pillarPlanes[activePillar.ID].leftParallel.GetSide(position);
 		bool rightPlaneTest = pillarPlanes[activePillar.ID].rightParallel.GetSide(position);
 

@@ -1,10 +1,4 @@
-﻿#define NUM_SHUTTERS 32
-
-int _ShutterInverse;
-sampler2D _ShutterNoise;
-float _Shutters[NUM_SHUTTERS];
-float3 _ShutterCenter;
-float _ShutterHeight;
+﻿#include "../../Suberspective/SuberspectiveUniforms.cginc"
 
 int ArrayIndex(int index) {
     index = (2 * index + 1);

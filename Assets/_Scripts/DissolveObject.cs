@@ -5,8 +5,10 @@ using System.Linq;
 using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
+using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DissolveObjects {
     
@@ -21,44 +23,10 @@ namespace DissolveObjects {
             Materializing
         }
 
+        [FormerlySerializedAs("_state")]
         [SerializeField]
-        private State _state;
-        public State state {
-            get => _state;
-            set {
-                if (value == _state) return;
-                
-                timeSinceStateChanged = 0f;
-                _state = value;
-                switch (value) {
-                    case State.Dematerialized:
-                        int invisibleLayer = SuperspectivePhysics.InvisibleLayer;
-                        if (IsInvisibleDimensionObj) {
-                            cachedLayers = defaultLayers;
-                        }
-                        else {
-                            cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
-                        }
-                        ApplyLayers(invisibleLayer);
-
-                        SubscribedToResetLayers = false;
-                        break;
-                    case State.Materialized:
-                    case State.Dematerializing:
-                    case State.Materializing:
-                        // Fix to DissolveObjects interacting with DimensionObjects on their parent tree
-                        if (IsInvisibleDimensionObj) {
-                            SubscribedToResetLayers = true;
-                            return;
-                        }
-
-                        ApplyLayers(cachedLayers);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(value), value, null);
-                }
-            }
-        }
+        private State startingState;
+        public StateMachine<State> stateMachine;
 
         private bool IsInvisibleDimensionObj => thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.Invisible;
         private bool hasSubscribedToResetLayers = false;
@@ -93,7 +61,7 @@ namespace DissolveObjects {
         public float timeSinceStateChanged = 0f;
 
         private const float MATERIALIZE_COLLIDER_THRESHOLD = 0.25f;
-        private const string DISSOLVE_VALUE_PROP = "_DissolveValue";
+        private const string DISSOLVE_AMOUNT_PROP = "_DissolveAmount";
         private const string DISSOLVE_BURN_SIZE_PROP = "_DissolveBurnSize";
         private const string DISSOLVE_BURN_COLOR_PROP = "_DissolveBurnColor";
         private const string DISSOLVE_BURN_EMISSION_AMOUNT_PROP = "_DissolveEmissionAmount";
@@ -127,17 +95,29 @@ namespace DissolveObjects {
         public void Dematerialize() {
             if (!Application.isPlaying) return;
 
-            if (state == State.Materialized) {
-                state = State.Dematerializing;
+            if (stateMachine.State is not (State.Dematerialized or State.Dematerializing)) {
+                float prevTime = stateMachine.Time;
+                stateMachine.Set(State.Dematerializing);
+
+                // If we transitioned from Materializing to Dematerializing, we need to adjust the time to match the animation
+                if (stateMachine.PrevState == State.Materializing) {
+                    stateMachine.Time = materializeTime - prevTime;
+                }
             }
         }
 
         [Button("Materialize")]
         public void Materialize() {
             if (!Application.isPlaying) return;
-
-            if (state == State.Dematerialized) {
-                state = State.Materializing;
+            
+            if (stateMachine.State is not (State.Materialized or State.Materializing)) {
+                float prevTime = stateMachine.Time;
+                stateMachine.Set(State.Materializing);
+                
+                // If we transitioned from Dematerializing to Materializing, we need to adjust the time to match the animation
+                if (stateMachine.PrevState == State.Dematerializing) {
+                    stateMachine.Time = materializeTime - prevTime;
+                }
             }
         }
 
@@ -153,16 +133,26 @@ namespace DissolveObjects {
 
         protected override void Awake() {
             base.Awake();
-            renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();
+            if (renderers == null || renderers.Length == 0) {
+                renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();
+            }
+
+            foreach (Renderer renderer in renderers) {
+                foreach (Material material in renderer.materials) {
+                    material.EnableKeyword(DISSOLVE_OBJECT_KEYWORD);
+                }
+            }
             cachedLayers = renderers.Select(r => r.gameObject.layer).ToArray();
             defaultLayers = renderers.Select(r => r.gameObject.layer).ToArray();
-            colliders = gameObject.GetComponentsInChildrenRecursively<Collider>();
+            if (colliders == null || colliders.Length == 0) {
+                colliders = gameObject.GetComponentsInChildrenRecursively<Collider>();
+            }
             thisDimensionObj = gameObject.FindDimensionObjectRecursively<DimensionObject>();
         }
 
-        protected override void Start() {
-            base.Start();
-            switch (state) {
+        protected override void Init() {
+            InitializeStateMachine();
+            switch (startingState) {
                 case State.Materialized:
                     dissolveAmount = 0;
                     break;
@@ -178,59 +168,50 @@ namespace DissolveObjects {
             }
         }
 
+        protected override void OnEnable() {
+            base.OnEnable();
+
+            InitializeStateMachine();
+        }
+
+        bool hasInitializedStateMachine = false;
+        public void InitializeStateMachine() {
+            if (hasInitializedStateMachine) return;
+            hasInitializedStateMachine = true;
+            stateMachine = this.StateMachine(startingState);
+            
+            // Add state transitions for finishing an animation
+            stateMachine.AddStateTransition(State.Materializing, State.Materialized, () => dissolveAmount <= 0);
+            stateMachine.AddStateTransition(State.Dematerializing, State.Dematerialized, () => dissolveAmount >= 1);
+            
+            // Set dissolveAmount to 1 or 0 when entering Materialized or Dematerialized states
+            stateMachine.WithUpdate(State.Materialized, _ => {
+                dissolveAmount = 0;
+                ApplyCurrentState();
+            });
+            stateMachine.WithUpdate(State.Dematerialized, _ => {
+                dissolveAmount = 1;
+                ApplyCurrentState();
+            });
+            
+            // Update the dissolveAmount each frame when in Materializing or Dematerializing states
+            stateMachine.WithUpdate(State.Materializing, time => {
+                dissolveAmount = Mathf.Clamp01(1 - time / materializeTime);
+                ApplyCurrentState();
+            });
+            
+            stateMachine.WithUpdate(State.Dematerializing, time => {
+                dissolveAmount = Mathf.Clamp01(time / materializeTime);
+                ApplyCurrentState();
+            });
+        }
+
         // Update is called once per frame
         void Update() {
             if (DEBUG && DebugInput.GetKeyDown(KeyCode.Alpha0)) {
-                state = (state == State.Materialized || state == State.Materializing)
+                stateMachine.Set((stateMachine.State is State.Materialized or State.Materializing)
                     ? State.Dematerializing
-                    : State.Materializing;
-            }
-            
-            UpdateState();
-            SetMaterialProperties();
-        }
-
-        void UpdateState() {
-            timeSinceStateChanged += Time.deltaTime;
-
-            switch (state) {
-                case State.Materialized:
-                    dissolveAmount = 0f;
-                    break;
-                case State.Dematerializing:
-                    dissolveAmount = timeSinceStateChanged / materializeTime;
-                    if (dissolveAmount >= 1) {
-                        state = State.Dematerialized;
-                    }
-                    break;
-                case State.Dematerialized:
-                    dissolveAmount = 1f;
-                    break;
-                case State.Materializing:
-                    dissolveAmount = 1 - timeSinceStateChanged / materializeTime;
-                    if (dissolveAmount <= 0) {
-                        state = State.Materialized;
-                    }
-                    break;
-            }
-
-            foreach (var c in colliders) {
-                bool isOverMaterializedThreshold = false;
-                switch (state) {
-                    case State.Materialized:
-                        isOverMaterializedThreshold = true;
-                        break;
-                    case State.Dematerializing:
-                    case State.Materializing:
-                        isOverMaterializedThreshold = 1-dissolveAmount > MATERIALIZE_COLLIDER_THRESHOLD;
-                        break;
-                    case State.Dematerialized:
-                        isOverMaterializedThreshold = false;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                c.enabled = isOverMaterializedThreshold;
+                    : State.Materializing);
             }
         }
 
@@ -240,27 +221,42 @@ namespace DissolveObjects {
             }
         }
 
-        void ApplyLayers(int layerToApply) {
-            for (var i = 0; i < renderers.Length; i++) {
-                renderers[i].gameObject.layer = layerToApply;
+        void ApplyCurrentState() {
+            // Enable or disable colliders based on dissolveAmount
+            foreach (var c in colliders) {
+                bool colliderShouldBeEnabled = false;
+                switch (stateMachine.State) {
+                    case State.Materialized:
+                        colliderShouldBeEnabled = true;
+                        break;
+                    case State.Dematerializing:
+                    case State.Materializing:
+                        colliderShouldBeEnabled = 1-dissolveAmount > MATERIALIZE_COLLIDER_THRESHOLD;
+                        break;
+                    case State.Dematerialized:
+                        colliderShouldBeEnabled = false;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                c.enabled = colliderShouldBeEnabled;
             }
-        }
-
-        void SetMaterialProperties() {
+            
+            // Retrieve the MaterialPropertyBlock from the renderer
+            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+    
             foreach (var renderer in renderers) {
-                Material material = renderer.material;
-                if (state == State.Materialized) {
-                    material.DisableKeyword(DISSOLVE_OBJECT_KEYWORD);
-                }
-                else {
-                    material.EnableKeyword(DISSOLVE_OBJECT_KEYWORD);
-                }
-                material.SetFloat(DISSOLVE_VALUE_PROP, dissolveAmount);
-                material.SetFloat(DISSOLVE_BURN_SIZE_PROP, burnSize);
-                material.SetColor(DISSOLVE_BURN_COLOR_PROP, burnColor);
-                material.SetFloat(DISSOLVE_BURN_EMISSION_AMOUNT_PROP, burnEmissionBrightness);
-                material.SetTexture(DISSOLVE_TEX_PROP, dissolveTexture);
-                material.SetTexture(DISSOLVE_BURN_RAMP_PROP, dissolveBurnRamp);
+                renderer.GetPropertyBlock(mpb);
+
+                // Set material properties via MaterialPropertyBlock
+                mpb.SetFloat(DISSOLVE_AMOUNT_PROP, dissolveAmount);
+                mpb.SetFloat(DISSOLVE_BURN_SIZE_PROP, burnSize);
+                mpb.SetColor(DISSOLVE_BURN_COLOR_PROP, burnColor);
+                mpb.SetFloat(DISSOLVE_BURN_EMISSION_AMOUNT_PROP, burnEmissionBrightness);
+                mpb.SetTexture(DISSOLVE_TEX_PROP, dissolveTexture);
+                mpb.SetTexture(DISSOLVE_BURN_RAMP_PROP, dissolveBurnRamp);
+                    
+                renderer.SetPropertyBlock(mpb);
             }
         }
         
@@ -268,8 +264,7 @@ namespace DissolveObjects {
 
         [Serializable]
         public class DissolveObjectSave : SerializableSaveObject<DissolveObject> {
-            private State state;
-            private float timeSinceStateChanged;
+            private StateMachine<State>.StateMachineSave stateSave;
             private float materializeTime;
             private float dissolveAmount;
             private float burnSize;
@@ -280,8 +275,7 @@ namespace DissolveObjects {
             private int[] cachedLayers;
             
             public DissolveObjectSave(DissolveObject dissolveObject) : base(dissolveObject) {
-                this.state = dissolveObject.state;
-                this.timeSinceStateChanged = dissolveObject.timeSinceStateChanged;
+                this.stateSave = dissolveObject.stateMachine.ToSave();
                 this.materializeTime = dissolveObject.materializeTime;
                 this.dissolveAmount = dissolveObject.dissolveAmount;
                 this.burnSize = dissolveObject.burnSize;
@@ -293,8 +287,7 @@ namespace DissolveObjects {
             }
 
             public override void LoadSave(DissolveObject dissolveObject) {
-                dissolveObject.state = this.state;
-                dissolveObject.timeSinceStateChanged = this.timeSinceStateChanged;
+                dissolveObject.stateMachine.LoadFromSave(this.stateSave);
                 dissolveObject.materializeTime = this.materializeTime;
                 dissolveObject.dissolveAmount = this.dissolveAmount;
                 dissolveObject.burnSize = this.burnSize;

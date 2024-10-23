@@ -75,7 +75,10 @@ uniform float		_MaskSoftnessX;
 uniform float		_MaskSoftnessY;
 
 // Font Atlas properties
-uniform sampler2D	_MainTex;
+#ifndef UNITY_BUILT_IN_TEXTURE
+#define UNITY_BUILT_IN_TEXTURE
+uniform sampler2D _MainTex;
+#endif
 uniform float		_TextureWidth;
 uniform float		_TextureHeight;
 uniform float 		_GradientScale;

@@ -102,12 +102,12 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         #endregion
 
         IEnumerator AddPowerDelayed(PoweredObject powerTrail) {
-            yield return new WaitForSeconds(powerTrailTopMiddle.duration);
+            yield return new WaitForSeconds(powerTrailTopMiddle.Duration);
             FloorManager.instance.currentValue += powerSourceLookup[powerTrail].value;
         }
         
         IEnumerator RemovePowerDelayed(PoweredObject powerTrail) {
-            yield return new WaitForSeconds(powerTrailTopMiddle.duration);
+            yield return new WaitForSeconds(powerTrailTopMiddle.Duration);
             FloorManager.instance.currentValue -= powerSourceLookup[powerTrail].value;
         }
 

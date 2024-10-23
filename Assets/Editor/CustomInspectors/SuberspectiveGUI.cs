@@ -152,7 +152,7 @@ namespace UnityEditor {
             dimensionChannel = FindProperty("_Channel", props, false);
             
             dissolveTex = FindProperty("_DissolveTex", props, false);
-            dissolveValue = FindProperty("_DissolveValue", props, false);
+            dissolveValue = FindProperty("_DissolveAmount", props, false);
             dissolveBurnSize = FindProperty("_DissolveBurnSize", props, false);
             dissolveBurnRamp = FindProperty("_DissolveBurnRamp", props);
             dissolveBurnColor = FindProperty("_DissolveBurnColor", props, false);

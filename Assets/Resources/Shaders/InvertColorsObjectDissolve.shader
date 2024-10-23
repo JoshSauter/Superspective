@@ -3,7 +3,7 @@
 	Properties
 	{
         _MainTex("Dissolve Texture (RGB)", 2D) = "white" {}
-        _DissolveValue("Dissolve Amount", Range(0.0, 1.0)) = 0
+        _DissolveAmount("Dissolve Amount", Range(0.0, 1.0)) = 0
  
         _BurnSize("Burn Size", Range(0.0, 1.0)) = 0.15
         _BurnRamp("Burn Ramp (RGB)", 2D) = "white" {}
@@ -34,7 +34,7 @@
 			sampler2D _BurnRamp;
 			fixed4 _BurnColor;
 			float _BurnSize;
-			float _DissolveValue;
+			float _DissolveAmount;
 			float _EmissionAmount;
 
 			struct appdata
@@ -59,7 +59,7 @@
 			}
 			
 			fixed4 frag (v2f i) : SV_Target {
-				half test = tex2D(_MainTex, i.uv.xy).rgb - _DissolveValue;
+				half test = tex2D(_MainTex, i.uv.xy).rgb - _DissolveAmount;
 				clip(test);
 				return fixed4(1,1,1,1);
 			}

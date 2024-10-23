@@ -38,7 +38,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
 
 		[Button("Destroy all children")]
 		void DestroyChildren() {
-			Transform[] children = transform.GetChildren();
+			List<Transform> children = transform.GetChildren();
 			foreach (Transform child in children) {
 				if (child.gameObject != copy) {
 					DestroyImmediate(child.gameObject);

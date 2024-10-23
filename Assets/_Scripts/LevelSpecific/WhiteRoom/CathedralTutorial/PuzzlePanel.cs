@@ -71,9 +71,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         }
         
         void InitStateMachine() {
-            state.AddStateTransition(PuzzleState.PoweringUp, NextState, powerTrail.duration + floorPuzzle.powerTrailBottomMiddle.duration);
+            state.AddStateTransition(PuzzleState.PoweringUp, NextState, powerTrail.Duration + floorPuzzle.powerTrailBottomMiddle.Duration);
             state.AddStateTransition(PuzzleState.Incorrect, PuzzleState.Depowering, incorrectFlashDuration);
-            state.AddStateTransition(PuzzleState.Depowering, PuzzleState.Idle, powerTrail.durationOff + floorPuzzle.powerTrailBottomMiddle.durationOff);
+            state.AddStateTransition(PuzzleState.Depowering, PuzzleState.Idle, powerTrail.DurationOff + floorPuzzle.powerTrailBottomMiddle.DurationOff);
             state.AddStateTransition(PuzzleState.Correct, PuzzleState.CorrectIdle, correctToDepowerDelay);
 
             // Incorrect SFX
@@ -128,7 +128,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             if (isLastPuzzle) {
                 powerTrailToNextPuzzle.pwr.OnPowerFinish += () => floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
             }
-            state.AddTrigger(PuzzleState.Idle, floorPuzzle.powerTrailTopMiddle.duration + .125f, () => {
+            state.AddTrigger(PuzzleState.Idle, floorPuzzle.powerTrailTopMiddle.Duration + .125f, () => {
                 if (floorPuzzle.currentValue.actualValue == 0) {
                     floorPuzzle.currentValue.desiredColor = floorPuzzle.currentValue.defaultColor;
                 }

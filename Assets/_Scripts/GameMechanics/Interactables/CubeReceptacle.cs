@@ -253,7 +253,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
                 }
                 
                 
-                if (lockCubeInPlace && lockDissolve.state == DissolveObject.State.Dematerialized) {
+                if (lockCubeInPlace && lockDissolve.stateMachine == DissolveObject.State.Dematerialized) {
                     LockCubeInPlace();
                 }
                 break;
@@ -346,6 +346,10 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         cubeInReceptacle = null;
     }
 
+    private const float EXPEL_CUBE_FORCE = 1200;
+    private const float EXPEL_CUBE_FORCE_VARIANCE = 240;
+    public void ExpelCube() => ExpelCubeWithForce(1);
+
     public void ExpelCubeWithForce(float forceMultiplier) {
         PickupObject cubeToEject = cubeInReceptacle;
         if (cubeToEject == null) {
@@ -353,16 +357,39 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         }
         ReleaseCubeFromReceptacleInstantly();
         Vector2 randomDirection = UnityEngine.Random.insideUnitCircle.normalized;
-        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(240f, 350f);
-        Vector3 ejectionDirection = transform.TransformDirection(new Vector3(-Mathf.Abs(randomDirection.x), 4, randomDirection.y));
+        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(EXPEL_CUBE_FORCE - EXPEL_CUBE_FORCE_VARIANCE, EXPEL_CUBE_FORCE + EXPEL_CUBE_FORCE_VARIANCE);
+        Vector3 ejectionDirection = transform.TransformDirection(new Vector3(-Mathf.Abs(randomDirection.x), 4, randomDirection.y)).normalized;
+        debug.Log($"Adding {ejectionDirection * forceMagnitude} force to cube {cubeToEject.ID}'s {(cubeToEject.thisRigidbody.isKinematic ? "Kinematic" : "Non-Kinematic")} Rigidbody to eject it from receptacle");
         cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
     }
 
-    public void ExpelCube() => ExpelCubeWithForce(1);
+    public void ExpelCubeStraightOut(float forceMultiplier) {
+        PickupObject cubeToEject = cubeInReceptacle;
+        if (cubeToEject == null) {
+            return;
+        }
+        ReleaseCubeFromReceptacleInstantly();
+        Vector3 ejectionDirection = transform.up;
+        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(240f, 350f);
+        debug.Log($"Adding {ejectionDirection * forceMagnitude} force to cube {cubeToEject.ID}'s {(cubeToEject.thisRigidbody.isKinematic ? "Kinematic" : "Non-Kinematic")} Rigidbody to eject it from receptacle");
+        cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
+    }
 
     void ReleaseFromReceptacle() {
         cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
         ReleaseCubeFromReceptacle();
+    }
+
+    protected override void OnEnable() {
+        base.OnEnable();
+        
+        if (triggerZone != null) {
+            triggerZone.enabled = true;
+        }
+    }
+
+    protected void OnDisable() {
+        triggerZone.enabled = false;
     }
 
     void ReleaseCubeFromReceptacle() {

@@ -2,11 +2,7 @@
 #define SUBERSPECTIVE_INCLUDED
 	
 #include "SuberspectiveCommon.cginc"
-
-sampler2D _MainTex;
-float4 _MainTex_ST;
-sampler2D _EmissionMap;
-float4 _EmissionMap_ST;
+#include "SuberspectiveUniforms.cginc"
 
 struct SuberspectiveV2F {
     float4 clipPos : SV_POSITION;

@@ -11,7 +11,7 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
     private const float FULL_SHAKE_DISTANCE = 10f; // Distance within which the player will feel the full intensity of the shake
     private const float NO_SHAKE_DISTANCE = 150f; // Distance beyond which the player will feel no shake
     private const float RETURN_TO_CENTER_LERP_SPEED = 2f; // Speed at which we lerp the camera back to its original position after shaking
-    private const float INTENSITY_TO_OFFSET_MULTPLIER = 0.02f; // Arbitrary "unit" conversion from intensity to offset (I like specifying values like 2.5f instead of .05f for shake intensity)
+    private const float INTENSITY_TO_OFFSET_MULTPLIER = 1f; // Arbitrary "unit" conversion from intensity to offset (I like specifying values like 2.5f instead of .05f for shake intensity)
     
     public Vector2 totalOffsetApplied = Vector2.zero;
     
@@ -138,9 +138,11 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
     
         // Gradually return the camera to its original position
         newTotalOffset = Vector2.Lerp(newTotalOffset, Vector2.zero, RETURN_TO_CENTER_LERP_SPEED * Time.deltaTime);
+
     
         // Apply the final offset to the camera's position
-        PlayerCam.localPosition += new Vector3(newTotalOffset.x, newTotalOffset.y, 0f);
+        Vector3 finalOffset = new Vector3(newTotalOffset.x, newTotalOffset.y, 0f);
+        PlayerCam.localPosition += finalOffset * Time.deltaTime;
         
         if (curIntensity > 0) {
             debug.Log($"Shake: {curIntensity}\nOffset before: {totalOffsetApplied}\nOffset after: {newTotalOffset}");

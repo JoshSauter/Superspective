@@ -34,7 +34,9 @@ namespace GrowShrink {
         [Button("Compile", EButtonEnableMode.Editor)]
         void Compile() {
             Decompile();
-            
+
+            Vector3 originalScale = transform.localScale;
+            transform.localScale = Vector3.one;
 #region Vertex Transformation Methods
             Vector3 pivotAxis;
             Vector3 smallSidePointWorld, largeSidePointWorld;
@@ -182,6 +184,8 @@ namespace GrowShrink {
             shrunkTriggerCollider.ForceRefresh();
             
             originalTriggerZone.gameObject.SetActive(false);
+            
+            transform.localScale = originalScale;
             
             targetPbMesh.Refresh();
         }

@@ -4783,7 +4783,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
@@ -14842,7 +14841,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
 --- !u!114 &2331844844923839940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14905,7 +14903,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}
@@ -14982,7 +14979,6 @@ MonoBehaviour:
     _state: 1
     _prevState: 0
     _time: 0
-    onStateChange: []
   valueIcon: {fileID: 3896326707807030746}
   powerButton: {fileID: 1834143664177481985}
   powerTrailFromPrevPuzzle: {fileID: 0}
@@ -16193,7 +16189,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}

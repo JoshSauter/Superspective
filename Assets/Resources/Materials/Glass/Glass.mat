@@ -93,6 +93,7 @@ Material:
     - _DepthBias: 0
     - _DetailNormalMapScale: 1
     - _DiffuseMagnitude: 0.112
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0

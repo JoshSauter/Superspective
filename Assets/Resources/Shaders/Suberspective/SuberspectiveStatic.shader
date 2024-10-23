@@ -21,7 +21,7 @@ Shader "Suberspective/SuberspectiveStatic" {
     	_Channel("Channel", Range(0, 8)) = 0
     	// DissolveObject
         _DissolveTex("Dissolve Texture", 2D) = "white" {}
-        _DissolveValue("Dissolve Amount", Range(0.0, 1.0)) = 0
+        _DissolveAmount("Dissolve Amount", Range(0.0, 1.0)) = 0
         _DissolveBurnSize("Burn Size", Range(0.0, 1.0)) = 0.15
         _DissolveBurnRamp("Burn Ramp (RGB)", 2D) = "white" {}
         _DissolveBurnColor("Burn Color", Color) = (.3,.6,1,1)
@@ -57,7 +57,6 @@ Shader "Suberspective/SuberspectiveStatic" {
 
 			sampler2D _BumpMap;
 			float _EmissionAmount;
-            uniform float4 _Color;
 
 			float rand(float3 co) {
 				float r1 = frac(sin(dot(co, float3(127.1, 311.7, 74.7))) * 43758.5453);

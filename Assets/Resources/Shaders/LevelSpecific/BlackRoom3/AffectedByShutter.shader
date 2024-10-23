@@ -20,8 +20,6 @@ Shader "Custom/BlackRoom3/AffectedByShutter" {
 
             #include "UnityCG.cginc"
             #include "AffectedByShutterHelpers.cginc"
-            fixed4 _Color;
-            fixed4 _EmissionColor;
 
             struct appdata {
                 float4 vertex : POSITION;

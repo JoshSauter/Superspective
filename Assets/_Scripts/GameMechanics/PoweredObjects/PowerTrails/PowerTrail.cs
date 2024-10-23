@@ -15,6 +15,9 @@ using static Audio.AudioManager;
 namespace PowerTrailMechanics {
 	[RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
 	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
+		public delegate void PowerTrailUpdateAction(float prevDistance, float newDistance);
+		public PowerTrailUpdateAction OnPowerTrailUpdate;
+		
 		[Label("Power")]
 		[SerializeField]
 		private PoweredObject _pwr;
@@ -102,8 +105,8 @@ namespace PowerTrailMechanics {
 		///////////
 		// State //
 		///////////
-		public float duration => maxDistance / speed;
-		public float durationOff => useSeparateSpeedsForPowerOnOff ? maxDistance / speedPowerOff : duration;
+		public float Duration => maxDistance / speed;
+		public float DurationOff => useSeparateSpeedsForPowerOnOff ? maxDistance / speedPowerOff : Duration;
 		[Header("Current State")]
 		public float distance = 0f;
 		public float maxDistance = 0f;
@@ -268,8 +271,9 @@ namespace PowerTrailMechanics {
 				materials = nowMaterials;
 				PopulateStaticGPUInfo();
 			}
-			
+
 			distance = nextDistance;
+			OnPowerTrailUpdate?.Invoke(prevDistance, nextDistance);
 			
 			UpdateInterpolationValues(nextDistance);
 		}

@@ -26,7 +26,7 @@
     	_Channel("Channel", Range(0, 8)) = 0
     	// DissolveObject
         _DissolveTex("Dissolve Texture", 2D) = "white" {}
-        _DissolveValue("Dissolve Amount", Range(0.0, 1.0)) = 0
+        _DissolveAmount("Dissolve Amount", Range(0.0, 1.0)) = 0
         _DissolveBurnSize("Burn Size", Range(0.0, 1.0)) = 0.15
         _DissolveBurnRamp("Burn Ramp (RGB)", 2D) = "white" {}
         _DissolveBurnColor("Burn Color", Color) = (.3,.6,1,1)
@@ -61,7 +61,7 @@
 			#include "Assets/Resources/Shaders/Suberspective/SuberspectiveHelpers.cginc"
 
 			float4 _AngleFadeColor, _AngleFadeColor2;
-			float4 _EmissionColor, _EmissionColor2;
+			float4 _EmissionColor2;
 			float3 _ColorChangePoint;
 			float3 _ColorChangeAxis;
 			float _ColorChangeWidth;

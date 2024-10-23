@@ -4,6 +4,7 @@ using NaughtyAttributes;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
+using SuperspectiveUtils;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -23,7 +24,7 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
     }
     public float gravityMagnitude = Physics.gravity.magnitude;
 
-    private int RaycastLayermask => ~SuperspectivePhysics.PlayerLayer;
+    private int RaycastLayermask => ~(1 << SuperspectivePhysics.PlayerLayer);
 
     private PickupObject _pickupObject;
     private PickupObject PickupObject {
@@ -43,11 +44,19 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
             return thisRigidbody.velocity;
         }
     }
+    
+    public GrowShrinkObject growShrinkObject;
+    public float Scale => startingScale * (growShrinkObject ? growShrinkObject.CurrentScale : 1f);
+    public float startingScale;
 
     protected override void Awake() {
         base.Awake();
+        
+        startingScale = transform.localScale.x;
+        
         thisRigidbody = GetComponent<Rigidbody>();
         GravityDirection = startingGravityDirection;
+        growShrinkObject = gameObject.FindInParentsRecursively<GrowShrinkObject>();
     }
 
     protected override void Start() {
@@ -63,8 +72,7 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
         if (GameManager.instance.IsCurrentlyLoading) return;
         
         if (useGravity) {
-            Vector3 rayDirection = GravityDirection * (0.5f * transform.localScale.x);
-            rayDirection += GravityDirection * (0.05f * transform.localScale.x);
+            Vector3 rayDirection = GravityDirection * (0.55f * Scale);
             Ray groundRaycast = new Ray(transform.position, rayDirection);
             bool onGround = Physics.Raycast(groundRaycast, rayDirection.magnitude, RaycastLayermask);
             Debug.DrawRay(groundRaycast.origin, rayDirection, onGround ? Color.green : Color.yellow);
