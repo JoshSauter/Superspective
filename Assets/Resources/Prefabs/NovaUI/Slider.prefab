@@ -1739,12 +1739,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 1093745032197570710
+    rid: 8647374355792396310
   references:
     version: 2
     RefIds:
-    - rid: 1093745032197570710
-      type: {class: SliderVisual, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396310
+      type: {class: SliderVisual, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         Slider: {fileID: 8387996706013070913}
         HoverButton: {fileID: 5434393557107758464}
@@ -3255,7 +3255,7 @@ MonoBehaviour:
     ReceiveShadows: 1
   PreviewSize: {x: 1.2142859, y: 10, z: 0}
   visuals:
-    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.3}
+    Color: {r: 1, g: 1, b: 1, a: 0.43137255}
     CornerRadius:
       Raw: 0
       Type: 0
@@ -3343,17 +3343,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   hoverState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   BackgroundUIBlock: {fileID: 0}
   novaInteractable: {fileID: 0}
   OtherUIBlocks:

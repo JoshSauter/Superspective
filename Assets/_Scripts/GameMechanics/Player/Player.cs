@@ -5,12 +5,15 @@ using System.Collections.Generic;
 using GrowShrink;
 using UnityEngine;
 using SerializableClasses;
+using SuperspectiveUtils;
 
 public class Player : SingletonSaveableObject<Player, Player.PlayerSave> {
 	public PlayerLook look;
 	public PlayerMovement movement;
 	public Headbob headbob;
 	public Camera PlayerCam => SuperspectiveScreen.instance.playerCamera;
+	// Returns the position of the camera adjusted to be aligned with the player's body
+	public Vector3 AdjustedCamPos => PlayerCam.transform.position.GetClosestPointOnFiniteLine(movement.BottomOfPlayer, movement.TopOfPlayer);
 	public CameraFollow cameraFollow;
 	public PickupObject heldObject;
 

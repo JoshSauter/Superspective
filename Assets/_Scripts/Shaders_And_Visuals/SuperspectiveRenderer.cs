@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using DimensionObjectMechanics;
 using UnityEngine;
 using NaughtyAttributes;
 
@@ -78,7 +80,7 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		return r.sharedMaterial;
 	}
 
-	public void SetMaterial(Material newMaterial, bool keepMainColor = true) {
+	public void SetSharedMaterial(Material newMaterial, bool keepMainColor = true) {
 		Color prevColor = GetMainColor();
 
 		r.sharedMaterial = newMaterial;
@@ -88,12 +90,23 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		}
 	}
 
-	public Material[] GetMaterials() {
-		return r.sharedMaterials;
+	public void SetSharedMaterials(Material[] newMaterials, bool keepMainColor = true) {
+		Color prevColor = GetMainColor();
+
+		r.sharedMaterials = newMaterials;
+
+		if (keepMainColor) {
+			SetMainColor(prevColor);
+		}
+	}
+
+	public Material[] GetSharedMaterials() {
+		// Drop null materials
+		return r.sharedMaterials.Where(m => m).ToArray();
 	}
 
 	public void SetMaterials(Material[] newMaterials) {
-		r.sharedMaterials = newMaterials;
+		r.materials = newMaterials;
 	}
 	#endregion
 
@@ -120,7 +133,7 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	public float[] GetFloatArray(string propName) {
 		return GetPropBlock().GetFloatArray(propName);
 	}
-
+	
 	public Texture GetTexture(string propName) {
 		return GetPropBlock().GetTexture(propName);
 	}
@@ -160,6 +173,12 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	public void SetFloatArray(string propName, float[] value) {
 		MaterialPropertyBlock mpb = GetPropBlock();
 		mpb.SetFloatArray(propName, value);
+		SetPropBlock(mpb);
+	}
+
+	public void SetBuffer(string propName, ComputeBuffer buffer) {
+		MaterialPropertyBlock mpb = GetPropBlock();
+		mpb.SetBuffer(propName, buffer);
 		SetPropBlock(mpb);
 	}
 
@@ -214,5 +233,13 @@ public class SuperspectiveRenderer : MonoBehaviour {
 				Debug.Log($"{key}: {r.material.IsKeywordEnabled(key)}");
 				break;
 		}
+	}
+	
+	// Don't tell anyone I put this here
+	[Button("Print Dimension Object Mask Info")]
+	public void DebugPrintDimensionObjectMaskInfo() {
+		ListHashSet<DimensionObject> dimensionObjectsAffecting = DimensionObjectManager.instance.GetDimensionObjectsAffectingRenderer(this);
+		string msg = $"DimensionObjects affecting: {string.Join(", ", dimensionObjectsAffecting)}\n{DimensionObjectManager.instance.GetDimensionObjectBitmask(this).DebugPrettyPrint()}";
+		Debug.Log(msg, this);
 	}
 }

@@ -1032,9 +1032,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 7179573506733506560
+    rid: 8647374355792396309
   references:
     version: 2
     RefIds:
-    - rid: 7179573506733506560
-      type: {class: SeparatorVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396309
+      type: {class: SeparatorVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}

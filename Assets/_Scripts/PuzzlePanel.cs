@@ -117,7 +117,7 @@ public class PuzzlePanel : MonoBehaviour {
                 newButtonGO.transform.localPosition = spawnPosition;
                 newButtonGO.transform.localScale = new Vector3(sizeOfButtons.x, sizeOfButtons.y, 0.25f);
                 newButtonGO.AddComponent<SuperspectiveRenderer>()
-                    .SetMaterial(Resources.Load<Material>("Materials/Unlit/Unlit"));
+                    .SetSharedMaterial(Resources.Load<Material>("Materials/Unlit/Unlit"));
                 newButtons.Add(SetUpNewButton(newButtonGO));
 
                 spawnPosition.x += sizeOfSpacers.x + sizeOfButtons.x;

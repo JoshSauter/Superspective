@@ -229,7 +229,7 @@ namespace GrowShrink {
         private void ObjectEnter(Collider c, bool enteredSmallSide) {
             string id = GetId(c);
             if (!growShrinkObjects.ContainsKey(id)) {
-                GrowShrinkObject growShrinkObj = c.GetComponent<GrowShrinkObject>();
+                GrowShrinkObject growShrinkObj = GrowShrinkObject.collidersAffectedByGrowShrinkObjects.GetOrNull(c);
                 if (growShrinkObj == null) return;
                 growShrinkObjects[id] = growShrinkObj;
             }

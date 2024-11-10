@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 971708723495936008}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.957252, y: 0.25, z: 0}
+  m_LocalPosition: {x: -11.957251, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -295,7 +295,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 971708723534657609}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.9897501, y: 0, z: 0}
+  m_LocalPosition: {x: -0.98975, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -536,7 +536,7 @@ Transform:
   - {fileID: 6809606467329488806}
   - {fileID: 971708724807786558}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &971708723574876906
 MonoBehaviour:
@@ -786,12 +786,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 1093744914742378514
+    rid: 8647374355792396305
   references:
     version: 2
     RefIds:
-    - rid: 1093744914742378514
-      type: {class: SaveSlotVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396305
+      type: {class: SaveSlotVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         saveSlotScript: {fileID: 971708725239219490}
         SaveName: {fileID: 971708725311228170}
@@ -852,23 +852,19 @@ MonoBehaviour:
   saveSlotButtonState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   deleteButtonState:
     _state: 1
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   deleteConfirmButtonState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   deleteCancelButtonState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
 --- !u!1 &971708724097332646
 GameObject:
   m_ObjectHideFlags: 0
@@ -1601,7 +1597,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 971708724452446869}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -38.500004, y: 0, z: 0}
+  m_LocalPosition: {x: -38.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2159,7 +2155,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 971708724807786497}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 31.350002, y: -5.25, z: 0}
+  m_LocalPosition: {x: 31.349998, y: -5.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -15,10 +15,10 @@ public class PillarFork : MonoBehaviour {
         if (Mathf.Abs(diff.x) < 0.4f || diff.z < 0) return;
         
         bool playerToTheLeft = diff.x < 0;
-        if (playerToTheLeft && pillar.curDimension == 1) {
+        if (playerToTheLeft && pillar.curBaseDimension == 1) {
             pillar.ShiftDimensionDown();
         }
-        else if (!playerToTheLeft && pillar.curDimension == 0) {
+        else if (!playerToTheLeft && pillar.curBaseDimension == 0) {
             pillar.ShiftDimensionUp();
         }
     }

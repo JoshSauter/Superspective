@@ -34,9 +34,12 @@ public class DimensionObjectInspector : UnityEditor.Editor {
     SerializedProperty treatChildrenAsOneObjectRecursively;
     SerializedProperty ignoreChildrenWithDimensionObject;
     SerializedProperty ignorePartiallyVisibleLayerChanges;
+    SerializedProperty bypassRaycastCheck;
     SerializedProperty disableColliderWhileInvisible;
     
+    SerializedProperty automaticallySetRenderersIfEmpty;
     SerializedProperty renderers;
+    SerializedProperty automaticallySetCollidersIfEmpty;
     SerializedProperty colliders;
     
     SerializedProperty startingVisibilityState;
@@ -53,9 +56,12 @@ public class DimensionObjectInspector : UnityEditor.Editor {
         treatChildrenAsOneObjectRecursively = serializedObject.FindProperty("treatChildrenAsOneObjectRecursively");
         ignoreChildrenWithDimensionObject = serializedObject.FindProperty("ignoreChildrenWithDimensionObject");
         ignorePartiallyVisibleLayerChanges = serializedObject.FindProperty("ignorePartiallyVisibleLayerChanges");
+        bypassRaycastCheck = serializedObject.FindProperty("bypassRaycastCheck");
         disableColliderWhileInvisible = serializedObject.FindProperty("disableColliderWhileInvisible");
         
+        automaticallySetRenderersIfEmpty = serializedObject.FindProperty("automaticallySetRenderersIfEmpty");
         renderers = serializedObject.FindProperty("renderers");
+        automaticallySetCollidersIfEmpty = serializedObject.FindProperty("automaticallySetCollidersIfEmpty");
         colliders = serializedObject.FindProperty("colliders");
         
         startingVisibilityState = serializedObject.FindProperty("startingVisibilityState");
@@ -140,6 +146,7 @@ public class DimensionObjectInspector : UnityEditor.Editor {
             EditorGUILayout.PropertyField(treatChildrenAsOneObjectRecursively);
             EditorGUILayout.PropertyField(ignoreChildrenWithDimensionObject);
             EditorGUILayout.PropertyField(ignorePartiallyVisibleLayerChanges);
+            EditorGUILayout.PropertyField(bypassRaycastCheck);
             EditorGUILayout.PropertyField(disableColliderWhileInvisible);
             EditorGUI.indentLevel--;
         }
@@ -150,7 +157,15 @@ public class DimensionObjectInspector : UnityEditor.Editor {
 
         if (renderersAndCollidersShown) {
             EditorGUI.indentLevel++;
+            automaticallySetRenderersIfEmpty.boolValue = EditorGUILayout.Toggle(
+                "Automatically set renderers if empty",
+                automaticallySetRenderersIfEmpty.boolValue
+            );
             EditorGUILayout.PropertyField(renderers);
+            automaticallySetCollidersIfEmpty.boolValue = EditorGUILayout.Toggle(
+                "Automatically set colliders if empty",
+                automaticallySetCollidersIfEmpty.boolValue
+            );
             EditorGUILayout.PropertyField(colliders);
             EditorGUI.indentLevel--;
         }

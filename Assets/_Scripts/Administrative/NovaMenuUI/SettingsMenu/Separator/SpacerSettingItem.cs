@@ -1,1 +1,3 @@
-﻿public class SpacerSettingItem : SettingsItem {}
+﻿namespace NovaMenuUI {
+    public class SpacerSettingItem : SettingsItem {}
+}

@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 2560
     height: 1349.3334
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Console
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 500, y: 100}
   m_MaxSize: {x: 40480, y: 16192}
   vertical: 0
-  controlID: 35846
+  controlID: 43453
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -144,7 +144,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 100}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 1
-  controlID: 35847
+  controlID: 43454
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 50}
   m_MaxSize: {x: 32384, y: 8096}
   vertical: 0
-  controlID: 35799
+  controlID: 43455
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -300,7 +300,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 35848
+  controlID: 43504
 --- !u!114 &13
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -525,7 +525,8 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SkipHidden: 0
     m_SearchArea: 1
-    m_Folders: []
+    m_Folders:
+    - Assets/Resources/Prefabs/NovaUI
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -540,7 +541,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 5e100300
     m_LastClickedID: 200798
-    m_ExpandedIDs: ffffffff00000000d26e0100d46e0100d66e0100d86e0100da6e0100dc6e0100de6e0100e06e0100e26e0100e46e0100e66e0100e86e0100ea6e0100ec6e0100ee6e0100f06e0100f26e0100f46e0100f66e0100f86e0100fa6e0100fc6e0100fe6e0100006f0100026f0100046f0100706f0100
+    m_ExpandedIDs: ffffffff00000000283c02002a3c02002c3c02002e3c0200303c0200323c0200343c0200363c0200383c02003a3c02003c3c02003e3c0200403c0200423c0200443c0200463c0200483c02004a3c02004c3c02004e3c0200503c0200523c0200543c0200563c0200583c02005c3c02005e3c0200c23c0200863d02009006070016b33200
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -565,10 +566,10 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 580}
+    scrollPos: {x: 0, y: 5152.3335}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff00000000d26e0100d46e0100d66e0100d86e0100da6e0100dc6e0100de6e0100e06e0100e26e0100e46e0100e66e0100e86e0100ea6e0100ec6e0100ee6e0100f06e0100f26e0100f46e0100f66e0100f86e0100fa6e0100fc6e0100fe6e0100006f0100026f0100046f0100706f0100
+    m_ExpandedIDs: ffffffff00000000283c02002a3c02002c3c02002e3c0200303c0200323c0200343c0200363c0200383c02003a3c02003c3c02003e3c0200403c0200423c0200443c0200463c0200483c02004a3c02004c3c02004e3c0200503c0200523c0200543c0200563c0200583c02005c3c02005e3c0200c23c0200863d02009006070016b33200
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -661,10 +662,10 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 103.33331}
+      scrollPos: {x: 0, y: 71.33331}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: be1bc6ff101cc6ff904fc6ffba4fc6ff1c52c6ff0467c6ff9e77c6ffc077c6ffdc86c6fff8d6c6ff06d7c6ff0cd7c6ff36d7c6ff06d9c6ff24d9c6ff94dec6ff98dec6ffbeefc6ff2af0c6ff30f0c6ff34f0c6ff9af7c6ff00ffc6ff8cffc6ff5a02c7fff802c7ff9403c7ff8e05c7ff9e05c7ff3e06c7fffc06c7ffbe07c7ff8c18c7ffca18c7ff6423c7ffac9cccffd69cccffc0a6cdffeaa6cdffacf2fcffd4f2fcffc406fdffa810fdffe450ffff78d9ffff30daffff90e3fffff4e3ffff68e4fffff2f9ffffe8faffffecfaffff2a74000004770000b67a000034800000ca84000096860000b2870000ec8700000c8800004a880000c88c0000e8900000da950000f2960000d4970000489d0000529e000008a00000e8a400003ca50000c2a800004cab000008ad0000c4ba0000c2bd0000a2c0000026d7000038d7000072d70000aad800005cdd0000a6e2000026e70000d4e800004eed0000e4ee0000bcf80000d4f80000cafb0000d4fc0000c8fd000014fe0000deff00002e00010082000100580301005008010024190100b01a01008e1b01007e1d0100321e01005e012600020b2600ee7526009e822600308c2600
+      m_ExpandedIDs: 88c6f9ff8867fbffdc67fbff9088fbffbe88fbff248bfbff589ffbfff6affbff1cb0fbff3cbffbffe00efcfff20efcfffc0efcff2a0ffcff0611fcff2811fcff8816fcff9016fcffba27fcff2a28fcff3428fcff3c28fcffa62efcff1036fcffa236fcff8e37fcff3038fcffd038fcffce3afcffe23afcff863bfcff483cfcff0e3dfcffe64dfcff284efcffe058fcffa477fcfff677fcffaa98fcffd898fcff3e9bfcff72affcff10c0fcff36c0fcff56cffcfffa1efdff0c1ffdff161ffdff441ffdff2021fdffd422fdff3428fdff3c28fdff6639fdffd639fdffe039fdffe839fdff5240fdffbc47fdff4e48fdff3a49fdffdc49fdff7c4afdff7a4cfdff8e4cfdff324dfdfff44dfdffba4efdff925ffdffd45ffdff8c6afdff8c0dfeffe00dfeff942efeffc22efeff2831feff5c45fefffa55feff2056feff4065feffe4b4fefff6b4feff00b5feff2eb5feff0ab7feff2cb7feff8cbcfeff94bcfeffbecdfeff2ecefeff36cefeff3ecefeffa8d4feff12dcfeffa2dcfeff8eddfeff30defeffd0defeffcee0feffe2e0feff86e1feff46e2feff0ce3feffe4f3feff26f4feffdefefeffe8adffffeaadffffd8faffffdafaffff4e6b02003a750200f4ca0200ecd9020046eb0200a62a0300c2d9040056dd040056c014001016150062361500c2751500da7715005480150018891500748c15004ec32700ae022800dc6a3000346c300094ab3000ccb030007eb33000c2b3300052b83000a4b830007cba300090ba3000a0ba3000daba3000e6bb30009abc3000b6bf300076c03000d6c03000f4c03000f0c2300012c43000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1079,9 +1080,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 916.65643, y: 62.29323, z: 248.34198}
+    m_Target: {x: 152.66005, y: -457.1599, z: 1022.22217}
     speed: 2
-    m_Value: {x: 916.65643, y: 62.29323, z: 248.34198}
+    m_Value: {x: 152.66005, y: -457.1599, z: 1022.22217}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1127,13 +1128,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.004352932, y: -0.9936085, z: 0.11221904, w: -0.031798344}
+    m_Target: {x: 0.0474516, y: 0.95272493, z: -0.21663271, w: 0.21063434}
     speed: 2
-    m_Value: {x: -0.004182756, y: -0.9932176, z: 0.11217604, w: -0.030294552}
+    m_Value: {x: 0.046784643, y: 0.9527766, z: -0.21514109, w: 0.20914641}
   m_Size:
-    m_Target: 73.528915
+    m_Target: 98.372055
     speed: 2
-    m_Value: 73.528915
+    m_Value: 98.372055
   m_Ortho:
     m_Target: 0
     speed: 2

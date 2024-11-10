@@ -573,7 +573,7 @@ MonoBehaviour:
     ReceiveShadows: 1
   PreviewSize: {x: 0.8500001, y: 10, z: 0}
   visuals:
-    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.3}
+    Color: {r: 1, g: 1, b: 1, a: 0.43137255}
     CornerRadius:
       Raw: 0
       Type: 0
@@ -661,17 +661,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   hoverState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   BackgroundUIBlock: {fileID: 889474184504629666}
   novaInteractable: {fileID: 1515657898557833317}
   OtherUIBlocks:
@@ -1531,12 +1531,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 1093745139834945743
+    rid: 8647374355792396306
   references:
     version: 2
     RefIds:
-    - rid: 1093745139834945743
-      type: {class: DropdownVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396306
+      type: {class: DropdownVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         Dropdown: {fileID: 2351433904900537772}
 --- !u!114 &2351433904900537772
@@ -1564,8 +1564,7 @@ MonoBehaviour:
   state:
     _state: 1
     _prevState: 1
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
 --- !u!1 &4760873070158710117
 GameObject:
   m_ObjectHideFlags: 0
@@ -3477,7 +3476,7 @@ MonoBehaviour:
     ReceiveShadows: 1
   PreviewSize: {x: 1, y: 1, z: 0}
   visuals:
-    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.3}
+    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.29803923}
     CornerRadius:
       Raw: 0
       Type: 0
@@ -3565,17 +3564,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   hoverState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   BackgroundUIBlock: {fileID: 0}
   novaInteractable: {fileID: 0}
   OtherUIBlocks: []

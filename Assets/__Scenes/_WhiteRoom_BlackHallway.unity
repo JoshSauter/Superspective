@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339508
+  m_Name: pb_Mesh1527910
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -859,7 +859,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339160
+  m_Name: pb_Mesh1527562
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1024,7 +1024,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339336
+  m_Name: pb_Mesh1527738
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1513,7 +1513,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339216
+  m_Name: pb_Mesh1527618
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2072,7 +2072,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339298
+  m_Name: pb_Mesh1527700
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2237,7 +2237,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339436
+  m_Name: pb_Mesh1527838
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3374,7 +3374,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339266
+  m_Name: pb_Mesh1527668
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4187,7 +4187,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339228
+  m_Name: pb_Mesh1527630
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4416,7 +4416,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339350
+  m_Name: pb_Mesh1527752
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4581,7 +4581,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339148
+  m_Name: pb_Mesh1527550
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4746,7 +4746,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339524
+  m_Name: pb_Mesh1527926
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4911,7 +4911,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339408
+  m_Name: pb_Mesh1527810
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5076,7 +5076,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339180
+  m_Name: pb_Mesh1527582
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5406,7 +5406,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339396
+  m_Name: pb_Mesh1527798
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5571,7 +5571,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339384
+  m_Name: pb_Mesh1527786
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6027,7 +6027,10 @@ MonoBehaviour:
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
@@ -6042,14 +6045,19 @@ MonoBehaviour:
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  minDimension: 0
+  maxDimension: 0
   activePillar: {fileID: 0}
   pillars:
   - referencedObjId: DimensionPillar_7fd889e6-0943-40e0-8aa2-01d9a5ea358c
-  collideWithPlayerWhileInvisible: 0
+  lastPillarPlanes:
+    minDimension: 0
+    maxDimension: 0
+    maxDistance: 0
   thisObjectMoves: 0
   thisRigidbody: {fileID: 0}
   colliderBoundsOverride: {fileID: 0}
-  camSetUpFor: {fileID: 0}
+  camSetUpFor: 0
 --- !u!114 &1229604684
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6110,7 +6118,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339254
+  m_Name: pb_Mesh1527656
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6275,7 +6283,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339486
+  m_Name: pb_Mesh1527888
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -7088,7 +7096,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339542
+  m_Name: pb_Mesh1527944
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -7544,7 +7552,10 @@ MonoBehaviour:
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
@@ -7559,14 +7570,19 @@ MonoBehaviour:
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  minDimension: 0
+  maxDimension: 0
   activePillar: {fileID: 0}
   pillars:
   - referencedObjId: DimensionPillar_7fd889e6-0943-40e0-8aa2-01d9a5ea358c
-  collideWithPlayerWhileInvisible: 0
+  lastPillarPlanes:
+    minDimension: 0
+    maxDimension: 0
+    maxDistance: 0
   thisObjectMoves: 0
   thisRigidbody: {fileID: 0}
   colliderBoundsOverride: {fileID: 0}
-  camSetUpFor: {fileID: 0}
+  camSetUpFor: 0
 --- !u!114 &1401322221
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7726,7 +7742,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339458
+  m_Name: pb_Mesh1527860
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -9187,7 +9203,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339194
+  m_Name: pb_Mesh1527596
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -9352,7 +9368,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339420
+  m_Name: pb_Mesh1527822
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -10753,7 +10769,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339324
+  m_Name: pb_Mesh1527726
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11303,7 +11319,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339240
+  m_Name: pb_Mesh1527642
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11468,7 +11484,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2339472
+  m_Name: pb_Mesh1527874
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11682,8 +11698,8 @@ MonoBehaviour:
   dimensionWallPrefab: {fileID: 2399391013733540048, guid: 768fe6b695ffee444bdfec8d2ca85cf0,
     type: 3}
   dimensionWall: {fileID: 0}
-  maxDimension: 1
-  curDimension: 0
+  maxBaseDimension: 1
+  curBaseDimension: 0
   heightOverride: -1
 --- !u!114 &1971783413
 MonoBehaviour:

@@ -11,6 +11,7 @@ using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SerializableReference<PickupObject, PickupObject.PickupObjectSave>;
 
@@ -31,7 +32,8 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public PickupObject cubeSpawned;
     [Header("Cube grabbed from spawner:")]
     public PickupObjectReference cubeGrabbedFromSpawner;
-    public Collider roofCollider;
+    // Colliders to suspend collision with while the cube is in the spawner
+    public Collider[] temporarilyIgnoreColliders;
     public Transform glass;
     public Transform glassHitbox;
     const float GLASS_LOWER_DELAY = 1.75f;
@@ -267,7 +269,9 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         parentDimensionObj.startingVisibilityState = VisibilityState.PartiallyVisible;
         parentDimensionObj.treatChildrenAsOneObjectRecursively = true;
         parentDimensionObj.ignoreChildrenWithDimensionObject = false;
+        // We're setting the channel after OnEnable, so we need to re-apply the channel logic to update it properly
         parentDimensionObj.channel = backWall.channel;
+        parentDimensionObj.ValidateAndApplyChannelLogic();
         // Don't save the specifics of the DimensionObject to the scene, we'll recreate it upon loading
         parentDimensionObj.SkipSave = true;
         cubeParent.name = "CubeDimensionObjectParent";
@@ -276,9 +280,9 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
         SceneManager.MoveGameObjectToScene(cubeParent, gameObject.scene);
         
         newCube.transform.SetParent(cubeParent.transform);
-        parentDimensionObj.InitializeRenderersAndLayers();
+        parentDimensionObj.InitializeRenderersAndColliders(true);
         parentDimensionObj.SwitchVisibilityState(VisibilityState.PartiallyVisible, true);
-        parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyVisible, true);
+        parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyVisible, false);
         parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyInvisible, true);
         parentDimensionObj.SetCollisionForPlayer(VisibilityState.PartiallyVisible, false);
         parentDimensionObj.SetCollisionForPlayer(VisibilityState.PartiallyInvisible, false);
@@ -287,8 +291,11 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             // Collision disabled for first half of fall
             c.enabled = false;
         }
-        
-        SuperspectivePhysics.IgnoreCollision(roofCollider, newCube.GetComponent<Collider>());
+
+        Collider newCubeCollider = newCube.GetComponent<Collider>();
+        foreach (Collider ignoreCollider in temporarilyIgnoreColliders) {
+            SuperspectivePhysics.IgnoreCollision(ignoreCollider, newCubeCollider, ID);
+        }
     }
     
     void DestroyCubeAlreadyGrabbedFromSpawner() {
@@ -387,7 +394,10 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             AudioManager.instance.PlayAtLocation(AudioName.CubeSpawnerClose, ID, glass.transform.position);
             
             // Restore collision with the roof of the Cube Spawner when the cube is taken from the spawner
-            SuperspectivePhysics.RestoreCollision(roofCollider, cube.GetComponent<Collider>());
+            Collider cubeCollider = cube.GetComponent<Collider>();
+            foreach (Collider ignoreCollider in temporarilyIgnoreColliders) {
+                SuperspectivePhysics.RestoreCollision(ignoreCollider, cubeCollider, ID);
+            }
             cube.GetComponent<DynamicObject>().isGlobal = true; // Restore isGlobal behavior when retrieved from spawner
 
             // When the cube is removed from the spawner, swap it out with the real cube prefab
@@ -422,6 +432,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             
             // Also remove the dimension parent object
             DimensionObject dimensionParent = cube.transform.parent?.GetComponent<DimensionObject>();
+            dimensionParent.UninitializeRenderersAndColliders();
             dimensionParent.Unregister();
             Transform parent = cube.transform.parent;
             cube.transform.SetParent(null);
@@ -434,11 +445,6 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     }
     public void OnBetterTriggerEnter(Collider other) { }
     public void OnBetterTriggerStay(Collider other) { }
-
-    IEnumerator RestoreCollisionLogicAfterABriefPause(List<DimensionObject> dimensionObjs) {
-        yield return null;
-        dimensionObjs.ForEach(d => d.collisionLogic.pleaseStopIgnoringCollisionsForASecond = false);
-    }
 
 #region Saving
 

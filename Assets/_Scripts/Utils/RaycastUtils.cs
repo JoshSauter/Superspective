@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DimensionObjectMechanics;
 using PortalMechanics;
 using UnityEngine;
 
@@ -39,7 +40,7 @@ namespace SuperspectiveUtils {
             return minDistance;
         }
 
-        public static SuperspectiveRaycast Raycast(Ray ray, float maxDistance, int layerMask) {
+        public static SuperspectiveRaycast Raycast(Ray ray, float maxDistance, int layerMask, bool isPlayerCamRaycast = false) {
             SuperspectiveRaycast result = new SuperspectiveRaycast {
                 distance = maxDistance,
                 ray = ray
@@ -78,7 +79,7 @@ namespace SuperspectiveUtils {
                     }
                 }
 
-                SuperspectiveRaycastPart part = new SuperspectiveRaycastPart(currentRay, distanceRemaining, hits);
+                SuperspectiveRaycastPart part = new SuperspectiveRaycastPart(currentRay, distanceRemaining, hits, isPlayerCamRaycast);
                 distanceRemaining -= part.distance;
                 if (part.hitPortal && distanceRemaining > 0) {
                     currentRay = part.NextRay();
@@ -102,9 +103,10 @@ namespace SuperspectiveUtils {
             Vector3 origin,
             Vector3 direction,
             float maxDistance,
-            int layerMask
+            int layerMask,
+            bool isPlayerCamRaycast = false // We only do VisibilityMask checks for player camera raycasts (since we only know the cursor pixel mask value on the CPU)
         ) {
-            return Raycast(new Ray(origin, direction), maxDistance, layerMask);
+            return Raycast(new Ray(origin, direction), maxDistance, layerMask, isPlayerCamRaycast);
         }
     }
     
@@ -190,7 +192,7 @@ namespace SuperspectiveUtils {
         public Portal portalHit;
         readonly public int portalHitIndex;
 
-        public SuperspectiveRaycastPart(Ray ray, float raycastDistance, RaycastHit[] raycastHits) {
+        public SuperspectiveRaycastPart(Ray ray, float raycastDistance, RaycastHit[] raycastHits, bool isPlayerCamRaycast = false) {
             // Make sure we sort the results into distance-based order
             raycastHits = raycastHits.OrderBy(hit => hit.distance).ToArray();
 
@@ -215,17 +217,8 @@ namespace SuperspectiveUtils {
             this.rawHitInfos = raycastHits;
 
             bool VisibilityMaskCheck(RaycastHit hit) {
-                DimensionObject dimensionObject = hit.collider.FindDimensionObjectRecursively<DimensionObject>();
-                // If this object is rendered as a DimensionObject, only consider it a hit if the cursor is hovering
-                // over the appropriate visibility masks to show the DimensionObject
-                if (dimensionObject != null) {
-                    int maskValue = MaskBufferRenderTextures.instance.visibilityMaskValue;
-                    return dimensionObject.IsVisibleFromMask(maskValue);
-                }
-                // Everything else is rendered by default
-                else {
-                    return true;
-                }
+                // We only care about the visibility mask if this is a player camera raycast
+                return !isPlayerCamRaycast || DimensionObjectManager.instance.RaycastHitCollider(hit.collider);
             }
 
             bool InFrontOfPortalCheck(RaycastHit hit) {

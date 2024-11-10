@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Library.Functional;
+using NovaMenuUI;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Serialization;

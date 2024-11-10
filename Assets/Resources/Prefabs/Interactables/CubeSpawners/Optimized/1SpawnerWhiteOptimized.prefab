@@ -3536,16 +3536,20 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
+  includeInactiveGameObjects: 0
   channel: 7
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
-  collisionMatrix: 010000000000000101000000000101000101000000010000
+  collisionMatrix: 010000000000000100000000000001000101000000010000
   collisionLogic: {fileID: 0}
   isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
@@ -4470,11 +4474,15 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
+  includeInactiveGameObjects: 0
   channel: 7
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 3
@@ -8192,16 +8200,20 @@ MonoBehaviour:
   DEBUG: 0
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
+  includeInactiveGameObjects: 0
   channel: 7
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
-  collisionMatrix: 010000000000000101000000000101000101000000010000
+  collisionMatrix: 010000000000000100000000000001000101000000010000
   collisionLogic: {fileID: 0}
   isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
@@ -9307,6 +9319,7 @@ GameObject:
   - component: {fileID: 335899603867626187}
   - component: {fileID: 1616752183303242348}
   - component: {fileID: 8605105674672683542}
+  - component: {fileID: 5823284554879837877}
   m_Layer: 2
   m_Name: CubeSpawner
   m_TagString: Untagged
@@ -9380,24 +9393,35 @@ MonoBehaviour:
   backWall: {fileID: 6032645579626551359}
   button: {fileID: 4192834185593556100}
   tDistanceBeforeEnablingNewCubeColliders: 0.5
+  cubeInSpawnerPrefab: {fileID: 0}
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
     type: 3}
   cubeSpawned: {fileID: 0}
   cubeGrabbedFromSpawner:
     referencedObjId: 
-  roofCollider: {fileID: 5648005016010809340}
+  temporarilyIgnoreColliders: []
   glass: {fileID: 6402960592079445632}
   glassHitbox: {fileID: 7949998654365641052}
   spawnState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   despawnState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
+--- !u!114 &5823284554879837877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2909311871095686824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3056327443332719856
 GameObject:
   m_ObjectHideFlags: 0
@@ -15145,8 +15169,7 @@ MonoBehaviour:
   stateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
 --- !u!114 &2787296773522123000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15164,8 +15187,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   powerMode: 3
   parentMultiMode: 0
   source: {fileID: 0}

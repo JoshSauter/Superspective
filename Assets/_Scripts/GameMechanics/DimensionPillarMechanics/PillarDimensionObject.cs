@@ -4,7 +4,6 @@ using UnityEngine;
 using NaughtyAttributes;
 using SuperspectiveUtils;
 using System;
-using LevelManagement;
 using PortalMechanics;
 using Saving;
 using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
@@ -15,7 +14,7 @@ using PillarReference = SerializableClasses.SerializableReference<DimensionPilla
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
 	public static readonly HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
-	
+
 	[SerializeField]
 	[Range(0, 7)]
 	int _dimension = 0;
@@ -25,8 +24,38 @@ public class PillarDimensionObject : DimensionObject {
 			if (_dimension != value) {
 				debug.Log($"Dimension changing from {_dimension} to {value}");
 			}
+			int diff = value - _dimension;
 			_dimension = value;
 			
+			// Instantly update the object bounds to reflect the new dimension so we don't have a frame of old bounds causing the wrong visibility state to be used
+			if (activePillar != null) {
+				DimensionPillarPlanes prev = pillarPlanes[activePillar.ID];
+				pillarPlanes[activePillar.ID] = new DimensionPillarPlanes() {
+					leftParallel = prev.leftParallel,
+					rightParallel = prev.rightParallel,
+					maxDistance = prev.maxDistance,
+					objectBounds = new DimensionRange() {
+						min = activePillar.WrappedValue(prev.objectBounds.min + diff),
+						max = activePillar.WrappedValue(prev.objectBounds.max + diff)
+					},
+					invisibleRange = new DimensionRange() {
+						min = activePillar.WrappedValue(prev.invisibleRange.min + diff),
+						max = activePillar.WrappedValue(prev.invisibleRange.max + diff)
+					},
+					partiallyInvisibleRange = new DimensionRange() {
+						min = activePillar.WrappedValue(prev.partiallyInvisibleRange.min + diff),
+						max = activePillar.WrappedValue(prev.partiallyInvisibleRange.max + diff)
+					},
+					partiallyVisibleRange = new DimensionRange() {
+						min = activePillar.WrappedValue(prev.partiallyVisibleRange.min + diff),
+						max = activePillar.WrappedValue(prev.partiallyVisibleRange.max + diff)
+					},
+					visibleRange = new DimensionRange() {
+						min = activePillar.WrappedValue(prev.visibleRange.min + diff),
+						max = activePillar.WrappedValue(prev.visibleRange.max + diff)
+					}
+				};
+			}
 		}
 	}
 
@@ -40,16 +69,85 @@ public class PillarDimensionObject : DimensionObject {
 	public Quadrant camQuadrant;
 	[ReadOnly]
 	public Quadrant dimensionShiftQuadrant;
-	[SerializeField]
-	[ReadOnly]
-	float minAngle;
-	[SerializeField]
-	[ReadOnly]
-	float maxAngle;
 
+	[SerializeField]
+	[ReadOnly]
+	private float minAngle;
+	[SerializeField]
+	[ReadOnly]
+	private float maxAngle;
+
+	[SerializeField]
+	[ReadOnly]
+	private DimensionRange objectBounds;
+	[SerializeField]
+	[ReadOnly]
+	private DimensionRange visibleRange;
+	[SerializeField]
+	[ReadOnly]
+	private DimensionRange partiallyVisibleRange;
+	[SerializeField]
+	[ReadOnly]
+	private DimensionRange partiallyInvisibleRange;
+	[SerializeField]
+	[ReadOnly]
+	private DimensionRange invisibleRange;
+
+	[Serializable]
+	public struct DimensionRange {
+		public float min;
+		public float max;
+		
+		public bool WrapsAround => min > max;
+		
+		/// <summary>
+		/// Returns true if the given value is within the range, taking into account wrap-around values
+		/// </summary>
+		/// <param name="value">Value to test if it is in the range or not</param>
+		/// <returns>True if the value is within the range, taking into account wrap-around values, false otherwise</returns>
+		public bool Contains(float value) {
+			if (WrapsAround) {
+				return value >= min || value <= max;
+			}
+			else {
+				return value >= min && value <= max;
+			}
+		}
+		
+		/// <summary>
+		/// Returns true if the two sets of DimensionRanges overlap at all
+		/// </summary>
+		/// <param name="other">Other DimensionRange to compare overlap with</param>
+		/// <returns>True if the ranges have any overlap, taking into account wrap-around values</returns>
+		public bool HasOverlapWith(DimensionRange other) {
+			switch (WrapsAround, other.WrapsAround) {
+				case (true, true):
+					// Any wrap-around intervals always overlap
+					return true;
+				case (true, false):
+					return min <= other.max || max >= other.min;
+				case (false, true):
+					return other.min <= max || other.max >= min;
+				case (false, false):
+					return min <= other.max && max >= other.min;
+			}
+		}
+	}
+
+	[Serializable]
 	struct DimensionPillarPlanes {
 		public Plane leftParallel;
 		public Plane rightParallel;
+
+		// Tells us how many trips around the pillar (starting from dimension 0) this object exists in
+		// e.g. if this object exists a little bit in dimension 1, it might be minDimension = 1.2, maxDimension = 1.8
+		public DimensionRange objectBounds;
+
+		public DimensionRange visibleRange;
+		public DimensionRange partiallyVisibleRange;
+		public DimensionRange partiallyInvisibleRange;
+		public DimensionRange invisibleRange;
+		
 		// Only used for drawing debug planes
 		public float maxDistance;
 	}
@@ -60,18 +158,20 @@ public class PillarDimensionObject : DimensionObject {
 	public PillarReference[] pillars;
 	// Key == pillar.ID
 	readonly Dictionary<string, DimensionPillarPlanes> pillarPlanes = new Dictionary<string, DimensionPillarPlanes>();
+	[SerializeField]
+	private DimensionPillarPlanes lastPillarPlanes;
 
 	Vector3 minAngleVector, maxAngleVector;
 
-	public bool collideWithPlayerWhileInvisible = false;
 	public bool thisObjectMoves = false;
+	bool IsMoving => thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
 	public Rigidbody thisRigidbody;
 	public Collider colliderBoundsOverride;
 
-	Camera playerCam => SuperspectiveScreen.instance.playerCamera;
+	Vector3 PlayerCamPos => Player.instance.AdjustedCamPos;
 
 	// For context about rest of current state
-	public Camera camSetUpFor;
+	public Cam camSetUpFor;
 
 	protected override void OnEnable() {
 		base.OnEnable();
@@ -107,61 +207,56 @@ public class PillarDimensionObject : DimensionObject {
 
 	protected override void Init() {
 		base.Init();
-		renderers = GetAllSuperspectiveRenderers().ToArray();
-		if (colliders == null || colliders.Length == 0) {
-			colliders = GetAllColliders().ToArray();
-		}
 
 		HandlePillarChanged();
 	}
 
 	void HandlePillarChanged() {
 		if (activePillar != null) {
-			camSetUpFor = playerCam;
+			camSetUpFor = Cam.Player;
 			DetermineQuadrantForPlayerCam();
 			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
-			UpdateState(activePillar.curDimension, true);
+			UpdateState(activePillar, true);
 		}
 	}
 
 	public override bool ShouldCollideWithPlayer() {
-		if (collideWithPlayerWhileInvisible) return true;
-		
 		return EffectiveVisibilityState != VisibilityState.Invisible;
 	}
 
-	public override bool ShouldCollideWithNonDimensionObject() {
+	public override bool ShouldCollideWithNonDimensionObjects() {
 		return true;
+		return EffectiveVisibilityState != VisibilityState.Invisible;
 	}
 
-	public override bool ShouldCollideWith(DimensionObject other) {
+	public override bool ShouldCollideWithDimensionObject(DimensionObject other) {
 		if (other is PillarDimensionObject otherPillarDimensionObj) {
-			int testDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible || v == VisibilityState.PartiallyVisible);
-			if (testDimension == -1) {
-				return false;
+			if (activePillar == null) return true;
+
+			if (!pillarPlanes.ContainsKey(activePillar.ID)) {
+				DeterminePlanes(activePillar);
 			}
 
-			VisibilityState test1 = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, testDimension);
-			VisibilityState test2 = otherPillarDimensionObj.DetermineVisibilityState(otherPillarDimensionObj.camQuadrant, otherPillarDimensionObj.dimensionShiftQuadrant, testDimension);
-
-			bool areOpposites = test1 == test2.Opposite();
-			return !areOpposites;
+			if (!otherPillarDimensionObj.pillarPlanes.ContainsKey(activePillar.ID)) {
+				otherPillarDimensionObj.DeterminePlanes(activePillar);
+			}
+			
+			bool shouldCollide = pillarPlanes[activePillar.ID].objectBounds.HasOverlapWith(otherPillarDimensionObj.pillarPlanes[activePillar.ID].objectBounds);
+			return shouldCollide;
 		}
 		else {
-			VisibilityState effectiveVisibilityState = reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
-			return effectiveVisibilityState != VisibilityState.Invisible;
+			return other.ShouldCollideWithDimensionObject(this);
 		}
 	}
 
 	void Update() {
 		if (!hasInitialized) return;
 		if (GameManager.instance.IsCurrentlyLoading) return;
-		bool thisObjectMoving = thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
 		
 		DimensionPillar DetermineActivePillar() {
 			DimensionPillar FindNearestDimensionPillar() {
 				// Only look for a new closest pillar if the object moved or we don't already have one
-				if (!(thisObjectMoving || activePillar == null)) {
+				if (!(IsMoving || activePillar == null)) {
 					return activePillar;
 				}
 				
@@ -199,31 +294,31 @@ public class PillarDimensionObject : DimensionObject {
 			Debug.DrawRay(pillarPos, minAngleVector, Color.cyan);
 			Debug.DrawRay(pillarPos, maxAngleVector, Color.blue);
 		}
-
-		if (thisObjectMoving || !pillarPlanes.ContainsKey(activePillar.ID)) {
+		
+		// Recalculate planes if the object is moving or the pillar changed
+		if (IsMoving || !pillarPlanes.ContainsKey(activePillar.ID)) {
 			DeterminePlanes(activePillar);
 		}
+		
+		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.SameSide (moving objects only)
+		// Represents the moment when the object has fully moved into the next dimension (not just partially)
+		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
+		if (IsMoving) {
+			if (dimensionShiftQuadrant == Quadrant.SameSide && nextDimensionShiftQuadrant == Quadrant.Right) {
+				Dimension = activePillar.PrevDimension(Dimension);
+			}
+			else if (dimensionShiftQuadrant == Quadrant.Right && nextDimensionShiftQuadrant == Quadrant.SameSide) {
+				Dimension = activePillar.NextDimension(Dimension);
+			}
+		}
+		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
 
 		// If the pillar changed this frame, handle this immediately
 		if (prevPillar != activePillar) {
 			HandlePillarChanged();
 		}
-
-		// Used to determine first frame where dimensionShiftQuadrant == Quadrant.Opposite (moving objects only)
-		Quadrant nextDimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
-		if (thisObjectMoving) {
-			//debug.Log($"CurDimensionShiftQuadrant: {dimensionShiftQuadrant}\nNextDimensionShiftQuadrant: {nextDimensionShiftQuadrant}");
-			if (dimensionShiftQuadrant == Quadrant.Opposite && nextDimensionShiftQuadrant == Quadrant.Right) {
-				Dimension = activePillar.NextDimension(Dimension);
-			}
-			else if (dimensionShiftQuadrant == Quadrant.Right && nextDimensionShiftQuadrant == Quadrant.Opposite) {
-				Dimension = activePillar.PrevDimension(Dimension);
-			}
-		}
-
-		dimensionShiftQuadrant = nextDimensionShiftQuadrant;
 		
-		UpdateStateForCamera(playerCam, activePillar.curDimension, true);
+		UpdateStateForCamera(Cam.Player, activePillar, true);
 	}
 	
 	/////////////////////////////
@@ -242,69 +337,73 @@ public class PillarDimensionObject : DimensionObject {
 		
 		PillarDimensionObject portalDimensionObj = portal?.otherPortal?.pillarDimensionObject;
 		DimensionPillar activePillar = portalDimensionObj?.activePillar;
-		if (portalDimensionObj != null && activePillar != null) {
+		if (portalDimensionObj != null && activePillar != null && this.activePillar != null) {
 			if (this == portalDimensionObj) return; // Don't update the state for the Portal being rendered
 			
 			// Assumes the out portal's activePillar is the same as this object's activePillar
 			// TODO: Add support for different activePillars
-			int outOfPortalDimension = GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible);
-			UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, outOfPortalDimension, false, true);
+			int outOfPortalDimension = portalDimensionObj.GetPillarDimensionWhere(v => v == VisibilityState.Visible);
+			UpdateStateForCamera(Cam.Portal, activePillar, false, true, outOfPortalDimension);
 		}
 	}
 
-	void OnPostRenderPortal(Portal _) {
+	public void UpdateStateForPlayerCamera(bool sendEvents = true, bool suppressLogs = false) {
 		if (activePillar == null) return;
-		UpdateStateForCamera(playerCam, activePillar.curDimension, false, true);
-	}
-	#endregion
-	
-	public void UpdateStateForCamera(Camera cam, int pillarDimension, bool sendEvents = false, bool suppressLogs = false) {
-		camSetUpFor = cam;
-		camQuadrant = DetermineQuadrant(cam.transform.position);
-		
-		// Don't trigger state change events when we're just doing it for the rendering
-		UpdateState(pillarDimension, false, sendEvents, suppressLogs);
+		UpdateStateForCamera(Cam.Player, activePillar, false, true, -1);
 	}
 
-	void UpdateState(int pillarDimension, bool forceUpdate = false, bool sendEvents = true, bool suppressLogs = false) {
-		VisibilityState nextState = DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, pillarDimension);
+	void OnPostRenderPortal(Portal _) => UpdateStateForPlayerCamera(false, true);
+	#endregion
+	
+	/// <summary>
+	/// Sets the camSetUpFor and camQuadrant for this object, then updates the visibility state based on the given pillar and camera position.
+	/// </summary>
+	/// <param name="cam">Cam to use for camSetUpFor. What camera are we trying to update state for?</param>
+	/// <param name="pillar">Active DimensionPillar to update state for</param>
+	/// <param name="sendEvents">If false, will suppress OnStateChange events</param>
+	/// <param name="suppressLogs">If true, will suppress debug logs (to avoid spamming the console log)</param>
+	/// <param name="baseDimensionOverride">If provided, will use this value as the base dimension instead of the current one</param>
+	public void UpdateStateForCamera(Cam cam, DimensionPillar pillar, bool sendEvents = false, bool suppressLogs = false, int baseDimensionOverride = -1) {
+		camSetUpFor = cam;
+		camQuadrant = DetermineQuadrant(cam.CamPos());
+		
+		// Don't trigger state change events when we're just doing it for the rendering
+		UpdateState(pillar, false, sendEvents, suppressLogs, baseDimensionOverride);
+	}
+
+	/// <summary>
+	/// Uses the camSetUpFor and the provided DimensionPillar to determine the visibility state of this object.
+	/// Will update the visibility state if it has changed.
+	/// </summary>
+	/// <param name="pillar">DimensionPillar to update state with respect to</param>
+	/// <param name="forceUpdate">If true, will call SwitchVisibilityState even if the state has not changed</param>
+	/// <param name="sendEvents">If false, will suppress OnStateChange events</param>
+	/// <param name="suppressLogs">If true, will suppress debug logs (to avoid spamming the console log)</param>
+	/// <param name="baseDimensionOverride">If provided, will use this value as the base dimension instead of the current one</param>
+	void UpdateState(DimensionPillar pillar, bool forceUpdate = false, bool sendEvents = true, bool suppressLogs = false, int baseDimensionOverride = -1) {
+		int baseDimension = baseDimensionOverride >= 0 ? baseDimensionOverride : pillar.curBaseDimension;
+		VisibilityState nextState = DetermineVisibilityState(pillar, camSetUpFor.CamPos(), baseDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
 			SwitchVisibilityState(nextState, true, sendEvents, suppressLogs);
 		}
 	}
 
-	bool HasGoneToNextDimension(DimensionPillar pillar, Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant) {
-		if (pillar == null) {
-			return false;
-		}
-		if (playerQuadrant == dimensionShiftQuadrant) {
-			Vector3 dimensionShiftPlaneNormalVector = Vector3.Cross(pillar.DimensionShiftVector.normalized, pillar.Axis);
-			Plane dimensionShiftPlane = new Plane(dimensionShiftPlaneNormalVector, pillar.transform.position);
-			//debug.Log($"GetSide: {dimensionShiftPlane.GetSide(camPos)}\nPillar.curDimension: {pillar.curDimension}");
-			return !dimensionShiftPlane.GetSide(camSetUpFor.transform.position);
-		}
-		else {
-			return false;
-		}
-	}
-
 	// Iterates through the dimension pillar's possible dimensions and checks what the visibility state would be
 	// if this the player were in that dimension. This is not very performant but there's probably a smarter way to do this.
-	// This is identical to the method below it except that it holds the object's dimension constant and tries different values of pillar.curDimension
-	public int GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
+	public int GetPillarDimensionWhere(Predicate<VisibilityState> desiredVisibility) {
 		if (activePillar == null) {
 			return -1;
 		}
 
 		// Don't need to check all the dimensions if we already are in the right one
 		if (desiredVisibility(visibilityState)) {
-			return activePillar.curDimension;
+			return activePillar.curBaseDimension;
 		}
 
 		// Try each dimension, test what the visibility state would be there
-		for (int i = 0; i <= activePillar.maxDimension; i++) {
-			if (desiredVisibility(DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, i))) {
+		for (int i = 0; i <= activePillar.maxBaseDimension; i++) {
+			if (desiredVisibility(DetermineVisibilityState(activePillar, camSetUpFor.CamPos(), i))) {
 				return i;
 			}
 		}
@@ -312,14 +411,15 @@ public class PillarDimensionObject : DimensionObject {
 		// No suitable dimension was found
 		return -1;
 	}
-
+	
 	// Iterates through the dimension pillar's possible dimensions and checks what the visibility state would be
 	// if this object were in that dimension. This is not very performant but there's probably a smarter way to do this.
-	public int GetDimensionWhereThisObjectWouldBeInVisibilityState(Predicate<VisibilityState> desiredVisibility) {
+	public int GetDimensionWhere(Predicate<VisibilityState> desiredVisibility) {
 		if (activePillar == null) {
 			return -1;
 		}
-		int tempDimension = _dimension;
+
+		int tempDimension = Dimension;
 
 		// Don't need to check all the dimensions if we already are in the right one
 		if (desiredVisibility(visibilityState)) {
@@ -327,60 +427,53 @@ public class PillarDimensionObject : DimensionObject {
 		}
 
 		// Try each dimension, test what the visibility state would be there
-		for (int i = 0; i <= activePillar.maxDimension; i++) {
-			_dimension = i;
-			if (desiredVisibility(DetermineVisibilityState(camQuadrant, dimensionShiftQuadrant, activePillar.curDimension))) {
-				_dimension = tempDimension;
+		for (int i = 0; i <= activePillar.maxBaseDimension; i++) {
+			Dimension = i;
+			if (desiredVisibility(DetermineVisibilityState(activePillar, camSetUpFor.CamPos(), activePillar.curBaseDimension))) {
+				Dimension = tempDimension;
 				return i;
 			}
 		}
-		_dimension = tempDimension;
-
+		
+		// Restore the original dimension
+		Dimension = tempDimension;
+		
 		// No suitable dimension was found
 		return -1;
 	}
 
-	public VisibilityState DetermineVisibilityState(Quadrant playerQuadrant, Quadrant dimensionShiftQuadrant, int dimension) {
-		if (activePillar == null) {
-			return visibilityState;
-		}
-		if (HasGoneToNextDimension(activePillar, playerQuadrant, dimensionShiftQuadrant)) {
-			dimension = activePillar.PrevDimension(dimension);
+	/// <summary>
+	/// Determines the visibility state of this object based on the given pillar, camera position, and test base dimension.
+	/// Also takes reverseVisibilityState into account, which will flip the visibility state if true.
+	/// </summary>
+	/// <param name="pillar">DimensionPillar to use for the test</param>
+	/// <param name="camPos">Position to test</param>
+	/// <param name="testBaseDimension">Base dimension for the position</param>
+	/// <returns>VisibilityState where the testDimension falls within the range of</returns>
+	/// <exception cref="ArgumentException">If the testDimension doesn't fall within any of the ranges</exception>
+	public VisibilityState DetermineVisibilityState(DimensionPillar pillar, Vector3 camPos, int testBaseDimension) {
+		if (pillar == null) return visibilityState;
+		if (!pillarPlanes.ContainsKey(pillar.ID)) {
+			DeterminePlanes(pillar);
 		}
 
-		switch (playerQuadrant) {
-			case Quadrant.Opposite:
-				if (dimension == Dimension) {
-					return VisibilityState.PartiallyVisible;
-				}
-				else if (dimension == activePillar.NextDimension(Dimension)) {
-					return VisibilityState.PartiallyInvisible;
-				}
-				else {
-					return VisibilityState.Invisible;
-				}
-			case Quadrant.Left:
-			case Quadrant.SameSide:
-			case Quadrant.Right:
-				if ((int)dimensionShiftQuadrant < (int)playerQuadrant) {
-					if (dimension == activePillar.NextDimension(Dimension)) {
-						return VisibilityState.Visible;
-					}
-					else {
-						return VisibilityState.Invisible;
-					}
-				}
-				else {
-					if (dimension == Dimension) {
-						return VisibilityState.Visible;
-					}
-					else {
-						return VisibilityState.Invisible;
-					}
-				}
-			default:
-				throw new Exception($"Unhandled case: {this.camQuadrant}");
+		float testDimension = pillar.GetDimension(testBaseDimension, camPos);
+
+		DimensionPillarPlanes thisPillarPlanes = pillarPlanes[pillar.ID];
+		if (thisPillarPlanes.visibleRange.Contains(testDimension)) {
+			return VisibilityState.Visible;
 		}
+		if (thisPillarPlanes.partiallyVisibleRange.Contains(testDimension)) {
+			return VisibilityState.PartiallyVisible;
+		}
+		if (thisPillarPlanes.partiallyInvisibleRange.Contains(testDimension)) {
+			return VisibilityState.PartiallyInvisible;
+		}
+		if (thisPillarPlanes.invisibleRange.Contains(testDimension)) {
+			return VisibilityState.Invisible;
+		}
+		
+		throw new ArgumentException($"Test dimension {testDimension} was not in any of the ranges!");
 	}
 
 	/// <summary>
@@ -388,24 +481,26 @@ public class PillarDimensionObject : DimensionObject {
 	/// Can be called by anyone who needs this state to be updated before further logic is run.
 	/// </summary>
 	public void DetermineQuadrantForPlayerCam() {
-		camQuadrant = DetermineQuadrant(playerCam.transform.position);
+		camQuadrant = DetermineQuadrant(Cam.Player.CamPos());
 	}
 
-	public Quadrant DetermineQuadrant(Vector3 position) {
+	private Quadrant DetermineQuadrant(Vector3 position) {
+		if (!pillarPlanes.ContainsKey(activePillar.ID)) {
+			DeterminePlanes(activePillar);
+		}
+		
 		bool leftPlaneTest = pillarPlanes[activePillar.ID].leftParallel.GetSide(position);
 		bool rightPlaneTest = pillarPlanes[activePillar.ID].rightParallel.GetSide(position);
 
-		if (leftPlaneTest && rightPlaneTest) {
-			return Quadrant.Left;
-		}
-		else if (leftPlaneTest && !rightPlaneTest) {
-			return Quadrant.Opposite;
-		}
-		else if (!leftPlaneTest && rightPlaneTest) {
-			return Quadrant.SameSide;
-		}
-		else { // if (!leftPlaneTest && !rightPlaneTest) {
-			return Quadrant.Right;
+		switch (leftPlaneTest, rightPlaneTest) {
+			case (true, true):
+				return Quadrant.Left;
+			case (true, false):
+				return Quadrant.Opposite;
+			case (false, true):
+				return Quadrant.SameSide;
+			case (false, false):
+				return Quadrant.Right;
 		}
 	}
 
@@ -431,19 +526,24 @@ public class PillarDimensionObject : DimensionObject {
 		maxAngle = float.MinValue;
 		minAngleVector = Vector3.zero;
 		maxAngleVector = Vector3.zero;
+		float objectBoundsMin = float.MaxValue;
+		float objectBoundsMax = float.MinValue;
 		foreach (Vector3 corner in allCorners) {
 			Vector3 projectedCorner = Vector3.ProjectOnPlane(corner, pillar.Axis) + projectedVerticalPillarOffset;
 			float signedAngle = Vector3.SignedAngle(dimensionShiftVector, projectedCorner - pillar.transform.position, pillar.Axis);
+			float dimension = pillar.GetDimension(Dimension, projectedCorner);
 			if (signedAngle < minAngle) {
 				minAngle = signedAngle;
 				minAngleVector = (projectedCorner - pillar.transform.position);
+				objectBoundsMin = dimension;
 			}
 			else if (signedAngle > maxAngle) {
 				maxAngle = signedAngle;
 				maxAngleVector = (projectedCorner - pillar.transform.position);
+				objectBoundsMax = dimension;
 			}
 
-			float distance = (projectedCorner - pillar.transform.position).magnitude;
+			float distance = Vector3.Distance(projectedCorner, pillar.transform.position);
 			if (distance > maxDistance) {
 				maxDistance = distance;
 			}
@@ -455,13 +555,75 @@ public class PillarDimensionObject : DimensionObject {
 
 		Vector3 minAngleNormalVector = Vector3.Cross(minAngleVector.normalized, pillar.Axis);
 		Vector3 maxAngleNormalVector = Vector3.Cross(maxAngleVector.normalized, pillar.Axis);
+		Plane leftParallelPlane = new Plane(minAngleNormalVector, pillar.transform.position);
+		Plane rightParallelPlane = new Plane(maxAngleNormalVector, pillar.transform.position);
+
+		float WrappedValue(float value) {
+			if (value < 0) value += pillar.maxBaseDimension + 1;
+			if (value >= pillar.maxBaseDimension + 1) value -= pillar.maxBaseDimension + 1;
+
+			return value;
+		}
+		
+		// Object bounds:
+		if (objectBoundsMin > objectBoundsMax) {
+			objectBoundsMin = WrappedValue(objectBoundsMin - 1);
+		}
+		
+		// Fully visible range:
+		float fullyVisibleMin = WrappedValue(objectBoundsMax - .5f);
+		float fullyVisibleMax = WrappedValue(objectBoundsMin + .5f);
+		
+		// Partially visible range:
+		float partiallyVisibleMin = WrappedValue(objectBoundsMin - .5f);
+		float partiallyVisibleMax = WrappedValue(objectBoundsMax - .5f);
+		
+		float partiallyInvisibleMin = WrappedValue(objectBoundsMin + .5f);
+		float partiallyInvisibleMax = WrappedValue(objectBoundsMax + .5f);
+		
+		float invisibleMin = WrappedValue(objectBoundsMax + .5f);
+		float invisibleMax = WrappedValue(objectBoundsMin - .5f);
+		
+		// Take reverseVisibilityStates into account
+		if (reverseVisibilityStates) {
+			// Swap object bounds for inverse pillar dimension objects
+			(objectBoundsMin, objectBoundsMax) = (objectBoundsMax, objectBoundsMin);
+		}
+
+		objectBounds = new DimensionRange() {
+			min = objectBoundsMin,
+			max = objectBoundsMax
+		};
+		visibleRange = new DimensionRange() {
+			min = fullyVisibleMin,
+			max = fullyVisibleMax
+		};
+		partiallyVisibleRange = new DimensionRange() {
+			min = partiallyVisibleMin,
+			max = partiallyVisibleMax
+		};
+		partiallyInvisibleRange = new DimensionRange() {
+			min = partiallyInvisibleMin,
+			max = partiallyInvisibleMax
+		};
+		invisibleRange = new DimensionRange() {
+			min = invisibleMin,
+			max = invisibleMax
+		};
+		
 		DimensionPillarPlanes thisPillarPlanes = new DimensionPillarPlanes {
-			leftParallel = new Plane(minAngleNormalVector, pillar.transform.position),
-			rightParallel = new Plane(maxAngleNormalVector, pillar.transform.position),
+			leftParallel = leftParallelPlane,
+			rightParallel = rightParallelPlane,
+			objectBounds = objectBounds,
+			visibleRange = visibleRange,
+			partiallyVisibleRange = partiallyVisibleRange,
+			partiallyInvisibleRange = partiallyInvisibleRange,
+			invisibleRange = invisibleRange,
 			maxDistance = maxDistance
 		};
 
 		pillarPlanes[pillar.ID] = thisPillarPlanes;
+		lastPillarPlanes = thisPillarPlanes;
 
 		// Don't spam the console with a moving object updating this info every frame
 		if (DEBUG && !thisObjectMoves) {

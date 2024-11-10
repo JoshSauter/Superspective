@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: b9f518abcb7253e4ca58884dfa9de204, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - USE_ADVANCED_CHANNEL_LOGIC
   m_InvalidKeywords:
   - _ALPHAPREMULTIPLY_ON
   - _IGNOREMODELTRANSFORMDIAGONALREMOVAL_ON
@@ -92,6 +93,7 @@ Material:
     - _DepthBias: 0
     - _DetailNormalMapScale: 1
     - _DiffuseMagnitude: 0.072
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0

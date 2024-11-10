@@ -115,7 +115,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 			PillarDimensionObject portalDimensionObj = portal?.otherPortal?.pillarDimensionObject;
 			DimensionPillar activePillar = portalDimensionObj?.activePillar;
 			if (portalDimensionObj != null && activePillar != null) {
-				debug.Log($"Pillar dimension: {activePillar.curDimension}, Cube dimension: {corporealCubeDimensionObj.Dimension}, Portal dimension: {portalDimensionObj.Dimension}\nFor OnPickup for {portal.name}");
+				debug.Log($"Pillar dimension: {activePillar.curBaseDimension}, Cube dimension: {corporealCubeDimensionObj.Dimension}, Portal dimension: {portalDimensionObj.Dimension}\nFor OnPickup for {portal.name}");
 				if (portalDimensionObj.Dimension == corporealCubeDimensionObj.Dimension) {
 					shouldMaterialize = false;
 				}
@@ -161,14 +161,11 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		
 		InitStateMachines();
 		
-		interactableObject = GetComponent<InteractableObject>();
-		if (interactableObject == null) {
-			interactableObject = gameObject.AddComponent<InteractableObject>();
-		}
+		if (interactableObject == null) interactableObject = this.GetOrAddComponent<InteractableObject>();
 
 		Transform corporealCube = transform.Find("CorporealCube");
 		Transform invertedCube = transform.Find("InvertedCube");
-		pickupCube = GetComponent<PickupObject>();
+		if (pickupCube == null) pickupCube = GetComponent<PickupObject>();
 
 		corporealCubeDimensionObj = corporealCube.GetComponent<PillarDimensionObject>();
 		invertedCubeDimensionObj = invertedCube.GetComponent<PillarDimensionObject>();
@@ -178,7 +175,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		invertedCubeRenderer = invertedCube.GetComponent<SuperspectiveRenderer>();
 		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<SuperspectiveRenderer>();
 
-		thisCollider = GetComponent<BoxCollider>();
+		if (thisCollider == null) thisCollider = GetComponent<BoxCollider>();
 		defaultPhysicsMaterial = thisCollider.material;
 		kinematicCollider = invertedCube.Find("KinematicCollider").GetComponent<BoxCollider>();
 		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
@@ -279,7 +276,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		PillarDimensionObject portalDimensionObj = portal?.otherPortal?.pillarDimensionObject;
 		DimensionPillar activePillar = portalDimensionObj?.activePillar;
 		if (portalDimensionObj != null && activePillar != null) {
-			_pillarDimension = activePillar.curDimension;
+			_pillarDimension = activePillar.curBaseDimension;
 			_cubeDimension = corporealCubeDimensionObj.Dimension;
 			_portalDimension = portalDimensionObj.Dimension;
 		}
@@ -504,7 +501,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		stateMachine.Set(State.Materializing);
 		
 		VisibilityState desiredState = corporealCubeDimensionObj.visibilityState.Opposite();
-		int desiredDimension = corporealCubeDimensionObj.GetDimensionWhereThisObjectWouldBeInVisibilityState(v => v == desiredState);
+		int desiredDimension = corporealCubeDimensionObj.GetDimensionWhere(v => v == desiredState);
 		if (desiredDimension == -1) {
 			Debug.LogError($"Could not find a dimension where {corporealCubeDimensionObj.visibilityState} becomes {desiredState}");
 		}

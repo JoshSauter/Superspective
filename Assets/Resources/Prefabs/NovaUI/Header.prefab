@@ -582,12 +582,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 7432062055785431077
+    rid: 8647374355792396307
   references:
     version: 2
     RefIds:
-    - rid: 7432062055785431077
-      type: {class: HeaderVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396307
+      type: {class: HeaderVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         Name: {fileID: 6168755712597056959}
 --- !u!1 &2322447065223329981

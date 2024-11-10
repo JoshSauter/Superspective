@@ -263,6 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -2485,6 +2487,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -4395,6 +4399,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -11604,6 +11610,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -12444,6 +12452,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -14649,7 +14659,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 34
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -16898,6 +16908,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -17940,6 +17952,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -18925,6 +18939,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -19565,7 +19581,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 2
+      Raw: 2.5
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -21786,6 +21802,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -22246,7 +22264,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 957, y: 4.5, z: 290.5}
+  m_LocalPosition: {x: 0, y: -396.375, z: 36.625}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22256,7 +22274,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 206.891, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22407,6 +22425,7 @@ MonoBehaviour:
   DEBUG: 0
   thisGravityObj: {fileID: 0}
   thisRigidbody: {fileID: 623971845}
+  thisCollider: {fileID: 0}
   minScale: 0
   maxScale: 0
   _currentScale: 1
@@ -25998,6 +26017,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -26862,7 +26883,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 2
+      Raw: 2.5
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -31111,6 +31132,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -31373,6 +31396,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -31715,6 +31740,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -33257,6 +33284,8 @@ Transform:
   - {fileID: 298879240}
   - {fileID: 1419587138}
   - {fileID: 1098293739}
+  - {fileID: 2062763374}
+  - {fileID: 2029671553}
   m_Father: {fileID: 0}
   m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -33309,6 +33338,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -38971,6 +39002,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -41895,6 +41928,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -43999,6 +44034,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -47011,6 +47048,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -49275,6 +49314,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -51783,7 +51824,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 4
+      Raw: 2.5
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -56336,6 +56377,7 @@ MonoBehaviour:
   relativeStartPosition: {x: 0, y: 0, z: 0}
   relativePositionLastFrame: {x: 0, y: 0, z: 0}
   worldPositionLastFrame: {x: 0, y: 0, z: 0}
+  shouldFollow: 1
 --- !u!114 &1809741060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56463,7 +56505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: 6b261d643a85b40499f473b7cbe7b7d7, type: 2}
-  debugMode: 4
+  debugMode: 5
 --- !u!114 &1809741067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56646,7 +56688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57801,7 +57843,7 @@ MonoBehaviour:
   - {fileID: 6856606736351991969, guid: 821e28a4c275cbd448316cbc7ef7aa59, type: 3}
   - {fileID: 5301445305512896750, guid: b2daf8734985c4f418324624fc42a188, type: 3}
   - {fileID: 2322447065223330182, guid: ca4f327a9b6941f47b6779a2d3b31343, type: 3}
-  - {fileID: 4925803620051260900, guid: 01e66ef81d2a5e4489bd270c6a7f87fd, type: 3}
+  - {fileID: 541034295164105307, guid: 01e66ef81d2a5e4489bd270c6a7f87fd, type: 3}
   - {fileID: 1898054317181363739, guid: 181ff38d6c384e74eaa66ae3300a1f9d, type: 3}
   outOfViewDistance: 0
   _uiBlock: {fileID: 0}
@@ -57950,7 +57992,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 2
     Spacing:
-      Raw: 1.5
+      Raw: 2.5
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -61106,6 +61148,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -61425,6 +61469,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -61921,6 +61967,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -62378,6 +62426,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundColorOverride: {r: 0, g: 0, b: 0, a: 0}
+  hoverColorOverride: {r: 0, g: 0, b: 0, a: 0}
   DEBUG: 0
   clickState:
     _state: 0
@@ -63638,6 +63688,96 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &2029671552
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2029671553}
+  - component: {fileID: 2029671554}
+  m_Layer: 0
+  m_Name: UIStyleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2029671553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029671552}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1051691394}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2029671554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029671552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e1163cf0ba85104580c177f4d03baa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CurrentTheme: 0
+  Stylesheets:
+  - Theme: 0
+    NovaButton:
+      DefaultBgColor: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.29803923}
+      HoverBgColor: {r: 0.21470588, g: 0.20392157, b: 0.20686275, a: 0.4509804}
+      ClickHeldBgColor: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+      ClickedBgColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+      DefaultComponentColor: {r: 0, g: 0, b: 0, a: 1}
+      ClickHeldComponentColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+      ClickedComponentColor: {r: 1, g: 1, b: 1, a: 1}
+    SaveSlot:
+      DefaultBgColor: {r: 0.7137255, g: 0.7058824, b: 0.68235296, a: 0.81960785}
+      HoverBgColor: {r: 1, g: 0.9882353, b: 0.95529413, a: 0.9607843}
+      ClickHeldBgColor: {r: 0.3, g: 0.29, b: 0.27, a: 1}
+      ClickedBgColor: {r: 0.25, g: 0.23, b: 0.21, a: 1}
+      DefaultTextColor: {r: 0, g: 0, b: 0, a: 1}
+      ClickHeldTextColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+      ClickedTextColor: {r: 1, g: 1, b: 1, a: 1}
+      Delete:
+        DeleteDefaultBgColor: {r: 0.0627451, g: 0.0627451, b: 0.0627451, a: 1}
+        DeleteHoverBgColor: {r: 0.32941177, g: 0.32941177, b: 0.32941177, a: 1}
+        DeleteClickHeldBgColor: {r: 0.49411765, g: 0.49411765, b: 0.49411765, a: 1}
+        DeleteClickedBgColor: {r: 0.9411765, g: 0.9411765, b: 0.9411765, a: 1}
+        DefaultTextAndIconColor: {r: 0.9764706, g: 0.9764706, b: 0.9764706, a: 1}
+        ClickHeldTextAndIconColor: {r: 0.0627451, g: 0.0627451, b: 0.0627451, a: 1}
+        ClickedTextAndIconColor: {r: 0.047058824, g: 0.047058824, b: 0.047058824,
+          a: 1}
+        DefaultConfirmColor: {r: 0.12352941, g: 0.45686275, b: 0.22156863, a: 1}
+        ClickHeldConfirmColor: {r: 0.24705882, g: 0.9137255, b: 0.44313726, a: 1}
+        DefaultCancelColor: {r: 0.45686275, g: 0.12352941, b: 0.12352941, a: 1}
+        ClickHeldCancelColor: {r: 0.9137255, g: 0.24705882, b: 0.24705882, a: 1}
+    Settings:
+      BackgroundColor: {r: 1, g: 1, b: 1, a: 0.43137255}
+      HoverColor: {r: 0.65, g: 0.65, b: 0.65, a: 0.43137255}
+      DisabledOverlayColor: {r: 0.6117647, g: 0.6117647, b: 0.6117647, a: 0.6509804}
+      Slider:
+        fillColor: {r: 0.34901962, g: 0.34901962, b: 0.34901962, a: 1}
+      SmallIntSlider:
+        fillColor: {r: 0.34901962, g: 0.34901962, b: 0.34901962, a: 1}
+        unfilledColor: {r: 1, g: 1, b: 1, a: 1}
+      Dropdown:
+        UnselectedColor: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.29803923}
+        HoverBgColor: {r: 0.21470588, g: 0.20392157, b: 0.20686275, a: 0.4509804}
+        ClickHeldBgColor: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+        ClickedBgColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
 --- !u!1 &2047388074
 GameObject:
   m_ObjectHideFlags: 0
@@ -63918,6 +64058,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2055966899}
   m_CullTransparentMesh: 0
+--- !u!1 &2062763373
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2062763374}
+  - component: {fileID: 2062763375}
+  m_Layer: 0
+  m_Name: DimensionObjectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2062763374
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2062763373}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1051691394}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2062763375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2062763373}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57e37d04ff054c3f92fc7a82eb6d1c78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2078059298
 GameObject:
   m_ObjectHideFlags: 0
@@ -64947,7 +65131,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2670800
+  m_Name: pb_Mesh276214
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -67894,18 +68078,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 4903988733160874808}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1957368993003994069 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6856606736351992045, guid: 821e28a4c275cbd448316cbc7ef7aa59,
-    type: 3}
-  m_PrefabInstance: {fileID: 4903988733160874808}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c395591f6f08fb41897eb437d91b587, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1988174646330656893 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8401306280062010920, guid: 0ff8c122c5adb794b838f08ef69062b0,
@@ -68600,11 +68772,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 5
       objectReference: {fileID: 0}
-    - target: {fileID: 6856606736351991969, guid: 821e28a4c275cbd448316cbc7ef7aa59,
-        type: 3}
-      propertyPath: managedReferences[7432062458703380499].DisabledOverlay
-      value: 
-      objectReference: {fileID: 1957368993003994069}
     - target: {fileID: 6856606736351992201, guid: 821e28a4c275cbd448316cbc7ef7aa59,
         type: 3}
       propertyPath: m_RootOrder

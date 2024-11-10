@@ -25,7 +25,11 @@ public class DimensionWall : MonoBehaviour {
 
 	public float PillarHeight => TopOfPillar.y - BottomOfPillar.y;
 
-	public const float RADS_OFFSET_FOR_DIMENSION_WALL = -0.1f;
+	private const float MIN_RADS_OFFSET_FOR_DIMENSION_WALL = -0.2f;
+	private const float MAX_RADS_OFFSET_FOR_DIMENSION_WALL = -0.8f;
+	private const float DISTANCE_FOR_MIN_RADS_OFFSET = 4f; // When the camera is closer than this to the pillar, we need to offset the wall angle more
+	private float CamDistanceFromPillar(Vector3 camPos) => Vector3.Distance(Vector3.ProjectOnPlane(camPos, pillar.transform.up), Vector3.ProjectOnPlane(pillar.transform.position, pillar.transform.up));
+	public float RadsOffsetForDimensionWall(Vector3 camPos) => Mathf.Lerp(MAX_RADS_OFFSET_FOR_DIMENSION_WALL, MIN_RADS_OFFSET_FOR_DIMENSION_WALL, CamDistanceFromPillar(camPos) / DISTANCE_FOR_MIN_RADS_OFFSET); 
 	const float DIMENSION_WALL_WIDTH = 0.01f;
 	LayerMask roomBoundsMask;
 
@@ -64,36 +68,36 @@ public class DimensionWall : MonoBehaviour {
 	}
 
 	void Update() {
-		UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
+		UpdateStateForCamera(Cam.Player, RadsOffsetForDimensionWall(Cam.Player.CamPos()));
 	}
 
 	void OnPreRenderPortal(Portal _) {
 		// Offset the wall angle by more when rendering for portals,
 		// since the DimensionWall can get cut off by the oblique projection matrix of the virtual portal camera
-		UpdateStateForCamera(VirtualPortalCamera.instance.portalCamera, 4 * RADS_OFFSET_FOR_DIMENSION_WALL);
+		UpdateStateForCamera(Cam.Portal, 4 * RadsOffsetForDimensionWall(Cam.Portal.CamPos()));
 	}
 
 	void OnPostRenderPortal(Portal _) {
-		UpdateStateForCamera(Player.instance.PlayerCam);
+		UpdateStateForCamera(Cam.Player, RadsOffsetForDimensionWall(Cam.Player.CamPos()));
 	}
 
-	public void UpdateStateForCamera(Camera cam, float offset = RADS_OFFSET_FOR_DIMENSION_WALL) {
+	public void UpdateStateForCamera(Cam cam, float offset) {
 		thisRenderer.enabled = pillar.enabled;
 		if (!pillar.enabled) return;
 
-		UpdateWallRotation(cam, offset);
+		UpdateWallRotation(cam.CamPos(), offset);
 		UpdateWallSize();
 	}
 
-	Angle AngleOfCamera(Camera cam) {
-		Vector3 pillarToPoint = cam.transform.position - transform.position;
+	Angle AngleOfPosition(Vector3 pos) {
+		Vector3 pillarToPoint = pos - transform.position;
 		PolarCoordinate polar = PolarCoordinate.CartesianToPolar(pillarToPoint);
 		PolarCoordinate dimensionShiftPolar = PolarCoordinate.CartesianToPolar(pillar.DimensionShiftVector);
 		return dimensionShiftPolar.angle - polar.angle;
 	}
 
-	void UpdateWallRotation(Camera cam, float offset) {
-		transform.localEulerAngles = new Vector3(0, AngleOfCamera(cam).degrees - offset * Mathf.Rad2Deg, 0);
+	void UpdateWallRotation(Vector3 camPos, float offset) {
+		transform.localEulerAngles = new Vector3(0, AngleOfPosition(camPos).degrees - offset * Mathf.Rad2Deg, 0);
 	}
 
 	void UpdateWallSize() {

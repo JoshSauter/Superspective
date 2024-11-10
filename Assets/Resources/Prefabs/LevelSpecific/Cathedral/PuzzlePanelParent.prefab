@@ -4609,9 +4609,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48f9d8bd593dd0042a716a955929b633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildAsStaircase: 0
+  buildMode: 1
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
+  buildDirectionIndex: 0
+  buildDirections: []
   showNodes: 1
   selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1
@@ -15509,7 +15511,10 @@ MonoBehaviour:
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 1
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 3
@@ -16099,9 +16104,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48f9d8bd593dd0042a716a955929b633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildAsStaircase: 1
+  buildMode: 1
   staircaseDirection1: {x: 1, y: 0, z: 0}
   staircaseDirection2: {x: 0, y: 1, z: 0}
+  buildDirectionIndex: 0
+  buildDirections: []
   showNodes: 1
   selectedNodesIndices: 00000000
   startOfStaircaseIndex: -1

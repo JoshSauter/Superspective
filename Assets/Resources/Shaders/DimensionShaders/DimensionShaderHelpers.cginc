@@ -76,16 +76,20 @@ inline int TestChannelFromColor(uint channel, fixed4 rgb) {
 }
 
 fixed4 ClipDimensionObjectFromScreenSpaceCoords(float2 screenPos, float disabled = 0.0) {
-	fixed4 dimensionSample = tex2D(_DimensionMask, screenPos);
-	#ifdef USE_ADVANCED_CHANNEL_LOGIC
 	const int maxMaskValue = (1 << NUM_CHANNELS) - 1;
-	int maskValue = clamp(ChannelFromColor(dimensionSample), 0, maxMaskValue);
-	float dimensionTest = _AcceptableMaskValues[maskValue];
-	#else
-	float dimensionTest = TestChannelFromColor(_Channel, dimensionSample);
-	#endif
 
-	clip(disabled-(((1 - dimensionTest)*_Inverse + dimensionTest*(1 - _Inverse)) == 0));
+	// Sample the dimension mask at the current screen position and extract the mask value
+	fixed4 dimensionSample = tex2D(_DimensionMask, screenPos);
+	int maskValue = clamp(ChannelFromColor(dimensionSample), 0, maxMaskValue);
+	
+	// Calculate which uint in the array and which bit to access
+	int uintIndex = maskValue / 32;       // Which of the 8 uints to access
+	int bitIndex = maskValue % 32;        // Which bit within that uint
+
+	// Extract the bit from the correct float, interpreted as a uint, using bitwise AND + bit-shifting
+	float dimensionTest = (asuint(_MaskSolution[uintIndex]) & (1u << bitIndex)) != 0 ? 1.0 : 0.0;
+
+	clip(disabled-(dimensionTest == 0));
 
 	return dimensionTest;
 }

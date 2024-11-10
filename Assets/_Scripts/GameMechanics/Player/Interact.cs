@@ -1,5 +1,6 @@
 ﻿using System;
 using Audio;
+using NovaMenuUI;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
@@ -135,7 +136,7 @@ public class Interact : Singleton<Interact> {
 
     public SuperspectiveRaycast GetRaycastHits() {
         Ray ray = AdjustedRay(Reticle.instance.thisTransformPos);
-        return RaycastUtils.Raycast(ray.origin, ray.direction, effectiveInteractionDistance, layerMask);
+        return RaycastUtils.Raycast(ray.origin, ray.direction, effectiveInteractionDistance, layerMask, true);
     }
 
     public SuperspectiveRaycast GetAnyDistanceRaycastHits() {
@@ -146,7 +147,7 @@ public class Interact : Singleton<Interact> {
         // );
 
         Ray ray = AdjustedRay(reticlePos);
-        return RaycastUtils.Raycast(ray.origin, ray.direction, float.MaxValue, layerMask);
+        return RaycastUtils.Raycast(ray.origin, ray.direction, float.MaxValue, layerMask, true);
     }
 
     Ray AdjustedRay(Vector2 viewportPos) {

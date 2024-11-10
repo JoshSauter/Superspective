@@ -52,6 +52,7 @@ namespace TheEntity {
             base.Awake();
 
             state = this.StateMachine(EyeState.Unnoticed);
+            RestoreAllInvisibleObjects();
         }
 
         protected override void Start() {

@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - POWER_TRAIL_OBJECT
+  - USE_ADVANCED_CHANNEL_LOGIC
   m_InvalidKeywords:
   - _ALPHATEST_ON
   m_LightmapFlags: 4
@@ -56,9 +57,12 @@ Material:
     - _CapsuleRadius: 0.25
     - _Channel: 0
     - _DiffuseMagnitude: 0.025
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
+    - _DistanceFadeEffectMagnitude: 0
+    - _DistanceFadeEffectStartDistance: 0
     - _DstBlend: 0
     - _EmissionEnabled: 1
     - _FudgeDistance: 0

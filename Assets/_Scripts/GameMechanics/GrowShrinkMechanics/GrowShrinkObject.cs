@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using PortalMechanics;
 using UnityEngine;
@@ -10,8 +11,12 @@ using UnityStandardAssets.ImageEffects;
 namespace GrowShrink {
     [RequireComponent(typeof(UniqueId))]
     public class GrowShrinkObject : SaveableObject<GrowShrinkObject, GrowShrinkObject.GrowShrinkObjectSave> {
+        public static readonly Dictionary<Collider, GrowShrinkObject> collidersAffectedByGrowShrinkObjects = new Dictionary<Collider, GrowShrinkObject>();
+        
         public GravityObject thisGravityObj;
         public Rigidbody thisRigidbody;
+        public Collider thisCollider;
+        
         // These values change/get set when this object enters a GrowShrinkHallway
         public float minScale, maxScale;
         public float _currentScale = 1;
@@ -63,6 +68,7 @@ namespace GrowShrink {
 
             if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
             if (thisGravityObj == null) thisGravityObj = GetComponent<GravityObject>();
+            if (thisCollider == null) thisCollider = thisRigidbody.GetComponent<Collider>();
 
             state.OnStateChangeSimple += () => debug.Log($"GrowShrinkObject state changed to {state.State}");
         }
@@ -78,10 +84,14 @@ namespace GrowShrink {
         protected override void OnEnable() {
             base.OnEnable();
             Portal.BeforeAnyPortalTeleport += HandlePortalTeleport;
+            
+            collidersAffectedByGrowShrinkObjects.Add(thisCollider, this);
         }
 
         private void OnDisable() {
             Portal.BeforeAnyPortalTeleport -= HandlePortalTeleport;
+            
+            collidersAffectedByGrowShrinkObjects.Remove(thisCollider);
         }
 
         void HandlePortalTeleport(Portal inPortal, Collider objTeleported) {

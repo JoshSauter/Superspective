@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DeveloperConsole;
 using LevelManagement;
 using NaughtyAttributes;
+using NovaMenuUI;
 using UnityEngine;
 using Saving;
 using Tayx.Graphy;
@@ -74,7 +75,7 @@ public class GameManager : Singleton<GameManager> {
 
     public void RestartGame() {
         Time.timeScale = 1f;
-        SuperspectivePhysics.ClearAllState();
+        SuperspectivePhysics.ClearAllCollisionState();
         SaveManager.ClearAllState();
         SceneManager.LoadScene(this.gameObject.scene.buildIndex);
     }

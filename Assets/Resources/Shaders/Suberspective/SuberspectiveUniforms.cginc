@@ -42,16 +42,13 @@ uniform float _DissolveEmissionAmount;
 
 // Dimension shader uniforms
 #define NUM_CHANNELS 8
+// 8 uints to pack 1 << NUM_CHANNELS = 256 possible channel combinations
+// Note that 8 is purely coincidental due to the size of uint and float, and not related to NUM_CHANNELS
+uniform float _MaskSolution[8];
 uniform float _ResolutionX;
 uniform float _ResolutionY;
 uniform sampler2D _DimensionMask;
 uniform float4 _DimensionMask_ST;
-#ifdef USE_ADVANCED_CHANNEL_LOGIC
-uniform int _AcceptableMaskValues[1 << NUM_CHANNELS];
-#else
-uniform int _Channel;
-#endif
-uniform int _Inverse;
 
 // PowerTrail shader uniforms
 #define MAX_NODES 512

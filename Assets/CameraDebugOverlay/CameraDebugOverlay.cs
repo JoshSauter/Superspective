@@ -16,7 +16,7 @@ public class CameraDebugOverlay : MonoBehaviour {
 		Normals,
 		Obliqueness,
 		PortalMask,
-		//stencilBuffer,
+		VisibilityMask,
 		Off
 	}
 	public DebugMode debugMode = DebugMode.Off;
@@ -48,6 +48,9 @@ public class CameraDebugOverlay : MonoBehaviour {
 		switch ((DebugMode)mode) {
 			case DebugMode.PortalMask:
 				Graphics.Blit(MaskBufferRenderTextures.instance.portalMaskTexture, destination);
+				break;
+			case DebugMode.VisibilityMask:
+				Graphics.Blit(MaskBufferRenderTextures.instance.visibilityMaskTexture, destination);
 				break;
 			case DebugMode.Off:
 				Graphics.Blit(source, destination);

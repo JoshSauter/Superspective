@@ -11,15 +11,9 @@ namespace DeveloperConsole {
         public override CommandResponse Execute(string[] args) {
             bool shouldShowTriggers = (PlayerCam.cullingMask & TriggerZoneMask) == 0;
             if (args.Length >= 1) {
-                string trueFalseArg = args[0];
-                if (trueFalseArg.Equals("true", StringComparison.OrdinalIgnoreCase)) {
-                    shouldShowTriggers = true;
-                }
-                else if (trueFalseArg.Equals("false", StringComparison.OrdinalIgnoreCase)) {
-                    shouldShowTriggers = false;
-                }
-                else {
-                    return new FailureResponse($"Invalid argument: {trueFalseArg}. Expected 'true' or 'false'.");
+                string boolArg = args[0];
+                if (!TryParseBool(boolArg, out shouldShowTriggers)) {
+                    return new FailureResponse($"Invalid argument: {boolArg}. Expected 'true' or 'false'.");
                 }
             }
 

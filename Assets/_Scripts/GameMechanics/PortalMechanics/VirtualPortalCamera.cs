@@ -59,7 +59,6 @@ namespace PortalMechanics {
 			public bool portalShouldBeRendered;
 		}
 		
-		
 		public delegate void RenderPortalAction(Portal portal);
 		public static event RenderPortalAction OnPreRenderPortal;
 		public static event RenderPortalAction OnPostRenderPortal;
@@ -85,12 +84,14 @@ namespace PortalMechanics {
 		int renderSteps;
 		public List<RecursiveTextures> renderStepTextures;
 
-		[ShowIf("DEBUG")]
+		[ShowIf(nameof(DEBUG))]
 		public List<Portal> portalOrder = new List<Portal>();
-		[ShowIf("DEBUG")]
+		[ShowIf(nameof(DEBUG))]
 		public List<RecursiveTextures> finishedTex = new List<RecursiveTextures>();
-		[ShowIf("DEBUG")]
+		[ShowIf(nameof(DEBUG))]
 		public List<RenderTexture> portalMaskTextures = new List<RenderTexture>();
+		[ShowIf(nameof(DEBUG))]
+		public List<RenderTexture> visibilityMaskTextures = new List<RenderTexture>();
 
 		Shader depthNormalsReplacementShader;
 		const string DEPTH_NORMALS_REPLACEMENT_TAG = "RenderType";
@@ -107,7 +108,7 @@ namespace PortalMechanics {
 			depthNormalsReplacementShader = Shader.Find("Custom/CustomDepthNormalsTexture");
 
 			SuperspectiveScreen.instance.OnPlayerCamPreRender += RenderPortals;
-			SuperspectiveScreen.instance.OnScreenResolutionChanged += (width, height) => ClearRenderTextures();
+			SuperspectiveScreen.instance.OnScreenResolutionChanged += (width, height) => ReleaseRenderTextures();
 
 			renderStepTextures = new List<RecursiveTextures>();
 			portalMaskTextures = new List<RenderTexture>();
@@ -120,15 +121,19 @@ namespace PortalMechanics {
 			});
 			if (DEBUG) {
 				portalMaskTextures.ForEach(rt => rt.Clear());
+				visibilityMaskTextures.ForEach(rt => rt.Clear());
 			}
 		}
 
-		void ClearRenderTextures() {
+		void ReleaseRenderTextures() {
 			renderStepTextures.ForEach(rt => rt.Release());
 			renderStepTextures.Clear();
 			if (DEBUG) {
 				portalMaskTextures.ForEach(rt => rt.Release());
 				portalMaskTextures.Clear();
+				
+				visibilityMaskTextures.ForEach(rt => rt.Release());
+				visibilityMaskTextures.Clear();
 			}
 		}
 
@@ -285,8 +290,13 @@ namespace PortalMechanics {
 				while (portalMaskTextures.Count <= index) {
 					portalMaskTextures.Add(new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, SuperspectiveScreen.instance.portalMaskCamera.targetTexture.format));
 				}
+
+				while (visibilityMaskTextures.Count <= index) {
+					visibilityMaskTextures.Add(new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, SuperspectiveScreen.instance.dimensionCamera.targetTexture.format));
+				}
 				
-				Graphics.CopyTexture(SuperspectiveScreen.instance.portalMaskCamera.targetTexture, portalMaskTextures[index]); 
+				Graphics.CopyTexture(SuperspectiveScreen.instance.portalMaskCamera.targetTexture, portalMaskTextures[index]);
+				Graphics.CopyTexture(SuperspectiveScreen.instance.dimensionCamera.targetTexture, visibilityMaskTextures[index]);
 			}
 
 			debug.LogWithContext($"Rendering: {index} to {portal.name}'s RenderTexture, depth: {depth}", portal);

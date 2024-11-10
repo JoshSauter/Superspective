@@ -10,7 +10,7 @@ public class BooleanExpressionTests {
         List<string> infix = new List<string>() { "(","0","||","1",")","&&","(","2","&&","(","0","||","3",")",")" };
         List<string> postfix = DimensionObject.InfixToPostfix(infix);
 
-        float[] solutions = DimensionObject.SolutionArrayFromPostfixExpression(postfix);
+        int[] solutions = DimensionObject.SolutionArrayFromPostfixExpression(postfix);
         
         Debug.Log(string.Join(", ", solutions));
     }

@@ -1,4 +1,5 @@
 ﻿using LevelManagement;
+using NovaMenuUI;
 using UnityEngine;
 
 public static class DebugInput {

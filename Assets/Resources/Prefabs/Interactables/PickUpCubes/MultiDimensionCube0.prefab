@@ -1,5 +1,58 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &706964322728468340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1871897572137617284}
+  - component: {fileID: 7472857696833531526}
+  m_Layer: 0
+  m_Name: MultiDimensionCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1871897572137617284
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706964322728468340}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1171805823180736634}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7472857696833531526
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706964322728468340}
+  m_Material: {fileID: 13400000, guid: 08f9397c9cb96ca41be3b639e17bcfce, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1443741934579114638
 GameObject:
   m_ObjectHideFlags: 0
@@ -215,6 +268,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6415079491670893105}
+  - {fileID: 1871897572137617284}
   m_Father: {fileID: 6108338575306644943}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
@@ -4106,7 +4160,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 0
+  m_VersionIndex: 12
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4145,9 +4199,12 @@ MonoBehaviour:
   reverseVisibilityStates: 0
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 1
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 0
   colliders:
-  - {fileID: 7055762742895272420}
+  - {fileID: 7472857696833531526}
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
@@ -4163,11 +4220,10 @@ MonoBehaviour:
   maxAngle: 0
   activePillar: {fileID: 0}
   pillars: []
-  collideWithPlayerWhileInvisible: 0
   thisObjectMoves: 1
   thisRigidbody: {fileID: 3978877450468716646}
-  colliderBoundsOverride: {fileID: 7055762742895272420}
-  camSetUpFor: {fileID: 0}
+  colliderBoundsOverride: {fileID: 7472857696833531526}
+  camSetUpFor: 0
 --- !u!114 &1797362795698917353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4285,8 +4341,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   printLookupValue: 0
-  lookupType: 2
-  lookupString: _Dimension
+  lookupType: 3
+  lookupString: Look up anything
 --- !u!114 &1096950187179362336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4308,7 +4364,10 @@ MonoBehaviour:
   reverseVisibilityStates: 1
   ignorePartiallyVisibleLayerChanges: 0
   disableColliderWhileInvisible: 1
+  bypassRaycastCheck: 0
+  automaticallySetRenderersIfEmpty: 1
   renderers: []
+  automaticallySetCollidersIfEmpty: 0
   colliders: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
@@ -4325,11 +4384,10 @@ MonoBehaviour:
   maxAngle: 0
   activePillar: {fileID: 0}
   pillars: []
-  collideWithPlayerWhileInvisible: 0
   thisObjectMoves: 1
-  thisRigidbody: {fileID: 3978877450468716646}
-  colliderBoundsOverride: {fileID: 7055762742895272420}
-  camSetUpFor: {fileID: 0}
+  thisRigidbody: {fileID: 5730362020235627467}
+  colliderBoundsOverride: {fileID: 7472857696833531526}
+  camSetUpFor: 0
 --- !u!114 &3181047595474204265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4452,7 +4510,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6108338575306644943}
   - component: {fileID: 3978877450468716646}
-  - component: {fileID: 7055762742895272420}
   - component: {fileID: 5159183983328537308}
   - component: {fileID: 2987867824161880409}
   - component: {fileID: 6647768954095359397}
@@ -4476,7 +4533,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6806505739208298890}
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -4.8632965, y: 1.5, z: -10.264496}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
@@ -4485,7 +4542,7 @@ Transform:
   - {fileID: 7640465620594022056}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!54 &3978877450468716646
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4513,27 +4570,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &7055762742895272420
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6806505739208298890}
-  m_Material: {fileID: 13400000, guid: 08f9397c9cb96ca41be3b639e17bcfce, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5159183983328537308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4553,7 +4589,7 @@ MonoBehaviour:
   corporealGlassRenderer: {fileID: 0}
   invertedCubeRenderer: {fileID: 0}
   raymarchRenderer: {fileID: 0}
-  thisCollider: {fileID: 0}
+  thisCollider: {fileID: 7472857696833531526}
   kinematicCollider: {fileID: 4463563736339578391}
   corporealDimensionBeforeMaterialize: -1
   corporealVisibilityStateBeforeRenderPortal: 0
@@ -4593,7 +4629,7 @@ MonoBehaviour:
   thisGravity: {fileID: 0}
   freezeRigidbodyDueToNearbyPlayer: 0
   thisRigidbody: {fileID: 3978877450468716646}
-  thisCollider: {fileID: 0}
+  thisCollider: {fileID: 7472857696833531526}
   portalableObject: {fileID: 0}
   growShrinkObject: {fileID: 0}
   spawnedFrom:
@@ -4609,12 +4645,10 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   freezeRotationStateMachine:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
 --- !u!114 &3950078180221486627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4649,6 +4683,8 @@ MonoBehaviour:
   useGravity: 1
   startingGravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
+  growShrinkObject: {fileID: 0}
+  startingScale: 0
 --- !u!114 &8111376249004383559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4702,6 +4738,7 @@ MonoBehaviour:
   DEBUG: 0
   thisGravityObj: {fileID: 2221574962254478033}
   thisRigidbody: {fileID: 3978877450468716646}
+  thisCollider: {fileID: 7472857696833531526}
   minScale: 0
   maxScale: 0
   _currentScale: 1
@@ -4710,7 +4747,6 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
 --- !u!114 &1510857465790657238
 MonoBehaviour:
   m_ObjectHideFlags: 0

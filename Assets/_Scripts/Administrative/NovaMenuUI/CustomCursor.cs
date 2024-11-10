@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using Nova;
+using NovaMenuUI;
 using UnityEngine;
 
 public class CustomCursor : MonoBehaviour {

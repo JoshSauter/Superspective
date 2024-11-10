@@ -194,8 +194,9 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
             StartCoroutine(ResetPlayerInTriggerZoneState());
         }
         if (playerStillInTriggerZone) return;
+        if (other.isTrigger) return;
         
-        PickupObject cube = other.gameObject.GetComponent<PickupObject>();
+        PickupObject cube = other.gameObject.FindInParentsRecursively<PickupObject>();
         if (cube != null && cubeInReceptacle == null) StartCubeEnter(cube);
     }
 

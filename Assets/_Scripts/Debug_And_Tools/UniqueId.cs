@@ -29,7 +29,7 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         bool idAlreadyTaken = !string.IsNullOrEmpty(uniqueId) && !IsUnique(uniqueId);
         // If we are playing and the id is non-null & already taken, destroy this instance
         if (Application.isPlaying && idAlreadyTaken) {
-            Debug.LogWarning($"ID {uniqueId} already taken, {gameObject.name} in {gameObject.scene.name} self-destructing.");
+            Debug.LogError($"ID {uniqueId} already taken, {gameObject.name} in {gameObject.scene.name} self-destructing.");
             Destroy(gameObject);
             return;
         }

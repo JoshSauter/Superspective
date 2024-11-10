@@ -94,6 +94,10 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
 
     void Update() {
         if (GameManager.instance.IsCurrentlyLoading) return;
+        
+        if (DebugInput.GetKey(KeyCode.LeftShift) && DebugInput.GetKeyDown(KeyCode.C)) {
+            Shake(4, 2);
+        }
 
         ShakeCamera(GetCurrentShakeIntensity());
     }

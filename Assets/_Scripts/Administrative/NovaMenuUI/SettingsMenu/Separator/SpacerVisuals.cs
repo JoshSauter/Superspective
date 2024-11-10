@@ -1,3 +1,5 @@
 ﻿using Nova;
 
-public class SpacerVisuals : ItemVisuals {}
+namespace NovaMenuUI {
+    public class SpacerVisuals : ItemVisuals {}
+}

@@ -48,7 +48,7 @@ public class PortalCopy : MonoBehaviour {
         // Disallow collisions between a portal object and its copy
         foreach (var c1 in colliders) {
             foreach (var c2 in originalPortalableObj.colliders) {
-                SuperspectivePhysics.IgnoreCollision(c1, c2);
+                SuperspectivePhysics.IgnoreCollision(c1, c2, $"{originalPortalableObj.ID}_PortalCopy");
             }
         }
         

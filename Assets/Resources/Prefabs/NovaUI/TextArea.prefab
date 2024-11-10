@@ -337,7 +337,7 @@ MonoBehaviour:
         Raw: 0.85
         Type: 1
       Y:
-        Raw: 23
+        Raw: 26
         Type: 0
       Z:
         Raw: 0
@@ -482,7 +482,7 @@ MonoBehaviour:
     LightingModel: 0
     ShadowCastingMode: 2
     ReceiveShadows: 1
-  PreviewSize: {x: 1, y: 23, z: 0}
+  PreviewSize: {x: 1, y: 26, z: 0}
 --- !u!114 &7933969249184595812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -496,12 +496,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 5514769406813274216
+    rid: 8647374355792396313
   references:
     version: 2
     RefIds:
-    - rid: 5514769406813274216
-      type: {class: TextAreaVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396313
+      type: {class: TextAreaVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         Name: {fileID: 8826251838579717666}
         textField: {fileID: 1067718343915429833}

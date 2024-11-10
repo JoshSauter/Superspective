@@ -6,6 +6,7 @@ using SuperspectiveUtils.ShaderUtils;
 using System.Linq;
 using Saving;
 using System;
+using DimensionObjectMechanics;
 using NaughtyAttributes;
 using PortalMechanics;
 
@@ -35,14 +36,25 @@ public static class VisibilityStateExt {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+	public const int NUM_CHANNELS = 8;
+	private const string IGNORE_COLLISIONS_TRIGGER_ZONE_NAME = "IgnoreCollisionsTriggerZone";
+	
+#region events
+	public delegate void DimensionObjectStateChangeAction(DimensionObject context);
+	public delegate void DimensionObjectStateChangeActionSimple();
+
+	// Immediate will fire immediately after any state change happens
+	public event DimensionObjectStateChangeAction OnStateChangeImmediate;
+	// Non-immediate events wait until end of frame to see if the net visibility state has changed
+	public event DimensionObjectStateChangeAction OnStateChange;
+	public event DimensionObjectStateChangeActionSimple OnStateChangeSimple;
+#endregion
+	
 	public override string ID => $"{gameObject.name}_{base.ID}";
 
-	public static HashSet<DimensionObject> allDimensionObjects = new HashSet<DimensionObject>();
-	const string DIMENSION_OBJECT_KEYWORD = "DIMENSION_OBJECT";
-	public const int NUM_CHANNELS = 8;
 	public bool treatChildrenAsOneObjectRecursively = false;
 	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
-	public bool ignoreChildrenWithDimensionObject = true;
+	public bool ignoreChildrenWithDimensionObject = true; // Only skips children with DimensionObject scripts that MATCH THE CHANNEL of this one
 	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
 	public bool includeInactiveGameObjects = false;
 
@@ -54,21 +66,47 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// prevents them from being rendered to PortalMask camera
 	public bool ignorePartiallyVisibleLayerChanges = false;
 	public bool disableColliderWhileInvisible = true;
-	protected int curDimensionSetInMaterial;
 
+	// If true, this object will not check the visibility mask when checking if a raycast hit this object
+	public bool bypassRaycastCheck = false;
+
+	public bool automaticallySetRenderersIfEmpty = true;
 	public SuperspectiveRenderer[] renderers;
+	public bool automaticallySetCollidersIfEmpty = true;
 	public Collider[] colliders;
-	Dictionary<SuperspectiveRenderer, int> startingLayers;
 	public SphereCollider ignoreCollisionsTriggerZone;
 
 	public VisibilityState startingVisibilityState = VisibilityState.Visible;
 	public VisibilityState visibilityState = VisibilityState.Visible;
 
+	/// <summary>
+	/// Returns true if the inverse mask should be applied for the shader
+	/// </summary>
+	private bool InverseShouldBeEnabled {
+		get {
+			switch (visibilityState) {
+				case VisibilityState.Visible:
+				case VisibilityState.Invisible:
+					return false;
+				case VisibilityState.PartiallyVisible:
+					return reverseVisibilityStates;
+				case VisibilityState.PartiallyInvisible:
+					return !reverseVisibilityStates;
+				default:
+					throw new ArgumentOutOfRangeException();
+					return false;
+			}
+		}
+	}
+
+	protected VisibilityState GetEffectiveVisibilityState(VisibilityState visibilityState) {
+		return reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+	}
 	public VisibilityState EffectiveVisibilityState {
-		get => reverseVisibilityStates ? visibilityState.Opposite() : visibilityState;
+		get => GetEffectiveVisibilityState(visibilityState);
 		set => visibilityState = reverseVisibilityStates ? value.Opposite() : value;
 	} 
-	static Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
+	private static readonly Dictionary<VisibilityState, HashSet<VisibilityState>> nextStates = new Dictionary<VisibilityState, HashSet<VisibilityState>> {
 		{ VisibilityState.Invisible, new HashSet<VisibilityState> { VisibilityState.PartiallyVisible, VisibilityState.PartiallyInvisible } },
 		{ VisibilityState.PartiallyVisible, new HashSet<VisibilityState> { VisibilityState.Invisible, VisibilityState.Visible } },
 		{ VisibilityState.Visible, new HashSet<VisibilityState> { VisibilityState.PartiallyVisible, VisibilityState.PartiallyInvisible } },
@@ -85,24 +123,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// First 4 columns are VisibilityStates, 5 is Player and 6 is Other Non-DimensionObjects
 	public const int COLLISION_MATRIX_COLS = 6;
 	public DimensionObjectCollisions collisionLogic;
-
-	public const string IgnoreCollisionsTriggerZone = "IgnoreCollisionsTriggerZone";
-	public bool isBeingDestroyed = false;
-
-#region events
-	public delegate void DimensionObjectStateChangeAction(DimensionObject context);
-	public delegate void DimensionObjectStateChangeActionSimple();
-
-	// Immediate will fire immediately after any state change happens
-	public event DimensionObjectStateChangeAction OnStateChangeImmediate;
-	// Non-immediate events wait until end of frame to see if the net visibility state has changed
-	public event DimensionObjectStateChangeAction OnStateChange;
-	public event DimensionObjectStateChangeActionSimple OnStateChangeSimple;
-	#endregion
-
+	
 	protected override void OnValidate() {
 		base.OnValidate();
-		if (collisionMatrix == null || collisionMatrix.Length < COLLISION_MATRIX_ROWS * COLLISION_MATRIX_COLS) {
+		if (collisionMatrix == null || collisionMatrix.Length != COLLISION_MATRIX_ROWS * COLLISION_MATRIX_COLS) {
 			collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
 				true, false, false, false, false, false,
 				false, true, false, false, false, false,
@@ -111,21 +135,19 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			};
 		}
 	}
-
-	protected override void Start() {
-		base.Start();
-
-		InitializeRenderersAndLayers();
-	}
+	
+	// Channel logic config
+	public bool useAdvancedChannelLogic = false;
+	public string channelLogic = "";
+	private DimensionObjectBitmask maskSolution;
+	private DimensionObjectBitmask inverseMaskSolution;
+	public DimensionObjectBitmask EffectiveMaskSolution => InverseShouldBeEnabled ? inverseMaskSolution : maskSolution;
 
 	protected override void Init() {
 		base.Init();
 		
-		foreach (var r in renderers) {
-			SetShaderProperties(r);
-		}
 		SetupDimensionCollisionLogic();
-		SetChannelValuesInMaterials();
+		InitializeMaskSolution();
 
 		if (!initialized && gameObject.activeInHierarchy) {
 			StartCoroutine(Initialize());
@@ -139,30 +161,22 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		SwitchVisibilityState(startingVisibilityState, true);
 		initialized = true;
 	}
+
+	protected override void OnEnable() {
+		base.OnEnable();
+		InitializeRenderersAndColliders();
+		
+		InitializeMaskSolution();
+	}
 	
 	void OnDisable() {
 		Destroy(collisionLogic);
-		allDimensionObjects.Remove(this);
-		isBeingDestroyed = true;
+		UninitializeRenderersAndColliders();
+		
 		visibilityState = VisibilityState.Visible;
 		OnStateChangeImmediate?.Invoke(this);
 		OnStateChange?.Invoke(this);
 		OnStateChangeSimple?.Invoke();
-		try {
-			SetChannelValuesInMaterials(false);
-		} catch {}
-	}
-
-	protected override void OnEnable() {
-		base.OnEnable();
-		allDimensionObjects.Add(this);
-		StartCoroutine(SetChannelsWhenReady());
-	}
-
-	IEnumerator SetChannelsWhenReady() {
-		yield return new WaitWhile(() => renderers == null || renderers.Length == 0);
-		
-		SetChannelValuesInMaterials();
 	}
 	
 	public bool IsVisibleFrom(Camera cam) {
@@ -207,8 +221,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		size.z /= transform.lossyScale.z;
 		Vector3 center = (max + min) / 2f;
 
-		GameObject triggerGO = new GameObject(IgnoreCollisionsTriggerZone) {
-			layer = LayerMask.NameToLayer("Ignore Raycast")
+		GameObject triggerGO = new GameObject(IGNORE_COLLISIONS_TRIGGER_ZONE_NAME) {
+			layer = SuperspectivePhysics.IgnoreRaycastLayer
 		};
 		triggerGO.transform.SetParent(transform, false);
 		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
@@ -220,74 +234,59 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 
 		return trigger;
 	}
-
-	public bool IsVisibleFromMask(int maskValue) {
-		bool ChannelOverlap() {
-			if (useAdvancedChannelLogic) {
-				return maskRenderSolution[maskValue] > 0;
-			}
-			else {
-				return DimensionShaderUtils.ChannelIsOnForMaskValue(channel, maskValue);
-			}
-		}
-
-		switch (EffectiveVisibilityState) {
-			case VisibilityState.Invisible:
-				return false;
-			case VisibilityState.PartiallyVisible:
-				return ChannelOverlap();
-			case VisibilityState.PartiallyInvisible:
-				return !ChannelOverlap();
-			case VisibilityState.Visible:
-				return true;
-			default:
-				throw new ArgumentOutOfRangeException();
-		}
-	}
 	
-	public static bool ShouldCollide(DimensionObject a, DimensionObject b) {
-		bool HaveChannelOverlap() {
-			bool MasksHaveOverlap(float[] maskSolutionsA, float[] maskSolutionsB) {
-				for (int i = 0; i < maskSolutionsA.Length; i++) {
-					if (maskSolutionsA[i] > 0 && maskSolutionsB[i] > 0) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			bool ChannelIsOnForMask(int channel, float[] maskSolution) {
-				return maskSolution[channel] > 0;
-			}
-
-			return a.useAdvancedChannelLogic switch {
-				true when b.useAdvancedChannelLogic => MasksHaveOverlap(a.maskRenderSolution, b.maskRenderSolution),
-				true when !b.useAdvancedChannelLogic => ChannelIsOnForMask(b.channel, a.maskRenderSolution),
-				false when b.useAdvancedChannelLogic => ChannelIsOnForMask(a.channel, b.maskRenderSolution),
-				_ => a.channel == b.channel
-			};
+	public bool HasChannelOverlapWith(DimensionObject other) {
+		bool MasksHaveOverlap(DimensionObjectBitmask maskA, DimensionObjectBitmask maskB) {
+			return !(maskA & maskB).IsEmpty;
 		}
 		
-		return HaveChannelOverlap() && ShouldCollideInSameChannel(a, b);
+		void CheckChannelLogicIsSet(DimensionObject dimObj) {
+			if (!dimObj.EffectiveMaskSolution.HasBitmaskSet) {
+				Debug.LogWarning("Mask render solution is null for " + dimObj.gameObject.name);
+				dimObj.ValidateAndApplyChannelLogic();
+				if (!dimObj.EffectiveMaskSolution.HasBitmaskSet) {
+					Debug.LogError("Mask render solution is still null for " + dimObj.gameObject.name);
+				}
+			}
+		}
+		
+		CheckChannelLogicIsSet(this);
+		CheckChannelLogicIsSet(other);
+
+		return MasksHaveOverlap(EffectiveMaskSolution, other.EffectiveMaskSolution);
 	}
 
-	public virtual bool ShouldCollideWithNonDimensionObject() {
+	/// <summary>
+	/// Checks if this object should collide with the other non-dimension object/Player
+	/// </summary>
+	/// <param name="other">Non-DimensionObject Collider or Player Collider</param>
+	/// <returns>True if this DimensionObject should collide with the provided Collider</returns>
+	public bool ShouldCollideWithNonDimensionCollider(Collider other) {
+		if (other.TaggedAsPlayer()) {
+			return ShouldCollideWithPlayer();
+		}
+		
+		return ShouldCollideWithNonDimensionObjects();
+	}
+
+	public virtual bool ShouldCollideWithNonDimensionObjects() {
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 1];
 	}
 
 	public virtual bool ShouldCollideWithPlayer() {
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 2];
 	}
-
-	static bool ShouldCollideInSameChannel(DimensionObject a, DimensionObject b) {
-		int aVisibility = (int)(a.reverseVisibilityStates ? a.visibilityState.Opposite() : a.visibilityState);
-		int bVisibility = (int)(b.reverseVisibilityStates ? b.visibilityState.Opposite() : b.visibilityState);
-		return a.collisionMatrix[aVisibility * COLLISION_MATRIX_COLS + bVisibility] && b.collisionMatrix[bVisibility * COLLISION_MATRIX_COLS + aVisibility];
-	}
 	
-	public virtual bool ShouldCollideWith(DimensionObject other) {
-		return ShouldCollide(this, other);
+	public virtual bool ShouldCollideWithDimensionObject(DimensionObject other) {
+		bool ShouldCollideInSameChannel() {
+			int thisVisibility = (int)EffectiveVisibilityState;
+			int otherVisibility = (int)other.EffectiveVisibilityState;
+			return collisionMatrix[thisVisibility * COLLISION_MATRIX_COLS + otherVisibility] && other.collisionMatrix[otherVisibility * COLLISION_MATRIX_COLS + thisVisibility];
+		}
+		
+		bool bothFullyVisible = EffectiveVisibilityState == VisibilityState.Visible && other.EffectiveVisibilityState == VisibilityState.Visible;
+		
+		return (HasChannelOverlapWith(other) || bothFullyVisible) && ShouldCollideInSameChannel();
 	}
 
 	public void SetCollision(VisibilityState thisVisibility, VisibilityState otherVisibility, bool shouldCollide) {
@@ -319,25 +318,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			debug.Log("State transition: " + visibilityState + " --> " + nextState);
 		}
 
-		switch (nextState) {
-			case VisibilityState.Invisible:
-				visibilityState = VisibilityState.Invisible;
-				break;
-			case VisibilityState.PartiallyVisible:
-				visibilityState = VisibilityState.PartiallyVisible;
-				break;
-			case VisibilityState.Visible:
-				visibilityState = VisibilityState.Visible;
-				break;
-			case VisibilityState.PartiallyInvisible:
-				visibilityState = VisibilityState.PartiallyInvisible;
-				break;
-		}
+		visibilityState = nextState;
 		
-		foreach (var r in renderers) {
-			SetShaderProperties(r, suppressLogs);
-		}
-		SetChannelValuesInMaterials();
+		DimensionObjectManager.instance.RefreshDimensionObject(this);
 
 		if (sendEvents) {
 			OnStateChangeImmediate?.Invoke(this);
@@ -358,100 +341,42 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// Material Change Logic //
 	///////////////////////////
 #region Materials
-	public void InitializeRenderersAndLayers() {
-		renderers = GetAllSuperspectiveRenderers().ToArray();
-		if (colliders == null || colliders.Length == 0) {
+	public void InitializeRenderersAndColliders(bool force = false) {
+		// Unregister existing renderers and colliders if we're forcing a re-initialization
+		if (force) {
+			UninitializeRenderersAndColliders();
+		}
+		
+		// Get all renderers if we haven't already, or if we're forcing a re-initialization
+		if (force || (automaticallySetRenderersIfEmpty && (renderers == null || renderers.Length == 0))) {
+			renderers = GetAllSuperspectiveRenderers().ToArray();
+		}
+		foreach (SuperspectiveRenderer sRenderer in renderers) {
+			DimensionObjectManager.RegisterRenderer(sRenderer, this);
+		}
+		
+		// Get all colliders if we haven't already, or if we're forcing a re-initialization
+		if (force || (automaticallySetCollidersIfEmpty && (colliders == null || colliders.Length == 0))) {
 			colliders = GetAllColliders().ToArray();
+		}
+		foreach (Collider collider in colliders) {
+			DimensionObjectManager.RegisterCollider(collider, this);
 		}
 
 		if (renderers.Length == 0) {
 			debug.LogError("No renderers found for: " + gameObject.name);
 		}
-
-		SetStartingLayersFromCurrentLayers();
 	}
 
-	public void SetStartingLayersFromCurrentLayers() {
-		startingLayers = GetAllStartingLayers(renderers);
-	}
-
-	void SetShaderProperties(SuperspectiveRenderer renderer, bool suppressLogs = false) {
-		void SetLayers() {
-			if (!startingLayers.ContainsKey(renderer)) {
-				startingLayers.Add(renderer, renderer.gameObject.layer);
+	public void UninitializeRenderersAndColliders() {
+		if (renderers != null) {
+			foreach (SuperspectiveRenderer sRenderer in renderers) {
+				DimensionObjectManager.UnregisterRenderer(sRenderer, this);
 			}
-
-			int targetLayer = -1;
-			switch (visibilityState) {
-				case VisibilityState.Invisible:
-					targetLayer = reverseVisibilityStates
-						? startingLayers[renderer]
-						: SuperspectivePhysics.InvisibleLayer;
-					break;
-				case VisibilityState.Visible:
-					targetLayer = reverseVisibilityStates
-						? SuperspectivePhysics.InvisibleLayer
-						: startingLayers[renderer];
-					break;
-				case VisibilityState.PartiallyVisible:
-				case VisibilityState.PartiallyInvisible:
-					targetLayer = reverseVisibilityStates
-						? (ignorePartiallyVisibleLayerChanges
-							? startingLayers[renderer]
-							: SuperspectivePhysics.VisibleButNoPlayerCollisionLayer)
-						: startingLayers[renderer];
-					break;
-			}
-
-			// Since this is in the call chain for portal rendering, it will spam the console with logs, making it harder to debug
-			if (!suppressLogs) {
-				debug.Log($"Setting target layer for renderer {renderer.gameObject.name} to {LayerMask.LayerToName(targetLayer)}");
-			}
-			renderer.gameObject.layer = targetLayer;
 		}
-
-		bool DetermineInverse() {
-			bool inverseShader = false;
-			switch (visibilityState) {
-				case VisibilityState.Invisible:
-					break;
-				case VisibilityState.PartiallyVisible:
-					inverseShader = reverseVisibilityStates;
-					break;
-				case VisibilityState.Visible:
-					break;
-				case VisibilityState.PartiallyInvisible:
-					inverseShader = !reverseVisibilityStates;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			return inverseShader;
-		}
-		
-		SetLayers();
-		bool inverseShader = DetermineInverse();
-		
-		// Disable colliders while invisible
-		if (disableColliderWhileInvisible && renderer.TryGetComponent(out Collider c)) {
-			c.enabled = (!reverseVisibilityStates && visibilityState != VisibilityState.Invisible) ||
-			            (reverseVisibilityStates && visibilityState != VisibilityState.Visible);
-		}
-
-		renderer.SetInt("_Inverse", inverseShader ? 1 : 0);
-		SetDimensionKeyword(renderer, EffectiveVisibilityState != VisibilityState.Visible);
-	}
-	
-	void SetDimensionKeyword(SuperspectiveRenderer renderer, bool value) {
-		foreach (Material material in renderer.r.materials) {
-			if (material.IsKeywordEnabled(DIMENSION_OBJECT_KEYWORD) != value) {
-				if (value) {
-					material.EnableKeyword(DIMENSION_OBJECT_KEYWORD);
-				}
-				else {
-					material.DisableKeyword(DIMENSION_OBJECT_KEYWORD);
-				}
+		if (colliders != null) {
+			foreach (Collider collider in colliders) {
+				DimensionObjectManager.UnregisterCollider(collider, this);
 			}
 		}
 	}
@@ -464,7 +389,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
 			
 			// Children who have DimensionObject scripts are treated on only by their own settings
-			if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
+			if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasChannelOverlapWith(dimObj)) return;
 
 			result.AddRange(parent.GetComponents<Collider>());
 
@@ -505,7 +430,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
 		
 		// Children who have DimensionObject scripts are treated on only by their own settings
-		if (parent != transform && ignoreChildrenWithDimensionObject && parent.GetComponent<DimensionObject>() != null) return;
+		if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasChannelOverlapWith(dimObj)) return;
 
 		SuperspectiveRenderer thisRenderer = parent.GetComponent<SuperspectiveRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
@@ -532,28 +457,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	// Channel Logic //
 	///////////////////
 #region Channel Logic
-	public bool useAdvancedChannelLogic = false;
-	public string channelLogic = "";
-	float[] maskRenderSolution;
 	
-	void SetChannelValuesInMaterials(bool turnOn = true) {
-		foreach (var r in renderers) {
-			if (useAdvancedChannelLogic) {
-				if (maskRenderSolution == null) {
-					ValidateAndApplyChannelLogic();
-				}
-
-				foreach (var material in r.GetMaterials()) {
-					material.EnableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
-				}
-				r.SetFloatArray("_AcceptableMaskValues", maskRenderSolution);
-			}
-			else {
-				foreach (var material in r.GetMaterials()) {
-					material.DisableKeyword("USE_ADVANCED_CHANNEL_LOGIC");
-				}
-				r.SetInt("_Channel", turnOn ? channel : NUM_CHANNELS);
-			}
+	void InitializeMaskSolution() {
+		if (!EffectiveMaskSolution.HasBitmaskSet) {
+			ValidateAndApplyChannelLogic();
 		}
 	}
 
@@ -628,29 +535,36 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	
 	[Button("Apply boolean expression")]
 	public void ValidateAndApplyChannelLogic() {
-		BooleanExpressionStream validationStream = new BooleanExpressionStream(channelLogic);
-		List<string> booleanExpressionSymbols = new List<string>();
-		List<string> postfixBooleanExpression = new List<string>();
-		try {
-			string nextSymbol = validationStream.Next();
-			while (nextSymbol != "") {
-				booleanExpressionSymbols.Add(nextSymbol);
-				nextSymbol = validationStream.Next();
+		if (useAdvancedChannelLogic) {
+			BooleanExpressionStream validationStream = new BooleanExpressionStream(channelLogic);
+			List<string> booleanExpressionSymbols = new List<string>();
+			List<string> postfixBooleanExpression = new List<string>();
+			try {
+				string nextSymbol = validationStream.Next();
+				while (nextSymbol != "") {
+					booleanExpressionSymbols.Add(nextSymbol);
+					nextSymbol = validationStream.Next();
+				}
+
+				postfixBooleanExpression = InfixToPostfix(booleanExpressionSymbols);
+			}
+			catch (Exception e) {
+				Debug.LogError($"Invalid boolean expression string: {e}");
 			}
 
-			postfixBooleanExpression = InfixToPostfix(booleanExpressionSymbols);
+			ApplyBooleanExpression(postfixBooleanExpression);
 		}
-		catch (Exception e) {
-			Debug.LogError($"Invalid boolean expression string: {e}");
+		else {
+			maskSolution = new DimensionObjectBitmask(channel);
+			inverseMaskSolution = ~maskSolution;
 		}
-
-		ApplyBooleanExpression(postfixBooleanExpression);
 	}
 
 	void ApplyBooleanExpression(List<string> postfixExpression) {
-		maskRenderSolution = SolutionArrayFromPostfixExpression(postfixExpression);
-		string solutionLog = string.Join("\n", maskRenderSolution.Select((value, index) => $"{index}\t| {value}"));
-		//Debug.Log($"Boolean channel expression applied to {gameObject.name}.\n{solutionLog}");
+		maskSolution = new DimensionObjectBitmask(SolutionArrayFromPostfixExpression(postfixExpression));
+		inverseMaskSolution = ~maskSolution;
+		
+		debug.Log($"Boolean channel expression applied to {gameObject.name}.\n{maskSolution.DebugPrettyPrint()}");
 	}
 
 	public static List<string> InfixToPostfix(List<string> infix) {
@@ -702,9 +616,9 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	/// each entry is a 1 if the mask value would pass the boolean expression, and 0 otherwise
 	/// </summary>
 	/// <param name="postfixExpression">Boolean expression in postfix form</param>
-	/// <returns>Int array of size NUM_CHANNELS^2 with 1 or 0 in each cell</returns>
-	public static float[] SolutionArrayFromPostfixExpression(List<string> postfixExpression) {
-		float[] solution = new float[1 << NUM_CHANNELS];
+	/// <returns>Int array of size 2^NUM_CHANNELS with 1 or 0 in each cell</returns>
+	public static int[] SolutionArrayFromPostfixExpression(List<string> postfixExpression) {
+		int[] solution = new int[1 << NUM_CHANNELS];
 		// Run the boolean expression for every possible mask value
 		for (int i = 0; i < solution.Length; i++) {
 			Stack<bool> evaluationStack = new Stack<bool>();
@@ -757,7 +671,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		int channel;
 		bool reverseVisibilityStates;
 		bool ignorePartiallyVisibleLayerChanges;
-		int curDimensionSetInMaterial;
 
 		int startingVisibilityState;
 		public int visibilityState;
@@ -770,7 +683,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			this.channel = dimensionObj.channel;
 			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
 			this.ignorePartiallyVisibleLayerChanges = dimensionObj.ignorePartiallyVisibleLayerChanges;
-			this.curDimensionSetInMaterial = dimensionObj.curDimensionSetInMaterial;
 			this.startingVisibilityState = (int)dimensionObj.startingVisibilityState;
 			this.visibilityState = (int)dimensionObj.visibilityState;
 		}
@@ -783,7 +695,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			dimensionObj.channel = this.channel;
 			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
 			dimensionObj.ignorePartiallyVisibleLayerChanges = this.ignorePartiallyVisibleLayerChanges;
-			dimensionObj.curDimensionSetInMaterial = this.curDimensionSetInMaterial;
 			dimensionObj.startingVisibilityState = (VisibilityState)this.startingVisibilityState;
 			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;
 

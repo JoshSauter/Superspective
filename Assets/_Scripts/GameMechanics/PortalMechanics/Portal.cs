@@ -136,7 +136,8 @@ namespace PortalMechanics {
 		private float volumetricPortalThickness = 1f;
 		public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
 
-		private bool VolumetricPortalsShouldBeEnabled => PlayerRemainsInPortal;
+		public static bool forceVolumetricPortalsOn = false;
+		private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn || PlayerRemainsInPortal;
 
 		public Vector3 IntoPortalVector {
 			get {
@@ -340,7 +341,7 @@ namespace PortalMechanics {
 			gameObject.layer = SuperspectivePhysics.PortalLayer;
 			foreach (var r in renderers) {
 				r.gameObject.layer = SuperspectivePhysics.PortalLayer;
-				r.SetMaterial(PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
+				r.SetSharedMaterial(PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
 				if (changeScale) {
 					r.SetFloat("_PortalScaleFactor", scaleFactor);
 				}
@@ -483,7 +484,7 @@ namespace PortalMechanics {
 						.GetOrAddComponent<SuperspectiveRenderer>();
 
 					vp.enabled = false;
-					vp.SetMaterial(r.r.sharedMaterial);
+					vp.SetSharedMaterial(r.r.sharedMaterial);
 					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
 					volumetricPortalsList.Add(vp);
 				}
@@ -562,7 +563,6 @@ namespace PortalMechanics {
 			base.Start();
 
 			if (dimensionObject != null) {
-				dimensionObject.SetStartingLayersFromCurrentLayers();
 				dimensionObject.ignorePartiallyVisibleLayerChanges = true;
 			}
 			
@@ -817,11 +817,11 @@ namespace PortalMechanics {
 			if (!renderers[0].r.sharedMaterial.name.Contains(effectiveMaterial.name)) {
 				debug.LogWarning($"Setting portal material to {effectiveMaterial.name}");
 				foreach (var r in renderers) {
-					r.SetMaterial(effectiveMaterial);
+					r.SetSharedMaterial(effectiveMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.SetMaterial(effectiveMaterial);
+					vp.SetSharedMaterial(effectiveMaterial);
 				}
 			}
 		}
@@ -1034,8 +1034,8 @@ namespace PortalMechanics {
 					// Need to recalculate the camQuadrant of the PillarDimensionObject after teleporting the player
 					var originalQuadrant = otherPortal.pillarDimensionObject.camQuadrant;
 					otherPortal.pillarDimensionObject.DetermineQuadrantForPlayerCam();
-					activePillar.curDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhereThisObjectWouldBeInVisibilityState(v => v == VisibilityState.Visible);
-					activePillar.dimensionWall.UpdateStateForCamera(SuperspectiveScreen.instance.playerCamera);
+					activePillar.curBaseDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhere(v => v == VisibilityState.Visible);
+					activePillar.dimensionWall.UpdateStateForCamera(Cam.Player, activePillar.dimensionWall.RadsOffsetForDimensionWall(Cam.Player.CamPos()));
 					otherPortal.pillarDimensionObject.camQuadrant = originalQuadrant;
 				}
 			}
@@ -1090,11 +1090,14 @@ namespace PortalMechanics {
 		public void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
 			if (anyVolumetricPortalIsDisabled) {
-				debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
+				// Don't spam the console when we have the volumetric portal debug setting on
+				if (!forceVolumetricPortalsOn) {
+					debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
+				}
 				foreach (var vp in volumetricPortals) {
 					if (!PortalRenderingIsEnabled) continue;
 					
-					vp.SetMaterial(portalMaterial);
+					vp.SetSharedMaterial(portalMaterial);
 					vp.enabled = true;
 				}
 			}

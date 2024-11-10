@@ -57,6 +57,7 @@ namespace DeveloperConsole {
                 new ChangeScaleCommand("changeScale"),
                 new HideCullEverythingLayer("hideCullMask"),
                 new ShowTriggers("showTriggers"),
+                new ShowVolumetricPortalsCommand("showVolumetricPortals"),
                 new SetFarClipPlaneCommand("setFarClipPlane"),
             };
             

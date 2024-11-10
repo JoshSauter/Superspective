@@ -351,7 +351,7 @@ MonoBehaviour:
   _SortingLayerID: 0
   _SortingOrder: 0
   m_hasFontAssetChanged: 0
-  m_renderer: {fileID: 2344895159776110139}
+  m_renderer: {fileID: 5388330313500118770}
   m_maskType: 0
 --- !u!1 &2532991954775001283
 GameObject:
@@ -900,7 +900,7 @@ MonoBehaviour:
   autoLayout:
     Axis: 1
     Spacing:
-      Raw: 0
+      Raw: 2
       Type: 0
     SpacingMinMax:
       Min: 0
@@ -1559,12 +1559,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visuals:
-    rid: 7166771079302348847
+    rid: 8647374355792396308
   references:
     version: 2
     RefIds:
-    - rid: 7166771079302348847
-      type: {class: KeybindVisuals, ns: , asm: Assembly-CSharp}
+    - rid: 8647374355792396308
+      type: {class: KeybindVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
       data:
         keybind: {fileID: 7174216484528739020}
         Name: {fileID: 8401306280062011151}
@@ -1582,7 +1582,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc9a3fb6858a55d46890921747fac037, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ResetButton: {fileID: 0}
+  ResetButton: {fileID: 1299865090496414930}
 --- !u!1 &8401306280062010984
 GameObject:
   m_ObjectHideFlags: 0
@@ -1879,7 +1879,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8401306280062010998}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.021255, y: 0, z: 0}
+  m_LocalPosition: {x: 35.021255, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2066,7 +2066,7 @@ MonoBehaviour:
     ReceiveShadows: 1
   PreviewSize: {x: 1, y: 1, z: 0}
   visuals:
-    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.3}
+    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.29803923}
     CornerRadius:
       Raw: 0.025
       Type: 1
@@ -2158,13 +2158,11 @@ MonoBehaviour:
   clickState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   hoverState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   BackgroundUIBlock: {fileID: 8401306280062011273}
   novaInteractable: {fileID: 8401306280062011245}
   OtherUIBlocks: []
@@ -2199,7 +2197,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8846114346624259251}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 59.021255, y: 0, z: 0}
+  m_LocalPosition: {x: 63.021255, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2246,7 +2244,7 @@ MonoBehaviour:
         Type: 0
     Position:
       X:
-        Raw: 107.77126
+        Raw: 111.77126
         Type: 0
       Y:
         Raw: 0
@@ -2386,7 +2384,7 @@ MonoBehaviour:
     ReceiveShadows: 1
   PreviewSize: {x: 1, y: 1, z: 0}
   visuals:
-    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.3}
+    Color: {r: 0.64411765, g: 0.6117647, b: 0.62058824, a: 0.29803923}
     CornerRadius:
       Raw: 0.025
       Type: 1
@@ -2478,13 +2476,11 @@ MonoBehaviour:
   clickState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   hoverState:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   BackgroundUIBlock: {fileID: 1742076701082184351}
   novaInteractable: {fileID: 5884206769140213492}
   OtherUIBlocks: []
@@ -2512,7 +2508,12 @@ PrefabInstance:
     - target: {fileID: 6518141571374555865, guid: caa55f10cd376eb44988d1a04d3b676e,
         type: 3}
       propertyPath: layout.Position.X.Raw
-      value: 133.77127
+      value: 139.77127
+      objectReference: {fileID: 0}
+    - target: {fileID: 6518141571374555865, guid: caa55f10cd376eb44988d1a04d3b676e,
+        type: 3}
+      propertyPath: layout.Margin.Left.Raw
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6718135279191152624, guid: caa55f10cd376eb44988d1a04d3b676e,
         type: 3}
@@ -2522,7 +2523,7 @@ PrefabInstance:
     - target: {fileID: 6718135279191152624, guid: caa55f10cd376eb44988d1a04d3b676e,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 80.02126
+      value: 86.02126
       objectReference: {fileID: 0}
     - target: {fileID: 6718135279191152624, guid: caa55f10cd376eb44988d1a04d3b676e,
         type: 3}
@@ -2584,6 +2585,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: caa55f10cd376eb44988d1a04d3b676e, type: 3}
+--- !u!114 &1299865090496414930 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1292294502001792519, guid: caa55f10cd376eb44988d1a04d3b676e,
+    type: 3}
+  m_PrefabInstance: {fileID: 280678282288534229}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32c9c4a037ed80544aed3d729dff1964, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &6836102598820152613 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6718135279191152624, guid: caa55f10cd376eb44988d1a04d3b676e,

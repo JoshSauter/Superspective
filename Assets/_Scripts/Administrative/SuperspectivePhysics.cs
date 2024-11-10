@@ -8,9 +8,54 @@ using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine;
 
+public readonly struct ColliderPair : IEquatable<ColliderPair> {
+	public readonly Collider col1;
+	public readonly Collider col2;
+
+	public bool IsValid => col1 != null && col2 != null;
+	
+	public ColliderPair(Collider col1, Collider col2) {
+		this.col1 = col1;
+		this.col2 = col2;
+	}
+
+	public bool Equals(ColliderPair other) {
+		return (this.col1 == other.col1 && this.col2 == other.col2) ||
+		       (this.col2 == other.col1 && this.col1 == other.col2);
+	}
+
+	public override bool Equals(System.Object obj) {
+		//Check for null and compare run-time types.
+		if ((obj == null) || this.GetType() != obj.GetType()) {
+			return false;
+		}
+		else {
+			return Equals((ColliderPair)obj);
+		}
+	}
+
+	public static bool operator ==(ColliderPair pair1, ColliderPair pair2) {
+		return pair1.Equals(pair2);
+	}
+
+	public static bool operator !=(ColliderPair pair1, ColliderPair pair2) {
+		return !(pair1 == pair2);
+	}
+
+	public override int GetHashCode() {
+		int a = col1.GetHashCode();
+		int b = col2.GetHashCode();
+		int smaller = a < b ? a : b;
+		int larger = a < b ? b : a;
+
+		return $"{smaller}_{larger}".GetHashCode();
+	}
+}
+
 public static class SuperspectivePhysics {
 	private static readonly Vector3 originalGravity = Physics.gravity;
 
+#region Layers
 	private static int _defaultLayer = -1;
 	private static int _visibleButNoPlayerCollisionLayer = -1;
 	private static int _ignoreRaycastLayer = -1;
@@ -41,7 +86,7 @@ public static class SuperspectivePhysics {
 	public static int VisibilityMaskLayer => LazyLayer(ref _visibilityMaskLayer, "VisibilityMask");
 	public static int PortalLayer => LazyLayer(ref _portalLayer, "Portal");
 	public static int HideFromPortalLayer => LazyLayer(ref _hideFromPortalRendering, "HideFromPortalRendering");
-	public static int VolumetricPortalLayer => LazyLayer(ref _hideFromPortalRendering, "VolumetricPortal");
+	public static int VolumetricPortalLayer => LazyLayer(ref _volumetricPortalLayer, "VolumetricPortal");
 	public static int PhysicsRaycastLayerMask =>
 		~((1 << IgnoreRaycastLayer) |
 		  (1 << TriggerZoneLayer) |
@@ -49,81 +94,66 @@ public static class SuperspectivePhysics {
 		  (1 << InvisibleLayer) |
 		  (1 << VisibilityMaskLayer) |
 		  (1 << CollideWithPlayerOnlyLayer));
+	
+#endregion
 
-	public readonly struct ColliderPair : IEquatable<ColliderPair> {
-		public readonly Collider col1;
-		public readonly Collider col2;
-
-		public ColliderPair(Collider col1, Collider col2) {
-			this.col1 = col1;
-			this.col2 = col2;
-		}
-
-		public bool Equals(ColliderPair other) {
-			return (this.col1 == other.col1 && this.col2 == other.col2) ||
-			       (this.col2 == other.col1 && this.col1 == other.col2);
-		}
-
-		public override bool Equals(System.Object obj) {
-			//Check for null and compare run-time types.
-			if ((obj == null) || this.GetType() != obj.GetType()) {
-				return false;
-			}
-			else {
-				return Equals((ColliderPair)obj);
-			}
-		}
-
-		public static bool operator ==(ColliderPair pair1, ColliderPair pair2) {
-			return pair1.Equals(pair2);
-		}
-
-		public static bool operator !=(ColliderPair pair1, ColliderPair pair2) {
-			return !(pair1 == pair2);
-		}
-
-		public override int GetHashCode() {
-			int a = col1.GetHashCode();
-			int b = col2.GetHashCode();
-			int smaller = a < b ? a : b;
-			int larger = a < b ? b : a;
-
-			return $"{smaller}_{larger}".GetHashCode();
-		}
-	}
+#region Collisions
 
 	// Colliders ignoring each other -> # times the colliders have been instructed to ignore each other
-	private static readonly Dictionary<ColliderPair, int> ignoredCollisions = new Dictionary<ColliderPair, int>();
+	private static readonly Dictionary<ColliderPair, HashSet<string>> ignoredCollisions = new Dictionary<ColliderPair, HashSet<string>>();
 
 	public static bool CollisionsAreIgnored(Collider collider1, Collider collider2) {
 		ColliderPair pair = new ColliderPair(collider1, collider2);
-		return ignoredCollisions.ContainsKey(pair) && ignoredCollisions[pair] > 0;
+		return ignoredCollisions.ContainsKey(pair) && ignoredCollisions[pair].Count > 0;
 	}
 
-	public static void IgnoreCollision(Collider collider1, Collider collider2) {
+	/// <summary>
+	/// Ignores collisions between two Colliders, identified by a string identifier.
+	/// If multiple sources (given by identifier) ignore the same collision, they must all restore it before it will be restored.
+	/// </summary>
+	/// <param name="collider1">Collider 1</param>
+	/// <param name="collider2">Collider 2</param>
+	/// <param name="identifier">Unique identifier for this source of this collision ignore request</param>
+	public static void IgnoreCollision(Collider collider1, Collider collider2, string identifier) {
 		ColliderPair pair = new ColliderPair(collider1, collider2);
-		if (ignoredCollisions.ContainsKey(pair)) {
-			ignoredCollisions[pair]++;
+		if (ignoredCollisions.TryGetValue(pair, out HashSet<string> ignoredCollisionsForPair)) {
+			ignoredCollisionsForPair.Add(identifier);
 		}
 		else {
+			// if (collider1.FullPath().Contains("Corporeal") && collider2.FullPath().Contains("CubeReceptacle")) {
+			// 	Debug.LogError($"IT HAPPENED.\n{collider1.FullPath()} and {collider2.FullPath()}");
+			// }
+			
 			Physics.IgnoreCollision(pair.col1, pair.col2, true);
-			ignoredCollisions.Add(pair, 1);
+			ignoredCollisions.Add(pair, new HashSet<string>() { identifier });
 		}
 	}
 
-	public static void RestoreCollision(Collider collider1, Collider collider2) {
+	/// <summary>
+	/// Restores a collision between two Colliders that was previously ignored by a specific source.
+	/// If multiple sources (given by identifier) ignore the same collision, they must all restore it before it will be restored.
+	/// </summary>
+	/// <param name="collider1">Collider 1</param>
+	/// <param name="collider2">Collider 2</param>
+	/// <param name="identifier">Unique identifier for this source of this collision restore request</param>
+	public static void RestoreCollision(Collider collider1, Collider collider2, string identifier) {
 		ColliderPair pair = new ColliderPair(collider1, collider2);
 		if (ignoredCollisions.ContainsKey(pair)) {
-			if (ignoredCollisions[pair] <= 1) {
+			ignoredCollisions[pair].Remove(identifier);
+			
+			if (ignoredCollisions[pair].Count == 0) {
 				Physics.IgnoreCollision(pair.col1, pair.col2, false);
 				ignoredCollisions.Remove(pair);
 			}
-			else {
-				ignoredCollisions[pair]--;
-			}
 		}
 	}
 
+	/// <summary>
+	/// Checks if two Colliders are overlapping.
+	/// </summary>
+	/// <param name="c1">Collider 1</param>
+	/// <param name="c2">Collider 2</param>
+	/// <returns>True if the two Colliders overlap, false otherwise</returns>
 	public static bool CollidersOverlap(Collider c1, Collider c2) {
 		// This function isn't typically used for this purpose (hence the two throwaway out arguments),
 		// but it's the best I could find that did a proper check of whether two Colliders would be in contact with each other
@@ -133,7 +163,7 @@ public static class SuperspectivePhysics {
 			out _, out _);
 	}
 
-	public static void ClearAllState() {
+	public static void ClearAllCollisionState() {
 		Physics.gravity = originalGravity;
 
 		foreach (var ignoredCollision in ignoredCollisions.Keys) {
@@ -144,7 +174,42 @@ public static class SuperspectivePhysics {
 		
 		ignoredCollisions.Clear();
 	}
+	
+#if UNITY_EDITOR
+	[MenuItem("My Tools/Superspective Physics/Print Ignored Collider Pairs")]
+	public static void PrintIgnoredColliderPairs() {
+		IgnoredColliderPairsDebugString().ForEach(Debug.Log);
+	}
 
+	[MenuItem("My Tools/Superspective Physics/Print Non-Player Ignored Collider Pairs")]
+	public static void PrintNonPlayerIgnoredColliderPairs() {
+		IgnoredColliderPairsDebugString(
+				(pair) => pair.col1 == Player.instance.collider || pair.col2 == Player.instance.collider)
+			.ForEach(Debug.Log);
+	}
+
+	private static List<string> IgnoredColliderPairsDebugString(Func<ColliderPair, bool> filterOutCondition = null) {
+		string GetDebugString(KeyValuePair<ColliderPair, HashSet<string>> kv) {
+			(ColliderPair pair, HashSet<string> ignoreSources) = kv;
+
+			return $"{pair.col1.FullPath()}\n<>\n{pair.col2.FullPath()}\nTimes Ignored: {ignoreSources.Count}\nIgnored by:\n{string.Join("\n", ignoreSources)}";
+		}
+
+		bool AppliedFilter(KeyValuePair<ColliderPair, HashSet<string>> kv) {
+			ColliderPair pair = kv.Key;
+			// Ignore bad entries for now, may want to change behavior later
+			// Also filter by the filterOutCondition, if provided
+			return !(pair.col1 == null || pair.col2 == null || (filterOutCondition != null && filterOutCondition.Invoke(pair)));
+		}
+
+		return ignoredCollisions.Where(AppliedFilter).Select(GetDebugString).ToList();
+	}
+#endif
+
+#endregion
+
+#region Custom Physics Helpers
+	
 	public static float ShortestDistance(Vector3 p1, Vector3 p2) {
 		return ShortestVectorPointToPoint(p1, p2).magnitude;
 	}
@@ -220,36 +285,7 @@ public static class SuperspectivePhysics {
 		return (directionOfShortestVector * minDistance, minDistancePortal);
 	}
 
-#if UNITY_EDITOR
-	[MenuItem("My Tools/Superspective Physics/Print Ignored Collider Pairs")]
-	public static void PrintIgnoredColliderPairs() {
-		IgnoredColliderPairsDebugString().ForEach(Debug.Log);
-	}
-
-	[MenuItem("My Tools/Superspective Physics/Print Non-Player Ignored Collider Pairs")]
-	public static void PrintNonPlayerIgnoredColliderPairs() {
-		IgnoredColliderPairsDebugString(
-				(pair) => pair.col1 == Player.instance.collider || pair.col2 == Player.instance.collider)
-			.ForEach(Debug.Log);
-	}
-
-	private static List<string> IgnoredColliderPairsDebugString(Func<ColliderPair, bool> filterOutCondition = null) {
-		string GetDebugString(KeyValuePair<ColliderPair, int> kv) {
-			(ColliderPair pair, int timesIgnored) = kv;
-
-			return $"{pair.col1.FullPath()}\n<>\n{pair.col2.FullPath()}\nTimes Ignored: {timesIgnored}\n\n";
-		}
-
-		bool AppliedFilter(KeyValuePair<ColliderPair, int> kv) {
-			ColliderPair pair = kv.Key;
-			// Ignore bad entries for now, may want to change behavior later
-			// Also filter by the filterOutCondition, if provided
-			return !(pair.col1 == null || pair.col2 == null || (filterOutCondition != null && filterOutCondition.Invoke(pair)));
-		}
-
-		return ignoredCollisions.Where(AppliedFilter).Select(GetDebugString).ToList();
-	}
-#endif
+#endregion
 }
 
 public static class RigidbodyExt {

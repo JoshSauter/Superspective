@@ -5,6 +5,7 @@ using Audio;
 using DissolveObjects;
 using GrowShrink;
 using NaughtyAttributes;
+using NovaMenuUI;
 using SuperspectiveUtils;
 using PortalMechanics;
 using Saving;
@@ -333,13 +334,13 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     Vector3 TargetHoldPosition(out SuperspectiveRaycast raycastHits) {
         int ignoreRaycastLayer = SuperspectivePhysics.IgnoreRaycastLayer;
         int layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
-        int tempLayer = gameObject.layer;
-        gameObject.layer = ignoreRaycastLayer;
+        int tempLayer = thisCollider.gameObject.layer;
+        thisCollider.gameObject.layer = ignoreRaycastLayer;
 
         raycastHits = DoRaycast();
         
         Vector3 targetPos = PositionAtFirstObjectOrEndOfRaycast(raycastHits);
-        gameObject.layer = tempLayer;
+        thisCollider.gameObject.layer = tempLayer;
 
         return targetPos;
     }
@@ -348,8 +349,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     (int, int) SetLayerMasks(int layer, int portalCopyLayer = -1) {
         if (portalCopyLayer < 0) portalCopyLayer = layer; // Default to the same layer as the object
             
-        int prevLayer = gameObject.layer;
-        gameObject.layer = layer;
+        int prevLayer = thisCollider.gameObject.layer;
+        thisCollider.gameObject.layer = layer;
 
         int prevLayerPortalCopy = -1;
         if (portalCopyLayer >= 0) {
@@ -380,8 +381,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     }
 
     SuperspectiveRaycast DoRaycast() {
-        Vector3 raycastStartPos = playerCam.position.GetClosestPointOnFiniteLine(Player.instance.movement.BottomOfPlayer, Player.instance.movement.TopOfPlayer);
-        lastRaycast = RaycastUtils.Raycast(raycastStartPos, playerCam.forward, HoldDistance + RadiusOfCircumscribedSphere, SuperspectivePhysics.PhysicsRaycastLayerMask);
+        Vector3 raycastStartPos = Player.instance.AdjustedCamPos;
+        lastRaycast = RaycastUtils.Raycast(raycastStartPos, playerCam.forward, HoldDistance + RadiusOfCircumscribedSphere, SuperspectivePhysics.PhysicsRaycastLayerMask, true);
         return lastRaycast;
     }
 
@@ -465,7 +466,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             PickupSound.basePitch = currentPitch;
             AudioManager.instance.PlayOnGameObject(AudioName.CubePickup, ID, this, true);
             
-            SuperspectivePhysics.IgnoreCollision(thisCollider, Player.instance.collider);
+            SuperspectivePhysics.IgnoreCollision(thisCollider, Player.instance.collider, ID);
 
             OnPickupSimple?.Invoke();
             OnPickup?.Invoke(this);
@@ -490,7 +491,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
             AudioManager.instance.PlayOnGameObject(AudioName.CubeDrop, ID, this, true);
             
-            SuperspectivePhysics.RestoreCollision(thisCollider, Player.instance.collider);
+            SuperspectivePhysics.RestoreCollision(thisCollider, Player.instance.collider, ID);
             
             freezeRotationStateMachine.Set(FreezeRotationState.FreelyRotating);
 
