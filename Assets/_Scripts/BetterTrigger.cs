@@ -14,6 +14,7 @@ public class BetterTrigger : MonoBehaviour {
     public List<BetterTriggers> listeners = new List<BetterTriggers>();
 
     private int SkipLayerChangeBitmask => (1 << SuperspectivePhysics.PortalLayer) | (1 << SuperspectivePhysics.CollideWithPlayerOnlyLayer);
+    
     // Start is called before the first frame update
     void Start() {
         trigger = GetComponent<Collider>();

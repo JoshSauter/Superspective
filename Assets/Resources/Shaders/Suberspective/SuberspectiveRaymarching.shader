@@ -47,76 +47,12 @@
             #pragma fragment frag
 
             #include "SuberspectiveHelpers.cginc"
+            #include "../Raymarching/RaymarchingUtils.cginc"
 
 			sampler2D _BumpMap;
 			float _EmissionAmount;
 
             #define MAX_STEPS 50
-            
-            fixed hash( fixed n ) { return frac(sin(n)*753.5453123); }
-            fixed4 noised( in fixed3 x ) {
-                fixed3 p = floor(x);
-                fixed3 w = frac(x);
-                fixed3 u = w*w*(3.0-2.0*w);
-                fixed3 du = 6.0*w*(1.0-w);
-                
-                fixed n = p.x + p.y*157.0 + 113.0*p.z;
-                
-                fixed a = hash(n+  0.0);
-                fixed b = hash(n+  1.0);
-                fixed c = hash(n+157.0);
-                fixed d = hash(n+158.0);
-                fixed e = hash(n+113.0);
-                fixed f = hash(n+114.0);
-                fixed g = hash(n+270.0);
-                fixed h = hash(n+271.0);
-                
-                fixed k0 =   a;
-                fixed k1 =   b - a;
-                fixed k2 =   c - a;
-                fixed k3 =   e - a;
-                fixed k4 =   a - b - c + d;
-                fixed k5 =   a - c - e + g;
-                fixed k6 =   a - b - e + f;
-                fixed k7 = - a + b + c - d + e - f - g + h;
-
-                return fixed4( k0 + k1*u.x + k2*u.y + k3*u.z + k4*u.x*u.y + k5*u.y*u.z + k6*u.z*u.x + k7*u.x*u.y*u.z, 
-                             du * (fixed3(k1,k2,k3) + u.yzx*fixed3(k4,k5,k6) + u.zxy*fixed3(k6,k4,k5) + k7*u.yzx*u.zxy ));
-            }
-            
-            float3 repeat(float3 pos, float3 repetition) {
-                return fmod(abs(pos), repetition) - 0.5*repetition;
-            }
-            
-            float3 repeatRegular(float3 pos, float regularRepetition) {
-                return repeat(pos, float3(regularRepetition, regularRepetition, regularRepetition));
-            }
-            
-            float boxSDF(float3 pos, float3 bounds) {
-                float3 diff = abs(pos) - bounds;
-                return length(max(diff, 0.0)) + min(max(diff.x, max(diff.y, diff.z)), 0.0);
-            }
-            
-            float sphereSDF(float3 pos, float radius) {
-                return length(pos) - radius;
-            }
-            
-            float unionSDF(float p1, float p2) {
-                return min(p1, p2);
-            }
-            
-            float intersectionSDF(float p1, float p2) {
-                return max(p1, p2);
-            }
-            
-            float diffSDF(float p1, float p2) {
-                return max(-p2, p1);
-            }
-            
-            float smoothIntersectionSDF( float d1, float d2, float k ) {
-                float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
-                return lerp( d2, d1, h ) + k*h*(1.0-h);
-            }
             
             float worldSDF(in float3 pos) {
                 //float sphere = sphereSDF(repeatRegular(pos, 96), (1 + 0.5 * _SinTime.z) * 56);
@@ -154,26 +90,16 @@
                 return smoothIntersectionSDF(cubes, sphere, .5);
             }
 
+            #define SDF(p) worldSDF(p)
+            #include "../Raymarching/RaymarchingMacros.cginc"
+
             fixed4 frag (SuberspectiveV2F i) : SV_Target {
-                float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
             	SuberspectiveClipOnly(i);
-                float depth = 100;
-                float end = 400 + depth;
-                for (int x = 0; x < MAX_STEPS && depth < end; x++) {
-                    float3 position = i.worldPos + depth * viewDirection;
-                    float sdfValue = worldSDF(position);
-                    if (sdfValue < .001) {
-                        float col = 1.0 - (x / (float)MAX_STEPS);
-                        //return col * normalize(noised(position/256));
-                        //return col * fixed4(position.x,position.y,(-position.x - position.y) / 2.0,1);
-                    	col = smoothstep(0.0,1.0,col);
-                        return (1-fixed4(col, col, col, 1));// * (1-_Color);
-                    }
-                    
-                    depth += sdfValue + .001;
-                }
-                
-                return 1-fixed4(0,0,0,0);
+            	fixed4 raymarchingResult = Raymarch(MAX_STEPS, i.worldPos, 100, 400) * _Color;
+            	fixed shadow = raymarchingResult.a;
+            	fixed4 col = (raymarchingResult.r * _Color) * (1-shadow);
+
+            	return col;
             }
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -265,12 +191,14 @@
 			}
 
 
+            // This one looks like fractal grass or something, may want to use later:
 			fixed4 frag2(SuberspectiveV2F i) : SV_Target {
                 float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
                 float depth = 0;
                 float end = 400 + depth;
 
-				return float4(intersect(i.worldPos, viewDirection), 0);
+				fixed4 col = float4(intersect(i.worldPos, viewDirection), 0);
+				return fixed4(col.r * .15, col.g, col.b * 0.25, col.a);
                 //for (int x = 0; x < MAX_STEPS && depth < end; x++) {
                 //    float3 position = i.worldPos + depth * viewDirection;
                 //    float sdfValue = worldSDF(position);

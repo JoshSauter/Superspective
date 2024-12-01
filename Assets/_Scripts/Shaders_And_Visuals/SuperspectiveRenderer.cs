@@ -8,6 +8,16 @@ using NaughtyAttributes;
 
 [RequireComponent(typeof(Renderer))]
 public class SuperspectiveRenderer : MonoBehaviour {
+#region Events
+
+	public delegate void MaterialChangedAction(Material newMaterial);
+	public delegate void MaterialsChangedAction(Material[] newMaterials);
+	
+	public MaterialChangedAction OnMaterialChanged;
+	public MaterialsChangedAction OnMaterialsChanged;
+#endregion
+	
+	
 	public enum PropBlockType {
 		ShaderKeyword,
 		Color,
@@ -88,6 +98,9 @@ public class SuperspectiveRenderer : MonoBehaviour {
 		if (keepMainColor) {
 			SetMainColor(prevColor);
 		}
+		
+		OnMaterialChanged?.Invoke(newMaterial);
+		OnMaterialsChanged?.Invoke(new Material[] {newMaterial});
 	}
 
 	public void SetSharedMaterials(Material[] newMaterials, bool keepMainColor = true) {
@@ -97,6 +110,11 @@ public class SuperspectiveRenderer : MonoBehaviour {
 
 		if (keepMainColor) {
 			SetMainColor(prevColor);
+		}
+		
+		OnMaterialsChanged?.Invoke(newMaterials);
+		if (newMaterials.Length == 1) {
+			OnMaterialChanged?.Invoke(newMaterials[0]);
 		}
 	}
 

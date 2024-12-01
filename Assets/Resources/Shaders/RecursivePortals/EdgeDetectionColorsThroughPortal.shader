@@ -64,6 +64,8 @@
 			}
 
 			fixed4 FinalColor(float depth, float3 ray) {
+				//return fixed4(_ColorMode == 0, _ColorMode == 1, _ColorMode == 2, 1);
+            	
 				fixed4 edgeColor = fixed4(0,0,0,0);
             	// distance doesn't work with Portals for some reason, use depth instead for approximation
 				float distance = depth;//saturate((length(ray * depth) - _ProjectionParams.y) / _ProjectionParams.z);

@@ -98,7 +98,7 @@ namespace GrowShrink {
             if (!inPortal.changeScale) return;
             
             if (objTeleported == thisRigidbody.GetComponent<Collider>()) {
-                SetScaleDirectly(CurrentScale * inPortal.ScaleFactor);
+                SetScaleDirectly(CurrentScale * inPortal.ScaleFactor, false);
                 minScale *= inPortal.ScaleFactor;
                 maxScale *= inPortal.ScaleFactor;
             }
@@ -147,33 +147,39 @@ namespace GrowShrink {
             SetScaleDirectly(targetScale);
         }
 
-        public void SetScaleDirectly(float targetScale) {
+        public void SetScaleDirectly(float targetScale, bool adjustPlayerPosition = true) {
             // Debug.LogWarning($"{ID}: SetScaleDirectly: setting scale to {targetScale} from {currentScale}");
             float targetScaleClamped = Mathf.Clamp01(targetScale);
-            Vector3 scaleWithoutMultiplier = transform.localScale / CurrentScale;
-            transform.localScale = scaleWithoutMultiplier * targetScale;
+            // Calculate scale change ratio
+            float scaleChangeRatio = targetScale / CurrentScale;
+            transform.localScale *= scaleChangeRatio;
 
             if (thisRigidbody != null) {
-                // Technically square-cube law should apply but we're not going to worry about that
-                float massWithoutMultiplier = thisRigidbody.mass / CurrentScale;
-                thisRigidbody.mass = massWithoutMultiplier * targetScale;
+                // Technically square-cube law should apply, but we're not going to worry about that
+                thisRigidbody.mass *= scaleChangeRatio;
 
                 if (!thisRigidbody.isKinematic) {
-                    Vector3 velocityWithoutMultiplier = thisRigidbody.velocity / CurrentScale;
-                    thisRigidbody.velocity = velocityWithoutMultiplier * targetScale;
+                    thisRigidbody.velocity *= scaleChangeRatio;
                 }
             }
 
             if (this.TaggedAsPlayer()) {
-                Vector3 gravityWithoutMultiplier = Physics.gravity / CurrentScale;
-                Physics.gravity = gravityWithoutMultiplier * targetScale;
+                Physics.gravity *= scaleChangeRatio;
 
-                Vector3 lastGroundVelocityWithoutMultiplier = PlayerMovement.instance.groundMovement.lastGroundVelocity / CurrentScale;
-                PlayerMovement.instance.groundMovement.lastGroundVelocity = lastGroundVelocityWithoutMultiplier * targetScale;
+                if (adjustPlayerPosition) {
+                    // When the player's scale changes, we need to move the player up or down so that the player's feet stay on the ground
+                    Vector3 topOfPlayer = Player.instance.movement.TopOfPlayer;
+                    Vector3 bottomOfPlayer = Player.instance.movement.BottomOfPlayer;
+                    float offsetMultiplier = Utils.Vector3InverseLerp(bottomOfPlayer, topOfPlayer, Player.instance.transform.position);
+                    float playerHeight = (topOfPlayer - bottomOfPlayer).magnitude;
+                    float verticalOffset = (scaleChangeRatio - 1) * playerHeight * offsetMultiplier;
+                    Player.instance.transform.position += Player.instance.transform.up * verticalOffset;
+                }
+
+                PlayerMovement.instance.groundMovement.lastGroundVelocity *= scaleChangeRatio;
             }
             else if (thisGravityObj != null) {
-                float gravityMagnitudeWithoutMultiplier = thisGravityObj.gravityMagnitude / CurrentScale;
-                thisGravityObj.gravityMagnitude = gravityMagnitudeWithoutMultiplier * targetScale;
+                thisGravityObj.gravityMagnitude *= scaleChangeRatio;
             }
 
             CurrentScale = targetScale;

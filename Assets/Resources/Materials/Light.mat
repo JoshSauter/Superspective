@@ -86,6 +86,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DiffuseMagnitude: 0.065
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
@@ -120,7 +121,7 @@ Material:
     - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
     - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
-    - _EmissionColor: {r: 1.1979221, g: 1.3975757, b: 1.4142135, a: 1}
+    - _EmissionColor: {r: 1.4576149, g: 1.7005507, b: 1.7207953, a: 1}
     - _EndColor: {r: 1, g: 1, b: 1, a: 1}
     - _MaxRenderZone: {r: 0, g: 0, b: 0, a: 1}
     - _MinRenderZone: {r: 0, g: 0, b: 0, a: 1}

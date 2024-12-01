@@ -87,16 +87,16 @@ EditorBuildSettings:
     path: Assets/__Scenes/_Fork_Cathedral_Tutorial.unity
     guid: c71c7f54e8aca7b4eb1647b2068c2a77
   - enabled: 1
-    path: Assets/__Scenes/_GrowShrinkIntro.unity
+    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntro.unity
     guid: 1d418f6f1bb8d8541846171806d5f724
   - enabled: 1
     path: Assets/__Scenes/__TitleCard.unity
     guid: 3e9f0103632db3047a4c4816312e0ae8
   - enabled: 1
-    path: Assets/__Scenes/_GrowShrinkIntroDarkSide.unity
+    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntroDarkSide.unity
     guid: 7d15e4f6d02b4c243b793251276bc8a0
   - enabled: 1
-    path: Assets/__Scenes/_GrowShrinkIntroBetweenWorlds.unity
+    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntroBetweenWorlds.unity
     guid: f7b848d1cf8fca147bdcb840c4e24484
   - enabled: 1
     path: Assets/__Scenes/_TransitionWhiteRoom3GrowShrinkIntro.unity
@@ -107,4 +107,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_GrowShrink2.unity
     guid: 1e2c2dfdea77a854a98afd75a799251d
+  - enabled: 1
+    path: Assets/__Scenes/Ascension/_Ascension0.unity
+    guid: a65961a6ece1cc8468888ae52384aa6d
   m_configObjects: {}

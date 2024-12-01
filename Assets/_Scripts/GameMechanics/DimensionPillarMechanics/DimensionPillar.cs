@@ -39,9 +39,16 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 
 	public int heightOverride = -1;
 	public bool HeightOverridden => heightOverride != -1;
+	
+	public Renderer pillarRenderer;
 
 	protected override void Awake() {
 		base.Awake();
+		
+		if (pillarRenderer == null) {
+			pillarRenderer = GetComponent<Renderer>();
+		}
+		
 		InitializeDimensionWall();
 		if (!allPillars.ContainsKey(ID)) {
 			allPillars.Add(ID, this);

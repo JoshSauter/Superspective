@@ -12,14 +12,6 @@ CGINCLUDE
 #define UNITY_BUILT_IN_COLOR
 #include "Suberspective/SuberspectiveHelpers.cginc"
 
-uniform float4x4 _PortalScalingMatrix;
-
-inline float3 SuperspectiveObjectToViewPos(in float3 pos) {
-	return mul(_PortalScalingMatrix, mul(UNITY_MATRIX_V, mul(unity_ObjectToWorld, float4(pos, 1.0)))).xyz;
-}
-
-#define SUPERSPECTIVE_COMPUTE_DEPTH_01 -(SuperspectiveObjectToViewPos( v.vertex ).z * _ProjectionParams.w)
-
 struct SuberspectiveDepthNormalsV2F {
 	float4 clipPos : SV_POSITION;
 	float4 nz : TEXCOORD0;

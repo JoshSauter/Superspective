@@ -1,6 +1,8 @@
 using LevelManagement;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 public class SelectSceneTool : EditorWindow {
     private static Levels selectedLevel = Levels.ManagerScene;  // Default selection
@@ -47,6 +49,7 @@ public class SelectSceneTool : EditorWindow {
     private void OpenSelectedScene() {
         LevelManager.instance.startingScene = selectedLevel;
         LevelManager.instance.ChangeLevelInEditor();
+        EditorSceneManager.MarkSceneDirty(LevelManager.instance.gameObject.scene);
     }
 
     private void OpenAllScenes() {

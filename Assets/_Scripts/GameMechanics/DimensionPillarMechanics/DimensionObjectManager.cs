@@ -11,7 +11,7 @@ namespace DimensionObjectMechanics {
     public class DimensionObjectManager : Singleton<DimensionObjectManager> {
         private const string DIMENSION_OBJECT_KEYWORD = "DIMENSION_OBJECT";
         private const string MASK_SOLUTION_PROPERTY_KEY = "_MaskSolution";
-        private const string DIMENSION_OBJECT_SUFFIX = " (DimensionObject)";
+        public const string DIMENSION_OBJECT_SUFFIX = " (DimensionObject)";
         
         // We use these to keep track of which DimensionObjects are affecting which colliders and renderers.
         // This way, we can figure out exactly how each renderer and collider
@@ -160,29 +160,33 @@ namespace DimensionObjectMechanics {
             Material[] dimensionMaterials = new Material[sharedMaterials.Length];
             for (int i = 0; i < sharedMaterials.Length; i++) {
                 Material originalMaterial = sharedMaterials[i];
-                
-                if (originalMaterial.name.Contains(DIMENSION_OBJECT_SUFFIX)) {
-                    // If this material is already a DimensionObject material, we don't need to do anything
-                    dimensionMaterials[i] = originalMaterial;
-                    continue;
-                }
-                
-                // Check our cache to see if we've already created a material for this original material
-                if (dimensionObjectMaterials.TryGetValue(originalMaterial, out Material dimensionObjectMaterial)) {
-                    r.SetSharedMaterial(dimensionObjectMaterial);
-                }
-                else {
-                    // If we haven't created a material for this original material yet, create one now and set the DIMENSION_OBJECT keyword
-                    dimensionObjectMaterial = new Material(originalMaterial);
-                    dimensionObjectMaterial.name += DIMENSION_OBJECT_SUFFIX;
-                    dimensionObjectMaterial.EnableKeyword(DIMENSION_OBJECT_KEYWORD);
-                    dimensionObjectMaterials[originalMaterial] = dimensionObjectMaterial;
-                }
-
-                dimensionMaterials[i] = dimensionObjectMaterial;
+                dimensionMaterials[i] = GetOrCreateDimensionObjectMaterial(originalMaterial);
             }
-            r.SetSharedMaterials(dimensionMaterials);
+            r.SetSharedMaterials(dimensionMaterials, false);
             r.SetFloatArray(MASK_SOLUTION_PROPERTY_KEY, bitmask.ShaderData);
+        }
+
+        /// <summary>
+        /// Get or create a DimensionObject Material for a given original Material
+        /// </summary>
+        /// <param name="originalMaterial">The original Material to get or create a DimensionObject version of</param>
+        /// <returns>A shared Material based on the original Material with the DIMENSION_OBJECT keyword enabled</returns>
+        public Material GetOrCreateDimensionObjectMaterial(Material originalMaterial) {
+            if (originalMaterial.name.Contains(DIMENSION_OBJECT_SUFFIX)) {
+                // If this material is already a DimensionObject material, we don't need to do anything
+                return originalMaterial;
+            }
+                
+            // Check our cache to see if we've already created a material for this original material
+            if (!dimensionObjectMaterials.TryGetValue(originalMaterial, out Material dimensionObjectMaterial)) {
+                // If we haven't created a material for this original material yet, create one now and set the DIMENSION_OBJECT keyword
+                dimensionObjectMaterial = new Material(originalMaterial);
+                dimensionObjectMaterial.name += DIMENSION_OBJECT_SUFFIX;
+                dimensionObjectMaterial.EnableKeyword(DIMENSION_OBJECT_KEYWORD);
+                return dimensionObjectMaterial;
+            }
+
+            return dimensionObjectMaterial;
         }
 
         /// <summary>
@@ -408,6 +412,7 @@ namespace DimensionObjectMechanics {
     }
 }
 
+#region Collisions Cache
 public enum CollisionCacheValue {
     NotCached,
     CollisionIgnored,
@@ -470,6 +475,7 @@ public class CollisionsCache {
         }
     }
 }
+#endregion
 
 // Custom data structure that combines the functionality of a List and a HashSet for fast lookup and iteration
 // Tradeoff is it's slightly slower for some operations like removal

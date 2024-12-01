@@ -6,6 +6,7 @@ using UnityEngine;
 using Saving;
 using SerializableClasses;
 using SuperspectiveUtils;
+using UnityEditor;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
@@ -14,12 +15,12 @@ namespace GrowShrink {
     public class GrowShrinkHallway : SaveableObject<GrowShrinkHallway, GrowShrinkHallway.GrowShrinkHallwayNewSave> {
         public float scaleFactor = 4;
 
-        private GrowShrinkTransitionTrigger effectiveTriggerZone => shrunkTriggerZone ? shrunkTriggerZone : originalTriggerZone;
+        private GrowShrinkTransitionTrigger EffectiveTriggerZone => shrunkTriggerZone ? shrunkTriggerZone : originalTriggerZone;
         public GrowShrinkTransitionTrigger originalTriggerZone;
         [ReadOnly]
         public ProBuilderMesh[] pbMeshes;
         [ReadOnly]
-        public ProBuilderMesh targetPbMesh;
+        public ProBuilderMesh[] targetPbMeshes; // One per material
         [ReadOnly]
         public GrowShrinkTransitionTrigger shrunkTriggerZone;
 
@@ -30,22 +31,28 @@ namespace GrowShrink {
 
         string GetId(Collider c) => GrowShrinkTransitionTrigger.GetId(c);
 
+#if UNITY_EDITOR
         // Note to self: If the results of this look fucked up, check that the pivot points for combined mesh & trigger zone hitbox are the same
         [Button("Compile", EButtonEnableMode.Editor)]
         void Compile() {
-            Decompile();
+            Undo.SetCurrentGroupName("Compile GrowShrinkHallway");
+            int compileGroup = Undo.GetCurrentGroup();
+            
+            Decompile(true);
 
-            Vector3 originalScale = transform.localScale;
-            transform.localScale = Vector3.one;
 #region Vertex Transformation Methods
-            Vector3 pivotAxis;
-            Vector3 smallSidePointWorld, largeSidePointWorld;
-
-            void SetupTriggerZoneBoundaryFrom(MeshCollider meshCollider) {
-                effectiveTriggerZone.SetupBoundaries(meshCollider);
-                smallSidePointWorld = effectiveTriggerZone.smallSidePointWorld;
-                largeSidePointWorld = effectiveTriggerZone.largeSidePointWorld;
-            }
+            Vector3 pivotAxis = (originalTriggerZone.largeSidePointWorld - originalTriggerZone.smallSidePointWorld).normalized;
+            
+            Undo.RecordObject(this, "GrowShrinkHallway: Set Trigger Zone Boundaries");
+            Undo.RecordObject(EffectiveTriggerZone, "GrowShrinkHallway: Set Trigger Zone Boundaries");
+            EffectiveTriggerZone.SetupBoundaries(originalTriggerZone.MeshCollider);
+            Vector3 smallSidePointWorld = EffectiveTriggerZone.smallSidePointWorld;
+            Vector3 largeSidePointWorld = EffectiveTriggerZone.largeSidePointWorld;
+            float logScaleFactor = Mathf.Log(scaleFactor);
+            
+            float originalLength = (largeSidePointWorld - smallSidePointWorld).magnitude;
+            float resultingLengthOfHallway = (largeSidePointWorld - smallSidePointWorld).magnitude * (logScaleFactor / (scaleFactor - 1));
+            float lengthRatio = resultingLengthOfHallway / originalLength;
             
             // Takes in a world position and returns the world position closest to it along the pivot line
             Vector3 PivotPoint(Vector3 sample) {
@@ -55,7 +62,41 @@ namespace GrowShrink {
                 return largeSidePointWorld + pivotAxis * dot;
             }
 
-            Vector3 TransformVertexShrink(Vector3 worldPos) {
+            // Transforms a vertex, bringing it in along the pivot axis, then scaling down the cross-section to the new size
+            Vector3 TransformVertex(Vector3 worldPos) {
+                // Compute the pivot point for this vertex (a reference point along the hallway axis)
+                Vector3 pivotPoint = PivotPoint(worldPos);
+                
+                // Compute normalized position along the hallway (0 = start, 1 = end but can go beyond for further shrinking on e.g. the doorframe at the small side)
+                float t = Mathf.Clamp(Utils.Vector3InverseLerp(largeSidePointWorld, smallSidePointWorld, pivotPoint), 0, float.MaxValue);
+
+                // Compute scale factor at this point
+                float vertexScaleFactor = 1f / (1 + t * (scaleFactor - 1));
+                
+                // Yay, integrals:
+                float scaledLengthAtT = Mathf.Log(1 + t * (scaleFactor - 1)) / logScaleFactor;
+                float distanceToBringIn = (largeSidePointWorld-smallSidePointWorld).magnitude * (t - scaledLengthAtT * lengthRatio);
+                
+                // Bring the vertex closer or farther along the axis by scaling the distance
+                Vector3 modifiedPivotPoint = pivotPoint + pivotAxis * distanceToBringIn;
+                
+                // Shrink or grow the cross-section in the plane perpendicular to the pivot axis
+                Vector3 sampleToPivot = worldPos - pivotPoint;
+                float unscaledDistance = sampleToPivot.magnitude;
+                float scaledDistance = unscaledDistance * vertexScaleFactor;
+                Vector3 targetPoint = modifiedPivotPoint + sampleToPivot.normalized * scaledDistance;
+
+                if (DEBUG) {
+                    Debug.DrawLine(worldPos, targetPoint, Color.cyan, 5f);
+
+                    float distanceBroughtIn = Vector3.Distance(pivotPoint, modifiedPivotPoint);
+                    debug.Log($"{worldPos:F2} -> {targetPoint:F2}, brought in {distanceBroughtIn:F3} with scalar {vertexScaleFactor:F3}");
+                }
+                
+                return targetPoint;
+            }
+
+            Vector3 TransformVertexShrinkOld(Vector3 worldPos) {
                 Vector3 pivot = PivotPoint(worldPos);
                 float unscaledDistance = Vector3.Distance(worldPos, pivot);
                 float scaledDistance = unscaledDistance / scaleFactor;
@@ -75,7 +116,7 @@ namespace GrowShrink {
                 return vertexWorldPos;
             }
 
-            Vector3 TransformVertexIn(Vector3 worldPos) {
+            Vector3 TransformVertexInOld(Vector3 worldPos) {
                 Vector3 pivot = PivotPoint(worldPos);
                 float t = Mathf.Clamp(Utils.Vector3InverseLerp(largeSidePointWorld, smallSidePointWorld, pivot), 0, float.MaxValue);
                 // debug.Log($"InverseLerp({largeSidePointWorld.x}, {smallSidePointWorld.x}, {pivot.x:F2}) = {t}");
@@ -92,52 +133,97 @@ namespace GrowShrink {
                 return vertexWorldPos;
             }
 #endregion
+            // Destroy the old combined mesh
             if (shrunkTriggerZone != null) {
-                DestroyImmediate(this.shrunkTriggerZone.gameObject);
+                Undo.DestroyObjectImmediate(this.shrunkTriggerZone.gameObject);
+                shrunkTriggerZone = null;
             }
-            if (targetPbMesh != null) {
-                DestroyImmediate(this.targetPbMesh.gameObject);
+            if (targetPbMeshes != null) {
+                foreach (ProBuilderMesh pbMesh in targetPbMeshes) {
+                    Undo.DestroyObjectImmediate(pbMesh.gameObject);
+                }
+                targetPbMeshes = null;
             }
             
-            // Set up CombineMesh gameObject
-            targetPbMesh = ProBuilderMesh.Create();
-            targetPbMesh.transform.position = transform.position;
-            targetPbMesh.transform.rotation = transform.rotation;
-            targetPbMesh.transform.SetParent(transform);
-            targetPbMesh.transform.SetSiblingIndex(0);
-            targetPbMesh.gameObject.name = $"{gameObject.name}_CombinedMesh";
+            // Create a new root for the geometry
+            Transform geometryRoot = new GameObject("Geometry Root").transform;
+            Undo.RegisterCreatedObjectUndo(geometryRoot.gameObject, "GrowShrinkHallway: Create Geometry Root");
+            geometryRoot.SetParent(transform);
+            geometryRoot.SetSiblingIndex(0);
+            geometryRoot.localScale = Vector3.one;
             
+            // Set up CombineMesh gameObjects
+            ProBuilderMesh CreateEmptyTargetPbMesh(Material forMaterial) {
+                ProBuilderMesh targetPbMesh = ProBuilderMesh.Create();
+                Undo.RegisterCreatedObjectUndo(targetPbMesh.gameObject, "GrowShrinkHallway: Create Combined Mesh");
+                Undo.RecordObject(targetPbMesh.transform, "GrowShrinkHallway: Set Combined Mesh Transform");
+                targetPbMesh.transform.position = transform.position;
+                targetPbMesh.transform.rotation = transform.rotation;
+                targetPbMesh.transform.SetParent(geometryRoot);
+                targetPbMesh.transform.SetSiblingIndex(0);
+                targetPbMesh.gameObject.name = $"{gameObject.name}_CombinedMesh_{forMaterial?.name ?? "Shape"}";
+                
+                // This line is needed to prevent a null Material from the new ProBuilderMesh from ending up in the resulting MeshRender materials
+                if (forMaterial != null) {
+                    targetPbMesh.SetMaterial(new List<Face>(), forMaterial);
+                }
+
+                return targetPbMesh;
+            }
+
+            Dictionary<Material, List<ProBuilderMesh>> meshesByMaterial = new Dictionary<Material, List<ProBuilderMesh>>();
+            Dictionary<Material, ProBuilderMesh> targetMeshByMaterial = new Dictionary<Material, ProBuilderMesh>();
             if (PbMeshesNeedToBeSet) {
+                Undo.RecordObject(this, "GrowShrinkHallway: Set PB Meshes");
                 // Get all mesh renderers from children recursively, skipping this gameObject and the triggerZone gameObject
                 pbMeshes = gameObject.GetComponentsInChildrenRecursively<ProBuilderMesh>()
                     .Where(mf => mf.gameObject.activeInHierarchy
                                  && mf.gameObject != this.gameObject
-                                 && mf.gameObject != originalTriggerZone.gameObject
-                                 && mf.gameObject != targetPbMesh.gameObject)
+                                 && mf.gameObject != originalTriggerZone.gameObject)
                     .ToArray();
             }
-
-            var combineMeshes = pbMeshes.Append(targetPbMesh).ToArray();
-
-            var resultMeshes = CombineMeshes.Combine(combineMeshes, targetPbMesh);
-            if (resultMeshes.Count > 1) {
-                Debug.LogError("Multiple result meshes not yet handled");
-                return;
+            
+            // Set up the target meshes for each material
+            foreach (ProBuilderMesh pbMesh in pbMeshes) {
+                Material[] materials = pbMesh.GetComponent<MeshRenderer>().sharedMaterials;
+                if (materials.Length != 1) {
+                    Debug.LogError("ProBuilder mesh has multiple materials. Split the mesh into multiple meshes with one material each.\nProblematic mesh: " + pbMesh.gameObject.name);
+                    Undo.RevertAllInCurrentGroup();
+                    return;
+                }
+                
+                Material material = materials[0];
+                // New material found, create a new target mesh for it
+                if (!meshesByMaterial.ContainsKey(material)) {
+                    meshesByMaterial[material] = new List<ProBuilderMesh>();
+                    targetMeshByMaterial[material] = CreateEmptyTargetPbMesh(material);
+                }
+                meshesByMaterial[material].Add(pbMesh);
             }
-            
-            for (int i = 0; i < pbMeshes.Length; i++) {
-                // Turn off children meshes
-                pbMeshes[i].gameObject.SetActive(false);
+
+            MeshCollider CombineMeshesForMaterial(Material material) {
+                ProBuilderMesh targetPbMesh = targetMeshByMaterial[material];
+                var pbMeshesForMaterial = meshesByMaterial[material];
+                var combineMeshes = pbMeshesForMaterial.Append(targetPbMesh).ToArray();                
+                var resultMeshes = CombineMeshes.Combine(combineMeshes, targetPbMesh);
+                if (resultMeshes.Count > 1) {
+                    Undo.RevertAllInCurrentGroup();
+                    throw new Exception("Multiple result meshes not yet handled");
+                }
+
+                Mesh targetMesh = targetPbMesh.GetComponent<MeshFilter>().sharedMesh;
+                MeshCollider targetMeshCollider = targetPbMesh.gameObject.GetOrAddComponent<MeshCollider>();
+                Undo.RecordObject(targetMeshCollider, "GrowShrinkHallway: Set Combined Mesh Collider");
+                targetMeshCollider.sharedMesh = targetMesh;
+                
+                targetPbMesh.Refresh();
+
+                return targetMeshCollider;
             }
-            
-            Mesh targetMesh = targetPbMesh.gameObject.GetComponent<MeshFilter>().sharedMesh;
-            MeshCollider targetMeshCollider = targetPbMesh.gameObject.GetOrAddComponent<MeshCollider>();
-            targetMeshCollider.sharedMesh = targetMesh;
-            
-            SetupTriggerZoneBoundaryFrom(targetMeshCollider);
-            pivotAxis = (originalTriggerZone.largeSidePointWorld - originalTriggerZone.smallSidePointWorld).normalized;
 
             void ShrinkMeshCollider(MeshCollider meshCollider) {
+                Undo.RecordObject(meshCollider, "GrowShrinkHallway: Shrink Combined Mesh Collider");
+                Undo.RecordObject(meshCollider.sharedMesh, "GrowShrinkHallway: Shrink Combined Mesh Collider");
                 // Adjust mesh vertices
                 Mesh mesh = meshCollider.sharedMesh;
                 void Transform(Func<Vector3, Vector3> transform) {
@@ -149,60 +235,92 @@ namespace GrowShrink {
                     // Force the MeshCollider to refresh the bounds
                     meshCollider.sharedMesh = null;
                     meshCollider.sharedMesh = mesh;
-                    
-                    SetupTriggerZoneBoundaryFrom(meshCollider);
                 }
                 
-                Transform(TransformVertexIn);
-                Transform(TransformVertexShrink);
+                Transform(TransformVertex);
+            }
+            
+            Undo.RecordObjects(pbMeshes.Select(x => x.gameObject).ToArray(), "GrowShrinkHallway");
+            foreach (ProBuilderMesh pbMesh in pbMeshes) {
+                // Turn off children meshes
+                pbMesh.gameObject.SetActive(false);
             }
 
-            ShrinkMeshCollider(targetMeshCollider);
-
             // Set up CombineMesh gameObject for the shrunk trigger zone
-            GameObject shrunkTriggerZoneGO = Instantiate(originalTriggerZone.gameObject);
+            GameObject shrunkTriggerZoneGO = Instantiate(originalTriggerZone.gameObject, geometryRoot, false);
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerZoneGO, "GrowShrinkHallway: Create Shrunk Trigger Zone");
             shrunkTriggerZoneGO.name = $"{originalTriggerZone.gameObject.name}_Shrunk";
-            shrunkTriggerZoneGO.transform.SetParent(transform);
+            Undo.RecordObject(shrunkTriggerZoneGO.transform, "GrowShrinkHallway: Set Shrunk Trigger Zone Transform");
             shrunkTriggerZoneGO.transform.SetSiblingIndex(1);
             shrunkTriggerZoneGO.transform.position = originalTriggerZone.transform.position;
             shrunkTriggerZoneGO.transform.rotation = originalTriggerZone.transform.rotation;
+            
             // Remove the PB mesh filter because it doesn't seem to allow setting the mesh value
-            DestroyImmediate(shrunkTriggerZoneGO.GetComponent<ProBuilderMesh>());
+            Undo.DestroyObjectImmediate(shrunkTriggerZoneGO.GetComponent<ProBuilderMesh>());
+            
             // Add a normal Unity MeshFilter instead
             MeshFilter shrunkTriggerMeshFilter = shrunkTriggerZoneGO.GetOrAddComponent<MeshFilter>();
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerMeshFilter, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh Filter");
             MeshCollider shrunkTriggerCollider = shrunkTriggerZoneGO.GetOrAddComponent<MeshCollider>();
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerCollider, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh Collider");
             shrunkTriggerZone = shrunkTriggerZoneGO.GetOrAddComponent<GrowShrinkTransitionTrigger>();
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerZone, "GrowShrinkHallway: Create Shrunk Trigger Zone Transition Trigger");
 
             Mesh shrunkTriggerMesh = MeshCopyFromPBMesh(originalTriggerZone.GetComponent<ProBuilderMesh>());
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerMesh, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh");
             shrunkTriggerMesh.name = $"{shrunkTriggerMesh.name}_Shrunk";
+            Undo.RecordObject(shrunkTriggerCollider, "GrowShrinkHallway: Set Shrunk Trigger Zone Mesh Collider");
             shrunkTriggerCollider.sharedMesh = shrunkTriggerMesh;
+            Undo.RecordObject(shrunkTriggerMeshFilter, "GrowShrinkHallway: Set Shrunk Trigger Zone Mesh Filter");
             shrunkTriggerMeshFilter.sharedMesh = shrunkTriggerMesh;
-            SetupTriggerZoneBoundaryFrom(shrunkTriggerCollider);
+            
+            EffectiveTriggerZone.SetupBoundaries(shrunkTriggerCollider);
             
             ShrinkMeshCollider(shrunkTriggerCollider);
             // Force the MeshCollider to refresh the bounds
+            Undo.RecordObject(shrunkTriggerCollider, "GrowShrinkHallway: Refresh Shrunk Trigger Zone Collider");
             shrunkTriggerCollider.ForceRefresh();
             
+            Undo.RecordObject(originalTriggerZone.gameObject, "GrowShrinkHallway: Set Original Trigger Zone Inactive");
             originalTriggerZone.gameObject.SetActive(false);
             
-            transform.localScale = originalScale;
+            foreach (Material material in meshesByMaterial.Keys) {
+                ShrinkMeshCollider(CombineMeshesForMaterial(material));
+            }
+            targetPbMeshes = targetMeshByMaterial.Values.ToArray();
             
-            targetPbMesh.Refresh();
+            EffectiveTriggerZone.SetupBoundaries(shrunkTriggerCollider);
+            
+            Undo.CollapseUndoOperations(compileGroup);
         }
 
         [Button("Decompile", EButtonEnableMode.Editor)]
-        public void Decompile() {
-            if (targetPbMesh != null) {
-                DestroyImmediate(this.targetPbMesh.gameObject);
-                targetPbMesh = null;
+        public void Decompile(bool isPartOfParentOperation = false) {
+            if (!isPartOfParentOperation) {
+                Undo.SetCurrentGroupName("Decompile GrowShrinkHallway");
+            }
+            int decompileGroup = Undo.GetCurrentGroup();
+            
+            if (targetPbMeshes != null) {
+                foreach (ProBuilderMesh pbMesh in targetPbMeshes) {
+                    Undo.DestroyObjectImmediate(pbMesh.gameObject);
+                }
+                Undo.RecordObject(this, "GrowShrinkHallway: Remove Combined Mesh");
+                targetPbMeshes = null;
+            }
+            
+            if (transform.Find("Geometry Root") is Transform geometryRoot) {
+                Undo.DestroyObjectImmediate(geometryRoot.gameObject);
             }
 
             if (shrunkTriggerZone != null) {
-                DestroyImmediate(this.shrunkTriggerZone.gameObject);
+                Undo.DestroyObjectImmediate(this.shrunkTriggerZone.gameObject);
+                Undo.RecordObject(this, "GrowShrinkHallway: Remove Shrunk Trigger Zone");
                 shrunkTriggerZone = null;
             }
             
             if (PbMeshesNeedToBeSet) {
+                Undo.RecordObject(this, "GrowShrinkHallway: Set PB Meshes");
                 // Get all meshes from children recursively, skipping this gameObject and the triggerZone gameObject
                 pbMeshes = gameObject.GetComponentsInChildrenRecursively<ProBuilderMesh>()
                     .Where(mf => mf.gameObject != this.gameObject && mf.gameObject != originalTriggerZone.gameObject)
@@ -210,20 +328,27 @@ namespace GrowShrink {
             }
 
             if (pbMeshes != null) {
+                Undo.RecordObjects(pbMeshes.Select(x => x.gameObject).ToArray(), "GrowShrinkHallway");
                 foreach (var mesh in pbMeshes) {
                     if (mesh == null) continue;
                     mesh.gameObject.SetActive(true);
                 }
             }
+            Undo.RecordObject(originalTriggerZone.gameObject, "GrowShrinkHallway");
             originalTriggerZone.gameObject.SetActive(true);
+            
+            if (!isPartOfParentOperation) {
+                Undo.CollapseUndoOperations(decompileGroup);
+            }
         }
+#endif
 
         protected override void Start() {
             base.Start();
 
-            effectiveTriggerZone.OnTransitionTrigger += SetLerpValue;
-            effectiveTriggerZone.OnHallwayEnter += ObjectEnter;
-            effectiveTriggerZone.OnHallwayExit += ObjectExit;
+            EffectiveTriggerZone.OnTransitionTrigger += SetLerpValue;
+            EffectiveTriggerZone.OnHallwayEnter += ObjectEnter;
+            EffectiveTriggerZone.OnHallwayExit += ObjectExit;
         }
 
         private void ObjectEnter(Collider c, bool enteredSmallSide) {

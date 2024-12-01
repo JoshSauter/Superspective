@@ -3,6 +3,15 @@ float hash(float n ) {
     return frac(sin(n)*753.5453123);
 }
 
+float2x2 rot2D(float angle) {
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    return float2x2(
+        cosA, -sinA,
+        sinA,  cosA
+    );
+}
+
 float4 noised(in float3 x ) {
     float3 p = floor(x);
     float3 w = frac(x);
@@ -51,13 +60,20 @@ float boxSDF(float3 pos, float3 bounds) {
     return length(max(diff, 0.0)) + min(max(diff.x, max(diff.y, diff.z)), 0.0);
 }
 
-float cubeSDF(float3 pos, float size) {
+float boxSDF(float3 pos, float size) {
     return boxSDF(pos, float3(size,size,size));
 }
 
 float sphereSDF(float3 pos, float radius) {
     return length(pos) - radius;
 }
+
+float cylinderSDF(float3 pos, float2 radiusHeight) {
+    // Flatten the Y component to evaluate distance from the Z-axis
+    float2 d = float2(length(pos.xz) - radiusHeight.x, abs(pos.y) - radiusHeight.y);
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
+}
+
 
 // Combination Operations
 float unionSDF(float p1, float p2) {
@@ -70,6 +86,11 @@ float intersectionSDF(float p1, float p2) {
 
 float diffSDF(float p1, float p2) {
     return max(-p2, p1);
+}
+
+float smoothUnionSDF(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return lerp(d2, d1, h) - k * h * (1.0 - h);
 }
 
 float smoothIntersectionSDF( float d1, float d2, float k ) {
@@ -105,3 +126,5 @@ float octahedronSDF(float3 pos, float size) {
     float k = clamp(0.5*(q.z-q.y+size),0.0,size);
     return length(float3(q.x,q.y-size+k,q.z-k));
 }
+
+// Fractal Shapes

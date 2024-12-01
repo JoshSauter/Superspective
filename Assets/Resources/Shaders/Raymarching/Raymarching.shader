@@ -15,29 +15,8 @@ Shader "Hidden/Raymarching"
         Pass
         {
             CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-
-            uniform float4 _Color;
-
             #include "UnityCG.cginc"
             #include "RaymarchingUtils.cginc"
-
-            struct v2f
-            {
-                float4 clipPos : SV_POSITION;
-                float3 worldPos : TEXCOORD0;
-            };
-
-            v2f vert (appdata_full v) {
-                v2f o;
-                o.clipPos = UnityObjectToClipPos(v.vertex);
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-                return o;
-            }
-
-            #define MAX_STEPS 50
-            
             float worldSDF(in float3 pos) {
                 //float sphere = sphereSDF(repeatRegular(pos, 96), (1 + 0.5 * _SinTime.z) * 56);
                 //float outerSphere = sphereSDF(repeatRegular(pos * hash(pos.x + pos.y + pos.z), 96), (1 + 0.5 * _SinTime.z) * 56);
@@ -73,26 +52,36 @@ Shader "Hidden/Raymarching"
                 
                 return smoothIntersectionSDF(cubes, sphere, .5);
             }
+            
+            #pragma vertex vert
+            #pragma fragment frag
+
+			#define SDF(p) worldSDF(p)
+            #include "RaymarchingMacros.cginc"
+            
+            uniform float4 _Color;
+
+            struct v2f
+            {
+                float4 clipPos : SV_POSITION;
+                float3 worldPos : TEXCOORD0;
+            };
+
+            v2f vert (appdata_full v) {
+                v2f o;
+                o.clipPos = UnityObjectToClipPos(v.vertex);
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                return o;
+            }
+
+            #define MAX_STEPS 50
 
             fixed4 frag (v2f i) : SV_Target {
-                float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
-                float depth = 100;
-                float end = 400 + depth;
-                for (int x = 0; x < MAX_STEPS && depth < end; x++) {
-                    float3 position = i.worldPos + depth * viewDirection;
-                    float sdfValue = worldSDF(position);
-                    if (sdfValue < .001) {
-                        float col = 1.0 - (x / (float)MAX_STEPS);
-                        //return col * normalize(noised(position/256));
-                        //return col * fixed4(position.x,position.y,(-position.x - position.y) / 2.0,1);
-                    	col = smoothstep(0.0,1.0,col) * _Color;
-                        return 1-fixed4(col, col, col, 1);
-                    }
-                    
-                    depth += sdfValue + .001;
-                }
-                
-                return 1-fixed4(0,0,0,0);
+            	fixed4 raymarchingResult = Raymarch(MAX_STEPS, i.worldPos, 100, 400) * _Color;
+            	fixed shadow = raymarchingResult.a;
+            	fixed4 col = (1 - (smoothstep(0.0, 1.0, raymarchingResult.g) * _Color) * shadow);
+
+            	return col;
             }
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

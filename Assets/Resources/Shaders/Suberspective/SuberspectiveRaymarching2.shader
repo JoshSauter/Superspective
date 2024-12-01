@@ -108,30 +108,15 @@ Shader "Suberspective/SuberspectiveRaymarching2" {
                 return smoothIntersectionSDF(cubes, sphere, .5);
             }
 
+            #define SDF(p) worldSDF(p)
+            #include "../Raymarching/RaymarchingMacros.cginc"
+
             fixed4 frag (SuberspectiveV2F i) : SV_Target {
-            	#ifdef DISSOLVE_OBJECT
             	SuberspectiveClipOnly(i);
-            	#else
-            	SuberspectiveClipOnly(i);
-            	#endif
-                float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
-                float depth = 100;
-                float end = 400 + depth;
-                for (int x = 0; x < MAX_STEPS && depth < end; x++) {
-                    float3 position = i.worldPos + depth * viewDirection;
-                    float sdfValue = worldSDF(position);
-                    if (sdfValue < .001) {
-                        float col = 1.0 - (x / (float)MAX_STEPS);
-                        //return col * normalize(noised(position/256));
-                        //return col * fixed4(position.x,position.y,(-position.x - position.y) / 2.0,1);
-                    	col = smoothstep(0.0,1.0,col);
-                        return fixed4(col, col-.6, col-.6, 1);
-                    }
-                    
-                    depth += sdfValue + .001;
-                }
-                
-                return fixed4(0,0,0,0);
+            	fixed4 raymarchingResult = Raymarch(MAX_STEPS, i.worldPos, 100, 400) * _Color;
+            	fixed shadow = raymarchingResult.a;
+            	fixed4 col = raymarchingResult.r;
+            	return fixed4(col.r, col.g - .6, col.b - .6, col.a);
             }
 
             ENDCG

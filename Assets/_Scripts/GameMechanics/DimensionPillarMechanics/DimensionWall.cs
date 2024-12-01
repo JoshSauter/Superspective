@@ -35,7 +35,7 @@ public class DimensionWall : MonoBehaviour {
 
 	void Awake() {
 		pillar = GetComponentInParent<DimensionPillar>();
-		pillarRenderer = pillar.GetComponent<Renderer>();
+		pillarRenderer = pillar.pillarRenderer;
 		thisRenderer = GetComponent<Renderer>();
 
 		roomBoundsMask = 1 << LayerMask.NameToLayer("RoomBounds");

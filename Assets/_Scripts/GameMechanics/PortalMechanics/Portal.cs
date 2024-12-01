@@ -9,6 +9,7 @@ using UnityEditor;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Remoting.Messaging;
+using DimensionObjectMechanics;
 using GrowShrink;
 using LevelManagement;
 using MagicTriggerMechanics;
@@ -194,7 +195,17 @@ namespace PortalMechanics {
 			SetMaterialsToEffectiveMaterial();
 		}
 		
-		private Material effectiveMaterial => PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
+		private Material EffectiveMaterial {
+			get => PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
+			set {
+				if (PortalRenderingIsEnabled) {
+					portalMaterial = value;
+				}
+				else {
+					fallbackMaterial = value;
+				}
+			}
+		}
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 		public bool PortalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf && allowPortalRendering && (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
@@ -620,11 +631,20 @@ namespace PortalMechanics {
 			}
 		}
 
+		private void HandleMaterialChanged(Material newMaterial) {
+			if (newMaterial.name.EndsWith(DimensionObjectManager.DIMENSION_OBJECT_SUFFIX)) {
+				EffectiveMaterial = newMaterial;
+			}
+		}
+
 		protected override void OnEnable() {
 			base.OnEnable();
 			StartCoroutine(AddPortalCoroutine());
 			
 			if (dimensionObject != null) {
+				foreach (SuperspectiveRenderer r in renderers) {
+					r.OnMaterialChanged += HandleMaterialChanged;
+				}
 				dimensionObject.OnStateChangeSimple += SetPropertiesOnMaterial;
 			}
 		}
@@ -636,6 +656,9 @@ namespace PortalMechanics {
 			PortalManager.instance.RemovePortal(channel, this);
 			
 			if (dimensionObject != null) {
+				foreach (SuperspectiveRenderer r in renderers) {
+					r.OnMaterialChanged -= HandleMaterialChanged;
+				}
 				dimensionObject.OnStateChangeSimple -= SetPropertiesOnMaterial;
 			}
 		}
@@ -814,14 +837,14 @@ namespace PortalMechanics {
 		}
 
 		public void SetMaterialsToEffectiveMaterial() {
-			if (!renderers[0].r.sharedMaterial.name.Contains(effectiveMaterial.name)) {
-				debug.LogWarning($"Setting portal material to {effectiveMaterial.name}");
+			if (!renderers[0].r.sharedMaterial.name.Contains(EffectiveMaterial.name)) {
+				debug.LogWarning($"Setting portal material to {EffectiveMaterial.name}");
 				foreach (var r in renderers) {
-					r.SetSharedMaterial(effectiveMaterial);
+					r.SetSharedMaterial(EffectiveMaterial);
 				}
 
 				foreach (var vp in volumetricPortals) {
-					vp.SetSharedMaterial(effectiveMaterial);
+					vp.SetSharedMaterial(EffectiveMaterial);
 				}
 			}
 		}

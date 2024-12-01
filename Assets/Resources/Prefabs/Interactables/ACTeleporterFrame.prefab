@@ -4674,7 +4674,7 @@ MonoBehaviour:
     camRotationEuler: {x: -0, y: 180, z: -0}
   cursorIsStationaryOnLock: 0
   viewLockTime: 0.75
-  viewUnlockTime: 0.25
+  viewUnlockTime: 0.75
   hitbox: {fileID: 2318863764164944885}
   interactableObject: {fileID: 0}
 --- !u!114 &5589856500501811557
@@ -4698,11 +4698,13 @@ MonoBehaviour:
   bigFrame: {fileID: 0}
   bigFrameLevel: 0
   bigFrameName: 
+  dragNDropCameraTransform: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetRotation: {x: 0, y: 0, z: 0}
   targetCameraPosition: {x: 0, y: 0, z: 0}
   targetCameraRotation: {x: 0, y: 0, z: 0}
   targetLookY: 90
+  enabledSsaoBlending: 1
   ssaoBlendTimeRemaining: 0
 --- !u!1 &4431383537724328567
 GameObject:
@@ -4738,7 +4740,7 @@ Transform:
   - {fileID: 5359365084905355658}
   - {fileID: 1249332732739408097}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4525461972047191452
 GameObject:
@@ -4848,7 +4850,6 @@ MonoBehaviour:
   _id: {fileID: 0}
   DEBUG: 0
   debugMode: 0
-  doubleSidedEdges: 0
   checkPortalDepth: 0
   depthSensitivity: 1
   normalSensitivity: 1

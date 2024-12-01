@@ -24,6 +24,8 @@ namespace GrowShrink {
 			set => _debug = value;
 		}
 		Bounds bounds;
+		
+		public MeshCollider MeshCollider => GetComponent<MeshCollider>();
 
 		private Dictionary<Collider, Vector3> positionsLastFrame = new Dictionary<Collider, Vector3>();
 

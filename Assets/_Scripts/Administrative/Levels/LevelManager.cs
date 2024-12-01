@@ -38,7 +38,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 35
+	// Next level: 37
 	[Serializable]
 	public enum Levels {
 		TitleCard = 29,
@@ -75,6 +75,8 @@ namespace LevelManagement {
 		GrowShrinkIntroDarkSide = 31,
 		TransitionWhiteRoom3GrowShrinkIntro = 32,
 		GrowShrink2 = 34,
+		Ascension0 = 35,
+		Ascension1 = 36,
 		EdgeOfAUniverse = 33,
 	}
 
@@ -235,6 +237,8 @@ namespace LevelManagement {
 			{ Levels.GrowShrinkIntroDarkSide, "_GrowShrinkIntroDarkSide" },
 			{ Levels.TransitionWhiteRoom3GrowShrinkIntro, "_TransitionWhiteRoom3GrowShrinkIntro" },
 			{ Levels.GrowShrink2, "_GrowShrink2" },
+			{ Levels.Ascension0, "_Ascension0" },
+			{ Levels.Ascension1, "_Ascension1" },
 			{ Levels.EdgeOfAUniverse, "_EdgeOfAUniverse" }
 		};
 		public string activeSceneName;
