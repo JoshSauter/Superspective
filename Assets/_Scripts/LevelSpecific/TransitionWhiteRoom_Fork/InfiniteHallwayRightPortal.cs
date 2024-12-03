@@ -87,7 +87,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
             lowerPlatformPortal.pauseRendering = shouldPause;
             lowerPlatformPortal.pauseLogic = shouldPause;
 
-            lowerPlatformPortal.SetMaterialsToEffectiveMaterial();
+            lowerPlatformPortal.SetPortalRenderingDisabledFlag();
 
             turnAroundTeleport.teleportEnter.enabled = !ExitsAreConnected;
         }

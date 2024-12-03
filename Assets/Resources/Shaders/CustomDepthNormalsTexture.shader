@@ -113,10 +113,19 @@ SubShader {
 CGPROGRAM
 #pragma vertex SuberspectiveDepthNormalsVert
 #pragma fragment SuberspectivePortalDepthNormalsFrag
+#include "RecursivePortals/PortalSurfaceHelpers.cginc"
 
 uniform sampler2D_float _DepthNormals;
+uniform float _PortalRenderingDisabled = 0;
 
 float4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
+    if (_PortalRenderingDisabled) {
+        ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
+    }
+    if (_PortalRenderingDisabled > 0) {
+	    i.nz.w = clamp(i.nz.w, 0, .999);
+        return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+    }
 	float2 uv = i.screenPos.xy / i.screenPos.w;
     SuberspectiveClipOnly(i);
 

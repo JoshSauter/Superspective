@@ -73,7 +73,12 @@ partial class PlayerMovement {
             }
             m.thisRigidbody.isKinematic = false;
             
-            m.thisRigidbody.velocity = m.thisRigidbody.velocity.WithY(0);
+            // Cancel out any existing y-velocity (projected)
+            Vector3 gravityDirection = Physics.gravity.normalized;
+            Vector3 velocity = m.thisRigidbody.velocity;
+            Vector3 velocityParallelToGravity = Vector3.Project(velocity, gravityDirection);
+            m.thisRigidbody.velocity = velocity - velocityParallelToGravity;
+
             m.thisRigidbody.AddForce(jumpVector, ForceMode.Impulse);
             m.StartCoroutine(PrintMaxHeight(transform.position));
 

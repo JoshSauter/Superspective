@@ -71,7 +71,7 @@ uniform float _ShutterHeight;
 
 // PortalCopy shader uniforms
 uniform float3 _PortalPos;
-uniform float3 _PortalNormal;
+uniform float3 _PortalNormal; // Also used for Portals when drawing inactive Portal surfaces
 uniform float _FudgeDistance;
 
 // RenderInZone shader uniforms

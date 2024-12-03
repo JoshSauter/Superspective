@@ -9,9 +9,9 @@
         [HideInInspector] __SrcBlend("__src", Float) = 1.0
 		[HideInInspector] __DstBlend("__dst", Float) = 0.0
 		[HideInInspector] __ZWrite("__zw", Float) = 1.0
-    	
-    	
+		
         _PortalScaleFactor("Portal scale factor", Range(0.000001, 1000000.0)) = 1
+    	_PortalRenderingDisabled("Portal Rendering Disabled (true: 1, false: 0)", Float) = 0.0
     	
     	_MainTex("Main Texture", 2D) = "white" {}
 		_Color("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -19,8 +19,6 @@
     	_EmissionMap("Emission Map", 2D) = "white" {}
 		[HDR]
 		_EmissionColor("Emissive Color", Color) = (0, 0, 0, 0)
-    	// DimensionObject
-		_Inverse("Inverted (true: 1, false: 0)", Int) = 0
     	// Hardcoded 8 here because no way to read NUM_CHANNELS from DimensionShaderHelpers.cginc
     	_Channel("Channel", Range(0, 8)) = 0
     	// DissolveObject
@@ -55,6 +53,7 @@
 				#pragma fragment frag
 
 				#include "SuberspectiveHelpers.cginc"
+				#include "../RecursivePortals/PortalSurfaceHelpers.cginc"
 			
 				#define GRADIENT_RESOLUTION 10	// 10 == MaxNumberOfKeysSetInGradient + 1 (for keyTime of 0) + 1 (for keyTime of 1)
 
@@ -62,6 +61,9 @@
 
 				// Exposed here so we can read from the PortalMask replacement shader when adjusting depth through scaled Portals
 				uniform float _PortalScaleFactor = 1;
+
+				// When set to 1, the portal will not render anything
+				uniform float _PortalRenderingDisabled = 0;
 
 				// These are all defined so that they can be used in the EdgeDetectionColorsThroughPortal replacement shader
 				//sampler2D _CameraDepthNormalsTexture;
@@ -81,6 +83,13 @@
 
 				float4 frag(SuberspectiveV2F i) : SV_Target {
 					float2 uv = i.screenPos.xy / i.screenPos.w;
+
+					if (_PortalRenderingDisabled > 0) {
+						ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
+						float x = 0.5 * sin(_Time.x * 2 * 3.14159 + length(i.worldPos.xz) / 4.0) + 0.5;
+						float y = 0.5 * cos(_Time.x * 2 * 3.14159 + length(i.worldPos.yz) / 4.0) + 0.5;
+						return fixed4(0,x,y,1);
+					}
 					
 		            #ifdef DISSOLVE_OBJECT
 		            SuberspectiveClipOnly(i.clipPos, i.uv_DissolveTex, i.worldPos);

@@ -161,7 +161,7 @@ namespace PortalMechanics {
 
 			renderSteps = 0;
 			foreach (var p in allActivePortals) {
-				p.SetMaterialsToEffectiveMaterial();
+				p.SetPortalRenderingDisabledFlag();
 				// Ignore disabled portals
 				if (!p.PortalRenderingIsEnabled) continue;
 
@@ -261,7 +261,7 @@ namespace PortalMechanics {
 				else {
 					bool wasPausedState = visiblePortal.pauseRendering;
 					visiblePortal.pauseRendering = true;
-					visiblePortal.SetMaterialsToEffectiveMaterial();
+					visiblePortal.SetPortalRenderingDisabledFlag();
 					visiblePortal.pauseRendering = wasPausedState;
 				}
 			}

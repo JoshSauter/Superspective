@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2785,6 +2785,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 175725434}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: TestPortal2
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -2831,7 +2832,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 1869363019}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 175725436}
   colliders: []
@@ -13977,6 +13977,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 428743997}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: Portal1_2
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -14023,7 +14024,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 113120843}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 428743999}
   colliders: []
@@ -14522,6 +14522,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 474960403}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: TestPortal2
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -14568,7 +14569,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 1423681281}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 474960405}
   colliders: []
@@ -27957,6 +27957,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 995013539}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: TestPortal
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -28003,7 +28004,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 964387595}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 995013541}
   colliders: []
@@ -28618,6 +28618,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1006212441}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: TestPortal
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -28664,7 +28665,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 1768399518}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 1006212443}
   colliders: []
@@ -31044,6 +31044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1279202369}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: SameSpotPortal
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -31090,7 +31091,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 1080217735}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 1279202371}
   colliders: []
@@ -34326,6 +34326,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1419587143}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: Portal1_2
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 0
@@ -34372,7 +34373,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 1300455112}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 1419587145}
   colliders: []
@@ -50011,6 +50011,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 2026189900}
   DEBUG: 0
+  portalMaterial: {fileID: 0}
   channel: SameSpotPortal
   changeActiveSceneOnTeleport: 0
   changeCameraEdgeDetection: 1
@@ -50057,7 +50058,6 @@ MonoBehaviour:
   volumetricPortals:
   - {fileID: 736210752}
   volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
   renderers:
   - {fileID: 2026189902}
   colliders: []

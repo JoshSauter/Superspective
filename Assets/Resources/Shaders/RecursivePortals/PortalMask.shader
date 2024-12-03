@@ -13,7 +13,8 @@
             #include "../Suberspective/SuberspectiveHelpers.cginc"
 			
 			half4 _CameraDepthNormalsTexture_ST;
-			float _PortalScaleFactor = 1;
+			uniform float _PortalScaleFactor = 1;
+            uniform float _PortalRenderingDisabled = 0;
 
             struct PortalMaskV2F {
 	            SuberspectiveV2F suberspective;
@@ -33,6 +34,7 @@
 
 			// Only write the object's depth to the DepthNormalsTexture, leave the normal at whatever value it was
 			fixed4 frag(PortalMaskV2F i) : SV_Target {
+				clip(-_PortalRenderingDisabled);
 				SuberspectiveClipOnly(i.suberspective);
 				fixed4 sample = tex2D(_CameraDepthNormalsTexture, i.suberspective.clipPos);
 				float sampleDepthValue;

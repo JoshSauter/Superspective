@@ -14659,7 +14659,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 35
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -22270,7 +22270,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 957, y: 4.5, z: 290.5}
+  m_LocalPosition: {x: 0, y: -396.375, z: 36.625}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -42291,7 +42291,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 100.85
+  m_fontSize: 91.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -65137,7 +65137,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh41754
+  m_Name: pb_Mesh1391832
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

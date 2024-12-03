@@ -16,6 +16,7 @@ using MagicTriggerMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 using Matrix4x4 = UnityEngine.Matrix4x4;
 using Plane = UnityEngine.Plane;
 using Quaternion = UnityEngine.Quaternion;
@@ -62,6 +63,16 @@ namespace PortalMechanics {
 	
 	[RequireComponent(typeof(UniqueId))]
 	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
+		
+		private const string PORTAL_RENDERING_DISABLED_PROPERTY = "_PortalRenderingDisabled";
+		private const string PORTAL_NORMAL_PROPERTY = "_PortalNormal"; // Different use case for _PortalNormal than in PortalCopy
+		private const string SHADER_PATH = "Shaders/Suberspective/SuberspectivePortal";
+		private static Material _sharedPortalMaterial;
+		private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
+
+		// Will be same as SharedPortalMaterial in most cases, but may reference a different material if the Portal is a DimensionObject
+		public Material portalMaterial;
+		
 		private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
 		private int consecutiveFramesVPShouldBeDisabled = 0;
 		private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
@@ -160,9 +171,6 @@ namespace PortalMechanics {
 				return false;
 			}
 		}
-		Material portalMaterial;
-		
-		public Material fallbackMaterial;
 		public SuperspectiveRenderer[] renderers;
 		// Colliders are the infinitely thin planes on the Portal layer that interact with raycasts
 		public Collider[] colliders;
@@ -192,19 +200,7 @@ namespace PortalMechanics {
 		public void SetPauseLogic(bool toValue) {
 			pauseRendering = toValue;
 			pauseLogic = toValue;
-			SetMaterialsToEffectiveMaterial();
-		}
-		
-		private Material EffectiveMaterial {
-			get => PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial;
-			set {
-				if (PortalRenderingIsEnabled) {
-					portalMaterial = value;
-				}
-				else {
-					fallbackMaterial = value;
-				}
-			}
+			SetPortalRenderingDisabledFlag();
 		}
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -342,17 +338,14 @@ namespace PortalMechanics {
 			
 			dimensionObject = gameObject.FindDimensionObjectRecursively<DimensionObject>();
 			pillarDimensionObject = dimensionObject as PillarDimensionObject;
-			string shaderPath = "Shaders/Suberspective/SuberspectivePortal";
-			portalMaterial = new Material(Resources.Load<Shader>(shaderPath));
-			if (fallbackMaterial == null) {
-				fallbackMaterial = Resources.Load<Material>("Materials/Invisible");
-			}
+			portalMaterial = SharedPortalMaterial;
 
 			InitializeRenderers();
 			gameObject.layer = SuperspectivePhysics.PortalLayer;
 			foreach (var r in renderers) {
 				r.gameObject.layer = SuperspectivePhysics.PortalLayer;
-				r.SetSharedMaterial(PortalRenderingIsEnabled ? portalMaterial : fallbackMaterial);
+				r.SetSharedMaterial(portalMaterial);
+				r.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, PortalRenderingIsEnabled ? 0 : 1);
 				if (changeScale) {
 					r.SetFloat("_PortalScaleFactor", scaleFactor);
 				}
@@ -495,7 +488,7 @@ namespace PortalMechanics {
 						.GetOrAddComponent<SuperspectiveRenderer>();
 
 					vp.enabled = false;
-					vp.SetSharedMaterial(r.r.sharedMaterial);
+					vp.SetSharedMaterial(portalMaterial);
 					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
 					volumetricPortalsList.Add(vp);
 				}
@@ -582,7 +575,7 @@ namespace PortalMechanics {
 
 			CreateRenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
-			SetMaterialsToEffectiveMaterial();
+			SetPortalRenderingDisabledFlag();
 
 			startRotation = transform.rotation;
 			flippedRotation = Quaternion.AngleAxis(180f, Vector3.up) * startRotation;
@@ -631,9 +624,11 @@ namespace PortalMechanics {
 			}
 		}
 
+		// When a Portal is part of a DimensionObject, a new Material will be created with the DIMENSION_OBJECT keyword enabled
+		// This updates our Material reference to the new dimension object material
 		private void HandleMaterialChanged(Material newMaterial) {
 			if (newMaterial.name.EndsWith(DimensionObjectManager.DIMENSION_OBJECT_SUFFIX)) {
-				EffectiveMaterial = newMaterial;
+				portalMaterial = newMaterial;
 			}
 		}
 
@@ -813,7 +808,7 @@ namespace PortalMechanics {
 				return;
 			}
 
-			SetMaterialsToEffectiveMaterial();
+			SetPortalRenderingDisabledFlag();
 
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.mainTexture);
 			SetPropertiesOnMaterial();
@@ -830,22 +825,25 @@ namespace PortalMechanics {
 				return;
 			}
 
-			SetMaterialsToEffectiveMaterial();
+			SetPortalRenderingDisabledFlag();
 			
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
 			SetPropertiesOnMaterial();
 		}
 
-		public void SetMaterialsToEffectiveMaterial() {
-			if (!renderers[0].r.sharedMaterial.name.Contains(EffectiveMaterial.name)) {
-				debug.LogWarning($"Setting portal material to {EffectiveMaterial.name}");
-				foreach (var r in renderers) {
-					r.SetSharedMaterial(EffectiveMaterial);
-				}
+		/// <summary>
+		/// If portal rendering is disabled, set the _PortalRenderingDisabled flag on the portal's material
+		/// </summary>
+		public void SetPortalRenderingDisabledFlag() {
+			int renderingDisabled = PortalRenderingIsEnabled ? 0 : 1;
+			foreach (SuperspectiveRenderer r in renderers) {
+				r.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, renderingDisabled);
+				r.SetVector(PORTAL_NORMAL_PROPERTY, IntoPortalVector);
+			}
 
-				foreach (var vp in volumetricPortals) {
-					vp.SetSharedMaterial(EffectiveMaterial);
-				}
+			foreach (SuperspectiveRenderer vp in volumetricPortals) {
+				vp.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, renderingDisabled);
+				vp.SetVector(PORTAL_NORMAL_PROPERTY, IntoPortalVector);
 			}
 		}
 
