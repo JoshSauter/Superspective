@@ -1,8 +1,8 @@
 using System;
 
 namespace DeveloperConsole {
-    public class HideCullEverythingLayer : ConsoleCommand {
-        public HideCullEverythingLayer(string commandWord) : base(commandWord) { }
+    public class HideCullEverythingLayerCommand : ConsoleCommand {
+        public HideCullEverythingLayerCommand(string commandWord) : base(commandWord) { }
 
         private bool layerIsHidden = false;
         public override CommandResponse Execute(string[] args) {

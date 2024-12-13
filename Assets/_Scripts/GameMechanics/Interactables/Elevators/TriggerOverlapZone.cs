@@ -9,7 +9,8 @@ using UnityEngine;
 [RequireComponent(typeof(Collider), typeof(BetterTrigger))]
 public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
     public bool playerInZone;
-    public HashSet<Collider> objectsInZone = new HashSet<Collider>();
+    public readonly HashSet<Collider> objectsInZone = new HashSet<Collider>();
+    public readonly Dictionary<Collider, Rigidbody> rigidbodiesInZone = new Dictionary<Collider, Rigidbody>();
 
     private void Awake() {
         gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
@@ -25,6 +26,12 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
         }
         else {
             objectsInZone.Add(other);
+            if (!rigidbodiesInZone.ContainsKey(other)) {
+                Rigidbody maybeRigidbody = other.GetComponentInParent<Rigidbody>();
+                if (maybeRigidbody) {
+                    rigidbodiesInZone.Add(other, maybeRigidbody);
+                }
+            }
         }
     }
 
@@ -43,6 +50,9 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
         }
         else {
             objectsInZone.Remove(other);
+            if (rigidbodiesInZone.ContainsKey(other)) {
+                rigidbodiesInZone.Remove(other);
+            }
         }
     }
 }

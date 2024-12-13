@@ -119,6 +119,9 @@ uniform sampler2D_float _DepthNormals;
 uniform float _PortalRenderingDisabled = 0;
 
 float4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
+	float2 uv = i.screenPos.xy / i.screenPos.w;
+    SuberspectiveClipOnly(i);
+    
     if (_PortalRenderingDisabled) {
         ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
     }
@@ -126,8 +129,6 @@ float4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_
 	    i.nz.w = clamp(i.nz.w, 0, .999);
         return EncodeDepthNormal(i.nz.w, i.nz.xyz);
     }
-	float2 uv = i.screenPos.xy / i.screenPos.w;
-    SuberspectiveClipOnly(i);
 
 	float4 col = tex2D(_DepthNormals, uv);
     if (length(col) == 0) {

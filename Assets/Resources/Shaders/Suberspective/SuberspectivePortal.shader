@@ -83,6 +83,12 @@
 
 				float4 frag(SuberspectiveV2F i) : SV_Target {
 					float2 uv = i.screenPos.xy / i.screenPos.w;
+					
+		            #ifdef DISSOLVE_OBJECT
+		            SuberspectiveClipOnly(i.clipPos, i.uv_DissolveTex, i.worldPos);
+		            #else
+		            SuberspectiveClipOnly(i);
+		            #endif
 
 					if (_PortalRenderingDisabled > 0) {
 						ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
@@ -90,12 +96,6 @@
 						float y = 0.5 * cos(_Time.x * 2 * 3.14159 + length(i.worldPos.yz) / 4.0) + 0.5;
 						return fixed4(0,x,y,1);
 					}
-					
-		            #ifdef DISSOLVE_OBJECT
-		            SuberspectiveClipOnly(i.clipPos, i.uv_DissolveTex, i.worldPos);
-		            #else
-		            SuberspectiveClipOnly(i);
-		            #endif
 
 					float4 col = tex2D(_MainTex, uv);
 					return col;

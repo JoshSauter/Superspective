@@ -16,8 +16,7 @@ public class OpenAllScenesTool {
                 string sceneName = level.level.ToName();
                 Scene scene = EditorSceneManager.GetSceneByName(sceneName);
                 if (!scene.IsValid()) {
-                    string path = $"Assets/{(!sceneName.ToLevel().IsTestingLevel() ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
-                    EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+                    EditorSceneManager.OpenScene(scene.path, OpenSceneMode.Additive);
                 }
             }
             catch (Exception e) {

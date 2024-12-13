@@ -4210,7 +4210,6 @@ MonoBehaviour:
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
   _dimension: 0
@@ -4218,8 +4217,40 @@ MonoBehaviour:
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  objectBounds:
+    min: 0
+    max: 0
+  visibleRange:
+    min: 0
+    max: 0
+  partiallyVisibleRange:
+    min: 0
+    max: 0
+  partiallyInvisibleRange:
+    min: 0
+    max: 0
+  invisibleRange:
+    min: 0
+    max: 0
   activePillar: {fileID: 0}
   pillars: []
+  lastPillarPlanes:
+    objectBounds:
+      min: 0
+      max: 0
+    visibleRange:
+      min: 0
+      max: 0
+    partiallyVisibleRange:
+      min: 0
+      max: 0
+    partiallyInvisibleRange:
+      min: 0
+      max: 0
+    invisibleRange:
+      min: 0
+      max: 0
+    maxDistance: 0
   thisObjectMoves: 1
   thisRigidbody: {fileID: 3978877450468716646}
   colliderBoundsOverride: {fileID: 7472857696833531526}
@@ -4374,7 +4405,6 @@ MonoBehaviour:
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
   _dimension: 0
@@ -4382,8 +4412,40 @@ MonoBehaviour:
   dimensionShiftQuadrant: 0
   minAngle: 0
   maxAngle: 0
+  objectBounds:
+    min: 0
+    max: 0
+  visibleRange:
+    min: 0
+    max: 0
+  partiallyVisibleRange:
+    min: 0
+    max: 0
+  partiallyInvisibleRange:
+    min: 0
+    max: 0
+  invisibleRange:
+    min: 0
+    max: 0
   activePillar: {fileID: 0}
   pillars: []
+  lastPillarPlanes:
+    objectBounds:
+      min: 0
+      max: 0
+    visibleRange:
+      min: 0
+      max: 0
+    partiallyVisibleRange:
+      min: 0
+      max: 0
+    partiallyInvisibleRange:
+      min: 0
+      max: 0
+    invisibleRange:
+      min: 0
+      max: 0
+    maxDistance: 0
   thisObjectMoves: 1
   thisRigidbody: {fileID: 5730362020235627467}
   colliderBoundsOverride: {fileID: 7472857696833531526}
@@ -4680,11 +4742,10 @@ MonoBehaviour:
   DEBUG: 0
   growShrink: {fileID: 0}
   thisRigidbody: {fileID: 0}
+  thisCollider: {fileID: 7472857696833531526}
   useGravity: 1
   startingGravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
-  growShrinkObject: {fileID: 0}
-  startingScale: 0
 --- !u!114 &8111376249004383559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4741,7 +4802,6 @@ MonoBehaviour:
   thisCollider: {fileID: 7472857696833531526}
   minScale: 0
   maxScale: 0
-  _currentScale: 1
   startingScale: 1
   state:
     _state: 0

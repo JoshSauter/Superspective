@@ -6,6 +6,7 @@ using LevelManagement;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 namespace Saving {
     public class AutosaveManager : Singleton<AutosaveManager> {
@@ -14,9 +15,9 @@ namespace Saving {
         private bool IsLoading => GameManager.instance.IsCurrentlyLoading;
 
 #if UNITY_EDITOR
-        public bool CanMakeTimedAutosave => false;
-        public bool CanMakeAutosaveOnLevelLoad => false;
-#else
+        private bool _canMakeAutosaveInEditor = false;
+        public bool ToggleCanMakeAutosaveInEditor() => _canMakeAutosaveInEditor = !_canMakeAutosaveInEditor;
+#endif
         private const float MIN_TIME_BETWEEN_AUTOSAVES_SEC = 10f;
         private const float AUTOSAVE_DISABLED_AFTER_LOAD_DELAY = 30f;
 
@@ -29,12 +30,19 @@ namespace Saving {
         private bool AutosaveOnLevelLoadEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnLevelChange;
         
         private bool CanMakeAutosave => !isAutosaving && timeSinceLastAutosave > MIN_TIME_BETWEEN_AUTOSAVES_SEC && !PlayerMovement.instance.PlayerIsAFK;
-        public bool CanMakeTimedAutosave => TimedAutosaveEnabled && CanMakeAutosave;
+        public bool CanMakeTimedAutosave => TimedAutosaveEnabled && CanMakeAutosave
+        #if UNITY_EDITOR
+        && _canMakeAutosaveInEditor
+        #endif
+        ;
         public bool CanMakeAutosaveOnLevelLoad => AutosaveOnLevelLoadEnabled &&
                                                   CanMakeAutosave &&
                                                   SaveManager.realtimeSinceLastLoad > AUTOSAVE_DISABLED_AFTER_LOAD_DELAY &&
-                                                  !levelsToSkipAutosaveOnLoad.Contains(LevelManager.instance.ActiveScene);
+                                                  !levelsToSkipAutosaveOnLoad.Contains(LevelManager.instance.ActiveScene)
+#if UNITY_EDITOR
+                                                  && _canMakeAutosaveInEditor
 #endif
+        ;
 
         public float timeSinceLastAutosave = 0f;
         bool isAutosaving = false;

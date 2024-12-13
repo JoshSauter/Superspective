@@ -53,7 +53,7 @@ public readonly struct ColliderPair : IEquatable<ColliderPair> {
 }
 
 public static class SuperspectivePhysics {
-	private static readonly Vector3 originalGravity = Physics.gravity;
+	public static readonly Vector3 originalGravity = Physics.gravity;
 
 #region Layers
 	private static int _defaultLayer = -1;
@@ -163,7 +163,7 @@ public static class SuperspectivePhysics {
 			out _, out _);
 	}
 
-	public static void ClearAllCollisionState() {
+	public static void ResetState() {
 		Physics.gravity = originalGravity;
 
 		foreach (var ignoredCollision in ignoredCollisions.Keys) {

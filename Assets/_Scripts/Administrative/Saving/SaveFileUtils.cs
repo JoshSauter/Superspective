@@ -67,15 +67,22 @@ namespace Saving {
         }
 
         public static JobHandle WriteSaveToDisk(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
-            string saveFilename = saveMetadataWithScreenshot.metadata.saveFilename;
-            // Handle data save construction and saving to disk
-            SaveData saveData = SaveData.CreateSaveDataFromCurrentState();
-            if (!saveData.managerScene.serializedSaveObjects.ContainsKey("Player")) {
-                Debug.LogError("Player not found in serialized save objects! Here are the serialized save objects:" + string.Join(", ", saveData.managerScene.serializedSaveObjects.Keys));
+            try {
+                string saveFilename = saveMetadataWithScreenshot.metadata.saveFilename;
+                // Handle data save construction and saving to disk
+                SaveData saveData = SaveData.CreateSaveDataFromCurrentState();
+                if (!saveData.managerScene.serializedSaveObjects.ContainsKey("Player")) {
+                    Debug.LogError("Player not found in serialized save objects! Here are the serialized save objects:" + string.Join(", ", saveData.managerScene.serializedSaveObjects.Keys));
+                }
+
+                JobHandle writeSaveToDiskJob = WriteToDisk(saveFilename, saveData);
+
+                return WriteMetadataToDisk(saveMetadataWithScreenshot, writeSaveToDiskJob);
             }
-            JobHandle writeSaveToDiskJob = WriteToDisk(saveFilename, saveData);
-            
-            return WriteMetadataToDisk(saveMetadataWithScreenshot, writeSaveToDiskJob);
+            catch (Exception e) {
+                Debug.LogError($"Error writing save to disk: {e}");
+                return default;
+            }
         }
 
         private static JobHandle WriteToDisk(string saveFileName, SaveData saveData) {
@@ -427,13 +434,20 @@ namespace Saving {
             jobHandle.Complete();
 
             if (callback != null) {
-                byte[] allBytesArray = metadataBytes.ToArray();
-                SaveMetadata metadata = new SaveMetadata(allBytesArray, saveFilename);
-                
-                callback.Invoke(metadata);
+                try {
+                    byte[] allBytesArray = metadataBytes.ToArray();
+                    SaveMetadata metadata = new SaveMetadata(allBytesArray, saveFilename);
+
+                    callback.Invoke(metadata);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"Error reading metadata from disk: {e}");
+                }
             }
-            
-            metadataBytes.Dispose();
+
+            if (metadataBytes.IsCreated) {
+                metadataBytes.Dispose();
+            }
         }
         
         private static IEnumerator ReadMetadataJobWithScreenshotCompleteCallback(JobHandle jobHandle, NativeArray<byte> metadataBytes, string saveFilename, Action<SaveMetadataWithScreenshot> callback) {
@@ -442,13 +456,20 @@ namespace Saving {
             jobHandle.Complete();
 
             if (callback != null) {
-                byte[] allBytesArray = metadataBytes.ToArray();
-                SaveMetadataWithScreenshot metadataWithScreenshot = new SaveMetadataWithScreenshot(allBytesArray, saveFilename);
-                
-                callback.Invoke(metadataWithScreenshot);
+                try {
+                    byte[] allBytesArray = metadataBytes.ToArray();
+                    SaveMetadataWithScreenshot metadataWithScreenshot = new SaveMetadataWithScreenshot(allBytesArray, saveFilename);
+
+                    callback.Invoke(metadataWithScreenshot);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"Error reading metadata from disk: {e}");
+                }
             }
             
-            metadataBytes.Dispose();
+            if (metadataBytes.IsCreated) {
+                metadataBytes.Dispose();
+            }
         }
 
         private static IEnumerator ReadAllMetadataJobCompleteCallback(JobHandle combinedJobHandle, Action callback) {

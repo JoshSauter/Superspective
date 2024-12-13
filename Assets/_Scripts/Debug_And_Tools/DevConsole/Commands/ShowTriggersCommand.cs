@@ -2,11 +2,11 @@ using System;
 using UnityEngine;
 
 namespace DeveloperConsole {
-    public class ShowTriggers : ConsoleCommand {
+    public class ShowTriggersCommand : ConsoleCommand {
         private int TriggerZoneMask = 1 << SuperspectivePhysics.TriggerZoneLayer;
         private Camera PlayerCam = Player.instance.PlayerCam;
         
-        public ShowTriggers(string commandWord) : base(commandWord) { }
+        public ShowTriggersCommand(string commandWord) : base(commandWord) { }
         
         public override CommandResponse Execute(string[] args) {
             bool shouldShowTriggers = (PlayerCam.cullingMask & TriggerZoneMask) == 0;

@@ -36,7 +36,7 @@ public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
     public float minHeight;
     public float maxHeight;
 
-    private float curVelocity;
+    public float curVelocity;
     private float DesiredVelocity => (0.05f + SpeedMultiplier) * speed * direction;
     
     public bool IsAtTop => CurHeight >= maxHeight;
@@ -58,7 +58,13 @@ public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
 
             if (triggerZone) {
                 foreach (Collider otherObject in triggerZone.objectsInZone) {
-                    otherObject.transform.position += worldOffset;
+                    Rigidbody maybeRigidbody = triggerZone.rigidbodiesInZone[otherObject];
+                    if (maybeRigidbody) {
+                        maybeRigidbody.MovePosition(maybeRigidbody.position + worldOffset);
+                    }
+                    else {
+                        otherObject.transform.position += worldOffset;
+                    }
                 }
 
                 if (triggerZone.playerInZone) {
@@ -76,7 +82,7 @@ public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
             Debug.LogWarning($"Element {name} is missing a TriggerOverlapZone reference. Player movement will not be affected by this elevator.");
         }
 
-        state = this.StateMachine(ElevatorState.Idle);
+        state = this.StateMachine(ElevatorState.Idle, true);
         
         // Elevator should go to Idle state when it reaches the top or bottom
         state.AddStateTransition(ElevatorState.Moving, ElevatorState.Idle, () => (direction > 0 && IsAtTop) || (direction < 0 && IsAtBottom));

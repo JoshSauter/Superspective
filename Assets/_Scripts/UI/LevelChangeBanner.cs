@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Audio;
 using LevelManagement;
 using Saving;
 using StateUtils;
@@ -19,6 +20,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
     }
     public Banner[] banners;
     public Dictionary<string, Image> levelToBanner = new Dictionary<string, Image>();
+    private HashSet<string> bannersPlayed = new HashSet<string>();
     
     public bool HasQueuedBanner => !string.IsNullOrEmpty(queuedBanner);
     public bool IsPlayingBanner => state == State.Playing || state == State.WaitingForLetterbox;
@@ -97,6 +99,12 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
             }
         }
         state.AddTrigger(State.Playing, EnterPlayingState);
+        state.AddTrigger(State.Playing, 1.5f, () => {
+            if (Time.time > 10f && !bannersPlayed.Contains(currentlyPlayingBanner)) {
+                bannersPlayed.Add(currentlyPlayingBanner);
+                AudioManager.instance.Play(AudioName.LevelChangeSting);
+            }
+        });
         state.AddTrigger(State.Playing, FADE_TIME + DISPLAY_TIME, () => Letterboxing.instance.TurnOffLetterboxing());
         
         state.AddTrigger(State.NotPlaying, () => {

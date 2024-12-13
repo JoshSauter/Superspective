@@ -671,7 +671,7 @@ namespace PortalMechanics {
 				return;
 			}
 			
-			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			PortalableObject portalableObj = other.gameObject.FindInParentsRecursively<PortalableObject>();
 			if (portalableObj != null && (!portalableObj.IsInPortal || portalableObj.Portal != this)) {
 				portalableObj.EnterPortal(this);
 			}
@@ -690,7 +690,7 @@ namespace PortalMechanics {
 				return;
 			}
 			
-			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			PortalableObject portalableObj = other.gameObject.FindInParentsRecursively<PortalableObject>();
 			if (portalableObj != null && !portalableObj.teleportedThisFixedUpdate) {
 				if (objectsInPortal.Contains(portalableObj)) {
 					portalableObj.ExitPortal(this);
@@ -713,7 +713,7 @@ namespace PortalMechanics {
 			
 			Vector3 closestPoint = ClosestPoint(other.transform.position, true, true);
 			bool objectShouldBeTeleported = Mathf.Sign(Vector3.Dot(IntoPortalVector, (other.transform.position - closestPoint).normalized)) > 0;
-			PortalableObject portalableObj = other.gameObject.GetComponent<PortalableObject>();
+			PortalableObject portalableObj = other.gameObject.FindInParentsRecursively<PortalableObject>();
 
 			if (!objectShouldBeTeleported) {
 				if (portalableObj != null && portalableObj.IsInPortal && portalableObj.Portal != this) {
@@ -1055,7 +1055,7 @@ namespace PortalMechanics {
 					// Need to recalculate the camQuadrant of the PillarDimensionObject after teleporting the player
 					var originalQuadrant = otherPortal.pillarDimensionObject.camQuadrant;
 					otherPortal.pillarDimensionObject.DetermineQuadrantForPlayerCam();
-					activePillar.curBaseDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhere(v => v == VisibilityState.Visible);
+					activePillar.curBaseDimension = otherPortal.pillarDimensionObject.Dimension;
 					activePillar.dimensionWall.UpdateStateForCamera(Cam.Player, activePillar.dimensionWall.RadsOffsetForDimensionWall(Cam.Player.CamPos()));
 					otherPortal.pillarDimensionObject.camQuadrant = originalQuadrant;
 				}

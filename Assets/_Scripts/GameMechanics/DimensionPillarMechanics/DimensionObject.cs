@@ -225,22 +225,33 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			layer = SuperspectivePhysics.IgnoreRaycastLayer
 		};
 		triggerGO.transform.SetParent(transform, false);
-		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
-		collisionLogic.dimensionObject = this;
 		SphereCollider trigger = triggerGO.AddComponent<SphereCollider>();
 		trigger.radius = Mathf.Max(size.x, size.y, size.z);
 		trigger.center = transform.InverseTransformPoint(center);
 		trigger.isTrigger = true;
+		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
+		collisionLogic.dimensionObject = this;
 
 		return trigger;
 	}
-	
+
 	public bool HasChannelOverlapWith(DimensionObject other) {
+		// If we're dealing with advanced channel logic, compare the resulting bitmasks
+		if (useAdvancedChannelLogic || other.useAdvancedChannelLogic) {
+			return HasMaskOverlapWith(other);
+		}
+		// Otherwise, just compare the channels directly
+		else {
+			return channel == other.channel;
+		}
+	}
+	
+	private bool HasMaskOverlapWith(DimensionObject other) {
 		bool MasksHaveOverlap(DimensionObjectBitmask maskA, DimensionObjectBitmask maskB) {
 			return !(maskA & maskB).IsEmpty;
 		}
 		
-		void CheckChannelLogicIsSet(DimensionObject dimObj) {
+		void CheckMaskIsSet(DimensionObject dimObj) {
 			if (!dimObj.EffectiveMaskSolution.HasBitmaskSet) {
 				Debug.LogWarning("Mask render solution is null for " + dimObj.gameObject.name);
 				dimObj.ValidateAndApplyChannelLogic();
@@ -250,8 +261,8 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			}
 		}
 		
-		CheckChannelLogicIsSet(this);
-		CheckChannelLogicIsSet(other);
+		CheckMaskIsSet(this);
+		CheckMaskIsSet(other);
 
 		return MasksHaveOverlap(EffectiveMaskSolution, other.EffectiveMaskSolution);
 	}
@@ -286,7 +297,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		
 		bool bothFullyVisible = EffectiveVisibilityState == VisibilityState.Visible && other.EffectiveVisibilityState == VisibilityState.Visible;
 		
-		return (HasChannelOverlapWith(other) || bothFullyVisible) && ShouldCollideInSameChannel();
+		return (HasMaskOverlapWith(other) || bothFullyVisible) && ShouldCollideInSameChannel();
 	}
 
 	public void SetCollision(VisibilityState thisVisibility, VisibilityState otherVisibility, bool shouldCollide) {
@@ -389,7 +400,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
 			
 			// Children who have DimensionObject scripts are treated on only by their own settings
-			if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasChannelOverlapWith(dimObj)) return;
+			if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasMaskOverlapWith(dimObj)) return;
 
 			result.AddRange(parent.GetComponents<Collider>());
 
@@ -430,7 +441,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		if (!includeInactiveGameObjects && !parent.gameObject.activeInHierarchy) return;
 		
 		// Children who have DimensionObject scripts are treated on only by their own settings
-		if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasChannelOverlapWith(dimObj)) return;
+		if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasMaskOverlapWith(dimObj)) return;
 
 		SuperspectiveRenderer thisRenderer = parent.GetComponent<SuperspectiveRenderer>();
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
@@ -536,28 +547,32 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	[Button("Apply boolean expression")]
 	public void ValidateAndApplyChannelLogic() {
 		if (useAdvancedChannelLogic) {
-			BooleanExpressionStream validationStream = new BooleanExpressionStream(channelLogic);
-			List<string> booleanExpressionSymbols = new List<string>();
-			List<string> postfixBooleanExpression = new List<string>();
-			try {
-				string nextSymbol = validationStream.Next();
-				while (nextSymbol != "") {
-					booleanExpressionSymbols.Add(nextSymbol);
-					nextSymbol = validationStream.Next();
-				}
-
-				postfixBooleanExpression = InfixToPostfix(booleanExpressionSymbols);
-			}
-			catch (Exception e) {
-				Debug.LogError($"Invalid boolean expression string: {e}");
-			}
-
-			ApplyBooleanExpression(postfixBooleanExpression);
+			ValidateAndApplyAdvancedChannelLogic();
 		}
 		else {
 			maskSolution = new DimensionObjectBitmask(channel);
 			inverseMaskSolution = ~maskSolution;
 		}
+	}
+
+	private void ValidateAndApplyAdvancedChannelLogic() {
+		BooleanExpressionStream validationStream = new BooleanExpressionStream(channelLogic);
+		List<string> booleanExpressionSymbols = new List<string>();
+		List<string> postfixBooleanExpression = new List<string>();
+		try {
+			string nextSymbol = validationStream.Next();
+			while (nextSymbol != "") {
+				booleanExpressionSymbols.Add(nextSymbol);
+				nextSymbol = validationStream.Next();
+			}
+
+			postfixBooleanExpression = InfixToPostfix(booleanExpressionSymbols);
+		}
+		catch (Exception e) {
+			Debug.LogError($"Invalid boolean expression string: {e}");
+		}
+
+		ApplyBooleanExpression(postfixBooleanExpression);
 	}
 
 	void ApplyBooleanExpression(List<string> postfixExpression) {

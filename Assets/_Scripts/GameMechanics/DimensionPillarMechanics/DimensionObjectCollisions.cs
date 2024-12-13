@@ -2,8 +2,8 @@
 using Saving;
 using UnityEngine;
 
-[RequireComponent(typeof(UniqueId))]
-public class DimensionObjectCollisions : SaveableObject {
+[RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
+public class DimensionObjectCollisions : SaveableObject, BetterTriggers {
 	public DimensionObject dimensionObject;
 	
 	void Update() {
@@ -13,12 +13,16 @@ public class DimensionObjectCollisions : SaveableObject {
 		}
 	}
 
-	void OnTriggerStay(Collider other) {
+	public void OnBetterTriggerEnter(Collider other) {
 		if (GameManager.instance.IsCurrentlyLoading) return;
 		if (dimensionObject == null) return;
 
 		foreach (Collider thisCollider in dimensionObject.colliders) {
-			DimensionObjectManager.instance.SetCollision(other, thisCollider, dimensionObject.ID, true);
+			DimensionObjectManager.instance.SetCollision(other, thisCollider, dimensionObject.ID);
 		}
 	}
+
+	public void OnBetterTriggerExit(Collider other) {}
+
+	public void OnBetterTriggerStay(Collider c) {}
 }

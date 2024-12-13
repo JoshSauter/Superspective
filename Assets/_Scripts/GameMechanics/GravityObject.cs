@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using GrowShrink;
 using NaughtyAttributes;
 using PortalMechanics;
@@ -10,9 +11,16 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(UniqueId))]
 public class GravityObject : SaveableObject<GravityObject, GravityObject.GravityObjectSave> {
+    private const float RAY_LENGTH = .025f;
+    private const float ON_GROUND_CHECK_THRESHOLD = -.1f;
+    private float RayLength => RAY_LENGTH * Scale;
+    private float OnGroundCheckThreshold => ON_GROUND_CHECK_THRESHOLD * Scale;
+    
     public GrowShrinkObject growShrink;
     public Rigidbody thisRigidbody;
+    public BoxCollider thisCollider;
     public bool useGravity = true;
+    public bool onGround = false;
     [SerializeField]
     private Vector3 startingGravityDirection = Vector3.down;
 
@@ -22,20 +30,16 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
         get => GravityRotation * Vector3.down;
         set => GravityRotation = Quaternion.FromToRotation(Vector3.down, value.normalized);
     }
-    public float gravityMagnitude = Physics.gravity.magnitude;
+    public float gravityMagnitude = SuperspectivePhysics.originalGravity.magnitude;
 
-    private int RaycastLayermask => ~(1 << SuperspectivePhysics.PlayerLayer);
+    private int RaycastLayermask => SuperspectivePhysics.PhysicsRaycastLayerMask;
 
     private PickupObject _pickupObject;
-    private PickupObject PickupObject {
-        get {
-            if (!_pickupObject) {
-                _pickupObject = GetComponent<PickupObject>();
-            }
+    private PickupObject PickupObject => _pickupObject ??= GetComponent<PickupObject>();
 
-            return _pickupObject;
-        }
-    }
+    private GrowShrinkObject _growShrinkObject;
+    private GrowShrinkObject GrowShrinkObject => _growShrinkObject ??= GetComponent<GrowShrinkObject>();
+    private float Scale => GrowShrinkObject ? GrowShrinkObject.CurrentScale : 1f;
 
     [ShowNativeProperty]
     private Vector3 CurrentVelocity {
@@ -44,19 +48,14 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
             return thisRigidbody.velocity;
         }
     }
-    
-    public GrowShrinkObject growShrinkObject;
-    public float Scale => startingScale * (growShrinkObject ? growShrinkObject.CurrentScale : 1f);
-    public float startingScale;
 
     protected override void Awake() {
         base.Awake();
+
         
-        startingScale = transform.localScale.x;
-        
-        thisRigidbody = GetComponent<Rigidbody>();
+        if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
+        if (thisCollider == null) thisCollider = GetComponent<BoxCollider>();
         GravityDirection = startingGravityDirection;
-        growShrinkObject = gameObject.FindInParentsRecursively<GrowShrinkObject>();
     }
 
     protected override void Start() {
@@ -72,12 +71,82 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
         if (GameManager.instance.IsCurrentlyLoading) return;
         
         if (useGravity) {
-            Vector3 rayDirection = GravityDirection * (0.55f * Scale);
-            Ray groundRaycast = new Ray(transform.position, rayDirection);
-            bool onGround = Physics.Raycast(groundRaycast, rayDirection.magnitude, RaycastLayermask);
-            Debug.DrawRay(groundRaycast.origin, rayDirection, onGround ? Color.green : Color.yellow);
-            thisRigidbody.AddForce(GravityDirection * gravityMagnitude / (onGround && growShrink != null ? growShrink.CurrentScale : 1f), ForceMode.Acceleration);
+            onGround = IsOnGround();
+            
+            thisRigidbody.AddForce(GravityDirection * gravityMagnitude / (onGround ? Mathf.Max(1, Scale) : 1f), ForceMode.Acceleration);
         }
+        else {
+            onGround = false;
+        }
+    }
+    
+    /// <summary>
+    /// Checks if the cube is on the ground by raycasting from its center and corners.
+    /// Assumes that the GravityObject is a cube... so maybe revisit if that changes.
+    /// </summary>
+    /// <returns>True if the cube is on the ground, otherwise false.</returns>
+    public bool IsOnGround() {
+        if (thisCollider == null || !thisCollider.enabled || thisRigidbody == null || thisRigidbody.isKinematic) {
+            return false;
+        }
+
+        Vector3 curVelocity = CurrentVelocity;
+        if (Vector3.Dot(curVelocity, GravityDirection) <= OnGroundCheckThreshold) {
+            return false;
+        }
+        
+        Vector3 nextPos = thisRigidbody.position + curVelocity * Time.fixedDeltaTime + (GravityDirection * RayLength);
+
+        // Half-extents of the box
+        Vector3 boxHalfExtents = transform.lossyScale.ComponentMultiply(thisCollider.size * 0.5f);
+
+        int tempLayer = thisCollider.gameObject.layer;
+        thisCollider.gameObject.layer = SuperspectivePhysics.IgnoreRaycastLayer;
+        
+        // Perform the BoxCast
+        Collider[] result = Physics.OverlapBox(
+            nextPos,
+            boxHalfExtents,
+            transform.rotation, // No rotation for the BoxCast
+            RaycastLayermask
+        );
+        onGround = result.Length > 0;
+
+        if (onGround) {
+            debug.Log($"{string.Join("\n", result.Select(c => c.FullPath()))}");
+        }
+        
+        thisCollider.gameObject.layer = tempLayer;
+
+        if (onGround) {
+            debug.Log("On ground");
+        }
+        else {
+            debug.Log("Not on ground");
+        }
+
+        return onGround;
+    }
+    
+    void OnDrawGizmos() {
+        // Visualize the BoxCast in the editor
+        if (thisCollider == null || !thisCollider.enabled || thisRigidbody == null || thisRigidbody.isKinematic) return;
+
+        Gizmos.color = Color.green;
+
+        Vector3 curVelocity = CurrentVelocity;
+        if (Vector3.Dot(curVelocity, GravityDirection) <= OnGroundCheckThreshold) {
+            return;
+        }
+
+        Vector3 nextPos = thisRigidbody.position + curVelocity * Time.fixedDeltaTime + (GravityDirection * RayLength);
+        Vector3 boxHalfExtents = transform.lossyScale.ComponentMultiply(thisCollider.size * 0.5f);
+
+        // Set up gizmos for rotation
+        Gizmos.matrix = Matrix4x4.TRS(nextPos, transform.rotation, Vector3.one);
+
+        // Draw the box
+        Gizmos.DrawWireCube(Vector3.zero, boxHalfExtents * 2f);
     }
 
     void ReorientGravityAfterPortaling(Portal inPortal) {

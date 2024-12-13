@@ -308,6 +308,8 @@ namespace DimensionObjectMechanics {
             foreach (DimensionObject aDimensionObject in aDimensionObjects) {
                 // Check if all bDimensionObjects satisfy ShouldCollideWithDimensionObject
                 foreach (DimensionObject bDimensionObject in bDimensionObjects) {
+                    if (!aDimensionObject.HasChannelOverlapWith(bDimensionObject)) continue;
+                    
                     if (!aDimensionObject.ShouldCollideWithDimensionObject(bDimensionObject)) {
                         // If any collision check fails, return false immediately
                         collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionIgnored);
@@ -465,7 +467,8 @@ public class CollisionsCache {
     public void RemoveCollider(Collider collider) {
         if (collisionsCache.TryGetValue(collider, out Dictionary<Collider, CollisionCacheValue> collisions)) {
             // Before removing the collider, we need to remove it from all other colliders' collision checks
-            foreach (Collider otherCollider in collisions.Keys) {
+            List<Collider> keys = new List<Collider>(collisions.Keys);
+            foreach (Collider otherCollider in keys) {
                 if (collisionsCache.TryGetValue(otherCollider, out Dictionary<Collider, CollisionCacheValue> otherCollisions)) {
                     otherCollisions.Remove(collider);
                 }

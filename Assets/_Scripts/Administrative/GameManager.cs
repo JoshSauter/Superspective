@@ -75,7 +75,7 @@ public class GameManager : Singleton<GameManager> {
 
     public void RestartGame() {
         Time.timeScale = 1f;
-        SuperspectivePhysics.ClearAllCollisionState();
+        SuperspectivePhysics.ResetState();
         SaveManager.ClearAllState();
         SceneManager.LoadScene(this.gameObject.scene.buildIndex);
     }

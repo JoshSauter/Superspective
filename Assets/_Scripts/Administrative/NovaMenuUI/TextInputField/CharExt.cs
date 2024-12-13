@@ -1,3 +1,4 @@
+using NovaMenuUI;
 using TMPro;
 using UnityEngine.UIElements;
 

@@ -394,6 +394,7 @@ namespace Audio {
 					audioName = audioName,
 					audio = newAudioSource,
 					basePitch = newAudioSource.pitch,
+					baseVolume = newAudioSource.volume,
 					pitchRandomness = UnityEngine.Random.Range(-settings.randomizePitch, settings.randomizePitch)
 				};
 				settingsOverride?.Invoke(audioJob);

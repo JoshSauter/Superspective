@@ -20,7 +20,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
     public DimensionObject backWall;
     public Button button;
     public float tDistanceBeforeEnablingNewCubeColliders = 0.5f;
-    const float SPAWN_OFFSET = 12;
+    const float SPAWN_OFFSET = 6;
     private float SpawnOffset => SPAWN_OFFSET * CurScale;
 
     private Vector3 lastCubeSpawnedPosition;
@@ -416,6 +416,7 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
             newCube.isHeld = cubeSpawned.isHeld;
+            newCubeGravity.useGravity = false;
             
             // Delete the temp cube from the spawner
             cubeSpawned.GetComponent<DynamicObject>().Destroy();
@@ -438,11 +439,27 @@ public class CubeSpawner : SaveableObject<CubeSpawner, CubeSpawner.CubeSpawnerSa
             cube.transform.SetParent(null);
             Destroy(parent.gameObject);
 
+            // We disable the colliders of the new cube for the first frame after being spawned, to allow GrowShrinkObject to apply its starting scale without bumping the player
+            Collider[] collidersTemporarilyDisabled = newCube.transform.GetComponentsInChildrenRecursively<Collider>();
+            foreach (Collider c in collidersTemporarilyDisabled) {
+                c.enabled = false;
+            }
+
+            StartCoroutine(RestoreColliders(collidersTemporarilyDisabled));
+
             cubeSpawned = null;
             cubeGrabbedFromSpawner = newCube;
             newCube.gameObject.layer = SuperspectivePhysics.DefaultLayer;
         }
     }
+
+    private IEnumerator RestoreColliders(Collider[] collidersTemporarilyIgnored) {
+        yield return null;
+        foreach (Collider c in collidersTemporarilyIgnored) {
+            c.enabled = true;
+        }
+    }
+
     public void OnBetterTriggerEnter(Collider other) { }
     public void OnBetterTriggerStay(Collider other) { }
 

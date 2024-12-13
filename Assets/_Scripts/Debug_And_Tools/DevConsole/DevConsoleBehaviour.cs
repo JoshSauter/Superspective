@@ -55,10 +55,14 @@ namespace DeveloperConsole {
                 new ToggleDebugModeCommand("toggleDebug"),
                 new ToggleUICommand("toggleUI"),
                 new ChangeScaleCommand("changeScale"),
-                new HideCullEverythingLayer("hideCullMask"),
-                new ShowTriggers("showTriggers"),
+                new HideCullEverythingLayerCommand("hideCullMask"),
+                new ShowTriggersCommand("showTriggers"),
                 new ShowVolumetricPortalsCommand("showVolumetricPortals"),
                 new SetFarClipPlaneCommand("setFarClipPlane"),
+                new TogglePortalDebuggingCommand("togglePortalDebugging"),
+                #if UNITY_EDITOR
+                new ToggleAutosaveInEditorCommand("toggleAutosaveInEditor"),
+                #endif
             };
             
             inputField.onSubmit.AddListener(ProcessCommand);

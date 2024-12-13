@@ -19,7 +19,7 @@ namespace GrowShrink {
         
         // These values change/get set when this object enters a GrowShrinkHallway
         public float minScale, maxScale;
-        public float _currentScale = 1;
+        private float _currentScale = 1;
 
         public float startingScale = 1f;
         
@@ -155,8 +155,8 @@ namespace GrowShrink {
             transform.localScale *= scaleChangeRatio;
 
             if (thisRigidbody != null) {
-                // Technically square-cube law should apply, but we're not going to worry about that
-                thisRigidbody.mass *= scaleChangeRatio;
+                // Scale mass according to the cube of the scale change (square-cube law)
+                thisRigidbody.mass *= Mathf.Pow(scaleChangeRatio, 3);
 
                 if (!thisRigidbody.isKinematic) {
                     thisRigidbody.velocity *= scaleChangeRatio;

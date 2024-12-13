@@ -147,8 +147,11 @@ Shader "Suberspective/SuberspectiveRainbow" {
 				// specular direction
 				float3 lightReflectDirection = reflect(-lightDirection, normalDirection);
                 float3 viewDirection = normalize(i.worldPos - _WorldSpaceCameraPos);
+            	viewDirection.x += 0.5 * sin(_Time.y * 0.123);
+            	viewDirection.y += 0.25 * sin(_Time.x + 0.5);
+            	viewDirection.z += 0.25 * _CosTime.x;
+            	viewDirection = normalize(viewDirection);
 				
-				// Following line makes a cool rainbow-glass effect, might want to use it:
 				float4 rainbowColor = abs(float4(viewDirection.x, viewDirection.y, viewDirection.z, _Color.a));
 
 				SuberspectiveClipOnly(i);

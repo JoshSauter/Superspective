@@ -31,6 +31,7 @@ public class SelectAllChildrenRecursivelyTool : EditorWindow {
             typeName = prevTypeName;
         }
 
+        selectInactive = EditorGUILayout.Toggle("Select inactive?", selectInactive);
         allowInheritance = EditorGUILayout.Toggle("Allow inheritance?", allowInheritance);
         typeName = EditorGUILayout.TextField("Type Name:", typeName);
         if (GUILayout.Button($"Find {DisplayName(typeName)} in selected GameObjects")) {

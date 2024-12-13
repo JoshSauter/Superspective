@@ -1,17 +1,27 @@
 using System;
+using Audio;
 using UnityEngine;
 using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmElevatorSave> {
+public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmElevatorSave>, CustomAudioJob {
     public Collider playerUnderElevatorHitbox;
     public ChasmElevatorHandle handle;
     public Elevator elevator;
     public Transform[] crossBeams;
 
-    private int Direction => handle.handleState == ChasmElevatorHandle.HandleState.Down ? -1 : 1;
+    private int Direction {
+	    get {
+		    var effectiveHandleState = handle.handleState.State;
+		    if (effectiveHandleState == ChasmElevatorHandle.HandleState.HeldByPlayer) {
+			    effectiveHandleState = handle.handleState.PrevState;
+		    }
+
+		    return effectiveHandleState == ChasmElevatorHandle.HandleState.Down ? -1 : 1;
+	    }
+    }
 
     private const float CROSS_BEAMS_MIN_SIZE = 0.74f;
     private const float SEND_BACK_DOWN_DELAY = 4.25f;
@@ -53,7 +63,15 @@ public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmEl
         elevator.state.AddStateTransition(Elevator.ElevatorState.Moving, Elevator.ElevatorState.Idle, () => PlayerUnderElevator);
         
         // Apply camera shake when we start moving
-        elevator.state.AddTrigger(Elevator.ElevatorState.Moving, () => CameraShake.instance.Shake(() => transform.position, CAMERA_SHAKE_INTENSITY, ELEVATOR_STARTUP_TIME));
+        elevator.state.AddTrigger(Elevator.ElevatorState.Moving, () => {
+	        AudioManager.instance.PlayWithUpdate(AudioName.MachineClick, ID, this);
+	        AudioManager.instance.PlayWithUpdate(AudioName.ElectricalHum, ID, this);
+	        CameraShake.instance.Shake(() => transform.position, CAMERA_SHAKE_INTENSITY, ELEVATOR_STARTUP_TIME);
+        });
+        
+        elevator.state.AddTrigger(Elevator.ElevatorState.Idle, () => {
+	        AudioManager.instance.PlayWithUpdate(AudioName.MachineOff, ID, this);
+        });
         
         // Keep the elevator moving in the correct direction
         elevator.state.WithUpdate(Elevator.ElevatorState.Moving, _ => {
@@ -67,6 +85,13 @@ public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmEl
         if (automaticallySendDownWhenAtTop) {
 	        ManuallySendElevatorBackDownForCutscene();
         }
+    }
+
+    public void UpdateAudioJob(AudioManager.AudioJob job) {
+	    job.audio.transform.position = transform.position;
+	    if (job.audioName == AudioName.ElectricalHum) {
+		    job.audio.volume = Mathf.InverseLerp(0, elevator.speed, Mathf.Abs(elevator.curVelocity));
+	    }
     }
     
 #region Saving

@@ -138,66 +138,77 @@ namespace LevelManagement {
 		[Button("Load default player position")]
 		public void ChangeLevelInEditor() {
 #if !UNITY_EDITOR
-		return;
+			return;
 #endif
 
-		if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
-		
-		string sceneName = GetSceneName();
-		LoadDefaultPlayerPosition(sceneName.ToLevel());
-
-		// Hijacking this to display level banner on load, even when it's already the active scene
-		LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
+			if (!defaultPlayerPosition || hasLoadedDefaultPlayerPosition) return;
+			
+			string sceneName = GetSceneName();
+			LoadDefaultPlayerPosition(sceneName.ToLevel());
+			
+			// Hijacking this to display level banner on load, even when it's already the active scene
+			LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
 #if UNITY_EDITOR
-		void LoadSceneInEditor(string sceneName) {
-			try {
-				Scene scene = EditorSceneManager.GetSceneByName(sceneName);
-				if (!scene.IsValid()) {
-					bool isPrototypeScene = sceneName.ToLevel().IsTestingLevel();
-					string path = $"Assets/{(!isPrototypeScene ? "__Scenes" : "PrototypeAndTesting")}/{sceneName}.unity";
-					scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
-				}
-				EditorSceneManager.SetActiveScene(scene);
-			}
-			catch (Exception e) {
-				Debug.LogError(e);
-			}
-		}
 
-		void UnloadUnrelatedScenes(string sceneName) {
-			HashSet<Levels> connectedLevels = allLevels.Find(l => l.level == startingScene).connectedLevels.ToHashSet();
-			foreach (var level in allLevels) {
-				if (level.level == Levels.ManagerScene || level.level == sceneName.ToLevel()) continue;
-
-				try {
-					if (!connectedLevels.Contains(level.level)) {
-						Scene scene = EditorSceneManager.GetSceneByName(level.level.ToName());
-						if (scene.IsValid()) {
-							EditorSceneManager.SaveScene(scene);
-							EditorSceneManager.CloseScene(scene, true);
-						}
+			string GetScenePathByName(string sceneName) {
+				foreach (EditorBuildSettingsScene editorScene in EditorBuildSettings.scenes) {
+					if (editorScene.enabled && Path.GetFileNameWithoutExtension(editorScene.path) == sceneName) {
+						return editorScene.path;
 					}
+				}
+
+				return default;
+			}
+			
+			void LoadSceneInEditor(string sceneName) {
+				try {
+					Scene scene = EditorSceneManager.GetSceneByName(sceneName);
+					if (!scene.IsValid()) {
+						bool isPrototypeScene = sceneName.ToLevel().IsTestingLevel();
+						scene = EditorSceneManager.OpenScene(GetScenePathByName(sceneName), OpenSceneMode.Additive);
+					}
+					EditorSceneManager.SetActiveScene(scene);
 				}
 				catch (Exception e) {
 					Debug.LogError(e);
 				}
 			}
-		}
-
-		if (!Application.isPlaying) {
-			UnloadUnrelatedScenes(sceneName);
-			foreach (var connectedLevel in allLevels.Find(l => l.level == startingScene).connectedLevels) {
-				LoadSceneInEditor(connectedLevel.ToName());
+	
+			void UnloadUnrelatedScenes(string sceneName) {
+				HashSet<Levels> connectedLevels = allLevels.Find(l => l.level == startingScene).connectedLevels.ToHashSet();
+				foreach (var level in allLevels) {
+					if (level.level == Levels.ManagerScene || level.level == sceneName.ToLevel()) continue;
+	
+					try {
+						if (!connectedLevels.Contains(level.level)) {
+							Scene scene = EditorSceneManager.GetSceneByName(level.level.ToName());
+							if (scene.IsValid()) {
+								EditorSceneManager.SaveScene(scene);
+								EditorSceneManager.CloseScene(scene, true);
+							}
+						}
+					}
+					catch (Exception e) {
+						Debug.LogError(e);
+					}
+				}
 			}
-			LoadSceneInEditor(sceneName);
-		}
-
-
-		if (EditorApplication.isPlaying)
+	
+			if (!Application.isPlaying) {
+				UnloadUnrelatedScenes(sceneName);
+				foreach (var connectedLevel in allLevels.Find(l => l.level == startingScene).connectedLevels) {
+					LoadSceneInEditor(connectedLevel.ToName());
+				}
+				LoadSceneInEditor(sceneName);
+			}
+	
+	
+			if (EditorApplication.isPlaying)
 #endif
 			hasLoadedDefaultPlayerPosition = true;
 		}
 #endregion
+		
 		[SerializeField]
 		public List<Level> allLevels;
 		// levels is allLevels, keyed by levelName, but with test scenes removed in build

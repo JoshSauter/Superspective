@@ -6,7 +6,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace Audio {
-	// next 56
+	// next 61
 	public enum AudioName {
 		CubeDrop = 0,
 		CubePickup = 1,
@@ -16,7 +16,7 @@ namespace Audio {
 		ElevatorClose = 5,
 		ElevatorOpen = 6,
 		ElevatorMove = 7,
-		PanelHum = 8,
+		ElectricalHum = 8,
 		PowerTrailHum = 9,
 		PowerTrailBootup = 34,
 		PowerTrailShutdown = 35,
@@ -62,9 +62,15 @@ namespace Audio {
 		MachineClick = 53,
 		MachineOn = 54,
 		MachineOff = 55,
+		LeverSnapDown = 57,
+		LeverSnapUp = 58,
+		LeverCrank = 59,
 		// UI Sounds
 		UI_ShortBlip = 49,
 		UI_HoverBlip = 50,
+		LevelChangeSting = 56,
+		// Music
+		Music_Dusk = 60,
 	}
 
 	public static class AudioNameExt {

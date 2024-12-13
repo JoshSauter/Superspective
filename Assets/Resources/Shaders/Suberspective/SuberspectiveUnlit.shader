@@ -92,51 +92,6 @@ Shader "Suberspective/SuberspectiveUnlit" {
             }
             ENDCG
         }
-        
-		// Pass to render object as a shadow caster
-		Pass {
-			Name "ShadowCaster"
-			Tags { "LightMode" = "ShadowCaster" }
-
-			ZWrite On ZTest LEqual Cull Off
-
-			CGPROGRAM
-            #include "SuberspectiveHelpers.cginc"
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma target 3.0
-			#pragma multi_compile_shadowcaster
-
-            struct appdata {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            	float3 normal : NORMAL;
-            };
-			
-			struct v2f {
-                float2 uv : TEXCOORD0;
-				V2F_SHADOW_CASTER;
-				UNITY_VERTEX_OUTPUT_STEREO
-                float3 worldPos : TEXCOORD1;
-			};
-
-			v2f vert(appdata v ) {
-				v2f o;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-				return o;
-			}
-
-			float4 frag(v2f i) : SV_Target {
-				// TODO: Figure this out if needed
-				// SuberspectiveClipOnly(i.pos, i.uv, i.worldPos);
-				SHADOW_CASTER_FRAGMENT(i)
-			}
-			ENDCG
-		}
     }
 	CustomEditor "SuberspectiveGUI"
 }

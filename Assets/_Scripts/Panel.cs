@@ -86,7 +86,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
     }
 
     protected override void Init() {
-        AudioManager.instance.PlayWithUpdate(AudioName.PanelHum, ID, this);
+        AudioManager.instance.PlayWithUpdate(AudioName.ElectricalHum, ID, this);
     }
 
     void Update() {

@@ -338,11 +338,12 @@ public class PillarDimensionObject : DimensionObject {
 		PillarDimensionObject portalDimensionObj = portal?.otherPortal?.pillarDimensionObject;
 		DimensionPillar activePillar = portalDimensionObj?.activePillar;
 		if (portalDimensionObj != null && activePillar != null && this.activePillar != null) {
+			// Make sure that the portal has its own dimension object to avoid this condition yielding false positives
 			if (this == portalDimensionObj) return; // Don't update the state for the Portal being rendered
 			
 			// Assumes the out portal's activePillar is the same as this object's activePillar
 			// TODO: Add support for different activePillars
-			int outOfPortalDimension = portalDimensionObj.GetPillarDimensionWhere(v => v == VisibilityState.Visible);
+			int outOfPortalDimension = portalDimensionObj.Dimension;
 			UpdateStateForCamera(Cam.Portal, activePillar, false, true, outOfPortalDimension);
 		}
 	}
