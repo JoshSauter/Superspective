@@ -505,22 +505,22 @@ namespace PortalMechanics {
 				debug.Log("No trigger set, getting or adding a CompositeMagicTrigger");
 				// A CompositeMagicTrigger handles player passing through portals
 				trigger = gameObject.GetOrAddComponent<CompositeMagicTrigger>();
-				TriggerCondition positionCondition = new TriggerCondition {
+				TriggerCondition_Deprecated positionConditionDeprecated = new TriggerCondition_Deprecated {
 					triggerCondition = TriggerConditionType.PlayerInDirectionFromPoint,
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
 					targetPosition = Vector3.zero,
 					triggerThreshold = 0f
 				};
-				TriggerCondition movementCondition = new TriggerCondition {
+				TriggerCondition_Deprecated movementConditionDeprecated = new TriggerCondition_Deprecated {
 					triggerCondition = TriggerConditionType.PlayerMovingDirection,
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
 					triggerThreshold = 0f
 				};
-				trigger.triggerConditions = new List<TriggerCondition>() {
-					positionCondition,
-					movementCondition
+				trigger.triggerConditions = new List<TriggerCondition_Deprecated>() {
+					positionConditionDeprecated,
+					movementConditionDeprecated
 				};
 			}
 		}

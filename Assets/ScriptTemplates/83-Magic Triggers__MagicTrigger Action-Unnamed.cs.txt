@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace MagicTriggerMechanics.TriggerActions {
+    [Serializable]
+    public class #SCRIPTNAME# : TriggerAction {
+        public override void Execute(MagicTrigger triggerScript) {
+            
+        }
+
+        public override void NegativeExecute(MagicTrigger triggerScript) {
+            
+        }
+    }
+}

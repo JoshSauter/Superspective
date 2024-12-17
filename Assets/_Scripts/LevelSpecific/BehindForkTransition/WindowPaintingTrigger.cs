@@ -27,16 +27,16 @@ namespace LevelSpecific.BehindForkTransition {
             yield return new WaitWhile(() => LevelManager.instance.IsCurrentlySwitchingScenes);
             yield return new WaitUntil(() => portal != null);
             MagicTrigger trigger = GetComponent<MagicTrigger>();
-            TriggerAction action = trigger.actionsToTrigger.Find(a => a.action == triggerType);
-            if (action.objectsToDisable == null) {
+            TriggerAction_Deprecated actionDeprecated = trigger.actionsToTrigger.Find(a => a.action == triggerType);
+            if (actionDeprecated.objectsToDisable == null) {
                 if (portal != null) {
-                    action.objectsToDisable = new[] { portal.gameObject };
+                    actionDeprecated.objectsToDisable = new[] { portal.gameObject };
                 }
             }
-            else if (!action.objectsToDisable.Contains(portal.gameObject)) {
-                List<GameObject> objects = action.objectsToDisable.ToList();
+            else if (!actionDeprecated.objectsToDisable.Contains(portal.gameObject)) {
+                List<GameObject> objects = actionDeprecated.objectsToDisable.ToList();
                 objects.Add(portal.gameObject);
-                action.objectsToDisable = objects.ToArray();
+                actionDeprecated.objectsToDisable = objects.ToArray();
             }
             inAsyncReferenceSetup = false;
         }
@@ -44,11 +44,11 @@ namespace LevelSpecific.BehindForkTransition {
         private void Update() {
             if (!inAsyncReferenceSetup) {
                 MagicTrigger trigger = GetComponent<MagicTrigger>();
-                TriggerAction action = trigger.actionsToTrigger.Find(a => a.action == triggerType);
+                TriggerAction_Deprecated actionDeprecated = trigger.actionsToTrigger.Find(a => a.action == triggerType);
 
                 // Restore references broken by scene loads
-                if (action.objectsToDisable == null || action.objectsToDisable.ToList().Exists(o => o == null)) {
-                    action.objectsToDisable = null;
+                if (actionDeprecated.objectsToDisable == null || actionDeprecated.objectsToDisable.ToList().Exists(o => o == null)) {
+                    actionDeprecated.objectsToDisable = null;
                     StartCoroutine(AsyncReferenceSetup());
                 }
             }

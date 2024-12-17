@@ -96,14 +96,14 @@ namespace PictureTeleportMechanics {
             GlobalMagicTrigger trigger = gameObject.AddComponent<GlobalMagicTrigger>();
 
 			// Add condition
-			TriggerCondition condition = new TriggerCondition {
+			TriggerCondition_Deprecated conditionDeprecated = new TriggerCondition_Deprecated {
 				triggerCondition = TriggerConditionType.RendererNotVisible,
 				targetRenderer = frameRenderer == null ? GetComponent<Renderer>() : frameRenderer
 			};
-			trigger.triggerConditions.Add(condition);
+			trigger.triggerConditions.Add(conditionDeprecated);
 
 			// Add action
-			TriggerAction disableSelfScriptAciton = new TriggerAction {
+			TriggerAction_Deprecated disableSelfScriptAciton = new TriggerAction_Deprecated {
 				actionTiming = ActionTiming.OnceWhileOnStay,
 				action = TriggerActionType.DisableSelfScript
 			};

@@ -21,4 +21,15 @@ public static class CamExt {
                 throw new ArgumentOutOfRangeException(nameof(cam), cam, null);
         }
     }
+    
+    public static Vector3 CamDirection(this Cam cam) {
+        switch (cam) {
+            case Cam.Player:
+                return Player.instance.PlayerCam.transform.forward;
+            case Cam.Portal:
+                return VirtualPortalCamera.instance.transform.forward;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(cam), cam, null);
+        }
+    }
 }

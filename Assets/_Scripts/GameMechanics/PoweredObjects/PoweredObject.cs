@@ -264,6 +264,33 @@ namespace PoweredObjects {
         [Serializable]
         public class PoweredObjectSave : SerializableSaveObject<PoweredObject> {
             private StateMachine<PowerState>.StateMachineSave stateSave;
+            public bool PowerIsOn {
+                get => stateSave.state is PowerState.PartiallyPowered or PowerState.Powered;
+                set {
+                    if (value == PowerIsOn) return;
+
+                    switch (stateSave.state) {
+                        case PowerState.PartiallyDepowered:
+                        case PowerState.Depowered:
+                            if (value) {
+                                stateSave.prevState = stateSave.state;
+                                stateSave.state = PowerState.PartiallyPowered;
+                                stateSave.timeSinceStateChanged = 0;
+                            }
+                            break;
+                        case PowerState.PartiallyPowered:
+                        case PowerState.Powered:
+                            if (!value) {
+                                stateSave.prevState = stateSave.state;
+                                stateSave.state = PowerState.PartiallyDepowered;
+                                stateSave.timeSinceStateChanged = 0;
+                            }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
             
             public PoweredObjectSave(PoweredObject script) : base(script) {
                 this.stateSave = script.state.ToSave();

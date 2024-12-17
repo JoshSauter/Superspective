@@ -1,0 +1,17 @@
+﻿using System;
+using UnityEngine;
+
+namespace MagicTriggerMechanics.TriggerConditions {
+    [Serializable]
+    public class #SCRIPTNAME# : TriggerCondition {
+        protected override float Evaluate(Transform triggerTransform) {
+            return 0.0f;
+        }
+        
+        public override string GetDebugInfo(Transform transform) {
+            string debugString = base.GetDebugInfo(transform);
+            debugString += "--------\n";
+            return debugString;
+        }
+    }
+}

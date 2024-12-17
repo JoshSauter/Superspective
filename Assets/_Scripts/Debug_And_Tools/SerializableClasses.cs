@@ -442,6 +442,14 @@ namespace SerializableClasses {
 		public static implicit operator SerializableReference<T, S>(S serializedObj) {
 			return serializedObj != null ? new SerializableReference<T, S> { Reference = serializedObj } : null;
 		}
+
+		// Only use this if you know you have a SerializableReference of a particular type:
+		// Actually don't use this unless you really need to (like for a migration script)
+		public static SerializableReference<T, S> FromGenericReference(SerializableReference reference) {
+			return new SerializableReference<T, S>() {
+				referencedObjId = reference.referencedObjId
+			};
+		}
 	}
 
 	public class SerializableDynamicReference : SerializableReference<DynamicObject, DynamicObject.DynamicObjectSave> {

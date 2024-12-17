@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "11c14a27283e247f57662038f58d7f41ade9d686"
     },
+    "com.mackysoft.serializereference-extensions": {
+      "version": "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f938fc5d9a9ef46a1669289450d38e17cb39567c"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

@@ -1,6 +1,7 @@
 using NovaMenuUI;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 // Yeah yeah anti-patterns, sue me if it works
 public static class AltF4ConfirmIntercept {
