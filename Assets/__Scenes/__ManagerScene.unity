@@ -14659,7 +14659,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 0}
   DEBUG: 0
-  startingScene: 34
+  startingScene: 25
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -15220,78 +15220,48 @@ MonoBehaviour:
   _id: {fileID: 441290176}
   DEBUG: 0
   triggerConditions:
-  - triggerCondition: 3
-    useLocalCoordinates: 0
-    triggerThreshold: 0.9
-    targetDirection: {x: -1, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 934.5, y: -103.75, z: 18}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: 8677781585990254850
   actionsToTrigger:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1208848658}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  - rid: 8677781585990254851
+  - rid: 8677781585990254852
   playerIsInTriggerZone: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585342235206
+      type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
+      data:
+        m_PersistentCalls:
+          m_Calls:
+          - m_Target: {fileID: 1208848658}
+            m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
+            m_MethodName: Display
+            m_Mode: 1
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 0
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+    - rid: 8677781585990254850
+      type: {class: PlayerFacingPositionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0.9
+        targetPosition: {x: 934.5, y: -103.75, z: 18}
+    - rid: 8677781585990254851
+      type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
+        unityEvent:
+          rid: 8677781585342235206
+    - rid: 8677781585990254852
+      type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
+        asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
 --- !u!114 &441290176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22564,8 +22534,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 957, y: 4.5, z: 290.5}
+  m_LocalRotation: {x: 0, y: 0.92387956, z: 0, w: -0.3826834}
+  m_LocalPosition: {x: 881.5, y: 60.5, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -31241,114 +31211,73 @@ MonoBehaviour:
   _id: {fileID: 978358504}
   DEBUG: 0
   triggerConditions:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: -1, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: 8677781585990254853
   actionsToTrigger:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 180439627}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1800991429}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Hide
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  - rid: 8677781585990254854
+  - rid: 8677781585990254855
+  - rid: 8677781585990254856
   playerIsInTriggerZone: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585342235211
+      type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
+      data:
+        m_PersistentCalls:
+          m_Calls:
+          - m_Target: {fileID: 180439627}
+            m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
+            m_MethodName: Display
+            m_Mode: 1
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 0
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+    - rid: 8677781585342235212
+      type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
+      data:
+        m_PersistentCalls:
+          m_Calls:
+          - m_Target: {fileID: 1800991429}
+            m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
+            m_MethodName: Hide
+            m_Mode: 1
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 0
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+    - rid: 8677781585990254853
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0.01
+        useLocalCoordinates: 0
+        targetDirection: {x: 0, y: -1, z: 0}
+    - rid: 8677781585990254854
+      type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
+        unityEvent:
+          rid: 8677781585342235211
+    - rid: 8677781585990254855
+      type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
+        unityEvent:
+          rid: 8677781585342235212
+    - rid: 8677781585990254856
+      type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
+        asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
 --- !u!114 &978358504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45941,7 +45870,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1879047679
 --- !u!114 &1535199394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55015,78 +54944,49 @@ MonoBehaviour:
   _id: {fileID: 1734990132}
   DEBUG: 0
   triggerConditions:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: -1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: 8677781585990254857
   actionsToTrigger:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1800991429}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  - rid: 8677781585990254858
+  - rid: 8677781585990254859
   playerIsInTriggerZone: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585342235216
+      type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
+      data:
+        m_PersistentCalls:
+          m_Calls:
+          - m_Target: {fileID: 1800991429}
+            m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
+            m_MethodName: Display
+            m_Mode: 1
+            m_Arguments:
+              m_ObjectArgument: {fileID: 0}
+              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+              m_IntArgument: 0
+              m_FloatArgument: 0
+              m_StringArgument: 
+              m_BoolArgument: 0
+            m_CallState: 2
+    - rid: 8677781585990254857
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0.01
+        useLocalCoordinates: 0
+        targetDirection: {x: 0, y: 0, z: -1}
+    - rid: 8677781585990254858
+      type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
+        unityEvent:
+          rid: 8677781585342235216
+    - rid: 8677781585990254859
+      type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
+        asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
 --- !u!114 &1734990132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57303,14 +57203,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65898,7 +65798,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh10549648
+  m_Name: pb_Mesh3912266
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

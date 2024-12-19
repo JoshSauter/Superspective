@@ -110,4 +110,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/Ascension/_Ascension0.unity
     guid: a65961a6ece1cc8468888ae52384aa6d
+  - enabled: 1
+    path: Assets/__Scenes/Ascension/_Ascension1.unity
+    guid: 03863cc05dbc4e94a8d3d4616f9f8856
   m_configObjects: {}
