@@ -5,9 +5,7 @@ using UnityEngine;
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class ToggleGameObjectsAction : TriggerAction {
-        [NonSerialized, ShowInInspector] // Fixes serialization in inspector issue
         public GameObject[] objectsToEnable;
-        [NonSerialized, ShowInInspector]
         public GameObject[] objectsToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
@@ -25,6 +23,32 @@ namespace MagicTriggerMechanics.TriggerActions {
             }
             foreach (var obj in objectsToDisable) {
                 obj.SetActive(true);
+            }
+        }
+        
+        [Serializable]
+        public class SaveData {
+            public ActionTiming actionTiming;
+            public bool[] objectsToEnableState;
+            public bool[] objectsToDisableState;
+        }
+        
+        public override object GetSaveData(MagicTrigger triggerScript) {
+            return new SaveData() {
+                actionTiming = actionTiming,
+                objectsToEnableState = Array.ConvertAll(objectsToEnable, o => o.activeSelf),
+                objectsToDisableState = Array.ConvertAll(objectsToDisable, o => o.activeSelf)
+            };
+        }
+
+        public override void LoadSaveData(object saveData, MagicTrigger triggerScript) {
+            SaveData data = (SaveData)saveData;
+            actionTiming = data.actionTiming;
+            for (int i = 0; i < objectsToEnable.Length; i++) {
+                objectsToEnable[i].SetActive(data.objectsToEnableState[i]);
+            }
+            for (int i = 0; i < objectsToDisable.Length; i++) {
+                objectsToDisable[i].SetActive(data.objectsToDisableState[i]);
             }
         }
     }

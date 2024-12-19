@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "com.cratesmith.assetui": {
-      "version": "https://github.com/Cratesmith/Cratesmith.AssetUI.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "11c14a27283e247f57662038f58d7f41ade9d686"
-    },
     "com.mackysoft.serializereference-extensions": {
       "version": "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions",
       "depth": 0,

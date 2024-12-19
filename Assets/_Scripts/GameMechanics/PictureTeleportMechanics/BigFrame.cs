@@ -4,6 +4,8 @@ using Saving;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MagicTriggerMechanics.TriggerActions;
+using MagicTriggerMechanics.TriggerConditions;
 using UnityEngine;
 
 namespace PictureTeleportMechanics {
@@ -96,18 +98,16 @@ namespace PictureTeleportMechanics {
             GlobalMagicTrigger trigger = gameObject.AddComponent<GlobalMagicTrigger>();
 
 			// Add condition
-			TriggerCondition_Deprecated conditionDeprecated = new TriggerCondition_Deprecated {
-				triggerCondition = TriggerConditionType.RendererNotVisible,
+			TriggerCondition condition = new RendererNotVisibleCondition() {
 				targetRenderer = frameRenderer == null ? GetComponent<Renderer>() : frameRenderer
 			};
-			trigger.triggerConditions.Add(conditionDeprecated);
+			trigger.triggerConditions.Add(condition);
 
 			// Add action
-			TriggerAction_Deprecated disableSelfScriptAciton = new TriggerAction_Deprecated {
-				actionTiming = ActionTiming.OnceWhileOnStay,
-				action = TriggerActionType.DisableSelfScript
+			TriggerAction disableSelfScriptAction = new DisableSelfScriptAction() {
+				actionTiming = ActionTiming.OnceWhileOnStay
 			};
-			trigger.actionsToTrigger.Add(disableSelfScriptAciton);
+			trigger.actionsToTrigger.Add(disableSelfScriptAction);
 
 			return trigger;
 		}

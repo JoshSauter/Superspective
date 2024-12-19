@@ -5,9 +5,7 @@ using UnityEngine;
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class ToggleCollidersAction : TriggerAction {
-        [NonSerialized, ShowInInspector] // Fixes serialization in inspector issue
         public Collider[] collidersToEnable;
-        [NonSerialized, ShowInInspector]
         public Collider[] collidersToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
@@ -25,6 +23,32 @@ namespace MagicTriggerMechanics.TriggerActions {
             }
             foreach (var col in collidersToDisable) {
                 col.enabled = true;
+            }
+        }
+        
+        [Serializable]
+        public class SaveData {
+            public ActionTiming actionTiming;
+            public bool[] collidersToEnableState;
+            public bool[] collidersToDisableState;
+        }
+        
+        public override object GetSaveData(MagicTrigger triggerScript) {
+            return new SaveData() {
+                actionTiming = actionTiming,
+                collidersToEnableState = Array.ConvertAll(collidersToEnable, c => c.enabled),
+                collidersToDisableState = Array.ConvertAll(collidersToDisable, c => c.enabled)
+            };
+        }
+
+        public override void LoadSaveData(object saveData, MagicTrigger triggerScript) {
+            SaveData data = (SaveData)saveData;
+            actionTiming = data.actionTiming;
+            for (int i = 0; i < collidersToEnable.Length; i++) {
+                collidersToEnable[i].enabled = data.collidersToEnableState[i];
+            }
+            for (int i = 0; i < collidersToDisable.Length; i++) {
+                collidersToDisable[i].enabled = data.collidersToDisableState[i];
             }
         }
     }

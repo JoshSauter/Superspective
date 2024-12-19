@@ -15521,7 +15521,6 @@ MonoBehaviour:
   visibilityState: 3
   collisionMatrix: 000000010000000000010000000000010000010101010101
   collisionLogic: {fileID: 0}
-  isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
 --- !u!1 &1834143664506403144

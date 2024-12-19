@@ -13,6 +13,7 @@ using DimensionObjectMechanics;
 using GrowShrink;
 using LevelManagement;
 using MagicTriggerMechanics;
+using MagicTriggerMechanics.TriggerConditions;
 using Saving;
 using SerializableClasses;
 using UnityEngine.Events;
@@ -505,22 +506,20 @@ namespace PortalMechanics {
 				debug.Log("No trigger set, getting or adding a CompositeMagicTrigger");
 				// A CompositeMagicTrigger handles player passing through portals
 				trigger = gameObject.GetOrAddComponent<CompositeMagicTrigger>();
-				TriggerCondition_Deprecated positionConditionDeprecated = new TriggerCondition_Deprecated {
-					triggerCondition = TriggerConditionType.PlayerInDirectionFromPoint,
+				TriggerCondition positionCondition = new PlayerInDirectionFromPointCondition() {
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
 					targetPosition = Vector3.zero,
 					triggerThreshold = 0f
 				};
-				TriggerCondition_Deprecated movementConditionDeprecated = new TriggerCondition_Deprecated {
-					triggerCondition = TriggerConditionType.PlayerMovingDirection,
+				TriggerCondition movementCondition = new PlayerMovingDirectionCondition() {
 					useLocalCoordinates = true,
 					targetDirection = Vector3.forward,
 					triggerThreshold = 0f
 				};
-				trigger.triggerConditions = new List<TriggerCondition_Deprecated>() {
-					positionConditionDeprecated,
-					movementConditionDeprecated
+				trigger.triggerConditions = new List<TriggerCondition>() {
+					positionCondition,
+					movementCondition
 				};
 			}
 		}

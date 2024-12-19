@@ -30,13 +30,12 @@ namespace MagicTriggerMechanics {
 		        debug.Log("IsActive is false");
 		        return;
 	        }
-			GameObject player = Player.instance.gameObject;
 			if (DEBUG) {
-				PrintDebugInfo(player);
+				PrintDebugInfo();
 			}
 
-			bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, player));
-            bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, player));
+			bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform));
+            bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform));
 			// Magic Events triggered
 			if (allConditionsSatisfied) {
 				debug.Log($"Triggering MagicTrigger for {gameObject.name}!");

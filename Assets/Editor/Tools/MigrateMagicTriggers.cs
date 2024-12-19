@@ -9,6 +9,7 @@ using PortalMechanics;
 using SerializableClasses;
 using SuperspectiveUtils;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class MigrateMagicTriggers : EditorWindow {
@@ -45,22 +46,24 @@ public class MigrateMagicTriggers : EditorWindow {
         foreach (var magicTrigger in magicTriggers) {
             MigrateMagicTrigger(magicTrigger);
         }
+        Debug.Log($"<color=green>Migration complete! {magicTriggers.Length} MagicTriggers migrated.</color>");
     }
 
     private static void MigrateMagicTrigger(MagicTrigger script) {
-        script.triggerConditionsNew = script
-            .triggerConditions
-            .Select(MigrateCondition)
-            .ToList();
-        script.actionsToTriggerNew = script
-            .actionsToTrigger
-            .Select(MigrateAction)
-            .ToList();
-        
-        Debug.Log($"Migrated MagicTrigger {script.name} with {script.triggerConditionsNew.Count} conditions and {script.actionsToTriggerNew.Count} actions.", script);
+        // script.triggerConditions = script
+        //     .triggerConditionsOld
+        //     .Select(tc => MigrateCondition(tc, script.gameObject))
+        //     .ToList();
+        // script.actionsToTrigger = script
+        //     .actionsToTriggerOld
+        //     .Select(a => MigrateAction(a, script.gameObject))
+        //     .ToList();
+
+        EditorSceneManager.MarkSceneDirty(script.gameObject.scene);
+        Debug.Log($"Migrated MagicTrigger {script.name} with {script.triggerConditions.Count} conditions and {script.actionsToTrigger.Count} actions.", script);
     }
 
-    private static TriggerCondition MigrateCondition(TriggerCondition_Deprecated old) {
+    private static TriggerCondition MigrateCondition(TriggerCondition_Deprecated old, GameObject context) {
         switch (old.triggerCondition) {
             case TriggerConditionType.PlayerFacingDirection:
                 return new PlayerFacingDirectionCondition {
@@ -126,11 +129,12 @@ public class MigrateMagicTriggers : EditorWindow {
                     targetObject = old.targetObject
                 };
             default:
-                throw new ArgumentOutOfRangeException();
+                Debug.LogError($"Unknown action type: {old.triggerCondition} on MagicTrigger {context.FullPath()}", context);
+                return null;
         }
     }
 
-    private static TriggerAction MigrateAction(TriggerAction_Deprecated old) {
+    private static TriggerAction MigrateAction(TriggerAction_Deprecated old, GameObject context) {
         switch (old.action) {
             case TriggerActionType.DisableSelfScript:
                 return new DisableSelfScriptAction() {
@@ -149,8 +153,8 @@ public class MigrateMagicTriggers : EditorWindow {
             case TriggerActionType.EnableDisableGameObjects:
                 return new EnableDisableGameObjectsAction() {
                     actionTiming = old.actionTiming,
-                    objectsToEnable = old.objectsToEnable,
-                    objectsToDisable = old.objectsToDisable
+                    objectsToEnable = old.objectsToEnable.ToList(),
+                    objectsToDisable = old.objectsToDisable.ToList()
                 };
             case TriggerActionType.ToggleScripts:
                 return new ToggleScriptsAction() {
@@ -213,7 +217,8 @@ public class MigrateMagicTriggers : EditorWindow {
                     levelBackward = old.levelBackward
                 };
             default:
-                throw new ArgumentOutOfRangeException();
+                Debug.LogError($"Unknown action type: {old.action} on MagicTrigger {context.FullPath()}", context);
+                return null;
         }
     }
 

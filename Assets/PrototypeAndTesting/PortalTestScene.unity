@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566522
+  m_Name: pb_Mesh1750920
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1613,7 +1613,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566994
+  m_Name: pb_Mesh1751392
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2052,7 +2052,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566378
+  m_Name: pb_Mesh1750776
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2392,7 +2392,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566260
+  m_Name: pb_Mesh1750658
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3017,7 +3017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 175725434}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -3038,10 +3038,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254803
+  - rid: 8677781585990254804
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254803
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254804
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &175725436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3238,7 +3260,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566794
+  m_Name: pb_Mesh1751192
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3403,7 +3425,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566662
+  m_Name: pb_Mesh1751060
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3568,7 +3590,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566248
+  m_Name: pb_Mesh1750646
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3739,7 +3761,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566588
+  m_Name: pb_Mesh1750986
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3904,7 +3926,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566236
+  m_Name: pb_Mesh1750634
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5796,7 +5818,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566272
+  m_Name: pb_Mesh1750670
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5961,7 +5983,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567194
+  m_Name: pb_Mesh1751592
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -14073,7 +14095,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 428743997}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -14094,10 +14116,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254805
+  - rid: 8677781585990254806
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254805
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254806
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &428743999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14754,7 +14798,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 474960403}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -14775,10 +14819,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254807
+  - rid: 8677781585990254808
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254807
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254808
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &474960405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14800,7 +14866,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566932
+  m_Name: pb_Mesh1751330
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -14965,7 +15031,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566328
+  m_Name: pb_Mesh1750726
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15130,7 +15196,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567006
+  m_Name: pb_Mesh1751404
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15619,7 +15685,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566740
+  m_Name: pb_Mesh1751138
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -15784,7 +15850,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566352
+  m_Name: pb_Mesh1750750
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -17437,7 +17503,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566482
+  m_Name: pb_Mesh1750880
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18740,7 +18806,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566172
+  m_Name: pb_Mesh1750570
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -20957,7 +21023,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566856
+  m_Name: pb_Mesh1751254
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -21122,7 +21188,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566112
+  m_Name: pb_Mesh1750510
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -21462,7 +21528,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567268
+  m_Name: pb_Mesh1751666
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -22530,7 +22596,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567208
+  m_Name: pb_Mesh1751606
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -22695,7 +22761,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567160
+  m_Name: pb_Mesh1751558
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -23025,7 +23091,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567122
+  m_Name: pb_Mesh1751520
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -24195,7 +24261,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567088
+  m_Name: pb_Mesh1751486
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -24360,7 +24426,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566152
+  m_Name: pb_Mesh1750550
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -25329,7 +25395,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566898
+  m_Name: pb_Mesh1751296
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -25669,7 +25735,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566224
+  m_Name: pb_Mesh1750622
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26133,7 +26199,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566076
+  m_Name: pb_Mesh1750474
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27166,7 +27232,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566340
+  m_Name: pb_Mesh1750738
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27595,7 +27661,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566088
+  m_Name: pb_Mesh1750486
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -27760,7 +27826,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2377686
+  m_Name: pb_Mesh736222
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -28210,7 +28276,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 995013539}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -28231,10 +28297,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254809
+  - rid: 8677781585990254810
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254809
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254810
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &995013541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28256,7 +28344,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566602
+  m_Name: pb_Mesh1751000
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -28421,7 +28509,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566196
+  m_Name: pb_Mesh1750594
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -28871,7 +28959,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1006212441}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -28892,10 +28980,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254811
+  - rid: 8677781585990254812
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254811
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254812
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &1006212443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28917,7 +29027,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566542
+  m_Name: pb_Mesh1750940
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29082,7 +29192,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567148
+  m_Name: pb_Mesh1751546
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29346,7 +29456,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566446
+  m_Name: pb_Mesh1750844
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29511,7 +29621,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566616
+  m_Name: pb_Mesh1751014
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29676,7 +29786,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566308
+  m_Name: pb_Mesh1750706
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -29841,7 +29951,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566406
+  m_Name: pb_Mesh1750804
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30006,7 +30116,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567256
+  m_Name: pb_Mesh1751654
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30171,7 +30281,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2377636
+  m_Name: pb_Mesh736172
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30336,7 +30446,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566686
+  m_Name: pb_Mesh1751084
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30666,7 +30776,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566498
+  m_Name: pb_Mesh1750896
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -30831,7 +30941,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566296
+  m_Name: pb_Mesh1750694
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31279,7 +31389,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1279202369}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -31300,10 +31410,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254813
+  - rid: 8677781585990254814
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254813
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254814
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &1279202371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31325,7 +31457,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566208
+  m_Name: pb_Mesh1750606
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31589,7 +31721,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566470
+  m_Name: pb_Mesh1750868
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31754,7 +31886,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567136
+  m_Name: pb_Mesh1751534
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31919,7 +32051,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566284
+  m_Name: pb_Mesh1750682
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -32084,7 +32216,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566826
+  m_Name: pb_Mesh1751224
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -32573,7 +32705,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566140
+  m_Name: pb_Mesh1750538
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -33302,7 +33434,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566458
+  m_Name: pb_Mesh1750856
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -33807,7 +33939,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566916
+  m_Name: pb_Mesh1751314
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -34422,7 +34554,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 1419587143}
   DEBUG: 1
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -34443,10 +34575,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254815
+  - rid: 8677781585990254816
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254815
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254816
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &1419587145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34917,7 +35071,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566394
+  m_Name: pb_Mesh1750792
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -35896,7 +36050,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567230
+  m_Name: pb_Mesh1751628
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -36061,7 +36215,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566956
+  m_Name: pb_Mesh1751354
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -36226,7 +36380,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566064
+  m_Name: pb_Mesh1750462
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -36566,7 +36720,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566630
+  m_Name: pb_Mesh1751028
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -36731,7 +36885,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566418
+  m_Name: pb_Mesh1750816
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -39070,7 +39224,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566126
+  m_Name: pb_Mesh1750524
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41511,7 +41665,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566968
+  m_Name: pb_Mesh1751366
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -43616,7 +43770,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567242
+  m_Name: pb_Mesh1751640
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -48825,7 +48979,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566868
+  m_Name: pb_Mesh1751266
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -48990,7 +49144,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566780
+  m_Name: pb_Mesh1751178
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -49155,7 +49309,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566882
+  m_Name: pb_Mesh1751280
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -49798,7 +49952,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1567034
+  m_Name: pb_Mesh1751432
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -50246,7 +50400,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 2026189900}
   DEBUG: 0
-  triggerConditions:
+  triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
     triggerThreshold: 0
@@ -50267,10 +50421,32 @@ MonoBehaviour:
     targetLevels: 
     targetPlayerScaleRange: {x: 0, y: 0}
     allowTriggeringWhileInsideObject: 0
-  actionsToTrigger: []
+  actionsToTriggerOld: []
+  triggerConditionsNew:
+  - rid: 8677781585990254817
+  - rid: 8677781585990254818
+  actionsToTriggerNew: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 8677781585990254817
+      type: {class: PlayerInDirectionFromPointCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
+        targetPosition: {x: 0, y: 0, z: 0}
+    - rid: 8677781585990254818
+      type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        triggerThreshold: 0
+        useLocalCoordinates: 1
+        targetDirection: {x: 0, y: 0, z: 1}
 --- !u!114 &2026189902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50292,7 +50468,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566808
+  m_Name: pb_Mesh1751206
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -50807,7 +50983,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1566432
+  m_Name: pb_Mesh1750830
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

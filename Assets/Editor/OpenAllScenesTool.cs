@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using LevelManagement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -9,6 +10,16 @@ using UnityEngine.SceneManagement;
 
 [InitializeOnLoad]
 public class OpenAllScenesTool {
+    static string GetScenePathByName(string sceneName) {
+        foreach (EditorBuildSettingsScene editorScene in EditorBuildSettings.scenes) {
+            if (editorScene.enabled && Path.GetFileNameWithoutExtension(editorScene.path) == sceneName) {
+                return editorScene.path;
+            }
+        }
+
+        return default;
+    }
+    
     [MenuItem("My Tools/Scenes/Open All Scenes")]
     public static void OpenAllScenes() {
         foreach (var level in LevelManager.instance.allLevels) {
@@ -16,7 +27,7 @@ public class OpenAllScenesTool {
                 string sceneName = level.level.ToName();
                 Scene scene = EditorSceneManager.GetSceneByName(sceneName);
                 if (!scene.IsValid()) {
-                    EditorSceneManager.OpenScene(scene.path, OpenSceneMode.Additive);
+                    EditorSceneManager.OpenScene(GetScenePathByName(sceneName), OpenSceneMode.Additive);
                 }
             }
             catch (Exception e) {

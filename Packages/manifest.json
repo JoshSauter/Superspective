@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.cratesmith.assetui": "https://github.com/Cratesmith/Cratesmith.AssetUI.git",
     "com.mackysoft.serializereference-extensions": "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",

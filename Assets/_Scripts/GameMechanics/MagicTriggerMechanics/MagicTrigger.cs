@@ -2,13 +2,14 @@
 using UnityEngine;
 using SuperspectiveUtils;
 using System.Linq;
-using NaughtyAttributes;
 using Saving;
 using System;
 using System.Collections;
 using MagicTriggerMechanics.TriggerActions;
 using MagicTriggerMechanics.TriggerConditions;
+using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,18 +17,22 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
-		[HorizontalLine(color: EColor.Yellow)]
-		public List<TriggerCondition_Deprecated> triggerConditions = new List<TriggerCondition_Deprecated>();
-		[HorizontalLine(color: EColor.Green)]
-		public List<TriggerAction_Deprecated> actionsToTrigger = new List<TriggerAction_Deprecated>();
+		[FormerlySerializedAs("triggerConditionsNew")]
+		[SerializeReference, BoxGroup("Trigger Conditions")]
+		[GUIColor(1f, 1f, 0.8f)]
+		[InfoBox("@NumConditionsLabel")]
+		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
+		[FormerlySerializedAs("actionsToTriggerNew")]
+		[SerializeReference, BoxGroup("Trigger Actions")]
+		[GUIColor(0.8f, 1f, 0.8f)]
+		[InfoBox("@NumActionsLabel")]
+		public List<TriggerAction> actionsToTrigger = new List<TriggerAction>();
 		
-		[SerializeReference, OdinSerialize]
-		public List<TriggerCondition> triggerConditionsNew = new List<TriggerCondition>();
-		[SerializeReference, OdinSerialize] // Enables Odin's polymorphic serialization
-		public List<TriggerAction> actionsToTriggerNew = new List<TriggerAction>();
+		private string NumConditionsLabel => $"Conditions: {triggerConditions.Count}";
+		private string NumActionsLabel => $"Actions: {actionsToTrigger.Count}";
 
 		#region events
-		public delegate void MagicAction();
+		public delegate void MagicAction(); 
 		// These events are fired when the trigger condition specified is met
 		public MagicAction OnMagicTriggerStay;
 		public MagicAction OnMagicTriggerEnter;
@@ -41,8 +46,8 @@ namespace MagicTriggerMechanics {
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
-		public bool AllConditionsSatisfied => triggerConditions.TrueForAll(tc => tc.IsTriggered(transform, Player.instance.gameObject));
-		public bool AllConditionsNegativelySatisfied => triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform, Player.instance.gameObject));
+		public bool AllConditionsSatisfied => triggerConditions.TrueForAll(tc => tc.IsTriggered(transform));
+		public bool AllConditionsNegativelySatisfied => triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform));
 		
 		public bool playerIsInTriggerZone = false;
 		protected bool hasTriggeredOnStay = false;
@@ -96,9 +101,8 @@ namespace MagicTriggerMechanics {
 			if (!enabled) return;
 
 			if (other.TaggedAsPlayer()) {
-				GameObject player = other.gameObject;
 				if (DEBUG) {
-					PrintDebugInfo(player);
+					PrintDebugInfo();
 				}
 
 				bool allConditionsSatisfied = AllConditionsSatisfied;
@@ -141,9 +145,8 @@ namespace MagicTriggerMechanics {
 
 			if (other.TaggedAsPlayer()) {
 				playerIsInTriggerZone = true;
-				GameObject player = other.gameObject;
 				if (DEBUG) {
-					PrintDebugInfo(player);
+					PrintDebugInfo();
 				}
 
 				bool allConditionsSatisfied = AllConditionsSatisfied;
@@ -179,20 +182,20 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected void ExecuteActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.Execute(this);
 			}
 		}
 		protected void ExecuteNegativeActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.NegativeExecute(this);
 			}
 		}
 
-		protected void PrintDebugInfo(GameObject player) {
+		protected void PrintDebugInfo() {
 			string debugString = $"{gameObject.name}:\n";
 			foreach (var condition in triggerConditions) {
-				debugString += condition.GetDebugInfo(transform, player);
+				debugString += condition.GetDebugInfo(transform);
 			}
 			debug.Log(debugString);
 		}
@@ -201,105 +204,27 @@ namespace MagicTriggerMechanics {
 
 		[Serializable]
 		public class MagicTriggerSave : SerializableSaveObject<MagicTrigger> {
-			List<List<bool>> gameObjectsToEnableState = new List<List<bool>>();
-			List<List<bool>> gameObjectsToDisableState = new List<List<bool>>();
-			List<List<bool>> scriptsToEnableStatePerAction = new List<List<bool>>();
-			List<List<bool>> scriptsToDisableStatePerAction = new List<List<bool>>();
+			List<object> triggerActionSaves;
 			bool hasTriggeredOnStay;
 			bool hasNegativeTriggeredOnStay;
 
 			public MagicTriggerSave(MagicTrigger magicTrigger) : base(magicTrigger) {
-				foreach (var action in magicTrigger.actionsToTrigger) {
-					List<bool> objectsToEnableState = new List<bool>();
-					List<bool> objectsToDisableState = new List<bool>();
-					List<bool> scriptsToEnableState = new List<bool>();
-					List<bool> scriptsToDisableState = new List<bool>();
-					if (action.action is TriggerActionType.EnableDisableGameObjects or TriggerActionType.ToggleGameObjects) {
-						if (action.objectsToEnable != null) {
-							foreach (var objToEnable in action.objectsToEnable) {
-								if (objToEnable != null) {
-									objectsToEnableState.Add(objToEnable.activeSelf);
-								}
-							}
-						}
-
-						if (action.objectsToDisable != null) {
-							foreach (var objToDisable in action.objectsToDisable) {
-								if (objToDisable != null) {
-									objectsToDisableState.Add(objToDisable.activeSelf);
-								}
-							}
-						}
-					}
-					else if (action.action is TriggerActionType.EnableDisableScripts or TriggerActionType.ToggleScripts) {
-						if (action.scriptsToEnable != null) {
-							foreach (var scriptToEnable in action.scriptsToEnable) {
-								if (scriptToEnable != null) {
-									scriptsToEnableState.Add(scriptToEnable.enabled);
-								}
-							}
-						}
-
-						if (action.scriptsToDisable != null) {
-							foreach (var scriptToDisable in action.scriptsToDisable) {
-								if (scriptToDisable != null) {
-									scriptsToDisableState.Add(scriptToDisable.enabled);
-								}
-							}
-						}
-					}
-
-					this.gameObjectsToEnableState.Add(objectsToEnableState);
-					this.gameObjectsToDisableState.Add(objectsToDisableState);
-					this.scriptsToEnableStatePerAction.Add(scriptsToEnableState);
-					this.scriptsToDisableStatePerAction.Add(scriptsToDisableState);
-				}
 				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
+
+				triggerActionSaves = magicTrigger.actionsToTrigger.Select(a => a.GetSaveData(magicTrigger)).ToList();
 			}
 
 			public override void LoadSave(MagicTrigger magicTrigger) {
-				for (int i = 0; i < magicTrigger.actionsToTrigger.Count; i++) {
-					TriggerAction_Deprecated actionDeprecated = magicTrigger.actionsToTrigger[i];
-
-					if (actionDeprecated.action is TriggerActionType.EnableDisableGameObjects or TriggerActionType.ToggleGameObjects) {
-						if (actionDeprecated.objectsToEnable != null) {
-							for (int j = 0; j < actionDeprecated.objectsToEnable.Length; j++) {
-								if (actionDeprecated.objectsToEnable[j] == null) continue;
-								actionDeprecated.objectsToEnable[j].SetActive(this.gameObjectsToEnableState[i][j]);
-							}
-						}
-
-						if (actionDeprecated.objectsToDisable != null) {
-							for (int j = 0; j < actionDeprecated.objectsToDisable.Length; j++) {
-								if (actionDeprecated.objectsToDisable[j] == null) continue;
-								actionDeprecated.objectsToDisable[j].SetActive(this.gameObjectsToDisableState[i][j]);
-							}
-						}
-					}
-					else if (actionDeprecated.action is TriggerActionType.EnableDisableScripts or TriggerActionType.ToggleScripts) {
-						if (actionDeprecated.scriptsToEnable != null) {
-							for (int j = 0; j < actionDeprecated.scriptsToEnable.Length; j++) {
-								if (actionDeprecated.scriptsToEnable[j] == null) continue;
-								actionDeprecated.scriptsToEnable[j].enabled = this.scriptsToEnableStatePerAction[i][j];
-							}
-						}
-						if (actionDeprecated.scriptsToDisable != null) {
-							for (int j = 0; j < actionDeprecated.scriptsToDisable.Length; j++) {
-								if (actionDeprecated.scriptsToDisable[j] == null) continue;
-								actionDeprecated.scriptsToDisable[j].enabled = this.scriptsToDisableStatePerAction[i][j];
-							}
-						}
-					}
-				}
-
 				magicTrigger.hasTriggeredOnStay = this.hasTriggeredOnStay;
 				magicTrigger.hasNegativeTriggeredOnStay = this.hasNegativeTriggeredOnStay;
+
+				for (int i = 0; i < triggerActionSaves.Count; i++) {
+					object saveData = triggerActionSaves[i];
+					magicTrigger.actionsToTrigger[i].LoadSaveData(saveData, magicTrigger);
+				}
 			}
 		}
 		#endregion
 	}
 }
-
-// TODO: Provide a home:
-public class SubclassPicker : PropertyAttribute { }
