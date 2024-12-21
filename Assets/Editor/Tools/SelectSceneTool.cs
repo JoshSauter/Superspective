@@ -23,6 +23,11 @@ public class SelectSceneTool : EditorWindow {
             windowOpen = true;
         }
     }
+        
+    // Reset the flag when the window is destroyed
+    private void OnDestroy() {
+        windowOpen = false;
+    }
 
     // Draw the GUI for the window
     private void OnGUI() {

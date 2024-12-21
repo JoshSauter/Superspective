@@ -21,12 +21,6 @@ namespace PictureTeleportMechanics {
 		[ReadOnly]
         public GlobalMagicTrigger disableFrameTrigger;
 
-        protected override void OnValidate() {
-	        base.OnValidate();
-
-			Initialize();
-		}
-
 		void Initialize() {
 	        if (disableFrameTrigger == null) {
 		        disableFrameTrigger = GetComponent<GlobalMagicTrigger>();
@@ -101,13 +95,13 @@ namespace PictureTeleportMechanics {
 			TriggerCondition condition = new RendererNotVisibleCondition() {
 				targetRenderer = frameRenderer == null ? GetComponent<Renderer>() : frameRenderer
 			};
-			trigger.triggerConditions.Add(condition);
+			trigger.triggerConditionsNew.Add(condition);
 
 			// Add action
 			TriggerAction disableSelfScriptAction = new DisableSelfScriptAction() {
 				actionTiming = ActionTiming.OnceWhileOnStay
 			};
-			trigger.actionsToTrigger.Add(disableSelfScriptAction);
+			trigger.actionsToTriggerNew.Add(disableSelfScriptAction);
 
 			return trigger;
 		}

@@ -11184,10 +11184,10 @@ MonoBehaviour:
   - {x: 0, y: 1, z: 0, w: -1}
   - {x: 0, y: 1, z: 0, w: -1}
   - {x: 0, y: 1, z: 0, w: -1}
-  - {x: -0.0000001589457, y: -1, z: -7.5791214e-14, w: -1}
-  - {x: -0.0000001589457, y: -1, z: -7.5791214e-14, w: -1}
-  - {x: -0.0000001589457, y: -1, z: -7.5791214e-14, w: -1}
-  - {x: -0.0000001589457, y: -1, z: -7.5791214e-14, w: -1}
+  - {x: 0, y: -1, z: 0, w: -1}
+  - {x: 0, y: -1, z: 0, w: -1}
+  - {x: 0, y: -1, z: 0, w: -1}
+  - {x: 0, y: -1, z: 0, w: -1}
   m_Colors: []
   m_UnwrapParameters:
     m_HardAngle: 88
@@ -13166,7 +13166,7 @@ Transform:
   - {fileID: 8097251626483315305}
   - {fileID: 6826384078206528019}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &141457596914348857
 MonoBehaviour:
@@ -13197,6 +13197,8 @@ MonoBehaviour:
   DEBUG: 0
   frameRenderer: {fileID: 4074407394453911727}
   frameCollider: {fileID: 7946368380084947025}
+  otherRenderers: []
+  otherColliders: []
   disableFrameTrigger: {fileID: 8716874794456523657}
 --- !u!114 &8716874794456523657
 MonoBehaviour:
@@ -13212,43 +13214,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: {fileID: 141457596914348857}
   DEBUG: 0
-  triggerConditions:
-  - triggerCondition: 7
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTrigger:
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  triggerConditions: []
+  actionsToTrigger: []
   playerIsInTriggerZone: 0
   sceneMustBeActive: 1
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &8986340818186636462
 GameObject:
   m_ObjectHideFlags: 0

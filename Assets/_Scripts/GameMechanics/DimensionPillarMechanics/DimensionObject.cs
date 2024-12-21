@@ -703,6 +703,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		}
 
 		public override void LoadSave(DimensionObject dimensionObj) {
+			base.LoadSave(dimensionObj);
 			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
 			dimensionObj.ignoreChildrenWithDimensionObject = this.ignoreChildrenWithDimensionObject;
 			dimensionObj.disableColliderWhileInvisible = this.disableColliderWhileInvisible;

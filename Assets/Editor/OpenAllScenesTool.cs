@@ -31,7 +31,7 @@ public class OpenAllScenesTool {
                 }
             }
             catch (Exception e) {
-                Debug.LogError(e);
+                Debug.LogError($"Error opening scene {level.level}: {e}");
             }
         }
     }

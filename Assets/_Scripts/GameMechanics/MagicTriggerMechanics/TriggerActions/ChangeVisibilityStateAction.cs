@@ -1,10 +1,8 @@
 using System;
-using Sirenix.OdinInspector;
 
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class ChangeVisibilityStateAction : TriggerAction {
-        [NonSerialized, ShowInInspector] // Fixes serialization in inspector issue
         public DimensionObject[] dimensionObjects;
         public VisibilityState visibilityState;
         

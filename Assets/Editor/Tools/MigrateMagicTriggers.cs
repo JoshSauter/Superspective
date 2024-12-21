@@ -30,6 +30,11 @@ public class MigrateMagicTriggers : EditorWindow {
         }
     }
     
+    // Reset the flag when the window is destroyed
+    private void OnDestroy() {
+        windowOpen = false;
+    }
+    
     // Draw the GUI for the window
     private void OnGUI() {
         GUILayout.Label("Select a Level", EditorStyles.boldLabel);
@@ -50,17 +55,17 @@ public class MigrateMagicTriggers : EditorWindow {
     }
 
     private static void MigrateMagicTrigger(MagicTrigger script) {
-        // script.triggerConditions = script
-        //     .triggerConditionsOld
-        //     .Select(tc => MigrateCondition(tc, script.gameObject))
-        //     .ToList();
-        // script.actionsToTrigger = script
-        //     .actionsToTriggerOld
-        //     .Select(a => MigrateAction(a, script.gameObject))
-        //     .ToList();
+        script.triggerConditionsNew = script
+            .triggerConditionsOld
+            .Select(tc => MigrateCondition(tc, script.gameObject))
+            .ToList();
+        script.actionsToTriggerNew = script
+            .actionsToTriggerOld
+            .Select(a => MigrateAction(a, script.gameObject))
+            .ToList();
 
         EditorSceneManager.MarkSceneDirty(script.gameObject.scene);
-        Debug.Log($"Migrated MagicTrigger {script.name} with {script.triggerConditions.Count} conditions and {script.actionsToTrigger.Count} actions.", script);
+        Debug.Log($"Migrated MagicTrigger {script.name} with {script.triggerConditionsNew.Count} conditions and {script.actionsToTriggerNew.Count} actions.", script);
     }
 
     private static TriggerCondition MigrateCondition(TriggerCondition_Deprecated old, GameObject context) {
@@ -153,8 +158,8 @@ public class MigrateMagicTriggers : EditorWindow {
             case TriggerActionType.EnableDisableGameObjects:
                 return new EnableDisableGameObjectsAction() {
                     actionTiming = old.actionTiming,
-                    objectsToEnable = old.objectsToEnable.ToList(),
-                    objectsToDisable = old.objectsToDisable.ToList()
+                    objectsToEnable = old.objectsToEnable.ToArray(),
+                    objectsToDisable = old.objectsToDisable.ToArray()
                 };
             case TriggerActionType.ToggleScripts:
                 return new ToggleScriptsAction() {

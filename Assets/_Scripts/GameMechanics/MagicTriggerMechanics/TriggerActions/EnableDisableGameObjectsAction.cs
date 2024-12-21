@@ -1,13 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class EnableDisableGameObjectsAction : TriggerAction {
-        public List<GameObject> objectsToEnable;
-        public List<GameObject> objectsToDisable;
+        public GameObject[] objectsToEnable;
+        public GameObject[] objectsToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
             foreach (var obj in objectsToEnable) {
@@ -36,10 +35,10 @@ namespace MagicTriggerMechanics.TriggerActions {
         public override void LoadSaveData(object saveData, MagicTrigger triggerScript) {
             SaveData data = (SaveData)saveData;
             actionTiming = data.actionTiming;
-            for (int i = 0; i < objectsToEnable.Count; i++) {
+            for (int i = 0; i < objectsToEnable.Length; i++) {
                 objectsToEnable[i].SetActive(data.objectsToEnableState[i]);
             }
-            for (int i = 0; i < objectsToDisable.Count; i++) {
+            for (int i = 0; i < objectsToDisable.Length; i++) {
                 objectsToDisable[i].SetActive(data.objectsToDisableState[i]);
             }
         }

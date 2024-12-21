@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using MagicTriggerMechanics.TriggerActions;
 using MagicTriggerMechanics.TriggerConditions;
+using NaughtyAttributes;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine.Serialization;
@@ -17,19 +18,24 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
-		[FormerlySerializedAs("triggerConditionsNew")]
-		[SerializeReference, BoxGroup("Trigger Conditions")]
-		[GUIColor(1f, 1f, 0.8f)]
-		[InfoBox("@NumConditionsLabel")]
-		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
-		[FormerlySerializedAs("actionsToTriggerNew")]
-		[SerializeReference, BoxGroup("Trigger Actions")]
-		[GUIColor(0.8f, 1f, 0.8f)]
-		[InfoBox("@NumActionsLabel")]
-		public List<TriggerAction> actionsToTrigger = new List<TriggerAction>();
+		[HorizontalLine(color: EColor.Yellow)]
+		[FormerlySerializedAs("triggerConditions")]
+		public List<TriggerCondition_Deprecated> triggerConditionsOld = new List<TriggerCondition_Deprecated>();
+		[HorizontalLine(color: EColor.Green)]
+		[FormerlySerializedAs("actionsToTrigger")]
+		public List<TriggerAction_Deprecated> actionsToTriggerOld = new List<TriggerAction_Deprecated>();
 		
-		private string NumConditionsLabel => $"Conditions: {triggerConditions.Count}";
-		private string NumActionsLabel => $"Actions: {actionsToTrigger.Count}";
+		[SerializeReference, Sirenix.OdinInspector.BoxGroup("Trigger Conditions")]
+		[GUIColor(1f, 1f, 0.8f)]
+		[Sirenix.OdinInspector.InfoBox("@NumConditionsLabel")]
+		public List<TriggerCondition> triggerConditionsNew = new List<TriggerCondition>();
+		[SerializeReference, Sirenix.OdinInspector.BoxGroup("Trigger Actions")]
+		[GUIColor(0.8f, 1f, 0.8f)]
+		[Sirenix.OdinInspector.InfoBox("@NumActionsLabel")]
+		public List<TriggerAction> actionsToTriggerNew = new List<TriggerAction>();
+		
+		private string NumConditionsLabel => $"Conditions: {triggerConditionsNew.Count}";
+		private string NumActionsLabel => $"Actions: {actionsToTriggerNew.Count}";
 
 		#region events
 		public delegate void MagicAction(); 
@@ -46,8 +52,8 @@ namespace MagicTriggerMechanics {
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
-		public bool AllConditionsSatisfied => triggerConditions.TrueForAll(tc => tc.IsTriggered(transform));
-		public bool AllConditionsNegativelySatisfied => triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform));
+		public bool AllConditionsSatisfied => triggerConditionsNew.TrueForAll(tc => tc.IsTriggered(transform));
+		public bool AllConditionsNegativelySatisfied => triggerConditionsNew.TrueForAll(tc => tc.IsReverseTriggered(transform));
 		
 		public bool playerIsInTriggerZone = false;
 		protected bool hasTriggeredOnStay = false;
@@ -182,19 +188,19 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected void ExecuteActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.Execute(this);
 			}
 		}
 		protected void ExecuteNegativeActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.NegativeExecute(this);
 			}
 		}
 
 		protected void PrintDebugInfo() {
 			string debugString = $"{gameObject.name}:\n";
-			foreach (var condition in triggerConditions) {
+			foreach (var condition in triggerConditionsNew) {
 				debugString += condition.GetDebugInfo(transform);
 			}
 			debug.Log(debugString);
@@ -212,7 +218,7 @@ namespace MagicTriggerMechanics {
 				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
 
-				triggerActionSaves = magicTrigger.actionsToTrigger.Select(a => a.GetSaveData(magicTrigger)).ToList();
+				triggerActionSaves = magicTrigger.actionsToTriggerNew.Select(a => a.GetSaveData(magicTrigger)).ToList();
 			}
 
 			public override void LoadSave(MagicTrigger magicTrigger) {
@@ -221,7 +227,7 @@ namespace MagicTriggerMechanics {
 
 				for (int i = 0; i < triggerActionSaves.Count; i++) {
 					object saveData = triggerActionSaves[i];
-					magicTrigger.actionsToTrigger[i].LoadSaveData(saveData, magicTrigger);
+					magicTrigger.actionsToTriggerNew[i].LoadSaveData(saveData, magicTrigger);
 				}
 			}
 		}

@@ -2,15 +2,12 @@ using System;
 using System.Collections.Generic;
 using PortalMechanics;
 using SerializableClasses;
-using Sirenix.OdinInspector;
 
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class EnableDisablePortalRendering : TriggerAction {
         public bool logicAndRendering = false;
-        [NonSerialized, ShowInInspector]
         public SerializableReference<Portal, Portal.PortalSave>[] portalsToEnable;
-        [NonSerialized, ShowInInspector]
         public SerializableReference<Portal, Portal.PortalSave>[] portalsToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
