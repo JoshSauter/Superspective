@@ -9,7 +9,7 @@ namespace UnityStandardAssets.ImageEffects
     [RequireComponent (typeof(Camera))]
     [AddComponentMenu("Image Effects/Rendering/Screen Space Ambient Occlusion")]
     // Extending SaveableObject to allow for cross-scene references (e.g. for PictureTeleport)
-    public class ScreenSpaceAmbientOcclusion : SaveableObject {
+    public class ScreenSpaceAmbientOcclusion : SuperspectiveObject {
 	    public const string SaveID = "ScreenSpaceAmbientOcclusion";
 	    public override string ID => SaveID;
 
@@ -59,8 +59,9 @@ namespace UnityStandardAssets.ImageEffects
         }
 
 
-        void OnDisable()
+        protected override void OnDisable()
         {
+	        base.OnDisable();
             DestroyMaterial (m_SSAOMaterial);
         }
 

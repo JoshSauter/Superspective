@@ -6,11 +6,11 @@ using Saving;
 using StateUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class AscensionPillar : SaveableObject<AscensionPillar, AscensionPillar.AscensionPillarSave> {
+public class AscensionPillar : SuperspectiveObject<AscensionPillar, AscensionPillar.AscensionPillarSave> {
     public DimensionPillar prevPillar;
     public PillarDimensionObject pillarDimensionObj;
     
-    public enum State {
+    public enum State : byte {
         NotActive,
         NotYetVisible,
         Visible
@@ -40,17 +40,18 @@ public class AscensionPillar : SaveableObject<AscensionPillar, AscensionPillar.A
     }
     
 #region Saving
-		[Serializable]
-		public class AscensionPillarSave : SerializableSaveObject<AscensionPillar> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public AscensionPillarSave(AscensionPillar script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(AscensionPillar script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(AscensionPillarSave save) {
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class AscensionPillarSave : SaveObject<AscensionPillar> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public AscensionPillarSave(AscensionPillar script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

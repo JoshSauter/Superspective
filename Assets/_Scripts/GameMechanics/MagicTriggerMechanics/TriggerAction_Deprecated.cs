@@ -59,8 +59,8 @@ namespace MagicTriggerMechanics {
 		public VisibilityState visibilityState;
 		public Levels flythroughCameraLevel;
 		public bool logicAndRendering = false;
-		public SerializableReference[] portalsToEnable;
-		public SerializableReference[] portalsToDisable;
+		public SuperspectiveReference[] portalsToEnable;
+		public SuperspectiveReference[] portalsToDisable;
 		public UnityEvent unityEvent;
 		public Collider[] collidersToEnable;
 		public Collider[] collidersToDisable;
@@ -203,14 +203,14 @@ namespace MagicTriggerMechanics {
 			return (int)timing > 0;
 		}
 
-		private void PortalRenderingToggle(IEnumerable<SerializableReference> portals, bool pauseRendering) {
+		private void PortalRenderingToggle(IEnumerable<SuperspectiveReference> portals, bool pauseRendering) {
 			foreach (var portal in portals) {
 				portal.Reference.MatchAction(
 					saveableObject => {
 						if (saveableObject is Portal loadedPortal) {
 							loadedPortal.pauseRendering = pauseRendering;
 							if (logicAndRendering) {
-								loadedPortal.pauseLogic = pauseRendering;
+								//loadedPortal.pauseLogic = pauseRendering;
 							}
 						}
 					},
@@ -218,7 +218,7 @@ namespace MagicTriggerMechanics {
 						if (serializedSaveObject is Portal.PortalSave unloadedPortal) {
 							unloadedPortal.pauseRendering = pauseRendering;
 							if (logicAndRendering) {
-								unloadedPortal.pauseLogic = pauseRendering;
+								//unloadedPortal.pauseLogic = pauseRendering;
 							}
 						}
 					}

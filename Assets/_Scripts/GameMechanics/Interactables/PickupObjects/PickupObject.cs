@@ -4,6 +4,7 @@ using System.Linq;
 using Audio;
 using DissolveObjects;
 using GrowShrink;
+using LevelManagement;
 using NaughtyAttributes;
 using NovaMenuUI;
 using SuperspectiveUtils;
@@ -12,11 +13,12 @@ using Saving;
 using SerializableClasses;
 using StateUtils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static Audio.AudioManager;
-using CubeSpawnerReference = SerializableClasses.SerializableReference<CubeSpawner, CubeSpawner.CubeSpawnerSave>;
+using CubeSpawnerReference = SerializableClasses.SuperspectiveReference<CubeSpawner, CubeSpawner.CubeSpawnerSave>;
 
 [RequireComponent(typeof(UniqueId))]
-public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObjectSave>, AudioJobOnGameObject {
+public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.PickupObjectSave>, AudioJobOnGameObject {
     public delegate void PickupObjectAction(PickupObject obj);
 
     public delegate void PickupObjectSimpleAction();
@@ -38,6 +40,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     static float currentPitch = 1f;
 
+    public DynamicObject thisDynamicObject;
     public bool isReplaceable = true;
     public bool isHeld;
     public CubeReceptacle receptacleHeldIn;
@@ -97,7 +100,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     bool OnCooldown => currentCooldown > 0;
 
     // For some reason, Unit's Rigidbody is not sleeping when it should be. This is a workaround.
-    public enum RigidbodySleepingState {
+    public enum RigidbodySleepingState : byte {
         Moving, // Rigidbody is moving
         Steady, // Rigidbody is not moving but not yet sleeping
         Sleeping // Rigidbody has been not moving for long enough to be considered sleeping
@@ -106,7 +109,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     private StateMachine<RigidbodySleepingState> rigidbodySleepingStateMachine;
 
     // Lock the cube into 90 degree angles when the player presses the button for it
-    public enum FreezeRotationState {
+    public enum FreezeRotationState : byte {
         FreelyRotating,
         RotatingToRightAngle,
         Frozen
@@ -114,7 +117,8 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
     [SerializeField, ReadOnly]
     private StateMachine<FreezeRotationState> freezeRotationStateMachine;
 
-    private void OnDisable() {
+    protected override void OnDisable() {
+        base.OnDisable();
         PlayerButtonInput.instance.OnInteractPress -= Drop;
         Portal.OnAnyPortalPlayerTeleport -= UpdatePlayerPositionLastFrameAfterPortal;
         TeleportEnter.OnAnyTeleportSimple -= UpdatePlayerPositionLastFrameAfterTeleport;
@@ -160,6 +164,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         if (thisRigidbody == null) thisRigidbody = GetComponent<Rigidbody>();
         if (thisGravity == null) thisGravity = GetComponent<GravityObject>();
         if (thisCollider == null) thisCollider = GetComponent<Collider>();
+        if (thisDynamicObject == null) thisDynamicObject = GetComponent<DynamicObject>();
 
         interactableObject = thisRigidbody.GetOrAddComponent<InteractableObject>();
         interactableObject.SkipSave = true;
@@ -220,8 +225,20 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         // Don't allow clicks in the menu to propagate to picking up/dropping the cube
         if (NovaPauseMenu.instance.PauseMenuIsOpen) currentCooldown = PICKUP_DROP_COOLDOWN;
 
+        if (thisDynamicObject) thisDynamicObject.isAllowedToChangeScenes = !isHeld;
+        
         if (isHeld) {
             interactableGlow.TurnOnGlow();
+            
+            // Change scenes dynamically if the cube is picked up and the player moves to a different scene
+            Scene activeScene = SceneManager.GetSceneByName(LevelManager.instance.activeSceneName);
+            if (gameObject.scene != activeScene && thisDynamicObject) {
+                // Force scene change regardless of normal settings
+                bool temp = thisDynamicObject.isAllowedToChangeScenes;
+                thisDynamicObject.isAllowedToChangeScenes = true;
+                thisDynamicObject.ChangeScene(activeScene);
+                thisDynamicObject.isAllowedToChangeScenes = temp;
+            }
         }
         else {
             thisRigidbody.sleepThreshold = SLEEP_THRESHOLD * Scale;
@@ -258,7 +275,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
     private Vector3 debugTargetPos = Vector3.zero;
     void FixedUpdate() {
-        if (thisCollider.material != EffectivePhysicsMaterial) thisCollider.material = EffectivePhysicsMaterial;
+        if (thisCollider.sharedMaterial != EffectivePhysicsMaterial) thisCollider.sharedMaterial = EffectivePhysicsMaterial;
         
         if (isHeld && shouldFollow) {
             OffsetByCameraMovement();
@@ -522,7 +539,7 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
         }
     }
 
-    private IEnumerator DestroyObjectAfterDissolve(DissolveObject dissolve, SerializableDynamicReference dynamicObjRef) {
+    private IEnumerator DestroyObjectAfterDissolve(DissolveObject dissolve, SuperspectiveDynamicReference dynamicObjRef) {
         yield return new WaitUntil(() => dissolve.stateMachine == DissolveObject.State.Dematerialized);
 
         if (spawnedFrom != null) {
@@ -588,27 +605,46 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
 
 #region Saving
 
+    public override void LoadSave(PickupObjectSave save) {
+        AssignReferences();
+
+        transform.position = save.position;
+        transform.rotation = save.rotation;
+        transform.localScale = save.localScale;
+
+        if (thisRigidbody != null) {
+            thisRigidbody.position = transform.position;
+            thisRigidbody.velocity = save.velocity;
+            thisRigidbody.angularVelocity = save.angularVelocity;
+            thisRigidbody.mass = save.mass;
+            thisRigidbody.isKinematic = save.kinematicRigidbody;
+        }
+
+        isReplaceable = save.isReplaceable;
+        interactable = save.interactable;
+        isHeld = save.isHeld;
+        receptacleHeldIn = save.receptacleHeldIn?.GetOrNull();
+        currentCooldown = save.currentCooldown;
+            
+        rigidbodySleepingStateMachine.LoadFromSave(save.rigidbodySleepingStateMachineSave);
+    }
+
     [Serializable]
-    public class PickupObjectSave : SerializableSaveObject<PickupObject> {
-        SerializableVector3 angularVelocity;
-        float currentCooldown;
-        bool interactable;
-        bool isHeld;
-
-        SerializableReference<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> receptacleHeldIn;
-
+    public class PickupObjectSave : SaveObject<PickupObject> {
+        public StateMachine<RigidbodySleepingState>.StateMachineSave rigidbodySleepingStateMachineSave;
+        public SuperspectiveReference<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> receptacleHeldIn;
+        public SerializableVector3 playerCamPosLastFrame;
+        public SerializableVector3 position;
+        public SerializableQuaternion rotation;
+        public SerializableVector3 angularVelocity;
+        public SerializableVector3 localScale;
+        public SerializableVector3 velocity;
+        public float mass;
+        public float currentCooldown;
+        public bool interactable;
+        public bool isHeld;
         public bool isReplaceable;
-        SerializableVector3 localScale;
-        float mass;
-
-        SerializableVector3 playerCamPosLastFrame;
-        SerializableVector3 position;
-        SerializableQuaternion rotation;
-
-        bool kinematicRigidbody;
-        SerializableVector3 velocity;
-        
-        StateMachine<RigidbodySleepingState>.StateMachineSave rigidbodySleepingStateMachineSave;
+        public bool kinematicRigidbody;
 
         public PickupObjectSave(PickupObject obj) : base(obj) {
             position = obj.transform.position;
@@ -629,30 +665,6 @@ public class PickupObject : SaveableObject<PickupObject, PickupObject.PickupObje
             currentCooldown = obj.currentCooldown;
 
             rigidbodySleepingStateMachineSave = obj.rigidbodySleepingStateMachine.ToSave();
-        }
-
-        public override void LoadSave(PickupObject obj) {
-            obj.AssignReferences();
-
-            obj.transform.position = position;
-            obj.transform.rotation = rotation;
-            obj.transform.localScale = localScale;
-
-            if (obj.thisRigidbody != null) {
-                obj.thisRigidbody.position = obj.transform.position;
-                obj.thisRigidbody.velocity = velocity;
-                obj.thisRigidbody.angularVelocity = angularVelocity;
-                obj.thisRigidbody.mass = mass;
-                obj.thisRigidbody.isKinematic = kinematicRigidbody;
-            }
-
-            obj.isReplaceable = isReplaceable;
-            obj.interactable = interactable;
-            obj.isHeld = isHeld;
-            obj.receptacleHeldIn = receptacleHeldIn?.GetOrNull();
-            obj.currentCooldown = currentCooldown;
-            
-            obj.rigidbodySleepingStateMachine.LoadFromSave(rigidbodySleepingStateMachineSave);
         }
     }
 #endregion

@@ -35,7 +35,7 @@ public static class VisibilityStateExt {
 }
 
 [RequireComponent(typeof(UniqueId))]
-public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObject.DimensionObjectSave> {
 	public const int NUM_CHANNELS = 8;
 	private const string IGNORE_COLLISIONS_TRIGGER_ZONE_NAME = "IgnoreCollisionsTriggerZone";
 	
@@ -168,9 +168,10 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		
 		InitializeMaskSolution();
 	}
-	
-	void OnDisable() {
-		Destroy(collisionLogic);
+
+	protected override void OnDisable() {
+		base.OnDisable();
+		collisionLogic?.Destroy();
 		UninitializeRenderersAndColliders();
 		
 		visibilityState = VisibilityState.Visible;
@@ -230,6 +231,7 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 		trigger.center = transform.InverseTransformPoint(center);
 		trigger.isTrigger = true;
 		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
+		collisionLogic.id = id;
 		collisionLogic.dimensionObject = this;
 
 		return trigger;
@@ -674,20 +676,32 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 	}
 #endregion
 
-	#region Saving
+#region Saving
+
+	public override void LoadSave(DimensionObjectSave save) {
+		treatChildrenAsOneObjectRecursively = save.treatChildrenAsOneObjectRecursively;
+		ignoreChildrenWithDimensionObject = save.ignoreChildrenWithDimensionObject;
+		disableColliderWhileInvisible = save.disableColliderWhileInvisible;
+		initialized = save.initialized;
+		channel = save.channel;
+		reverseVisibilityStates = save.reverseVisibilityStates;
+		ignorePartiallyVisibleLayerChanges = save.ignorePartiallyVisibleLayerChanges;
+		startingVisibilityState = (VisibilityState)save.startingVisibilityState;
+		visibilityState = (VisibilityState)save.visibilityState;
+		
+		SwitchVisibilityState(visibilityState, true);
+	}
 
 	[Serializable]
-	public class DimensionObjectSave : SerializableSaveObject<DimensionObject> {
-		bool treatChildrenAsOneObjectRecursively;
-		bool ignoreChildrenWithDimensionObject;
-		bool disableColliderWhileInvisible;
-
-		bool initialized;
-		int channel;
-		bool reverseVisibilityStates;
-		bool ignorePartiallyVisibleLayerChanges;
-
-		int startingVisibilityState;
+	public class DimensionObjectSave : SaveObject<DimensionObject> {
+		public bool treatChildrenAsOneObjectRecursively;
+		public bool ignoreChildrenWithDimensionObject;
+		public bool disableColliderWhileInvisible;
+		public bool initialized;
+		public int channel;
+		public bool reverseVisibilityStates;
+		public bool ignorePartiallyVisibleLayerChanges;
+		public int startingVisibilityState;
 		public int visibilityState;
 
 		public DimensionObjectSave(DimensionObject dimensionObj) : base(dimensionObj) {
@@ -701,21 +715,6 @@ public class DimensionObject : SaveableObject<DimensionObject, DimensionObject.D
 			this.startingVisibilityState = (int)dimensionObj.startingVisibilityState;
 			this.visibilityState = (int)dimensionObj.visibilityState;
 		}
-
-		public override void LoadSave(DimensionObject dimensionObj) {
-			base.LoadSave(dimensionObj);
-			dimensionObj.treatChildrenAsOneObjectRecursively = this.treatChildrenAsOneObjectRecursively;
-			dimensionObj.ignoreChildrenWithDimensionObject = this.ignoreChildrenWithDimensionObject;
-			dimensionObj.disableColliderWhileInvisible = this.disableColliderWhileInvisible;
-			dimensionObj.initialized = this.initialized;
-			dimensionObj.channel = this.channel;
-			dimensionObj.reverseVisibilityStates = this.reverseVisibilityStates;
-			dimensionObj.ignorePartiallyVisibleLayerChanges = this.ignorePartiallyVisibleLayerChanges;
-			dimensionObj.startingVisibilityState = (VisibilityState)this.startingVisibilityState;
-			dimensionObj.visibilityState = (VisibilityState)this.visibilityState;
-
-			dimensionObj.SwitchVisibilityState(dimensionObj.visibilityState, true);
-		}
 	}
-	#endregion
+#endregion
 }

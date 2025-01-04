@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using SuperspectiveUtils;
 using Saving;
 using System;
@@ -8,8 +6,8 @@ using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
 	[RequireComponent(typeof(UniqueId))]
-	public class ValveControl : SaveableObject<ValveControl, ValveControl.ValveControlSave> {
-		const float lookSpeedMultiplier = 0.5f;
+	public class ValveControl : SuperspectiveObject<ValveControl, ValveControl.ValveControlSave> {
+		const float LOOK_SPEED_MULTIPLIER = 0.5f;
 		InteractableObject interactableObject;
 		PlayerLook playerLook;
 		bool isActive = false;
@@ -57,7 +55,7 @@ namespace LevelSpecific.BlackRoom {
 
 		public void OnLeftMouseButtonDown() {
 			isActive = true;
-			playerLook.outsideMultiplier = lookSpeedMultiplier;
+			playerLook.outsideMultiplier = LOOK_SPEED_MULTIPLIER;
 			Interact.instance.enabled = false;
 			prevAngle = GetAngleOfMouse();
 		}
@@ -69,29 +67,30 @@ namespace LevelSpecific.BlackRoom {
 			return PolarCoordinate.CartesianToPolar(localMouseLocation).angle;
 		}
 
-		#region Saving
-		public override bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+#region Saving
+
+		public override void LoadSave(ValveControlSave save) {
+			transform.rotation = save.rotation;
+			isActive = save.isActive;
+			prevAngle = save.prevAngle;
+		}
+
+		public override bool SkipSave => !gameObject.activeInHierarchy;
 
 		public override string ID => $"{transform.parent.name}_ValveControl";
 
 		[Serializable]
-		public class ValveControlSave : SerializableSaveObject<ValveControl> {
-			SerializableQuaternion rotation;
-			bool isActive;
-			Angle prevAngle;
+		public class ValveControlSave : SaveObject<ValveControl> {
+			public SerializableQuaternion rotation;
+			public bool isActive;
+			public Angle prevAngle;
 
 			public ValveControlSave(ValveControl toggle) : base(toggle) {
 				this.rotation = toggle.transform.rotation;
 				this.isActive = toggle.isActive;
 				this.prevAngle = toggle.prevAngle;
 			}
-
-			public override void LoadSave(ValveControl toggle) {
-				toggle.transform.rotation = this.rotation;
-				toggle.isActive = this.isActive;
-				toggle.prevAngle = this.prevAngle;
-			}
 		}
-		#endregion
+#endregion
 	}
 }

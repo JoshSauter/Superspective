@@ -15,7 +15,7 @@ using StateUtils;
 using SuperspectiveUtils;
 
 // TODO: Loading while MazeFailed back to a save that's outside the maze doesn't seem to reset the nodes properly, they're all on. EDIT: Recheck this, it might be working now
-public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaze.MiniatureMazeSave> {
+public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, MiniatureMaze.MiniatureMazeSave> {
     public override string ID => "GrowShrinkIntro_MiniatureMaze";
 
     private const float NOISE_OVERLAY_FADE_IN_TIME = 4f;
@@ -53,7 +53,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         public MiniatureMazeNode nodeLastPowered;
     }
     
-    public enum State {
+    public enum State : byte {
         ShowingSolution,
         PlayerInMaze,
         MazeSolved,
@@ -150,7 +150,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
 
         // Dissolve the exit doorway blocker when the player solves the maze
         state.AddTrigger(State.MazeSolved, () => {
-            portalToBetweenWorlds.SetPauseLogic(false);
+            portalToBetweenWorlds.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
             AudioManager.instance.Play(AudioName.CorrectAnswer);
             mazeExitDoorwayBlocker.Dematerialize();
             solutionCheckButton.interactableObject.SetAsHidden();
@@ -209,7 +209,7 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         });
     }
 
-    private enum CheckSolutionResult {
+    private enum CheckSolutionResult : byte {
         Correct,
         Incomplete,
         Invalid
@@ -244,7 +244,8 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
                 state.Set(State.MazeFailed);
             }
 
-            if (result != CheckSolutionResult.Invalid) {
+            // The TimeSinceLastLoad condition stops the sound of all of them turning on at once when a player loads a save in the maze
+            if (result != CheckSolutionResult.Invalid && SaveManager.TimeSinceLastLoad > 5f) {
                 AudioManager.instance.PlayAtLocation(AudioName.LowPulse, node.pwr.ID, node.transform.position, false, (job) => job.baseVolume = 0.4f);
             }
         }
@@ -269,11 +270,15 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
     }
     
     public void PlayerEnteredMaze() {
-        state.Set(State.PlayerInMaze);
+        if (state != State.MazeSolved) {
+            state.Set(State.PlayerInMaze);
+        }
     }
     
     public void PlayerExitedMaze() {
-        state.Set(State.ShowingSolution);
+        if (state != State.MazeSolved) {
+            state.Set(State.ShowingSolution);
+        }
     }
 
     private void ResetPuzzleNodes() {
@@ -396,22 +401,22 @@ public class MiniatureMaze : SingletonSaveableObject<MiniatureMaze, MiniatureMaz
         GenerateSolution(new HashSet<string>(), 0, false);
     }
 
-
 #region Saving
-		[Serializable]
-		public class MiniatureMazeSave : SerializableSaveObject<MiniatureMaze> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            private int currentSolutionIndex;
-            
-			public MiniatureMazeSave(MiniatureMaze script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.currentSolutionIndex = script.currentSolutionIndex;
-            }
 
-			public override void LoadSave(MiniatureMaze script) {
-                script.SelectSolution(this.currentSolutionIndex);
-                script.state.LoadFromSave(this.stateSave);
-            }
-		}
+    public override void LoadSave(MiniatureMazeSave save) {
+        SelectSolution(save.currentSolutionIndex);
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class MiniatureMazeSave : SaveObject<MiniatureMaze> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public int currentSolutionIndex;
+        
+		public MiniatureMazeSave(MiniatureMaze script) : base(script) {
+            this.stateSave = script.state.ToSave();
+            this.currentSolutionIndex = script.currentSolutionIndex;
+        }
+	}
 #endregion
 }

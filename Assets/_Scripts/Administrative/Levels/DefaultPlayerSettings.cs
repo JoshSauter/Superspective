@@ -51,8 +51,10 @@ namespace LevelManagement {
         }
         
         private void SaveToDisk() {
-            File.WriteAllText(FILE_PATH, JsonUtility.ToJson(this, true));
+            string json = JsonUtility.ToJson(this, true);
+            File.WriteAllText(FILE_PATH, json);
             Debug.Log($"Wrote default player settings to {FILE_PATH}");
+            Debug.Log(json);
         }
         
         public static DefaultPlayerSettings LoadFromDisk() {

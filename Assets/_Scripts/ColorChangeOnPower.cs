@@ -1,16 +1,16 @@
 ﻿using System;
-using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
 using System.Linq;
 using PoweredObjects;
+using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChangeOnPower.ColorChangeOnPowerSave> {
+public class ColorChangeOnPower : SuperspectiveObject<ColorChangeOnPower, ColorChangeOnPower.ColorChangeOnPowerSave> {
     
-    public enum ActivationTiming {
+    public enum ActivationTiming : byte {
         OnPowerBegin,
         OnPowerFinish,
         OnDepowerBegin,
@@ -209,25 +209,39 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
     }
 
 #region Saving
+
+    public override void LoadSave(ColorChangeOnPowerSave save) {
+        timing = save.timing;
+        useMaterialAsStartColor = save.useMaterialAsStartColor;
+        useMaterialAsEndColor = save.useMaterialAsEndColor;
+        depoweredColor = save.depoweredColor;
+        depoweredEmission = save.depoweredEmission;
+        poweredColor = save.poweredColor;
+        poweredEmission = save.poweredEmission;
+        colorChangeAnimationCurve = save.colorChangeAnimationCurve;
+        timeElapsedSinceStateChange = save.timeElapsedSinceStateChange;
+
+        if (save.currentColor != null && save.currentEmission != null) SetColor(save.currentColor, save.currentEmission);
+    }
+
     public override string ID => $"{poweredColor:F3}_{id.uniqueId}";
 
     [Serializable]
-    public class ColorChangeOnPowerSave : SerializableSaveObject<ColorChangeOnPower> {
-        SerializableAnimationCurve colorChangeAnimationCurve;
-
-        SerializableColor currentColor;
-        SerializableColor currentEmission;
-        SerializableColor depoweredColor;
-        SerializableColor depoweredEmission;
-        SerializableColor poweredColor;
-        SerializableColor poweredEmission;
-        float timeElapsedSinceStateChange;
-        int timing;
-        bool useMaterialAsStartColor;
-        private bool useMaterialAsEndColor;
+    public class ColorChangeOnPowerSave : SaveObject<ColorChangeOnPower> {
+        public SerializableAnimationCurve colorChangeAnimationCurve;
+        public SerializableColor currentColor;
+        public SerializableColor currentEmission;
+        public SerializableColor depoweredColor;
+        public SerializableColor depoweredEmission;
+        public SerializableColor poweredColor;
+        public SerializableColor poweredEmission;
+        public float timeElapsedSinceStateChange;
+        public ActivationTiming timing;
+        public bool useMaterialAsStartColor;
+        public bool useMaterialAsEndColor;
 
         public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) : base(colorChange) {
-            timing = (int) colorChange.timing;
+            timing = colorChange.timing;
             useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
             useMaterialAsEndColor = colorChange.useMaterialAsEndColor;
             depoweredColor = colorChange.depoweredColor;
@@ -241,20 +255,6 @@ public class ColorChangeOnPower : SaveableObject<ColorChangeOnPower, ColorChange
                 currentColor = colorChange.renderers[0].GetMainColor();
                 currentEmission = colorChange.renderers[0].GetColor("_EmissionColor");
             }
-        }
-
-        public override void LoadSave(ColorChangeOnPower colorChange) {
-            colorChange.timing = (ActivationTiming) timing;
-            colorChange.useMaterialAsStartColor = useMaterialAsStartColor;
-            colorChange.useMaterialAsEndColor = useMaterialAsEndColor;
-            colorChange.depoweredColor = depoweredColor;
-            colorChange.depoweredEmission = depoweredEmission;
-            colorChange.poweredColor = poweredColor;
-            colorChange.poweredEmission = poweredEmission;
-            colorChange.colorChangeAnimationCurve = colorChangeAnimationCurve;
-            colorChange.timeElapsedSinceStateChange = timeElapsedSinceStateChange;
-
-            if (currentColor != null && currentEmission != null) colorChange.SetColor(currentColor, currentEmission);
         }
     }
 #endregion

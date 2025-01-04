@@ -292,6 +292,12 @@ namespace SuperspectiveUtils {
     }
     
     public static class StringExt {
+        // Shorthand for converting ID strings to association IDs (the unique part of the ID)
+        public static string GetAssociationId(this string id) {
+            string lastPart = id.Split('_').Last();
+            return lastPart.IsGuid() ? lastPart : id;
+        }
+        
         public static string ReplaceAt(this string str, int index, char newChar) {
             if (str == null) {
                 throw new ArgumentNullException(nameof(str));
@@ -558,11 +564,11 @@ namespace SuperspectiveUtils {
         }
 
         public static bool IsInLoadedScene(this Component c) {
-            return LevelManager.instance.loadedSceneNames.Contains(c.gameObject.scene.name);
+            return LevelManager.instance.loadedLevels.Contains(c.gameObject.scene.name.ToLevel());
         }
 
         public static bool IsInLoadedScene(this GameObject o) {
-            return LevelManager.instance.loadedSceneNames.Contains(o.scene.name);
+            return LevelManager.instance.loadedLevels.Contains(o.scene.name.ToLevel());
         }
 
         public static bool TaggedAsPlayer(this Component c) {
@@ -1488,35 +1494,35 @@ namespace SuperspectiveUtils {
         
         public void LogWithContext(object message, Object context, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
-                Debug.Log(MessageWithContext(message), context);
+                Debug.Log(MessageWithContext(message, context), context);
             }
         }
 
         public void Log(object message, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
-                Debug.Log(MessageWithContext(message), context);
+                Debug.Log(MessageWithContext(message, context), context);
             }
         }
 
         public void LogWarning(object message, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
-                Debug.LogWarning(MessageWithContext(message), context);
+                Debug.LogWarning(MessageWithContext(message, context), context);
             }
         }
 
         public void LogError(object message, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
-                Debug.LogError(MessageWithContext(message), context);
+                Debug.LogError(MessageWithContext(message, context), context);
             }
         }
         
         public void LogErrorWithContext(object message, Object context, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
-                Debug.LogError(MessageWithContext(message), context);
+                Debug.LogError(MessageWithContext(message, context), context);
             }
         }
         
-        private string MessageWithContext(object message) {
+        private string MessageWithContext(object message, Object context) {
             string name = (context is Component component) ? component.FullPath() : ((context is GameObject go) ? go.FullPath() : context.name);
             
             string gameObjectLabel = $"<color=#6a9fb5>GameObject:</color>   ";

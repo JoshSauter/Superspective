@@ -6,21 +6,21 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 // AKA GodMode
-public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipSave> {
+public class NoClipMode : SingletonSuperspectiveObject<NoClipMode, NoClipMode.NoClipSave> {
 	Transform playerCamera;
 	PlayerMovement playerMovement;
 	Rigidbody playerRigidbody;
 	Collider playerCollider;
 	PlayerButtonInput input;
 
+	float speed;
+	public float middleMouseVerticalSpeed = 4;
 	private bool allowGodModeInNonDevBuild = true;
 	public bool noClipOn = false;
 	private const float MIN_SPEED = 0.01f;
 	private const float BASE_SPEED = 25;
 	private const float MAX_SPEED = 300;
 	private const float SPEED_MULTIPLIER_DELTA = 1.02f; // Multiplier (or divisor) per frame to the speed
-	float speed;
-	public float middleMouseVerticalSpeed = 4;
 	
 	
 	string label = "";
@@ -65,7 +65,7 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 			
 			
 			float middleMouseScroll = Input.mouseScrollDelta.y;
-			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed) * (speed / BASE_SPEED) * Player.instance.Scale;
+			Vector3 verticalScroll = transform.up * (middleMouseScroll * middleMouseVerticalSpeed * (speed / BASE_SPEED) * Player.instance.Scale);
 			transform.position += verticalScroll;
 		}
 	}
@@ -94,17 +94,18 @@ public class NoClipMode : SingletonSaveableObject<NoClipMode, NoClipMode.NoClipS
 	// There's only one player so we don't need a UniqueId here
 	public override string ID => "NoClipMode";
 
+	public override void LoadSave(NoClipSave save) {
+		// There's a better way to do this than setting the inverse and then toggling, but w/e
+		noClipOn = !save.noClipOn;
+		ToggleNoClip();
+	}
+
 	[Serializable]
-	public class NoClipSave : SerializableSaveObject<NoClipMode> {
-		bool noClipOn;
+	public class NoClipSave : SaveObject<NoClipMode> {
+		public bool noClipOn;
 
 		public NoClipSave(NoClipMode noClip) : base(noClip) {
 			this.noClipOn = noClip.noClipOn;
-		}
-
-		public override void LoadSave(NoClipMode noClip) {
-			noClip.noClipOn = !this.noClipOn;
-			noClip.ToggleNoClip();
 		}
 	}
 	#endregion

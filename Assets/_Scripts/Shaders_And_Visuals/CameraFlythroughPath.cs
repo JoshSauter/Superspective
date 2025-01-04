@@ -25,7 +25,7 @@ public class CameraFlythroughPath : MonoBehaviour {
     public bool startOnPlayerCam = true;
     bool hasInsertedPlayerCamTransformAtStart = false;
     
-    public SerializableReference levelRootReference;
+    public SuperspectiveReference levelRootReference;
     Transform levelRoot => levelRootReference.Reference.LeftOrDefault().transform;
     Transform originalCameraParent;
     int originalCameraSiblingIndex;

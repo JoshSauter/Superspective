@@ -8,10 +8,10 @@ using UnityEngine;
 partial class PlayerMovement {
     [Serializable]
     public class JumpMovement : PlayerMovementComponent {
-        public JumpMovement(global::PlayerMovement movement) : base(movement) { }
+        public JumpMovement(PlayerMovement movement) : base(movement) { }
         
         // Jump Settings
-        public enum JumpState {
+        public enum JumpState : byte {
             JumpReady,
             Jumping,
             JumpOnCooldown

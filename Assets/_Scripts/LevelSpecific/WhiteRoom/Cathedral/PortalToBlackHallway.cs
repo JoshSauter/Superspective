@@ -9,11 +9,11 @@ using SerializableClasses;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
-    public class PortalToBlackHallway : SaveableObject<PortalToBlackHallway, PortalToBlackHallway.PortalToBlackHallwaySave> {
+    public class PortalToBlackHallway : SuperspectiveObject<PortalToBlackHallway, PortalToBlackHallway.PortalToBlackHallwaySave> {
         Portal portal;
         bool poweredNow = false;
         public PowerTrail powerTrail;
-        public SerializableReference<MagicTrigger, MagicTrigger.MagicTriggerSave>[] blackHallwayLoopTeleporters;
+        public SuperspectiveReference<MagicTrigger, MagicTrigger.MagicTriggerSave>[] blackHallwayLoopTeleporters;
 
         protected override void Awake() {
             base.Awake();
@@ -21,6 +21,7 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         protected override void Init() {
+            base.Init();
             StartCoroutine(Initialize());
         }
 
@@ -58,21 +59,21 @@ namespace LevelSpecific.WhiteRoom {
         }
 
 #region Saving
+
+        public override void LoadSave(PortalToBlackHallwaySave save) {
+            poweredNow = save.poweredNow;
+        }
+
         public override string ID => "PortalToBlackHallway";
 
         public override bool SkipSave => true;
 
         [Serializable]
-        public class PortalToBlackHallwaySave : SerializableSaveObject<PortalToBlackHallway> {
-            readonly bool poweredNow;
+        public class PortalToBlackHallwaySave : SaveObject<PortalToBlackHallway> {
+            public bool poweredNow;
 
             public PortalToBlackHallwaySave(PortalToBlackHallway script) : base(script) {
                 this.poweredNow = script.poweredNow;
-            }
-
-            public override void LoadSave(PortalToBlackHallway script) {
-                script.poweredNow = this.poweredNow;
-                script.HandlePowerTrail(script.poweredNow);
             }
         }
 #endregion

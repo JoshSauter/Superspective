@@ -3,13 +3,13 @@
         // This ID should come from UniqueId class (should be RequiredComponent on anything saveable)
         string ID { get; }
 
-        SerializableSaveObject GetSaveObject();
+        bool SkipSave { get; set; }
 
         void Register();
 
-        void RestoreStateFromSave(SerializableSaveObject savedObject);
+        SaveObject CreateSave();
 
-        bool SkipSave { get; set; }
+        void LoadFromSave(SaveObject save);
     }
 
     public static class ISaveableObjectExt {

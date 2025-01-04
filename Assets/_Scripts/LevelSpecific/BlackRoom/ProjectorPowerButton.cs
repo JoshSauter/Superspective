@@ -8,7 +8,7 @@ using Interactables;
 
 namespace LevelSpecific.BlackRoom {
 	[RequireComponent(typeof(Button))]
-	public class ProjectorPowerButton : SaveableObject<ProjectorPowerButton, ProjectorPowerButton.ProjectorPowerButtonSave> {
+	public class ProjectorPowerButton : SuperspectiveObject<ProjectorPowerButton, ProjectorPowerButton.ProjectorPowerButtonSave> {
 		public PowerTrail powerTrail;
 		public bool projectorTurnedOn = false;
 		public LightProjector projector;
@@ -55,25 +55,26 @@ namespace LevelSpecific.BlackRoom {
 			projectorTurnedOn = false;
 		}
 
-		#region Saving
-		public override bool SkipSave { get { return !gameObject.activeInHierarchy; } set { } }
+#region Saving
+
+		public override void LoadSave(ProjectorPowerButtonSave save) {
+			if (save.projectorTurnedOn) {
+				TurnOnProjector();
+			}
+		}
+
+		public override bool SkipSave => !gameObject.activeInHierarchy;
 
 		public override string ID => $"{gameObject.name}";
 
 		[Serializable]
-		public class ProjectorPowerButtonSave : SerializableSaveObject<ProjectorPowerButton> {
-			bool projectorTurnedOn;
+		public class ProjectorPowerButtonSave : SaveObject<ProjectorPowerButton> {
+			public bool projectorTurnedOn;
 
 			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) : base(projectorPowerButton) {
 				this.projectorTurnedOn = projectorPowerButton.projectorTurnedOn;
 			}
-
-			public override void LoadSave(ProjectorPowerButton projectorPowerButton) {
-				if (this.projectorTurnedOn) {
-					projectorPowerButton.TurnOnProjector();
-				}
-			}
 		}
-		#endregion
+#endregion
 	}
 }

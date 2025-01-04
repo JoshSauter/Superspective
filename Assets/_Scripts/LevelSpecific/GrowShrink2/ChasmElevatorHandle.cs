@@ -4,12 +4,13 @@ using System.Linq;
 using Audio;
 using UnityEngine;
 using Saving;
+using SerializableClasses;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId), typeof(InteractableObject))]
-public class ChasmElevatorHandle : SaveableObject<ChasmElevatorHandle, ChasmElevatorHandle.ChasmElevatorHandleSave>, AudioJobOnGameObject {
+public class ChasmElevatorHandle : SuperspectiveObject<ChasmElevatorHandle, ChasmElevatorHandle.ChasmElevatorHandleSave>, AudioJobOnGameObject {
     [FormerlySerializedAs("handleRenderer")]
     [SerializeField]
     private Renderer _handleRenderer;
@@ -21,7 +22,7 @@ public class ChasmElevatorHandle : SaveableObject<ChasmElevatorHandle, ChasmElev
     private List<Collider> handleColliders;
 
     public HandleState startingState = HandleState.Up;
-    public enum HandleState {
+    public enum HandleState : byte {
         Down,
         HeldByPlayer,
         Up
@@ -155,18 +156,28 @@ public class ChasmElevatorHandle : SaveableObject<ChasmElevatorHandle, ChasmElev
     }
     
 #region Saving
-		[Serializable]
-		public class ChasmElevatorHandleSave : SerializableSaveObject<ChasmElevatorHandle> {
-            private StateMachine<HandleState>.StateMachineSave stateSave;
-            
-			public ChasmElevatorHandleSave(ChasmElevatorHandle script) : base(script) {
-                this.stateSave = script.handleState.ToSave();
-			}
 
-			public override void LoadSave(ChasmElevatorHandle script) {
-                script.handleState.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(ChasmElevatorHandleSave save) {
+        handleState.LoadFromSave(save.stateSave);
+        heightAudioLastPlayedAt = save.heightAudioLastPlayedAt;
+        desiredHeight = save.desiredHeight;
+        transform.localPosition = save.localPosition;
+    }
+
+    [Serializable]
+	public class ChasmElevatorHandleSave : SaveObject<ChasmElevatorHandle> {
+        public StateMachine<HandleState>.StateMachineSave stateSave;
+        public SerializableVector3 localPosition;
+        public float heightAudioLastPlayedAt;
+        public float desiredHeight;
+        
+		public ChasmElevatorHandleSave(ChasmElevatorHandle script) : base(script) {
+            this.stateSave = script.handleState.ToSave();
+            this.localPosition = script.transform.localPosition;
+            this.heightAudioLastPlayedAt = script.heightAudioLastPlayedAt;
+            this.desiredHeight = script.desiredHeight;
 		}
+	}
 #endregion
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob audioJob) => transform;

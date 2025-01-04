@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using SuperspectiveUtils;
 using Saving;
 using System;
-using System.Linq;
+using DimensionObjectMechanics;
 using NaughtyAttributes;
 using PortalMechanics;
 using StateUtils;
@@ -12,19 +10,21 @@ using UnityEngine.Assertions;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
-public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimensionCube.MultiDimensionCubeSave> {
-	public enum State {
+public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiDimensionCube.MultiDimensionCubeSave> {
+	public enum State : byte {
 		Idle, // Same dimension or different dimension from the player (determined by PillarDimensionObject)
 		Materializing // Corporeal cube dissolves in as player picks it up and brings it into player's dimension
 	}
 	private StateMachine<State> stateMachine;
 	
+	[SerializeField]
 	InteractableObject interactableObject;
 	public PickupObject pickupCube;
+	[SerializeField]
 	PillarDimensionObject corporealCubeDimensionObj, invertedCubeDimensionObj;
 	public SuperspectiveRenderer cubeFrameRenderer, corporealGlassRenderer, invertedCubeRenderer, raymarchRenderer;
 
-	#region Portal Copy References
+#region Portal Copy References
 	// Assumes the following hierarchy:
 	// MultiDimensionCubePortalCopy
 	// - CorporealCube
@@ -75,15 +75,15 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		}
 	}
 	
-	#endregion
+#endregion
 
 	Transform[] cubeTransforms;
 
 	public BoxCollider thisCollider;
 	PhysicMaterial defaultPhysicsMaterial;
 
-	public BoxCollider kinematicCollider;
-	BoxCollider detectWhenPlayerIsNearCollider;
+	[SerializeField]
+	BoxCollider kinematicCollider, detectWhenPlayerIsNearCollider;
 
 	public const string DISSOLVE_PROPERTY_NAME = "_DissolveAmount";
 	const float OUTLINE_FADE_IN_TIME = .5f;
@@ -94,6 +94,8 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 	private float InvertColorsFadeOutTime => materializeMultiplier * INVERT_COLORS_FADE_OUT_TIME;
 	private float TotalTime => Mathf.Max(OutlineFadeInTime, InvertColorsDelay + InvertColorsFadeOutTime);
 
+	// This data is used to determine how the cube should be rendered through a portal
+	// It is written before the portal renders the cube and read when the cube is rendered through the portal
 	[ReadOnly]
 	public int corporealDimensionBeforeMaterialize = -1;
 	[ReadOnly]
@@ -161,24 +163,7 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		
 		InitStateMachines();
 		
-		if (interactableObject == null) interactableObject = this.GetOrAddComponent<InteractableObject>();
-
-		Transform corporealCube = transform.Find("CorporealCube");
-		Transform invertedCube = transform.Find("InvertedCube");
-		if (pickupCube == null) pickupCube = GetComponent<PickupObject>();
-
-		corporealCubeDimensionObj = corporealCube.GetComponent<PillarDimensionObject>();
-		invertedCubeDimensionObj = invertedCube.GetComponent<PillarDimensionObject>();
-
-		cubeFrameRenderer = corporealCube.GetComponent<SuperspectiveRenderer>();
-		corporealGlassRenderer = corporealCube.Find("Glass").GetComponent<SuperspectiveRenderer>();
-		invertedCubeRenderer = invertedCube.GetComponent<SuperspectiveRenderer>();
-		raymarchRenderer = invertedCube.Find("Glass (Raymarching)").GetComponent<SuperspectiveRenderer>();
-
-		if (thisCollider == null) thisCollider = GetComponent<BoxCollider>();
-		defaultPhysicsMaterial = thisCollider.material;
-		kinematicCollider = invertedCube.Find("KinematicCollider").GetComponent<BoxCollider>();
-		detectWhenPlayerIsNearCollider = invertedCube.Find("DetectPlayerIsNearCollider").GetComponent<BoxCollider>();
+		defaultPhysicsMaterial ??= thisCollider.material;
 	}
 
 	protected override void Start() {
@@ -196,7 +181,8 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		UpdateDissolveValuesInverted(1);
 	}
 
-	private void OnDisable() {
+	protected override void OnDisable() {
+		base.OnDisable();
 		UnsubscribeToEvents();
 	}
 
@@ -507,22 +493,26 @@ public class MultiDimensionCube : SaveableObject<MultiDimensionCube, MultiDimens
 		}
 		else {
 			corporealCubeDimensionObj.Dimension = desiredDimension;
+			DimensionObjectManager.instance.RefreshDimensionObject(corporealCubeDimensionObj);
 		}
 	}
 
-	#region Saving
+#region Saving
+
+	public override void LoadSave(MultiDimensionCubeSave save) {
+		stateMachine.LoadFromSave(save.state);
+		materializeMultiplier = save.materializeMultiplier;
+	}
 
 	[Serializable]
-	public class MultiDimensionCubeSave : SerializableSaveObject<MultiDimensionCube> {
-		private StateMachine<State>.StateMachineSave state;
+	public class MultiDimensionCubeSave : SaveObject<MultiDimensionCube> {
+		public StateMachine<State>.StateMachineSave state;
+		public float materializeMultiplier;
 
 		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) : base(multiDimensionCube) {
 			this.state = multiDimensionCube.stateMachine.ToSave();
-		}
-
-		public override void LoadSave(MultiDimensionCube multiDimensionCube) {
-			multiDimensionCube.stateMachine.LoadFromSave(state);
+			this.materializeMultiplier = multiDimensionCube.materializeMultiplier;
 		}
 	}
-	#endregion
+#endregion
 }

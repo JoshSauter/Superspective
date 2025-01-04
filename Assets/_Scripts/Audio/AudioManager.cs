@@ -10,7 +10,7 @@ using SerializableClasses;
 using Random = UnityEngine.Random;
 
 namespace Audio {
-	public class AudioManager : SingletonSaveableObject<AudioManager, AudioManager.AudioManagerSave> {
+	public class AudioManager : SingletonSuperspectiveObject<AudioManager, AudioManager.AudioManagerSave> {
 		public enum AudioType {
 			SFX,
 			Music
@@ -49,8 +49,7 @@ namespace Audio {
 				audio.Play();
 			}
 
-			public void Stop()
-			{
+			public void Stop() {
 				stopSound = true;
 			}
 
@@ -207,8 +206,8 @@ namespace Audio {
 
         readonly Dictionary<string, Action<AudioJob>> updateAudioJobs = new Dictionary<string, Action<AudioJob>>();
 		// These two are used for serialization and deserialization of the above Dictionary when saving
-		Dictionary<string, SerializableReference> serializableCustomUpdateAudioJobs = new Dictionary<string, SerializableReference>();
-		Dictionary<string, SerializableReference> serializableUpdateAudioOnGameObject = new Dictionary<string, SerializableReference>();
+		Dictionary<string, SuperspectiveReference> serializableCustomUpdateAudioJobs = new Dictionary<string, SuperspectiveReference>();
+		Dictionary<string, SuperspectiveReference> serializableUpdateAudioOnGameObject = new Dictionary<string, SuperspectiveReference>();
 
 		protected override void Awake() {
 			base.Awake();
@@ -306,7 +305,7 @@ namespace Audio {
 			T audioJobOnGameObject,
 			bool shouldForcePlay = false,
 			Action<AudioJob> settingsOverride = null
-		) where T : SaveableObject, AudioJobOnGameObject {
+		) where T : SuperspectiveObject, AudioJobOnGameObject {
 			AudioJob audioJob = GetOrCreateJob(audioName, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
@@ -329,7 +328,7 @@ namespace Audio {
 			T customUpdate,
 			bool shouldForcePlay = false,
 			Action<AudioJob> settingsOverride = null
-		) where T : SaveableObject, CustomAudioJob {
+		) where T : SuperspectiveObject, CustomAudioJob {
 			AudioJob audioJob = GetOrCreateJob(audioName, uniqueIdentifier, settingsOverride);
 
 			if (!audioJob.audio.isPlaying || shouldForcePlay) {
@@ -421,7 +420,7 @@ namespace Audio {
 		// There's only one AudioManager so we don't need a UniqueId here
 		public override string ID => "AudioManager";
 
-		void LoadSaveDelayed(AudioManagerSave save) {
+		public override void LoadSave(AudioManagerSave save) {
 			StartCoroutine(LoadSaveDelayedCoroutine(save));
 		}
 		
@@ -429,86 +428,77 @@ namespace Audio {
 			// Wait until objects are recreated in the scenes (ManagerScene is loaded before dynamic objects are created)
 			yield return new WaitWhile(() => SaveManager.isCurrentlyLoadingSave);
 			
-			save.LoadSaveDelayed(this);
+			foreach (var audioJob in audioJobs) {
+				GameObject.Destroy(audioJob.Value.audio.gameObject);
+			}
+			
+			audioJobs.Clear();
+			updateAudioJobs.Clear();
+			
+			serializableCustomUpdateAudioJobs = save.customAudioJobs;
+			serializableUpdateAudioOnGameObject = save.audioJobOnGameObjects;
+			Dictionary<string, AudioJob.AudioJobSave> savedAudioJobs = save.audioJobSaves;
+			
+			foreach (var kv in savedAudioJobs) {
+				audioJobs[kv.Key] = kv.Value.LoadAudioJob();
+			}
+
+			foreach (var kv in serializableCustomUpdateAudioJobs) {
+				string id = kv.Key;
+				SuperspectiveReference customAudioJobReference = kv.Value;
+
+				var reference = customAudioJobReference.Reference;
+				if (reference == null) {
+					Debug.LogError($"AudioManager hit an error while trying to play CustomUpdate audio, cause: {kv.Key} is null!");
+					continue;
+				}
+				reference.MatchAction(
+					saveableObject => {
+						if (saveableObject is CustomAudioJob customAudioJob) {
+							updateAudioJobs[id] = customAudioJob.UpdateAudio;
+						}
+						else {
+							debug.LogError($"Failed to cast audioJob {id} as CustomAudioJob");
+							audioJobs[id].Stop();
+						}
+					},
+					_ => audioJobs[id].Stop()
+				);
+			}
+
+			foreach (var kv in serializableUpdateAudioOnGameObject) {
+				string id = kv.Key;
+				SuperspectiveReference updateAudioOnGameObjectReference = kv.Value;
+
+				var reference = updateAudioOnGameObjectReference.Reference;
+				if (reference == null) {
+					Debug.LogError($"AudioManager hit an error while trying to play UpdateOnGameObject audio, cause: {kv.Key} is null!");
+					continue;
+				}
+				reference.MatchAction(
+					saveableObject => {
+						if (saveableObject is AudioJobOnGameObject audioJobOnGameObject) {
+							updateAudioJobs[id] = audioJobOnGameObject.UpdateAudio;
+						}
+						else {
+							debug.LogError($"Failed to cast audioJob {id} as AudioJobOnGameObject");
+						}
+					},
+					saveObj => audioJobs[id].Stop()
+				);
+			}
 		}
 
 		[Serializable]
-		public class AudioManagerSave : SerializableSaveObject<AudioManager> {
-			SerializableDictionary<string, AudioJob.AudioJobSave> audioJobSaves;
-			SerializableDictionary<string, SerializableReference> customAudioJobs;
-			SerializableDictionary<string, SerializableReference> audioJobOnGameObjects;
+		public class AudioManagerSave : SaveObject<AudioManager> {
+			public SerializableDictionary<string, AudioJob.AudioJobSave> audioJobSaves;
+			public SerializableDictionary<string, SuperspectiveReference> customAudioJobs;
+			public SerializableDictionary<string, SuperspectiveReference> audioJobOnGameObjects;
 
 			public AudioManagerSave(AudioManager audioManager) : base(audioManager) {
 				this.audioJobSaves = audioManager.audioJobs.MapValues(value => new AudioJob.AudioJobSave(value));
 				this.customAudioJobs = audioManager.serializableCustomUpdateAudioJobs;
 				this.audioJobOnGameObjects = audioManager.serializableUpdateAudioOnGameObject;
-			}
-
-			public void LoadSaveDelayed(AudioManager audioManager) {
-				foreach (var audioJob in audioManager.audioJobs) {
-					GameObject.Destroy(audioJob.Value.audio.gameObject);
-				}
-				
-				audioManager.audioJobs.Clear();
-				audioManager.updateAudioJobs.Clear();
-				
-				audioManager.serializableCustomUpdateAudioJobs = this.customAudioJobs;
-				audioManager.serializableUpdateAudioOnGameObject = this.audioJobOnGameObjects;
-				Dictionary<string, AudioJob.AudioJobSave> savedAudioJobs = this.audioJobSaves;
-				
-				foreach (var kv in savedAudioJobs) {
-					audioManager.audioJobs[kv.Key] = kv.Value.LoadAudioJob();
-				}
-
-				foreach (var kv in audioManager.serializableCustomUpdateAudioJobs) {
-					string id = kv.Key;
-					SerializableReference customAudioJobReference = kv.Value;
-
-					var reference = customAudioJobReference.Reference;
-					if (reference == null) {
-						Debug.LogError($"AudioManager hit an error while trying to play CustomUpdate audio, cause: {kv.Key} is null!");
-						continue;
-					}
-					reference.MatchAction(
-						saveableObject => {
-							if (saveableObject is CustomAudioJob customAudioJob) {
-								audioManager.updateAudioJobs[id] = customAudioJob.UpdateAudio;
-							}
-							else {
-								audioManager.debug.LogError($"Failed to cast audioJob {id} as CustomAudioJob");
-								audioManager.audioJobs[id].Stop();
-							}
-						},
-						_ => audioManager.audioJobs[id].Stop()
-					);
-				}
-
-				foreach (var kv in audioManager.serializableUpdateAudioOnGameObject) {
-					string id = kv.Key;
-					SerializableReference updateAudioOnGameObjectReference = kv.Value;
-
-					var reference = updateAudioOnGameObjectReference.Reference;
-					if (reference == null) {
-						Debug.LogError($"AudioManager hit an error while trying to play UpdateOnGameObject audio, cause: {kv.Key} is null!");
-						continue;
-					}
-					reference.MatchAction(
-						saveableObject => {
-							AudioJobOnGameObject audioJobOnGameObject = saveableObject as AudioJobOnGameObject;
-							if (audioJobOnGameObject != null) {
-								audioManager.updateAudioJobs[id] = audioJobOnGameObject.UpdateAudio;
-							}
-							else {
-								audioManager.debug.LogError($"Failed to cast audioJob {id} as AudioJobOnGameObject");
-							}
-						},
-						serializableSaveObject => audioManager.audioJobs[id].Stop()
-					);
-				}
-			}
-
-			public override void LoadSave(AudioManager audioManager) {
-				audioManager.LoadSaveDelayed(this);
 			}
 		}
 #endregion

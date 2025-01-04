@@ -1,10 +1,17 @@
 ﻿using DimensionObjectMechanics;
 using Saving;
+using SuperspectiveUtils;
 using UnityEngine;
 
-[RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
-public class DimensionObjectCollisions : SaveableObject, BetterTriggers {
+[RequireComponent(typeof(BetterTrigger))]
+public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 	public DimensionObject dimensionObject;
+
+	protected override void Init() {
+		base.Init();
+
+		if (id == null) id = gameObject.GetOrAddComponent<UniqueId>();
+	}
 	
 	void Update() {
 		if (dimensionObject == null) {

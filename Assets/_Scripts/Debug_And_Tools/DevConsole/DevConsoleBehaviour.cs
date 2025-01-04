@@ -21,7 +21,7 @@ namespace DeveloperConsole {
         private TMP_Text PlaceholderText => _placeholderText ??= inputField.PlaceholderText();
         private string originalPlaceholderText;
 
-        private float pausedTimeScale;
+        public float pausedTimeScale;
         
         private DeveloperConsole _developerConsole;
         private DeveloperConsole DeveloperConsole => _developerConsole ??= new DeveloperConsole(commands);
@@ -59,6 +59,7 @@ namespace DeveloperConsole {
                 new ShowTriggersCommand("showTriggers"),
                 new ShowVolumetricPortalsCommand("showVolumetricPortals"),
                 new SetFarClipPlaneCommand("setFarClipPlane"),
+                new SetTimeScaleCommand("setTimeScale"),
                 new TogglePortalDebuggingCommand("togglePortalDebugging"),
                 #if UNITY_EDITOR
                 new ToggleAutosaveInEditorCommand("toggleAutosaveInEditor"),

@@ -10,7 +10,7 @@ using SuperspectiveUtils;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
-public class ValueDisplay : SaveableObject<ValueDisplay, ValueDisplay.ValueDisplaySave> {
+public class ValueDisplay : SuperspectiveObject<ValueDisplay, ValueDisplay.ValueDisplaySave> {
 	protected const int MIN = -80;
 	protected const int MAX = 80;
 	
@@ -22,11 +22,11 @@ public class ValueDisplay : SaveableObject<ValueDisplay, ValueDisplay.ValueDispl
 	public int actualValue = 0;
 	protected float _displayedValue = 0f;
 
-	public float displayedValue {
+	public float DisplayedValue {
 		get => _displayedValue;
 		private set {
 			value = Mathf.Clamp(value, MIN, MAX);
-			if (value != _displayedValue) {
+			if (Mathf.Approximately(value, _displayedValue)) {
 				int valueAsInt = Mathf.CeilToInt(Mathf.Abs(value));
 				currentValueDisplay.sprite = base9Symbols[valueAsInt];
 				
@@ -39,15 +39,15 @@ public class ValueDisplay : SaveableObject<ValueDisplay, ValueDisplay.ValueDispl
 	}
 	
 	public virtual void SetDisplayedValue(float value) {
-		displayedValue = value;
+		DisplayedValue = value;
 	}
 
 	[SerializeField]
 	protected float _spriteAlpha = 1f;
-	public float spriteAlpha {
+	public float SpriteAlpha {
 		get => _spriteAlpha;
 		set {
-			if (value != _spriteAlpha) {
+			if (Mathf.Approximately(value, _spriteAlpha)) {
 				currentValueDisplay.color = currentValueDisplay.color.WithAlpha(value);
 				currentValueNegativeSymbol.color = currentValueNegativeSymbol.color.WithAlpha(value);
 
@@ -67,8 +67,8 @@ public class ValueDisplay : SaveableObject<ValueDisplay, ValueDisplay.ValueDispl
 	}
 
 	protected virtual void ApplyColors(Color to) {
-		currentValueDisplay.color = to.WithAlpha(spriteAlpha);
-		currentValueNegativeSymbol.color = to.WithAlpha(spriteAlpha);
+		currentValueDisplay.color = to.WithAlpha(SpriteAlpha);
+		currentValueNegativeSymbol.color = to.WithAlpha(SpriteAlpha);
 	}
 
 	public void SetColorImmediately(Color to) {
@@ -117,32 +117,33 @@ public class ValueDisplay : SaveableObject<ValueDisplay, ValueDisplay.ValueDispl
 	}
     
 #region Saving
-		[Serializable]
-		public class ValueDisplaySave : SerializableSaveObject<ValueDisplay> {
-			public int actualValue;
-			private float displayedValue;
-			private float spriteAlpha;
-			private SerializableColor color;
-			public SerializableColor defaultColor;
-			public SerializableColor desiredColor;
 
-			public ValueDisplaySave(ValueDisplay script) : base(script) {
-				this.actualValue = script.actualValue;
-				this.displayedValue = script.displayedValue;
-				this.spriteAlpha = script.spriteAlpha;
-				this.color = script.color;
-				this.defaultColor = script.defaultColor;
-				this.desiredColor = script.desiredColor;
-			}
+	public override void LoadSave(ValueDisplaySave save) {
+		actualValue = save.actualValue;
+		DisplayedValue = save.displayedValue;
+		SpriteAlpha = save.spriteAlpha;
+		color = save.color;
+		defaultColor = save.defaultColor;
+		desiredColor = save.desiredColor;
+	}
 
-			public override void LoadSave(ValueDisplay script) {
-				script.actualValue = this.actualValue;
-				script.displayedValue = this.displayedValue;
-				script.spriteAlpha = this.spriteAlpha;
-				script.color = this.color;
-				script.defaultColor = this.defaultColor;
-				script.desiredColor = this.desiredColor;
-			}
+	[Serializable]
+	public class ValueDisplaySave : SaveObject<ValueDisplay> {
+		public SerializableColor color;
+		public SerializableColor defaultColor;
+		public SerializableColor desiredColor;
+		public float displayedValue;
+		public float spriteAlpha;
+		public int actualValue;
+
+		public ValueDisplaySave(ValueDisplay script) : base(script) {
+			this.actualValue = script.actualValue;
+			this.displayedValue = script.DisplayedValue;
+			this.spriteAlpha = script.SpriteAlpha;
+			this.color = script.color;
+			this.defaultColor = script.defaultColor;
+			this.desiredColor = script.desiredColor;
 		}
+	}
 #endregion
 }

@@ -6,7 +6,7 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmElevatorSave>, CustomAudioJob {
+public class ChasmElevator : SuperspectiveObject<ChasmElevator, ChasmElevator.ChasmElevatorSave>, CustomAudioJob {
     public Collider playerUnderElevatorHitbox;
     public ChasmElevatorHandle handle;
     public Elevator elevator;
@@ -95,14 +95,18 @@ public class ChasmElevator : SaveableObject<ChasmElevator, ChasmElevator.ChasmEl
     }
     
 #region Saving
-		[Serializable]
-		public class ChasmElevatorSave : SerializableSaveObject<ChasmElevator> {
-            
-			public ChasmElevatorSave(ChasmElevator script) : base(script) {
-			}
 
-			public override void LoadSave(ChasmElevator script) {
-			}
+	public override void LoadSave(ChasmElevatorSave save) {
+		automaticallySendDownWhenAtTop = save.automaticallySendDownWhenAtTop;
+	}
+
+	[Serializable]
+	public class ChasmElevatorSave : SaveObject<ChasmElevator> {
+		public bool automaticallySendDownWhenAtTop;
+        
+		public ChasmElevatorSave(ChasmElevator script) : base(script) {
+			this.automaticallySendDownWhenAtTop = script.automaticallySendDownWhenAtTop;
 		}
+	}
 #endregion
 }

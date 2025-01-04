@@ -4,13 +4,13 @@ using Saving;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
-using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
+using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
 // TODO: ActivePillar logic needs some work
 [RequireComponent(typeof(UniqueId))]
 // NOTE: Assumes that transform.position is centered at the bottom center of the pillar
-public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.DimensionPillarSave> {
-	public static Dictionary<string, PillarReference> allPillars = new Dictionary<string, PillarReference>();
+public class DimensionPillar : SuperspectiveObject<DimensionPillar, DimensionPillar.DimensionPillarSave> {
+	public static readonly Dictionary<string, PillarReference> allPillars = new Dictionary<string, PillarReference>();
 
 	public Vector3 DimensionShiftVector => transform.forward;
 	public Vector3 Axis => transform.up;
@@ -161,22 +161,23 @@ public class DimensionPillar : SaveableObject<DimensionPillar, DimensionPillar.D
 	}
 
 #region Saving
+
+	public override void LoadSave(DimensionPillarSave save) {
+		initialized = save.initialized;
+		maxBaseDimension = save.maxDimension;
+		curBaseDimension = save.curDimension;
+	}
+
 	[Serializable]
-	public class DimensionPillarSave : SerializableSaveObject<DimensionPillar> {
-		bool initialized;
-		int maxDimension;
-		int curDimension;
+	public class DimensionPillarSave : SaveObject<DimensionPillar> {
+		public bool initialized;
+		public int maxDimension;
+		public int curDimension;
 
 		public DimensionPillarSave(DimensionPillar dimensionPillar) : base(dimensionPillar) {
 			this.initialized = dimensionPillar.initialized;
 			this.maxDimension = dimensionPillar.maxBaseDimension;
 			this.curDimension = dimensionPillar.curBaseDimension;
-		}
-
-		public override void LoadSave(DimensionPillar dimensionPillar) {
-			dimensionPillar.initialized = this.initialized;
-			dimensionPillar.maxBaseDimension = this.maxDimension;
-			dimensionPillar.curBaseDimension = this.curDimension;
 		}
 	}
 	#endregion

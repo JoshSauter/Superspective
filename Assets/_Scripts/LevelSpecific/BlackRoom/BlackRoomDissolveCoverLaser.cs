@@ -11,18 +11,19 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
-    public class BlackRoomDissolveCoverLaser : SaveableObject<BlackRoomDissolveCoverLaser, BlackRoomDissolveCoverLaser.BlackRoomDissolveCoverLaserSave> {
+    public class BlackRoomDissolveCoverLaser : SuperspectiveObject<BlackRoomDissolveCoverLaser, BlackRoomDissolveCoverLaser.BlackRoomDissolveCoverLaserSave> {
         
-        public enum LaserState {
+        public enum LaserState : byte {
             Idle,
             FiringAtCover
         }
 
         public StateMachine<LaserState> state;
         
-        private const float verticalOffsetFromCover = 0.15f;
-        private const float timeBeforeDissolveBegin = 1f;
-        private const float timeBeforeLaserParticlesStart = 0.15f;
+        private const float VERTICAL_OFFSET_FROM_COVER = 0.15f;
+        private const float TIME_BEFORE_DISSOLVE_BEGIN = 1f;
+        private const float TIME_BEFORE_LASER_PARTICLE_START = 0.15f;
+        public static readonly int EMISSION_PROPERTY = Shader.PropertyToID("_EmissionColor");
         public ParticleSystem laser;
         private DissolveObject coverFiringAt;
         [ColorUsage(false, true)]
@@ -31,38 +32,37 @@ namespace LevelSpecific.BlackRoom {
         public BlackRoomMainConsole mainConsole;
         public ColorPuzzleManager colorPuzzleManager;
         public Renderer puzzleIsSolvedIndicator;
-        public static readonly int EmissionProperty = Shader.PropertyToID("_EmissionColor");
 
-        private Vector3 targetParticleEndPosition => (coverFiringAt == null)
+        private Vector3 TargetParticleEndPosition => (coverFiringAt == null)
             ? Vector3.zero
-            : coverFiringAt.transform.position + coverFiringAt.transform.up * verticalOffsetFromCover;
+            : coverFiringAt.transform.position + coverFiringAt.transform.up * VERTICAL_OFFSET_FROM_COVER;
 
         protected override void Start() {
             base.Start();
             state = this.StateMachine(LaserState.Idle);
             
             state.AddStateTransition(LaserState.FiringAtCover, LaserState.Idle, laser.main.duration);
-            state.AddTrigger(LaserState.FiringAtCover, timeBeforeDissolveBegin, DissolveCoverFiringAt);
+            state.AddTrigger(LaserState.FiringAtCover, TIME_BEFORE_DISSOLVE_BEGIN, DissolveCoverFiringAt);
             state.AddTrigger(LaserState.Idle, 0f, Stop);
-            state.AddTrigger(LaserState.FiringAtCover, timeBeforeLaserParticlesStart, () => laser.Play());
+            state.AddTrigger(LaserState.FiringAtCover, TIME_BEFORE_LASER_PARTICLE_START, () => laser.Play());
             state.AddTrigger(
                 LaserState.FiringAtCover, 
-                timeBeforeLaserParticlesStart + laser.main.startLifetime.constant, 
+                TIME_BEFORE_LASER_PARTICLE_START + laser.main.startLifetime.constant, 
                 () => AudioManager.instance.PlayAtLocation(AudioName.RainstickFast, ID, coverFiringAt.transform.position));
             state.AddTrigger(LaserState.Idle, 0f, () => {
                 if (state.PrevState == LaserState.FiringAtCover) {
                     // Turn the next puzzle on and last puzzle off automatically
-                    if (!colorPuzzleManager.isLastPuzzle) {
-                        mainConsole.puzzleSelectButtons[colorPuzzleManager.activePuzzle+1].state.Set(ColorPuzzleButton.State.On);
+                    if (!colorPuzzleManager.IsLastPuzzle) {
+                        mainConsole.puzzleSelectButtons[colorPuzzleManager.ActivePuzzle+1].state.Set(ColorPuzzleButton.State.On);
                     }
-                    else if (!colorPuzzleManager.isFirstPuzzle) {
-                        mainConsole.puzzleSelectButtons[colorPuzzleManager.activePuzzle].state.Set(ColorPuzzleButton.State.Off);
+                    else if (!colorPuzzleManager.IsFirstPuzzle) {
+                        mainConsole.puzzleSelectButtons[colorPuzzleManager.ActivePuzzle].state.Set(ColorPuzzleButton.State.Off);
                     }
                 }
             });
 
             // Getting the sharedMaterial value because the actual Material may have been dimmed by now
-            startingEmission = puzzleIsSolvedIndicator.sharedMaterial.GetColor(EmissionProperty);
+            startingEmission = puzzleIsSolvedIndicator.sharedMaterial.GetColor(EMISSION_PROPERTY);
         }
 
         public void FireAt(DissolveObject cover) {
@@ -99,13 +99,13 @@ namespace LevelSpecific.BlackRoom {
             
             float t = state.Time / laser.main.duration;
             Color emission = Color.Lerp(startingEmission, Color.black, t);
-            puzzleIsSolvedIndicator.material.SetColor(EmissionProperty, emission);
+            puzzleIsSolvedIndicator.material.SetColor(EMISSION_PROPERTY, emission);
         }
 
         // As the origin of the particle system bobs up and down, the distance the particles need to travel changes slightly
         // This will set the lifespan of the particles accordingly
         void UpdateParticles() {
-            float distance = (targetParticleEndPosition - laser.transform.position).magnitude;
+            float distance = (TargetParticleEndPosition - laser.transform.position).magnitude;
 
             // Update lifetime to match slightly changing distances
             ParticleSystem.MainModule main = laser.main;
@@ -121,7 +121,7 @@ namespace LevelSpecific.BlackRoom {
         }
 
         void LookAtCover() {
-            laser.transform.LookAt(targetParticleEndPosition);
+            laser.transform.LookAt(TargetParticleEndPosition);
         }
 
         void DissolveCoverFiringAt() {
@@ -130,22 +130,22 @@ namespace LevelSpecific.BlackRoom {
             coverFiringAt.Dematerialize();
         }
 
+        public override void LoadSave(BlackRoomDissolveCoverLaserSave save) {
+            state.LoadFromSave(save.stateSave);
+            coverFiringAt = save.coverFiringAt?.GetOrNull();
+            laser.LoadFromSerializable(save.laser);
+        }
+
         [Serializable]
-        public class BlackRoomDissolveCoverLaserSave : SerializableSaveObject<BlackRoomDissolveCoverLaser> {
-            private StateMachine<LaserState>.StateMachineSave stateSave;
-            SerializableReference<DissolveObject, DissolveObject.DissolveObjectSave> coverFiringAt;
-            SerializableParticleSystem laser;
+        public class BlackRoomDissolveCoverLaserSave : SaveObject<BlackRoomDissolveCoverLaser> {
+            public StateMachine<LaserState>.StateMachineSave stateSave;
+            public SuperspectiveReference<DissolveObject, DissolveObject.DissolveObjectSave> coverFiringAt;
+            public SerializableParticleSystem laser;
 
             public BlackRoomDissolveCoverLaserSave(BlackRoomDissolveCoverLaser script) : base(script) {
                 stateSave = script.state.ToSave();
                 coverFiringAt = script.coverFiringAt;
                 laser = script.laser;
-            }
-            
-            public override void LoadSave(BlackRoomDissolveCoverLaser script) {
-                script.state.LoadFromSave(this.stateSave);
-                script.coverFiringAt = this.coverFiringAt?.GetOrNull();
-                this.laser.ApplyToParticleSystem(script.laser);
             }
         }
     }

@@ -7,14 +7,12 @@ using NaughtyAttributes;
 using Audio;
 using Saving;
 using PoweredObjects;
-using StateUtils;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 using static Audio.AudioManager;
 
 namespace PowerTrailMechanics {
 	[RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
-	public class PowerTrail : SaveableObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
+	public class PowerTrail : SuperspectiveObject<PowerTrail, PowerTrail.PowerTrailSave>, CustomAudioJob {
 		public delegate void PowerTrailUpdateAction(float prevDistance, float newDistance);
 		public PowerTrailUpdateAction OnPowerTrailUpdate;
 		
@@ -42,7 +40,7 @@ namespace PowerTrailMechanics {
 
 		public int numAudioSources = 2; // Max one per simplePath segment
 
-		private int NUM_AUDIO_SOURCES_HARDCODED = 2; // 4 seems like too many, and there are a lot that are using 4 for numAudioSources. It's very expensive to have 4 audio sources per power trail
+		private const int NUM_AUDIO_SOURCES_HARDCODED = 2; // 4 seems like too many, and there are a lot that are using 4 for numAudioSources. It's very expensive to have 4 audio sources per power trail
 		// trail segment -> audioJob.uniqueIdentifier
 		private readonly TwoWayDictionary<NodeTrailInfo, string> audioSegments = new TwoWayDictionary<NodeTrailInfo, string>();
 
@@ -197,7 +195,8 @@ namespace PowerTrailMechanics {
 			}
 		}
 
-		private void OnDisable() {
+		protected override void OnDisable() {
+			base.OnDisable();
 			Player.instance.growShrink.state.OnStateChangeSimple -= SetLayers;
 		}
 
@@ -466,9 +465,29 @@ namespace PowerTrailMechanics {
 #endregion
 
 #region Saving
-		
+
+		public override void LoadSave(PowerTrailSave save) {
+			reverseDirection = save.reverseVisibility;
+			useDurationInsteadOfSpeed = save.useDurationInsteadOfSpeed;
+			useSeparateSpeedsForPowerOnOff = save.useSeparateSpeedsForPowerOnOff;
+			targetDuration = save.targetDuration;
+			targetDurationPowerOff = save.targetDurationPowerOff;
+			speed = save.speed;
+			speedPowerOff = save.speedPowerOff;
+			powerTrailRadius = save.powerTrailRadius;
+			distance = save.distance;
+			maxDistance = save.maxDistance;
+			// If we're at min or max distance, bring us in ever so slightly so that it re-finishes the animation
+			if (Mathf.Approximately(distance, maxDistance)) {
+				distance -= 0.00001f;
+			}
+			else if (distance == 0) {
+				distance += 0.00001f;
+			}
+		}
+
 		[Serializable]
-		public class PowerTrailSave : SerializableSaveObject<PowerTrail> {
+		public class PowerTrailSave : SaveObject<PowerTrail> {
 			public bool reverseVisibility;
 			public bool useDurationInsteadOfSpeed;
 			public bool useSeparateSpeedsForPowerOnOff;
@@ -492,28 +511,9 @@ namespace PowerTrailMechanics {
 				this.distance = powerTrail.distance;
 				this.maxDistance = powerTrail.maxDistance;
 			}
-
-			public override void LoadSave(PowerTrail powerTrail) {
-				powerTrail.reverseDirection = this.reverseVisibility;
-				powerTrail.useDurationInsteadOfSpeed = this.useDurationInsteadOfSpeed;
-				powerTrail.useSeparateSpeedsForPowerOnOff = this.useSeparateSpeedsForPowerOnOff;
-				powerTrail.targetDuration = this.targetDuration;
-				powerTrail.targetDurationPowerOff = this.targetDurationPowerOff;
-				powerTrail.speed = this.speed;
-				powerTrail.speedPowerOff = this.speedPowerOff;
-				powerTrail.powerTrailRadius = this.powerTrailRadius;
-				powerTrail.distance = this.distance;
-				powerTrail.maxDistance = this.maxDistance;
-				// If we're at min or max distance, bring us in ever so slightly so that it re-finishes the animation
-				if (powerTrail.distance == powerTrail.maxDistance) {
-					powerTrail.distance -= 0.00001f;
-				}
-				else if (powerTrail.distance == 0) {
-					powerTrail.distance += 0.00001f;
-				}
-			}
 		}
 #endregion
+
 #region EditorGizmos
 		bool editorGizmosEnabled => DEBUG;
 

@@ -10,14 +10,14 @@ using StateUtils;
 using UnityEngine.Events;
 
 namespace PoweredObjects {
-    public enum MultiMode {
+    public enum MultiMode : byte {
         Single,
         Any,
         All
     }
     
     [Flags]
-    public enum PowerMode {
+    public enum PowerMode : byte {
         None = 0,
         PowerOn = 1,
         PowerOff = 2
@@ -34,7 +34,7 @@ namespace PoweredObjects {
     /// Can set its own state with daisy-chain power events, through the use of PowerIsOn property, or if automaticallyFinishPowering is true
     /// </summary>
     [RequireComponent(typeof(UniqueId))]
-    public class PoweredObject : SaveableObject<PoweredObject, PoweredObject.PoweredObjectSave> {
+    public class PoweredObject : SuperspectiveObject<PoweredObject, PoweredObject.PoweredObjectSave> {
         public StateMachine<PowerState> state;
 
 #region Power Chaining
@@ -192,7 +192,8 @@ namespace PoweredObjects {
             InitEvents();
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
+            base.OnDisable();
             TeardownEvents();
         }
 
@@ -261,9 +262,24 @@ namespace PoweredObjects {
         }
 
 #region Saving
+
+        public override void LoadSave(PoweredObjectSave save) {
+            state.LoadFromSave(save.stateSave);
+            automaticFinishPoweringTime = save.automaticFinishPoweringTime;
+            automaticFinishDepoweringTime = save.automaticFinishDepoweringTime;
+            automaticallyFinishPowering = save.automaticallyFinishPowering;
+            automaticallyFinishDepowering = save.automaticallyFinishDepowering;
+        }
+
         [Serializable]
-        public class PoweredObjectSave : SerializableSaveObject<PoweredObject> {
-            private StateMachine<PowerState>.StateMachineSave stateSave;
+        public class PoweredObjectSave : SaveObject<PoweredObject> {
+            public StateMachine<PowerState>.StateMachineSave stateSave;
+            public float automaticFinishPoweringTime;
+            public float automaticFinishDepoweringTime;
+            public bool automaticallyFinishPowering;
+            public bool automaticallyFinishDepowering;
+            
+            // Provided so that Power can be set even when the object is unloaded
             public bool PowerIsOn {
                 get => stateSave.state is PowerState.PartiallyPowered or PowerState.Powered;
                 set {
@@ -294,13 +310,12 @@ namespace PoweredObjects {
             
             public PoweredObjectSave(PoweredObject script) : base(script) {
                 this.stateSave = script.state.ToSave();
-            }
-
-            public override void LoadSave(PoweredObject script) {
-                script.state.LoadFromSave(this.stateSave);
+                this.automaticFinishPoweringTime = script.automaticFinishPoweringTime;
+                this.automaticFinishDepoweringTime = script.automaticFinishDepoweringTime;
+                this.automaticallyFinishPowering = script.automaticallyFinishPowering;
+                this.automaticallyFinishDepowering = script.automaticallyFinishDepowering;
             }
         }
 #endregion
     }
-
 }

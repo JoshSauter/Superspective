@@ -7,8 +7,8 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave> {
-	public enum ScramblerState {
+public class NoiseScrambleOverlayObject : SuperspectiveObject<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave> {
+	public enum ScramblerState : byte {
 		Off,
 		On
 	}
@@ -63,19 +63,20 @@ public class NoiseScrambleOverlayObject : SaveableObject<NoiseScrambleOverlayObj
 	}
     
 #region Saving
-		[Serializable]
-		public class NoiseScrambleOverlayObjectSave : SerializableSaveObject<NoiseScrambleOverlayObject> {
-			public StateMachine<ScramblerState>.StateMachineSave stateSave;
 
-			public NoiseScrambleOverlayObjectSave(NoiseScrambleOverlayObject script) : base(script) {
-				stateSave = script.scramblerState.ToSave();
-			}
+	public override void LoadSave(NoiseScrambleOverlayObjectSave save) {
+		scramblerState.LoadFromSave(save.stateSave);
+		
+		RegisterScrambler();
+	}
 
-			public override void LoadSave(NoiseScrambleOverlayObject script) {
-				script.scramblerState.LoadFromSave(stateSave);
+	[Serializable]
+	public class NoiseScrambleOverlayObjectSave : SaveObject<NoiseScrambleOverlayObject> {
+		public StateMachine<ScramblerState>.StateMachineSave stateSave;
 
-				script.RegisterScrambler();
-			}
+		public NoiseScrambleOverlayObjectSave(NoiseScrambleOverlayObject script) : base(script) {
+			stateSave = script.scramblerState.ToSave();
 		}
+	}
 #endregion
 }

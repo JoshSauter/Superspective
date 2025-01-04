@@ -5,7 +5,7 @@ using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
 
-public class PlayerFallingSound : SaveableObject, CustomAudioJob {
+public class PlayerFallingSound : SuperspectiveObject, CustomAudioJob {
     [SerializeField]
     PlayerMovement player;
 

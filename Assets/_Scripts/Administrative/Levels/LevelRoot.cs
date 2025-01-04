@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace LevelManagement {
-    public class LevelRoot : SaveableObject {
+    public class LevelRoot : SuperspectiveObject {
         public override string ID => $"LevelRoot_{gameObject.scene.name}";
     }
 }

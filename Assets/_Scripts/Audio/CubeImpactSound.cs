@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Audio {
 	[RequireComponent(typeof(Rigidbody))]
-    public class CubeImpactSound : SaveableObject, AudioJobOnGameObject {
+    public class CubeImpactSound : SuperspectiveObject, AudioJobOnGameObject {
 	    
 		float minSpeed = 5f;
 		float maxSpeed = 25f;
@@ -20,6 +20,8 @@ namespace Audio {
 
 		float timeSinceLastSound = 0f;
 		float cooldown = 0.05f;
+
+		private AudioManager.AudioJob audioJob;
 
 		void OnCollisionEnter(Collision collision) {
 			if (!GameManager.instance.gameHasLoaded) return;
@@ -36,7 +38,7 @@ namespace Audio {
 			}
 
 			PrintDebugCollisionInfo(collision, impactSpeed);
-			AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, this, shouldPlay, AudioSettingsOverride);
+			audioJob = AudioManager.instance.PlayOnGameObject(AudioName.CubeImpact, id.uniqueId, this, shouldPlay, AudioSettingsOverride);
 			timeSinceLastSound = 0f;
 			curVolume = nextVolume;
 		}
@@ -52,6 +54,12 @@ namespace Audio {
 
 		void Update() {
 			timeSinceLastSound += Time.deltaTime;
+		}
+
+		protected override void OnDisable() {
+			base.OnDisable();
+
+			audioJob?.Stop();
 		}
 
 		public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;

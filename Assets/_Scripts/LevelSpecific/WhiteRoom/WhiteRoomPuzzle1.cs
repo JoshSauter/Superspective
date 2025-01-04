@@ -9,10 +9,10 @@ using SuperspectiveUtils;
 using Library.Functional;
 using UnityEngine;
 using UnityEngine.Serialization;
-using DimensionObjectReference = SerializableClasses.SerializableReference<DimensionObject, DimensionObject.DimensionObjectSave>;
+using DimensionObjectReference = SerializableClasses.SuperspectiveReference<DimensionObject, DimensionObject.DimensionObjectSave>;
 using MaybeDimensionObject = Library.Functional.Either<DimensionObject, DimensionObject.DimensionObjectSave>;
 
-public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle1.WhiteRoomPuzzle1Save> {
+public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomPuzzle1.WhiteRoomPuzzle1Save> {
     public PowerTrail powerTrail;
     public MagicTrigger fakePortalTrigger;
 
@@ -22,8 +22,8 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	Vector3 fakePortalSolvedPos;
 	Vector3 fakePortalTargetPos;
 	float fakePortalLerpSpeed;
-	const float fakePortalLerpSpeedUp = 4;
-	const float fakePortalLerpSpeedDown = 10;
+	const float FAKE_PORTAL_LERP_SPEED_UP = 4;
+	const float FAKE_PORTAL_LERP_SPEED_DOWN = 10;
 
 	public PillarDimensionObject dimension1;
 
@@ -46,7 +46,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 	public DimensionObjectReference holeCoverReference;
 	MaybeDimensionObject holeCover => gameObject.IsInActiveScene() ? holeCoverReference.Reference : null;
 	
-	public enum State {
+	public enum State : byte {
         Unsolved,
         FakePortalPowered,
         WalkedThroughFakePortal
@@ -64,7 +64,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 			switch (value) {
 				case State.Unsolved:
 					fakePortalTargetPos = fakePortalUnsolvedPos;
-					fakePortalLerpSpeed = fakePortalLerpSpeedDown;
+					fakePortalLerpSpeed = FAKE_PORTAL_LERP_SPEED_DOWN;
 					archToNextRoom?.MatchAction(
 						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Invisible, true),
 						saveObject => saveObject.visibilityState = (int) VisibilityState.Invisible
@@ -76,7 +76,7 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
-					fakePortalLerpSpeed = fakePortalLerpSpeedUp;
+					fakePortalLerpSpeed = FAKE_PORTAL_LERP_SPEED_UP;
 					archToNextRoom?.MatchAction(
 						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.PartiallyVisible, true),
 						saveObject => saveObject.visibilityState = (int) VisibilityState.PartiallyVisible
@@ -196,36 +196,36 @@ public class WhiteRoomPuzzle1 : SaveableObject<WhiteRoomPuzzle1, WhiteRoomPuzzle
 		}
 	}
 
-	#region Saving
+#region Saving
+
+	public override void LoadSave(WhiteRoomPuzzle1Save save) {
+		state = save.state;
+		fakePortal.transform.position = save.fakePortalPos;
+		fakePortal.SetActive(save.fakePortalActive);
+		fakePortalPlane.SetActive(save.fakePortalPlaneActive);
+		restoreFakePortalPlaneTrigger.SetActive(save.restoreFakePortalPlaneTriggerActive);
+		fakePortalLerpSpeed = save.fakePortalLerpSpeed;
+	}
+
 	public override string ID => "WhiteRoomPuzzle1";
 
 	[Serializable]
-	public class WhiteRoomPuzzle1Save : SerializableSaveObject<WhiteRoomPuzzle1> {
-		int state;
-		SerializableVector3 fakePortalPos;
-		bool fakePortalActive;
-		bool fakePortalPlaneActive;
-		bool restoreFakePortalPlaneTriggerActive;
-
-		float fakePortalLerpSpeed;
+	public class WhiteRoomPuzzle1Save : SaveObject<WhiteRoomPuzzle1> {
+		public SerializableVector3 fakePortalPos;
+		public State state;
+		public bool fakePortalActive;
+		public bool fakePortalPlaneActive;
+		public bool restoreFakePortalPlaneTriggerActive;
+		public float fakePortalLerpSpeed;
 
 		public WhiteRoomPuzzle1Save(WhiteRoomPuzzle1 script) : base(script) {
-			this.state = (int)script.state;
+			this.state = script.state;
 			this.fakePortalPos = script.fakePortal.transform.position;
 			this.fakePortalActive = script.fakePortal.activeSelf;
 			this.fakePortalPlaneActive = script.fakePortalPlane.activeSelf;
 			this.restoreFakePortalPlaneTriggerActive = script.restoreFakePortalPlaneTrigger.activeSelf;
 			this.fakePortalLerpSpeed = script.fakePortalLerpSpeed;
 		}
-
-		public override void LoadSave(WhiteRoomPuzzle1 script) {
-			script.state = (State)this.state;
-			script.fakePortal.transform.position = this.fakePortalPos;
-			script.fakePortal.SetActive(this.fakePortalActive);
-			script.fakePortalPlane.SetActive(this.fakePortalPlaneActive);
-			script.restoreFakePortalPlaneTrigger.SetActive(this.restoreFakePortalPlaneTriggerActive);
-			script.fakePortalLerpSpeed = this.fakePortalLerpSpeed;
-		}
 	}
-	#endregion
+#endregion
 }

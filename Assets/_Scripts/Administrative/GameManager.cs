@@ -7,6 +7,7 @@ using NaughtyAttributes;
 using NovaMenuUI;
 using UnityEngine;
 using Saving;
+using Sirenix.OdinInspector;
 using Tayx.Graphy;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -21,8 +22,12 @@ public class GameManager : Singleton<GameManager> {
     public bool IsApplicationQuitting => _isApplicationQuitting;
 
     [Header("--- Game Version ---")]
-    [OnValueChanged("OnVersionChange")]
+    [NaughtyAttributes.OnValueChanged("OnVersionChange")]
     public string version;
+
+    // Can be set w/ develop console command, used as the base timescale for the game
+    [ShowInInspector]
+    public static float timeScale = 1f;
 
     private void OnVersionChange() {
         #if UNITY_EDITOR
@@ -56,7 +61,7 @@ public class GameManager : Singleton<GameManager> {
     public bool settingsHaveLoaded = false;
     IEnumerator Start() {
         MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.On;
-        SaveManager.GetOrCreateSaveManagerForScene(gameObject.scene.name);
+        SaveManager.GetOrCreateSaveManagerForLevel(gameObject.scene.name.ToLevel());
         SaveManager.LoadSettings();
         settingsHaveLoaded = true;
         yield return new WaitWhile(() => LevelManager.instance.activeSceneName == "");

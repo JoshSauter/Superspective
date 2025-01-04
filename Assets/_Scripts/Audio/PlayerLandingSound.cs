@@ -7,7 +7,7 @@ using Audio;
 using Saving;
 using static Audio.AudioManager;
 
-public class PlayerLandingSound : SaveableObject, AudioJobOnGameObject {
+public class PlayerLandingSound : SuperspectiveObject, AudioJobOnGameObject {
 	//public SoundEffectOld shoeSound;
 	//public SoundEffectOld thumpSound;
 	AudioJob ruffleSound => AudioManager.instance.GetOrCreateJob(AudioName.PlayerJumpLandingRuffle, ID);

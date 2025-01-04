@@ -1,19 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Audio;
-using Interactables;
 using PortalMechanics;
 using Saving;
 using StateUtils;
-using SuperspectiveUtils;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     [RequireComponent(typeof(UniqueId))]
-    public class PortalDoor : SaveableObject<PortalDoor, PortalDoorSave> {
+    public class PortalDoor : SuperspectiveObject<PortalDoor, PortalDoor.PortalDoorSave> {
         [SerializeField]
         private Transform doorLeft;
         [SerializeField]
@@ -40,7 +34,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
 
         // Define the different states the door can be in
-        public enum DoorState {
+        public enum DoorState : byte {
             Closed,
             Opening,
             Open,
@@ -182,21 +176,20 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             doorHitboxRight.localScale = curScale;
             doorHitboxLeft.localScale = curScale;
         }
-    }
 
-    #region Saving
-		
-		[Serializable]
-		public class PortalDoorSave : SerializableSaveObject<PortalDoor> {
-            private StateMachine<PortalDoor.DoorState>.StateMachineSave stateSave;
+#region Saving
+        public override void LoadSave(PortalDoorSave save) {
+            state.LoadFromSave(save.stateSave);
+        }
+        
+        [Serializable]
+        public class PortalDoorSave : SaveObject<PortalDoor> {
+            public StateMachine<DoorState>.StateMachineSave stateSave;
 
-			public PortalDoorSave(PortalDoor portalDoor) : base(portalDoor) {
+            public PortalDoorSave(PortalDoor portalDoor) : base(portalDoor) {
                 this.stateSave = portalDoor.state.ToSave();
             }
-
-			public override void LoadSave(PortalDoor portalDoor) {
-                portalDoor.state.LoadFromSave(stateSave);
-            }
-		}
+        }
 #endregion
+    }
 }

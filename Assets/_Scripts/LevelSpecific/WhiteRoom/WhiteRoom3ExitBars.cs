@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using PowerTrailMechanics;
 using Audio;
@@ -9,7 +8,7 @@ using SerializableClasses;
 using System.Linq;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3ExitBars : SaveableObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave>, AudioJobOnGameObject {
+    public class WhiteRoom3ExitBars : SuperspectiveObject<WhiteRoom3ExitBars, WhiteRoom3ExitBars.WhiteRoom3ExitBarsSave>, AudioJobOnGameObject {
         public CubeReceptacle[] puzzleReceptacles;
         public PowerTrail[] powerTrails;
         public Transform[] bars;
@@ -20,7 +19,7 @@ namespace LevelSpecific.WhiteRoom {
         public int numSolved = 0;
         private bool cheatSolved = false;
         bool wasSolvedLastFrame = false;
-        bool solved => numSolved == powerTrails.Length || cheatSolved;
+        bool Solved => numSolved == powerTrails.Length || cheatSolved;
 
         protected override void Start() {
             base.Start();
@@ -37,7 +36,7 @@ namespace LevelSpecific.WhiteRoom {
                 cheatSolved = !cheatSolved;
             }
             
-            if (solved && !wasSolvedLastFrame) {
+            if (Solved && !wasSolvedLastFrame) {
                 AudioManager.instance.Play(AudioName.CorrectAnswer);
                 AudioManager.instance.PlayOnGameObject(AudioName.MetalCreak, ID, this);
 
@@ -47,39 +46,40 @@ namespace LevelSpecific.WhiteRoom {
                 }
             }
 
-            invisibleWall.SetActive(!solved);
+            invisibleWall.SetActive(!Solved);
             foreach (var bar in bars) {
                 Vector3 barPos = bar.transform.localPosition;
-                Vector3 targetPos = new Vector3(barPos.x, barPos.y, solved ? 7.1f : 0);
+                Vector3 targetPos = new Vector3(barPos.x, barPos.y, Solved ? 7.1f : 0);
                 bar.transform.localPosition = Vector3.Lerp(barPos, targetPos, Time.deltaTime * 3f);
             }
 
-            wasSolvedLastFrame = solved;
+            wasSolvedLastFrame = Solved;
         }
 
-        #region Saving
+#region Saving
+
+        public override void LoadSave(WhiteRoom3ExitBarsSave save) {
+            numSolved = save.numSolved;
+            wasSolvedLastFrame = save.wasSolvedLastFrame;
+            for (int i = 0; i < bars.Length; i++) {
+                bars[i].position = save.barPositions[i];
+            }
+        }
+
         public override string ID => "WhiteRoom3ExitBars";
 
         [Serializable]
-        public class WhiteRoom3ExitBarsSave : SerializableSaveObject<WhiteRoom3ExitBars> {
-            int numSolved;
-            bool wasSolvedLastFrame;
-            List<SerializableVector3> barPositions;
+        public class WhiteRoom3ExitBarsSave : SaveObject<WhiteRoom3ExitBars> {
+            public List<SerializableVector3> barPositions;
+            public int numSolved;
+            public bool wasSolvedLastFrame;
 
             public WhiteRoom3ExitBarsSave(WhiteRoom3ExitBars exitBars) : base(exitBars) {
                 this.numSolved = exitBars.numSolved;
                 this.wasSolvedLastFrame = exitBars.wasSolvedLastFrame;
                 this.barPositions = exitBars.bars.Select<Transform, SerializableVector3>(b => b.position).ToList();
             }
-
-            public override void LoadSave(WhiteRoom3ExitBars exitBars) {
-                exitBars.numSolved = this.numSolved;
-                exitBars.wasSolvedLastFrame = this.wasSolvedLastFrame;
-                for (int i = 0; i < exitBars.bars.Length; i++) {
-                    exitBars.bars[i].position = this.barPositions[i];
-				}
-            }
         }
-        #endregion
+#endregion
     }
 }

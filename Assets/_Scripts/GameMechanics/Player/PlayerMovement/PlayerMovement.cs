@@ -15,7 +15,7 @@ using UnityEngine;
 using SprintBehaviorMode = Settings.Gameplay.SprintBehaviorMode;
 
 [RequireComponent(typeof(Rigidbody))]
-public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
+public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovement, PlayerMovement.PlayerMovementSave>, AudioJobOnGameObject {
     private List<PlayerMovementComponent> components = new List<PlayerMovementComponent>();
     public StaircaseMovement staircaseMovement;
     public JumpMovement jumpMovement;
@@ -30,13 +30,6 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public string GroundName => IsGrounded ? Grounded.Ground.name : "Not Grounded";
     [ShowNativeProperty]
     public Vector3 GroundNormal => IsGrounded ? Grounded.contact.normal : Vector3.zero;
-
-    // For Debugging:
-    void SetTimeScale() {
-        Time.timeScale = timeScale;
-    }
-    [OnValueChanged("SetTimeScale")]
-    public float timeScale = 1;
 
     public bool snapToGroundEnabled = true;
 
@@ -84,7 +77,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     public Vector3 TopOfPlayer => transform.position + (transform.up * 0.5f * Scale);
     
     // End-game mechanics
-    public enum EndGameMovement {
+    public enum EndGameMovement : byte {
         NotStarted,
         Walking,
         HorizontalInputMovesPlayerForward,
@@ -133,7 +126,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     bool Jumping => jumpMovement.jumpState == JumpMovement.JumpState.Jumping;
     bool MoveDirectionHeldRecently => moveDirectionHeldRecentlyState == MoveDirectionInputState.HeldRecently;
 
-    public enum MoveDirectionInputState {
+    public enum MoveDirectionInputState : byte {
         HeldRecently,
         NotHeldRecently
     }
@@ -145,7 +138,7 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
-    public enum MovementEnabledState {
+    public enum MovementEnabledState : byte {
         Enabled,
         Disabled
     }
@@ -248,7 +241,10 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
     void FixedUpdate() {
         if (!GameManager.instance.gameHasLoaded) return;
         if (movementEnabledState == MovementEnabledState.Disabled) {
-            thisRigidbody.velocity = Vector3.zero;
+            if (!thisRigidbody.isKinematic) {
+                thisRigidbody.velocity = Vector3.zero;
+            }
+
             return;
         }
         
@@ -428,59 +424,53 @@ public partial class PlayerMovement : SingletonSaveableObject<PlayerMovement, Pl
 #endregion
 
 #region Saving
+
+    public override void LoadSave(PlayerMovementSave save) {
+        autoRun = save.autoRun;
+        jumpMovement.jumpState.LoadFromSave(save.jumpStateSave);
+        staircaseMovement.stepState.LoadFromSave(save.stepStateSave);
+        movementEnabledState = save.movementEnabledState;
+            
+        movespeed = save.movespeed;
+        movespeedMultiplier = save.movespeedMultiplier;
+
+        thisRigidbody.isKinematic = save.thisRigidbodyKinematic;
+        if (!thisRigidbody.isKinematic) {
+            thisRigidbody.velocity = save.thisRigidbodyVelocity;
+        }
+        thisRigidbody.useGravity = save.thisRigidbodyUseGravity;
+        thisRigidbody.mass = save.thisRigidbodyMass;
+    }
+    
     // There's only one player so we don't need a UniqueId here
     public override string ID => "PlayerMovement";
 
     [Serializable]
-    public class PlayerMovementSave : SerializableSaveObject<PlayerMovement> {
-        bool autoRun;
-
-        StateMachine<JumpMovement.JumpState>.StateMachineSave jumpStateSave;
-        StateMachine<StaircaseMovement.StepState>.StateMachineSave stepStateSave;
-        float movespeed;
-        float movespeedMultiplier;
-
-        SerializableVector3 playerGravityDirection;
-
-        bool thisRigidbodyKinematic;
-        float thisRigidbodyMass;
-        bool thisRigidbodyUseGravity;
-        SerializableVector3 thisRigidbodyVelocity;
-        int movementEnabledState;
+    public class PlayerMovementSave : SaveObject<PlayerMovement> {
+        public StateMachine<JumpMovement.JumpState>.StateMachineSave jumpStateSave;
+        public StateMachine<StaircaseMovement.StepState>.StateMachineSave stepStateSave;
+        public SerializableVector3 thisRigidbodyVelocity;
+        public float movespeed;
+        public float movespeedMultiplier;
+        public float thisRigidbodyMass;
+        public MovementEnabledState movementEnabledState;
+        public bool autoRun;
+        public bool thisRigidbodyKinematic;
+        public bool thisRigidbodyUseGravity;
 
         public PlayerMovementSave(PlayerMovement playerMovement) : base(playerMovement) {
             autoRun = playerMovement.autoRun;
             jumpStateSave = playerMovement.jumpMovement.jumpState.ToSave();
             stepStateSave = playerMovement.staircaseMovement.stepState.ToSave();
-            movementEnabledState = (int)playerMovement.movementEnabledState;
+            movementEnabledState = playerMovement.movementEnabledState;
             
             movespeed = playerMovement.movespeed;
             movespeedMultiplier = playerMovement.movespeedMultiplier;
 
-            playerGravityDirection = Physics.gravity.normalized;
             thisRigidbodyVelocity = playerMovement.thisRigidbody.velocity;
             thisRigidbodyKinematic = playerMovement.thisRigidbody.isKinematic;
             thisRigidbodyUseGravity = playerMovement.thisRigidbody.useGravity;
             thisRigidbodyMass = playerMovement.thisRigidbody.mass;
-        }
-
-        public override void LoadSave(PlayerMovement playerMovement) {
-            playerMovement.autoRun = autoRun;
-            playerMovement.jumpMovement.jumpState.LoadFromSave(jumpStateSave);
-            playerMovement.staircaseMovement.stepState.LoadFromSave(stepStateSave);
-            playerMovement.movementEnabledState = (MovementEnabledState)movementEnabledState;
-            
-            playerMovement.movespeed = movespeed;
-            playerMovement.movespeedMultiplier = movespeedMultiplier;
-
-            // Don't know a better place to restore gravity direction
-            Physics.gravity = Physics.gravity.magnitude * (Vector3) playerGravityDirection;
-            playerMovement.thisRigidbody.isKinematic = thisRigidbodyKinematic;
-            if (!playerMovement.thisRigidbody.isKinematic) {
-                playerMovement.thisRigidbody.velocity = thisRigidbodyVelocity;
-            }
-            playerMovement.thisRigidbody.useGravity = thisRigidbodyUseGravity;
-            playerMovement.thisRigidbody.mass = thisRigidbodyMass;
         }
     }
 #endregion

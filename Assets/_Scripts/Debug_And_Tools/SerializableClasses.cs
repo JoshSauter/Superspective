@@ -338,25 +338,29 @@ namespace SerializableClasses {
 		}
 	}
 
+	/// <summary>
+	/// Untyped reference to a SuperspectiveObject, with no knowledge of its script or save data.
+	/// Use this when you only need a reference to the GameObject and not a particular script.
+	/// </summary>
 	[Serializable]
-	public class SerializableReference {
+	public class SuperspectiveReference {
 		public string referencedObjId;
 		
 		// Implicit SerializableReference creation from SaveableObject
-		public static implicit operator SerializableReference(SaveableObject obj) {
-			return obj != null ? new SerializableReference<SaveableObject, SerializableSaveObject<SaveableObject>> { Reference = obj } : null;
+		public static implicit operator SuperspectiveReference(SuperspectiveObject obj) {
+			return obj != null ? new SuperspectiveReference<SuperspectiveObject, SaveObject<SuperspectiveObject>> { Reference = obj } : null;
 		}
 		
 		// Implicit SerializableReference creation from SerializableSaveObject
-		public static implicit operator SerializableReference(SerializableSaveObject<SaveableObject> serializedObj) {
-			return serializedObj != null ? new SerializableReference<SaveableObject, SerializableSaveObject<SaveableObject>> { Reference = serializedObj } : null;
+		public static implicit operator SuperspectiveReference(SaveObject<SuperspectiveObject> serializedObj) {
+			return serializedObj != null ? new SuperspectiveReference<SuperspectiveObject, SaveObject<SuperspectiveObject>> { Reference = serializedObj } : null;
 		}
 
-		public Either<SaveableObject, SerializableSaveObject> Reference {
+		public Either<SuperspectiveObject, SaveObject> Reference {
 			get {
-				return SaveManager.GetSaveableObjectById(referencedObjId)?.Match(
-					saveableObject => new Either<SaveableObject, SerializableSaveObject>(saveableObject),
-					serializedSaveObject => new Either<SaveableObject, SerializableSaveObject>(serializedSaveObject)
+				return SaveManager.GetSuperspectiveObjectById(referencedObjId)?.Match(
+					saveableObject => new Either<SuperspectiveObject, SaveObject>(saveableObject),
+					serializedSaveObject => new Either<SuperspectiveObject, SaveObject>(serializedSaveObject)
 				);
 			}
 			set {
@@ -377,28 +381,39 @@ namespace SerializableClasses {
 		}
 	}
 
+	/// <summary>
+	/// Singly typed reference to a SuperspectiveObject of a given type, with no knowledge of its save object data.
+	/// Use this only when you know the reference you're trying to access is loaded.
+	/// </summary>
+	/// <typeparam name="T">Type of the loaded SuperspectiveObject script being referenced</typeparam>
 	[Serializable]
-	public class SerializableReference<T> : SerializableReference where T : MonoBehaviour, ISaveableObject {
+	public class SuperspectiveReference<T> : SuperspectiveReference where T : SuperspectiveObject {
 		public T GetOrNull() {
-			return SaveManager.GetSaveableObjectById(referencedObjId).LeftOrDefault() as T;
+			return SaveManager.GetSuperspectiveObjectById(referencedObjId).LeftOrDefault() as T;
 		}
 
 		// Implicit SerializableReference creation from SaveableObject
-		public static implicit operator SerializableReference<T>(T obj) {
-			return obj != null ? new SerializableReference<T> {
+		public static implicit operator SuperspectiveReference<T>(T obj) {
+			return obj != null ? new SuperspectiveReference<T> {
 				referencedObjId = obj.ID
 			} : null;
 		}
 	}
 
+	/// <summary>
+	/// Fully typed reference to a SuperspectiveObject of a given type, with knowledge of its save object data.
+	/// Use this when the reference may or may not be loaded, and you need to access its data either way.
+	/// </summary>
+	/// <typeparam name="T">Type of the loaded SuperspectiveObject script being referenced</typeparam>
+	/// <typeparam name="S">Type of the serialized save data for the SuperspectiveObject being referenced</typeparam>
 	[Serializable]
-	public class SerializableReference<T, S> : SerializableReference
-		where T : MonoBehaviour, ISaveableObject
-		where S : SerializableSaveObject<T> {
+	public class SuperspectiveReference<T, S> : SuperspectiveReference
+		where T : SuperspectiveObject
+		where S : SaveObject<T> {
 
 		public new Either<T, S> Reference {
 			get {
-				return SaveManager.GetSaveableObjectById(referencedObjId)?.Match(
+				return SaveManager.GetSuperspectiveObjectById(referencedObjId)?.Match(
 					// Map the results to the appropriate types
 					saveableObject => new Either<T, S>(saveableObject as T),
 					serializedSaveObject => new Either<T, S>(serializedSaveObject as S)
@@ -421,11 +436,13 @@ namespace SerializableClasses {
 			}
 		}
 		
+		// Try to get the referenced object, returning true and setting obj if it exists, and false if it doesn't
 		public bool TryGet(out T obj) {
 			obj = GetOrNull();
 			return obj != null;
 		}
 
+		// Get the referenced object if it exists, or null if it doesn't
 		public T GetOrNull() {
 			return Reference?.Match(
 				saveableObject => saveableObject,
@@ -433,26 +450,26 @@ namespace SerializableClasses {
 			);
 		}
 
-		// Implicit SerializableReference creation from SaveableObject
-		public static implicit operator SerializableReference<T, S>(T obj) {
-			return obj != null ? new SerializableReference<T, S> { Reference = obj } : null;
+		// Implicit SerializableReference creation from SuperspectiveObject
+		public static implicit operator SuperspectiveReference<T, S>(T obj) {
+			return obj != null ? new SuperspectiveReference<T, S> { Reference = obj } : null;
 		}
 		
 		// Implicit SerializableReference creation from SerializableSaveObject
-		public static implicit operator SerializableReference<T, S>(S serializedObj) {
-			return serializedObj != null ? new SerializableReference<T, S> { Reference = serializedObj } : null;
+		public static implicit operator SuperspectiveReference<T, S>(S serializedObj) {
+			return serializedObj != null ? new SuperspectiveReference<T, S> { Reference = serializedObj } : null;
 		}
 
 		// Only use this if you know you have a SerializableReference of a particular type:
 		// Actually don't use this unless you really need to (like for a migration script)
-		public static SerializableReference<T, S> FromGenericReference(SerializableReference reference) {
-			return new SerializableReference<T, S>() {
+		public static SuperspectiveReference<T, S> FromGenericReference(SuperspectiveReference reference) {
+			return new SuperspectiveReference<T, S>() {
 				referencedObjId = reference.referencedObjId
 			};
 		}
 	}
 
-	public class SerializableDynamicReference : SerializableReference<DynamicObject, DynamicObject.DynamicObjectSave> {
+	public class SuperspectiveDynamicReference : SuperspectiveReference<DynamicObject, DynamicObject.DynamicObjectSave> {
 		// Special-case reference should go through different method to find DynamicObjects
 		public new DynamicObjectReference Reference {
 			get {
@@ -480,13 +497,13 @@ namespace SerializableClasses {
 		}
 		
 		// Implicit SerializableReference creation from SaveableObject
-		public static implicit operator SerializableDynamicReference(DynamicObject obj) {
-			return obj != null ? new SerializableDynamicReference { Reference = obj } : null;
+		public static implicit operator SuperspectiveDynamicReference(DynamicObject obj) {
+			return obj != null ? new SuperspectiveDynamicReference { Reference = obj } : null;
 		}
 		
 		// Implicit SerializableReference creation from SerializableSaveObject
-		public static implicit operator SerializableDynamicReference(DynamicObject.DynamicObjectSave save) {
-			return save != null ? new SerializableDynamicReference { Reference = save } : null;
+		public static implicit operator SuperspectiveDynamicReference(DynamicObject.DynamicObjectSave save) {
+			return save != null ? new SuperspectiveDynamicReference { Reference = save } : null;
 		}
 	}
 
@@ -518,21 +535,23 @@ namespace SerializableClasses {
 
 	[Serializable]
 	public class SerializableParticleSystem {
-		private uint randomSeed;
-		private float time;
-		
-		public void ApplyToParticleSystem(ParticleSystem ps) {
-			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-			ps.randomSeed = this.randomSeed;
-			ps.Simulate(this.time);
-			ps.Play();
-		}
+		public uint randomSeed;
+		public float time;
 
 		public static implicit operator SerializableParticleSystem(ParticleSystem ps) {
 			return new SerializableParticleSystem {
 				randomSeed = ps.randomSeed,
 				time = ps.time
 			};
+		}
+	}
+
+	public static class ParticleSystemExt {
+		public static void LoadFromSerializable(this ParticleSystem ps, SerializableParticleSystem serializable) {
+			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+			ps.randomSeed = serializable.randomSeed;
+			ps.Simulate(serializable.time);
+			ps.Play();
 		}
 	}
 

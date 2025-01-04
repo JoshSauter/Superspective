@@ -8,7 +8,7 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class BlackRoomMiniSpotlight : SaveableObject<BlackRoomMiniSpotlight, BlackRoomMiniSpotlight.BlackRoomMiniSpotlightSave> {
+public class BlackRoomMiniSpotlight : SuperspectiveObject<BlackRoomMiniSpotlight, BlackRoomMiniSpotlight.BlackRoomMiniSpotlightSave> {
 	public Renderer lightSource;
 	public Renderer lightBeam;
 
@@ -36,19 +36,19 @@ public class BlackRoomMiniSpotlight : SaveableObject<BlackRoomMiniSpotlight, Bla
     }
     
 #region Saving
-		[Serializable]
-		public class BlackRoomMiniSpotlightSave : SerializableSaveObject<BlackRoomMiniSpotlight> {
-			private bool isOn;
-            
-			public BlackRoomMiniSpotlightSave(BlackRoomMiniSpotlight script) : base(script) {
-				this.isOn = script.isOn;
-			}
 
-			public override void LoadSave(BlackRoomMiniSpotlight script) {
-				script.isOn = this.isOn;
+	public override void LoadSave(BlackRoomMiniSpotlightSave save) {
+		isOn = save.isOn;
+		SetLights(isOn);
+	}
 
-				script.SetLights(isOn);
-			}
+	[Serializable]
+	public class BlackRoomMiniSpotlightSave : SaveObject<BlackRoomMiniSpotlight> {
+		public bool isOn;
+        
+		public BlackRoomMiniSpotlightSave(BlackRoomMiniSpotlight script) : base(script) {
+			this.isOn = script.isOn;
 		}
+	}
 #endregion
 }

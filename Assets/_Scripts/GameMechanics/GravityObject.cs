@@ -10,7 +10,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(UniqueId))]
-public class GravityObject : SaveableObject<GravityObject, GravityObject.GravityObjectSave> {
+public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.GravityObjectSave> {
     private const float RAY_LENGTH = .025f;
     private const float ON_GROUND_CHECK_THRESHOLD = -.1f;
     private float RayLength => RAY_LENGTH * Scale;
@@ -155,22 +155,25 @@ public class GravityObject : SaveableObject<GravityObject, GravityObject.Gravity
 
 #region Saving
 
+    public override void LoadSave(GravityObjectSave save) {
+        useGravity = save.useGravity;
+        GravityDirection = save.gravityDirection;
+        gravityMagnitude = save.gravityMagnitude;
+        onGround = save.onGround;
+    }
+
     [Serializable]
-    public class GravityObjectSave : SerializableSaveObject<GravityObject> {
-        SerializableVector3 gravityDirection;
-        float gravityMagnitude;
-        bool useGravity;
+    public class GravityObjectSave : SaveObject<GravityObject> {
+        public SerializableVector3 gravityDirection;
+        public float gravityMagnitude;
+        public bool useGravity;
+        public bool onGround;
 
         public GravityObjectSave(GravityObject obj) : base(obj) {
             useGravity = obj.useGravity;
             gravityDirection = obj.GravityDirection;
             gravityMagnitude = obj.gravityMagnitude;
-        }
-
-        public override void LoadSave(GravityObject obj) {
-            obj.useGravity = useGravity;
-            obj.GravityDirection = gravityDirection;
-            obj.gravityMagnitude = gravityMagnitude;
+            onGround = obj.onGround;
         }
     }
 #endregion

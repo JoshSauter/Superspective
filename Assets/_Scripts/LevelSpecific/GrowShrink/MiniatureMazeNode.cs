@@ -9,9 +9,9 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class MiniatureMazeNode : SaveableObject<MiniatureMazeNode, MiniatureMazeNode.MiniatureMazeNodeSave> {
+public class MiniatureMazeNode : SuperspectiveObject<MiniatureMazeNode, MiniatureMazeNode.MiniatureMazeNodeSave> {
     
-    public enum State {
+    public enum State : byte {
         Off,
         On
     }
@@ -56,17 +56,18 @@ public class MiniatureMazeNode : SaveableObject<MiniatureMazeNode, MiniatureMaze
     }
 
 #region Saving
-		[Serializable]
-		public class MiniatureMazeNodeSave : SerializableSaveObject<MiniatureMazeNode> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public MiniatureMazeNodeSave(MiniatureMazeNode script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(MiniatureMazeNode script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(MiniatureMazeNodeSave save) {
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class MiniatureMazeNodeSave : SaveObject<MiniatureMazeNode> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public MiniatureMazeNodeSave(MiniatureMazeNode script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

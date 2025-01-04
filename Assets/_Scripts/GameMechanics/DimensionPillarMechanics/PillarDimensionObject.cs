@@ -6,7 +6,7 @@ using SuperspectiveUtils;
 using System;
 using PortalMechanics;
 using Saving;
-using PillarReference = SerializableClasses.SerializableReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
+using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
 // DimensionObjectBase.baseDimension is the lower dimension that this object exists in
 // If this object goes across the 180° + dimensionShiftAngle (when the player is standing in the direction of pillar's transform.forward from pillar),
@@ -181,7 +181,8 @@ public class PillarDimensionObject : DimensionObject {
 		VirtualPortalCamera.OnPostRenderPortal += OnPostRenderPortal;
 	}
 
-	void OnDisable() {
+	protected override void OnDisable() {
+		base.OnDisable();
 		allPillarDimensionObjects.Remove(this);
 		
 		VirtualPortalCamera.OnPreRenderPortal -= OnPreRenderPortal;
@@ -686,33 +687,33 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	#region Saving
+	// When inheriting from a SuperspectiveObject, we need to override th CreateSave method to return the type of SaveObject that has the data we want to save
+	// Otherwise the SaveObject will be of the base class save object type
+	public override SaveObject CreateSave() {
+		return new PillarDimensionObjectSave(this);
+	}
+	
+	public override void LoadSave(DimensionObjectSave save) {
+		base.LoadSave(save);
+
+		if (save is not PillarDimensionObjectSave pillarDimObjSave) {
+			Debug.LogError($"Expected save object of type {nameof(PillarDimensionObjectSave)} but got {save.GetType()} instead");
+			return;
+		}
+		
+		pillars = pillarDimObjSave.pillars;
+		Dimension = pillarDimObjSave.dimension;
+	}
 
 	[Serializable]
 	public class PillarDimensionObjectSave : DimensionObjectSave {
-		PillarReference[] pillars;
-		int dimension;
+		public PillarReference[] pillars;
+		public int dimension;
 
 		public PillarDimensionObjectSave(PillarDimensionObject dimensionObj) : base(dimensionObj) {
 			this.pillars = dimensionObj.pillars;
 			this.dimension = dimensionObj.Dimension;
 		}
-
-		public void LoadSave(PillarDimensionObject dimensionObj) {
-			base.LoadSave(dimensionObj);
-			dimensionObj.pillars = this.pillars;
-
-			dimensionObj.Dimension = this.dimension;
-		}
-	}
-	
-	public override SerializableSaveObject GetSaveObject() {
-		return new PillarDimensionObjectSave(this);
-	}
-
-	public override void RestoreStateFromSave(SerializableSaveObject savedObject) {
-		PillarDimensionObjectSave save = savedObject as PillarDimensionObjectSave;
-
-		save?.LoadSave(this);
 	}
 	#endregion
 }

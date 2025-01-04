@@ -10,7 +10,7 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
-public class WeightedPressurePlate : SaveableObject<WeightedPressurePlate, WeightedPressurePlate.WeightedPressurePlateSave>, BetterTriggers {
+public class WeightedPressurePlate : SuperspectiveObject<WeightedPressurePlate, WeightedPressurePlate.WeightedPressurePlateSave>, BetterTriggers {
     public PowerTrail powerTrail;
     public float targetWeight = 30;
     [SerializeField]
@@ -34,7 +34,7 @@ public class WeightedPressurePlate : SaveableObject<WeightedPressurePlate, Weigh
             }
         }
     }
-    public enum State {
+    public enum State : byte {
         NoWeight,
         UnderTarget,
         OnTarget,
@@ -108,21 +108,21 @@ public class WeightedPressurePlate : SaveableObject<WeightedPressurePlate, Weigh
 
     public void OnBetterTriggerStay(Collider c) { }
 
+    public override void LoadSave(WeightedPressurePlateSave save) {
+        state.LoadFromSave(save.stateSave);
+        targetWeight = save.targetWeight;
+    }
+
 #region Saving
 		[Serializable]
-		public class WeightedPressurePlateSave : SerializableSaveObject<WeightedPressurePlate> {
-            private float targetWeight;
-            private StateMachine<State>.StateMachineSave stateSave;
+		public class WeightedPressurePlateSave : SaveObject<WeightedPressurePlate> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public float targetWeight;
             
 			public WeightedPressurePlateSave(WeightedPressurePlate script) : base(script) {
                 this.targetWeight = script.targetWeight;
                 this.stateSave = script.state.ToSave();
 			}
-
-			public override void LoadSave(WeightedPressurePlate script) {
-                script.state.LoadFromSave(this.stateSave);
-                script.targetWeight = this.targetWeight;
-            }
 		}
 #endregion
 }

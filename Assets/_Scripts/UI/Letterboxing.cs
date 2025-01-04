@@ -9,7 +9,7 @@ using SuperspectiveUtils;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(UniqueId))]
-public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.LetterboxingSave> {
+public class Letterboxing : SingletonSuperspectiveObject<Letterboxing, Letterboxing.LetterboxingSave> {
 	public Image topLetterboxBar, bottomLetterboxBar;
 	public const float LETTERBOX_HEIGHT = 0.15f; // Fraction of the screen that each bar takes up
 	public const float LETTERBOX_APPEAR_TIME = 2f;
@@ -19,7 +19,7 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
 	public bool LetterboxingEnabled => Settings.Video.LetterboxingEnabled;
 	private bool IsDisplaying => state == State.On;
 	
-    public enum State {
+    public enum State : byte {
         Off,
         On
     }
@@ -103,17 +103,18 @@ public class Letterboxing : SingletonSaveableObject<Letterboxing, Letterboxing.L
     }
     
 #region Saving
-		[Serializable]
-		public class LetterboxingSave : SerializableSaveObject<Letterboxing> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public LetterboxingSave(Letterboxing script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(Letterboxing script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+	public override void LoadSave(LetterboxingSave save) {
+		state.LoadFromSave(save.stateSave);
+	}
+
+	[Serializable]
+	public class LetterboxingSave : SaveObject<Letterboxing> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public LetterboxingSave(Letterboxing script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

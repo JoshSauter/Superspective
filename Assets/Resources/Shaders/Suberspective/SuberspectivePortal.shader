@@ -11,7 +11,7 @@
 		[HideInInspector] __ZWrite("__zw", Float) = 1.0
 		
         _PortalScaleFactor("Portal scale factor", Range(0.000001, 1000000.0)) = 1
-    	_PortalRenderingDisabled("Portal Rendering Disabled (true: 1, false: 0)", Float) = 0.0
+    	_PortalRenderingMode("Portal Rendering Mode (normal: 0, debug: 1, invisible: 2, wall: 3)", Float) = 0.0
     	
     	_MainTex("Main Texture", 2D) = "white" {}
 		_Color("Main Color", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -62,8 +62,8 @@
 				// Exposed here so we can read from the PortalMask replacement shader when adjusting depth through scaled Portals
 				uniform float _PortalScaleFactor = 1;
 
-				// When set to 1, the portal will not render anything
-				uniform float _PortalRenderingDisabled = 0;
+				// 1: Normal, 2: Debug, 3: Invisible, 4: Wall
+				uniform float _PortalRenderingMode = 0;
 
 				// These are all defined so that they can be used in the EdgeDetectionColorsThroughPortal replacement shader
 				//sampler2D _CameraDepthNormalsTexture;
@@ -90,15 +90,24 @@
 		            SuberspectiveClipOnly(i);
 		            #endif
 
-					if (_PortalRenderingDisabled > 0) {
-						ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
-						float x = 0.5 * sin(_Time.x * 2 * 3.14159 + length(i.worldPos.xz) / 4.0) + 0.5;
-						float y = 0.5 * cos(_Time.x * 2 * 3.14159 + length(i.worldPos.yz) / 4.0) + 0.5;
-						return fixed4(0,x,y,1);
+					switch (_PortalRenderingMode) {
+						case 0: // Normal portal rendering
+							float4 col = tex2D(_MainTex, uv);
+							return col;
+						case 1: // Debug portal rendering
+							ClipDebugPortalSurface(i.worldPos, _PortalNormal);
+							float x = 0.5 * sin(_Time.x * 2 * 3.14159 + length(i.worldPos.xz) / 4.0) + 0.5;
+							float y = 0.5 * cos(_Time.x * 2 * 3.14159 + length(i.worldPos.yz) / 4.0) + 0.5;
+							return fixed4(0,x,y,1);
+						case 2: // Portal off (invisible)
+							discard;
+						    return fixed4(0,0,0,0);
+						case 3: // Wall
+							return _Color;
+						default:
+							discard;
+						    return fixed4(0,0,0,0);
 					}
-
-					float4 col = tex2D(_MainTex, uv);
-					return col;
 				}
 			ENDCG
         }

@@ -7,12 +7,12 @@ using Saving;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class InteractableObject : SaveableObject<InteractableObject, InteractableObject.InteractableObjectSave> {
+public class InteractableObject : SuperspectiveObject<InteractableObject, InteractableObject.InteractableObjectSave> {
 
     public InteractableGlow glow;
     public delegate void InteractAction();
 
-    public enum InteractableState {
+    public enum InteractableState : byte {
         Interactable,
         Disabled,
         Hidden
@@ -107,15 +107,16 @@ public class InteractableObject : SaveableObject<InteractableObject, Interactabl
         return this == other;
     }
 
+    public override void LoadSave(InteractableObjectSave save) {
+        state = save.state;
+    }
+
     [Serializable]
-    public class InteractableObjectSave : SerializableSaveObject<InteractableObject> {
-        private InteractableState state;
+    public class InteractableObjectSave : SaveObject<InteractableObject> {
+        public InteractableState state;
         
         public InteractableObjectSave(InteractableObject script) : base(script) {
             this.state = script.state;
-        }
-        public override void LoadSave(InteractableObject script) {
-            script.state = this.state;
         }
     }
 }

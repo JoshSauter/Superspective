@@ -11,8 +11,8 @@ using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom {
     [RequireComponent(typeof(UniqueId))]
-    public class RaiseLowerPlatform : SaveableObject<RaiseLowerPlatform, RaiseLowerPlatformSave>, AudioJobOnGameObject {
-        public SerializableReference<PowerTrail, PowerTrail.PowerTrailSave> triggeredByPowerTrailRef;
+    public class RaiseLowerPlatform : SuperspectiveObject<RaiseLowerPlatform, RaiseLowerPlatform.RaiseLowerPlatformSave>, AudioJobOnGameObject {
+        public SuperspectiveReference<PowerTrail, PowerTrail.PowerTrailSave> triggeredByPowerTrailRef;
         public PowerTrail TriggeredByPowerTrail => triggeredByPowerTrailRef.GetOrNull(); // Assumes the power trail is loaded
         public CubeReceptacle cubeReceptacle;
         
@@ -22,11 +22,11 @@ namespace LevelSpecific.WhiteRoom {
         private float Height => Mathf.Abs(maxHeight - minHeight);
         private float TimeToMove => Height / raiseLowerSpeed;
 
-        const float juiceTime = 1.2f;
-        const float juiceFrequency = 8;
-        const float juiceAmplitude = 0.0625f;
+        const float JUICE_TIME = 1.2f;
+        const float JUICE_FREQUENCY = 8;
+        const float JUICE_AMPLITUDE = 0.0625f;
         
-        public enum State {
+        public enum State : byte {
             Lowered,
             Raising,
             Raised,
@@ -97,7 +97,8 @@ namespace LevelSpecific.WhiteRoom {
             }
         }
 
-        protected void OnDisable() {
+        protected override void OnDisable() {
+            base.OnDisable();
             var powerTrail = TriggeredByPowerTrail;
             if (powerTrail && powerTrail.pwr) {
                 powerTrail.pwr.OnPowerFinish -= Raise;
@@ -143,9 +144,9 @@ namespace LevelSpecific.WhiteRoom {
         void Update() {
             switch (state.State) {
                 case State.Lowered:
-                    if (state.Time < juiceTime) {
-                        float t = state.Time / juiceTime;
-                        float target = minHeight - juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
+                    if (state.Time < JUICE_TIME) {
+                        float t = state.Time / JUICE_TIME;
+                        float target = minHeight - JUICE_AMPLITUDE * Mathf.Pow((1-t), 2) * Mathf.Sin(JUICE_FREQUENCY * Mathf.PI * t);
                         float delta = SetHeight(target);
                         if (cubeReceptacle?.isCubeInReceptacle ?? false) {
                             cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
@@ -156,9 +157,9 @@ namespace LevelSpecific.WhiteRoom {
                     }
                     break;
                 case State.Raised:
-                    if (state.Time < juiceTime) {
-                        float t = state.Time / juiceTime;
-                        float target = maxHeight + juiceAmplitude * Mathf.Pow((1-t), 2) * Mathf.Sin(juiceFrequency * Mathf.PI * t);
+                    if (state.Time < JUICE_TIME) {
+                        float t = state.Time / JUICE_TIME;
+                        float target = maxHeight + JUICE_AMPLITUDE * Mathf.Pow((1-t), 2) * Mathf.Sin(JUICE_FREQUENCY * Mathf.PI * t);
                         float delta = SetHeight(target);
                         if (cubeReceptacle?.isCubeInReceptacle ?? false) {
                             cubeReceptacle.cubeInReceptacle.transform.Translate(transform.up * delta, Space.World);
@@ -199,23 +200,35 @@ namespace LevelSpecific.WhiteRoom {
             transform.localPosition = transformLocalPosition;
             return delta;
         }
+        
+#region Saving
+    
+        public override void LoadSave(RaiseLowerPlatformSave save) {
+            state.LoadFromSave(save.stateSave);
+            raiseLowerSpeed = save.raiseLowerSpeed;
+            maxHeight = save.maxHeight;
+            minHeight = save.minHeight;
+            playSfx = save.playSfx;
+        }
+
+        [Serializable]
+        public class RaiseLowerPlatformSave : SaveObject<RaiseLowerPlatform> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public float raiseLowerSpeed;
+            public float maxHeight;
+            public float minHeight;
+            public bool playSfx;
+
+            public RaiseLowerPlatformSave(RaiseLowerPlatform script) : base(script) {
+                stateSave = script.state.ToSave();
+                raiseLowerSpeed = script.raiseLowerSpeed;
+                maxHeight = script.maxHeight;
+                minHeight = script.minHeight;
+                playSfx = script.playSfx;
+            }
+        }
+#endregion
 
         public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob audioJob) => transform;
     }
-    
-    #region Saving
-
-    [Serializable]
-    public class RaiseLowerPlatformSave : SerializableSaveObject<RaiseLowerPlatform> {
-        private StateMachine<RaiseLowerPlatform.State>.StateMachineSave stateSave;
-
-        public RaiseLowerPlatformSave(RaiseLowerPlatform script) : base(script) {
-            stateSave = script.state.ToSave();
-        }
-
-        public override void LoadSave(RaiseLowerPlatform script) {
-            script.state.LoadFromSave(stateSave);
-        }
-    }
-    #endregion
 }

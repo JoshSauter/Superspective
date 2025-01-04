@@ -8,13 +8,13 @@ using UnityEngine.Rendering;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
-public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDetection.BladeEdgeDetectionSave> {
-	public enum EdgeColorMode {
+public class BladeEdgeDetection : SuperspectiveObject<BladeEdgeDetection, BladeEdgeDetection.BladeEdgeDetectionSave> {
+	public enum EdgeColorMode : byte {
 		SimpleColor,
 		Gradient,
 		ColorRampTexture
 	}
-	public enum WeightedEdgeMode {
+	public enum WeightedEdgeMode : byte {
 		Unweighted,
 		WeightedByDepth,
 		WeightedByNormals,
@@ -89,8 +89,6 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		frustumCorners = new Vector3[4];
 		frustumCornersOrdered = new Vector4[4];
 	}
-
-	public Texture cameraDepthNormalsTexture;
 	
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
 		if (shaderMaterial == null && !CreateMaterial()) {
@@ -221,7 +219,8 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		return shaderMaterial != null;
 	}
 
-	void OnDisable() {
+	protected override void OnDisable() {
+		base.OnDisable();
 		if (shaderMaterial != null) {
 			DestroyImmediate(shaderMaterial);
 			shaderMaterial = null;
@@ -234,26 +233,41 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 		normalSensitivity = Mathf.Max(0.0f, normalSensitivity);
 	}
 
-	#region Saving
+#region Saving
+
+	public override void LoadSave(BladeEdgeDetectionSave save) {
+		debugMode = save.debugMode;
+		checkPortalDepth = save.checkPortalDepth;
+		depthSensitivity = save.depthSensitivity;
+		normalSensitivity = save.normalSensitivity;
+		sampleDistance = save.sampleDistance;
+		weightedEdgeMode = save.weightedEdgeMode;
+		depthWeightEffect = save.depthWeightEffect;
+		normalWeightEffect = save.normalWeightEffect;
+		depthWeightMin = save.depthWeightMin;
+		normalWeightMin = save.normalWeightMin;
+		edgeColorMode = save.edgeColorMode;
+		edgeColor = save.edgeColor;
+		edgeColorGradient = save.edgeColorGradient;
+	}
+
 	public override string ID => $"{gameObject.name}_BladeEdgeDetection";
 
 	[Serializable]
-	public class BladeEdgeDetectionSave : SerializableSaveObject<BladeEdgeDetection> {
-		bool debugMode;
-		bool checkPortalDepth;
-		float depthSensitivity;
-		float normalSensitivity;
-		int sampleDistance;
-
-		int weightedEdgeMode;
-		float depthWeightEffect;
-		float normalWeightEffect;
-		float depthWeightMin;
-		float normalWeightMin;
-
-		int edgeColorMode;
-		SerializableColor edgeColor;
-		SerializableGradient edgeColorGradient;
+	public class BladeEdgeDetectionSave : SaveObject<BladeEdgeDetection> {
+		public readonly SerializableColor edgeColor;
+		public readonly SerializableGradient edgeColorGradient;
+		public readonly float depthWeightEffect;
+		public readonly float normalWeightEffect;
+		public readonly float depthSensitivity;
+		public readonly float normalSensitivity;
+		public readonly float depthWeightMin;
+		public readonly float normalWeightMin;
+		public readonly int sampleDistance;
+		public readonly WeightedEdgeMode weightedEdgeMode;
+		public readonly EdgeColorMode edgeColorMode;
+		public readonly bool debugMode;
+		public readonly bool checkPortalDepth;
 
 		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) : base(edgeDetection) {
 			this.debugMode = edgeDetection.debugMode;
@@ -261,31 +275,15 @@ public class BladeEdgeDetection : SaveableObject<BladeEdgeDetection, BladeEdgeDe
 			this.depthSensitivity = edgeDetection.depthSensitivity;
 			this.normalSensitivity = edgeDetection.normalSensitivity;
 			this.sampleDistance = edgeDetection.sampleDistance;
-			this.weightedEdgeMode = (int)edgeDetection.weightedEdgeMode;
+			this.weightedEdgeMode = edgeDetection.weightedEdgeMode;
 			this.depthWeightEffect = edgeDetection.depthWeightEffect;
 			this.normalWeightEffect = edgeDetection.normalWeightEffect;
-			this.edgeColorMode = (int)edgeDetection.edgeColorMode;
+			this.edgeColorMode = edgeDetection.edgeColorMode;
 			this.edgeColor = edgeDetection.edgeColor;
 			this.edgeColorGradient = edgeDetection.edgeColorGradient;
 			this.depthWeightMin = edgeDetection.depthWeightMin;
 			this.normalWeightMin = edgeDetection.normalWeightMin;
 		}
-
-		public override void LoadSave(BladeEdgeDetection edgeDetection) {
-			edgeDetection.debugMode = this.debugMode;
-			edgeDetection.checkPortalDepth = this.checkPortalDepth;
-			edgeDetection.depthSensitivity = this.depthSensitivity;
-			edgeDetection.normalSensitivity = this.normalSensitivity;
-			edgeDetection.sampleDistance = this.sampleDistance;
-			edgeDetection.weightedEdgeMode = (WeightedEdgeMode)this.weightedEdgeMode;
-			edgeDetection.depthWeightEffect = this.depthWeightEffect;
-			edgeDetection.normalWeightEffect = this.normalWeightEffect;
-			edgeDetection.depthWeightMin = this.depthWeightMin;
-			edgeDetection.normalWeightMin = this.normalWeightMin;
-			edgeDetection.edgeColorMode = (EdgeColorMode)this.edgeColorMode;
-			edgeDetection.edgeColor = this.edgeColor;
-			edgeDetection.edgeColorGradient = this.edgeColorGradient;
-		}
 	}
-	#endregion
+#endregion
 }

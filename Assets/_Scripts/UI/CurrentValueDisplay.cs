@@ -1,27 +1,22 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using NaughtyAttributes;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
 public class CurrentValueDisplay : ValueDisplay {
     public SpriteRenderer currentValueDisplayLo;
     
-    private float currentValueDisplayLoAlpha = 1f;
-    private float currentValueDisplayHiAlpha = 1f;
+    private const float CURRENT_VALUE_DISPLAY_LO_ALPHA = 1f;
+    private const float CURRENT_VALUE_DISPLAY_HI_ALPHA = 1f;
     private float currentValueNegativeSymbolAlpha = 0f;
     
-    public new float spriteAlpha {
+    public new float SpriteAlpha {
         get => _spriteAlpha;
         set => _spriteAlpha = value;
     }
     
-    public new float displayedValue {
+    public new float DisplayedValue {
         get => _displayedValue;
         private set {
             value = Mathf.Clamp(value, MIN, MAX);
@@ -34,9 +29,9 @@ public class CurrentValueDisplay : ValueDisplay {
             //int roundedValue = Mathf.RoundToInt(value);
             bool isNegative = value < 0;
             currentValueDisplayLo.sprite = base9Symbols[smallerValue];
-            float finalLoAlpha = currentValueDisplayLoAlpha * spriteAlpha * Mathf.Sqrt(1 - t);
+            float finalLoAlpha = CURRENT_VALUE_DISPLAY_LO_ALPHA * SpriteAlpha * Mathf.Sqrt(1 - t);
             currentValueDisplay.sprite = base9Symbols[largerValue];
-            float finalHiAlpha = currentValueDisplayHiAlpha * spriteAlpha * Mathf.Sqrt(t);
+            float finalHiAlpha = CURRENT_VALUE_DISPLAY_HI_ALPHA * SpriteAlpha * Mathf.Sqrt(t);
 
             currentValueNegativeSymbol.enabled = isNegative;
             if (isNegative) {
@@ -44,7 +39,7 @@ public class CurrentValueDisplay : ValueDisplay {
                     currentValueNegativeSymbolAlpha = t;
                 }
                 else {
-                    currentValueNegativeSymbolAlpha = spriteAlpha;
+                    currentValueNegativeSymbolAlpha = SpriteAlpha;
 
                 }
             }
@@ -67,24 +62,38 @@ public class CurrentValueDisplay : ValueDisplay {
     protected override void Update() {
         base.Update();
 
-        displayedValue = Mathf.Lerp(displayedValue, actualValue, Time.deltaTime * lerpSpeed);
+        DisplayedValue = Mathf.Lerp(DisplayedValue, actualValue, Time.deltaTime * lerpSpeed);
     }
 
     #region Saving
-    
+
+    public override SaveObject CreateSave() {
+        return new CurrentValueDisplaySave(this);
+    }
+
+    public override void LoadSave(ValueDisplaySave save) {
+        base.LoadSave(save);
+
+        if (save is not CurrentValueDisplaySave currentValueDisplaySave) {
+            Debug.LogError("Expected CurrentValueDisplaySave but got " + save.GetType(), this);
+            return;
+        }
+        
+        currentValueDisplayLo.color = currentValueDisplayLo.color.WithAlpha(currentValueDisplaySave.currentValueDisplayLoAlpha);
+        currentValueDisplay.color = currentValueDisplay.color.WithAlpha(currentValueDisplaySave.currentValueDisplayHiAlpha);
+        currentValueNegativeSymbol.color = currentValueNegativeSymbol.color.WithAlpha(currentValueDisplaySave.currentValueNegativeSymbolAlpha);
+    }
+
     [Serializable]
-    public class CurrentValueDisplaySave : SerializableSaveObject<CurrentValueDisplay> {
-        private int actualValue;
-        private float displayedValue;
-        private float currentValueDisplayLoAlpha;
-        private float currentValueDisplayHiAlpha;
-        private float currentValueNegativeSymbolAlpha;
+    public class CurrentValueDisplaySave : ValueDisplaySave {
+        public float currentValueDisplayLoAlpha;
+        public float currentValueDisplayHiAlpha;
+        public float currentValueNegativeSymbolAlpha;
         
         public CurrentValueDisplaySave(CurrentValueDisplay script) : base(script) {
-            throw new NotImplementedException("CurrentValueDisplaySave");
-        }
-        public override void LoadSave(CurrentValueDisplay script) {
-            throw new NotImplementedException("CurrentValueDisplaySave");
+            this.currentValueDisplayLoAlpha = script.currentValueDisplayLo.color.a;
+            this.currentValueDisplayHiAlpha = script.currentValueDisplay.color.a;
+            this.currentValueNegativeSymbolAlpha = script.currentValueNegativeSymbol.color.a;
         }
     }
 

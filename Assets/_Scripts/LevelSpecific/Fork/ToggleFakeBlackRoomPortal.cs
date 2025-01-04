@@ -2,13 +2,12 @@
 using Saving;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Audio;
 using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
-    public class ToggleFakeBlackRoomPortal : SaveableObject<ToggleFakeBlackRoomPortal, ToggleFakeBlackRoomPortal.ToggleFakeBlackRoomPortalSave>, CustomAudioJob {
+    public class ToggleFakeBlackRoomPortal : SuperspectiveObject<ToggleFakeBlackRoomPortal, ToggleFakeBlackRoomPortal.ToggleFakeBlackRoomPortalSave>, CustomAudioJob {
         public Portal realBlackRoomPortal;
         public Portal fakeBlackRoomPortal;
         BladeEdgeDetection edgeDetection;
@@ -47,36 +46,36 @@ namespace LevelSpecific.Fork {
         }
         
         public void UpdateAudioJob(AudioManager.AudioJob job) {
-            const float timeToFadeVolume = 2f;
+            const float TIME_TO_FADE_VOLUME = 2f;
             job.audio.loop = playerIsInFakeBlackRoom;
             if (!job.audio.loop) {
-                job.audio.volume -= Time.deltaTime / timeToFadeVolume;
+                job.audio.volume -= Time.deltaTime / TIME_TO_FADE_VOLUME;
             }
             else {
-                job.audio.volume += Time.deltaTime / timeToFadeVolume;
+                job.audio.volume += Time.deltaTime / TIME_TO_FADE_VOLUME;
             }
             job.audio.panStereo = Mathf.Sin(Time.time);
         }
 
-        #region Saving
+#region Saving
+
+        public override void LoadSave(ToggleFakeBlackRoomPortalSave save) {
+            edgesAreBlack = save.edgesAreBlack;
+            playerIsInFakeBlackRoom = save.playerIsInFakeBlackRoom;
+        }
+
         public override string ID => "ToggleFakeBlackRoomPortal";
 
         [Serializable]
-        public class ToggleFakeBlackRoomPortalSave : SerializableSaveObject<ToggleFakeBlackRoomPortal> {
-            bool edgesAreBlack;
-            bool playerIsInFakeBlackRoom;
+        public class ToggleFakeBlackRoomPortalSave : SaveObject<ToggleFakeBlackRoomPortal> {
+            public bool edgesAreBlack;
+            public bool playerIsInFakeBlackRoom;
 
             public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) : base(toggle) {
                 this.edgesAreBlack = toggle.edgesAreBlack;
                 this.playerIsInFakeBlackRoom = toggle.playerIsInFakeBlackRoom;
             }
-
-            public override void LoadSave(ToggleFakeBlackRoomPortal toggle) {
-                toggle.edgesAreBlack = this.edgesAreBlack;
-                toggle.playerIsInFakeBlackRoom = this.playerIsInFakeBlackRoom;
-            }
         }
-        #endregion
+#endregion
     }
-
 }

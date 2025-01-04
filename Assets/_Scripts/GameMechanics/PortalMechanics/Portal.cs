@@ -7,8 +7,6 @@ using SuperspectiveUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.Remoting.Messaging;
 using DimensionObjectMechanics;
 using GrowShrink;
 using LevelManagement;
@@ -16,13 +14,9 @@ using MagicTriggerMechanics;
 using MagicTriggerMechanics.TriggerConditions;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
-using Matrix4x4 = UnityEngine.Matrix4x4;
-using Plane = UnityEngine.Plane;
-using Quaternion = UnityEngine.Quaternion;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
+using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	/// <summary>
@@ -62,74 +56,101 @@ namespace PortalMechanics {
 		}
 	}
 	
+	public enum PortalRenderMode : byte {
+		Normal = 0,    // Render the portal as normal
+		Debug = 1,     // Render the grid lines showing the location of portals only
+		Invisible = 2, // Don't render the portal surface at all
+		Wall = 3       // Render the portal surface as a wall of flat color
+	}
+
+	public enum PortalPhysicsMode : byte {
+		Normal = 0, // Player and PortalableObjects will pass through the portal as normal
+		Wall = 1,   // All objects will collide with the portal as if it were a wall
+		None = 2    // All objects will pass through the portal as if it were not there
+	}
+	
 	[RequireComponent(typeof(UniqueId))]
-	public class Portal : SaveableObject<Portal, Portal.PortalSave> {
-		
-		private const string PORTAL_RENDERING_DISABLED_PROPERTY = "_PortalRenderingDisabled";
+	public class Portal : SuperspectiveObject<Portal, Portal.PortalSave> {
+		private const string PORTAL_RENDERING_MODE_PROPERTY = "_PortalRenderingMode";
 		private const string PORTAL_NORMAL_PROPERTY = "_PortalNormal"; // Different use case for _PortalNormal than in PortalCopy
 		private const string SHADER_PATH = "Shaders/Suberspective/SuberspectivePortal";
+		private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
+		private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
+		private const float TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED = 1f;
+		
+		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGB32;
+		private static int lastTeleportedFrame = 0;
+		private static float lastTeleportedTime = 0f;
+		
 		private static Material _sharedPortalMaterial;
 		private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
-
-		// Will be same as SharedPortalMaterial in most cases, but may reference a different material if the Portal is a DimensionObject
+		// Will be same as SharedPortalMaterial in most cases, but may reference a different material if e.g. the Portal is a DimensionObject
 		public Material portalMaterial;
 		
-		private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
-		private int consecutiveFramesVPShouldBeDisabled = 0;
-		private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
-		private static int lastTeleportedFrame = 0;
-		
-		public static bool allowPortalRendering =
-#if UNITY_EDITOR
-			// Disable portal rendering in editor to increase performance of play mode
-			false;
-#else
-		true;
-#endif
-		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGB32;
+		public static bool forceDebugRenderMode = Application.isEditor;
 
+		[SerializeField]
+		private PortalRenderMode _renderMode = PortalRenderMode.Normal;
+		public PortalRenderMode RenderMode {
+			get => _renderMode;
+			set {
+				_renderMode = value;
+				ApplyPortalRenderingModeToRenderers();
+			}
+		}
+		// This is what is actually rendering to the screen, rather than the logical RenderMode		
+		private PortalRenderMode EffectiveRenderMode => forceDebugRenderMode ? PortalRenderMode.Debug : RenderMode;
+
+		[SerializeField]
+		private PortalPhysicsMode _physicsMode = PortalPhysicsMode.Normal;
+		public PortalPhysicsMode PhysicsMode {
+			get => _physicsMode;
+			set {
+				_physicsMode = value;
+				ApplyPortalPhysicsModeToColliders();
+			}
+		}
+		
+		private bool ThisPortalIsInActiveScene => LevelManager.instance.activeSceneName == gameObject.scene.name;
+		private bool IsInActiveScene => ThisPortalIsInActiveScene || otherPortal.ThisPortalIsInActiveScene;
+		protected virtual int PortalsRequiredToActivate => 2;
+		
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
 		public string channel = "<Not set>";
 
+		private int consecutiveFramesVPShouldBeDisabled = 0;
 		public bool changeActiveSceneOnTeleport = false;
 		public bool changeCameraEdgeDetection;
-		[ShowIf("changeCameraEdgeDetection")]
+		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
 		public BladeEdgeDetection.EdgeColorMode edgeColorMode;
-		[ShowIf("changeCameraEdgeDetection")]
+		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
 		public Color edgeColor = Color.black;
-		[ShowIf("changeCameraEdgeDetection")]
+		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
 		public Gradient edgeColorGradient;
-		[ShowIf("changeCameraEdgeDetection")]
+		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
 		public Texture2D edgeColorGradientTexture;
 
 		[SerializeField]
 		private bool renderRecursivePortals = false;
-		public bool RenderRecursivePortals =>
-#if UNITY_EDITOR
-			// Never render recursive portals in editor, the slowdown is too much
-			false;
-#else
-			renderRecursivePortals;
-#endif
+		public bool RenderRecursivePortals => !Application.isEditor && renderRecursivePortals;
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
-
 		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
 		public bool doubleSidedPortals = false;
 		private bool isFlipped = false;
 		private Quaternion startRotation, flippedRotation;
 		public void FlipPortal() {
-			debug.Log($"Flipping from {(isFlipped ? "flipped" : "not flipped")} to {(!isFlipped ? "flipped" : "not flipped")}\nFrameCount: {Time.frameCount}, LastTeleportedFrame: {lastTeleportedFrame}, ShouldTeleportPlayer: {ShouldTeleportPlayer}");
+			debug.Log($"Flipping from {(isFlipped ? "flipped" : "not flipped")} to {(!isFlipped ? "flipped" : "not flipped")}\nFrameCount: {Time.frameCount}, LastTeleportedFrame: {lastTeleportedFrame}, ShouldTeleportPlayer: {WouldTeleportPlayer}");
 			isFlipped = !isFlipped;
 			transform.rotation = isFlipped ? flippedRotation : startRotation;
 		}
 
 		public bool skipIsVisibleCheck = false; // Useful for very large portals where the isVisible check doesn't work well
 		
-		[OnValueChanged(nameof(SetScaleFactor))]
+		[NaughtyAttributes.OnValueChanged(nameof(SetScaleFactor))]
 		public bool changeScale = false;
-		[ShowIf(nameof(changeScale))]
-		[OnValueChanged(nameof(SetScaleFactor))]
+		[NaughtyAttributes.ShowIf(nameof(changeScale))]
+		[NaughtyAttributes.OnValueChanged(nameof(SetScaleFactor))]
 		[Tooltip("Multiply the player size by this value when passing through this Portal (and inverse for the other Portal)")]
 		[Range(1f/64f, 64f)]
 		[SerializeField]
@@ -149,8 +170,9 @@ namespace PortalMechanics {
 		private float volumetricPortalThickness = 1f;
 		public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
 
+		private static float TimeSinceLastTeleport => Time.time - lastTeleportedTime;
 		public static bool forceVolumetricPortalsOn = false;
-		private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn || PlayerRemainsInPortal;
+		private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn || PlayerRemainsInPortal || TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED;
 
 		public Vector3 IntoPortalVector {
 			get {
@@ -187,31 +209,72 @@ namespace PortalMechanics {
 		public HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
 
 		[SerializeField]
-		[ShowIf("DEBUG")]
+		[NaughtyAttributes.ShowIf("DEBUG")]
 		RecursiveTextures internalRenderTexturesCopy;
 
 		public bool disableColliderWhilePaused = false;
 		public bool pauseRenderingWhenNotInActiveScene = false;
-		private bool ThisPortalIsInActiveScene => LevelManager.instance.activeSceneName == gameObject.scene.name;
-		private bool IsInActiveScene => ThisPortalIsInActiveScene || otherPortal.ThisPortalIsInActiveScene;
 		public bool pauseRendering = false;
-		public bool pauseLogic = false;
-
-		// I can't seem to set pauseLogic from a UnityEvent so this is a workaround
-		public void SetPauseLogic(bool toValue) {
-			pauseRendering = toValue;
-			pauseLogic = toValue;
-			SetPortalRenderingDisabledFlag();
-		}
 
 		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-		public bool PortalRenderingIsEnabled => otherPortal != null && !pauseRendering && gameObject.activeSelf && allowPortalRendering && (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
-		public bool PortalLogicIsEnabled => otherPortal != null && !pauseLogic && gameObject.activeSelf;
+		public bool PortalRenderingIsEnabled => otherPortal != null &&
+		                                        !pauseRendering &&
+		                                        gameObject.activeSelf &&
+		                                        RenderMode == PortalRenderMode.Normal &&
+		                                        (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
+		[ShowInInspector]
+		public bool PortalLogicIsEnabled => otherPortal != null && PhysicsMode == PortalPhysicsMode.Normal && gameObject.activeSelf;
 
 		public bool PlayerRemainsInPortal => PlayerIsInThisPortal || (otherPortal != null && otherPortal.PlayerIsInThisPortal);
 		private bool PlayerIsInThisPortal => trigger.playerIsInTriggerZone;
 
-		private bool ShouldTeleportPlayer => trigger.AllConditionsSatisfied;
+		private Plane PortalPlane => new Plane(IntoPortalVector, transform.position);
+
+		private Vector3 lastPlayerPositionProcessed;
+
+		/// <summary>
+		/// There exists an edge case bug with Portals with significant frame lag at the right time (such as an autosave).
+		/// The player can pass through the portal trigger zone without being teleported, potentially leading to OOB or softlocks.
+		///	We need to track player's position, draw a line between position last frame and position this frame, and if it intersects the trigger zone, teleport the player.
+		/// </summary>
+		/// <returns>True if we should teleport the player due to this check.</returns>
+		private bool ShouldRaycastTeleportPlayer() {
+			// Don't teleport the player if they were just teleported (the last frame position could be mighty different from the current position on the frame that happens)
+			if (Time.frameCount - lastTeleportedFrame < 2) return false;
+			
+			Vector3 start = lastPlayerPositionProcessed;
+			Vector3 end = Player.instance.transform.position;
+			float distance = Vector3.Distance(start, end);
+			// If the player moved more than thrice their velocity in one frame, they probably didn't actually move that far
+			// They were probably teleported, or we haven't processed their position in a while
+			if (distance > 3 * Player.instance.movement.CurVelocity.magnitude * Time.fixedDeltaTime) return false;
+
+			float startDot = Vector3.Dot(start - transform.position, IntoPortalVector);
+			float endDot = Vector3.Dot(end - transform.position, IntoPortalVector);
+			bool crossesPortalPlane = startDot * endDot < 0; // The two dot products will be different signs if the line crosses the portal plane
+			if (!crossesPortalPlane) return false;
+			
+			Ray unitRay = new Ray(start, (end - start).normalized);
+			debug.Log($"Crosses Portal Plane: {crossesPortalPlane}\nLast Frame Pos: {start}\nThis Frame Pos: {end}\nPortal Plane Pos: {transform.position}");
+			debug.Log($"Crosses Portal Plane was true, the distance between last frame {start} and this frame {end} is {distance}");
+			
+			bool DoesLineIntersectTriggerZone(Collider triggerCollider) {
+				// Use OverlapCapsule to approximate the trajectory as a capsule
+				Vector3 capsuleStart = start;
+				Vector3 capsuleEnd = end;
+				float radius = Player.instance.CapsuleCollider.radius;
+
+				Collider[] hits = Physics.OverlapCapsule(capsuleStart, capsuleEnd, radius, 1 << SuperspectivePhysics.TriggerZoneLayer, QueryTriggerInteraction.Collide);
+				debug.Log($"Number of hits: {hits.Length}\nTriggerColliders:\n{string.Join("\n", triggerColliders.Select(tc => $"{tc.name}: {LayerMask.LayerToName(tc.gameObject.layer)}"))}");
+				return hits.Contains(triggerCollider);
+			}
+
+
+			return triggerColliders.Any(DoesLineIntersectTriggerZone);
+		}
+		
+		// This is only used for a flip portals check, I can't think of a better name though
+		private bool WouldTeleportPlayer => trigger.AllConditionsSatisfied;
 
 		// May or may not exist on a Portal, affects what the PortalMaterial is
 		public DimensionObject dimensionObject;
@@ -291,7 +354,7 @@ namespace PortalMechanics {
 			return FindObjectsOfType<Portal>().Where(p => p != thisPortal && p.channel == thisPortal.channel).ToArray();
 		}
 
-		[Button("Initialize Portal")]
+		[NaughtyAttributes.Button("Initialize Portal")]
 		public void InitializePortal() {
 			if (!gameObject.activeInHierarchy) return;
 			try {
@@ -346,7 +409,7 @@ namespace PortalMechanics {
 			foreach (var r in renderers) {
 				r.gameObject.layer = SuperspectivePhysics.PortalLayer;
 				r.SetSharedMaterial(portalMaterial);
-				r.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, PortalRenderingIsEnabled ? 0 : 1);
+				r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, (int)EffectiveRenderMode);
 				if (changeScale) {
 					r.SetFloat("_PortalScaleFactor", scaleFactor);
 				}
@@ -529,7 +592,7 @@ namespace PortalMechanics {
 			trigger.OnMagicTriggerStayOneTime += () => {
 				playerCameraFollow.SetLerpSpeed(CameraFollow.desiredLerpSpeed);
 				if (!teleportingPlayer) {
-					StartCoroutine(TeleportPlayer(Player.instance.transform));
+					TeleportPlayer(Player.instance.transform);
 				}
 			};
 		}
@@ -574,7 +637,7 @@ namespace PortalMechanics {
 
 			CreateRenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
 
-			SetPortalRenderingDisabledFlag();
+			ApplyPortalRenderingModeToRenderers();
 
 			startRotation = transform.rotation;
 			flippedRotation = Quaternion.AngleAxis(180f, Vector3.up) * startRotation;
@@ -597,7 +660,7 @@ namespace PortalMechanics {
 
 			// If the player moves to the backside of a double-sided portal, rotate the portals to match
 			transform.rotation = !isFlipped ? flippedRotation : startRotation; // Pretend the Portal were already flipped
-			bool wouldTeleportPlayersIfPortalWereFlipped = ShouldTeleportPlayer; // If the Portal were flipped, would we be teleporting the player?
+			bool wouldTeleportPlayersIfPortalWereFlipped = WouldTeleportPlayer; // If the Portal were flipped, would we be teleporting the player?
 			transform.rotation = isFlipped ? flippedRotation : startRotation; // Restore rotation
 			if (doubleSidedPortals && PortalLogicIsEnabled && !PlayerRemainsInPortal && (Time.frameCount - lastTeleportedFrame > GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT) && !wouldTeleportPlayersIfPortalWereFlipped) {
 				Vector3 closestPoint = ClosestPoint(playerCamera.position, true, true);
@@ -621,6 +684,14 @@ namespace PortalMechanics {
 					}
 				}
 			}
+
+			// This is a low-frame rate edge case bugfix to check the player's trajectory to see if it passed through the portal
+			// If it did, we need to teleport them (even if they didn't end up in the trigger zone on any frame)
+			if (ShouldRaycastTeleportPlayer()) {
+				debug.Log("Teleporting player due to Raycast check! Usually this implies a low frame rate.");
+				TeleportPlayer(Player.instance.transform);
+			}
+			lastPlayerPositionProcessed = Player.instance.transform.position;
 		}
 
 		// When a Portal is part of a DimensionObject, a new Material will be created with the DIMENSION_OBJECT keyword enabled
@@ -637,17 +708,19 @@ namespace PortalMechanics {
 			
 			if (dimensionObject != null) {
 				foreach (SuperspectiveRenderer r in renderers) {
+					// TODO: Uhh does this get called like many times? I should only set the portalMaterial once ideally
 					r.OnMaterialChanged += HandleMaterialChanged;
 				}
 				dimensionObject.OnStateChangeSimple += SetPropertiesOnMaterial;
 			}
 		}
 
-		protected virtual void OnDisable() {
+		protected override void OnDisable() {
 			if (!Application.isPlaying) return; // ???
+			base.OnDisable();
 			
 			SuperspectiveScreen.instance.OnScreenResolutionChanged -= CreateRenderTexture;
-			PortalManager.instance.RemovePortal(channel, this);
+			PortalManager.instance.RemovePortal(channel, this, PortalsRequiredToActivate);
 			
 			if (dimensionObject != null) {
 				foreach (SuperspectiveRenderer r in renderers) {
@@ -807,7 +880,7 @@ namespace PortalMechanics {
 				return;
 			}
 
-			SetPortalRenderingDisabledFlag();
+			ApplyPortalRenderingModeToRenderers();
 
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.mainTexture);
 			SetPropertiesOnMaterial();
@@ -824,25 +897,50 @@ namespace PortalMechanics {
 				return;
 			}
 
-			SetPortalRenderingDisabledFlag();
+			ApplyPortalRenderingModeToRenderers();
 			
 			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
 			SetPropertiesOnMaterial();
 		}
 
+		public void SetPortalModes(PortalRenderMode renderMode, PortalPhysicsMode physicsMode) {
+			RenderMode = renderMode;
+			ApplyPortalRenderingModeToRenderers();
+
+			PhysicsMode = physicsMode;
+			ApplyPortalPhysicsModeToColliders();
+		}
+
 		/// <summary>
 		/// If portal rendering is disabled, set the _PortalRenderingDisabled flag on the portal's material
 		/// </summary>
-		public void SetPortalRenderingDisabledFlag() {
-			int renderingDisabled = PortalRenderingIsEnabled ? 0 : 1;
+		public void ApplyPortalRenderingModeToRenderers() {
+			int renderMode = (int)EffectiveRenderMode;
+			Vector3 intoPortal = IntoPortalVector;
+			
 			foreach (SuperspectiveRenderer r in renderers) {
-				r.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, renderingDisabled);
-				r.SetVector(PORTAL_NORMAL_PROPERTY, IntoPortalVector);
+				r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+				r.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
 			}
 
 			foreach (SuperspectiveRenderer vp in volumetricPortals) {
-				vp.SetFloat(PORTAL_RENDERING_DISABLED_PROPERTY, renderingDisabled);
-				vp.SetVector(PORTAL_NORMAL_PROPERTY, IntoPortalVector);
+				vp.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+				vp.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
+			}
+		}
+
+		public void ApplyPortalPhysicsModeToColliders() {
+			bool isEnabled = PhysicsMode is not PortalPhysicsMode.None;
+			bool isTrigger = PhysicsMode is not PortalPhysicsMode.Wall;
+			
+			foreach (var c in colliders) {
+				c.isTrigger = isTrigger;
+				c.enabled = isEnabled;
+			}
+
+			foreach (var tc in triggerColliders) {
+				tc.isTrigger = isTrigger;
+				tc.enabled = isEnabled;
 			}
 		}
 
@@ -869,9 +967,8 @@ namespace PortalMechanics {
 				c.enabled = true;
 
 				Vector3 thisClosestPoint;
-				if (useInfinitelyThinBounds) {
-					Plane portalPlane = new Plane(IntoPortalVector, transform.position);
-					thisClosestPoint = portalPlane.ClosestPointOnPlane(c.ClosestPoint(point));
+				if (useInfinitelyThinBounds) { ;
+					thisClosestPoint = PortalPlane.ClosestPointOnPlane(c.ClosestPoint(point));
 				}
 				else {
 					thisClosestPoint = c.ClosestPoint(point);
@@ -939,7 +1036,7 @@ namespace PortalMechanics {
 		}
 		#endregion
 
-		#region Portal Teleporter
+#region Portal Teleporter
 		void CreatePortalTeleporter() {
 			foreach (var c in colliders) {
 				c.isTrigger = true;
@@ -998,13 +1095,17 @@ namespace PortalMechanics {
 			return otherPortal.transform.rotation * relativeRot;
 		}
 
+		public void TeleportPlayer(Transform player) {
+			StartCoroutine(Co_TeleportPlayer(player));
+		}
+
 		/// <summary>
 		/// Frame 1: Teleport player and disable this portal's volumetric portal while enabling the otherPortal's volumetric portal
 		/// Frame 2: Do nothing (but ensure that this is not called twice)
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		IEnumerator TeleportPlayer(Transform player) {
+		IEnumerator Co_TeleportPlayer(Transform player) {
 			if (Time.frameCount - lastTeleportedFrame < GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT) {
 				debug.LogError("Can't teleport so quickly after last teleport!");
 				yield break;
@@ -1037,7 +1138,7 @@ namespace PortalMechanics {
 
 			if (changeActiveSceneOnTeleport) {
 				// TODO: Investigate crash that happens when switching scenes rapidly without the following check
-				LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
+				LevelManager.instance.SwitchActiveScene(otherPortal.Level);
 				// TODO: Can't reproduce the crash anymore, but if it starts happening, uncomment the following lines
 				// if (LevelManager.instance.IsCurrentlySwitchingScenes) {
 				// 	Debug.LogError($"Tried to switch scenes due to {ID} teleport but LevelManager is still loading!");
@@ -1070,6 +1171,7 @@ namespace PortalMechanics {
 			trigger.ResetHasTriggeredOnStayState();
 
 			lastTeleportedFrame = Time.frameCount;
+			lastTeleportedTime = Time.time;
 			
 			teleportingPlayer = false;
 		}
@@ -1103,9 +1205,9 @@ namespace PortalMechanics {
 				OnPortalTeleportPlayerSimple?.Invoke();
 			}
 		}
-		#endregion
+#endregion
 
-		#region Volumetric Portal
+#region Volumetric Portal
 
 		public void EnableVolumetricPortal() {
 			bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
@@ -1133,9 +1235,9 @@ namespace PortalMechanics {
 				}
 			}
 		}
-		#endregion
+#endregion
 
-		#region Helper Methods
+#region Helper Methods
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void SetMinMax(Vector2 point, ref Vector2 min, ref Vector2 max) {
 			min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
@@ -1148,7 +1250,7 @@ namespace PortalMechanics {
 				yield return null;
 			}
 
-			PortalManager.instance.AddPortal(channel, this);
+			PortalManager.instance.AddPortal(channel, this, PortalsRequiredToActivate);
 		}
 
 		// Allocate once to save GC every frame
@@ -1305,51 +1407,53 @@ namespace PortalMechanics {
 			to.edgeColorGradient = from.edgeColorGradient;
 			to.edgeColorGradientTexture = from.edgeColorGradientTexture;
 		}
-		#endregion
+#endregion
 
-		#region Saving
+#region Saving
+
+		public override void LoadSave(PortalSave save) {
+			channel = save.channel;
+			changeActiveSceneOnTeleport = save.changeActiveSceneOnTeleport;
+			changeCameraEdgeDetection = save.changeCameraEdgeDetection;
+			edgeColorMode = save.edgeColorMode;
+			edgeColor = save.edgeColor;
+			edgeColorGradient = save.edgeColorGradient;
+			renderRecursivePortals = save.renderRecursivePortals;
+			compositePortal = save.compositePortal;
+			teleportingPlayer = save.teleportingPlayer;
+			pauseRendering = save.pauseRendering;
+			PhysicsMode = save.physicsMode;
+			RenderMode = save.renderMode;
+		}
 		
 		[Serializable]
-		public class PortalSave : SerializableSaveObject<Portal> {
-			string channel;
-			bool changeActiveSceneOnTeleport;
-			bool changeCameraEdgeDetection;
-			int edgeColorMode;
-			SerializableColor edgeColor;
-			SerializableGradient edgeColorGradient;
-			bool renderRecursivePortals;
-			bool compositePortal;
-			bool teleportingPlayer = false;
-
-			public bool pauseRendering = false;
-			public bool pauseLogic = false;
+		public class PortalSave : SaveObject<Portal> {
+			public SerializableGradient edgeColorGradient;
+			public SerializableColor edgeColor;
+			public string channel;
+			public BladeEdgeDetection.EdgeColorMode edgeColorMode;
+			public bool changeActiveSceneOnTeleport;
+			public bool changeCameraEdgeDetection;
+			public bool renderRecursivePortals;
+			public bool compositePortal;
+			public bool teleportingPlayer;
+			public bool pauseRendering;
+			public PortalPhysicsMode physicsMode;
+			public PortalRenderMode renderMode;
 
 			public PortalSave(Portal portal) : base(portal) {
 				this.channel = portal.channel;
 				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
 				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;
-				this.edgeColorMode = (int)portal.edgeColorMode;
+				this.edgeColorMode = portal.edgeColorMode;
 				this.edgeColor = portal.edgeColor;
 				this.edgeColorGradient = portal.edgeColorGradient;
 				this.renderRecursivePortals = portal.renderRecursivePortals;
 				this.compositePortal = portal.compositePortal;
 				this.teleportingPlayer = portal.teleportingPlayer;
 				this.pauseRendering = portal.pauseRendering;
-				this.pauseLogic = portal.pauseLogic;
-			}
-
-			public override void LoadSave(Portal portal) {
-				portal.channel = this.channel;
-				portal.changeActiveSceneOnTeleport = this.changeActiveSceneOnTeleport;
-				portal.changeCameraEdgeDetection = this.changeCameraEdgeDetection;
-				portal.edgeColorMode = (BladeEdgeDetection.EdgeColorMode)this.edgeColorMode;
-				portal.edgeColor = this.edgeColor;
-				portal.edgeColorGradient = this.edgeColorGradient;
-				portal.renderRecursivePortals = this.renderRecursivePortals;
-				portal.compositePortal = this.compositePortal;
-				portal.teleportingPlayer = this.teleportingPlayer;
-				portal.pauseRendering = this.pauseRendering;
-				portal.pauseLogic = this.pauseLogic;
+				this.physicsMode = portal.PhysicsMode;
+				this.renderMode = portal.RenderMode;
 			}
 		}
 		#endregion

@@ -165,7 +165,7 @@ namespace NovaMenuUI {
         public void ClosePauseMenu(bool restoreTimeScale = true, bool restoreLockState = true) {
             // Assumes Time.timeScale is always 1 when we're not paused
             if (restoreTimeScale) {
-                Time.timeScale = 1;
+                Time.timeScale = GameManager.timeScale;
             }
 
             // Debug.Log("ClosePauseMenu called");

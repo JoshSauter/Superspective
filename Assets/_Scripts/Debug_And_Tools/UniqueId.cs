@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using NaughtyAttributes;
+using Saving;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -22,7 +23,7 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         // Don't generate an ID for objects without scenes (prefabs)
         bool notInitialized = string.IsNullOrEmpty(uniqueId);
         if (notInitialized && HasScene) {
-            //Debug.LogWarning($"{gameObject.name} in {gameObject.scene.name} has an uninitialized id. Creating one now.");
+            Debug.LogWarning($"{gameObject.name} in {gameObject.scene.name} has an uninitialized id. Creating one now.");
             Guid guid = Guid.NewGuid();
             uniqueId = guid.ToString();
 		}
@@ -31,7 +32,6 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         if (Application.isPlaying && idAlreadyTaken) {
             Debug.LogError($"ID {uniqueId} already taken, {gameObject.name} in {gameObject.scene.name} self-destructing.");
             Destroy(gameObject);
-            return;
         }
     }
 
@@ -44,6 +44,7 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         // Generate a unique ID, defaults to an empty string if nothing has been serialized yet
         if (HasScene && (string.IsNullOrEmpty(uniqueId) || idAlreadyTaken)) {
             Guid guid = Guid.NewGuid();
+            Debug.LogWarning($"Changing ID for {gameObject.name} in {gameObject.scene.name} from {uniqueId} to {guid}", gameObject);
             uniqueId = guid.ToString();
         }
     }
@@ -52,5 +53,12 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
     bool HasScene => gameObject != null && gameObject.scene != null && gameObject.scene.name != null && gameObject.scene.name != "" && gameObject.scene.name != transform.root.name;
     static bool IsUnique(string id) {
         return Resources.FindObjectsOfTypeAll<UniqueId>().Count(x => x.uniqueId == id) == 1;
+        if (!Application.isPlaying || GameManager.instance.IsCurrentlyLoading) {
+            return Resources.FindObjectsOfTypeAll<UniqueId>().Count(x => x.uniqueId == id) == 1;
+        }
+
+        // TODO: this doesn't work for DynamicObjects that are placed in the scene in the editor
+        // Not sure why yet
+        return !SaveManager.IsAnyAssociatedObjectRegistered(id);
     }
 }

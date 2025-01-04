@@ -9,10 +9,10 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Editor {
-    [CustomPropertyDrawer(typeof(SerializableReference))]
+    [CustomPropertyDrawer(typeof(SuperspectiveReference))]
     public class SerializableReferencePropertyDrawer : PropertyDrawer {
         public class CachedReference {
-            public SaveableObject cachedReference;
+            public SuperspectiveObject cachedReference;
             public string cachedId;
         }
 
@@ -29,7 +29,6 @@ namespace Editor {
             int indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
 
-            SerializedProperty referencedSceneName = property.FindPropertyRelative("referencedSceneName");
             SerializedProperty referencedObjId = property.FindPropertyRelative("referencedObjId");
 
             if (!cachedReferences.ContainsKey(referencedObjId.stringValue)) {
@@ -55,20 +54,22 @@ namespace Editor {
 
                     // If the current ID & sceneName are present, try to update the cached reference accordingly
                     if (!string.IsNullOrEmpty(cachedId)) {
-                        SaveableObject match = SaveManager.FindObjectById<SaveableObject>(cachedId);
+                        SuperspectiveObject match = SaveManager.FindObjectById<SuperspectiveObject>(cachedId);
                         if (genericReferenceType.IsInstanceOfType(match)) {
                             cached.cachedReference = match;
+                            cached.cachedId = cachedId;
                         }
                     }
                 }
 
-                SaveableObject prevReference = cached.cachedReference;
+                SuperspectiveObject prevReference = cached.cachedReference;
                 cached.cachedReference = EditorGUI.ObjectField(
                     referenceRect,
+                    label.text,
                     cached.cachedReference,
                     genericReferenceType,
                     viewAsReference
-                ) as SaveableObject;
+                ) as SuperspectiveObject;
 
                 if (cached.cachedReference != prevReference && cached.cachedReference != null) {
                     referencedObjId.stringValue = cached.cachedReference.ID;
@@ -80,7 +81,7 @@ namespace Editor {
         }
 
         protected virtual Type GetSaveableObjectType() {
-            return typeof(SaveableObject);
+            return typeof(SuperspectiveObject);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -88,7 +89,7 @@ namespace Editor {
         }
     }
     
-    [CustomPropertyDrawer(typeof(SerializableReference<,>))]
+    [CustomPropertyDrawer(typeof(SuperspectiveReference<,>))]
     public class SerializableReferencePropertyDrawerTyped : SerializableReferencePropertyDrawer {
         protected override Type GetSaveableObjectType() {
             // Gets the T in SaveableObject<T, S>

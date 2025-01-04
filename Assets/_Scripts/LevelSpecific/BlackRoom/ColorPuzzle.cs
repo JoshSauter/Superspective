@@ -1,19 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Linq;
-using SuperspectiveUtils;
 using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzle : SaveableObject<ColorPuzzle, ColorPuzzle.ColorPuzzleSave> {
+	public class ColorPuzzle : SuperspectiveObject<ColorPuzzle, ColorPuzzle.ColorPuzzleSave> {
 		public Transform smallPuzzleParent;
 		public bool solved = false;
 		public bool isActive = false;
 		ColorPuzzleNode[] solutionNodes;
-		public int numSolved => solutionNodes.Count(cpn => cpn.isSolved);
-		public int numPuzzles => solutionNodes.Length;
+		public int NumSolved => solutionNodes.Count(cpn => cpn.isSolved);
+		public int NumPuzzles => solutionNodes.Length;
 		LightBlocker[] lightBlockers;
 		Transform smallPuzzle;
 
@@ -76,20 +73,22 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 #region Saving
+
+		public override void LoadSave(ColorPuzzleSave save) {
+			solved = save.solved;
+			isActive = save.isActive;
+		}
+
 		public override string ID => $"BlackRoom_ColorPuzzle{transform.GetSiblingIndex()}";
 
 		[Serializable]
-		public class ColorPuzzleSave : SerializableSaveObject<ColorPuzzle> {
-			bool solved;
-			bool isActive;
+		public class ColorPuzzleSave : SaveObject<ColorPuzzle> {
+			public bool solved;
+			public bool isActive;
+			
 			public ColorPuzzleSave(ColorPuzzle colorPuzzle) : base(colorPuzzle) {
 				this.solved = colorPuzzle.solved;
 				this.isActive = colorPuzzle.isActive;
-			}
-
-			public override void LoadSave(ColorPuzzle colorPuzzle) {
-				colorPuzzle.solved = this.solved;
-				colorPuzzle.isActive = this.isActive;
 			}
 		}
 	}

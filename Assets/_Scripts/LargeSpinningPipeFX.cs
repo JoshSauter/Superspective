@@ -6,7 +6,7 @@ using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
 
-public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
+public class LargeSpinningPipeFX : SuperspectiveObject, CustomAudioJob {
     public AudioName audioToPlay = AudioName.LoopingMachinery;
     public float maxShakeDistance = 32f;
     public float minShakeDistance = 8f;
@@ -19,11 +19,13 @@ public class LargeSpinningPipeFX : SaveableObject, CustomAudioJob {
     public override string ID => $"{gameObject.scene.name}_{gameObject.FullPath()}";
 
     protected override void Init() {
+        base.Init();
         AudioManager.instance.PlayWithUpdate(audioToPlay, ID, this, true, UpdateAudioJob);
     }
 
-    private void OnDisable() {
+    protected override void OnDisable() {
         if (GameManager.instance.IsApplicationQuitting) return;
+        base.OnDisable();
         
         AudioManager.instance.GetAudioJob(audioToPlay, ID).Stop();
     }

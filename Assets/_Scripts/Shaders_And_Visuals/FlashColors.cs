@@ -12,7 +12,7 @@ using SuperspectiveUtils;
 /// Assumes that the renderers use _Color and _EmissionColor as their color and emission color properties.
 /// Also assumes that the renderers aren't changing colors while this script is flashing them.
 [RequireComponent(typeof(UniqueId))]
-public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSave> {
+public class FlashColors : SuperspectiveObject<FlashColors, FlashColors.FlashColorsSave> {
     public Color flashColor = new Color(.8f, .2f, .3f);
     [ColorUsage(false, true)]
     public Color flashEmission = new Color(1.4f, .05f, .055f);
@@ -24,7 +24,7 @@ public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSa
     private Dictionary<Renderer, Color> startColors;
     private Dictionary<Renderer, Color> startEmissions;
     
-    public enum State {
+    public enum State : byte {
         Idle,
         Flashing
     }
@@ -88,46 +88,46 @@ public class FlashColors : SaveableObject<FlashColors, FlashColors.FlashColorsSa
     }
     
 #region Saving
-		[Serializable]
-		public class FlashColorsSave : SerializableSaveObject<FlashColors> {
-            private StateMachine<State>.StateMachineSave stateSave;
+
+    public override void LoadSave(FlashColorsSave save) {
+        CancelFlash();
+        state.LoadFromSave(save.stateSave);
             
-            private List<SerializableColor> startColors;
-            private List<SerializableColor> startEmissions;
+        startColors = new Dictionary<Renderer, Color>();
+        startEmissions = new Dictionary<Renderer, Color>();
+        if (save.startColors != null && save.startColors.Count > 0) {
+            for (int i = 0; i < renderers.Count; i++) {
+                startColors[renderers[i]] = save.startColors[i];
+                if (save.startEmissions[i] != Color.clear) {
+                    startEmissions[renderers[i]] = save.startEmissions[i];
+                }
+            }
+        }
+    }
 
-			public FlashColorsSave(FlashColors script) : base(script) {
-                this.stateSave = script.state.ToSave();
+    [Serializable]
+	public class FlashColorsSave : SaveObject<FlashColors> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public List<SerializableColor> startColors;
+        public List<SerializableColor> startEmissions;
+        
+		public FlashColorsSave(FlashColors script) : base(script) {
+            this.stateSave = script.state.ToSave();
 
-                this.startColors = new List<SerializableColor>();
-                this.startEmissions = new List<SerializableColor>();
-                // Only save the start colors if they have been initialized
-                if (script.startColors != null && script.startColors.Count > 0) {
-                    for (int i = 0; i < script.renderers.Count; i++) {
-                        this.startColors.Add(script.startColors[script.renderers[i]]);
-                        if (script.startEmissions.ContainsKey(script.renderers[i])) {
-                            this.startEmissions.Add(script.startEmissions[script.renderers[i]]);
-                        } else {
-                            this.startEmissions.Add(Color.clear);
-                        }
+            this.startColors = new List<SerializableColor>();
+            this.startEmissions = new List<SerializableColor>();
+            // Only save the start colors if they have been initialized
+            if (script.startColors != null && script.startColors.Count > 0) {
+                for (int i = 0; i < script.renderers.Count; i++) {
+                    this.startColors.Add(script.startColors[script.renderers[i]]);
+                    if (script.startEmissions.ContainsKey(script.renderers[i])) {
+                        this.startEmissions.Add(script.startEmissions[script.renderers[i]]);
+                    } else {
+                        this.startEmissions.Add(Color.clear);
                     }
                 }
             }
-
-			public override void LoadSave(FlashColors script) {
-                script.CancelFlash();
-                script.state.LoadFromSave(this.stateSave);
-                
-                script.startColors = new Dictionary<Renderer, Color>();
-                script.startEmissions = new Dictionary<Renderer, Color>();
-                if (this.startColors != null && this.startColors.Count > 0) {
-                    for (int i = 0; i < script.renderers.Count; i++) {
-                        script.startColors[script.renderers[i]] = this.startColors[i];
-                        if (this.startEmissions[i] != Color.clear) {
-                            script.startEmissions[script.renderers[i]] = this.startEmissions[i];
-                        }
-                    }
-                }
-			}
-		}
+        }
+	}
 #endregion
 }

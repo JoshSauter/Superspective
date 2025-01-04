@@ -1,17 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
-using Saving;
+﻿using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzleManager : SingletonSaveableObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
+	public class ColorPuzzleManager : SingletonSuperspectiveObject<ColorPuzzleManager, ColorPuzzleManager.ColorPuzzleManagerSave> {
 		public FlashingColor smallGridOverlayFlash;
 		public FlashingColor smallGridOutlineFlash;
 
 		int _activePuzzle;
-		public int activePuzzle {
+		public int ActivePuzzle {
 			get => _activePuzzle;
 			set {
 				if (value == -1) {
@@ -23,11 +19,13 @@ namespace LevelSpecific.BlackRoom {
 					return;
 				}
 
-				if (activePuzzle != -1) {
-					puzzles[activePuzzle].SetActive(false);
+				// Disable previous active puzzle
+				if (ActivePuzzle != -1) {
+					puzzles[ActivePuzzle].SetActive(false);
 				}
 
-				if (activePuzzle < puzzles.Length) {
+				// Enable new active puzzle
+				if (ActivePuzzle < puzzles.Length) {
 					puzzles[value].SetActive(true);
 				}
 
@@ -35,10 +33,10 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		public bool isFirstPuzzle => activePuzzle == 0;
-		public bool isLastPuzzle => activePuzzle == puzzles.Length - 1;
+		public bool IsFirstPuzzle => ActivePuzzle == 0;
+		public bool IsLastPuzzle => ActivePuzzle == puzzles.Length - 1;
 		public ColorPuzzle[] puzzles;
-		public int numPuzzles => puzzles.Length;
+		public int NumPuzzles => puzzles.Length;
 
 		protected override void Awake() {
 			base.Awake();
@@ -46,15 +44,16 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		protected override void Init() {
-			activePuzzle = -1;
+			base.Init();
+			ActivePuzzle = -1;
 		}
 
 		public bool CheckSolution(bool outOfRangeDefault = false) {
-			if (activePuzzle == -1) {
+			if (ActivePuzzle == -1) {
 				return outOfRangeDefault;
 			}
 
-			return puzzles[activePuzzle].solved;
+			return puzzles[ActivePuzzle].solved;
 		}
 
 		public void FlashIncorrect() {
@@ -62,22 +61,23 @@ namespace LevelSpecific.BlackRoom {
 			smallGridOutlineFlash.Flash(3);
 		}
 
-		#region Saving
+#region Saving
+
+		public override void LoadSave(ColorPuzzleManagerSave save) {
+			ActivePuzzle = save.activePuzzle;
+		}
+
 		// There's only one of these so we don't need a UniqueId here
 		public override string ID => "ColorPuzzleManager";
 
 		[Serializable]
-		public class ColorPuzzleManagerSave : SerializableSaveObject<ColorPuzzleManager> {
-			int activePuzzle;
+		public class ColorPuzzleManagerSave : SaveObject<ColorPuzzleManager> {
+			public int activePuzzle;
 
 			public ColorPuzzleManagerSave(ColorPuzzleManager puzzleManager) : base(puzzleManager) {
-				this.activePuzzle = puzzleManager.activePuzzle;
-			}
-
-			public override void LoadSave(ColorPuzzleManager puzzleManager) {
-				puzzleManager.activePuzzle = this.activePuzzle;
+				this.activePuzzle = puzzleManager.ActivePuzzle;
 			}
 		}
-		#endregion
+#endregion
 	}
 }

@@ -21,7 +21,7 @@ bool SampleBehindPortal(float2 uv) {
 	return depth > portalDepth-DEPTH_OFFSET && portalDepth < 1;
 }
 
-void ClipDisabledPortalSurface(float3 worldPos, float3 portalNormal) {
+void ClipDebugPortalSurface(float3 worldPos, float3 portalNormal) {
 	// Normalize the portal normal to ensure stability
 	portalNormal = normalize(portalNormal);
 

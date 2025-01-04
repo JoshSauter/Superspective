@@ -1,21 +1,25 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Audio;
 using GrowShrink;
-using LevelManagement;
 using MagicTriggerMechanics;
 using PortalMechanics;
 using UnityEngine;
 using Saving;
+using SerializableClasses;
 using StateUtils;
 using SuperspectiveUtils;
-using Random = UnityEngine.Random;
 
 namespace TheEntity {
     [RequireComponent(typeof(UniqueId))]
-    public class TheEntity_GrowShrinkIntro : SingletonSaveableObject<TheEntity_GrowShrinkIntro, TheEntity_GrowShrinkIntro.TheEntity_GrowShrinkIntroSave>, AudioJobOnGameObject {
+    public class TheEntity_GrowShrinkIntro : SingletonSuperspectiveObject<TheEntity_GrowShrinkIntro, TheEntity_GrowShrinkIntro.TheEntity_GrowShrinkIntroSave>, AudioJobOnGameObject {
+        [SerializeField]
+        private SuperspectiveReference<Portal, Portal.PortalSave> infFallingPortal;
+        private float InfFallingRepeatDistance => infFallingPortal.Reference.Match(
+            p => Mathf.Abs(p.transform.position.y - p.otherPortal.transform.position.y),
+            _ => 0f);
+        
         [SerializeField]
         private Transform eyeTransform;
         public Transform particleSystemTransform;
@@ -60,7 +64,7 @@ namespace TheEntity {
 
         public StateMachine<State> state;
 
-        public enum ResetPlayerState {
+        public enum ResetPlayerState : byte {
             OutOfRange,
             WithinRange
         }
@@ -104,6 +108,8 @@ namespace TheEntity {
         }
 
         protected override void Init() {
+            base.Init();
+            
             state.Set(State.NotSpawned);
             MiniatureMaze.instance.state.AddTrigger(MiniatureMaze.State.MazeSolved, () => state.Set(State.Following));
 
@@ -256,7 +262,17 @@ namespace TheEntity {
         }
 
         private void LookAtPlayer() {
-            LookAtPosition(transform.position + SuperspectivePhysics.ShortestVectorPointToPoint(transform.position, Player.instance.transform.position, true));
+            Vector3 playerPos = Player.instance.transform.position;
+
+            // As soon as the player falls past the entity, it should look up at the player through the portal
+            // Otherwise the player has to pass through the portal before it will look up, and it will snap upwards
+            if (playerPos.y < transform.position.y - 10) {
+                playerPos += Vector3.up * InfFallingRepeatDistance;
+            }
+
+            Vector3 offset = state == State.SetPath ? SuperspectivePhysics.ShortestVectorPointToPoint(transform.position, playerPos) : playerPos - transform.position;
+            
+            LookAtPosition(transform.position + offset);
         }
 
         private void LookAtPosition(Vector3 pos) {
@@ -283,16 +299,31 @@ namespace TheEntity {
 
 #region Saving
 
+        public override void LoadSave(TheEntity_GrowShrinkIntroSave save) {
+            state.LoadFromSave(save.stateSave);
+            resetPlayerState.LoadFromSave(save.resetPlayerStateSave);
+            startPos = save.startPos;
+            desiredPos = save.desiredPos;
+            staticWallStartX = save.staticWallStartX;
+            hasPlayedBanner = save.hasPlayedBanner;
+        }
+
         [Serializable]
-        public class TheEntity_GrowShrinkIntroSave : SerializableSaveObject<TheEntity_GrowShrinkIntro> {
-            private StateMachine<State>.StateMachineSave stateSave;
+        public class TheEntity_GrowShrinkIntroSave : SaveObject<TheEntity_GrowShrinkIntro> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public StateMachine<ResetPlayerState>.StateMachineSave resetPlayerStateSave;
+            public SerializableVector3 startPos;
+            public SerializableVector3 desiredPos;
+            public float staticWallStartX;
+            public bool hasPlayedBanner;
 
             public TheEntity_GrowShrinkIntroSave(TheEntity_GrowShrinkIntro script) : base(script) {
                 this.stateSave = script.state.ToSave();
-            }
-
-            public override void LoadSave(TheEntity_GrowShrinkIntro script) {
-                script.state.LoadFromSave(this.stateSave);
+                this.resetPlayerStateSave = script.resetPlayerState.ToSave();
+                this.startPos = script.startPos;
+                this.desiredPos = script.desiredPos;
+                this.staticWallStartX = script.staticWallStartX;
+                this.hasPlayedBanner = script.hasPlayedBanner;
             }
         }
 

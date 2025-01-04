@@ -1,31 +1,36 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using MagicTriggerMechanics;
 using PortalMechanics;
+using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
 
-// TODO: Make saveable
+// TODO: Entering the portal from the top doesn't work right... The portal renders incorrectly
+// TODO: Loading doesn't seem to put the text in the right spot, it reverts to its original position
 namespace LevelSpecific.TransitionWhiteRoom_Fork {
-    public class InfiniteHallwayLeftPortal : MonoBehaviour {
+    public class InfiniteHallwayLeftPortal : SuperspectiveObject<InfiniteHallwayLeftPortal, InfiniteHallwayLeftPortal.Save> {
+        private const int MAX_INF_TELEPORT_FOR_TEXT = 11; // How many times we can move the text before we should just turn it off
+        
         public MagicTrigger enterInfiniteHallwayTrigger;
         public MagicTrigger pastTeleportTrigger;
         public MagicTrigger pastTeleportTriggerUpper;
+        public int timesInfTeleported = 0;
         bool playerIsInInfiniteHallway = false;
         bool exitsAreConnected = false;
         public Portal upperPlatformPortal;
         public Portal lowerPlatformPortal;
         public TeleportEnter infiniteTeleporter;
         public GlobalMagicTrigger goingNowhereText;
-        public int timesInfTeleported = 0;
-        private const int MAX_INF_TELEPORT_FOR_TEXT = 11; // How many times we can move the text before we should just turn it off
 
-        void Start() {
+        protected override void Start() {
+            base.Start();
+            
             SubscribeToEvents();
         }
 
-        void OnDestroy() {
+        protected override void OnDestroy() {
+            base.OnDestroy();
+            
             UnsubscribeFromEvents();
         }
 
@@ -104,5 +109,28 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         void ExitInfiniteHallway() {
             playerIsInInfiniteHallway = false;
         }
+    
+#region Saving
+        public override void LoadSave(Save save) {
+            playerIsInInfiniteHallway = save.playerIsInInfiniteHallway;
+            exitsAreConnected = save.exitsAreConnected;
+            timesInfTeleported = save.timesInfTeleported;
+        }
+        
+        public override string ID => "InfiniteHallwayLeftPortal";
+    
+        [Serializable]
+        public class Save : SaveObject<InfiniteHallwayLeftPortal> {
+            public bool playerIsInInfiniteHallway;
+            public bool exitsAreConnected;
+            public int timesInfTeleported;
+
+            public Save(InfiniteHallwayLeftPortal script) : base(script) {
+                playerIsInInfiniteHallway = script.playerIsInInfiniteHallway;
+                exitsAreConnected = script.exitsAreConnected;
+                timesInfTeleported = script.timesInfTeleported;
+            }
+        }
+#endregion
     }
 }

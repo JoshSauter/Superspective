@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace PictureTeleportMechanics {
 	[RequireComponent(typeof(UniqueId))]
-    public class BigFrame : SaveableObject<BigFrame, BigFrame.BigFrameSave> {
+    public class BigFrame : SuperspectiveObject<BigFrame, BigFrame.BigFrameSave> {
 
 		public Renderer frameRenderer;
 		public Collider frameCollider;
@@ -84,7 +84,8 @@ namespace PictureTeleportMechanics {
 			TurnOffFrame();
 		}
 
-		void OnDisable() {
+		protected override void OnDisable() {
+			base.OnDisable();
 			PictureTeleport.bigFrames.Remove(PictureTeleport.BigFrameKey(gameObject.scene.name, gameObject.name));
 		}
 
@@ -108,20 +109,20 @@ namespace PictureTeleportMechanics {
 
 		#region Saving
 
+	    public override void LoadSave(BigFrameSave save) {
+		    frameRenderer.enabled = save.frameEnabled;
+		    frameCollider.enabled = save.frameEnabled;
+		    disableFrameTrigger.enabled = save.disableFrameTriggerEnabled;
+	    }
+
 		[Serializable]
-		public class BigFrameSave : SerializableSaveObject<BigFrame> {
-			bool frameEnabled;
-			bool disableFrameTriggerEnabled;
+		public class BigFrameSave : SaveObject<BigFrame> {
+			public bool frameEnabled;
+			public bool disableFrameTriggerEnabled;
 
 			public BigFrameSave(BigFrame bigFrame) : base(bigFrame) {
 				this.frameEnabled = bigFrame.frameRenderer.enabled;
 				this.disableFrameTriggerEnabled = bigFrame.disableFrameTrigger.enabled;
-			}
-
-			public override void LoadSave(BigFrame bigFrame) {
-				bigFrame.frameRenderer.enabled = this.frameEnabled;
-				bigFrame.frameCollider.enabled = this.frameEnabled;
-				bigFrame.disableFrameTrigger.enabled = this.disableFrameTriggerEnabled;
 			}
 		}
 		#endregion

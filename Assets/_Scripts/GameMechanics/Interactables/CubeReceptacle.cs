@@ -12,12 +12,12 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
-public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave>, AudioJobOnGameObject {
+public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle.CubeReceptacleSave>, AudioJobOnGameObject {
     public delegate void CubeReceptacleAction(CubeReceptacle receptacle, PickupObject cube);
 
     public delegate void CubeReceptacleActionSimple();
 
-    public enum State {
+    public enum State : byte {
         Empty,
         CubeEnterRotate,
         CubeEnterTranslate,
@@ -188,6 +188,7 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
 
     private bool playerStillInTriggerZone = false;
     void OnTriggerStay(Collider other) {
+        if (!enabled) return;
         if (gameObject.layer == SuperspectivePhysics.InvisibleLayer) return;
         if (other.TaggedAsPlayer()) {
             playerStillInTriggerZone = true;
@@ -389,7 +390,8 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
         }
     }
 
-    protected void OnDisable() {
+    protected override void OnDisable() {
+        base.OnDisable();
         triggerZone.enabled = false;
     }
 
@@ -414,42 +416,37 @@ public class CubeReceptacle : SaveableObject<CubeReceptacle, CubeReceptacle.Cube
 
 #region Saving
 
+    public override void LoadSave(CubeReceptacleSave save) {
+        stateMachine.LoadFromSave(save.stateSave);
+
+        startRot = save.startRot;
+        endRot = save.endRot;
+
+        startPos = save.startPos;
+        endPos = save.endPos;
+
+        cubeInReceptacle = save.cubeInReceptacle?.GetOrNull();
+        if (cubeInReceptacle != null) {
+            cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
+        }
+    }
+
     [Serializable]
-    public class CubeReceptacleSave : SerializableSaveObject<CubeReceptacle> {
-        SerializableReference<PickupObject, PickupObject.PickupObjectSave> cubeInReceptacle;
-        SerializableVector3 endPos;
-        SerializableQuaternion endRot;
-
-        SerializableVector3 startPos;
-
-        SerializableQuaternion startRot;
-        StateMachine<State>.StateMachineSave stateSave;
+    public class CubeReceptacleSave : SaveObject<CubeReceptacle> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public SuperspectiveReference<PickupObject, PickupObject.PickupObjectSave> cubeInReceptacle;
+        public SerializableVector3 endPos;
+        public SerializableQuaternion endRot;
+        public SerializableVector3 startPos;
+        public SerializableQuaternion startRot;
 
         public CubeReceptacleSave(CubeReceptacle receptacle) : base(receptacle) {
             stateSave = receptacle.stateMachine.ToSave();
-
             startRot = receptacle.startRot;
             endRot = receptacle.endRot;
-
             startPos = receptacle.startPos;
             endPos = receptacle.endPos;
-
             cubeInReceptacle = receptacle.cubeInReceptacle;
-        }
-
-        public override void LoadSave(CubeReceptacle receptacle) {
-            receptacle.stateMachine.LoadFromSave(this.stateSave);
-
-            receptacle.startRot = startRot;
-            receptacle.endRot = endRot;
-
-            receptacle.startPos = startPos;
-            receptacle.endPos = endPos;
-
-            receptacle.cubeInReceptacle = cubeInReceptacle?.GetOrNull();
-            if (receptacle.cubeInReceptacle != null) {
-                receptacle.cubeInReceptacle.OnPickupSimple += receptacle.ReleaseFromReceptacle;
-            }
         }
     }
 #endregion

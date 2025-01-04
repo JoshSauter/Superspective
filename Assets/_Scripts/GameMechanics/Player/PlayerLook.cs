@@ -5,10 +5,10 @@ using Saving;
 using SerializableClasses;
 using UnityEngine;
 
-public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerLookSave> {
+public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.PlayerLookSave> {
     public delegate void ViewLockAction();
 
-    public enum ViewLockState {
+    public enum ViewLockState : byte {
         ViewUnlocked,
         ViewLocking,
         ViewLocked,
@@ -311,42 +311,63 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
 
 
 #region Saving
+
+    public override void LoadSave(PlayerLookSave save) {
+        cameraContainerTransform.localPosition = save.cameraLocalPosition;
+        cameraContainerTransform.localRotation = save.cameraLocalRotation;
+
+        state = save.state;
+        timeSinceStateChange = save.timeSinceStateChange;
+        rotationBeforeViewLock = save.rotationBeforeViewLock;
+        startPos = save.startPos;
+        startRot = save.startRot;
+        endPos = save.endPos;
+        endRot = save.endRot;
+        reticleStartPos = save.reticleStartPos;
+        reticleEndPos = save.reticleEndPos;
+        viewLockTime = save.viewLockTime;
+        viewUnlockTime = save.viewUnlockTime;
+
+        rotationY = save.rotationY;
+        yClamp = save.yClamp;
+        outsideMultiplier = save.outsideMultiplier;
+            
+        Cursor.lockState = save.cursorLockState;
+        Cursor.visible = save.cursorVisible;
+
+        Frozen = save.frozenOverride;
+    }
+    
     // There's only one PlayerLook so we don't need a UniqueId here
     public override string ID => "PlayerLook";
 
     [Serializable]
-    public class PlayerLookSave : SerializableSaveObject<PlayerLook> {
-        SerializableVector3 cameraLocalPosition;
-        SerializableQuaternion cameraLocalRotation;
-        bool cursorVisible;
-        SerializableVector3 endPos;
-        SerializableQuaternion endRot;
-
-        int lockState;
-        float outsideMultiplier;
-        SerializableVector2 reticleEndPos;
-
-        SerializableVector2 reticleStartPos;
-
-        // Previously Coroutine local variables
-        SerializableQuaternion rotationBeforeViewLock;
-        float rotationY;
-        SerializableVector3 startPos;
-        SerializableQuaternion startRot;
-
-        int state;
-        float timeSinceStateChange;
-        float viewLockTime;
-        float viewUnlockTime;
-        float yClamp;
-
-        private bool frozenOverride;
+    public class PlayerLookSave : SaveObject<PlayerLook> {
+        public SerializableQuaternion startRot;
+        public SerializableQuaternion endRot;
+        public SerializableQuaternion rotationBeforeViewLock;
+        public SerializableQuaternion cameraLocalRotation;
+        public SerializableVector3 cameraLocalPosition;
+        public SerializableVector3 startPos;
+        public SerializableVector3 endPos;
+        public SerializableVector2 reticleEndPos;
+        public SerializableVector2 reticleStartPos;
+        public ViewLockState state;
+        public CursorLockMode cursorLockState;
+        public float outsideMultiplier;
+        public float rotationY;
+        public float timeSinceStateChange;
+        public float viewLockTime;
+        public float viewUnlockTime;
+        public float yClamp;
+        public bool cursorVisible;
+        public bool frozenOverride;
 
         public PlayerLookSave(PlayerLook playerLook) : base(playerLook) {
             cameraLocalPosition = playerLook.cameraContainerTransform.localPosition;
             cameraLocalRotation = playerLook.cameraContainerTransform.localRotation;
 
-            state = (int) playerLook.state;
+            state = playerLook.state;
             timeSinceStateChange = playerLook.timeSinceStateChange;
             rotationBeforeViewLock = playerLook.rotationBeforeViewLock;
             startPos = playerLook.startPos;
@@ -363,41 +384,15 @@ public class PlayerLook : SingletonSaveableObject<PlayerLook, PlayerLook.PlayerL
             outsideMultiplier = playerLook.outsideMultiplier;
 
             if (NovaPauseMenu.instance.PauseMenuIsOpen) {
-                lockState = (int) NovaPauseMenu.instance.cachedLockMode;
+                cursorLockState = NovaPauseMenu.instance.cachedLockMode;
                 cursorVisible = false;
             }
             else {
-                lockState = (int) Cursor.lockState;
+                cursorLockState = Cursor.lockState;
                 cursorVisible = Cursor.visible;
             }
 
             frozenOverride = playerLook._frozenOverride;
-        }
-
-        public override void LoadSave(PlayerLook playerLook) {
-            playerLook.cameraContainerTransform.localPosition = cameraLocalPosition;
-            playerLook.cameraContainerTransform.localRotation = cameraLocalRotation;
-
-            playerLook.state = (ViewLockState) state;
-            playerLook.timeSinceStateChange = timeSinceStateChange;
-            playerLook.rotationBeforeViewLock = rotationBeforeViewLock;
-            playerLook.startPos = startPos;
-            playerLook.startRot = startRot;
-            playerLook.endPos = endPos;
-            playerLook.endRot = endRot;
-            playerLook.reticleStartPos = reticleStartPos;
-            playerLook.reticleEndPos = reticleEndPos;
-            playerLook.viewLockTime = viewLockTime;
-            playerLook.viewUnlockTime = viewUnlockTime;
-
-            playerLook.rotationY = rotationY;
-            playerLook.yClamp = yClamp;
-            playerLook.outsideMultiplier = outsideMultiplier;
-            
-            Cursor.lockState = (CursorLockMode) lockState;
-            Cursor.visible = cursorVisible;
-
-            playerLook.Frozen = frozenOverride;
         }
     }
 #endregion

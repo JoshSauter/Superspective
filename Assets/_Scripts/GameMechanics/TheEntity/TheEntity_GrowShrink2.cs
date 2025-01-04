@@ -7,8 +7,8 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace TheEntity {
-    public class TheEntity_GrowShrink2 : SaveableObject<TheEntity_GrowShrink2, TheEntity_GrowShrink2.TheEntity_GrowShrink2Save> {
-        public enum EyeState {
+    public class TheEntity_GrowShrink2 : SuperspectiveObject<TheEntity_GrowShrink2, TheEntity_GrowShrink2.TheEntity_GrowShrink2Save> {
+        public enum EyeState : byte {
             Unnoticed,
             Noticed,
             Despawned
@@ -70,8 +70,9 @@ namespace TheEntity {
             
             SubscribeEvents();
         }
-        
-        private void OnDisable() {
+
+        protected override void OnDisable() {
+            base.OnDisable();
             UnsubscribeEvents();
         }
 
@@ -103,10 +104,19 @@ namespace TheEntity {
         
 #region Saving
 
+        public override void LoadSave(TheEntity_GrowShrink2Save save) {
+            state.LoadFromSave(save.state);
+            locationIndex = save.locationIndex;
+        }
+
         [Serializable]
-        public class TheEntity_GrowShrink2Save : SerializableSaveObject<TheEntity_GrowShrink2> {
-            public TheEntity_GrowShrink2Save(TheEntity_GrowShrink2 script) : base(script) { }
-            public override void LoadSave(TheEntity_GrowShrink2 script) {
+        public class TheEntity_GrowShrink2Save : SaveObject<TheEntity_GrowShrink2> {
+            public StateMachine<EyeState>.StateMachineSave state;
+            public int locationIndex;
+
+            public TheEntity_GrowShrink2Save(TheEntity_GrowShrink2 script) : base(script) {
+                state = script.state.ToSave();
+                locationIndex = script.locationIndex;
             }
         }
 #endregion

@@ -6,18 +6,18 @@ using UnityEngine;
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class EnableDisableSaveableGameObjectsAction : TriggerAction {
-        public SerializableReference[] objectsToEnable;
-        public SerializableReference[] objectsToDisable;
+        public SuperspectiveReference[] objectsToEnable;
+        public SuperspectiveReference[] objectsToDisable;
 
-        protected GameObject GameObjectFromReference(SerializableReference reference) {
+        protected GameObject GameObjectFromReference(SuperspectiveReference reference) {
             var maybeReference = reference.Reference;
             return maybeReference.isLeft
                 ? maybeReference.LeftOrDefault().gameObject
-                : throw new Exception($"Reference {maybeReference.RightOrDefault().ID} in scene {maybeReference.RightOrDefault().sceneName} is not loaded!");
+                : throw new Exception($"Reference {maybeReference.RightOrDefault().ID} in level {maybeReference.RightOrDefault().level} is not loaded!");
         }
 
-        protected void SetEnabled(bool enabled, SerializableReference[] objects, MagicTrigger triggerScript) {
-            foreach (SerializableReference reference in objects) {
+        protected void SetEnabled(bool enabled, SuperspectiveReference[] objects, MagicTrigger triggerScript) {
+            foreach (SuperspectiveReference reference in objects) {
                 GameObjectFromReference(reference).SetActive(enabled);
             }
         }

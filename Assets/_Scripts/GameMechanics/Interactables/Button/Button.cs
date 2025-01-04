@@ -13,7 +13,7 @@ using UnityEngine.Serialization;
 
 namespace Interactables {
     [RequireComponent(typeof(UniqueId), typeof(PoweredObject))]
-    public class Button : SaveableObject<Button, Button.ButtonSave> {
+    public class Button : SuperspectiveObject<Button, Button.ButtonSave> {
         private PoweredObject _pwr;
 
         public PoweredObject pwr {
@@ -219,43 +219,41 @@ namespace Interactables {
 
 #region Saving
 
-        [Serializable]
-        public class ButtonSave : SerializableSaveObject<Button> {
-            SerializableAnimationCurve buttonDepressCurve;
-            SerializableAnimationCurve buttonPressCurve;
+        public override void LoadSave(ButtonSave save) {
+            stateMachine.LoadFromSave(save.stateSave);
+            buttonPressCurve = save.buttonPressCurve;
+            buttonUnpressCurve = save.buttonUnpressCurve;
+            unpressAfterPress = save.unpressAfterPress;
+            pressDistance = save.pressDistance;
+            timeBetweenPressEndDepressStart = save.timeBetweenPressEndDepressStart;
+            timeToPressButton = save.timeToPressButton;
+            timeToUnpressButton = save.timeToUnpressButton;
+            oneTimeButton = save.oneTimeButton;
+        }
 
-            bool depressAfterPress;
-            float depressDistance;
-            StateMachine<State>.StateMachineSave stateSave;
-            float timeBetweenPressEndDepressStart;
-            float timeToDepressButton;
-            float timeToPressButton;
-            bool oneTimeButton;
+        [Serializable]
+        public class ButtonSave : SaveObject<Button> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public SerializableAnimationCurve buttonPressCurve;
+            public SerializableAnimationCurve buttonUnpressCurve;
+            public bool unpressAfterPress;
+            public float pressDistance;
+            public float timeBetweenPressEndDepressStart;
+            public float timeToPressButton;
+            public float timeToUnpressButton;
+            public bool oneTimeButton;
 
             public ButtonSave(Button button) : base(button) {
                 stateSave = button.stateMachine.ToSave();
                 buttonPressCurve = button.buttonPressCurve;
-                buttonDepressCurve = button.buttonUnpressCurve;
+                buttonUnpressCurve = button.buttonUnpressCurve;
                 timeToPressButton = button.timeToPressButton;
-                timeToDepressButton = button.timeToUnpressButton;
-                depressDistance = button.pressDistance;
+                timeToUnpressButton = button.timeToUnpressButton;
+                pressDistance = button.pressDistance;
 
-                depressAfterPress = button.unpressAfterPress;
+                unpressAfterPress = button.unpressAfterPress;
                 timeBetweenPressEndDepressStart = button.timeBetweenPressEndDepressStart;
                 oneTimeButton = button.oneTimeButton;
-            }
-
-            public override void LoadSave(Button button) {
-                button.stateMachine.LoadFromSave(this.stateSave);
-                button.buttonPressCurve = buttonPressCurve;
-                button.buttonUnpressCurve = buttonDepressCurve;
-                button.timeToPressButton = timeToPressButton;
-                button.timeToUnpressButton = timeToDepressButton;
-                button.pressDistance = depressDistance;
-
-                button.unpressAfterPress = depressAfterPress;
-                button.timeBetweenPressEndDepressStart = timeBetweenPressEndDepressStart;
-                button.oneTimeButton = oneTimeButton;
             }
         }
 

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NaughtyAttributes;
 using UnityEngine;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 using UnityEditor;
 using UnityEngine.ProBuilder;
@@ -12,7 +12,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 namespace GrowShrink {
     [RequireComponent(typeof(UniqueId))]
-    public class GrowShrinkHallway : SaveableObject<GrowShrinkHallway, GrowShrinkHallway.GrowShrinkHallwayNewSave> {
+    public class GrowShrinkHallway : SuperspectiveObject<GrowShrinkHallway, GrowShrinkHallway.GrowShrinkHallwaySave> {
         public float scaleFactor = 4;
 
         private GrowShrinkTransitionTrigger EffectiveTriggerZone => shrunkTriggerZone ? shrunkTriggerZone : originalTriggerZone;
@@ -27,13 +27,13 @@ namespace GrowShrink {
         private bool PbMeshesNeedToBeSet => true || pbMeshes == null || pbMeshes.Length == 0 || pbMeshes.Any(m => m == null);
 
         // Objects that are or were in the tunnel at some point
-        private Dictionary<string, SerializableReference<GrowShrinkObject>> growShrinkObjects = new Dictionary<string, SerializableReference<GrowShrinkObject>>();
+        private Dictionary<string, SuperspectiveReference<GrowShrinkObject>> growShrinkObjects = new Dictionary<string, SuperspectiveReference<GrowShrinkObject>>();
 
         string GetId(Collider c) => GrowShrinkTransitionTrigger.GetId(c);
 
 #if UNITY_EDITOR
         // Note to self: If the results of this look fucked up, check that the pivot points for combined mesh & trigger zone hitbox are the same
-        [Button("Compile", EButtonEnableMode.Editor)]
+        [Button("Compile")]
         void Compile() {
             Undo.SetCurrentGroupName("Compile GrowShrinkHallway");
             int compileGroup = Undo.GetCurrentGroup();
@@ -294,7 +294,7 @@ namespace GrowShrink {
             Undo.CollapseUndoOperations(compileGroup);
         }
 
-        [Button("Decompile", EButtonEnableMode.Editor)]
+        [Button("Decompile")]
         public void Decompile(bool isPartOfParentOperation = false) {
             if (!isPartOfParentOperation) {
                 Undo.SetCurrentGroupName("Decompile GrowShrinkHallway");
@@ -383,19 +383,19 @@ namespace GrowShrink {
 
 #region Saving
 
-        [Serializable]
-        public class GrowShrinkHallwayNewSave : SerializableSaveObject<GrowShrinkHallway> {
-            private float scaleFactor;
-            private SerializableDictionary<string, SerializableReference<GrowShrinkObject>> growShrinkObjects;
+        public override void LoadSave(GrowShrinkHallwaySave save) {
+            scaleFactor = save.scaleFactor;
+            growShrinkObjects = save.growShrinkObjects;
+        }
 
-            public GrowShrinkHallwayNewSave(GrowShrinkHallway script) : base(script) {
+        [Serializable]
+        public class GrowShrinkHallwaySave : SaveObject<GrowShrinkHallway> {
+            public float scaleFactor;
+            public SerializableDictionary<string, SuperspectiveReference<GrowShrinkObject>> growShrinkObjects;
+
+            public GrowShrinkHallwaySave(GrowShrinkHallway script) : base(script) {
                 scaleFactor = script.scaleFactor;
                 growShrinkObjects = script.growShrinkObjects;
-            }
-
-            public override void LoadSave(GrowShrinkHallway script) {
-                script.growShrinkObjects = this.growShrinkObjects;
-                script.scaleFactor = this.scaleFactor;
             }
         }
 

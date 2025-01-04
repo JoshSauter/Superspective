@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Saving;
@@ -7,9 +6,9 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentValueShutter.CurrentValueShutterSave> {
-    private const float timeToOpen = .75f;
-    private const float timeToShut = 1.75f;
+public class CurrentValueShutter : SuperspectiveObject<CurrentValueShutter, CurrentValueShutter.CurrentValueShutterSave> {
+    private const float TIME_TO_OPEN = .75f;
+    private const float TIME_TO_SHUT = 1.75f;
 
     private Vector3 startingPosition;
     //private readonly Vector3 distanceToOpen = new Vector3(0, 3, 5.5f);
@@ -23,7 +22,7 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
     
     public Transform topLeft, topRight, botLeft, botRight;
 
-    public enum State {
+    public enum State : byte {
         Open,
         Moving,
         Shut
@@ -58,7 +57,7 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
                 lerpTime = 1;
                 break;
             case State.Moving:
-                lerpTime += (isSetToOpen ? 1 : -1) * Time.deltaTime / (isSetToOpen ? timeToOpen : timeToShut);
+                lerpTime += (isSetToOpen ? 1 : -1) * Time.deltaTime / (isSetToOpen ? TIME_TO_OPEN : TIME_TO_SHUT);
                 break;
             case State.Shut:
                 lerpTime = 0;
@@ -78,17 +77,24 @@ public class CurrentValueShutter : SaveableObject<CurrentValueShutter, CurrentVa
     }
     
 #region Saving
-		[Serializable]
-		public class CurrentValueShutterSave : SerializableSaveObject<CurrentValueShutter> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public CurrentValueShutterSave(CurrentValueShutter script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(CurrentValueShutter script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(CurrentValueShutterSave save) {
+        state.LoadFromSave(save.stateSave);
+        lerpTime = save.lerpTime;
+        isSetToOpen = save.isSetToOpen;
+    }
+
+    [Serializable]
+	public class CurrentValueShutterSave : SaveObject<CurrentValueShutter> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public float lerpTime;
+        public bool isSetToOpen;
+        
+		public CurrentValueShutterSave(CurrentValueShutter script) : base(script) {
+            this.stateSave = script.state.ToSave();
+            this.lerpTime = script.lerpTime;
+            this.isSetToOpen = script.isSetToOpen;
 		}
+	}
 #endregion
 }

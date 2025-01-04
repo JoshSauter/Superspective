@@ -7,7 +7,7 @@ using SerializableClasses;
 using UnityEngine;
 
 // Player camera is already a child of the player, but we want it to act like it's lerping its position towards the player instead
-public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFollowSave> {
+public class CameraFollow : SuperspectiveObject<CameraFollow, CameraFollow.CameraFollowSave> {
     public delegate void CameraFollowUpdate(Vector3 offset, Vector3 positionDiffFromLastFrame);
 
     public const float desiredLerpSpeed = 20f; // currentLerpSpeed will approach this value after not being changed for a while
@@ -43,8 +43,9 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
         Portal.OnAnyPortalTeleportSimple += RecalculateWorldPositionLastFrameForPlayer;
         Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
     }
-    
-    private void OnDisable() {
+
+    protected override void OnDisable() {
+        base.OnDisable();
         TeleportEnter.OnAnyTeleportSimple -= RecalculateWorldPositionLastFrame;
         Portal.OnAnyPortalTeleportSimple -= RecalculateWorldPositionLastFrameForPlayer;
         Player.instance.look.OnViewLockExitFinish -= HandleViewUnlockEnd;
@@ -110,16 +111,25 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
     }
 
 #region Saving
+
+    public override void LoadSave(CameraFollowSave save) {
+        currentLerpSpeed = save.currentLerpSpeed;
+        relativeStartPosition = save.relativeStartPosition;
+        relativePositionLastFrame = save.relativePositionLastFrame;
+        worldPositionLastFrame = save.worldPositionLastFrame;
+        timeSinceCurrentLerpSpeedWasModified = save.timeSinceCurrentLerpSpeedWasModified;
+    }
+    
     // There's only one player so we don't need a UniqueId here
     public override string ID => "CameraFollow";
 
     [Serializable]
-    public class CameraFollowSave : SerializableSaveObject<CameraFollow> {
-        public float currentLerpSpeed;
-        public float timeSinceCurrentLerpSpeedWasModified;
+    public class CameraFollowSave : SaveObject<CameraFollow> {
         public SerializableVector3 relativePositionLastFrame;
         public SerializableVector3 relativeStartPosition;
         public SerializableVector3 worldPositionLastFrame;
+        public float currentLerpSpeed;
+        public float timeSinceCurrentLerpSpeedWasModified;
 
         public CameraFollowSave(CameraFollow cam) : base(cam) {
             // Hack to allow parameterless constructor for interpolation function
@@ -130,14 +140,6 @@ public class CameraFollow : SaveableObject<CameraFollow, CameraFollow.CameraFoll
             relativePositionLastFrame = cam.relativePositionLastFrame;
             worldPositionLastFrame = cam.worldPositionLastFrame;
             timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
-        }
-
-        public override void LoadSave(CameraFollow cam) {
-            cam.currentLerpSpeed = currentLerpSpeed;
-            cam.relativeStartPosition = relativeStartPosition;
-            cam.relativePositionLastFrame = relativePositionLastFrame;
-            cam.worldPositionLastFrame = worldPositionLastFrame;
-            cam.timeSinceCurrentLerpSpeedWasModified = timeSinceCurrentLerpSpeedWasModified;
         }
     }
 #endregion

@@ -10,7 +10,7 @@ using UnityStandardAssets.ImageEffects;
 
 namespace GrowShrink {
     [RequireComponent(typeof(UniqueId))]
-    public class GrowShrinkObject : SaveableObject<GrowShrinkObject, GrowShrinkObject.GrowShrinkObjectSave> {
+    public class GrowShrinkObject : SuperspectiveObject<GrowShrinkObject, GrowShrinkObject.GrowShrinkObjectSave> {
         public static readonly Dictionary<Collider, GrowShrinkObject> collidersAffectedByGrowShrinkObjects = new Dictionary<Collider, GrowShrinkObject>();
         
         public GravityObject thisGravityObj;
@@ -39,6 +39,17 @@ namespace GrowShrink {
                 }
 
                 return _ssao;
+            }
+        }
+
+        private BladeEdgeDetection _bladeEdgeDetection;
+        private BladeEdgeDetection BladeEdgeDetection {
+            get {
+                if (_bladeEdgeDetection == null) {
+                    _bladeEdgeDetection = MaskBufferRenderTextures.instance.edgeDetection;
+                }
+
+                return _bladeEdgeDetection;
             }
         }
 
@@ -88,7 +99,8 @@ namespace GrowShrink {
             collidersAffectedByGrowShrinkObjects.Add(thisCollider, this);
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
+            base.OnDisable();
             Portal.BeforeAnyPortalTeleport -= HandlePortalTeleport;
             
             collidersAffectedByGrowShrinkObjects.Remove(thisCollider);
@@ -177,6 +189,15 @@ namespace GrowShrink {
                 }
 
                 PlayerMovement.instance.groundMovement.lastGroundVelocity *= scaleChangeRatio;
+                
+                // Change the EdgeDetection sensitivity to show small geometry outlines properly as player shrinks (no change for growing)
+                if (targetScale < 1) {
+                    BladeEdgeDetection.depthSensitivity = 1 / targetScale;
+                }
+                else {
+                    // TODO: Instead of hardcoded 1, determine the original sensitivity
+                    BladeEdgeDetection.depthSensitivity = 1;
+                }
             }
             else if (thisGravityObj != null) {
                 thisGravityObj.gravityMagnitude *= scaleChangeRatio;
@@ -186,26 +207,25 @@ namespace GrowShrink {
         }
 
 #region Saving
+        public override void LoadSave(GrowShrinkObjectSave save) {
+            minScale = save.minScale;
+            maxScale = save.maxScale;
+            CurrentScale = save.currentScale;
+            state.LoadFromSave(save.stateSave);
+        }
 
         [Serializable]
-        public class GrowShrinkObjectSave : SerializableSaveObject<GrowShrinkObject> {
-            private float minScale;
-            private float maxScale;
-            private float currentScale;
-            private StateMachine<State>.StateMachineSave stateSave;
+        public class GrowShrinkObjectSave : SaveObject<GrowShrinkObject> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public float minScale;
+            public float maxScale;
+            public float currentScale;
 
             public GrowShrinkObjectSave(GrowShrinkObject script) : base(script) {
                 this.minScale = script.minScale;
                 this.maxScale = script.maxScale;
                 this.currentScale = script.CurrentScale;
                 this.stateSave = script.state.ToSave();
-            }
-
-            public override void LoadSave(GrowShrinkObject script) {
-                script.minScale = this.minScale;
-                script.maxScale = this.maxScale;
-                script.CurrentScale = this.currentScale;
-                script.state.LoadFromSave(this.stateSave);
             }
         }
 

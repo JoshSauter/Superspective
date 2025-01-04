@@ -5,7 +5,7 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
-    public class ToggleBlackRoomEnabled : SaveableObject<ToggleBlackRoomEnabled, ToggleBlackRoomEnabled.ToggleBlackRoomEnabledSave> {
+    public class ToggleBlackRoomEnabled : SuperspectiveObject<ToggleBlackRoomEnabled, ToggleBlackRoomEnabled.ToggleBlackRoomEnabledSave> {
         public GameObject blackRoomRoot;
         DoorOpenClose door;
 
@@ -27,21 +27,22 @@ namespace LevelSpecific.BlackRoom {
             }
         }
 
-		#region Saving
-		public override string ID => "ToggleBlackRoomEnabled";
+#region Saving
+
+	    public override void LoadSave(ToggleBlackRoomEnabledSave save) {
+		    blackRoomRoot.SetActive(save.blackRoomEnabled);
+	    }
+
+	    public override string ID => "ToggleBlackRoomEnabled";
 
 		[Serializable]
-		public class ToggleBlackRoomEnabledSave : SerializableSaveObject<ToggleBlackRoomEnabled> {
-			bool blackRoomEnabled;
+		public class ToggleBlackRoomEnabledSave : SaveObject<ToggleBlackRoomEnabled> {
+			public bool blackRoomEnabled;
 
 			public ToggleBlackRoomEnabledSave(ToggleBlackRoomEnabled toggle) : base(toggle) {
 				this.blackRoomEnabled = toggle.blackRoomRoot.activeSelf;
 			}
-
-			public override void LoadSave(ToggleBlackRoomEnabled toggle) {
-				toggle.blackRoomRoot.SetActive(this.blackRoomEnabled);
-			}
 		}
-		#endregion
+#endregion
 	}
 }

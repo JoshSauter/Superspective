@@ -5,7 +5,7 @@ using SerializableClasses;
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class PowerOrDepowerAction : TriggerAction {
-        public SerializableReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredObject;
+        public SuperspectiveReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredObject;
         public bool setPowerIsOn = true;
         
         public override void Execute(MagicTrigger triggerScript) {

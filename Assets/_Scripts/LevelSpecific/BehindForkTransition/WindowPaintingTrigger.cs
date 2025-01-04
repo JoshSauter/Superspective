@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace LevelSpecific.BehindForkTransition {
     public class WindowPaintingTrigger : MonoBehaviour {
-        public SerializableReference<Portal, Portal.PortalSave> serializedPortalReference;
+        public SuperspectiveReference<Portal, Portal.PortalSave> serializedPortalReference;
         // GetOrNull valid here because we wait until we are in the active scene to reference it
         Portal portal => serializedPortalReference.GetOrNull();
         [SerializeReference]

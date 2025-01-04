@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444948
+  m_Name: pb_Mesh1025546
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -557,7 +557,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1046396324}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -661,8 +661,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 71625795}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 1
+  _id: {fileID: 71625795}
   triggerConditionsOld:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -820,7 +822,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 128667912}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -881,7 +883,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8134080
+  m_Name: pb_Mesh1025198
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1046,7 +1048,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444776
+  m_Name: pb_Mesh1025374
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1474,7 +1476,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1152060201}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1535,7 +1537,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444656
+  m_Name: pb_Mesh1025254
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1963,7 +1965,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1632265944}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2086,15 +2088,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b952ecbfbf2e4504b2aac68eb54ceeaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
 --- !u!43 &414193893
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8134218
+  m_Name: pb_Mesh1025336
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2259,7 +2263,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444876
+  m_Name: pb_Mesh1025474
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -2687,7 +2691,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 232730394}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3011,7 +3015,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1014839279}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3335,7 +3339,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1937861744}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -3396,7 +3400,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444706
+  m_Name: pb_Mesh1025304
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3824,7 +3828,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1241257837}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4148,7 +4152,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 881203735}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -4209,7 +4213,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444668
+  m_Name: pb_Mesh1025266
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4438,7 +4442,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8134270
+  m_Name: pb_Mesh1025388
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4603,7 +4607,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444588
+  m_Name: pb_Mesh1025186
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4768,7 +4772,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8134444
+  m_Name: pb_Mesh1025562
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -4933,7 +4937,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444848
+  m_Name: pb_Mesh1025446
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5098,7 +5102,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444620
+  m_Name: pb_Mesh1025218
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5428,7 +5432,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444836
+  m_Name: pb_Mesh1025434
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5593,7 +5597,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444824
+  m_Name: pb_Mesh1025422
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -5818,8 +5822,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1229604677}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1229604677}
   portalMaterial: {fileID: 0}
   channel: BlackHallwayToTransition
   changeActiveSceneOnTeleport: 1
@@ -5973,7 +5979,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 414193893}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -6040,8 +6046,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1229604677}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1229604677}
   treatChildrenAsOneObjectRecursively: 0
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -6117,8 +6125,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1229604677}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1229604677}
   triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
@@ -6187,7 +6197,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444694
+  m_Name: pb_Mesh1025292
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6352,7 +6362,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh8134406
+  m_Name: pb_Mesh1025524
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6780,7 +6790,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1908983220}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -7104,7 +7114,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 135485056}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -7165,7 +7175,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444982
+  m_Name: pb_Mesh1025580
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -7377,8 +7387,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1401322219}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1401322219}
   portalMaterial: {fileID: 0}
   channel: BlackHallwayPortal
   changeActiveSceneOnTeleport: 1
@@ -7532,7 +7544,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1045882532}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -7612,8 +7624,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1401322219}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1401322219}
   treatChildrenAsOneObjectRecursively: 0
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -7689,8 +7703,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1401322219}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1401322219}
   triggerConditionsOld:
   - triggerCondition: 8
     useLocalCoordinates: 1
@@ -7858,7 +7874,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444898
+  m_Name: pb_Mesh1025496
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -8286,7 +8302,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1228938658}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -8610,7 +8626,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1226803578}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -8934,7 +8950,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1118257911}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -9258,7 +9274,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1752580584}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -9319,7 +9335,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444634
+  m_Name: pb_Mesh1025232
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -9484,7 +9500,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444860
+  m_Name: pb_Mesh1025458
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -9912,7 +9928,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 604208054}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -10335,7 +10351,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1439297343}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -10824,7 +10840,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1956478361}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -10885,7 +10901,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444764
+  m_Name: pb_Mesh1025362
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11119,8 +11135,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1928904777}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1928904777}
   triggerConditionsOld:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -11359,7 +11377,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1271680148}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -11448,7 +11466,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444680
+  m_Name: pb_Mesh1025278
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11613,7 +11631,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh6444912
+  m_Name: pb_Mesh1025510
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -11821,8 +11839,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 174395a181897ac4faef38492df39ac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1971783413}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 1
   DEBUG: 0
+  _id: {fileID: 1971783413}
   playerQuadrant: 0
   dimensionWallPrefab: {fileID: 2399391013733540048, guid: 768fe6b695ffee444bdfec8d2ca85cf0,
     type: 3}
@@ -12079,7 +12099,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 12363288}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -12188,8 +12208,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2125552946}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2125552946}
   triggerConditionsOld:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -12449,7 +12471,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1084233879}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -12801,7 +12823,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1357658097}
-  m_VersionIndex: 39
+  m_VersionIndex: 45
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

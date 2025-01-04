@@ -7,7 +7,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {
-    public class ToggleFakeWhiteRoomPortal : SaveableObject<ToggleFakeWhiteRoomPortal, ToggleFakeWhiteRoomPortal.ToggleFakeWhiteRoomPortalSave> {
+    public class ToggleFakeWhiteRoomPortal : SuperspectiveObject<ToggleFakeWhiteRoomPortal, ToggleFakeWhiteRoomPortal.ToggleFakeWhiteRoomPortalSave> {
         public Portal realWhiteRoomPortal;
         public Portal fakeWhiteRoomPortal;
         BladeEdgeDetection edgeDetection;
@@ -28,22 +28,22 @@ namespace LevelSpecific.Fork {
             fakeWhiteRoomPortal.gameObject.SetActive(edgesAreWhite);
         }
 
-        #region Saving
+#region Saving
+
+        public override void LoadSave(ToggleFakeWhiteRoomPortalSave save) {
+            edgesAreWhite = save.edgesAreWhite;
+        }
+
         public override string ID => "ToggleFakeWhiteRoomPortal";
 
         [Serializable]
-        public class ToggleFakeWhiteRoomPortalSave : SerializableSaveObject<ToggleFakeWhiteRoomPortal> {
-            bool edgesAreWhite;
+        public class ToggleFakeWhiteRoomPortalSave : SaveObject<ToggleFakeWhiteRoomPortal> {
+            public bool edgesAreWhite;
 
             public ToggleFakeWhiteRoomPortalSave(ToggleFakeWhiteRoomPortal toggle) : base(toggle) {
                 this.edgesAreWhite = toggle.edgesAreWhite;
             }
-
-            public override void LoadSave(ToggleFakeWhiteRoomPortal toggle) {
-                toggle.edgesAreWhite = this.edgesAreWhite;
-            }
         }
-        #endregion
+#endregion
     }
-
 }

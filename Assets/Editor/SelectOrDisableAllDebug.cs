@@ -30,7 +30,7 @@ public class SelectOrDisableAllDebug : EditorWindow {
 
     private void Execute() {
         GameObject[] selectedGameObjects = Selection.gameObjects;
-        List<SaveableObject> saveableObjects = new List<SaveableObject>();
+        List<SuperspectiveObject> saveableObjects = new List<SuperspectiveObject>();
 
         if (selectedGameObjects.Length > 0) {
             foreach (GameObject go in selectedGameObjects) {
@@ -48,18 +48,18 @@ public class SelectOrDisableAllDebug : EditorWindow {
 
         string listSaveableObjects;
         
-        string SaveableObjectPath(SaveableObject so) {
+        string SaveableObjectPath(SuperspectiveObject so) {
             string className = so.GetType().Name;
             return $"{so.FullPath()}.{className}";
         }
 
         if (turnOffDebug) {
-            List<SaveableObject> disabled = DisableDebug(saveableObjects);
+            List<SuperspectiveObject> disabled = DisableDebug(saveableObjects);
             debugText.Append($", {disabled.Count} where DEBUG got turned off");
             listSaveableObjects = string.Join("\n", disabled.ConvertAll(SaveableObjectPath).ToArray());
         }
         else {
-            List<SaveableObject> enabled = saveableObjects.Where(so => so.DEBUG).ToList();
+            List<SuperspectiveObject> enabled = saveableObjects.Where(so => so.DEBUG).ToList();
             debugText.Append($", {enabled.Count} where DEBUG is turned on");
             listSaveableObjects = string.Join("\n", enabled.ConvertAll(SaveableObjectPath).ToArray());
         }
@@ -72,8 +72,8 @@ public class SelectOrDisableAllDebug : EditorWindow {
         Selection.objects = saveableObjects.ToArray();
     }
 
-    private void GetSaveableObjectsRecursive(Transform parent, List<SaveableObject> saveableObjects) {
-        SaveableObject[] thisObjSaveableObjects = parent.GetComponents<SaveableObject>();
+    private void GetSaveableObjectsRecursive(Transform parent, List<SuperspectiveObject> saveableObjects) {
+        SuperspectiveObject[] thisObjSaveableObjects = parent.GetComponents<SuperspectiveObject>();
         if (thisObjSaveableObjects != null && thisObjSaveableObjects.Length > 0) {
             saveableObjects.AddRange(thisObjSaveableObjects);
         }
@@ -95,11 +95,11 @@ public class SelectOrDisableAllDebug : EditorWindow {
         return rootObjects.ToArray();
     }
 
-    private List<SaveableObject> DisableDebug(List<SaveableObject> saveableObjects) {
+    private List<SuperspectiveObject> DisableDebug(List<SuperspectiveObject> saveableObjects) {
         Undo.RecordObjects(saveableObjects.ToArray(), "Disable DEBUG on SaveableObjects");
         
-        HashSet<SaveableObject> disabledObjects = new HashSet<SaveableObject>();
-        foreach (SaveableObject saveableObject in saveableObjects) {
+        HashSet<SuperspectiveObject> disabledObjects = new HashSet<SuperspectiveObject>();
+        foreach (SuperspectiveObject saveableObject in saveableObjects) {
             if (saveableObject.DEBUG) {
                 disabledObjects.Add(saveableObject);
             }

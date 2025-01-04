@@ -63,6 +63,7 @@ namespace Saving {
                 .Replace("/", "_")
                 .Replace("\\", "_")
                 .Replace(":", "_")
+                .Replace("\n", "_")
                 .Replace(" ", "_");
         }
 
@@ -71,8 +72,8 @@ namespace Saving {
                 string saveFilename = saveMetadataWithScreenshot.metadata.saveFilename;
                 // Handle data save construction and saving to disk
                 SaveData saveData = SaveData.CreateSaveDataFromCurrentState();
-                if (!saveData.managerScene.serializedSaveObjects.ContainsKey("Player")) {
-                    Debug.LogError("Player not found in serialized save objects! Here are the serialized save objects:" + string.Join(", ", saveData.managerScene.serializedSaveObjects.Keys));
+                if (!saveData.managerLevel.serializedSaveObjects.ContainsKey("Player")) {
+                    Debug.LogError("Player not found in serialized save objects! Here are the serialized save objects:" + string.Join(", ", saveData.managerLevel.serializedSaveObjects.Keys));
                 }
 
                 JobHandle writeSaveToDiskJob = WriteToDisk(saveFilename, saveData);

@@ -246,12 +246,86 @@ namespace DimensionObjectMechanics {
                 }
                 return;
             }
+                
+            bool aIsAffected = collidersAffectedByDimensionObjects.ContainsKey(a);
+            bool bIsAffected = collidersAffectedByDimensionObjects.ContainsKey(b);
+            ListHashSet<DimensionObject> aDimensionObjects;
+            ListHashSet<DimensionObject> bDimensionObjects = new ListHashSet<DimensionObject>();
             
-            if (CollidersShouldInteract(a, b, skipCache)) {
+            bool CollidersShouldInteract() {
+                // If we have the value cached, use that
+                if (!skipCache && collisionsCache.TryGetValue(a, b, out CollisionCacheValue cachedCollision)) {
+                    switch (cachedCollision) {
+                        case CollisionCacheValue.CollisionIgnored:
+                            return false;
+                        case CollisionCacheValue.CollisionNotIgnored:
+                            return true;
+                        default:
+                            throw new Exception("Unhandled CollisionCacheValue: " + cachedCollision);
+                    }
+                }
+                
+                // If neither collider is affected by any DimensionObjects, they should interact
+                if (!aIsAffected && !bIsAffected) {
+                    collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionNotIgnored);
+                    return true;
+                }
+
+                // If one collider is affected and the other isn't, we need to check if the affected collider should interact with non-DimensionObjects
+                if (aIsAffected != bIsAffected) {
+                    Collider affected = aIsAffected ? a : b;
+                    Collider unaffected = aIsAffected ? b : a;
+                    
+                    ListHashSet<DimensionObject> affectingDimensionObjects = collidersAffectedByDimensionObjects[affected];
+                    // Avoid using LINQ to avoid heap allocations
+                    foreach (DimensionObject dimObj in affectingDimensionObjects) {
+                        if (!dimObj.ShouldCollideWithNonDimensionCollider(unaffected)) {
+                            collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionIgnored);
+                            return false;
+                        }
+                    }
+                    collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionNotIgnored);
+                    return true;
+                }
+                
+                // If both colliders are affected, we need to check if they should interact with each other
+                aDimensionObjects = collidersAffectedByDimensionObjects[a];
+                bDimensionObjects = collidersAffectedByDimensionObjects[b];
+
+                foreach (DimensionObject aDimensionObject in aDimensionObjects) {
+                    // Check if all bDimensionObjects satisfy ShouldCollideWithDimensionObject
+                    foreach (DimensionObject bDimensionObject in bDimensionObjects) {
+                        if (!aDimensionObject.HasChannelOverlapWith(bDimensionObject)) continue;
+                        
+                        if (!aDimensionObject.ShouldCollideWithDimensionObject(bDimensionObject)) {
+                            // If any collision check fails, return false immediately
+                            collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionIgnored);
+                            return false;
+                        }
+                    }
+                }
+                // If all checks pass, return true
+                collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionNotIgnored);
+                return true;
+            }
+            
+            bool collidersShouldInteract = CollidersShouldInteract();
+            if (collidersShouldInteract) {
                 SuperspectivePhysics.RestoreCollision(a, b, identifier);
+                // If a and b are both affected by DimensionObjects, we need to symmetrically restore collision between them
+                if (aIsAffected && bIsAffected) {
+                    foreach (DimensionObject bDimensionObj in bDimensionObjects) {
+                        SuperspectivePhysics.RestoreCollision(a, b, bDimensionObj.ID);
+                    }
+                }
             }
             else {
                 SuperspectivePhysics.IgnoreCollision(a, b, identifier);
+                if (aIsAffected && bIsAffected) {
+                    foreach (DimensionObject bDimensionObj in bDimensionObjects) {
+                        SuperspectivePhysics.IgnoreCollision(a, b, bDimensionObj.ID);
+                    }
+                }
             }
         }
         

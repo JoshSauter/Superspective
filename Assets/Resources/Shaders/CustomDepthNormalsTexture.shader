@@ -116,25 +116,32 @@ CGPROGRAM
 #include "RecursivePortals/PortalSurfaceHelpers.cginc"
 
 uniform sampler2D_float _DepthNormals;
-uniform float _PortalRenderingDisabled = 0;
+uniform float _PortalRenderingMode = 0;
 
 float4 SuberspectivePortalDepthNormalsFrag(SuberspectiveDepthNormalsV2F i) : SV_Target {
 	float2 uv = i.screenPos.xy / i.screenPos.w;
     SuberspectiveClipOnly(i);
-    
-    if (_PortalRenderingDisabled) {
-        ClipDisabledPortalSurface(i.worldPos, _PortalNormal);
-    }
-    if (_PortalRenderingDisabled > 0) {
-	    i.nz.w = clamp(i.nz.w, 0, .999);
-        return EncodeDepthNormal(i.nz.w, i.nz.xyz);
-    }
 
-	float4 col = tex2D(_DepthNormals, uv);
-    if (length(col) == 0) {
-     clip(-1);
-	}
-	return col;
+    switch (_PortalRenderingMode) {
+        case 0: // Normal portal rendering
+            float4 col = tex2D(_DepthNormals, uv);
+            if (length(col) == 0) {
+                discard;
+	        }
+	        return col;
+        case 1: // Debug portal rendering
+            ClipDebugPortalSurface(i.worldPos, _PortalNormal);
+	        i.nz.w = clamp(i.nz.w, 0, .999);
+            return EncodeDepthNormal(i.nz.w, i.nz.xyz);
+        case 2: // Portal off (invisible)
+            discard;
+        return fixed4(0,0,0,0);
+        case 3: // Wall
+            return SuberspectiveDepthNormalsFrag(i);
+        default:
+            discard;
+            return fixed4(0,0,0,0);
+    }
 }
 ENDCG
     }

@@ -37,7 +37,7 @@ public class MigrateMagicTriggers : EditorWindow {
     
     // Draw the GUI for the window
     private void OnGUI() {
-        GUILayout.Label("Select a Level", EditorStyles.boldLabel);
+        GUILayout.Label("Migrate Magic Triggers Tool", EditorStyles.boldLabel);
 
         // Confirm button to open the selected level
         if (GUILayout.Button("Migrate MagicTriggers")) {
@@ -200,8 +200,8 @@ public class MigrateMagicTriggers : EditorWindow {
             case TriggerActionType.EnablePortalRendering:
                 return new EnableDisablePortalRendering() {
                     actionTiming = old.actionTiming,
-                    portalsToEnable = old.portalsToEnable.Select(SerializableReference<Portal, Portal.PortalSave>.FromGenericReference).ToArray(),
-                    portalsToDisable = old.portalsToDisable.Select(SerializableReference<Portal, Portal.PortalSave>.FromGenericReference).ToArray()
+                    portalsToEnable = old.portalsToEnable.Select(SuperspectiveReference<Portal, Portal.PortalSave>.FromGenericReference).ToArray(),
+                    portalsToDisable = old.portalsToDisable.Select(SuperspectiveReference<Portal, Portal.PortalSave>.FromGenericReference).ToArray()
                 };
             case TriggerActionType.UnityEvent:
                 return new UnityEventAction() {

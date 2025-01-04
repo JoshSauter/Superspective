@@ -8,8 +8,8 @@ using UnityEngine;
 using static Audio.AudioManager;
 
 [RequireComponent(typeof(UniqueId))]
-public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
-    public enum State {
+public class Panel : SuperspectiveObject<Panel, Panel.PanelSave>, CustomAudioJob {
+    public enum State : byte {
         Deactivated,
         Activating,
         Activated,
@@ -19,18 +19,19 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
     public Color gemColor;
     public Button gemButton;
     public float colorLerpTime = .75f;
-    readonly float maxPitch = 1f;
-    readonly float maxVolume = 1f;
-    readonly float minPitch = 0.5f;
-    readonly float minVolume = 0.25f;
+    const float MAX_PITCH = 1f;
+    const float MAX_VOLUME = 1f;
+    const float MIN_PITCH = 0.5f;
+    const float MIN_VOLUME = 0.25f;
+    
     State _state;
+    float timeSinceStateChange;
 
     // Sound settings
     bool soundActivated;
 
     Color startColor, endColor;
     SuperspectiveRenderer thisRenderer;
-    float timeSinceStateChange;
 
     public State state {
         get => _state;
@@ -60,7 +61,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
         }
     }
 
-    public bool activated => state == State.Activated || state == State.Activating;
+    public bool Activated => state == State.Activated || state == State.Activating;
 
     protected override void Awake() {
         base.Awake();
@@ -86,6 +87,7 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
     }
 
     protected override void Init() {
+        base.Init();
         AudioManager.instance.PlayWithUpdate(AudioName.ElectricalHum, ID, this);
     }
 
@@ -131,26 +133,26 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
 
         audioJob.audio.transform.position = transform.position;
 
-        if (soundActivated && audioJob.audio.volume < maxVolume) {
+        if (soundActivated && audioJob.audio.volume < MAX_VOLUME) {
             float soundLerpSpeedOn = 1f;
-            float newPitch = Mathf.Clamp(audioJob.basePitch + Time.deltaTime * soundLerpSpeedOn, minPitch, maxPitch);
+            float newPitch = Mathf.Clamp(audioJob.basePitch + Time.deltaTime * soundLerpSpeedOn, MIN_PITCH, MAX_PITCH);
             float newVolume = Mathf.Clamp(
                 audioJob.audio.volume + Time.deltaTime * soundLerpSpeedOn,
-                minVolume,
-                maxVolume
+                MIN_VOLUME,
+                MAX_VOLUME
             );
 
             audioJob.basePitch = newPitch;
             audioJob.audio.volume = newVolume;
         }
 
-        if (!soundActivated && audioJob.audio.volume > minVolume) {
+        if (!soundActivated && audioJob.audio.volume > MIN_VOLUME) {
             float soundLerpSpeedOff = .333f;
-            float newPitch = Mathf.Clamp(audioJob.basePitch - Time.deltaTime * soundLerpSpeedOff, minPitch, maxPitch);
+            float newPitch = Mathf.Clamp(audioJob.basePitch - Time.deltaTime * soundLerpSpeedOff, MIN_PITCH, MAX_PITCH);
             float newVolume = Mathf.Clamp(
                 audioJob.audio.volume - Time.deltaTime * soundLerpSpeedOff,
-                minVolume,
-                maxVolume
+                MIN_VOLUME,
+                MAX_VOLUME
             );
 
             audioJob.basePitch = newPitch;
@@ -178,15 +180,25 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
 
 #region Saving
 
+    public override void LoadSave(PanelSave save) {
+        state = save.state;
+        timeSinceStateChange = save.timeSinceStateChange;
+        gemColor = save.gemColor;
+        startColor = save.startColor;
+        endColor = save.endColor;
+        colorLerpTime = save.colorLerpTime;
+        soundActivated = save.soundActivated;
+    }
+
     [Serializable]
-    public class PanelSave : SerializableSaveObject<Panel> {
-        float colorLerpTime;
-        SerializableColor endColor;
-        SerializableColor gemColor;
-        bool soundActivated;
-        SerializableColor startColor;
-        State state;
-        float timeSinceStateChange;
+    public class PanelSave : SaveObject<Panel> {
+        public SerializableColor startColor;
+        public SerializableColor endColor;
+        public SerializableColor gemColor;
+        public float colorLerpTime;
+        public float timeSinceStateChange;
+        public State state;
+        public bool soundActivated;
 
         public PanelSave(Panel script) : base(script) {
             state = script.state;
@@ -196,16 +208,6 @@ public class Panel : SaveableObject<Panel, Panel.PanelSave>, CustomAudioJob {
             endColor = script.endColor;
             colorLerpTime = script.colorLerpTime;
             soundActivated = script.soundActivated;
-        }
-
-        public override void LoadSave(Panel script) {
-            script.state = state;
-            script.timeSinceStateChange = timeSinceStateChange;
-            script.gemColor = gemColor;
-            script.startColor = startColor;
-            script.endColor = endColor;
-            script.colorLerpTime = colorLerpTime;
-            script.soundActivated = soundActivated;
         }
     }
 #endregion

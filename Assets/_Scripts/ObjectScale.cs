@@ -4,7 +4,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSave> {
+public class ObjectScale : SuperspectiveObject<ObjectScale, ObjectScale.ObjectScaleSave> {
     public float minSize = 1f;
     public float maxSize = 1f;
     public float period = 3f;
@@ -19,7 +19,7 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
         transform.localScale = startScale.normalized * (startScale.magnitude * Mathf.Lerp(
             minSize,
             maxSize,
-            Mathf.Cos(Time.time * 2 * Mathf.PI / period) * 0.5f + 0.5f
+            Mathf.Cos(timeElapsed * 2 * Mathf.PI / period) * 0.5f + 0.5f
         ));
     }
 
@@ -28,23 +28,31 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
         startScale = transform.localScale;
     }
 
-    void OnDisable() {
+    protected override void OnDisable() {
+        base.OnDisable();
         transform.localScale = startScale;
         timeElapsed = 0;
     }
 
 #region Saving
 
+    public override void LoadSave(ObjectScaleSave save) {
+        minSize = save.minSize;
+        maxSize = save.maxSize;
+        period = save.period;
+        startScale = save.startScale;
+        timeElapsed = save.timeElapsed;
+        transform.localScale = save.scale;
+    }
+
     [Serializable]
-    public class ObjectScaleSave : SerializableSaveObject<ObjectScale> {
-        float maxSize;
-        float minSize;
-        float period;
-        SerializableVector3 scale;
-
-        SerializableVector3 startScale;
-
-        float timeElapsed;
+    public class ObjectScaleSave : SaveObject<ObjectScale> {
+        public SerializableVector3 startScale;
+        public SerializableVector3 scale;
+        public float maxSize;
+        public float minSize;
+        public float period;
+        public float timeElapsed;
 
         public ObjectScaleSave(ObjectScale script) : base(script) {
             minSize = script.minSize;
@@ -53,15 +61,6 @@ public class ObjectScale : SaveableObject<ObjectScale, ObjectScale.ObjectScaleSa
             startScale = script.startScale;
             timeElapsed = script.timeElapsed;
             scale = script.transform.localScale;
-        }
-
-        public override void LoadSave(ObjectScale script) {
-            script.minSize = minSize;
-            script.maxSize = maxSize;
-            script.period = period;
-            script.startScale = startScale;
-            script.timeElapsed = timeElapsed;
-            script.transform.localScale = scale;
         }
     }
 #endregion

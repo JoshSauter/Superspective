@@ -5,10 +5,10 @@ using SerializableClasses;
 using UnityEngine;
 
 public class InteractControlPrompt : ControlPrompt {
-    public SerializableReference<PickupObject, PickupObject.PickupObjectSave> cubeToBePickedUp;
+    public SuperspectiveReference<PickupObject, PickupObject.PickupObjectSave> cubeToBePickedUp;
 
     private bool cubeHasEverBeenHeld = false;
-    private bool CubeIsHeld => LevelManager.instance.loadedSceneNames.Contains(Levels.ForkWhiteRoom.ToName()) && (cubeToBePickedUp.GetOrNull()?.isHeld ?? false);
+    private bool CubeIsHeld => LevelManager.instance.loadedLevels.Contains(Levels.ForkWhiteRoom) && (cubeToBePickedUp.GetOrNull()?.isHeld ?? false);
     
     protected override bool CanStopDisplaying => base.CanStopDisplaying && cubeHasEverBeenHeld;
 

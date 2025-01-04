@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Saving;
+using SerializableClasses;
 using StateUtils;
 using SuperspectiveUtils;
 
@@ -12,8 +13,8 @@ using SuperspectiveUtils;
 /// Instead of re-implementing this functionality for every elevator, just have a has-of relationship with this script.
 /// </summary>
 [RequireComponent(typeof(UniqueId))]
-public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
-    public enum ElevatorState {
+public class Elevator : SuperspectiveObject<Elevator, Elevator.ElevatorSave> {
+    public enum ElevatorState : byte {
         Idle,
         Moving
     }
@@ -31,12 +32,13 @@ public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
     
     [Header("Animation curve should be normalized in the 0-1 range. X-axis is normalized distance, Y-axis is speed multiplier.")]
     public AnimationCurve speedMultiplierCurve = AnimationCurve.Constant(0f, 1f, 1f);
-    public float SpeedMultiplier => speedMultiplierCurve.Evaluate(DistanceTraveled / TotalHeight);
     
     public float minHeight;
     public float maxHeight;
 
     public float curVelocity;
+    
+    public float SpeedMultiplier => speedMultiplierCurve.Evaluate(DistanceTraveled / TotalHeight);
     private float DesiredVelocity => (0.05f + SpeedMultiplier) * speed * direction;
     
     public bool IsAtTop => CurHeight >= maxHeight;
@@ -106,17 +108,42 @@ public class Elevator : SaveableObject<Elevator, Elevator.ElevatorSave> {
     }
 
 #region Saving
-		[Serializable]
-		public class ElevatorSave : SerializableSaveObject<Elevator> {
-            private StateMachine<ElevatorState>.StateMachineSave stateSave;
-            
-			public ElevatorSave(Elevator script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(Elevator script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
-		}
+    public override void LoadSave(ElevatorSave save) {
+        state.LoadFromSave(save.stateSave);
+        speedMultiplierCurve = save.speedMultiplierCurve;
+        speed = save.speed;
+        acceleration = save.acceleration;
+        changeDirectionAcceleration = save.changeDirectionAcceleration;
+        minHeight = save.minHeight;
+        maxHeight = save.maxHeight;
+        curVelocity = save.curVelocity;
+        direction = save.direction;
+    }
+    
+	[Serializable]
+	public class ElevatorSave : SaveObject<Elevator> {
+        public StateMachine<ElevatorState>.StateMachineSave stateSave;
+        public SerializableAnimationCurve speedMultiplierCurve;
+        public float speed;
+        public float acceleration;
+        public float changeDirectionAcceleration;
+        public float minHeight;
+        public float maxHeight;
+        public float curVelocity;
+        public int direction;
+        
+		public ElevatorSave(Elevator script) : base(script) {
+            this.stateSave = script.state.ToSave();
+            this.speedMultiplierCurve = script.speedMultiplierCurve;
+            this.speed = script.speed;
+            this.acceleration = script.acceleration;
+            this.changeDirectionAcceleration = script.changeDirectionAcceleration;
+            this.minHeight = script.minHeight;
+            this.maxHeight = script.maxHeight;
+            this.curVelocity = script.curVelocity;
+            this.direction = script.direction;
+        }
+	}
 #endregion
 }

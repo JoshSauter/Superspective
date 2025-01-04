@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace LevelSpecific.BehindForkTransition {
     public class TurnPortalBackOnTeleport : MonoBehaviour {
-        public SerializableReference<Portal, Portal.PortalSave> portalRef;
+        public SuperspectiveReference<Portal, Portal.PortalSave> portalRef;
         // GetOrNull since we only refer to the value when we know the reference is valid (when this scene is active)
         Portal portal => portalRef.GetOrNull();
         PictureTeleport pictureTeleport;

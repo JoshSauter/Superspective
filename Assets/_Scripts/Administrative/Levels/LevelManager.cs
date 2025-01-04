@@ -9,11 +9,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using SuperspectiveUtils;
-using NaughtyAttributes;
-using ObjectSerializationUtils;
 using Saving;
-using SerializableClasses;
-using static Saving.SaveManagerForScene;
+using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -30,22 +27,30 @@ namespace LevelManagement {
 			return LevelManager.enumToSceneName[levelName];
 		}
 
-		public static bool IsTestingLevel(this Levels level) {
-			return level is Levels.PortalTestScene or Levels.PowerTrailTestScene or Levels.TestScene;
+		public static string ToDisplayName(this Levels enumValue) {
+			return LevelManager.instance.levels[enumValue].displayName;
 		}
+		
+		public static bool IsTestingLevel(this Levels level) {
+			return level is Levels.PortalTestScene or Levels.PowerTrailTestScene or Levels.TestScene or Levels.SuperspectiveObjectTestScene;
+		}
+		
+		public static bool IsValid(this Levels enumValue) => enumValue is not Levels.InvalidLevel;
 	}
 	
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 37
+	// Next level: 38
 	[Serializable]
 	public enum Levels {
+		InvalidLevel = -1,
 		TitleCard = 29,
 		ManagerScene = 0,
 		TestScene = 1,
 		PortalTestScene = 17,
 		PowerTrailTestScene = 27,
+		SuperspectiveObjectTestScene = 37,
 		EmptyRoom = 2,
 		HexPillarRoom = 3,
 		Library = 4,
@@ -80,13 +85,7 @@ namespace LevelManagement {
 		EdgeOfAUniverse = 33,
 	}
 
-	public static class LevelsExt {
-		public static string ToDisplayName(this Levels enumValue) {
-			return LevelManager.instance.levels[enumValue.ToName()].displayName;
-		}
-	}
-
-	public class LevelManager : SingletonSaveableObject<LevelManager, LevelManager.LevelManagerSave> {
+	public class LevelManager : SingletonSuperspectiveObject<LevelManager, LevelManager.LevelManagerSave> {
 		[OnValueChanged(nameof(ChangeLevelInEditor))]
 		public Levels startingScene;
 
@@ -106,9 +105,6 @@ namespace LevelManagement {
 				return _defaultPlayerSettings;
 			}
 		}
-		const string EdgeDetectionSettingsKeyPrefix = "edgeDetectionSettings";
-		const string PositionKeyPrefix = "playerStartingPositions";
-		const string RotationKeyPrefix = "playerStartingRotations";
 		public bool defaultPlayerPosition = false;
 		bool hasLoadedDefaultPlayerPosition = false;
 
@@ -211,12 +207,14 @@ namespace LevelManagement {
 		
 		[SerializeField]
 		public List<Level> allLevels;
-		// levels is allLevels, keyed by levelName, but with test scenes removed in build
-		public Dictionary<string, Level> levels;
-		public static TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
+		// levels is allLevels, keyed by Level enum value, but with test scenes removed in build
+		public Dictionary<Levels, Level> levels;
+		public static readonly TwoWayDictionary<Levels, string> enumToSceneName = new TwoWayDictionary<Levels, string>() {
+			{ Levels.InvalidLevel, "!!! Invalid Level !!!"}, // Flag for invalid level
 			{ Levels.TitleCard, "__TitleCard" },
 			{ Levels.ManagerScene, ManagerScene },
 			{ Levels.TestScene, "_TestScene" },
+			{ Levels.SuperspectiveObjectTestScene, "SuperspectiveObjectTest" },
 			{ Levels.PortalTestScene, "PortalTestScene" },
 			{ Levels.PowerTrailTestScene, "PowerTrailTestScene" },
 			{ Levels.EmptyRoom, "_EmptyRoom" },
@@ -254,16 +252,16 @@ namespace LevelManagement {
 		};
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();
-		public List<string> loadedSceneNames;
-		public List<string> currentlyLoadingSceneNames;
-		public List<string> currentlyUnloadingSceneNames;
+		public List<Levels> loadedLevels;
+		public List<Levels> currentlyLoadingLevels;
+		public List<Levels> currentlyUnloadingLevels;
 		QueuedSceneSwitch queuedActiveSceneSwitch;
 		
 		public bool isCurrentlySwitchingScenes;
 
 		[Serializable]
-		class QueuedSceneSwitch {
-			readonly string levelName;
+		public class QueuedSceneSwitch {
+			readonly Levels level;
 			readonly bool playBanner;
 			readonly bool saveDeactivatedScenesToDisk;
 			readonly bool loadActivatedScenesFromDisk;
@@ -273,14 +271,14 @@ namespace LevelManagement {
 			private readonly Action callback;
 
 			public QueuedSceneSwitch(
-				string levelName,
+				Levels level,
 				bool playBanner = true,
 				bool saveDeactivatedScenesToDisk = true,
 				bool loadActivatedScenesFromDisk = true,
 				bool checkActiveSceneName = true,
 				Action callback = null
 			) {
-				this.levelName = levelName;
+				this.level = level;
 				this.playBanner = playBanner;
 				this.saveDeactivatedScenesToDisk = saveDeactivatedScenesToDisk;
 				this.loadActivatedScenesFromDisk = loadActivatedScenesFromDisk;
@@ -289,14 +287,14 @@ namespace LevelManagement {
 			}
 
 			public void Invoke(DebugLogger debug) {
-				debug.LogWarning($"Queued level change happening now for {levelName}");
-				LevelManager.instance.SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
+				debug.LogWarning($"Queued level change happening now for {level}");
+				LevelManager.instance.SwitchActiveSceneNow(level, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName);
 			}
 		}
 
 		public bool IsCurrentlySwitchingScenes => isCurrentlySwitchingScenes || ScenesAreLoading;
 
-		private bool ScenesAreLoading => currentlyLoadingSceneNames.Count > 0 || currentlyUnloadingSceneNames.Count > 0;
+		private bool ScenesAreLoading => currentlyLoadingLevels.Count > 0 || currentlyUnloadingLevels.Count > 0;
 
 		/// <summary>
 		/// Order of events:
@@ -317,11 +315,11 @@ namespace LevelManagement {
 		// Called at the very end of the scene change process, after active scene has already changed
 		public event ActiveSceneChange OnActiveSceneChange;
 
-		public delegate void ActiveSceneWillChange(string nextSceneName);
+		public delegate void ActiveSceneWillChange(Levels nextLevel);
 
 		public event ActiveSceneWillChange BeforeActiveSceneChange;
 
-		public delegate void SceneLoadUnload(string sceneName);
+		public delegate void SceneLoadUnload(Levels level);
 
 		public event SceneLoadUnload BeforeSceneUnload;
 		public event SceneLoadUnload BeforeSceneLoad;
@@ -338,12 +336,12 @@ namespace LevelManagement {
 			base.Awake();
 			hasLoadedDefaultPlayerPosition = false;
 
-			loadedSceneNames = new List<string>();
-			currentlyLoadingSceneNames = new List<string>();
-			currentlyUnloadingSceneNames = new List<string>();
+			loadedLevels = new List<Levels>();
+			currentlyLoadingLevels = new List<Levels>();
+			currentlyUnloadingLevels = new List<Levels>();
 
 #if UNITY_EDITOR || TEST_BUILD
-			levels = allLevels.ToDictionary(l => l.level.ToName(), l => l);
+			levels = allLevels.ToDictionary(l => l.level, l => l);
 #else
 			levels = allLevels.Where(l => l.level.ToName().ToLower().Contains("test")).ToDictionary(l => l.level, l => l);
 #endif
@@ -418,7 +416,6 @@ namespace LevelManagement {
 		/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
 		/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
 		/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
-		/// <param name="onFinishCallback">Callback to be invoked once the scene change is complete.</param>
 		public void SwitchActiveScene(
 			Levels level,
 			bool playBanner = true,
@@ -427,66 +424,39 @@ namespace LevelManagement {
 			bool checkActiveSceneName = true,
 			Action onFinishCallback = null
 		) {
-			SwitchActiveScene(
-				enumToSceneName[level],
-				playBanner,
-				saveDeactivatedScenesToDisk,
-				loadActivatedScenesFromDisk,
-				checkActiveSceneName,
-				onFinishCallback
-			);
-		}
-
-		/// <summary>
-		/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
-		/// If we are currently loading already, queue up this scene change instead to be started once the previous one finishes.
-		/// </summary>
-		/// <param name="levelName">Name of the scene to become active</param>
-		/// <param name="playBanner">Whether or not to play the LevelBanner. Defaults to true.</param>
-		/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
-		/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
-		/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
-		public void SwitchActiveScene(
-			string levelName,
-			bool playBanner = true,
-			bool saveDeactivatedScenesToDisk = true,
-			bool loadActivatedScenesFromDisk = true,
-			bool checkActiveSceneName = true,
-			Action onFinishCallback = null
-		) {
 			if (IsCurrentlySwitchingScenes) {
-				queuedActiveSceneSwitch = new QueuedSceneSwitch(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
-				debug.LogWarning($"Queued scene switch to {levelName}");
+				queuedActiveSceneSwitch = new QueuedSceneSwitch(level, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
+				debug.LogWarning($"Queued scene switch to {level}");
 			}
 			else {
-				SwitchActiveSceneNow(levelName, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
+				SwitchActiveSceneNow(level, playBanner, saveDeactivatedScenesToDisk, loadActivatedScenesFromDisk, checkActiveSceneName, onFinishCallback);
 			}
 		}
 
 		/// <summary>
 		/// Switches the active scene, loads the connected scenes as defined by worldGraph, and unloads all other currently loaded scenes.
 		/// </summary>
-		/// <param name="levelName">Name of the scene to become active</param>
+		/// <param name="level">Level to become active</param>
 		/// <param name="playBanner">Whether or not to play the LevelBanner. Defaults to true.</param>
 		/// <param name="saveDeactivatedScenesToDisk">Whether or not to save any scenes that deactivated to disk. Defaults to true</param>
 		/// <param name="loadActivatedScenesFromDisk">Whether or not to load any scenes from disk that become activated. Defaults to true</param>
 		/// <param name="checkActiveSceneName">If true, will skip loading the scene if it's already the active scene. False will force it to load the scene. Defaults to true.</param>
 		/// <param name="onFinishCallback">Callback to be invoked once the scene switch is complete.</param>
 		async void SwitchActiveSceneNow(
-			string levelName,
+			Levels level,
 			bool playBanner = true,
 			bool saveDeactivatedScenesToDisk = true,
 			bool loadActivatedScenesFromDisk = true,
 			bool checkActiveSceneName = true,
 			Action onFinishCallback = null
 		) {
-			if (!levels.ContainsKey(levelName)) {
-				debug.LogError("No level name found in world graph with name " + levelName);
+			if (!levels.ContainsKey(level)) {
+				debug.LogError("No level name found in world graph for " + level);
 				return;
 			}
 
-			if (checkActiveSceneName && activeSceneName == levelName) {
-				debug.LogWarning("Level " + levelName + " already the active scene.");
+			if (checkActiveSceneName && ActiveScene == level) {
+				debug.LogWarning("Level " + level + " already the active scene.");
 				return;
 			}
 
@@ -494,40 +464,40 @@ namespace LevelManagement {
 			// Immediately turn on the loading icon instead of waiting for a frame into the loading
 			LoadingIcon.instance.ShowLoadingIcon();
 			
-			debug.Log($"Switching to level {levelName}");
+			debug.Log($"Switching to level {level}");
 
 			try {
-				BeforeActiveSceneChange?.Invoke(levelName);
+				BeforeActiveSceneChange?.Invoke(level);
 			}
 			catch (Exception e) {
 				Debug.LogError($"Error during BeforeActiveSceneChange: {e.Message}: {e.StackTrace}");
 			}
 
-			activeSceneName = levelName;
+			activeSceneName = level.ToName();
 
 			if (playBanner) {
 				LevelChangeBanner.instance.PlayBanner(enumToSceneName[activeSceneName]);
 			}
 
 			// First unload any scene no longer needed
-			DeactivateUnrelatedScenes(levelName, saveDeactivatedScenesToDisk);
+			DeactivateUnrelatedScenes(level, saveDeactivatedScenesToDisk);
 
-			List<string> scenesToBeLoadedFromDisk = new List<string>();
+			List<Levels> levelsToBeLoadedFromDisk = new List<Levels>();
 
 			// Then load the level if it's not already loaded
-			if (!(loadedSceneNames.Contains(levelName) || currentlyLoadingSceneNames.Contains(levelName))) {
-				if (ShouldLoadScene(levelName)) {
-					currentlyLoadingSceneNames.Add(levelName);
+			if (!(loadedLevels.Contains(level) || currentlyLoadingLevels.Contains(level))) {
+				if (ShouldLoadLevel(level)) {
+					currentlyLoadingLevels.Add(level);
 
 					try {
-						BeforeSceneLoad?.Invoke(levelName);
+						BeforeSceneLoad?.Invoke(level);
 					}
 					catch (Exception e) {
-						Debug.LogError($"Error during BeforeSceneLoad({levelName}): {e.Message}: {e.StackTrace}");
+						Debug.LogError($"Error during BeforeSceneLoad({level}): {e.Message}: {e.StackTrace}");
 					}
 
-					scenesToBeLoadedFromDisk.Add(levelName);
-					SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
+					levelsToBeLoadedFromDisk.Add(level);
+					SceneManager.LoadSceneAsync(level.ToName(), LoadSceneMode.Additive);
 				}
 			}
 			else {
@@ -537,21 +507,21 @@ namespace LevelManagement {
 			}
 
 			// Then load the adjacent scenes if they're not already loaded
-			var connectedSceneNames = levels[levelName].connectedLevels.Select(l => enumToSceneName[l]);
-			foreach (string connectedSceneName in connectedSceneNames) {
-				if (!(loadedSceneNames.Contains(connectedSceneName) ||
-				      currentlyLoadingSceneNames.Contains(connectedSceneName))) {
-					if (ShouldLoadScene(connectedSceneName)) {
-						currentlyLoadingSceneNames.Add(connectedSceneName);
+			List<Levels> connectedLevels = levels[level].connectedLevels;
+			foreach (var connectedLevel in connectedLevels) {
+				if (!(loadedLevels.Contains(connectedLevel) ||
+				      currentlyLoadingLevels.Contains(connectedLevel))) {
+					if (ShouldLoadLevel(connectedLevel)) {
+						currentlyLoadingLevels.Add(connectedLevel);
 
 						try {
-							BeforeSceneLoad?.Invoke(connectedSceneName);
+							BeforeSceneLoad?.Invoke(connectedLevel);
 						}
 						catch (Exception e) {
-							Debug.LogError($"Error during BeforeSceneLoad({connectedSceneName}): {e.Message}: {e.StackTrace}");
+							Debug.LogError($"Error during BeforeSceneLoad({connectedLevel}): {e.Message}: {e.StackTrace}");
 						}
-						scenesToBeLoadedFromDisk.Add(connectedSceneName);
-						SceneManager.LoadSceneAsync(connectedSceneName, LoadSceneMode.Additive);
+						levelsToBeLoadedFromDisk.Add(connectedLevel);
+						SceneManager.LoadSceneAsync(connectedLevel.ToName(), LoadSceneMode.Additive);
 					}
 				}
 			}
@@ -560,43 +530,49 @@ namespace LevelManagement {
 			await TaskEx.WaitUntil(() => !LevelManager.instance.ScenesAreLoading);
 			debug.Log("All scenes loaded into memory" + (loadActivatedScenesFromDisk ? ", loading save..." : "."));
 
-			SceneManager.SetActiveScene(SceneManager.GetSceneByName(levelName));
+			SceneManager.SetActiveScene(SceneManager.GetSceneByName(activeSceneName));
 
-			if (loadActivatedScenesFromDisk && scenesToBeLoadedFromDisk.Count > 0) {
-				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+			// Restore the state for the loaded scenes
+			if (loadActivatedScenesFromDisk && levelsToBeLoadedFromDisk.Count > 0) {
+				// BeforeSceneRestoreDynamicObjects event
+				foreach (var levelToBeLoaded in levelsToBeLoadedFromDisk) {
 					try {
-						BeforeSceneRestoreDynamicObjects?.Invoke(sceneToBeLoaded);
+						BeforeSceneRestoreDynamicObjects?.Invoke(levelToBeLoaded);
 					}
 					catch (Exception e) {
-						Debug.LogError($"Error during BeforeSceneRestoreDynamicObjects({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+						Debug.LogError($"Error during BeforeSceneRestoreDynamicObjects({levelToBeLoaded}): {e.Message}: {e.StackTrace}");
 					}
 				}
 
-				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToBeLoaded);
-					saveManagerForScene.RestoreDynamicObjectStateForScene();
+				// Restore DynamicObjects state for each loaded scene
+				foreach (var levelToBeLoaded in levelsToBeLoadedFromDisk) {
+					SaveManager.SaveManagerForLevel saveManagerForLevel = SaveManager.GetOrCreateSaveManagerForLevel(levelToBeLoaded);
+					saveManagerForLevel.RestoreDynamicObjectStateForScene();
 				}
 
-				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				// BeforeSceneRestoreState event
+				foreach (var levelToBeLoaded in levelsToBeLoadedFromDisk) {
 					try {
-						BeforeSceneRestoreState?.Invoke(sceneToBeLoaded);
+						BeforeSceneRestoreState?.Invoke(levelToBeLoaded);
 					}
 					catch (Exception e) {
-						Debug.LogError($"Error during BeforeSceneRestoreState({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+						Debug.LogError($"Error during BeforeSceneRestoreState({levelToBeLoaded}): {e.Message}: {e.StackTrace}");
 					}
 				}
 
-				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
-					SaveManagerForScene saveManagerForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToBeLoaded);
-					saveManagerForScene.RestoreSaveableObjectStateForScene();
+				// Restore SuperspectiveObject state for each loaded scene
+				foreach (var levelToBeLoaded in levelsToBeLoadedFromDisk) {
+					SaveManager.SaveManagerForLevel saveManagerForLevel = SaveManager.GetOrCreateSaveManagerForLevel(levelToBeLoaded);
+					saveManagerForLevel.RestoreSuperspectiveObjectStateForLevel();
 				}
 
-				foreach (string sceneToBeLoaded in scenesToBeLoadedFromDisk) {
+				// AfterSceneRestoreState event
+				foreach (var levelToBeLoaded in levelsToBeLoadedFromDisk) {
 					try {
-						AfterSceneRestoreState?.Invoke(sceneToBeLoaded);
+						AfterSceneRestoreState?.Invoke(levelToBeLoaded);
 					}
 					catch (Exception e) {
-						Debug.LogError($"Error during AfterSceneRestoreState({sceneToBeLoaded}): {e.Message}: {e.StackTrace}");
+						Debug.LogError($"Error during AfterSceneRestoreState({levelToBeLoaded}): {e.Message}: {e.StackTrace}");
 					}
 				}
 			}
@@ -620,20 +596,20 @@ namespace LevelManagement {
 		/// <summary>
 		/// Unloads any scene that is not the selected scene or connected to it as defined by the world graph.
 		/// </summary>
-		/// <param name="selectedScene"></param>
-		void DeactivateUnrelatedScenes(string selectedScene, bool serializeDeactivatingScenes) {
-			List<string> scenesToDeactivate = new List<string>();
-			foreach (string currentlyActiveScene in loadedSceneNames) {
-				if (currentlyActiveScene != selectedScene &&
-				    !levels[selectedScene].connectedLevels.Exists(l => enumToSceneName[l] == currentlyActiveScene)) {
-					scenesToDeactivate.Add(currentlyActiveScene);
+		/// <param name="forLevel"></param>
+		void DeactivateUnrelatedScenes(Levels forLevel, bool serializeDeactivatingScenes) {
+			List<Levels> levelsToDeactivate = new List<Levels>();
+			foreach (Levels currentlyActiveLevel in loadedLevels) {
+				if (currentlyActiveLevel != forLevel &&
+				    !levels[forLevel].connectedLevels.Exists(l => l == currentlyActiveLevel)) {
+					levelsToDeactivate.Add(currentlyActiveLevel);
 				}
 			}
 
 			if (serializeDeactivatingScenes) {
-				foreach (var sceneToDeactivate in scenesToDeactivate) {
+				foreach (var levelToDeactivate in levelsToDeactivate) {
 					try {
-						BeforeSceneSerializeState?.Invoke(sceneToDeactivate);
+						BeforeSceneSerializeState?.Invoke(levelToDeactivate);
 					}
 					catch (Exception e) {
 						Debug.LogError($"Error during BeforeSceneSerializeState: {e.Message}: {e.StackTrace}");
@@ -642,29 +618,29 @@ namespace LevelManagement {
 			}
 
 			if (serializeDeactivatingScenes) {
-				foreach (string sceneToDeactivate in scenesToDeactivate) {
-					SaveManagerForScene saveForScene = SaveManager.GetOrCreateSaveManagerForScene(sceneToDeactivate);
-					saveForScene.SerializeStateForScene();
+				foreach (Levels levelToDeactivate in levelsToDeactivate) {
+					SaveManager.SaveManagerForLevel saveForLevel = SaveManager.GetOrCreateSaveManagerForLevel(levelToDeactivate);
+					saveForLevel.SerializeSceneState();
 				}
 			}
 
 			// Update internal state before starting any unload scene calls
-			foreach (var sceneToDeactivate in scenesToDeactivate) {
-				loadedSceneNames.Remove(sceneToDeactivate);
-				currentlyUnloadingSceneNames.Add(sceneToDeactivate);
+			foreach (var levelToDeactivate in levelsToDeactivate) {
+				loadedLevels.Remove(levelToDeactivate);
+				currentlyUnloadingLevels.Add(levelToDeactivate);
 			}
 
-			foreach (var sceneToDeactivate in scenesToDeactivate) {
+			foreach (var levelToDeactivate in levelsToDeactivate) {
 				try {
-					BeforeSceneUnload?.Invoke(sceneToDeactivate);
+					BeforeSceneUnload?.Invoke(levelToDeactivate);
 				}
 				catch (Exception e) {
 					Debug.LogError($"Error during BeforeSceneUnload: {e.Message}: {e.StackTrace}");
 				}
 			}
 
-			foreach (var sceneToDeactivate in scenesToDeactivate) {
-				SceneManager.UnloadSceneAsync(sceneToDeactivate);
+			foreach (var levelToDeactivate in levelsToDeactivate) {
+				SceneManager.UnloadSceneAsync(levelToDeactivate.ToName());
 			}
 		}
 
@@ -679,19 +655,24 @@ namespace LevelManagement {
 				return;
 			}
 
+			Levels loadedLevel = loadedScene.name.ToLevel();
+
 			try {
-				AfterSceneLoad?.Invoke(loadedScene.name);
+				if (loadedLevel is Levels.InvalidLevel) {
+					throw new Exception($"Invalid scene loaded: {loadedScene.name}");
+				}
+				AfterSceneLoad?.Invoke(loadedScene.name.ToLevel());
 			}
 			catch (Exception e) {
 				Debug.LogError($"Error during AfterSceneLoad({loadedScene.name}): {e.Message}: {e.StackTrace}");
 			}
 
-			if (currentlyLoadingSceneNames.Contains(loadedScene.name)) {
-				currentlyLoadingSceneNames.Remove(loadedScene.name);
+			if (currentlyLoadingLevels.Contains(loadedLevel)) {
+				currentlyLoadingLevels.Remove(loadedLevel);
 			}
 
-			if (!loadedSceneNames.Contains(loadedScene.name)) {
-				loadedSceneNames.Add(loadedScene.name);
+			if (!loadedLevels.Contains(loadedLevel)) {
+				loadedLevels.Add(loadedLevel);
 			}
 		}
 
@@ -704,21 +685,26 @@ namespace LevelManagement {
 			if (unloadedScene.name == activeSceneName) {
 				debug.LogError("Just unloaded the active scene!");
 			}
+
+			Levels unloadedLevel = unloadedScene.name.ToLevel();
 			
 			try {
-				AfterSceneUnload?.Invoke(unloadedScene.name);
+				if (unloadedLevel is Levels.InvalidLevel) {
+					throw new Exception($"Invalid scene unloaded: {unloadedScene.name}");
+				}
+				AfterSceneUnload?.Invoke(unloadedLevel);
 			}
 			catch (Exception e) {
 				Debug.LogError($"Error during AfterSceneUnload({unloadedScene.name}): {e.Message}: {e.StackTrace}");
 			}
 
-			if (currentlyUnloadingSceneNames.Contains(unloadedScene.name)) {
-				currentlyUnloadingSceneNames.Remove(unloadedScene.name);
+			if (currentlyUnloadingLevels.Contains(unloadedLevel)) {
+				currentlyUnloadingLevels.Remove(unloadedLevel);
 			}
 		}
 
-		bool ShouldLoadScene(string sceneToLoad) {
-			return sceneToLoad != ManagerScene && !SceneManager.GetSceneByName(sceneToLoad).isLoaded;
+		bool ShouldLoadLevel(Levels levelToMaybeLoad) {
+			return levelToMaybeLoad != Levels.ManagerScene && !SceneManager.GetSceneByName(levelToMaybeLoad.ToName()).isLoaded;
 		}
 
 #if UNITY_EDITOR
@@ -731,7 +717,7 @@ namespace LevelManagement {
 			foreach (var scene in EditorBuildSettings.scenes) {
 				Scene alreadyLoadedScene = SceneManager.GetSceneByPath(scene.path);
 				if (alreadyLoadedScene.IsValid() && alreadyLoadedScene.name != ManagerScene) {
-					loadedSceneNames.Add(alreadyLoadedScene.name);
+					loadedLevels.Add(alreadyLoadedScene.name.ToLevel());
 				}
 			}
 		}
@@ -741,22 +727,22 @@ namespace LevelManagement {
 		// There's only one LevelManager so we don't need a UniqueId here
 		public override string ID => "LevelManager";
 
+		public override void LoadSave(LevelManagerSave save) {
+			initialized = save.initialized;
+			queuedActiveSceneSwitch = save.queuedActiveSceneSwitch;
+			SwitchActiveScene(save.activeScene.ToLevel(), false, false, false, false);
+		}
+		
 		[Serializable]
-		public class LevelManagerSave : SerializableSaveObject<LevelManager> {
-			bool initialized;
-			string activeScene;
-			QueuedSceneSwitch queuedActiveSceneSwitch;
+		public class LevelManagerSave : SaveObject<LevelManager> {
+			public bool initialized;
+			public string activeScene;
+			public QueuedSceneSwitch queuedActiveSceneSwitch;
 
 			public LevelManagerSave(LevelManager levelManager) : base(levelManager) {
 				this.initialized = levelManager.initialized;
 				this.activeScene = levelManager.activeSceneName;
 				this.queuedActiveSceneSwitch = levelManager.queuedActiveSceneSwitch;
-			}
-
-			public override void LoadSave(LevelManager levelManager) {
-				levelManager.initialized = this.initialized;
-				levelManager.queuedActiveSceneSwitch = this.queuedActiveSceneSwitch;
-				levelManager.SwitchActiveScene(activeScene, false, false, false, false);
 			}
 		}
 #endregion

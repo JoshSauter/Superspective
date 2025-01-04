@@ -4190,8 +4190,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -4386,8 +4388,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -4645,15 +4649,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17128bce5ada30849bc3db494a064870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
+  interactableObject: {fileID: 536263481882464699}
   pickupCube: {fileID: 6647768954095359397}
-  cubeFrameRenderer: {fileID: 0}
-  corporealGlassRenderer: {fileID: 0}
-  invertedCubeRenderer: {fileID: 0}
-  raymarchRenderer: {fileID: 0}
+  corporealCubeDimensionObj: {fileID: 8489692966253685748}
+  invertedCubeDimensionObj: {fileID: 1096950187179362336}
+  cubeFrameRenderer: {fileID: 1797362795698917353}
+  corporealGlassRenderer: {fileID: 3228855526322152174}
+  invertedCubeRenderer: {fileID: 2392685412365280080}
+  raymarchRenderer: {fileID: 4511951467238843055}
   thisCollider: {fileID: 7472857696833531526}
   kinematicCollider: {fileID: 4463563736339578391}
+  detectWhenPlayerIsNearCollider: {fileID: 3993660375050849874}
   corporealDimensionBeforeMaterialize: -1
   corporealVisibilityStateBeforeRenderPortal: 0
   invertedVisibilityStateBeforeRenderPortal: 0
@@ -4683,8 +4693,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c585d99796d38d4a8097086e2c1ddcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
+  thisDynamicObject: {fileID: 0}
   isReplaceable: 1
   isHeld: 0
   receptacleHeldIn: {fileID: 0}
@@ -4724,9 +4737,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  DEBUG: 0
+  _id: {fileID: 0}
   prefabPath: Prefabs/Interactables/PickUpCubes/MultiDimensionCubePurple0
   instantiatedAtRuntime: 1
-  isGlobal: 1
+  isAllowedToChangeScenes: 1
 --- !u!114 &2221574962254478033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4739,12 +4756,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   growShrink: {fileID: 0}
   thisRigidbody: {fileID: 0}
   thisCollider: {fileID: 7472857696833531526}
   useGravity: 1
+  onGround: 0
   startingGravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
 --- !u!114 &8111376249004383559
@@ -4759,8 +4779,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
 --- !u!114 &536263481882464699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4773,8 +4795,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fedb6bfdd22f1ef4fba2401cd0ce9fc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   glow: {fileID: 0}
   _state: 0
   enabledHelpText: Pick up
@@ -4796,8 +4820,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39cb98eca5ecef4abc00d1332820c1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   thisGravityObj: {fileID: 2221574962254478033}
   thisRigidbody: {fileID: 3978877450468716646}
   thisCollider: {fileID: 7472857696833531526}
@@ -4820,8 +4846,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdacce54b553d1349a94f6f1fafa007b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2987867824161880409}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2987867824161880409}
   portalCopyPrefab: {fileID: 6999769808715117251, guid: 7e0eea5b1dcb2d44bb9cfc9d17730ace,
     type: 3}
   colliders: []

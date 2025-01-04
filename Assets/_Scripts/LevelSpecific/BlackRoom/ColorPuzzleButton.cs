@@ -10,17 +10,20 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId), typeof(InteractableObject))]
-public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleButton.ColorPuzzleButtonSave> {
+public class ColorPuzzleButton : SuperspectiveObject<ColorPuzzleButton, ColorPuzzleButton.ColorPuzzleButtonSave> {
 	public ColorPuzzle colorPuzzle;
 	private new Renderer renderer;
 	private InteractableObject interact;
-	private BlackRoomMainConsole mainConsole => BlackRoomMainConsole.instance;
-	private ColorPuzzleManager colorPuzzleManager => ColorPuzzleManager.instance;
-	bool isLastPuzzle => colorPuzzleManager.activePuzzle == colorPuzzleManager.numPuzzles - 1;
+	private BlackRoomMainConsole MainConsole => BlackRoomMainConsole.instance;
+	private ColorPuzzleManager ColorPuzzleManager => ColorPuzzleManager.instance;
+	bool IsLastPuzzle => ColorPuzzleManager.ActivePuzzle == ColorPuzzleManager.NumPuzzles - 1;
 	
 	// Animation properties
-	private const float lerpSpeed = 4f;
-	private string emissionProp => SuperspectiveRenderer.emissionColor;
+	private const float LERP_SPEED = 4f;
+	private const int INCORRECT_FLASH_TIMES = 3;
+	private const float INCORRECT_FLASH_DURATION = 2.4f;
+	private const float CORRECT_TIME = 1.5f;
+	private string EmissionProp => SuperspectiveRenderer.emissionColor;
 	private static readonly Color offColor = Color.gray;
 	
 	private static readonly Color onColor = Color.white;
@@ -35,14 +38,7 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
 	[ColorUsage(false, true)]
 	private static readonly Color correctEmission = new Color(.05f, 1.4f, .055f);
 	
-	private const int incorrectFlashTimes = 3;
-	private const float incorrectFlashDuration = 2.4f;
-	private const float correctTime = 1.5f;
-
-	// TODO: Remove hasBeenSolvedBefore, no longer serves a purpose since we now check the DissolveState of the next button cover instead
-	private bool hasBeenSolvedBefore = false;
-	
-    public enum State {
+    public enum State : byte {
         Off,
         On,
         Incorrect,
@@ -65,43 +61,36 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
         interact.SetAsHidden();
         interact.OnLeftMouseButtonDown += OnLeftMouseButtonDown;
         
-        state.AddStateTransition(State.Incorrect, State.On, incorrectFlashDuration);
+        state.AddStateTransition(State.Incorrect, State.On, INCORRECT_FLASH_DURATION);
         
         state.AddTrigger(State.Correct, () => {
 	        AudioManager.instance.Play(AudioName.CorrectAnswer);
 	        interact.SetAsHidden();
 	        
-	        if (isLastPuzzle) {
+	        if (IsLastPuzzle) {
 		        EndOfPlaytestMessage.instance.state.Set(EndOfPlaytestMessage.State.BackgroundFadingIn);
 	        }
         });
         state.AddTrigger(State.On, () => interact.SetAsInteractable("Check solution"));
         state.AddTrigger(State.Incorrect, () => {
 	        interact.SetAsHidden();
-	        colorPuzzleManager.FlashIncorrect();
+	        ColorPuzzleManager.FlashIncorrect();
         });
         // Incorrect SFX
-        for (int i = 0; i < incorrectFlashTimes; i++) {
-	        state.AddTrigger(State.Incorrect, (incorrectFlashDuration/incorrectFlashTimes) * i, () =>
+        for (int i = 0; i < INCORRECT_FLASH_TIMES; i++) {
+	        state.AddTrigger(State.Incorrect, (INCORRECT_FLASH_DURATION/INCORRECT_FLASH_TIMES) * i, () =>
 		        AudioManager.instance.Play(AudioName.IncorrectAnswer));
         }
         
         // After showing correct for a short time, fire the laser (or just move the active puzzle to next)
-        state.AddTrigger(State.Correct, correctTime, () => {
-	        if (!hasBeenSolvedBefore) {
-		        hasBeenSolvedBefore = true;
-	        }
-	        if (!isLastPuzzle) {
-		        if (!hasBeenSolvedBefore) {
-			        hasBeenSolvedBefore = true;
-		        }
-
-		        if (mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1].stateMachine == DissolveObject.State.Materialized) {
-			        mainConsole.dissolveLaser.FireAt(
-				        mainConsole.puzzleSelectCovers[colorPuzzleManager.activePuzzle + 1]);
+        state.AddTrigger(State.Correct, CORRECT_TIME, () => {
+	        if (!IsLastPuzzle) {
+		        if (MainConsole.puzzleSelectCovers[ColorPuzzleManager.ActivePuzzle + 1].stateMachine == DissolveObject.State.Materialized) {
+			        MainConsole.dissolveLaser.FireAt(
+				        MainConsole.puzzleSelectCovers[ColorPuzzleManager.ActivePuzzle + 1]);
 		        }
 		        else {
-			        mainConsole.puzzleSelectButtons[mainConsole.colorPuzzleManager.activePuzzle + 1].state
+			        MainConsole.puzzleSelectButtons[MainConsole.colorPuzzleManager.ActivePuzzle + 1].state
 				        .Set(State.On);
 		        }
 	        }
@@ -125,28 +114,28 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
     
     void Update() {
 	    Color curColor = renderer.GetColorFromRenderer();
-	    Color curEmission = renderer.GetHDRColorFromRenderer(emissionProp);
+	    Color curEmission = renderer.GetHDRColorFromRenderer(EmissionProp);
 	    
 	    switch (state.State) {
 		    case State.Off:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, offColor, Time.deltaTime * lerpSpeed));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, Color.clear, Time.deltaTime * lerpSpeed), emissionProp);
+			    renderer.SetColorForRenderer(Color.Lerp(curColor, offColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, Color.clear, Time.deltaTime * LERP_SPEED), EmissionProp);
 			    break;
 		    case State.On:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, onColor, Time.deltaTime * lerpSpeed));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, onEmission, Time.deltaTime * lerpSpeed), emissionProp);
+			    renderer.SetColorForRenderer(Color.Lerp(curColor, onColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, onEmission, Time.deltaTime * LERP_SPEED), EmissionProp);
 			    if (this.InstaSolvePuzzle()) {
 				    state.Set(State.Correct);
 			    }
 			    break;
 		    case State.Incorrect:
-			    float t = 0.5f + 0.5f*Mathf.Cos(state.Time * incorrectFlashTimes * 2 * Mathf.PI/incorrectFlashDuration + Mathf.PI);
+			    float t = 0.5f + 0.5f*Mathf.Cos(state.Time * INCORRECT_FLASH_TIMES * 2 * Mathf.PI/INCORRECT_FLASH_DURATION + Mathf.PI);
 			    renderer.SetColorForRenderer(Color.Lerp(onColor, incorrectColor, t));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(onEmission, incorrectEmission, t), emissionProp);
+			    renderer.SetHDRColorForRenderer(Color.Lerp(onEmission, incorrectEmission, t), EmissionProp);
 			    break;
 		    case State.Correct:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, correctColor, Time.deltaTime * lerpSpeed));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, correctEmission, Time.deltaTime * lerpSpeed), emissionProp);
+			    renderer.SetColorForRenderer(Color.Lerp(curColor, correctColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, correctEmission, Time.deltaTime * LERP_SPEED), EmissionProp);
 			    break;
 		    default:
 			    throw new ArgumentOutOfRangeException();
@@ -154,20 +143,18 @@ public class ColorPuzzleButton : SaveableObject<ColorPuzzleButton, ColorPuzzleBu
     }
     
 #region Saving
-		[Serializable]
-		public class ColorPuzzleButtonSave : SerializableSaveObject<ColorPuzzleButton> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            private bool hasBeenSolved;
-            
-			public ColorPuzzleButtonSave(ColorPuzzleButton script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.hasBeenSolved = script.hasBeenSolvedBefore;
-			}
 
-			public override void LoadSave(ColorPuzzleButton script) {
-                script.state.LoadFromSave(this.stateSave);
-                script.hasBeenSolvedBefore = this.hasBeenSolved;
-			}
+	public override void LoadSave(ColorPuzzleButtonSave save) {
+		state.LoadFromSave(save.stateSave);
+	}
+
+	[Serializable]
+	public class ColorPuzzleButtonSave : SaveObject<ColorPuzzleButton> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public ColorPuzzleButtonSave(ColorPuzzleButton script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

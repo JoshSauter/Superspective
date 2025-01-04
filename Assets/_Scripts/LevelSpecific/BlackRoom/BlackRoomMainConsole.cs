@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Audio;
 using DissolveObjects;
 using Interactables;
 using PowerTrailMechanics;
@@ -11,8 +8,8 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
-    public class BlackRoomMainConsole : SingletonSaveableObject<BlackRoomMainConsole, BlackRoomMainConsole.BlackRoomMainConsoleSave> {
-        public enum State {
+    public class BlackRoomMainConsole : SingletonSuperspectiveObject<BlackRoomMainConsole, BlackRoomMainConsole.BlackRoomMainConsoleSave> {
+        public enum State : byte {
             Depowered,
             Powering,
             Powered
@@ -22,7 +19,7 @@ namespace LevelSpecific.BlackRoom {
         
         // Mini Spotlights
         public BlackRoomMiniSpotlight[] miniSpotlights;
-        private const float timeBetweenMiniSpotlights = 2f;
+        private const float TIME_BETWEEN_MINI_SPOTLIGHTS = 2f;
         
         // Puzzle is solved indicator
         public Renderer puzzleIsSolvedIndicator;
@@ -47,7 +44,7 @@ namespace LevelSpecific.BlackRoom {
                 int index = i;
                 puzzleSelectButtons[i].state.OnStateChangeSimple += () => {
                     if (puzzleSelectButtons[index].state == ColorPuzzleButton.State.On) {
-                        colorPuzzleManager.activePuzzle = index;
+                        colorPuzzleManager.ActivePuzzle = index;
                         for (int j = 0; j < puzzleSelectButtons.Length; j++) {
                             if (index == j) continue;
 
@@ -87,7 +84,7 @@ namespace LevelSpecific.BlackRoom {
             UpdateGridColors();
         }
 
-        #region Puzzle Grids
+#region Puzzle Grids
         private void UpdateGridColors() {
             Color color = Color.clear;
             Color endColor = Color.white;
@@ -107,11 +104,11 @@ namespace LevelSpecific.BlackRoom {
             smallPuzzleGrid.SetMainColor(color);
             mainPuzzleGrid.SetMainColor(color);
         }
-        #endregion
+#endregion
 
-        #region Mini Spotlights
+#region Mini Spotlights
 
-        float totalTimeToTurnOnSpotlights => miniSpotlights.Length * timeBetweenMiniSpotlights;
+        float totalTimeToTurnOnSpotlights => miniSpotlights.Length * TIME_BETWEEN_MINI_SPOTLIGHTS;
         
         void UpdateMiniSpotlights() {
             switch (state.State) {
@@ -130,7 +127,7 @@ namespace LevelSpecific.BlackRoom {
             // Gradually turn on the spotlights
             for (int i = 0; i < miniSpotlights.Length; i++) {
                 int index = i;
-                state.AddTrigger(State.Powering, i * timeBetweenMiniSpotlights, () => miniSpotlights[index].TurnOn());
+                state.AddTrigger(State.Powering, i * TIME_BETWEEN_MINI_SPOTLIGHTS, () => miniSpotlights[index].TurnOn());
             }
             
             state.AddStateTransition(State.Powering, State.Powered, totalTimeToTurnOnSpotlights);
@@ -147,36 +144,36 @@ namespace LevelSpecific.BlackRoom {
                 miniSpotlight.TurnOn();
             }
         }
-        #endregion
+#endregion
 
-        #region Puzzle Is Solved Indicator
+#region Puzzle Is Solved Indicator
 
         void UpdatePuzzleIsSolvedIndicator() {
-            const float lerpSpeed = .5f;
+            const float LERP_SPEED = .5f;
             switch (state.State) {
                 case State.Depowered: {
                     Color curColor = puzzleIsSolvedIndicator.material.color;
-                    curColor.a = Mathf.Lerp(curColor.a, 1f/255f, Time.deltaTime * lerpSpeed);
+                    curColor.a = Mathf.Lerp(curColor.a, 1f/255f, Time.deltaTime * LERP_SPEED);
                     puzzleIsSolvedIndicator.material.color = curColor;
                     break;
                 }
                 case State.Powering: {
                     float timeSinceFirstLightOn = state.Time;
-                    float t = (timeSinceFirstLightOn % timeBetweenMiniSpotlights) / timeBetweenMiniSpotlights;
+                    float t = (timeSinceFirstLightOn % TIME_BETWEEN_MINI_SPOTLIGHTS) / TIME_BETWEEN_MINI_SPOTLIGHTS;
 
                     float[] keyframes = new[] {7f / 255f, 43f / 255f, 1};
                     Color curColor = puzzleIsSolvedIndicator.material.color;
                     // One light
-                    if (timeSinceFirstLightOn < timeBetweenMiniSpotlights) {
-                        curColor.a = Mathf.Lerp(curColor.a, keyframes[0], Time.deltaTime * lerpSpeed);
+                    if (timeSinceFirstLightOn < TIME_BETWEEN_MINI_SPOTLIGHTS) {
+                        curColor.a = Mathf.Lerp(curColor.a, keyframes[0], Time.deltaTime * LERP_SPEED);
                     }
                     // Two lights
-                    else if (timeSinceFirstLightOn < 2 * timeBetweenMiniSpotlights) {
-                        curColor.a = Mathf.Lerp(curColor.a, keyframes[1], Time.deltaTime * lerpSpeed);
+                    else if (timeSinceFirstLightOn < 2 * TIME_BETWEEN_MINI_SPOTLIGHTS) {
+                        curColor.a = Mathf.Lerp(curColor.a, keyframes[1], Time.deltaTime * LERP_SPEED);
                     }
                     // All three lights
                     else {
-                        curColor.a = Mathf.Lerp(curColor.a, keyframes[2], Time.deltaTime * lerpSpeed);
+                        curColor.a = Mathf.Lerp(curColor.a, keyframes[2], Time.deltaTime * LERP_SPEED);
                     }
 
                     puzzleIsSolvedIndicator.material.color = curColor;
@@ -184,13 +181,13 @@ namespace LevelSpecific.BlackRoom {
                 }
                 case State.Powered: {
                     if (dissolveLaser.state == BlackRoomDissolveCoverLaser.LaserState.Idle) {
-                        if (colorPuzzleManager.activePuzzle >= 0) {
-                            ColorPuzzle curPuzzle = colorPuzzleManager.puzzles[colorPuzzleManager.activePuzzle];
-                            float t = (float)curPuzzle.numSolved / curPuzzle.numPuzzles;
-                            Color curEmission = puzzleIsSolvedIndicator.material.GetColor(BlackRoomDissolveCoverLaser.EmissionProperty);
-                            Color emission = Color.Lerp(curEmission, t * dissolveLaser.startingEmission, Time.deltaTime * lerpSpeed);
-                            puzzleIsSolvedIndicator.material.SetColor(BlackRoomDissolveCoverLaser.EmissionProperty, emission);
-                            puzzleIsSolvedIndicator.material.color = Color.Lerp(puzzleIsSolvedIndicator.material.color, puzzleIsSolvedIndicator.material.color.WithAlpha(0.25f + 0.75f*t), Time.deltaTime * lerpSpeed);
+                        if (colorPuzzleManager.ActivePuzzle >= 0) {
+                            ColorPuzzle curPuzzle = colorPuzzleManager.puzzles[colorPuzzleManager.ActivePuzzle];
+                            float t = (float)curPuzzle.NumSolved / curPuzzle.NumPuzzles;
+                            Color curEmission = puzzleIsSolvedIndicator.material.GetColor(BlackRoomDissolveCoverLaser.EMISSION_PROPERTY);
+                            Color emission = Color.Lerp(curEmission, t * dissolveLaser.startingEmission, Time.deltaTime * LERP_SPEED);
+                            puzzleIsSolvedIndicator.material.SetColor(BlackRoomDissolveCoverLaser.EMISSION_PROPERTY, emission);
+                            puzzleIsSolvedIndicator.material.color = Color.Lerp(puzzleIsSolvedIndicator.material.color, puzzleIsSolvedIndicator.material.color.WithAlpha(0.25f + 0.75f*t), Time.deltaTime * LERP_SPEED);
                         }
                     }
                     break;
@@ -199,9 +196,9 @@ namespace LevelSpecific.BlackRoom {
                     throw new ArgumentOutOfRangeException();
             }
         }
-        #endregion
+#endregion
 
-        #region Puzzle Select Covers
+#region Puzzle Select Covers
 
         public BlackRoomDissolveCoverLaser dissolveLaser;
         public DissolveObject[] puzzleSelectCovers;
@@ -225,20 +222,20 @@ namespace LevelSpecific.BlackRoom {
             }
         }
 
-        #endregion
+#endregion
+        
+        public override void LoadSave(BlackRoomMainConsoleSave save) {
+            state.LoadFromSave(save.stateSave);
+        }
 
         public override string ID => "BlackRoomMainConsole";
 
         [Serializable]
-        public class BlackRoomMainConsoleSave : SerializableSaveObject<BlackRoomMainConsole> {
-            private StateMachine<State>.StateMachineSave stateSave;
+        public class BlackRoomMainConsoleSave : SaveObject<BlackRoomMainConsole> {
+            public StateMachine<State>.StateMachineSave stateSave;
 
             public BlackRoomMainConsoleSave(BlackRoomMainConsole script) : base(script) {
                 stateSave = script.state.ToSave();
-            }
-            
-            public override void LoadSave(BlackRoomMainConsole script) {
-                script.state.LoadFromSave(stateSave);
             }
         }
     }

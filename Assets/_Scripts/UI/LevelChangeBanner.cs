@@ -10,16 +10,17 @@ using SuperspectiveUtils;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, LevelChangeBanner.LevelChangeBannerSave> {
+public class LevelChangeBanner : SingletonSuperspectiveObject<LevelChangeBanner, LevelChangeBanner.LevelChangeBannerSave> {
     CanvasGroup bannerGroup;
     [Serializable]
     public struct Banner {
-        public Levels level;
-        public string overrideKey; // If this is set, this banner will be used instead of the level name
         public Image banner;
+        public string overrideKey; // If this is set, this banner will be used instead of the level name
+        public Levels level;
+        public bool skipSfx;
     }
     public Banner[] banners;
-    public Dictionary<string, Image> levelToBanner = new Dictionary<string, Image>();
+    public Dictionary<string, Banner> levelToBanner = new Dictionary<string, Banner>();
     private HashSet<string> bannersPlayed = new HashSet<string>();
     
     public bool HasQueuedBanner => !string.IsNullOrEmpty(queuedBanner);
@@ -29,7 +30,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
     public const float DISPLAY_TIME = 4f;
     const float DEFAULT_BANNER_Y_MIDPOINT = .8f; // Height of non-raised, non-letterboxed level change banner
 
-    public enum State {
+    public enum State : byte {
         NotPlaying,
         WaitingForLetterbox,
         Playing
@@ -45,7 +46,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
 
         foreach (var banner in banners) {
             string key = banner.overrideKey != "" ? banner.overrideKey : banner.level.ToString();
-            levelToBanner[key] = banner.banner;
+            levelToBanner[key] = banner;
         }
 
         InitializeStateMachine();
@@ -62,7 +63,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
         // When we start playing a banner, hide the last banner that was shown and show the new one
         void EnterPlayingState() {
             if (lastBannerLoaded != "" && lastBannerLoaded != currentlyPlayingBanner) {
-                levelToBanner[lastBannerLoaded].gameObject.SetActive(false);
+                levelToBanner[lastBannerLoaded].banner.gameObject.SetActive(false);
             }
             lastBannerLoaded = currentlyPlayingBanner;
             
@@ -77,7 +78,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
             }
 
             bannerGroup.alpha = 0;
-            Image bannerImage = levelToBanner[currentlyPlayingBanner];
+            Image bannerImage = levelToBanner[currentlyPlayingBanner].banner;
             bannerImage.gameObject.SetActive(true);
             RectTransform bannerRect = bannerImage.rectTransform;
             
@@ -102,7 +103,9 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
         state.AddTrigger(State.Playing, 1.5f, () => {
             if (Time.time > 10f && !bannersPlayed.Contains(currentlyPlayingBanner)) {
                 bannersPlayed.Add(currentlyPlayingBanner);
-                AudioManager.instance.Play(AudioName.LevelChangeSting);
+                if (!levelToBanner[currentlyPlayingBanner].skipSfx) {
+                    AudioManager.instance.Play(AudioName.LevelChangeSting);
+                }
             }
         });
         state.AddTrigger(State.Playing, FADE_TIME + DISPLAY_TIME, () => Letterboxing.instance.TurnOffLetterboxing());
@@ -159,7 +162,7 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
             
             // Transition to next state
             bannerGroup.alpha = 0;
-            levelToBanner[currentlyPlayingBanner].color = originalColor;
+            levelToBanner[currentlyPlayingBanner].banner.color = originalColor;
             if (HasQueuedBanner && queuedBanner != currentlyPlayingBanner) {
                 currentlyPlayingBanner = queuedBanner;
                 queuedBanner = "";
@@ -169,6 +172,10 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
             else {
                 state.Set(State.NotPlaying);
             }
+        });
+        
+        state.WithUpdate(State.NotPlaying, _ => {
+            bannerGroup.alpha = 0;
         });
     }
 
@@ -201,14 +208,32 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
 
     public void PlayBanner(Levels level) => PlayBanner(level.ToString());
     
-    #region Saving
+    public void CancelAllBanners() {
+        queuedBanner = "";
+        currentlyPlayingBanner = "";
+        state.Set(State.NotPlaying);
+        foreach (Banner banner in banners) {
+            banner.banner.gameObject.SetActive(false);
+        }
+    }
+    
+#region Saving
+
+    public override void LoadSave(LevelChangeBannerSave save) {
+        CancelAllBanners();
+        
+        lastBannerLoaded = save.lastBannerLoaded;
+        queuedBanner = save.queuedBanner;
+        currentlyPlayingBanner = save.currentlyPlayingBanner;
+        state.LoadFromSave(save.state);
+    }
 
     [Serializable]
-    public class LevelChangeBannerSave : SerializableSaveObject<LevelChangeBanner> {
-        private string lastBannerLoaded;
-        private string queuedBanner;
-        private string currentlyPlayingBanner;
-        private StateMachine<State>.StateMachineSave state;
+    public class LevelChangeBannerSave : SaveObject<LevelChangeBanner> {
+        public StateMachine<State>.StateMachineSave state;
+        public string lastBannerLoaded;
+        public string queuedBanner;
+        public string currentlyPlayingBanner;
         
         public LevelChangeBannerSave(LevelChangeBanner script) : base(script) {
             this.lastBannerLoaded = script.lastBannerLoaded;
@@ -216,13 +241,6 @@ public class LevelChangeBanner : SingletonSaveableObject<LevelChangeBanner, Leve
             this.currentlyPlayingBanner = script.currentlyPlayingBanner;
             this.state = script.state.ToSave();
         }
-        public override void LoadSave(LevelChangeBanner script) {
-            script.lastBannerLoaded = this.lastBannerLoaded;
-            script.queuedBanner = this.queuedBanner;
-            script.currentlyPlayingBanner = this.currentlyPlayingBanner;
-            script.state.LoadFromSave(this.state);
-        }
     }
-
-    #endregion
+#endregion
 }

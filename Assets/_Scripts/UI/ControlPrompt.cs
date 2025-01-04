@@ -11,8 +11,8 @@ using TMPro;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(UniqueId))]
-public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.ControlPromptSave> {
-    public enum State {
+public class ControlPrompt : SuperspectiveObject<ControlPrompt, ControlPrompt.ControlPromptSave> {
+    public enum State : byte {
         DelayedStart,
         NotYetDisplayed,
         Displaying,
@@ -31,7 +31,7 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
 
     [ShowNonSerializedField]
     private float _imagesAlpha = 0.01f;
-    private float imagesAlpha {
+    private float ImagesAlpha {
         get => _imagesAlpha;
         set {
             foreach (var keyboardPrompt in keyboardPrompts) {
@@ -44,10 +44,10 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
         }
     }
 
-    private const float minTimeAfterInputAccepted = 2f;
-    private const float maxTimeAfterInputAccepted = 5f;
-    private const float alphaLerpTimeIn = 1.25f;
-    private const float alphaLerpTimeOut = .75f;
+    private const float MIN_TIME_AFTER_INPUT_ACCEPTED = 2f;
+    private const float MAX_TIME_AFTER_INPUT_ACCEPTED = 5f;
+    private const float ALPHA_LERP_TIME_IN = 1.25f;
+    private const float ALHPA_LERP_TIME_OUT = .75f;
 
     [ShowNonSerializedField]
     private bool hasProvidedInput = false;
@@ -73,8 +73,8 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
     }
 
     private bool InputIsBeingProvided => keyboardPrompts.Any(prompt => prompt.keybind.Held);
-    private bool MinTimeAfterInputHasElapsed => state.Time > (alphaLerpTimeIn + minTimeAfterInputAccepted);
-    private bool MaxTimeAfterInputHasElapsed => state.Time > (alphaLerpTimeIn + maxTimeAfterInputAccepted);
+    private bool MinTimeAfterInputHasElapsed => state.Time > (ALPHA_LERP_TIME_IN + MIN_TIME_AFTER_INPUT_ACCEPTED);
+    private bool MaxTimeAfterInputHasElapsed => state.Time > (ALPHA_LERP_TIME_IN + MAX_TIME_AFTER_INPUT_ACCEPTED);
     protected virtual bool CanStopDisplaying => hasProvidedInput && (MaxTimeAfterInputHasElapsed || (MinTimeAfterInputHasElapsed && !InputIsBeingProvided));
 
     protected virtual void Update() {
@@ -83,8 +83,8 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
         switch (state.State) {
             case State.DelayedStart:
             case State.NotYetDisplayed:
-                if (imagesAlpha != 0) {
-                    imagesAlpha = 0;
+                if (ImagesAlpha != 0) {
+                    ImagesAlpha = 0;
                 }
                 break;
             case State.Displaying:
@@ -92,16 +92,16 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
                     hasProvidedInput = true;
                 }
                 
-                if (imagesAlpha < 1) {
-                    imagesAlpha = Mathf.Lerp(0f, 1f, state.Time / alphaLerpTimeIn);
+                if (ImagesAlpha < 1) {
+                    ImagesAlpha = Mathf.Lerp(0f, 1f, state.Time / ALPHA_LERP_TIME_IN);
                 }
                 else if (CanStopDisplaying) {
                     state.Set(State.FinishedDisplaying);
                 }
                 break;
             case State.FinishedDisplaying:
-                if (imagesAlpha > 0) {
-                    imagesAlpha = Mathf.Lerp(1f, 0f, state.Time / alphaLerpTimeOut);
+                if (ImagesAlpha > 0) {
+                    ImagesAlpha = Mathf.Lerp(1f, 0f, state.Time / ALHPA_LERP_TIME_OUT);
                 }
                 break;
             default:
@@ -122,17 +122,18 @@ public class ControlPrompt : SaveableObject<ControlPrompt, ControlPrompt.Control
     }
     
 #region Saving
-		[Serializable]
-		public class ControlPromptSave : SerializableSaveObject<ControlPrompt> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public ControlPromptSave(ControlPrompt script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(ControlPrompt script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(ControlPromptSave save) {
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class ControlPromptSave : SaveObject<ControlPrompt> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public ControlPromptSave(ControlPrompt script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 
-public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> {
+public class CameraZoom : SuperspectiveObject<CameraZoom, CameraZoom.CameraZoomSave> {
     public float defaultFOV = 90f;
     public const float zoomFOV = 30f;
     public float currentFOV => mainCamera.fieldOfView;
@@ -54,27 +54,28 @@ public class CameraZoom : SaveableObject<CameraZoom, CameraZoom.CameraZoomSave> 
         vignette.intensity = Mathf.Lerp(vignette.intensity, zoomed ? defaultVignetteMagnitude * VIGNETTE_MULTIPLIER : defaultVignetteMagnitude, Time.deltaTime * zoomLerpSpeed * (zoomed ? 1f : 2f));
     }
 
-	#region Saving
+#region Saving
+
+	public override void LoadSave(CameraZoomSave save) {
+		defaultFOV = save.defaultFOV;
+		mainCamera.fieldOfView = currentFOV;
+		zoomed = save.zoomed;
+	}
+
 	// There's only one player so we don't need a UniqueId here
 	public override string ID => "CameraZoom";
 
 	[Serializable]
-	public class CameraZoomSave : SerializableSaveObject<CameraZoom> {
-		float defaultFOV;
-		bool zoomed;
-		float currentFOV;
+	public class CameraZoomSave : SaveObject<CameraZoom> {
+		public float defaultFOV;
+		public float currentFOV;
+		public bool zoomed;
 
 		public CameraZoomSave(CameraZoom zoom) : base(zoom) {
 			this.defaultFOV = zoom.defaultFOV;
-			this.zoomed = zoom.zoomed;
 			this.currentFOV = zoom.currentFOV;
-		}
-
-		public override void LoadSave(CameraZoom zoom) {
-			zoom.defaultFOV = this.defaultFOV;
-			zoom.zoomed = this.zoomed;
-			zoom.mainCamera.fieldOfView = this.currentFOV;
+			this.zoomed = zoom.zoomed;
 		}
 	}
-	#endregion
+#endregion
 }

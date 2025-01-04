@@ -13,7 +13,7 @@ public struct ViewLockInfo {
 
 [RequireComponent(typeof(UniqueId))]
 [RequireComponent(typeof(Collider))]
-public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.ViewLockObjectSave>, AudioJobOnGameObject {
+public class ViewLockObject : SuperspectiveObject<ViewLockObject, ViewLockObject.ViewLockObjectSave>, AudioJobOnGameObject {
     public delegate void ViewLockEvent();
 
     [OnValueChanged(nameof(SetDragNDropTransform))]
@@ -132,19 +132,19 @@ public class ViewLockObject : SaveableObject<ViewLockObject, ViewLockObject.View
         set { }
     }
 
+    public override void LoadSave(ViewLockObjectSave save) {
+        _state = save.state;
+        hitbox.enabled = save.colliderEnabled;
+    }
+
     [Serializable]
-    public class ViewLockObjectSave : SerializableSaveObject<ViewLockObject> {
-        bool colliderEnabled;
-        int state;
+    public class ViewLockObjectSave : SaveObject<ViewLockObject> {
+        public PlayerLook.ViewLockState state;
+        public bool colliderEnabled;
 
         public ViewLockObjectSave(ViewLockObject viewLockObject) : base(viewLockObject) {
-            state = (int) viewLockObject.state;
+            state = viewLockObject.state;
             colliderEnabled = viewLockObject.hitbox.enabled;
-        }
-
-        public override void LoadSave(ViewLockObject viewLockObject) {
-            viewLockObject._state = (PlayerLook.ViewLockState) state;
-            viewLockObject.hitbox.enabled = colliderEnabled;
         }
     }
 #endregion

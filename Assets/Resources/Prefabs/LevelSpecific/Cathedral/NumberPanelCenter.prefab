@@ -355,8 +355,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 258049248693470635}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 258049248693470635}
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -460,8 +462,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 258049248693470635}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 258049248693470635}
   state:
     _state: 0
     _prevState: 0
@@ -1005,8 +1009,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1edad038136b4fa7a9cf9caf29a9c192, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8544038721500222810}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8544038721500222810}
   currentValueDisplay: {fileID: 1168760970}
   currentValueNegativeSymbol: {fileID: 1055979035}
   actualValue: 4
@@ -5699,8 +5705,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 4562047940476477240}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 1
+  _id: {fileID: 4562047940476477240}
   _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 368950477549591830}
@@ -5733,8 +5741,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 4562047940476477240}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 4562047940476477240}
   state:
     _state: 0
     _prevState: 0

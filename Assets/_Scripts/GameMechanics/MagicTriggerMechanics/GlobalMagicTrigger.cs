@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using LevelManagement;
+﻿using LevelManagement;
 using UnityEngine;
 
 namespace MagicTriggerMechanics {

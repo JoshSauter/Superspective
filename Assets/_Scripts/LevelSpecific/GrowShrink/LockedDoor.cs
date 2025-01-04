@@ -12,8 +12,8 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> {
-    public enum TriggerCondition {
+public class LockedDoor : SuperspectiveObject<LockedDoor, LockedDoor.LockedDoorSave> {
+    public enum TriggerCondition : byte {
         PoweredObject,
         PowerTrailDistance
     }
@@ -21,7 +21,7 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     public bool TriggeredByPowerObj => triggerCondition == TriggerCondition.PoweredObject;
     public bool TriggeredByPowerTrailDistance => triggerCondition == TriggerCondition.PowerTrailDistance;
     
-    public enum State {
+    public enum State : byte {
         Closed,
         Opening,
         Open,
@@ -35,18 +35,18 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     public Transform doorLeft, doorRight;
 
     // Config
-    private const float cameraShakeIntensity = 5f;
-    private const float cameraLongShakeIntensity = 1.25f;
-    private const float cameraShakeDuration = .25f;
-    private const float portalMovingSoundDelay = .35f;
+    private const float CAMERA_SHAKE_INTENSITY = 5f;
+    private const float CAMERA_LONG_SHAKE_INTENSITY = 1.25f;
+    private const float CAMERA_SHAKE_DURATION = .25f;
+    private const float PORTAL_MOVING_SOUND_DELAY = .35f;
+    private const float OPEN_CLOSE_TIME = 3.75f;
     public float maxOffset = 3f; // Max distance for doors to open (total opening width is this value * 2)
     private float OpenCloseSpeed => maxOffset / OPEN_CLOSE_TIME;
-    private const float OPEN_CLOSE_TIME = 3.75f;
 
     [ShowIf(nameof(TriggeredByPowerObj))]
-    public SerializableReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredFrom;
+    public SuperspectiveReference<PoweredObject, PoweredObject.PoweredObjectSave> poweredFrom;
     [ShowIf(nameof(TriggeredByPowerTrailDistance))]
-    public SerializableReference<PowerTrail, PowerTrail.PowerTrailSave> powerTrail;
+    public SuperspectiveReference<PowerTrail, PowerTrail.PowerTrailSave> powerTrail;
     [ShowIf(nameof(TriggeredByPowerTrailDistance))]
     public float powerTrailDistance;
 
@@ -93,34 +93,34 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
         state.AddTrigger(State.Closed, () => {
             if (state.PrevState != State.Closing) return;
             
-            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
+            CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
         });
         
         state.AddTrigger(State.Open, () => {
             if (state.PrevState != State.Opening) return;
             
-            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
+            CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingEnd, ID, transform.position);
         });
         
         state.AddTrigger(State.Closing, () => {
             if (state.PrevState != State.Open) return;
             
-            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
+            CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
         });
         
         state.AddTrigger(State.Opening, () => {
             if (state.PrevState != State.Closed) return;
             
-            CameraShake.instance.Shake(transform.position, cameraShakeIntensity, cameraShakeDuration);
+            CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_INTENSITY, CAMERA_SHAKE_DURATION);
             AudioManager.instance.PlayAtLocation(AudioName.PortalDoorMovingStart, ID, transform.position);
         });
-        state.AddTrigger((enumValue) => enumValue is State.Closing or State.Opening, portalMovingSoundDelay, () => {
+        state.AddTrigger((enumValue) => enumValue is State.Closing or State.Opening, PORTAL_MOVING_SOUND_DELAY, () => {
             CameraShake.CameraShakeEvent shake = new CameraShake.CameraShakeEvent() {
-                duration = OPEN_CLOSE_TIME - portalMovingSoundDelay,
-                intensity = cameraLongShakeIntensity,
+                duration = OPEN_CLOSE_TIME - PORTAL_MOVING_SOUND_DELAY,
+                intensity = CAMERA_LONG_SHAKE_INTENSITY,
                 intensityCurve = AnimationCurve.Constant(0, 1, 1),
                 spatial = 1,
                 locationProvider = () => transform.position
@@ -174,20 +174,21 @@ public class LockedDoor : SaveableObject<LockedDoor, LockedDoor.LockedDoorSave> 
     }
     
 #region Saving
-		[Serializable]
-		public class LockedDoorSave : SerializableSaveObject<LockedDoor> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            private float curOffset;
-            
-			public LockedDoorSave(LockedDoor script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.curOffset = script.DoorOffset;
-            }
 
-			public override void LoadSave(LockedDoor script) {
-                script.state.LoadFromSave(this.stateSave);
-                script.DoorOffset = curOffset;
-            }
-		}
+    public override void LoadSave(LockedDoorSave save) {
+        state.LoadFromSave(save.stateSave);
+        DoorOffset = save.curOffset;
+    }
+
+    [Serializable]
+	public class LockedDoorSave : SaveObject<LockedDoor> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public float curOffset;
+        
+		public LockedDoorSave(LockedDoor script) : base(script) {
+            this.stateSave = script.state.ToSave();
+            this.curOffset = script.DoorOffset;
+        }
+	}
 #endregion
 }

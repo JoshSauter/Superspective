@@ -4,13 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Saving.SaveManagerForScene;
 using System.Reflection;
 using SuperspectiveUtils;
 using LevelManagement;
 using Library.Functional;
-using Newtonsoft.Json;
-using Unity.Collections;
 using Unity.Jobs;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -18,47 +15,62 @@ using UnityEditor;
 #endif
 
 namespace Saving {
-    public static class SaveManager {
+    public static partial class SaveManager {
+        
         public static bool DEBUG = false;
         public static bool isCurrentlyLoadingSave = false;
-        public static readonly Dictionary<string, SaveManagerForScene> saveManagers = new Dictionary<string, SaveManagerForScene>();
-        // Keeps track of what scene a given SaveableObject ID can be located in
-        public static readonly Dictionary<string, string> sceneLookupForId = new Dictionary<string, string>();
+        public static readonly Dictionary<Levels, SaveManagerForLevel> saveManagers = new Dictionary<Levels, SaveManagerForLevel>();
+        private static SaveManagerCache cache = new SaveManagerCache();
 
         public delegate void SaveAction();
 
         public static event SaveAction BeforeSave;
         public static event SaveAction BeforeLoad;
 
+        private static float realTimeOfLastLoad = 0f;
+        public static float RealtimeSinceLastLoad => Time.realtimeSinceStartup - realTimeOfLastLoad;
+        
         private static float timeOfLastLoad = 0f;
-        public static float realtimeSinceLastLoad => Time.realtimeSinceStartup - timeOfLastLoad;
+        public static float TimeSinceLastLoad => Time.time - timeOfLastLoad;
 
-        public static SaveManagerForScene GetOrCreateSaveManagerForScene(string sceneName) {
-            if (string.IsNullOrEmpty(sceneName)) {
+        private static DebugLogger _debug;
+        private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, () => DEBUG);
+
+        public static SaveManagerForLevel GetOrCreateSaveManagerForLevel(Levels level) {
+            if (!level.IsValid()) {
                 return null;
 			}
 
-            if (!saveManagers.ContainsKey(sceneName)) {
-                saveManagers.Add(sceneName, new SaveManagerForScene(sceneName));
+            if (!saveManagers.ContainsKey(level)) {
+                saveManagers.Add(level, new SaveManagerForLevel(level));
             }
             
-            return saveManagers[sceneName];
+            return saveManagers[level];
 		}
-
-        private static string SettingsFilePath => $"{Application.persistentDataPath}/settings.ini";
-
+        
+#region Save/Load
+        /// <summary>
+        /// Starts the process of asynchronously saving the current state of the game to disk.
+        /// </summary>
+        /// <param name="saveMetadataWithScreenshot">Metadata for the save</param>
+        /// <returns>JobHandle for the asynchronous Save process</returns>
         public static JobHandle Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
             Debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
             BeforeSave?.Invoke();
             return SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
         }
 
+        /// <summary>
+        /// Asynchronously loads the save file from disk and restores the game state.
+        /// </summary>
+        /// <param name="saveMetadata">Metadata for the save file to be loaded</param>
         public static async void Load(SaveMetadataWithScreenshot saveMetadata) {
             string saveName = saveMetadata.metadata.saveFilename;
             Debug.Log($"--- Loading Save File: {saveName} ---");
             
             // Updating this at beginning and end of Load to make sure loading knows that a load just happened as well as mark the finish time
-            timeOfLastLoad = Time.realtimeSinceStartup;
+            realTimeOfLastLoad = Time.realtimeSinceStartup;
+            timeOfLastLoad = Time.time;
             isCurrentlyLoadingSave = true;
             
             if (LevelManager.instance.IsCurrentlySwitchingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
@@ -77,15 +89,15 @@ namespace Saving {
             SaveData save = SaveData.RetrieveSaveDataFromDisk(saveName);
             
             // Clear state of levels that don't exist in the save file
-            List<string> levelsNotInSaveFile = saveManagers.Keys.Where(level => !save.scenes.ContainsKey(level)).ToList();
+            List<Levels> levelsNotInSaveFile = saveManagers.Keys.Where(level => level is not Levels.ManagerScene && !save.levels.ContainsKey(level)).ToList();
             foreach (var levelNotInSaveFile in levelsNotInSaveFile) {
-                saveManagers[levelNotInSaveFile].ClearAllState();
+                saveManagers[levelNotInSaveFile].ClearAllStateForScene();
                 saveManagers.Remove(levelNotInSaveFile);
             }
             
             // Create a SaveManager for ManagerScene and restore its state
-            SaveManagerForScene saveManagerForManagerScene = GetOrCreateSaveManagerForScene(LevelManager.ManagerScene);
-            saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
+            SaveManagerForLevel saveManagerForManagerLevel = GetOrCreateSaveManagerForLevel(Levels.ManagerScene);
+            saveManagerForManagerLevel.LoadSuperspectiveObjectsStateFromSaveFile(save.managerLevel);
 
             Debug.Log("Waiting for scenes to be loaded...");
             await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
@@ -95,38 +107,38 @@ namespace Saving {
             save.dynamicObjects.LoadSaveFile();
 
             // Load all DynamicObjects for each scene
-            foreach (var kv in save.scenes) {
-                string sceneName = kv.Key;
-                SaveDataForScene saveDataForScene = kv.Value;
-                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadDynamicObjectsStateFromSaveFile(saveDataForScene);
+            foreach (var kv in save.levels) {
+                Levels level = kv.Key;
+                SaveDataForLevel saveDataForLevel = kv.Value;
+                SaveManagerForLevel saveManager = GetOrCreateSaveManagerForLevel(level);
+                saveManager.LoadDynamicObjectsStateFromSaveFile(saveDataForLevel);
             }
             
-            Dictionary<string, SaveDataForScene> loadedScenes = save.scenes
-                .Where(kv => LevelManager.instance.loadedSceneNames.Contains(kv.Key))
+            Dictionary<Levels, SaveDataForLevel> loadedLevels = save.levels
+                .Where(kv => LevelManager.instance.loadedLevels.Contains(kv.Key))
                 .ToDictionary();
-            Dictionary<string, SaveDataForScene> unloadedScenes = save.scenes
-                .Except(loadedScenes)
+            Dictionary<Levels, SaveDataForLevel> unloadedLevels = save.levels
+                .Except(loadedLevels)
                 .ToDictionary();
             
-            Debug.Log($"Loaded scenes: {string.Join(", ", loadedScenes.Keys)}");
-            Debug.Log($"Unloaded scenes: {string.Join(", ", unloadedScenes.Keys)}");
+            Debug.Log($"Loaded levels: {string.Join(", ", loadedLevels.Keys)}");
+            Debug.Log($"Unloaded levels: {string.Join(", ", unloadedLevels.Keys)}");
             
             // Restore state for all unloaded scenes from the save file
-            foreach (var kv in unloadedScenes) {
-                string sceneName = kv.Key;
-                SaveDataForScene saveDataForScene = kv.Value;
-                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadSaveableObjectsStateFromSaveFile(saveDataForScene);
+            foreach (var kv in unloadedLevels) {
+                Levels level = kv.Key;
+                SaveDataForLevel saveDataForLevel = kv.Value;
+                SaveManagerForLevel saveManager = GetOrCreateSaveManagerForLevel(level);
+                saveManager.LoadSuperspectiveObjectsStateFromSaveFile(saveDataForLevel);
             }
 
             // Load data for every object in each loaded scene (starting with the ManagerScene)
-            saveManagerForManagerScene.LoadSaveableObjectsStateFromSaveFile(save.managerScene);
-            foreach (var kv in loadedScenes) {
-                string sceneName = kv.Key;
-                SaveDataForScene saveDataForScene = kv.Value;
-                SaveManagerForScene saveManager = GetOrCreateSaveManagerForScene(sceneName);
-                saveManager.LoadSaveableObjectsStateFromSaveFile(saveDataForScene);
+            saveManagerForManagerLevel.LoadSuperspectiveObjectsStateFromSaveFile(save.managerLevel);
+            foreach (var kv in loadedLevels) {
+                Levels level = kv.Key;
+                SaveDataForLevel saveDataForLevel = kv.Value;
+                SaveManagerForLevel saveManager = GetOrCreateSaveManagerForLevel(level);
+                saveManager.LoadSuperspectiveObjectsStateFromSaveFile(saveDataForLevel);
             }
             
             // Update the lastLoadedTime for this save
@@ -136,98 +148,224 @@ namespace Saving {
 
             // Play the level change banner and remove the black overlay
             LevelChangeBanner.instance.PlayBanner(LevelManager.instance.ActiveScene);
-            Time.timeScale = 1f;
+            Time.timeScale = GameManager.timeScale;
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
-            timeOfLastLoad = Time.realtimeSinceStartup;
+            realTimeOfLastLoad = Time.realtimeSinceStartup;
             isCurrentlyLoadingSave = false;
         }
 
-        public static void ClearAllState() {
-            DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
-            saveManagers.Clear();
-            sceneLookupForId.Clear();
-        }
-
+        private static string SettingsFilePath => $"{Application.persistentDataPath}/settings.ini";
+        
+        /// <summary>
+        /// Tells the settings to write themselves to disk.
+        /// </summary>
         public static void SaveSettings() {
             Settings.instance.WriteSettings(SettingsFilePath);
         }
 
+        /// <summary>
+        /// Tells the settings to load themselves from disk.
+        /// </summary>
         public static void LoadSettings() {
             Settings.instance.LoadSettings(SettingsFilePath);
         }
+        
+#endregion
 
+        /// <summary>
+        /// Clears all state for all scenes and deletes all existing DynamicObjects.
+        /// </summary>
+        public static void ClearAllState() {
+            DynamicObjectManager.DeleteAllExistingDynamicObjectsAndClearState();
+            saveManagers.Clear();
+            cache.Clear();
+        }
+#region Superspective Object Management
+
+        /// <summary>
+        /// Registers a SuperspectiveObject with its SaveManagerForLevel, and caches its level and association ID.
+        /// </summary>
+        /// <param name="superspectiveObj">SuperspectiveObject to register.</param>
+        /// <returns>True if the SuperspectiveObject was registered successfully, false otherwise.</returns>
+        public static bool Register(SuperspectiveObject superspectiveObj) {
+            cache.AddSuperspectiveObject(superspectiveObj);
+            
+            return GetOrCreateSaveManagerForLevel(superspectiveObj.Level).RegisterSuperspectiveObjectInScene(superspectiveObj);
+        }
+        
+        /// <summary>
+        /// Registers a DynamicObject with its SaveManagerForLevel, and caches its level and association ID.
+        /// </summary>
+        /// <param name="dynamicObject">DynamicObject to register.</param>
+        /// <returns>True if the DynamicObject was registered successfully, false otherwise.</returns>
+        public static bool RegisterDynamicObject(DynamicObject dynamicObject) {
+            cache.AddDynamicObject(dynamicObject);
+            
+            return GetOrCreateSaveManagerForLevel(dynamicObject.Level).RegisterDynamicObjectInScene(dynamicObject);
+        }
+        
+        /// <summary>
+        /// Unregisters a SuperspectiveObject with its SaveManagerForLevel, and removes its level and association ID from the cache.
+        /// </summary>
+        /// <param name="id">ID of the SuperspectiveObject to unregister.</param>
+        /// <returns>True if the SuperspectiveObject was unregistered successfully, false otherwise.</returns>
+        public static bool Unregister(string id) {
+            Levels level = cache.GetLevelForSuperspectiveObject(id);
+            if (level.IsValid() && cache.RemoveSuperspectiveObject(id)) {
+                return GetOrCreateSaveManagerForLevel(level).UnregisterSuperspectiveObjectInScene(id);
+            }
+            
+            debug.LogError($"No valid scene found for SuperspectiveObject with id {id}. Was this object already unregistered?", true);
+            return false;
+        }
+        
+        /// <summary>
+        /// Unregisters a DynamicObject with its SaveManagerForLevel, and removes its level and association ID from the cache.
+        /// </summary>
+        /// <param name="id">ID of the DynamicObject to unregister.</param>
+        /// <returns>True if the DynamicObject was unregistered successfully, false otherwise.</returns>
+        public static bool UnregisterDynamicObject(string id) {
+            Levels level = cache.GetLevelForDynamicObject(id);
+            if (level.IsValid() && cache.RemoveDynamicObject(id)) {
+                return GetOrCreateSaveManagerForLevel(level).UnregisterDynamicObjectInScene(id);
+            }
+            
+            debug.LogError($"No valid scene found for DynamicObject with id {id}. Was this object already unregistered?", true);
+            return false;
+        }
+
+        /// <summary>
+        /// Unregisters a DynamicObject from the old level and registers it in the new level.
+        /// Also migrates all associated SuperspectiveObjects to the new level.
+        /// </summary>
+        /// <param name="dynamicObj">DynamicObject to change the level of</param>
+        /// <param name="oldLevel">Level the DynamicObject is moving from</param>
+        /// <param name="newLevel">Level the DynamicObject is moving to</param>
+        /// <returns></returns>
+        public static void ChangeDynamicObjectLevel(DynamicObject dynamicObj, Levels oldLevel, Levels newLevel) {
+            cache.SetLevelForDynamicObject(dynamicObj.ID, newLevel);
+            
+            SaveManagerForLevel oldLevelSaveManager = GetOrCreateSaveManagerForLevel(oldLevel);
+            SaveManagerForLevel newLevelSaveManager = GetOrCreateSaveManagerForLevel(newLevel);
+            
+            // Unregister the DynamicObject from the old scene and register it in the new scene
+            oldLevelSaveManager.UnregisterDynamicObjectInScene(dynamicObj.ID);
+            newLevelSaveManager.RegisterDynamicObjectInScene(dynamicObj);
+            // DynamicObjects are also SuperspectiveObjects
+            oldLevelSaveManager.UnregisterSuperspectiveObjectInScene(dynamicObj.ID);
+            newLevelSaveManager.RegisterSuperspectiveObjectInScene(dynamicObj);
+
+            // Migrate all associated SuperspectiveObjects to the new scene
+            List<SuperspectiveObject> associatedSuperspectiveObjects = GetAllAssociatedSuperspectiveObjects(dynamicObj.AssociationID);
+            foreach (SuperspectiveObject associatedSuperspectiveObject in associatedSuperspectiveObjects) {
+                oldLevelSaveManager.UnregisterSuperspectiveObjectInScene(associatedSuperspectiveObject.ID);
+                newLevelSaveManager.RegisterSuperspectiveObjectInScene(associatedSuperspectiveObject);
+            }
+        }
+        
+        /// <summary>
+        /// Returns all associated IDs for a given associationId.
+        /// </summary>
+        /// <param name="associationId">Unique part of an ID (usually a GUID except for singleton objects which can just be a descriptive string)</param>
+        /// <returns>All registered SuperspectiveObject IDs whose associationId match the input</returns>
         public static List<string> GetAllAssociatedIds(string associationId) {
-            List<string> associatedIds = new List<string>();
-            foreach (string id in sceneLookupForId.Keys) {
-                string lastPart = id.Split('_').Last();
-                string curAssociationId = lastPart.IsGuid() ? lastPart : id;
-
-                if (curAssociationId == associationId) {
-                    associatedIds.Add(id);
-                }
-            }
-
-            return associatedIds;
+            return cache.GetAssociatedIds(associationId).ToList();
+        }
+        
+        /// <summary>
+        /// Returns true if a unique ID is associated with any registered SuperspectiveObject.
+        /// </summary>
+        /// <param name="id">Unique ID to check registered status</param>
+        /// <returns>True if any associated IDs are already registered, false otherwise</returns>
+        public static bool IsAnyAssociatedObjectRegistered(string id) {
+            return GetAllAssociatedIds(id.GetAssociationId()).Count > 0;
         }
 
-        public static List<SaveableObject> GetAllAssociatedSaveableObjects(string associationId) {
-            List<SaveableObject> associatedIds = new List<SaveableObject>();
-            foreach (string id in sceneLookupForId.Keys) {
-                string lastPart = id.Split('_').Last();
-                string curAssociationId = lastPart.IsGuid() ? lastPart : id;
-
-                if (curAssociationId == associationId) {
-                    SaveManagerForScene saveManagerForScene = GetOrCreateSaveManagerForScene(sceneLookupForId[id]);
-                    var saveableObject = saveManagerForScene.GetSaveableObject(id)?.LeftOrDefault();
-                    if (saveableObject == null) {
-                        if (id != associationId) {
-                            Debug.LogError($"SaveableObject with id {id} not found in scene {sceneLookupForId[id]} when getting all associated saveableObjects for {associationId}");
-                        }
-                    }
-                    else {
-                        associatedIds.Add(saveableObject);
-                    }
-                }
-            }
-
-            return associatedIds;
+        public static bool IsRegistered(string id) {
+            return cache.GetLevelForSuperspectiveObject(id) != Levels.InvalidLevel;
         }
 
+        /// <summary>
+        /// Returns all associated SuperspectiveObjects for a given associationId.
+        /// Since this uses LeftOrDefault, this should only be called when you're sure that all the associated IDs are in loaded scenes.
+        /// </summary>
+        /// <param name="associationId">Unique part of an ID (usually a GUID except for singleton objects which can just be a descriptive string)</param>
+        /// <returns>All registered SuperspectiveObjects whose associationId match the input</returns>
+        public static List<SuperspectiveObject> GetAllAssociatedSuperspectiveObjects(string associationId) {
+            return GetAllAssociatedIds(associationId).Select(associatedId => {
+                Levels levelForAssociatedId = cache.GetLevelForSuperspectiveObject(associatedId);
+                return GetOrCreateSaveManagerForLevel(levelForAssociatedId).GetSuperspectiveObjectInScene(associatedId).LeftOrDefault();
+            }).ToList();
+        }
+
+        public static List<SaveObject> GetAllAssociatedSaveObjects(string associationId) {
+            return GetAllAssociatedIds(associationId).Select(associatedId => {
+                Levels levelForAssociatedId = cache.GetLevelForSuperspectiveObject(associatedId);
+                return GetOrCreateSaveManagerForLevel(levelForAssociatedId).GetSuperspectiveObjectInScene(associatedId).Match(
+                    superspectiveObject => new SaveObject(superspectiveObject),
+                    saveObject => saveObject
+                );
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Returns either the loaded DynamicObject or the serialized DynamicObjectSave by ID.
+        /// </summary>
+        /// <param name="id">The ID of the DynamicObject to retrieve</param>
+        /// <returns>Either the loaded DynamicObject or the serialized DynamicObjectSave</returns>
         public static Either<DynamicObject, DynamicObject.DynamicObjectSave> GetDynamicObjectById(string id) {
             if (!Application.isPlaying) {
                 return FindObjectById<DynamicObject>(id);
             }
-            else if (!sceneLookupForId.ContainsKey(id)) {
+
+            Levels level = cache.GetLevelForDynamicObject(id);
+            if (!level.IsValid()) {
                 DynamicObject objFound = FindObjectById<DynamicObject>(id);
                 if (objFound != null) {
-                    sceneLookupForId[id] = objFound.gameObject.scene.name;
+                    cache.AddDynamicObject(objFound);
                 }
 
                 return objFound;
             }
-            else {
-                return GetOrCreateSaveManagerForScene(sceneLookupForId[id]).GetDynamicObject(id);
-            }
+            
+            return GetOrCreateSaveManagerForLevel(level).GetDynamicObject(id);
         }
 
-        public static Either<SaveableObject, SerializableSaveObject> GetSaveableObjectById(string id) {
+        /// <summary>
+        /// Returns either the loaded SuperspectiveObject or the serialized SaveObject by ID.
+        /// </summary>
+        /// <param name="id">The ID of the SuperspectiveObject to retrieve</param>
+        /// <returns>Either the loaded SuperspectiveObject or the serialized SaveObject</returns>
+        public static Either<SuperspectiveObject, SaveObject> GetSuperspectiveObjectById(string id) {
             if (!Application.isPlaying) {
-                return FindObjectById<SaveableObject>(id);
+                return FindObjectById<SuperspectiveObject>(id);
             }
-            else if (!sceneLookupForId.ContainsKey(id)) {
-                SaveableObject objFound = FindObjectById<SaveableObject>(id);
+
+            Levels level = cache.GetLevelForSuperspectiveObject(id);
+            if (!level.IsValid()) {
+                SuperspectiveObject objFound = FindObjectById<SuperspectiveObject>(id);
                 if (objFound != null) {
-                    sceneLookupForId[id] = objFound.gameObject.scene.name;
+                    cache.AddSuperspectiveObject(objFound);
                 }
 
                 return objFound;
             }
-            else {
-                return GetOrCreateSaveManagerForScene(sceneLookupForId[id]).GetSaveableObject(id);
-            }
+            
+            return GetOrCreateSaveManagerForLevel(level).GetSuperspectiveObjectInScene(id);
         }
         
+        /// <summary>
+        /// Looks everywhere for an object with the given ID. This is inefficient and should be avoided where possible.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T FindObjectById<T>(string id) where T : class, ISaveableObject {
+            // Log a warning because we want to try to avoid using this function wherever possible (except in the Editor, w/e)
+            if (Application.isPlaying) {
+                Debug.LogWarning($"FindObjectById called for {id}. This is inefficient and should be avoided where possible.");
+            }
+
             List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
                 .OfType<ISaveableObject>()
                 .Where(s => s.HasValidId() && s.ID.Contains(id))
@@ -239,17 +377,18 @@ namespace Saving {
                 return null;
             }
             else if (matches.Count > 1) {
-                Debug.LogWarning($"Multiple objects with id {id} found.");
+                Debug.LogError($"Multiple objects with id {id} found.");
                 return matches[0] as T;
             }
             else {
                 return matches[0] as T;
             }
         }
+#endregion
 
 #if UNITY_EDITOR
         [MenuItem("Saving/Add UniqueIds where needed (in loaded scenes)")]
-        public static void AddUniqueIdsToAllSaveableObjectsLackingOne() {
+        public static void AddUniqueIdsToAllSuperspectiveObjectsNeedingOne() {
             List<MonoBehaviour> test = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
                 // Find all script instances which require a UniqueId
                 .Where(s => s.GetType().GetCustomAttributes<RequireComponent>().Any(a => a.m_Type0 == typeof(UniqueId)))
@@ -283,6 +422,7 @@ namespace Saving {
     }
 }
 
+// TODO: Give this a home
 public static class TaskEx {
     /// <summary>
     /// Blocks while condition is true or timeout occurs.

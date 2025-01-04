@@ -7,8 +7,8 @@ namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class EnableDisablePortalRendering : TriggerAction {
         public bool logicAndRendering = false;
-        public SerializableReference<Portal, Portal.PortalSave>[] portalsToEnable;
-        public SerializableReference<Portal, Portal.PortalSave>[] portalsToDisable;
+        public SuperspectiveReference<Portal, Portal.PortalSave>[] portalsToEnable;
+        public SuperspectiveReference<Portal, Portal.PortalSave>[] portalsToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
             PortalRenderingToggle(portalsToEnable, false);
@@ -20,19 +20,22 @@ namespace MagicTriggerMechanics.TriggerActions {
             PortalRenderingToggle(portalsToDisable, false);
         }
         
-        private void PortalRenderingToggle(IEnumerable<SerializableReference<Portal, Portal.PortalSave>> portals, bool pauseRendering) {
+        private void PortalRenderingToggle(IEnumerable<SuperspectiveReference<Portal, Portal.PortalSave>> portals, bool pauseRendering) {
+            // TODO: Make this just use the enums instead of booleans
+            PortalRenderMode renderMode = pauseRendering ? PortalRenderMode.Invisible : PortalRenderMode.Normal;
+            PortalPhysicsMode physicsMode = pauseRendering ? PortalPhysicsMode.None : PortalPhysicsMode.Normal;
             foreach (var portal in portals) {
                 portal.Reference.MatchAction(
                 loadedPortal => {
-                        loadedPortal.pauseRendering = pauseRendering;
+                        loadedPortal.RenderMode = renderMode;
                         if (logicAndRendering) {
-                            loadedPortal.pauseLogic = pauseRendering;
+                            loadedPortal.PhysicsMode = physicsMode;
                         }
                 },
                 unloadedPortal => {
-                    unloadedPortal.pauseRendering = pauseRendering;
+                    unloadedPortal.renderMode = renderMode;
                     if (logicAndRendering) {
-                        unloadedPortal.pauseLogic = pauseRendering;
+                        unloadedPortal.physicsMode = physicsMode;
                     }
                 });
             }

@@ -13,7 +13,7 @@ using SuperspectiveUtils;
 /// I'm hoping that this will lead to players re-using the cube that powered the receptacle
 /// </summary>
 [RequireComponent(typeof(UniqueId))]
-public class CubeReceptacleDisappearAfterUse : SaveableObject<CubeReceptacleDisappearAfterUse, CubeReceptacleDisappearAfterUse.CubeReceptacleDisappearAfterUseSave> {
+public class CubeReceptacleDisappearAfterUse : SuperspectiveObject<CubeReceptacleDisappearAfterUse, CubeReceptacleDisappearAfterUse.CubeReceptacleDisappearAfterUseSave> {
     // PowerTrail must be powered
     public PoweredObject powerTrigger;
     // Revealed doorway DimensionObject must be in the correct visibility state
@@ -23,9 +23,8 @@ public class CubeReceptacleDisappearAfterUse : SaveableObject<CubeReceptacleDisa
     private Renderer cubeReceptacleRenderer => _cubeReceptacleRenderer ??= cubeReceptacle.GetComponent<Renderer>();
     public List<GameObject> otherObjectsToDisappear;
     private List<Renderer> otherObjectsToDisappearRenderers;
-
     
-    public enum State {
+    public enum State : byte {
         Idle,
         AwaitingPlayerLookAway,
         Gone
@@ -64,17 +63,18 @@ public class CubeReceptacleDisappearAfterUse : SaveableObject<CubeReceptacleDisa
     }
     
 #region Saving
-		[Serializable]
-		public class CubeReceptacleDisappearAfterUseSave : SerializableSaveObject<CubeReceptacleDisappearAfterUse> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public CubeReceptacleDisappearAfterUseSave(CubeReceptacleDisappearAfterUse script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(CubeReceptacleDisappearAfterUse script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(CubeReceptacleDisappearAfterUseSave save) {
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class CubeReceptacleDisappearAfterUseSave : SaveObject<CubeReceptacleDisappearAfterUse> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public CubeReceptacleDisappearAfterUseSave(CubeReceptacleDisappearAfterUse script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

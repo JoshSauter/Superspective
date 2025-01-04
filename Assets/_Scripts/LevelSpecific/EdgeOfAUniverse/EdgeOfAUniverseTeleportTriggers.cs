@@ -7,13 +7,13 @@ using Saving;
 using StateUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class EdgeOfAUniverseTeleportTriggers : SaveableObject<EdgeOfAUniverseTeleportTriggers, EdgeOfAUniverseTeleportTriggers.EdgeOfAUniverseTeleportTriggersSave> {
+public class EdgeOfAUniverseTeleportTriggers : SuperspectiveObject<EdgeOfAUniverseTeleportTriggers, EdgeOfAUniverseTeleportTriggers.EdgeOfAUniverseTeleportTriggersSave> {
     public MagicTrigger enterEndgameWalkwayTrigger;
     public TeleportEnter firstTeleport;
-    private float secondTeleportThreshold = 32; // Distance player has to move in the X direction to be manually teleported
+    private const float SECOND_TELEPORT_THRESHOLD = 32; // Distance player has to move in the X direction to be manually teleported
     public Transform secondTeleportExit; // Player teleported manually when they go far enough in the X direction
     public TeleportEnter thirdTeleport;
-    private float fourthTeleportThreshold = 32; // Distance player has to move in the X direction to be manually teleported
+    private const float FOURTH_TELEPORT_THRESHOLD = 32; // Distance player has to move in the X direction to be manually teleported
     public Transform fourthTeleportExit; // Player teleported manually when they go far enough in the X direction
 
     private float PlayerX => Player.instance.transform.position.x;
@@ -100,14 +100,14 @@ public class EdgeOfAUniverseTeleportTriggers : SaveableObject<EdgeOfAUniverseTel
             case State.EnteredEndgameWalkway:
                 break;
             case State.TeleportedOnce:
-                if (PlayerX - playerLastTeleportedX > secondTeleportThreshold) {
+                if (PlayerX - playerLastTeleportedX > SECOND_TELEPORT_THRESHOLD) {
                     state.Set(State.TeleportedTwice);
                 }
                 break;
             case State.TeleportedTwice:
                 break;
             case State.TeleportedThrice:
-                if (PlayerX - playerLastTeleportedX > fourthTeleportThreshold) {
+                if (PlayerX - playerLastTeleportedX > FOURTH_TELEPORT_THRESHOLD) {
                     state.Set(State.TeleportedFourTimes);
                 }
                 break;
@@ -119,17 +119,18 @@ public class EdgeOfAUniverseTeleportTriggers : SaveableObject<EdgeOfAUniverseTel
     }
     
 #region Saving
-		[Serializable]
-		public class EdgeOfAUniverseTeleportTriggersSave : SerializableSaveObject<EdgeOfAUniverseTeleportTriggers> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public EdgeOfAUniverseTeleportTriggersSave(EdgeOfAUniverseTeleportTriggers script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(EdgeOfAUniverseTeleportTriggers script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+    public override void LoadSave(EdgeOfAUniverseTeleportTriggersSave save) {
+        state.LoadFromSave(save.stateSave);
+    }
+
+    [Serializable]
+	public class EdgeOfAUniverseTeleportTriggersSave : SaveObject<EdgeOfAUniverseTeleportTriggers> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public EdgeOfAUniverseTeleportTriggersSave(EdgeOfAUniverseTeleportTriggers script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

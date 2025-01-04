@@ -17,7 +17,7 @@ using UnityEditor;
 
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
-	public class MagicTrigger : SaveableObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
+	public class MagicTrigger : SuperspectiveObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
 		[HorizontalLine(color: EColor.Yellow)]
 		[FormerlySerializedAs("triggerConditions")]
 		public List<TriggerCondition_Deprecated> triggerConditionsOld = new List<TriggerCondition_Deprecated>();
@@ -97,7 +97,8 @@ namespace MagicTriggerMechanics {
 			hasNegativeTriggeredOnStay = false;
 		}
 
-		void OnDisable() {
+		protected override void OnDisable() {
+			base.OnDisable();
 			playerIsInTriggerZone = false;
 			hasTriggeredOnStay = false;
 			hasNegativeTriggeredOnStay = false;
@@ -208,27 +209,27 @@ namespace MagicTriggerMechanics {
 
 		#region Saving
 
+		public override void LoadSave(MagicTriggerSave save) {
+			hasTriggeredOnStay = save.hasTriggeredOnStay;
+			hasNegativeTriggeredOnStay = save.hasNegativeTriggeredOnStay;
+
+			for (int i = 0; i < save.triggerActionSaves.Length; i++) {
+				object saveData = save.triggerActionSaves[i];
+				actionsToTriggerNew[i].LoadSaveData(saveData, this);
+			}
+		}
+
 		[Serializable]
-		public class MagicTriggerSave : SerializableSaveObject<MagicTrigger> {
-			List<object> triggerActionSaves;
-			bool hasTriggeredOnStay;
-			bool hasNegativeTriggeredOnStay;
+		public class MagicTriggerSave : SaveObject<MagicTrigger> {
+			public object[] triggerActionSaves;
+			public bool hasTriggeredOnStay;
+			public bool hasNegativeTriggeredOnStay;
 
 			public MagicTriggerSave(MagicTrigger magicTrigger) : base(magicTrigger) {
 				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
 
-				triggerActionSaves = magicTrigger.actionsToTriggerNew.Select(a => a.GetSaveData(magicTrigger)).ToList();
-			}
-
-			public override void LoadSave(MagicTrigger magicTrigger) {
-				magicTrigger.hasTriggeredOnStay = this.hasTriggeredOnStay;
-				magicTrigger.hasNegativeTriggeredOnStay = this.hasNegativeTriggeredOnStay;
-
-				for (int i = 0; i < triggerActionSaves.Count; i++) {
-					object saveData = triggerActionSaves[i];
-					magicTrigger.actionsToTriggerNew[i].LoadSaveData(saveData, magicTrigger);
-				}
+				triggerActionSaves = magicTrigger.actionsToTriggerNew.Select(a => a.GetSaveData(magicTrigger)).ToArray();
 			}
 		}
 		#endregion

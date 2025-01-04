@@ -3,17 +3,18 @@ using UnityEngine;
 
 // GameObjectRef fits into the SaveableObjects framework but does not actually save anything
 // It only exists to allow cross-scene references through SerializableReference<GameObjectRef>
+// TODO: Deprecate this. SuperspectiveObject contains this functionality now
 [RequireComponent(typeof(UniqueId))]
-public class GameObjectRef : SaveableObject<GameObjectRef, GameObjectRef.GameObjectRefSave> {
+public class GameObjectRef : SuperspectiveObject<GameObjectRef, GameObjectRef.GameObjectRefSave> {
     public bool setAsInactiveOnStart = false;
-    
+
+    public override void LoadSave(GameObjectRefSave save) {
+        throw new System.NotImplementedException();
+    }
+
     // GameObjectRefSave is never actually used since this object always skips saving.
-    public class GameObjectRefSave : SerializableSaveObject<GameObjectRef> {
+    public class GameObjectRefSave : SaveObject<GameObjectRef> {
         public GameObjectRefSave(GameObjectRef script) : base(script) {}
-        
-        public override void LoadSave(GameObjectRef saveableScript) {
-            throw new System.NotImplementedException();
-        }
     }
 
     protected override void Awake() {

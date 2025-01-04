@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class ArtificialLowFramerate : MonoBehaviour {
 	[Header("Toggle with Shift+F5")]
 	public float targetFramerate = 60;
 
+	[SerializeField, ReadOnly]
 	int numOperations = 0;
 	long sum = long.MinValue;
-	int maxOperationsDelta = 20000;
+	int maxOperationsDelta = 50000;
 
 	bool limitFramerate = false;
 

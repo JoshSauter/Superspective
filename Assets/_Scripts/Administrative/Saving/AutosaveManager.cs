@@ -37,7 +37,7 @@ namespace Saving {
         ;
         public bool CanMakeAutosaveOnLevelLoad => AutosaveOnLevelLoadEnabled &&
                                                   CanMakeAutosave &&
-                                                  SaveManager.realtimeSinceLastLoad > AUTOSAVE_DISABLED_AFTER_LOAD_DELAY &&
+                                                  SaveManager.RealtimeSinceLastLoad > AUTOSAVE_DISABLED_AFTER_LOAD_DELAY &&
                                                   !levelsToSkipAutosaveOnLoad.Contains(LevelManager.instance.ActiveScene)
 #if UNITY_EDITOR
                                                   && _canMakeAutosaveInEditor

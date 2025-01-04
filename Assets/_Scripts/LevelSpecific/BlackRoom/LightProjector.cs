@@ -4,30 +4,31 @@ using System;
 using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
-	public class LightProjector : SaveableObject<LightProjector, LightProjector.LightProjectorSave> {
-		const float minSize = .5f;
-		const float maxSize = 2.5f;
+	public class LightProjector : SuperspectiveObject<LightProjector, LightProjector.LightProjectorSave> {
+		const float MIN_SIZE = .5f;
+		const float MAX_SIZE = 2.5f;
+		const float FRUSTUM_SIZE_CHANGE_SPEED = 200;
+		const float SIDE_TO_SIDE_ANIM_LERP_SPEED = 10f;
+		const float ROTATION_SPEED = .4f;
+		const float CIRCUMFERENCE_ROTATION_LERP_SPEED = 2.5f;
+		const float UP_AND_DOWN_ANIM_LERP_SPEED = 10f;
+		const float VERTICAL_MOVESPEED = .15f;
+		
 		float currentSize = 1;
-		const float frustumSizeChangeSpeed = 200;
 
 		Animator sideToSideAnim;
 		public float curSideToSideAnimTime = 0.5f;
 		float desiredSideToSideAnimTime = 0.5f;
-		const float sideToSideAnimLerpSpeed = 10f;
-		const float rotationSpeed = .4f;
 
 		Quaternion desiredCircumferenceRotation;
 		Quaternion curCircumferenceRotation {
 			get { return transform.parent.parent.localRotation; }
 			set { transform.parent.parent.localRotation = value; }
 		}
-		const float circumferenceRotationLerpSpeed = 2.5f;
 
 		Animator upAndDownAnim;
 		public float curUpAndDownAnimTime = 0.15f;
 		float desiredUpAndDownAnimTime = 0.15f;
-		const float upAndDownAnimLerpSpeed = 10f;
-		const float verticalMovespeed = .15f;
 
 		protected override void Awake() {
 			base.Awake();
@@ -60,60 +61,60 @@ namespace LevelSpecific.BlackRoom {
 					}
 				}
 				if (DebugInput.GetKey("g")) {
-					ChangeAngle(DebugInput.GetKey(KeyCode.LeftShift) ? -rotationSpeed : rotationSpeed);
+					ChangeAngle(DebugInput.GetKey(KeyCode.LeftShift) ? -ROTATION_SPEED : ROTATION_SPEED);
 				}
 				if (DebugInput.GetKey("h")) {
 					RotateAroundCircumference(DebugInput.GetKey(KeyCode.LeftShift) ? -1 : 1);
 				}
 				if (DebugInput.GetKey("j")) {
-					MoveProjectorVertical(DebugInput.GetKey(KeyCode.LeftShift) ? -verticalMovespeed : verticalMovespeed);
+					MoveProjectorVertical(DebugInput.GetKey(KeyCode.LeftShift) ? -VERTICAL_MOVESPEED : VERTICAL_MOVESPEED);
 				}
 			}
 
 			if (upAndDownAnim != null) {
-				curUpAndDownAnimTime = Mathf.Lerp(curUpAndDownAnimTime, desiredUpAndDownAnimTime, upAndDownAnimLerpSpeed * Time.deltaTime);
+				curUpAndDownAnimTime = Mathf.Lerp(curUpAndDownAnimTime, desiredUpAndDownAnimTime, UP_AND_DOWN_ANIM_LERP_SPEED * Time.deltaTime);
 				upAndDownAnim.Play("ProjectorUpDown", 0, curUpAndDownAnimTime);
 			}
 			if (sideToSideAnim != null) {
-				curSideToSideAnimTime = Mathf.Lerp(curSideToSideAnimTime, desiredSideToSideAnimTime, sideToSideAnimLerpSpeed * Time.deltaTime);
+				curSideToSideAnimTime = Mathf.Lerp(curSideToSideAnimTime, desiredSideToSideAnimTime, SIDE_TO_SIDE_ANIM_LERP_SPEED * Time.deltaTime);
 				sideToSideAnim.Play("ProjectorSideToSide", 1, curSideToSideAnimTime);
 			}
 
-			curCircumferenceRotation = Quaternion.Lerp(curCircumferenceRotation, desiredCircumferenceRotation, circumferenceRotationLerpSpeed * Time.deltaTime);
+			curCircumferenceRotation = Quaternion.Lerp(curCircumferenceRotation, desiredCircumferenceRotation, CIRCUMFERENCE_ROTATION_LERP_SPEED * Time.deltaTime);
 		}
 
 		// Returns true if the frustum size changed, false otherwise
 		public bool IncreaseFrustumSize() {
-			return ChangeFrustumSize(1 + frustumSizeChangeSpeed * Time.deltaTime / 100f);
+			return ChangeFrustumSize(1 + FRUSTUM_SIZE_CHANGE_SPEED * Time.deltaTime / 100f);
 		}
 
 		// Returns true if the frustum size changed, false otherwise
 		public bool DecreaseFrustumSize() {
-			return ChangeFrustumSize(1 - frustumSizeChangeSpeed * Time.deltaTime / 100f);
+			return ChangeFrustumSize(1 - FRUSTUM_SIZE_CHANGE_SPEED * Time.deltaTime / 100f);
 		}
 
 		public void RotateAngleLeft() {
-			ChangeAngle(-rotationSpeed);
+			ChangeAngle(-ROTATION_SPEED);
 		}
 
 		public void RotateAngleRight() {
-			ChangeAngle(rotationSpeed);
+			ChangeAngle(ROTATION_SPEED);
 		}
 
 		public void RotateAngleDown() {
-			MoveProjectorVertical(-verticalMovespeed);
+			MoveProjectorVertical(-VERTICAL_MOVESPEED);
 		}
 
 		public void RotateAngleUp() {
-			MoveProjectorVertical(verticalMovespeed);
+			MoveProjectorVertical(VERTICAL_MOVESPEED);
 		}
 
 		// Stretches the far plane of the frustum within the bounds minSize <-> maxSize
 		// Returns true if the size is within minSize <-> maxSize, false otherwise
 		bool ChangeFrustumSize(float multiplier) {
 			currentSize *= multiplier;
-			if (currentSize < minSize || currentSize > maxSize) {
-				currentSize = Mathf.Clamp(currentSize, minSize, maxSize);
+			if (currentSize < MIN_SIZE || currentSize > MAX_SIZE) {
+				currentSize = Mathf.Clamp(currentSize, MIN_SIZE, MAX_SIZE);
 				transform.GetChild(0).localScale = new Vector3(currentSize, transform.GetChild(0).localScale.y, currentSize);
 				return false;
 			}
@@ -143,21 +144,34 @@ namespace LevelSpecific.BlackRoom {
 			}
 		}
 
-		#region Saving
+#region Saving
+
+		public override void LoadSave(LightProjectorSave save) {
+			currentSize = save.currentSize;
+
+			curSideToSideAnimTime = save.curSideToSideAnimTime;
+			desiredSideToSideAnimTime = save.desiredSideToSideAnimTime;
+				
+			desiredCircumferenceRotation = save.desiredCircumferenceRotation;
+			curCircumferenceRotation = save.curCircumferenceRotation;
+				
+			curUpAndDownAnimTime = save.curUpAndDownAnimTime;
+			desiredUpAndDownAnimTime = save.desiredUpAndDownAnimTime;
+
+			ChangeFrustumSize(1);
+		}
+
 		public override string ID => $"{gameObject.name}";
 
 		[Serializable]
-		public class LightProjectorSave : SerializableSaveObject<LightProjector> {
-			float currentSize;
-
-			float curSideToSideAnimTime;
-			float desiredSideToSideAnimTime;
-
-			SerializableQuaternion desiredCircumferenceRotation;
-			SerializableQuaternion curCircumferenceRotation;
-
-			float curUpAndDownAnimTime;
-			float desiredUpAndDownAnimTime;
+		public class LightProjectorSave : SaveObject<LightProjector> {
+			public SerializableQuaternion desiredCircumferenceRotation;
+			public SerializableQuaternion curCircumferenceRotation;
+			public float currentSize;
+			public float curSideToSideAnimTime;
+			public float desiredSideToSideAnimTime;
+			public float curUpAndDownAnimTime;
+			public float desiredUpAndDownAnimTime;
 
 			public LightProjectorSave(LightProjector lightProjector) : base(lightProjector) {
 				this.currentSize = lightProjector.currentSize;
@@ -171,22 +185,7 @@ namespace LevelSpecific.BlackRoom {
 				this.curUpAndDownAnimTime = lightProjector.curUpAndDownAnimTime;
 				this.desiredUpAndDownAnimTime = lightProjector.desiredUpAndDownAnimTime;
 			}
-
-			public override void LoadSave(LightProjector lightProjector) {
-				lightProjector.currentSize = this.currentSize;
-
-				lightProjector.curSideToSideAnimTime = this.curSideToSideAnimTime;
-				lightProjector.desiredSideToSideAnimTime = this.desiredSideToSideAnimTime;
-				
-				lightProjector.desiredCircumferenceRotation = this.desiredCircumferenceRotation;
-				lightProjector.curCircumferenceRotation = this.curCircumferenceRotation;
-				
-				lightProjector.curUpAndDownAnimTime = this.curUpAndDownAnimTime;
-				lightProjector.desiredUpAndDownAnimTime = this.desiredUpAndDownAnimTime;
-
-				lightProjector.ChangeFrustumSize(1);
-			}
 		}
-		#endregion
+#endregion
 	}
 }

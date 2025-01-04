@@ -1,7 +1,4 @@
-using SuperspectiveUtils;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using System.Linq;
 using System;
@@ -12,7 +9,7 @@ using SerializableClasses;
 using UnityEngine.Serialization;
 
 namespace LevelSpecific.WhiteRoom {
-    public class CathedralPuzzle : SaveableObject<CathedralPuzzle, CathedralPuzzle.CathedralPuzzleSave> {
+    public class CathedralPuzzle : SuperspectiveObject<CathedralPuzzle, CathedralPuzzle.CathedralPuzzleSave> {
         [Serializable]
         public class PowerReceptacle {
             public int powerGenerated;
@@ -24,7 +21,7 @@ namespace LevelSpecific.WhiteRoom {
         public SpriteRenderer currentValueBackground;
         public PowerReceptacle[] powerReceptacles;
 
-        const int target = 47;
+        const int TARGET = 47;
 
         private bool playerOnWhiteSide => Vector3.Dot(transform.parent.right,
             Player.instance.transform.position - transform.parent.position) > 0;
@@ -36,7 +33,7 @@ namespace LevelSpecific.WhiteRoom {
         const string colorProp2 = "_AngleFadeColor2";
 
         // Hexes react to the player looking at them by looking back
-        public enum HexState {
+        public enum HexState : byte {
             ValueInRangeAndRotating,
             LookingAtPlayer,
             ValueOutOfRange,
@@ -114,13 +111,15 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         protected override void Init() {
+            base.Init();
             foreach (var powerReceptacle in powerReceptacles) {
                 powerReceptacle.powerTrail.pwr.OnPowerFinish += () => currentValueDisplay.actualValue += powerReceptacle.powerGenerated;
                 powerReceptacle.powerTrail.pwr.OnDepowerBegin += () => currentValueDisplay.actualValue -= powerReceptacle.powerGenerated;
             }
         }
 
-        void OnDisable() {
+        protected override void OnDisable() {
+            base.OnDisable();
             ResetWhiteBlackFadeMaterials();
 
             if (obeliskLightMaterial != null) {
@@ -143,7 +142,7 @@ namespace LevelSpecific.WhiteRoom {
             
             if (this.InstaSolvePuzzle()) {
                 if (cheaterToggleAmount == 0) {
-                    cheaterToggleAmount = target - currentValueDisplay.actualValue;
+                    cheaterToggleAmount = TARGET - currentValueDisplay.actualValue;
                     currentValueDisplay.actualValue += cheaterToggleAmount;
                 }
                 else {
@@ -157,10 +156,10 @@ namespace LevelSpecific.WhiteRoom {
 			}
 
             float amountPlayerIsLookingAtHexes = Vector3.Dot(playerCamera.forward, (transform.position - playerCamera.position).normalized);
-            bool valueInRange = (80 - Mathf.Abs(currentValueDisplay.displayedValue) > 0);
+            bool valueInRange = (80 - Mathf.Abs(currentValueDisplay.DisplayedValue) > 0);
             UpdateHexesState(amountPlayerIsLookingAtHexes, valueInRange);
 
-            float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.displayedValue);
+            float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.DisplayedValue);
             UpdateObeliskLight(t);
             UpdateValueLine(t);
 
@@ -171,7 +170,7 @@ namespace LevelSpecific.WhiteRoom {
             if (!valueInRange) {
                 hexState = HexState.ValueOutOfRange;
             }
-            else if (currentValueDisplay.actualValue == target) {
+            else if (currentValueDisplay.actualValue == TARGET) {
                 hexState = HexState.CorrectValue;
                 if (!hasBeenSolvedBefore) {
                     AudioManager.instance.Play(AudioName.CorrectAnswer);
@@ -230,7 +229,7 @@ namespace LevelSpecific.WhiteRoom {
 
                     // Update the current value's alpha
                     currentValueDisplay.desiredColor = playerOnWhiteSide ? Color.black : Color.white;
-                    currentValueDisplay.spriteAlpha = lookingAtLerpValue;
+                    currentValueDisplay.SpriteAlpha = lookingAtLerpValue;
                     break;
                 case HexState.ValueOutOfRange:
                     // Re-enable and speed up rotations
@@ -296,7 +295,7 @@ namespace LevelSpecific.WhiteRoom {
                 return (Color.green * 0.6f, Color.green);
             }
             else {
-                float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.displayedValue);
+                float t = Mathf.InverseLerp(-80f, 80f, currentValueDisplay.DisplayedValue);
                 return (baseObeliskGradient.Evaluate(t), emissionObeliskGradient.Evaluate(t));
             }
         }
@@ -311,7 +310,7 @@ namespace LevelSpecific.WhiteRoom {
             innerParticlesMain.startColor = new ParticleSystem.MinMaxGradient(minColor, maxColor);
         }
 
-        #region ObeliskLight
+#region ObeliskLight
         void UpdateObeliskLight(float t) {
             SetObeliskLightColorGradients();
             SetObeliskLightEmissionColorGradients();
@@ -382,25 +381,37 @@ namespace LevelSpecific.WhiteRoom {
             }
             return colorGradientBuffer;
         }
-		#endregion
+#endregion
 
-		#region ValueLine
+#region ValueLine
         void UpdateValueLine(float t) {
             valueLine.localPosition = Vector3.Lerp(valueLIneBot, valueLineTop, t);
             valueLine.localScale = Vector3.Lerp(valueLineScaleMax, valueLineScaleMin, t);
         }
-		#endregion
+#endregion
         
 #region Saving
+
+        public override void LoadSave(CathedralPuzzleSave save) {
+            _hexState = save.hexState;
+            timeSinceHexStateChanged = save.timeSinceHexStateChanged;
+            for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
+                floatGradientBuffer[i] = save.floatGradientBuffer[i];
+                colorGradientBuffer[i] = save.colorGradientBuffer[i];
+            }
+
+            hasBeenSolvedBefore = save.hasBeenSolvedBefore;
+        }
+
         public override string ID => "WhiteRoomPuzzle2";
 
         [Serializable]
-        public class CathedralPuzzleSave : SerializableSaveObject<CathedralPuzzle> {
-            HexState hexState;
-            float timeSinceHexStateChanged;
-            float[] floatGradientBuffer;
-            SerializableColor[] colorGradientBuffer;
-            private bool hasBeenSolvedBefore;
+        public class CathedralPuzzleSave : SaveObject<CathedralPuzzle> {
+            public SerializableColor[] colorGradientBuffer;
+            public float[] floatGradientBuffer;
+            public HexState hexState;
+            public float timeSinceHexStateChanged;
+            public bool hasBeenSolvedBefore;
             
             public CathedralPuzzleSave(CathedralPuzzle script) : base(script) {
                 this.hexState = script.hexState;
@@ -413,17 +424,6 @@ namespace LevelSpecific.WhiteRoom {
                 }
 
                 this.hasBeenSolvedBefore = script.hasBeenSolvedBefore;
-            }
-
-            public override void LoadSave(CathedralPuzzle script) {
-                script._hexState = this.hexState;
-                script.timeSinceHexStateChanged = this.timeSinceHexStateChanged;
-                for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
-                    script.floatGradientBuffer[i] = this.floatGradientBuffer[i];
-                    script.colorGradientBuffer[i] = this.colorGradientBuffer[i];
-                }
-
-                script.hasBeenSolvedBefore = this.hasBeenSolvedBefore;
             }
         }
 #endregion

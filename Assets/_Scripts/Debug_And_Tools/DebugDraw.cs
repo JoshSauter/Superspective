@@ -23,7 +23,7 @@ public class DebugDraw : Singleton<DebugDraw> {
 }
 
 public static class DebugDrawExt {
-    public static void Sphere(this SaveableObject saveObj, Vector3 center, float radius, Color color = default) {
+    public static void Sphere(this SuperspectiveObject saveObj, Vector3 center, float radius, Color color = default) {
         DebugDraw.Sphere(saveObj.ID, center, radius, color);
     }
 }

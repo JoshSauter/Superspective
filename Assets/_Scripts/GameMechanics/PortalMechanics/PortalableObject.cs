@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
-using PortalMechanics;
 using UnityEngine;
 using Saving;
 using SerializableClasses;
@@ -12,7 +10,7 @@ using SuperspectiveUtils;
 
 namespace PortalMechanics {
     [RequireComponent(typeof(UniqueId))]
-    public class PortalableObject : SaveableObject<PortalableObject, PortalableObject.PortalableObjectSave> {
+    public class PortalableObject : SuperspectiveObject<PortalableObject, PortalableObject.PortalableObjectSave> {
         public delegate void PortalObjectAction(Portal inPortal);
         public event PortalObjectAction OnObjectTeleported;
         
@@ -34,16 +32,15 @@ namespace PortalMechanics {
 
         // This is the portal the object is currently in the trigger zone of
         private Portal _portal;
+        [ShowNativeProperty]
+        public Portal Portal => _portal;
         public bool IsInPortal => _portal != null;
         
         // This is the portal the object is currently held through
         private Portal _portalHeldThrough = null;
-        public bool IsHeldThroughPortal => _portalHeldThrough != null;
-
-        [ShowNativeProperty]
-        public Portal Portal => _portal;
         [ShowNativeProperty]
         public Portal PortalHeldThrough => _portalHeldThrough;
+        public bool IsHeldThroughPortal => _portalHeldThrough != null;
 
         public Collider[] colliders;
         private HashSet<Collider> collidersHash = new HashSet<Collider>();
@@ -96,7 +93,7 @@ namespace PortalMechanics {
         // Prevents ExitPortal from being called when the object is teleported through a portal
         public bool teleportedThisFixedUpdate = false;
 
-        private enum HeldThroughPortalResetState {
+        public enum HeldThroughPortalResetState : byte {
             Idle,
             RaycastGoesThroughPortal,
             RaycastDoesNotGoThroughPortal
@@ -161,7 +158,8 @@ namespace PortalMechanics {
             Portal.OnAnyPortalPlayerTeleport += OnPlayerTeleport;
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
+            base.OnDisable();
             Portal.OnAnyPortalPlayerTeleport -= OnPlayerTeleport;
         }
 
@@ -271,21 +269,30 @@ namespace PortalMechanics {
         }
 #region Saving
 
+        public override void LoadSave(PortalableObjectSave save) {
+            if (save.portalSittingInRef != null && save.portalSittingInRef.TryGet(out Portal portalSittingIn)) {
+                EnterPortal(portalSittingIn);
+            }
+            
+            if (save.portalHeldThroughRef != null && save.portalHeldThroughRef.TryGet(out Portal portalHeldThrough)) {
+                SetPortalHeldThrough(portalHeldThrough);
+            }
+            
+            heldThroughPortalResetState.LoadFromSave(save.heldThroughPortalResetStateSave);
+        }
+
         [Serializable]
-        public class PortalableObjectSave : SerializableSaveObject<PortalableObject> {
-            SerializableReference<Portal, Portal.PortalSave> portalSittingInRef;
+        public class PortalableObjectSave : SaveObject<PortalableObject> {
+            public SuperspectiveReference<Portal, Portal.PortalSave> portalSittingInRef;
+            public SuperspectiveReference<Portal, Portal.PortalSave> portalHeldThroughRef;
+            public StateMachine<HeldThroughPortalResetState>.StateMachineSave heldThroughPortalResetStateSave;
 
             public PortalableObjectSave(PortalableObject script) : base(script) {
                 portalSittingInRef = script._portal;
-            }
-
-            public override void LoadSave(PortalableObject script) {
-                if (portalSittingInRef != null && portalSittingInRef.TryGet(out Portal portalSittingIn)) {
-                    script.EnterPortal(portalSittingIn);
-                }
+                portalHeldThroughRef = script._portalHeldThrough;
+                heldThroughPortalResetStateSave = script.heldThroughPortalResetState.ToSave();
             }
         }
-
 #endregion
     }
 }

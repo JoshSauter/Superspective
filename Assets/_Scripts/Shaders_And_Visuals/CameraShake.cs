@@ -7,7 +7,7 @@ using StateUtils;
 
 // TODO: Make saveable? Not that important tho
 [RequireComponent(typeof(UniqueId))]
-public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.CameraShakeSave> {
+public class CameraShake : SingletonSuperspectiveObject<CameraShake, CameraShake.CameraShakeSave> {
     private const float FULL_SHAKE_DISTANCE = 10f; // Distance within which the player will feel the full intensity of the shake
     private const float NO_SHAKE_DISTANCE = 150f; // Distance beyond which the player will feel no shake
     private const float RETURN_TO_CENTER_LERP_SPEED = 2f; // Speed at which we lerp the camera back to its original position after shaking
@@ -182,14 +182,16 @@ public class CameraShake : SingletonSaveableObject<CameraShake, CameraShake.Came
     }
     
 #region Saving
-		[Serializable]
-		public class CameraShakeSave : SerializableSaveObject<CameraShake> {
-            
-			public CameraShakeSave(CameraShake script) : base(script) {
-			}
 
-			public override void LoadSave(CameraShake script) {
-			}
-		}
+    public override void LoadSave(CameraShakeSave save) {
+        // TODO: Implement?
+    }
+
+    [Serializable]
+	public class CameraShakeSave : SaveObject<CameraShake> {
+        // TODO: Add save data here
+        
+		public CameraShakeSave(CameraShake script) : base(script) {}
+	}
 #endregion
 }

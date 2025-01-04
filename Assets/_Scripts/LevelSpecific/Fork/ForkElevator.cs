@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Audio;
 using Interactables;
 using NaughtyAttributes;
@@ -7,11 +8,12 @@ using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using UnityEngine;
+using PickupObjectRef = SerializableClasses.SuperspectiveReference<PickupObject, PickupObject.PickupObjectSave>;
 
 namespace LevelSpecific.Fork {
 	[RequireComponent(typeof(UniqueId))]
-	public class ForkElevator : SaveableObject<ForkElevator, ForkElevator.ForkElevatorSave>, AudioJobOnGameObject {
-		public enum State {
+	public class ForkElevator : SuperspectiveObject<ForkElevator, ForkElevator.ForkElevatorSave>, AudioJobOnGameObject {
+		public enum State : byte {
 			NotPowered,
 			Idle,
 			DoorsClosing,
@@ -23,15 +25,14 @@ namespace LevelSpecific.Fork {
 		[ReadOnly]
 		State _state = State.NotPowered;
 		public State state {
-			get { return _state; }
+			get => _state;
 			set {
 				timeElapsedSinceStateChange = 0f;
 				_state = value;
 			}
 		}
-
-		public bool goingDown = true;
 		float timeElapsedSinceStateChange = 0f;
+
 
 		public PowerTrail initialPowerTrail;
 		public AnimationCurve lockBarAnimation;
@@ -43,18 +44,20 @@ namespace LevelSpecific.Fork {
 		float raisedHeight;
 		float loweredHeight;
 
-		const float height = 21.5f;
-		const float lockBarDelayTime = 0.25f;
-		const float unlockBarDelayTime = 0.125f;
-		const float timeToLockDoors = 2f;
-		const float timeToUnlockDoors = .75f;
-		const float lockBeamMinSize = 0.125f;
+		const float HEIGHT = 21.5f;
+		const float LOCK_BAR_DELAY_TIME = 0.25f;
+		const float UNLOCK_BAR_DELAY_TIME = 0.125f;
+		const float TIME_TO_LOCK_DOORS = 2f;
+		const float TIME_TO_UNLOCK_DOORS = .75f;
+		const float LOCK_BEAM_MIN_SIZE = 0.125f;
+		const float MAX_SPEED = 6f;
+		
 		float curSpeed = 0f;
-		const float maxSpeed = 6f;
+		public bool goingDown = true;
 
 		private CameraShake.CameraShakeEvent cameraShake;
 
-		List<PickupObject> otherObjectsInElevator = new List<PickupObject>();
+		List<PickupObjectRef> otherObjectsInElevator = new List<PickupObjectRef>();
 		bool playerStandingInElevator = false;
 
 		public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
@@ -62,7 +65,7 @@ namespace LevelSpecific.Fork {
 		protected override void Start() {
 			base.Start();
 			raisedHeight = transform.parent.position.y;
-			loweredHeight = raisedHeight - height;
+			loweredHeight = raisedHeight - HEIGHT;
 
 			elevatorButton.OnButtonPressBegin += (ctx) => RaiseLowerElevator(true);
 			elevatorButton.OnButtonUnpressBegin += (ctx) => RaiseLowerElevator(false);
@@ -127,7 +130,7 @@ namespace LevelSpecific.Fork {
 					foreach (var lockBar in lockBars) {
 						lockBar.localScale = new Vector3(1, 1, 1);
 					}
-					lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, lockBeamMinSize);
+					lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, LOCK_BEAM_MIN_SIZE);
 					UpdateElevatorMovingAnimation();
 					break;
 				case State.DoorsOpening:
@@ -142,20 +145,20 @@ namespace LevelSpecific.Fork {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				invisibleElevatorWall.SetActive(true);
 				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorClose, ID, this, true);
-				cameraShake = CameraShake.instance.Shake(5f, timeToLockDoors);
+				cameraShake = CameraShake.instance.Shake(5f, TIME_TO_LOCK_DOORS);
 			}
 
-			float totalAnimationTime = timeToLockDoors + (lockBars.Length / 2) * lockBarDelayTime;
+			float totalAnimationTime = TIME_TO_LOCK_DOORS + (lockBars.Length / 2) * LOCK_BAR_DELAY_TIME;
 			if (timeElapsedSinceStateChange < totalAnimationTime) {
-				float t = timeElapsedSinceStateChange / timeToLockDoors;
+				float t = timeElapsedSinceStateChange / TIME_TO_LOCK_DOORS;
 
 				for (int i = 0; i < lockBars.Length; i++) {
-					float thisBarTime = Mathf.Clamp01((timeElapsedSinceStateChange - lockBarDelayTime * (i / 2)) / timeToLockDoors);
+					float thisBarTime = Mathf.Clamp01((timeElapsedSinceStateChange - LOCK_BAR_DELAY_TIME * (i / 2)) / TIME_TO_LOCK_DOORS);
 					Vector3 curScale = lockBars[i].localScale;
 					curScale.y = lockBarAnimation.Evaluate(thisBarTime);
 					lockBars[i].localScale = curScale;
 				}
-				lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, Mathf.Lerp(1f, lockBeamMinSize, t));
+				lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, Mathf.Lerp(1f, LOCK_BEAM_MIN_SIZE, t));
 			}
 			else {
 				invisibleElevatorWall.SetActive(false);
@@ -181,20 +184,20 @@ namespace LevelSpecific.Fork {
 		void UpdateDoorOpeningAnimation() {
 			if (timeElapsedSinceStateChange <= Time.fixedDeltaTime) {
 				AudioManager.instance.PlayOnGameObject(AudioName.ElevatorOpen, ID, this, true);
-				cameraShake = CameraShake.instance.Shake(5f, timeToUnlockDoors);
+				cameraShake = CameraShake.instance.Shake(5f, TIME_TO_UNLOCK_DOORS);
 			}
 
-			float totalAnimationTime = timeToUnlockDoors + (lockBars.Length / 2) * unlockBarDelayTime;
+			float totalAnimationTime = TIME_TO_UNLOCK_DOORS + (lockBars.Length / 2) * UNLOCK_BAR_DELAY_TIME;
 			if (timeElapsedSinceStateChange < totalAnimationTime) {
-				float t = timeElapsedSinceStateChange / timeToUnlockDoors;
+				float t = timeElapsedSinceStateChange / TIME_TO_UNLOCK_DOORS;
 
 				for (int i = 0; i < lockBars.Length; i++) {
-					float thisBarTime = 1 - Mathf.Clamp01((timeElapsedSinceStateChange - unlockBarDelayTime * (i / 2)) / timeToUnlockDoors);
+					float thisBarTime = 1 - Mathf.Clamp01((timeElapsedSinceStateChange - UNLOCK_BAR_DELAY_TIME * (i / 2)) / TIME_TO_UNLOCK_DOORS);
 					Vector3 curScale = lockBars[i].localScale;
 					curScale.y = lockBarAnimation.Evaluate(thisBarTime);
 					lockBars[i].localScale = curScale;
 				}
-				lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, Mathf.Lerp(1f, lockBeamMinSize, 1 - t));
+				lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, Mathf.Lerp(1f, LOCK_BEAM_MIN_SIZE, 1 - t));
 			}
 			else {
 				lockBeam.localScale = new Vector3(lockBeam.localScale.x, lockBeam.localScale.y, 1f);
@@ -207,7 +210,7 @@ namespace LevelSpecific.Fork {
 
 		void UpdateElevatorMovingAnimation() {
 			if (goingDown ? (elevator.position.y - 0.2f > loweredHeight) : (elevator.position.y + 0.2f < raisedHeight)) {
-				curSpeed = Mathf.Lerp(curSpeed, maxSpeed, Time.fixedDeltaTime);
+				curSpeed = Mathf.Lerp(curSpeed, MAX_SPEED, Time.fixedDeltaTime);
 
 				float nextHeight = elevator.position.y;
 				nextHeight += (goingDown ? -1 : 1) * curSpeed * Time.fixedDeltaTime;
@@ -223,7 +226,7 @@ namespace LevelSpecific.Fork {
 				}
 
 				foreach (var pickupObj in otherObjectsInElevator) {
-					pickupObj.transform.position += diff;
+					pickupObj.GetOrNull().transform.position += diff;
 				}
 				otherObjectsInElevator.Clear();
 			}
@@ -262,39 +265,41 @@ namespace LevelSpecific.Fork {
 		}
 
 #region Saving
-		
-		[Serializable]
-		public class ForkElevatorSave : SerializableSaveObject<ForkElevator> {
-			SerializableVector3 position;
-			int state;
-			bool goingDown;
-			float timeElapsedSinceStateChange;
-			float raisedHeight;
-			float loweredHeight;
-			float curSpeed;
 
-			bool playerStandingInElevator;
+		public override void LoadSave(ForkElevatorSave save) {
+			state = save.state;
+			otherObjectsInElevator = save.otherObjectsInElevator.ToList();
+			goingDown = save.goingDown;
+			timeElapsedSinceStateChange = save.timeElapsedSinceStateChange;
+			raisedHeight = save.raisedHeight;
+			loweredHeight = save.loweredHeight;
+			curSpeed = save.curSpeed;
+			playerStandingInElevator = save.playerStandingInElevator;
+			transform.parent.position = save.position;
+		}
+
+		[Serializable]
+		public class ForkElevatorSave : SaveObject<ForkElevator> {
+			public SerializableVector3 position;
+			public PickupObjectRef[] otherObjectsInElevator;
+			public State state;
+			public float timeElapsedSinceStateChange;
+			public float raisedHeight;
+			public float loweredHeight;
+			public float curSpeed;
+			public bool goingDown;
+			public bool playerStandingInElevator;
 
 			public ForkElevatorSave(ForkElevator elevator) : base(elevator) {
-				this.state = (int)elevator.state;
+				this.state = elevator.state;
 				this.goingDown = elevator.goingDown;
 				this.timeElapsedSinceStateChange = elevator.timeElapsedSinceStateChange;
 				this.raisedHeight = elevator.raisedHeight;
 				this.loweredHeight = elevator.loweredHeight;
 				this.curSpeed = elevator.curSpeed;
 				this.playerStandingInElevator = elevator.playerStandingInElevator;
+				this.otherObjectsInElevator = elevator.otherObjectsInElevator.ToArray();
 				this.position = elevator.transform.parent.position;
-			}
-
-			public override void LoadSave(ForkElevator elevator) {
-				elevator.state = (State)this.state;
-				elevator.goingDown = this.goingDown;
-				elevator.timeElapsedSinceStateChange = this.timeElapsedSinceStateChange;
-				elevator.raisedHeight = this.raisedHeight;
-				elevator.loweredHeight = this.loweredHeight;
-				elevator.curSpeed = this.curSpeed;
-				elevator.playerStandingInElevator = this.playerStandingInElevator;
-				elevator.transform.parent.position = this.position;
 			}
 		}
 #endregion

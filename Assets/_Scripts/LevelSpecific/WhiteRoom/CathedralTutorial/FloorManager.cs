@@ -7,9 +7,9 @@ using StateUtils;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
-    public class FloorManager : SingletonSaveableObject<FloorManager, FloorManager.FloorManagerSave> {
+    public class FloorManager : SingletonSuperspectiveObject<FloorManager, FloorManager.FloorManagerSave> {
 
-        public enum Floor {
+        public enum Floor : byte {
             None,
             Floor1,
             Floor2,
@@ -30,7 +30,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         public Dictionary<Floor, FloorPuzzle> floors;
         private int _currentValue = 0;
 
-        public int currentValue {
+        public int CurrentValue {
             get => _currentValue;
             set {
                 if (value != _currentValue) {
@@ -45,7 +45,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             }
         }
 
-        private void OnValidate() {
+        protected override void OnValidate() {
+            base.OnValidate();
+            
             if (puzzleFloors != null) {
                 floors = puzzleFloors.ToDictionary(pf => pf.floor, pf => pf);
             }
@@ -113,19 +115,21 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
             this.floor.Set(floorToSet);
         }
 
+        public override void LoadSave(FloorManagerSave save) {
+            CurrentValue = save.currentValue;
+            floor.LoadFromSave(save.stateSave);
+        }
+
         public override string ID => "CathedralTutorialFloorManager";
 
         [Serializable]
-        public class FloorManagerSave : SerializableSaveObject<FloorManager> {
-            private StateMachine<Floor>.StateMachineSave stateSave;
-            private int currentValue;
+        public class FloorManagerSave : SaveObject<FloorManager> {
+            public StateMachine<Floor>.StateMachineSave stateSave;
+            public int currentValue;
+            
             public FloorManagerSave(FloorManager script) : base(script) {
-                this.currentValue = script.currentValue;
+                this.currentValue = script.CurrentValue;
                 this.stateSave = script.floor.ToSave();
-            }
-            public override void LoadSave(FloorManager script) {
-                script.currentValue = this.currentValue;
-                script.floor.LoadFromSave(this.stateSave);
             }
         }
     }

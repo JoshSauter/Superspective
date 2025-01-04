@@ -6,9 +6,9 @@ using NaughtyAttributes;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
-using ScramblerReference = SerializableClasses.SerializableReference<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave>;
+using ScramblerReference = SerializableClasses.SuperspectiveReference<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave>;
 
-public class NoiseScrambleOverlay : SingletonSaveableObject<NoiseScrambleOverlay, NoiseScrambleOverlay.NoiseScrambleOverlaySave>, CustomAudioJob {
+public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOverlay, NoiseScrambleOverlay.NoiseScrambleOverlaySave>, CustomAudioJob {
     public static Dictionary<string, ScramblerReference> scramblers = new Dictionary<string, ScramblerReference>();
     [SerializeField]
     Shader noiseShader;
@@ -20,16 +20,16 @@ public class NoiseScrambleOverlay : SingletonSaveableObject<NoiseScrambleOverlay
     public const float MAX_VOLUME_DISTANCE = 10f;
     public const float ZERO_VOLUME_DISTANCE = 75;
 
-    private float timeWhenOverrideValueSet = -1;
+    private float timeWhenGlobalValueSet = -1;
     private float _globalValue = -1;
     private float GlobalValue {
         get => _globalValue;
         set {
             if (value < 0) {
-                timeWhenOverrideValueSet = -1;
+                timeWhenGlobalValueSet = -1;
             }
             else {
-                timeWhenOverrideValueSet = Time.time;
+                timeWhenGlobalValueSet = Time.time;
             }
             _globalValue = value;
         }
@@ -85,7 +85,7 @@ public class NoiseScrambleOverlay : SingletonSaveableObject<NoiseScrambleOverlay
     }
 
     private void LateUpdate() {
-        if (timeWhenOverrideValueSet > 0 && Time.time - timeWhenOverrideValueSet > 0.15f) {
+        if (timeWhenGlobalValueSet > 0 && Time.time - timeWhenGlobalValueSet > 0.15f) {
             GlobalValue = -1;
         }
     }
@@ -127,15 +127,19 @@ public class NoiseScrambleOverlay : SingletonSaveableObject<NoiseScrambleOverlay
         this.GlobalValue = overrideValue;
     }
 
+    public override void LoadSave(NoiseScrambleOverlaySave save) {
+        _globalValue = save.globalValue;
+        timeWhenGlobalValueSet = save.timeWhenOverrideValueSet;
+    }
+
     [Serializable]
-    public class NoiseScrambleOverlaySave : SerializableSaveObject<NoiseScrambleOverlay> {
-        private readonly float overrideValue;
+    public class NoiseScrambleOverlaySave : SaveObject<NoiseScrambleOverlay> {
+        public float globalValue;
+        public float timeWhenOverrideValueSet;
 
         public NoiseScrambleOverlaySave(NoiseScrambleOverlay script) : base(script) {
-            this.overrideValue = script.GlobalValue;
-        }
-        public override void LoadSave(NoiseScrambleOverlay script) {
-            script.GlobalValue = this.overrideValue;
+            this.globalValue = script.GlobalValue;
+            this.timeWhenOverrideValueSet = script.timeWhenGlobalValueSet;
         }
     }
 }

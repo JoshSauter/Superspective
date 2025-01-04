@@ -4,25 +4,26 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using LevelManagement;
+using UnityEngine.Serialization;
 
 namespace Saving {
 
     [Serializable]
     public struct SaveData {
-        
-        public SaveDataForScene managerScene;
-        public Dictionary<string, SaveDataForScene> scenes;
+        [FormerlySerializedAs("managerScene")]
+        public SaveDataForLevel managerLevel;
+        public Dictionary<Levels, SaveDataForLevel> levels;
         public DynamicObjectManager.DynamicObjectsSaveFile dynamicObjects;
 
         public static SaveData CreateSaveDataFromCurrentState() {
             // We force the ManagerScene to find all SaveableObjects because of the ExecuteInEditMode scripts in this scene
-            SaveManagerForScene managerSceneSaveManager = SaveManager.saveManagers[LevelManager.ManagerScene];
-            managerSceneSaveManager.ForceGetAllSaveableObjectsInScene();
+            SaveManager.SaveManagerForLevel managerLevelSaveManager = SaveManager.saveManagers[Levels.ManagerScene];
+            managerLevelSaveManager.ForceGetAllSaveableObjectsInScene();
             return new SaveData {
-                managerScene = SaveManager.saveManagers[LevelManager.ManagerScene].GetSaveFileForScene(),
-                scenes = SaveManager.saveManagers
-                    .Where(kv => kv.Key != LevelManager.ManagerScene)
-                    .ToDictionary(kv => kv.Key, kv => kv.Value.GetSaveFileForScene()),
+                managerLevel = SaveManager.saveManagers[Levels.ManagerScene].GetSaveFileForLevel(),
+                levels = SaveManager.saveManagers
+                    .Where(kv => kv.Key != Levels.ManagerScene)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value.GetSaveFileForLevel()),
                 dynamicObjects = DynamicObjectManager.GetDynamicObjectRecordsSave()
             };
         }

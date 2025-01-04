@@ -25,9 +25,9 @@ namespace Telemetry {
         private readonly List<TransformTelemetryData> telemetryData = new List<TransformTelemetryData>();
         private TransformTelemetryData telemetryDataBeforePlay;
 
-        private Player.PlayerSave GetPlayerTelemetryData => Player.instance.GetSaveObject() as Player.PlayerSave;
-        private CameraFollow.CameraFollowSave GetCamTelemetryData => Player.instance.cameraFollow.GetSaveObject() as CameraFollow.CameraFollowSave;
-        private PlayerLook.PlayerLookSave GetPlayerLookTelemetryData => Player.instance.look.GetSaveObject() as PlayerLook.PlayerLookSave;
+        private Player.PlayerSave GetPlayerTelemetryData => Player.instance.CreateSave() as Player.PlayerSave;
+        private CameraFollow.CameraFollowSave GetCamTelemetryData => Player.instance.cameraFollow.CreateSave() as CameraFollow.CameraFollowSave;
+        private PlayerLook.PlayerLookSave GetPlayerLookTelemetryData => Player.instance.look.CreateSave() as PlayerLook.PlayerLookSave;
         
         protected void Awake() {
             telemetryState = this.StateMachine(TelemetryState.Stopped);
@@ -81,9 +81,9 @@ namespace Telemetry {
             telemetryDataBeforePlay.playerCam = GetCamTelemetryData;
             telemetryDataBeforePlay.playerLook = GetPlayerLookTelemetryData;
             
-            telemetryData[0].player.LoadSave(Player.instance);
-            telemetryData[0].playerCam.LoadSave(Player.instance.cameraFollow);
-            telemetryData[0].playerLook.LoadSave(Player.instance.look);
+            Player.instance.LoadFromSave(telemetryData[0].player);
+            Player.instance.cameraFollow.LoadFromSave(telemetryData[0].playerCam);
+            Player.instance.look.LoadFromSave(telemetryData[0].playerLook);
 
             // Updates to next datapoint after each one is played back
             int index = 0;
@@ -92,9 +92,9 @@ namespace Telemetry {
             while (telemetryState == TelemetryState.PlayingBack) {
                 float time = telemetryState.Time;
                 
-                dataPoint.player.LoadSave(Player.instance);
-                dataPoint.playerCam.LoadSave(Player.instance.cameraFollow);
-                dataPoint.playerLook.LoadSave(Player.instance.look);
+                Player.instance.LoadFromSave(dataPoint.player);
+                Player.instance.cameraFollow.LoadFromSave(dataPoint.playerCam);
+                Player.instance.look.LoadFromSave(dataPoint.playerLook);
                 
                 // If we're at the last index, stop playing back
                 if (index == telemetryData.Count - 1) {

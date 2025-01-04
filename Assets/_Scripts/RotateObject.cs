@@ -4,7 +4,7 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class RotateObject : SaveableObject<RotateObject, RotateObject.RotateObjectSave> {
+public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.RotateObjectSave> {
     public bool importantToSave = false;
     public bool useLocalCoordinates = true;
 
@@ -22,35 +22,37 @@ public class RotateObject : SaveableObject<RotateObject, RotateObject.RotateObje
     }
 
 #region Saving
+
+    public override void LoadSave(RotateObjectSave save) {
+        useLocalCoordinates = save.useLocalCoordinates;
+        rotationsPerSecondX = save.rotationsPerSecondX;
+        rotationsPerSecondY = save.rotationsPerSecondY;
+        rotationsPerSecondZ = save.rotationsPerSecondZ;
+        if (useLocalCoordinates) {
+            transform.localRotation = save.rotation;
+        }
+        else {
+            transform.rotation = save.rotation;
+        }
+    }
+
     // Many usages of RotateObject have no gameplay impact and do not need to be saved. Mark importantToSave as true if you want to save it
     public override bool SkipSave => !importantToSave;
 
     [Serializable]
-    public class RotateObjectSave : SerializableSaveObject<RotateObject> {
-        readonly bool useLocalCoordinates;
-        readonly float rotationsPerSecondX;
-        readonly float rotationsPerSecondY;
-        readonly float rotationsPerSecondZ;
+    public class RotateObjectSave : SaveObject<RotateObject> {
+        public SerializableQuaternion rotation;
+        public float rotationsPerSecondX;
+        public float rotationsPerSecondY;
+        public float rotationsPerSecondZ;
+        public bool useLocalCoordinates;
 
-        readonly SerializableQuaternion rotation;
         public RotateObjectSave(RotateObject rotate) : base(rotate) {
             this.useLocalCoordinates = rotate.useLocalCoordinates;
             this.rotationsPerSecondX = rotate.rotationsPerSecondX;
             this.rotationsPerSecondY = rotate.rotationsPerSecondY;
             this.rotationsPerSecondZ = rotate.rotationsPerSecondZ;
             this.rotation = rotate.useLocalCoordinates ? rotate.transform.localRotation : rotate.transform.rotation;
-        }
-        public override void LoadSave(RotateObject script) {
-            script.useLocalCoordinates = this.useLocalCoordinates;
-            script.rotationsPerSecondX = this.rotationsPerSecondX;
-            script.rotationsPerSecondY = this.rotationsPerSecondY;
-            script.rotationsPerSecondZ = this.rotationsPerSecondZ;
-            if (script.useLocalCoordinates) {
-                script.transform.localRotation = this.rotation;
-            }
-            else {
-                script.transform.rotation = this.rotation;
-            }
         }
     }
 #endregion

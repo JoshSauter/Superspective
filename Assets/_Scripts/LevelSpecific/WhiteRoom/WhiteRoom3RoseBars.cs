@@ -3,14 +3,13 @@ using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Interactables;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3RoseBars : SaveableObject<WhiteRoom3RoseBars, WhiteRoom3RoseBars.WhiteRoom3RoseBarsSave>, AudioJobOnGameObject {
+    public class WhiteRoom3RoseBars : SuperspectiveObject<WhiteRoom3RoseBars, WhiteRoom3RoseBars.WhiteRoom3RoseBarsSave>, AudioJobOnGameObject {
         public PowerTrail powerTrail;
         public Button powerButton;
         public GameObject invisibleWall;
@@ -45,15 +44,25 @@ namespace LevelSpecific.WhiteRoom {
             barsWereUpLastFrame = barsAreUp;
         }
 
-        #region Saving
+#region Saving
+
+        public override void LoadSave(WhiteRoom3RoseBarsSave save) {
+            barsWereUpLastFrame = save.barsWereUpLastFrame;
+            barsAreUp = save.barsAreUp;
+            invisibleWall.SetActive(save.invisibleWallActive);
+            for (int i = 0; i < bars.Length; i++) {
+                bars[i].transform.position = save.barPositions[i];
+            }
+        }
+
         public override string ID => "WhiteRoom3RoseBars";
 
         [Serializable]
-        public class WhiteRoom3RoseBarsSave : SerializableSaveObject<WhiteRoom3RoseBars> {
-            bool barsWereUpLastFrame;
-            bool barsAreUp;
-            bool invisibleWallActive;
-            List<SerializableVector3> barPositions;
+        public class WhiteRoom3RoseBarsSave : SaveObject<WhiteRoom3RoseBars> {
+            public List<SerializableVector3> barPositions;
+            public bool barsWereUpLastFrame;
+            public bool barsAreUp;
+            public bool invisibleWallActive;
 
             public WhiteRoom3RoseBarsSave(WhiteRoom3RoseBars roseBars) : base(roseBars) {
                 this.barsWereUpLastFrame = roseBars.barsWereUpLastFrame;
@@ -61,16 +70,7 @@ namespace LevelSpecific.WhiteRoom {
                 this.invisibleWallActive = roseBars.invisibleWall.activeSelf;
                 this.barPositions = roseBars.bars.Select<GameObject, SerializableVector3>(b => b.transform.position).ToList();
             }
-
-            public override void LoadSave(WhiteRoom3RoseBars roseBars) {
-                roseBars.barsWereUpLastFrame = this.barsWereUpLastFrame;
-                roseBars.barsAreUp = this.barsAreUp;
-                roseBars.invisibleWall.SetActive(this.invisibleWallActive);
-                for (int i = 0; i < roseBars.bars.Length; i++) {
-                    roseBars.bars[i].transform.position = this.barPositions[i];
-                }
-            }
         }
-        #endregion
+#endregion
     }
 }

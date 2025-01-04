@@ -9,7 +9,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom.BlackRoom3 {
-    public class CentralPipeMachinery : SaveableObject, CustomAudioJob, AudioJobOnGameObject {
+    public class CentralPipeMachinery : SuperspectiveObject, CustomAudioJob, AudioJobOnGameObject {
         float maxShakeDistance = 32f;
         float minShakeDistance = 8f;
         float shakeIntensity = 4f;

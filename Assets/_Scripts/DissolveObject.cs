@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
 using Saving;
@@ -13,10 +11,10 @@ using UnityEngine.Serialization;
 namespace DissolveObjects {
     
     [RequireComponent(typeof(UniqueId))]
-    public class DissolveObject : SaveableObject<DissolveObject, DissolveObject.DissolveObjectSave> {
+    public class DissolveObject : SuperspectiveObject<DissolveObject, DissolveObject.DissolveObjectSave> {
         private const string DISSOLVE_OBJECT_KEYWORD = "DISSOLVE_OBJECT";
         
-        public enum State {
+        public enum State : byte {
             Materialized,
             Dematerializing,
             Dematerialized,
@@ -151,6 +149,8 @@ namespace DissolveObjects {
         }
 
         protected override void Init() {
+            base.Init();
+            
             InitializeStateMachine();
             switch (startingState) {
                 case State.Materialized:
@@ -260,19 +260,31 @@ namespace DissolveObjects {
             }
         }
         
-        #region Saving
+#region Saving
+
+        public override void LoadSave(DissolveObjectSave save) {
+            stateMachine.LoadFromSave(save.stateSave);
+            materializeTime = save.materializeTime;
+            dissolveAmount = save.dissolveAmount;
+            burnSize = save.burnSize;
+            burnColor = save.burnColor;
+            burnEmissionBrightness = save.burnEmissionBrightness;
+            advancedOptions = save.advancedOptions;
+            dissolveAnimationCurve = save.dissolveAnimationCurve;
+            cachedLayers = (int[])save.cachedLayers.Clone();
+        }
 
         [Serializable]
-        public class DissolveObjectSave : SerializableSaveObject<DissolveObject> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            private float materializeTime;
-            private float dissolveAmount;
-            private float burnSize;
-            private SerializableColor burnColor;
-            private float burnEmissionBrightness;
+        public class DissolveObjectSave : SaveObject<DissolveObject> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            public float materializeTime;
+            public float dissolveAmount;
+            public float burnSize;
+            public SerializableColor burnColor;
+            public float burnEmissionBrightness;
             public bool advancedOptions;
-            private SerializableAnimationCurve dissolveAnimationCurve;
-            private int[] cachedLayers;
+            public SerializableAnimationCurve dissolveAnimationCurve;
+            public int[] cachedLayers;
             
             public DissolveObjectSave(DissolveObject dissolveObject) : base(dissolveObject) {
                 this.stateSave = dissolveObject.stateMachine.ToSave();
@@ -285,19 +297,7 @@ namespace DissolveObjects {
                 this.dissolveAnimationCurve = dissolveObject.dissolveAnimationCurve;
                 this.cachedLayers = (int[])dissolveObject.cachedLayers.Clone();
             }
-
-            public override void LoadSave(DissolveObject dissolveObject) {
-                dissolveObject.stateMachine.LoadFromSave(this.stateSave);
-                dissolveObject.materializeTime = this.materializeTime;
-                dissolveObject.dissolveAmount = this.dissolveAmount;
-                dissolveObject.burnSize = this.burnSize;
-                dissolveObject.burnColor = this.burnColor;
-                dissolveObject.burnEmissionBrightness = this.burnEmissionBrightness;
-                dissolveObject.advancedOptions = this.advancedOptions;
-                dissolveObject.dissolveAnimationCurve = this.dissolveAnimationCurve;
-                dissolveObject.cachedLayers = (int[])this.cachedLayers.Clone();
-            }
         }
-        #endregion
+#endregion
     }
 }

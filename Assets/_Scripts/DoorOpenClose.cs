@@ -6,8 +6,8 @@ using SerializableClasses;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
-public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpenCloseSave> {
-    public enum DoorState {
+public class DoorOpenClose : SuperspectiveObject<DoorOpenClose, DoorOpenClose.DoorOpenCloseSave> {
+    public enum DoorState : byte {
         Closed,
         Opening,
         Open,
@@ -196,29 +196,50 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
 #endregion
 
 #region Saving
+
+    public override void LoadSave(DoorOpenCloseSave save) {
+        doorOpenCurve = save.doorOpenCurve;
+        doorCloseCurve = save.doorCloseCurve;
+
+        for (int i = 0; i < save.doorPieceScales.Length; i++) {
+            doorPieces[i].localScale = save.doorPieceScales[i];
+        }
+
+        _state = save.state;
+        timeSinceStateChange = save.timeSinceStateChange;
+        queueDoorClose = save.queueDoorClose;
+
+        closedScale = save.closedScale;
+        openedScale = save.openedScale;
+
+        playerWasInTriggerZoneLastFrame = save.playerWasInTriggerZoneLastFrame;
+        playerInTriggerZoneThisFrame = save.playerInTriggerZoneThisFrame;
+
+        timeBetweenEachDoorPiece = save.timeBetweenEachDoorPiece;
+        timeForEachDoorPieceToOpen = save.timeForEachDoorPieceToOpen;
+        timeForEachDoorPieceToClose = save.timeForEachDoorPieceToClose;
+    }
+
     public override bool SkipSave {
         get => !gameObject.activeInHierarchy;
         set { }
     }
 
     [Serializable]
-    public class DoorOpenCloseSave : SerializableSaveObject<DoorOpenClose> {
+    public class DoorOpenCloseSave : SaveObject<DoorOpenClose> {
+        public SerializableAnimationCurve doorCloseCurve;
+        public SerializableAnimationCurve doorOpenCurve;
+        public SerializableVector3[] doorPieceScales;
+        public SerializableVector3 closedScale;
+        public SerializableVector3 openedScale;
         public float timeBetweenEachDoorPiece;
         public float timeForEachDoorPieceToOpen;
         public float timeForEachDoorPieceToClose;
-
-        SerializableVector3 closedScale;
-        SerializableAnimationCurve doorCloseCurve;
-        SerializableAnimationCurve doorOpenCurve;
-
-        SerializableVector3[] doorPieceScales;
-        SerializableVector3 openedScale;
-        bool playerInTriggerZoneThisFrame;
-
-        bool playerWasInTriggerZoneLastFrame;
-        bool queueDoorClose;
-        DoorState state;
-        float timeSinceStateChange;
+        public float timeSinceStateChange;
+        public DoorState state;
+        public bool playerInTriggerZoneThisFrame;
+        public bool playerWasInTriggerZoneLastFrame;
+        public bool queueDoorClose;
 
         public DoorOpenCloseSave(DoorOpenClose door) : base(door) {
             doorOpenCurve = door.doorOpenCurve;
@@ -238,29 +259,6 @@ public class DoorOpenClose : SaveableObject<DoorOpenClose, DoorOpenClose.DoorOpe
             timeBetweenEachDoorPiece = door.timeBetweenEachDoorPiece;
             timeForEachDoorPieceToOpen = door.timeForEachDoorPieceToOpen;
             timeForEachDoorPieceToClose = door.timeForEachDoorPieceToClose;
-        }
-
-        public override void LoadSave(DoorOpenClose door) {
-            door.doorOpenCurve = doorOpenCurve;
-            door.doorCloseCurve = doorCloseCurve;
-
-            for (int i = 0; i < doorPieceScales.Length; i++) {
-                door.doorPieces[i].localScale = doorPieceScales[i];
-            }
-
-            door._state = state;
-            door.timeSinceStateChange = timeSinceStateChange;
-            door.queueDoorClose = queueDoorClose;
-
-            door.closedScale = closedScale;
-            door.openedScale = openedScale;
-
-            door.playerWasInTriggerZoneLastFrame = playerWasInTriggerZoneLastFrame;
-            door.playerInTriggerZoneThisFrame = playerInTriggerZoneThisFrame;
-
-            door.timeBetweenEachDoorPiece = timeBetweenEachDoorPiece;
-            door.timeForEachDoorPieceToOpen = timeForEachDoorPieceToOpen;
-            door.timeForEachDoorPieceToClose = timeForEachDoorPieceToClose;
         }
     }
 #endregion

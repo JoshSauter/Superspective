@@ -5827,12 +5827,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 658c4254e644b214c9714935b086d550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 180439628}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 180439628}
   state:
-    _state: 1
-    _prevState: 0
-    _time: 0
+    _state: 3
+    _prevState: 2
+    _time: 259.90463
   label: {fileID: 1392956393}
   keyboardPrompts:
   - {fileID: 229396103}
@@ -7860,6 +7862,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiCanvas: {fileID: 272460800}
   inputField: {fileID: 1538325373}
+  pausedTimeScale: 0
   cubePrefab: {fileID: 4397215519273683910, guid: db7f895775b7a4e46a3f6de9c8e9743a,
     type: 3}
   multiDimensionCubePrefab: {fileID: 1544007497055716618, guid: 080b4de68633fa74caed8ddad090ac94,
@@ -11304,8 +11307,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79cbd88b49b61534f87292c6667d61f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   sfxVolume: 0.5
   musicVolume: 0.5
   audioJobsToDebug:
@@ -14657,9 +14662,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5559bdf01982dac4e9e33c3b5f6df9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
-  startingScene: 12
+  _id: {fileID: 0}
+  startingScene: 20
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -14773,10 +14780,13 @@ MonoBehaviour:
   - level: 36
     _displayName: Ascension
     connectedLevels: 
+  - level: 37
+    _displayName: 
+    connectedLevels: 
   activeSceneName: 
-  loadedSceneNames: []
-  currentlyLoadingSceneNames: []
-  currentlyUnloadingSceneNames: []
+  loadedLevels: 
+  currentlyLoadingLevels: 
+  currentlyUnloadingLevels: 
   isCurrentlySwitchingScenes: 0
 --- !u!1 &394815695
 GameObject:
@@ -15212,13 +15222,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 441290173}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 441290176}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 441290176}
   triggerConditionsOld:
   - triggerCondition: 3
     useLocalCoordinates: 0
@@ -22077,7 +22089,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 2084211005}
-  m_VersionIndex: 2592
+  m_VersionIndex: 2598
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -22459,18 +22471,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0870e363690555847a43d9792aeeeff9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 623971857}
   staircaseMovement:
     stepState:
       _state: 0
-      _prevState: 0
-      _time: 0
+      _prevState: 1
+      _time: 41.720764
   jumpMovement:
     jumpState:
       _state: 0
-      _prevState: 0
-      _time: 0
+      _prevState: 2
+      _time: 7.7799935
   groundMovement:
     lastGroundTouchedDebug: 
     grounded:
@@ -22481,7 +22495,6 @@ MonoBehaviour:
       _state: 0
       _prevState: 0
       _time: 0
-  timeScale: 1
   snapToGroundEnabled: 1
   autoRun: 0
   thisRigidbody: {fileID: 0}
@@ -22502,8 +22515,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7a5373e2aa26fa4ab83f917defe1bd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 623971857}
   rotationBeforeViewLock: {x: 0, y: 0, z: 0, w: 0}
   cameraContainerTransform: {fileID: 0}
   cameraInitialLocalPos: {x: 0, y: 0, z: 0}
@@ -22572,10 +22587,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c64a417e00857664196cef9bc2ea48e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
-  noClipOn: 0
+  _id: {fileID: 623971857}
   middleMouseVerticalSpeed: 10
+  noClipOn: 0
 --- !u!114 &623971848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22588,8 +22605,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69762f1aa877fda4ea5c017df44892f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 623971857}
   look: {fileID: 0}
   movement: {fileID: 0}
   headbob: {fileID: 0}
@@ -22599,6 +22618,7 @@ MonoBehaviour:
   collider: {fileID: 0}
   renderer: {fileID: 0}
   interactsWithPlayerLayerMask: 0
+  lastFramePosition: {x: 0, y: 0, z: 0}
 --- !u!4 &623971849
 Transform:
   m_ObjectHideFlags: 0
@@ -22606,8 +22626,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.375, z: 36.625}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 159.87015, y: -739.2186, z: -351.841}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22617,7 +22637,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22663,8 +22683,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c304049bfa2a74545b88203a105bd4db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 623971857}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 623971857}
   viewBobCurve:
     serializedVersion: 2
     m_Curve:
@@ -22707,9 +22729,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  curBobAmount: 0
-  t: 0
-  curPeriod: 1
+  curBobAmount: -0.09778021
+  t: 0.68254906
+  curPeriod: 0.66260815
 --- !u!114 &623971853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22734,8 +22756,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b72f45e6bf997824b9b3b9ace2db3ed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   volumeDelta: 0.3
   minSpeed: 6
   maxSpeed: 40
@@ -22764,8 +22788,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39cb98eca5ecef4abc00d1332820c1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 623971857}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 623971857}
   thisGravityObj: {fileID: 0}
   thisRigidbody: {fileID: 623971845}
   thisCollider: {fileID: 0}
@@ -22775,7 +22801,7 @@ MonoBehaviour:
   state:
     _state: 0
     _prevState: 0
-    _time: 0
+    _time: 284.0239
 --- !u!114 &623971857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29811,8 +29837,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e72270755a14d85bb10c71095957071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   player: {fileID: 623971843}
 --- !u!1 &938140790
 GameObject:
@@ -31275,13 +31303,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 978358501}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 978358504}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 978358504}
   triggerConditionsOld:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -32075,12 +32105,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 658c4254e644b214c9714935b086d550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1002357133}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1002357133}
   state:
-    _state: 0
-    _prevState: 0
-    _time: 0
+    _state: 1
+    _prevState: 1
+    _time: 284.0239
   label: {fileID: 608056472}
   keyboardPrompts:
   - {fileID: 284425255}
@@ -33103,32 +33135,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bde97680eb164824999c6226800d2377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   banners:
-  - level: 18
+  - banner: {fileID: 1232568248}
     overrideKey: 
-    banner: {fileID: 1232568248}
-  - level: 14
+    level: 18
+    skipSfx: 0
+  - banner: {fileID: 1659195838}
     overrideKey: 
-    banner: {fileID: 1659195838}
-  - level: 13
+    level: 14
+    skipSfx: 0
+  - banner: {fileID: 841803766}
     overrideKey: 
-    banner: {fileID: 841803766}
-  - level: 12
+    level: 13
+    skipSfx: 0
+  - banner: {fileID: 1593681515}
     overrideKey: 
-    banner: {fileID: 1593681515}
-  - level: 20
+    level: 12
+    skipSfx: 0
+  - banner: {fileID: 1265665701}
     overrideKey: 
-    banner: {fileID: 1265665701}
-  - level: 0
+    level: 20
+    skipSfx: 0
+  - banner: {fileID: 696710690}
     overrideKey: ItFollows_GrowShrink
-    banner: {fileID: 696710690}
+    level: 0
+    skipSfx: 1
   state:
     _state: 0
-    _prevState: 0
-    _time: 0
-  lastBannerLoaded: 
+    _prevState: 2
+    _time: 65.01956
+  lastBannerLoaded: ForkWhiteRoom3
   queuedBanner: 
   currentlyPlayingBanner: 
 --- !u!225 &1038374371
@@ -37028,15 +37068,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b0079bb50a6b1f41a9ed799cd9fca8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1195260050}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1195260050}
   topLetterboxBar: {fileID: 1274354492}
   bottomLetterboxBar: {fileID: 1540861680}
   LETTERBOX_DISAPPEAR_TIME: 2.5
   state:
     _state: 0
-    _prevState: 0
-    _time: 0
+    _prevState: 1
+    _time: 74.00191
 --- !u!114 &1195260050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37260,12 +37302,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9986c059ada1ec447893ba4f408b51fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1208848657}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1208848657}
   state:
-    _state: 1
-    _prevState: 0
-    _time: 0
+    _state: 3
+    _prevState: 2
+    _time: 252.35297
   label: {fileID: 522338435}
   keyboardPrompts:
   - {fileID: 2117937477}
@@ -47415,8 +47459,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3843156f05840f545b955a89ba5969ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1554336844}
   totalOffsetApplied: {x: 0, y: 0}
 --- !u!114 &1554336844
 MonoBehaviour:
@@ -55121,8 +55167,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1734990132}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1734990132}
   triggerConditionsOld:
   - triggerCondition: 5
     useLocalCoordinates: 0
@@ -56857,12 +56905,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 658c4254e644b214c9714935b086d550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1800991430}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1800991430}
   state:
     _state: 1
-    _prevState: 0
-    _time: 0
+    _prevState: 1
+    _time: 284.0239
   label: {fileID: 1754711379}
   keyboardPrompts:
   - {fileID: 1042006113}
@@ -57145,12 +57195,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23080fdd6271c07448ec761b56883742, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
-  currentLerpSpeed: 45
+  _id: {fileID: 0}
+  currentLerpSpeed: 20
   relativeStartPosition: {x: 0, y: 0, z: 0}
-  relativePositionLastFrame: {x: 0, y: 0, z: 0}
-  worldPositionLastFrame: {x: 0, y: 0, z: 0}
+  relativePositionLastFrame: {x: 0.013322569, y: -0.0146361, z: -0.104417615}
+  worldPositionLastFrame: {x: 151.0217, y: -751.49994, z: -336.2996}
   shouldFollow: 1
 --- !u!114 &1809741060
 MonoBehaviour:
@@ -57338,8 +57390,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0923359e9e352a4b9b11c7b7161ad67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   m_Radius: 0.409
   m_SampleCount: 1
   m_OcclusionIntensity: 1.78
@@ -57361,8 +57415,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543dc804960a8c64b9a7d40169eeee43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   debugMode: 0
   checkPortalDepth: 1
   depthSensitivity: 1
@@ -57407,7 +57463,6 @@ MonoBehaviour:
     m_NumAlphaKeys: 4
   edgeColorGradientTexture: {fileID: 0}
   edgeDetectShader: {fileID: 4800000, guid: 233b38d5c7c0ec549b6341830ccac5b7, type: 3}
-  cameraDepthNormalsTexture: {fileID: 0}
 --- !u!114 &1809741072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57420,8 +57475,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3e106f67c3316343b8ef39a73b59268, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   defaultFOV: 90
   zoomed: 0
   otherCameras:
@@ -57455,14 +57512,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809741056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aea598947758dd84f9349be1e51f17c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG: 0
   sceneViewCamera: {fileID: 0}
-  cachedEnableState: 1
+  cachedEnableState: 0
 --- !u!114 &1809741075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57596,8 +57653,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a9a18b83e38fb54b8208d9636066e06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 0}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 0}
   noiseShader: {fileID: 4800000, guid: ccdd82dc63bf54e4d905274f7beb125b, type: 3}
 --- !u!114 &1809741079
 MonoBehaviour:
@@ -66050,7 +66109,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh7583854
+  m_Name: pb_Mesh5091282
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -67364,7 +67423,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 405e15bca3f07fb4f982a0c3af352495, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetFramerate: 15
+  targetFramerate: 5
+  numOperations: 0
 --- !u!4 &2106594819
 Transform:
   m_ObjectHideFlags: 0

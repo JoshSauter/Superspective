@@ -9,18 +9,18 @@ using StateUtils;
 using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorwaySave> {
+public class FrontDoorway : SuperspectiveObject<FrontDoorway, FrontDoorway.FrontDoorwaySave> {
 	public DimensionObject movingDoorway, staticOpenDoorway;
 	public Transform leftDoor, rightDoor;
 	public Renderer visibilityMask;
 
-	private const float timeToMove = 5f;
-	const float distanceToMove = 5;
-	private AnimationCurve doorMoveCurve = AnimationCurve.EaseInOut(0,0,1,distanceToMove);
-	private BladeEdgeDetection edgeDetection => MaskBufferRenderTextures.instance.edgeDetection;
+	private const float TIME_TO_MOVE = 5f;
+	private const float DISTANCE_TO_MOVE = 5;
+	private readonly AnimationCurve doorMoveCurve = AnimationCurve.EaseInOut(0,0,1,DISTANCE_TO_MOVE);
+	private BladeEdgeDetection EdgeDetection => MaskBufferRenderTextures.instance.edgeDetection;
 	public ToggleEdgeDetectionOnPortal portalEdgeColors;
 
-	public enum State {
+	public enum State : byte {
         Open,
         Closing,
         Closed
@@ -32,7 +32,7 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
 
         state = this.StateMachine(State.Open);
 
-        state.AddStateTransition(State.Closing, State.Closed, timeToMove);
+        state.AddStateTransition(State.Closing, State.Closed, TIME_TO_MOVE);
     }
 
     public void Close() {
@@ -42,8 +42,8 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
     }
 
     void Update() {
-	    bool edgesAreWhite = edgeDetection.EdgesAreWhite();
-	    bool edgesAreBlack = edgeDetection.EdgesAreBlack();
+	    bool edgesAreWhite = EdgeDetection.EdgesAreWhite();
+	    bool edgesAreBlack = EdgeDetection.EdgesAreBlack();
 	    visibilityMask.enabled = state != State.Open && edgesAreBlack && portalEdgeColors.portalEdgesAreWhite;
 	    if (edgesAreWhite) {
 		    movingDoorway.SwitchVisibilityState(VisibilityState.Invisible, true);
@@ -60,7 +60,7 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
 			    t = 0;
 			    break;
 		    case State.Closing:
-			    t = state.Time / timeToMove;
+			    t = state.Time / TIME_TO_MOVE;
 			    break;
 		    case State.Closed:
 			    t = 1;
@@ -73,17 +73,18 @@ public class FrontDoorway : SaveableObject<FrontDoorway, FrontDoorway.FrontDoorw
     }
     
 #region Saving
-		[Serializable]
-		public class FrontDoorwaySave : SerializableSaveObject<FrontDoorway> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            
-			public FrontDoorwaySave(FrontDoorway script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
 
-			public override void LoadSave(FrontDoorway script) {
-                script.state.LoadFromSave(this.stateSave);
-			}
+	public override void LoadSave(FrontDoorwaySave save) {
+		state.LoadFromSave(save.stateSave);
+	}
+
+	[Serializable]
+	public class FrontDoorwaySave : SaveObject<FrontDoorway> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        
+		public FrontDoorwaySave(FrontDoorway script) : base(script) {
+            this.stateSave = script.state.ToSave();
 		}
+	}
 #endregion
 }

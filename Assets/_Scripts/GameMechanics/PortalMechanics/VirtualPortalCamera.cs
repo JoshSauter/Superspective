@@ -161,7 +161,7 @@ namespace PortalMechanics {
 
 			renderSteps = 0;
 			foreach (var p in allActivePortals) {
-				p.SetPortalRenderingDisabledFlag();
+				p.ApplyPortalRenderingModeToRenderers();
 				// Ignore disabled portals
 				if (!p.PortalRenderingIsEnabled) continue;
 
@@ -261,7 +261,7 @@ namespace PortalMechanics {
 				else {
 					bool wasPausedState = visiblePortal.pauseRendering;
 					visiblePortal.pauseRendering = true;
-					visiblePortal.SetPortalRenderingDisabledFlag();
+					visiblePortal.ApplyPortalRenderingModeToRenderers();
 					visiblePortal.pauseRendering = wasPausedState;
 				}
 			}
@@ -426,8 +426,12 @@ namespace PortalMechanics {
 			}
 			bool isInCameraFrustum = testPortal.IsVisibleFrom(cam);
 			bool isWithinParentPortalScreenBounds = parentPortalScreenBounds.Any(parentBound => testPortalBounds.Any(testPortalBound => testPortalBound.Overlaps(parentBound)));
-			bool isFacingCamera = Vector3.Dot(testPortal.IntoPortalVector, (cam.transform.position - testPortal.ClosestPoint(cam.transform.position)).normalized) < 0.05f;
-			bool result = isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingCamera && !IsInvisibleDimensionObject();
+
+			// The isFacingPlayer check can have false negatives when the camera is significantly lagging behind the player, such as in freefall
+			// so we use the player's position for this check instead of the camera's
+			Vector3 playerPos = Player.instance.transform.position;
+			bool isFacingPlayer = Vector3.Dot(testPortal.IntoPortalVector, (playerPos - testPortal.ClosestPoint(playerPos)).normalized) < 0.05f;
+			bool result = isInCameraFrustum && isWithinParentPortalScreenBounds && isFacingPlayer && !IsInvisibleDimensionObject();
 			return result;
 		}
 
@@ -481,7 +485,7 @@ namespace PortalMechanics {
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
 			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.ScaleFactor;
-			bool shouldUseDefaultProjectionMatrix = depth == 0 && distanceToPortal < 2*clearSpaceBehindPortal;
+			bool shouldUseDefaultProjectionMatrix = depth == 0 && (distanceToPortal < 2*clearSpaceBehindPortal || inPortal.IsVolumetricPortalEnabled());
 			if (DEBUG) {
 				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
 			}

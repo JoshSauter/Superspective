@@ -6,11 +6,10 @@ using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LevelSpecific.TransitionWhiteRoom_Fork {
-    public class InfiniteHallwayRightPortal : SaveableObject<InfiniteHallwayRightPortal, InfiniteHallwayRightPortal.Save> {
-        public enum RightHallwayState {
+    public class InfiniteHallwayRightPortal : SuperspectiveObject<InfiniteHallwayRightPortal, InfiniteHallwayRightPortal.Save> {
+        public enum RightHallwayState : byte {
             Inactive,
             PlayerInHallway,
             ExitsConnected,
@@ -29,8 +28,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         protected override void Awake() {
             base.Awake();
             
-            lowerPlatformPortal.pauseRendering = !ExitsAreConnected;
-            lowerPlatformPortal.pauseLogic = !ExitsAreConnected;
+            lowerPlatformPortal.SetPortalModes(!ExitsAreConnected ? PortalRenderMode.Invisible : PortalRenderMode.Normal, !ExitsAreConnected ? PortalPhysicsMode.None : PortalPhysicsMode.Normal);
 
             InitializeStateMachine();
         }
@@ -84,10 +82,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         void Update() {
             bool shouldPause = !ExitsAreConnected;
 
-            lowerPlatformPortal.pauseRendering = shouldPause;
-            lowerPlatformPortal.pauseLogic = shouldPause;
-
-            lowerPlatformPortal.SetPortalRenderingDisabledFlag();
+            lowerPlatformPortal.SetPortalModes(shouldPause ? PortalRenderMode.Invisible : PortalRenderMode.Normal, shouldPause ? PortalPhysicsMode.None : PortalPhysicsMode.Normal);
 
             turnAroundTeleport.teleportEnter.enabled = !ExitsAreConnected;
         }
@@ -129,21 +124,21 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
         }
     
 #region Saving
+
+        public override void LoadSave(Save save) {
+            rightHallwayState.LoadFromSave(save.stateSave);
+        }
+
         public override string ID => "InfiniteHallwayRightPortal";
         
         [Serializable]
-        public class Save : SerializableSaveObject<InfiniteHallwayRightPortal> {
+        public class Save : SaveObject<InfiniteHallwayRightPortal> {
             public StateMachine<RightHallwayState>.StateMachineSave stateSave;
             
             public Save(InfiniteHallwayRightPortal script) : base(script) {
                 stateSave = script.rightHallwayState.ToSave();
             }
-            
-            public override void LoadSave(InfiniteHallwayRightPortal script) {
-                script.rightHallwayState.LoadFromSave(this.stateSave);
-            }
         }
-
 #endregion
     }
 }

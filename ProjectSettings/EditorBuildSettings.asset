@@ -9,13 +9,13 @@ EditorBuildSettings:
     path: Assets/__Scenes/__ManagerScene.unity
     guid: 3fcf0f08a36318544bf0e8c697f9b3b7
   - enabled: 0
-    path: Assets/PrototypeAndTesting/WaterTest.unity
+    path: Assets/PrototypeAndTesting/_TestScenes/WaterTest.unity
     guid: c89be43f322dbfd4d87aa85eb1945a90
   - enabled: 1
-    path: Assets/PrototypeAndTesting/PortalTestScene.unity
+    path: Assets/PrototypeAndTesting/_TestScenes/PortalTestScene.unity
     guid: c7bf95f83a6530d4d850792fd3e62f03
   - enabled: 1
-    path: Assets/PrototypeAndTesting/_TestScene.unity
+    path: Assets/PrototypeAndTesting/_TestScenes/_TestScene.unity
     guid: 332e1962a8c708447a42a2b310b15c5e
   - enabled: 1
     path: Assets/__Scenes/_EmptyRoom.unity
@@ -113,4 +113,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/Ascension/_Ascension1.unity
     guid: 03863cc05dbc4e94a8d3d4616f9f8856
+  - enabled: 1
+    path: Assets/PrototypeAndTesting/_TestScenes/SuperspectiveObjectTest.unity
+    guid: 89e6408470ed0984cab7818ab42ab36c
   m_configObjects: {}

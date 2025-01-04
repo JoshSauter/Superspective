@@ -11,7 +11,7 @@ using UnityEngine.Events;
 namespace PictureTeleportMechanics {
     [RequireComponent(typeof(UniqueId))]
     [RequireComponent(typeof(ViewLockObject))]
-    public class PictureTeleport : SaveableObject<PictureTeleport, PictureTeleport.PictureTeleportSave> {
+    public class PictureTeleport : SuperspectiveObject<PictureTeleport, PictureTeleport.PictureTeleportSave> {
         public static Dictionary<string, BigFrame> bigFrames = new Dictionary<string, BigFrame>();
 
         public static string BigFrameKey(string scene, string name) {
@@ -133,16 +133,27 @@ namespace PictureTeleportMechanics {
 
         #region Saving
 
+        public override void LoadSave(PictureTeleportSave save) {
+            targetPosition = save.targetPosition;
+            targetRotation = save.targetRotation;
+            targetCameraPosition = save.targetCameraPosition;
+            targetCameraRotation = save.targetCameraRotation;
+            targetLookY = save.targetLookY;
+            startSsaoIntensity = save.startSsaoIntensity;
+            ssao.m_OcclusionIntensity = save.curSsaoIntensity;
+            ssaoBlendTimeRemaining = save.ssaoBlendTimeRemaining;
+        }
+
         [Serializable]
-        public class PictureTeleportSave : SerializableSaveObject<PictureTeleport> {
-            SerializableVector3 targetPosition;
-            SerializableVector3 targetRotation;
-            SerializableVector3 targetCameraPosition;
-            SerializableVector3 targetCameraRotation;
-            float targetLookY;
-            float startSsaoIntensity;
-            float curSsaoIntensity;
-            float ssaoBlendTimeRemaining;
+        public class PictureTeleportSave : SaveObject<PictureTeleport> {
+            public SerializableVector3 targetPosition;
+            public SerializableVector3 targetRotation;
+            public SerializableVector3 targetCameraPosition;
+            public SerializableVector3 targetCameraRotation;
+            public float targetLookY;
+            public float startSsaoIntensity;
+            public float curSsaoIntensity;
+            public float ssaoBlendTimeRemaining;
 
             public PictureTeleportSave(PictureTeleport script) : base(script) {
                 this.targetPosition = script.targetPosition;
@@ -153,17 +164,6 @@ namespace PictureTeleportMechanics {
                 this.startSsaoIntensity = script.startSsaoIntensity;
                 this.curSsaoIntensity = script.ssao.m_OcclusionIntensity;
                 this.ssaoBlendTimeRemaining = script.ssaoBlendTimeRemaining;
-            }
-
-            public override void LoadSave(PictureTeleport script) {
-                script.targetPosition = this.targetPosition;
-                script.targetRotation = this.targetRotation;
-                script.targetCameraPosition = this.targetCameraPosition;
-                script.targetCameraRotation = this.targetCameraRotation;
-                script.targetLookY = this.targetLookY;
-                script.startSsaoIntensity = this.startSsaoIntensity;
-                script.ssao.m_OcclusionIntensity = this.curSsaoIntensity;
-                script.ssaoBlendTimeRemaining = this.ssaoBlendTimeRemaining;
             }
         }
         #endregion

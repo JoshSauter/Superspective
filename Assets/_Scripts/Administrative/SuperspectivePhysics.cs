@@ -120,10 +120,6 @@ public static class SuperspectivePhysics {
 			ignoredCollisionsForPair.Add(identifier);
 		}
 		else {
-			// if (collider1.FullPath().Contains("Corporeal") && collider2.FullPath().Contains("CubeReceptacle")) {
-			// 	Debug.LogError($"IT HAPPENED.\n{collider1.FullPath()} and {collider2.FullPath()}");
-			// }
-			
 			Physics.IgnoreCollision(pair.col1, pair.col2, true);
 			ignoredCollisions.Add(pair, new HashSet<string>() { identifier });
 		}
@@ -188,7 +184,7 @@ public static class SuperspectivePhysics {
 			.ForEach(Debug.Log);
 	}
 
-	private static List<string> IgnoredColliderPairsDebugString(Func<ColliderPair, bool> filterOutCondition = null) {
+	public static List<string> IgnoredColliderPairsDebugString(Func<ColliderPair, bool> filterOutCondition = null) {
 		string GetDebugString(KeyValuePair<ColliderPair, HashSet<string>> kv) {
 			(ColliderPair pair, HashSet<string> ignoreSources) = kv;
 

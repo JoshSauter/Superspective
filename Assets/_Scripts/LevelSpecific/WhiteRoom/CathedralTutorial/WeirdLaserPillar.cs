@@ -9,28 +9,22 @@ using SerializableClasses;
 using StateUtils;
 
 [RequireComponent(typeof(UniqueId))]
-public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPillar.WeirdLaserPillarSave> {
+public class WeirdLaserPillar : SuperspectiveObject<WeirdLaserPillar, WeirdLaserPillar.WeirdLaserPillarSave> {
 	public PowerTrail powerTrailToReactTo;
 	ParticleSystem ps;
 
-	public enum State {
+	public enum State : byte {
         Off,
         On
     }
     public StateMachine<State> state;
 
-    private const float powerPropagationSpeed = 9.5f;
-    private float initialDelay => Mathf.Max(0f, (Vector3.Distance(transform.position, powerTrailToReactTo.transform.position) - 17.5f) / powerPropagationSpeed);
-    private const float airWhooshCrescendoTime = 2f;
-    private const float laserLoopDelay = 1.215f;
-    private const float cameraShakeTime = 2f;
-    private const float cameraShakeStartIntensity = 3.75f;
-    private const float cameraShakeStartIntensityMultiplierMin = .05f;
-
-    private float cameraShakeMultiplier => Mathf.Lerp(cameraShakeStartIntensityMultiplierMin, 1,
-	    1-Mathf.InverseLerp(5f, 40f, distanceFromPlayer));
-
-    private float distanceFromPlayer => Vector3.Distance(Player.instance.PlayerCam.transform.position, transform.position);
+    private const float POWER_PROPAGATION_SPEED = 9.5f;
+    private float InitialDelay => Mathf.Max(0f, (Vector3.Distance(transform.position, powerTrailToReactTo.transform.position) - 17.5f) / POWER_PROPAGATION_SPEED);
+    private const float AIR_WHOOSH_CRESCENDO_TIME = 2f;
+    private const float LASER_LOOP_DELAY = 1.215f;
+    private const float CAMERA_SHAKE_TIME = 2f;
+    private const float CAMERA_SHAKE_START_INTENSITY = 3.75f;
 
     protected override void Start() {
         base.Start();
@@ -41,14 +35,14 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
 
         powerTrailToReactTo.pwr.OnPowerBegin += () => state.Set(State.On);
         
-        state.AddTrigger(State.On, initialDelay, () => AudioManager.instance.PlayAtLocation(AudioName.AirWhoosh, ID, transform.position));
-        state.AddTrigger(State.On, initialDelay + airWhooshCrescendoTime, () => {
+        state.AddTrigger(State.On, InitialDelay, () => AudioManager.instance.PlayAtLocation(AudioName.AirWhoosh, ID, transform.position));
+        state.AddTrigger(State.On, InitialDelay + AIR_WHOOSH_CRESCENDO_TIME, () => {
 	        // Debug.Log($"Multiple: {cameraShakeMultiplier}, Distance: {distanceFromPlayer}");
-	        CameraShake.instance.Shake(transform.position, cameraShakeStartIntensity, cameraShakeTime);
+	        CameraShake.instance.Shake(transform.position, CAMERA_SHAKE_START_INTENSITY, CAMERA_SHAKE_TIME);
 	        AudioManager.instance.PlayAtLocation(AudioName.LaserLoopStart, ID, transform.position);
 	        ps.Play();
         });
-        state.AddTrigger(State.On, initialDelay + airWhooshCrescendoTime + laserLoopDelay, () => AudioManager.instance.PlayAtLocation(AudioName.LaserLoop, ID, transform.position));
+        state.AddTrigger(State.On, InitialDelay + AIR_WHOOSH_CRESCENDO_TIME + LASER_LOOP_DELAY, () => AudioManager.instance.PlayAtLocation(AudioName.LaserLoop, ID, transform.position));
     }
 
     private void Update() {
@@ -65,21 +59,22 @@ public class WeirdLaserPillar : SaveableObject<WeirdLaserPillar, WeirdLaserPilla
 	    }
     }
 
-    #region Saving
-		[Serializable]
-		public class WeirdLaserPillarSave : SerializableSaveObject<WeirdLaserPillar> {
-            private StateMachine<State>.StateMachineSave stateSave;
-            private SerializableParticleSystem particleSystemSave;
-            
-			public WeirdLaserPillarSave(WeirdLaserPillar script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.particleSystemSave = script.ps;
-			}
+#region Saving
 
-			public override void LoadSave(WeirdLaserPillar script) {
-                script.state.LoadFromSave(this.stateSave);
-                this.particleSystemSave.ApplyToParticleSystem(script.ps);
-			}
+	public override void LoadSave(WeirdLaserPillarSave save) {
+		state.LoadFromSave(save.stateSave);
+		ps.LoadFromSerializable(save.particleSystemSave);
+	}
+
+	[Serializable]
+	public class WeirdLaserPillarSave : SaveObject<WeirdLaserPillar> {
+        public StateMachine<State>.StateMachineSave stateSave;
+        public SerializableParticleSystem particleSystemSave;
+        
+		public WeirdLaserPillarSave(WeirdLaserPillar script) : base(script) {
+            this.stateSave = script.state.ToSave();
+            this.particleSystemSave = script.ps;
 		}
+	}
 #endregion
 }

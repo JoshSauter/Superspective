@@ -3,7 +3,7 @@ using PortalMechanics;
 using Saving;
 using UnityEngine;
 
-public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
+public class Headbob : SuperspectiveObject<Headbob, Headbob.HeadbobSave> {
     const float minPeriod = .24f;
     const float maxPeriod = .87f;
     const float minAmplitude = .5f;
@@ -28,7 +28,8 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
         Portal.BeforeAnyPortalPlayerTeleport += HandlePlayerTeleport;
     }
 
-    private void OnDisable() {
+    protected override void OnDisable() {
+        base.OnDisable();
         Portal.BeforeAnyPortalPlayerTeleport -= HandlePlayerTeleport;
     }
 
@@ -65,28 +66,28 @@ public class Headbob : SaveableObject<Headbob, Headbob.HeadbobSave> {
     }
 
 #region Saving
+
+    public override void LoadSave(HeadbobSave save) {
+        curBobAmount = save.curBobAmount;
+        t = save.t;
+        curPeriod = save.curPeriod;
+        curAmplitude = save.curAmplitude;
+    }
+    
     public override string ID => "Headbob";
 
     [Serializable]
-    public class HeadbobSave : SerializableSaveObject<Headbob> {
-        float curAmplitude;
-        float curBobAmount;
-        float curPeriod;
-
-        float t;
+    public class HeadbobSave : SaveObject<Headbob> {
+        public float curAmplitude;
+        public float curBobAmount;
+        public float curPeriod;
+        public float t;
 
         public HeadbobSave(Headbob headbob) : base(headbob) {
             curBobAmount = headbob.curBobAmount;
             t = headbob.t;
             curPeriod = headbob.curPeriod;
             curAmplitude = headbob.curAmplitude;
-        }
-
-        public override void LoadSave(Headbob headbob) {
-            headbob.curBobAmount = curBobAmount;
-            headbob.t = t;
-            headbob.curPeriod = curPeriod;
-            headbob.curAmplitude = curAmplitude;
         }
     }
 #endregion
