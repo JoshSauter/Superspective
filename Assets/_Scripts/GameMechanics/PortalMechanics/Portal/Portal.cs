@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using NaughtyAttributes;
 using SuperspectiveUtils;
 using System.Runtime.CompilerServices;
 using UnityEditor;
@@ -16,53 +15,8 @@ using Saving;
 using SerializableClasses;
 using Sirenix.OdinInspector;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace PortalMechanics {
-	/// <summary>
-	/// RecursiveTextures contains the mainTexture (what the camera sees)
-	/// as well as the depthNormalsTexture (used for image effects)
-	/// </summary>
-	[Serializable]
-	public class RecursiveTextures {
-		public string portalName;
-		public RenderTexture mainTexture;
-		public RenderTexture depthNormalsTexture;
-
-		public static RecursiveTextures CreateTextures(string name, string associatedPortalName) {
-			int width = SuperspectiveScreen.instance.currentPortalWidth;
-			int height = SuperspectiveScreen.instance.currentPortalHeight;
-			
-			RecursiveTextures recursiveTextures = new RecursiveTextures {
-				mainTexture = new RenderTexture(width, height, 24, RenderTextureFormat.DefaultHDR),
-				depthNormalsTexture = new RenderTexture(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight, 24, Portal.DepthNormalsTextureFormat, RenderTextureReadWrite.Linear)
-			};
-			recursiveTextures.mainTexture.name = $"{name}_MainTex";
-			recursiveTextures.depthNormalsTexture.name = $"{name}_DepthNormals";
-			recursiveTextures.portalName = associatedPortalName;
-			return recursiveTextures;
-		}
-
-		public void Release() {
-			if (mainTexture != null) {
-				mainTexture.Release();
-				GameObject.Destroy(mainTexture);
-			}
-
-			if (depthNormalsTexture != null) {
-				depthNormalsTexture.Release();
-				GameObject.Destroy(depthNormalsTexture);
-			}
-		}
-	}
-	
-	public enum PortalRenderMode : byte {
-		Normal = 0,    // Render the portal as normal
-		Debug = 1,     // Render the grid lines showing the location of portals only
-		Invisible = 2, // Don't render the portal surface at all
-		Wall = 3       // Render the portal surface as a wall of flat color
-	}
-
 	public enum PortalPhysicsMode : byte {
 		Normal = 0, // Player and PortalableObjects will pass through the portal as normal
 		Wall = 1,   // All objects will collide with the portal as if it were a wall
@@ -70,36 +24,14 @@ namespace PortalMechanics {
 	}
 	
 	[RequireComponent(typeof(UniqueId))]
-	public class Portal : SuperspectiveObject<Portal, Portal.PortalSave> {
-		private const string PORTAL_RENDERING_MODE_PROPERTY = "_PortalRenderingMode";
+	public partial class Portal : SuperspectiveObject<Portal, Portal.PortalSave> {
 		private const string PORTAL_NORMAL_PROPERTY = "_PortalNormal"; // Different use case for _PortalNormal than in PortalCopy
-		private const string SHADER_PATH = "Shaders/Suberspective/SuberspectivePortal";
 		private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
 		private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
 		private const float TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED = 1f;
 		
-		public static RenderTextureFormat DepthNormalsTextureFormat = RenderTextureFormat.ARGB32;
 		private static int lastTeleportedFrame = 0;
 		private static float lastTeleportedTime = 0f;
-		
-		private static Material _sharedPortalMaterial;
-		private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
-		// Will be same as SharedPortalMaterial in most cases, but may reference a different material if e.g. the Portal is a DimensionObject
-		public Material portalMaterial;
-		
-		public static bool forceDebugRenderMode = Application.isEditor;
-
-		[SerializeField]
-		private PortalRenderMode _renderMode = PortalRenderMode.Normal;
-		public PortalRenderMode RenderMode {
-			get => _renderMode;
-			set {
-				_renderMode = value;
-				ApplyPortalRenderingModeToRenderers();
-			}
-		}
-		// This is what is actually rendering to the screen, rather than the logical RenderMode		
-		private PortalRenderMode EffectiveRenderMode => forceDebugRenderMode ? PortalRenderMode.Debug : RenderMode;
 
 		[SerializeField]
 		private PortalPhysicsMode _physicsMode = PortalPhysicsMode.Normal;
@@ -118,21 +50,10 @@ namespace PortalMechanics {
 		[Header("Make sure the Transform's Z-direction arrow points into the portal")]
 		public string channel = "<Not set>";
 
-		private int consecutiveFramesVPShouldBeDisabled = 0;
 		public bool changeActiveSceneOnTeleport = false;
-		public bool changeCameraEdgeDetection;
-		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
-		public BladeEdgeDetection.EdgeColorMode edgeColorMode;
-		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
-		public Color edgeColor = Color.black;
-		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
-		public Gradient edgeColorGradient;
-		[NaughtyAttributes.ShowIf("changeCameraEdgeDetection")]
-		public Texture2D edgeColorGradientTexture;
 
-		[SerializeField]
-		private bool renderRecursivePortals = false;
-		public bool RenderRecursivePortals => !Application.isEditor && renderRecursivePortals;
+
+
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		public bool compositePortal = false;
 		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
@@ -145,12 +66,11 @@ namespace PortalMechanics {
 			transform.rotation = isFlipped ? flippedRotation : startRotation;
 		}
 
-		public bool skipIsVisibleCheck = false; // Useful for very large portals where the isVisible check doesn't work well
 		
-		[NaughtyAttributes.OnValueChanged(nameof(SetScaleFactor))]
+		[OnValueChanged(nameof(SetScaleFactor))]
 		public bool changeScale = false;
-		[NaughtyAttributes.ShowIf(nameof(changeScale))]
-		[NaughtyAttributes.OnValueChanged(nameof(SetScaleFactor))]
+		[ShowIf(nameof(changeScale))]
+		[OnValueChanged(nameof(SetScaleFactor))]
 		[Tooltip("Multiply the player size by this value when passing through this Portal (and inverse for the other Portal)")]
 		[Range(1f/64f, 64f)]
 		[SerializeField]
@@ -161,18 +81,9 @@ namespace PortalMechanics {
 		public float maxScaleAllowed = 6f;
 		private float MaxScaleAllowed => otherPortal != null ? Mathf.Max(maxScaleAllowed, otherPortal.maxScaleAllowed) : maxScaleAllowed;
 
-		private readonly string VOLUMETRIC_PORTAL_NAME = "Volumetric Portal";
-		[SerializeField]
-		SuperspectiveRenderer[] volumetricPortals;
-		private const float volumetricPortalEnableDistance = 5f;
 
-		[SerializeField]
-		private float volumetricPortalThickness = 1f;
-		public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
 
 		private static float TimeSinceLastTeleport => Time.time - lastTeleportedTime;
-		public static bool forceVolumetricPortalsOn = false;
-		private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn || PlayerRemainsInPortal || TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED;
 
 		public Vector3 IntoPortalVector {
 			get {
@@ -184,17 +95,7 @@ namespace PortalMechanics {
 				}
 			}
 		}
-
-		private bool IsInvisible {
-			get {
-				if (dimensionObject != null) {
-					return dimensionObject.EffectiveVisibilityState == VisibilityState.Invisible;
-				}
-
-				return false;
-			}
-		}
-		public SuperspectiveRenderer[] renderers;
+		
 		// Colliders are the infinitely thin planes on the Portal layer that interact with raycasts
 		public Collider[] colliders;
 		// Trigger colliders are the trigger zones that the CompositeMagicTriggers operate within to teleport the player/objects
@@ -203,25 +104,12 @@ namespace PortalMechanics {
 		CameraFollow playerCameraFollow;
 		bool teleportingPlayer = false;
 
-		[HorizontalLine]
-
 		public Portal otherPortal;
 		public HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
 
-		[SerializeField]
-		[NaughtyAttributes.ShowIf("DEBUG")]
-		RecursiveTextures internalRenderTexturesCopy;
 
 		public bool disableColliderWhilePaused = false;
-		public bool pauseRenderingWhenNotInActiveScene = false;
-		public bool pauseRendering = false;
 
-		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-		public bool PortalRenderingIsEnabled => otherPortal != null &&
-		                                        !pauseRendering &&
-		                                        gameObject.activeSelf &&
-		                                        RenderMode == PortalRenderMode.Normal &&
-		                                        (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
 		[ShowInInspector]
 		public bool PortalLogicIsEnabled => otherPortal != null && PhysicsMode == PortalPhysicsMode.Normal && gameObject.activeSelf;
 
@@ -282,8 +170,8 @@ namespace PortalMechanics {
 		public PillarDimensionObject pillarDimensionObject;
 		public CompositeMagicTrigger trigger;
 
-		private const float PORTAL_THICKNESS = 1.55f;
-		private float PortalThickness => PORTAL_THICKNESS / (changeScale ? ScaleFactor : 1f);
+		private const float PORTAL_TRIGGER_THICKNESS = 1.55f;
+		private float PortalTriggerThickness => PORTAL_TRIGGER_THICKNESS / (changeScale ? ScaleFactor : 1f);
 
 #region Events
 		// Type declarations
@@ -354,7 +242,7 @@ namespace PortalMechanics {
 			return FindObjectsOfType<Portal>().Where(p => p != thisPortal && p.channel == thisPortal.channel).ToArray();
 		}
 
-		[NaughtyAttributes.Button("Initialize Portal")]
+		[Button("Initialize Portal")]
 		public void InitializePortal() {
 			if (!gameObject.activeInHierarchy) return;
 			try {
@@ -440,7 +328,7 @@ namespace PortalMechanics {
 						triggerCollider = triggerColliderGO.PasteComponent(boxCollider);
 						triggerCollider.isTrigger = true;
 
-						boxCollider.size = boxCollider.size.WithZ(PortalThickness);
+						boxCollider.size = boxCollider.size.WithZ(PortalTriggerThickness);
 						break;
 					case MeshCollider meshCollider:
 						// Copy the collider's properties to the trigger collider
@@ -503,7 +391,7 @@ namespace PortalMechanics {
 				// Give the trigger colliders some thickness so the player can't phase through them with lag
 				if (c is BoxCollider boxCollider) {
 					var size = boxCollider.size;
-					boxCollider.size = size.WithZ(PortalThickness);
+					boxCollider.size = size.WithZ(PortalTriggerThickness);
 				}
 			}
 
@@ -514,54 +402,6 @@ namespace PortalMechanics {
 					vp.SetFloat("_PortalScaleFactor", scaleFactor);
 				}
 			}
-		}
-
-		private void InitializeRenderers() {
-			if (!(renderers == null || renderers.Length == 0)) return;
-			
-			if (compositePortal) {
-				renderers = GetComponentsInChildren<Renderer>()
-					.Select(r => r.GetOrAddComponent<SuperspectiveRenderer>()).ToArray();
-			}
-			else {
-				renderers = new SuperspectiveRenderer[] { GetComponents<Renderer>().Select(r => r.GetOrAddComponent<SuperspectiveRenderer>()).FirstOrDefault() };
-			}
-		}
-
-		private void InitializeVolumetricPortals() {
-			// Clean up extra Volumetric Portals
-			foreach (var existingVolumetricPortal in transform.GetChildrenMatchingNameRecursively(VOLUMETRIC_PORTAL_NAME)) {
-				if (volumetricPortals != null && volumetricPortals.ToList().Exists(vp => vp.transform == existingVolumetricPortal)) continue;
-				
-				DestroyImmediate(existingVolumetricPortal.gameObject);
-			}
-
-			volumetricPortals = volumetricPortals?.Where(vp => vp != null).ToArray();
-
-			if (volumetricPortals != null && volumetricPortals.Length > 0) {
-				foreach (var vp in volumetricPortals){
-					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
-				}
-				return;
-			}
-
-			List<SuperspectiveRenderer> volumetricPortalsList = new List<SuperspectiveRenderer>();
-			foreach (SuperspectiveRenderer r in renderers) {
-				try {
-					SuperspectiveRenderer vp = GenerateExtrudedMesh(r.GetComponent<MeshFilter>(), VolumetricPortalThickness)
-						.GetOrAddComponent<SuperspectiveRenderer>();
-
-					vp.enabled = false;
-					vp.SetSharedMaterial(portalMaterial);
-					vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
-					volumetricPortalsList.Add(vp);
-				}
-				catch (Exception e) {
-					Debug.LogError($"{ID} in scene {gameObject.scene.name} failed to build volumetric portal, error: {e.StackTrace}");
-				}
-			}
-
-			volumetricPortals = volumetricPortalsList.ToArray();
 		}
 
 		private void CreateCompositeTrigger() {
@@ -595,34 +435,6 @@ namespace PortalMechanics {
 					TeleportPlayer(Player.instance.transform);
 				}
 			};
-		}
-
-		private void CreateRenderTexture(int width, int height) {
-			// Not sure why but it seems sometimes the Portals don't get OnDisable called when scene unloaded
-			if (this == null) {
-				OnDisable();
-				return;
-			}
-			debug.Log($"Creating render textures for new resolution {width}x{height}");
-			if (internalRenderTexturesCopy != null && (internalRenderTexturesCopy.mainTexture != null || internalRenderTexturesCopy.depthNormalsTexture != null)) {
-				internalRenderTexturesCopy.Release();
-			}
-			internalRenderTexturesCopy = RecursiveTextures.CreateTextures(ID, $"{channel}: {name}");
-			SetPropertiesOnMaterial();
-		}
-
-		private void SetPropertiesOnMaterial() {
-			if (!PortalRenderingIsEnabled) return;
-			
-			void SetTexturesForRenderers(SuperspectiveRenderer[] portalRenderers) {
-				foreach (var r in portalRenderers) {
-					r.SetTexture("_MainTex", internalRenderTexturesCopy.mainTexture);
-					r.SetTexture("_DepthNormals", internalRenderTexturesCopy.depthNormalsTexture);
-				}
-			}
-
-			SetTexturesForRenderers(renderers);
-			SetTexturesForRenderers(volumetricPortals);
 		}
 
 		protected override void Start() {
@@ -692,14 +504,6 @@ namespace PortalMechanics {
 				TeleportPlayer(Player.instance.transform);
 			}
 			lastPlayerPositionProcessed = Player.instance.transform.position;
-		}
-
-		// When a Portal is part of a DimensionObject, a new Material will be created with the DIMENSION_OBJECT keyword enabled
-		// This updates our Material reference to the new dimension object material
-		private void HandleMaterialChanged(Material newMaterial) {
-			if (newMaterial.name.EndsWith(DimensionObjectManager.DIMENSION_OBJECT_SUFFIX)) {
-				portalMaterial = newMaterial;
-			}
 		}
 
 		protected override void OnEnable() {
@@ -805,26 +609,6 @@ namespace PortalMechanics {
 				otherPortal.objectsInPortal.Add(portalableObj);
 			}
 		}
-
-		// Called before render process begins, either enable or disable the volumetric portals for this frame
-		void LateUpdate() {
-			SetEdgeDetectionColorProperties();
-			//debug.Log(volumetricPortalsShouldBeEnabled);
-			if (VolumetricPortalsShouldBeEnabled) {
-				EnableVolumetricPortal();
-				
-				consecutiveFramesVPShouldBeDisabled = 0;
-			}
-			else {
-				// Replacing with delayed disabling of VP
-				// DisableVolumetricPortal();
-				if (consecutiveFramesVPShouldBeDisabled > FRAMES_TO_WAIT_BEFORE_DISABLING_VP) {
-					DisableVolumetricPortal();
-				}
-				
-				consecutiveFramesVPShouldBeDisabled++;
-			}
-		}
 		#endregion
 		
 		MeshFilter GenerateExtrudedMesh(MeshFilter planarMeshFilter, float extrusionDistance) {
@@ -858,75 +642,14 @@ namespace PortalMechanics {
 			otherPortal = null;
 		}
 
-		public bool IsVolumetricPortalEnabled() {
-			return volumetricPortals.Any(vp => vp.enabled && vp.gameObject.layer != SuperspectivePhysics.InvisibleLayer);
-		}
-
-		public void SetVolumetricHiddenForPortalRendering(bool hidden) {
-			int targetLayer = hidden ? SuperspectivePhysics.InvisibleLayer : SuperspectivePhysics.VolumetricPortalLayer;
-			foreach (SuperspectiveRenderer vp in volumetricPortals) {
-				vp.gameObject.layer = targetLayer;
-			}
-		}
-
-		public void SetTexture(RenderTexture tex) {
-			if (!PortalRenderingIsEnabled) {
-				debug.LogWarning($"Attempting to set MainTexture for disabled portal: {gameObject.FullPath()}");
-				return;
-			}
-			
-			if (internalRenderTexturesCopy.mainTexture == null) { 
-				Debug.LogWarning($"Attempting to set MainTexture for portal w/ null mainTexture: {gameObject.FullPath()}");
-				return;
-			}
-
-			ApplyPortalRenderingModeToRenderers();
-
-			Graphics.CopyTexture(tex, internalRenderTexturesCopy.mainTexture);
-			SetPropertiesOnMaterial();
-		}
-
-		public void SetDepthNormalsTexture(RenderTexture tex) {
-			if (!PortalRenderingIsEnabled) {
-				debug.LogWarning($"Attempting to set DepthNormalsTexture for disabled portal: {gameObject.FullPath()}");
-				return;
-			}
-
-			if (internalRenderTexturesCopy.depthNormalsTexture == null) { 
-				Debug.LogWarning($"Attempting to set DepthNormalsTexture for portal w/ null depthNormalsTexture: {gameObject.FullPath()}");
-				return;
-			}
-
-			ApplyPortalRenderingModeToRenderers();
-			
-			Graphics.CopyTexture(tex, internalRenderTexturesCopy.depthNormalsTexture);
-			SetPropertiesOnMaterial();
-		}
-
+		/// <summary>
+		/// Sets the rendering and physics modes for the portal and applies the settings to the renderers and colliders.
+		/// </summary>
+		/// <param name="renderMode">PortalRenderMode for the Portal to use.</param>
+		/// <param name="physicsMode">PortalPhysicsMode for the Portal to use.</param>
 		public void SetPortalModes(PortalRenderMode renderMode, PortalPhysicsMode physicsMode) {
 			RenderMode = renderMode;
-			ApplyPortalRenderingModeToRenderers();
-
 			PhysicsMode = physicsMode;
-			ApplyPortalPhysicsModeToColliders();
-		}
-
-		/// <summary>
-		/// If portal rendering is disabled, set the _PortalRenderingDisabled flag on the portal's material
-		/// </summary>
-		public void ApplyPortalRenderingModeToRenderers() {
-			int renderMode = (int)EffectiveRenderMode;
-			Vector3 intoPortal = IntoPortalVector;
-			
-			foreach (SuperspectiveRenderer r in renderers) {
-				r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
-				r.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
-			}
-
-			foreach (SuperspectiveRenderer vp in volumetricPortals) {
-				vp.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
-				vp.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
-			}
 		}
 
 		public void ApplyPortalPhysicsModeToColliders() {
