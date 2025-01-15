@@ -1,13 +1,11 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Audio;
-using NaughtyAttributes;
 using PoweredObjects;
 using PowerTrailMechanics;
 using UnityEngine;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using StateUtils;
 using SuperspectiveUtils;
 

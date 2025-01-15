@@ -3,15 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Interactables;
-using NaughtyAttributes;
 using PortalMechanics;
 using PoweredObjects;
 using PowerTrailMechanics;
 using Saving;
-using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
-
 
 namespace LevelSpecific.WhiteRoom.CathedralTutorial {
     public class FloorPuzzle : MonoBehaviour {

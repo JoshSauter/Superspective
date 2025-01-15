@@ -146,7 +146,7 @@ namespace Saving {
             }
             
             if (!SaveManager.Register(this)) {
-                debug.LogError($"Failed to register SaveableObject in scene {SceneName}, destroying self.", true);
+                debug.LogError($"Failed to register SaveableObject with id {ID} in scene {SceneName}, destroying self.", true);
                 Destroy(gameObject);
             }
             else {

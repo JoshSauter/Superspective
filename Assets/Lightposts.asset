@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f1ca63a91b17724bbd99c8fa67e0180, type: 3}
+  m_Name: Lightposts
+  m_EditorClassIdentifier: 
+  array:
+  - {fileID: 2100000, guid: f5bab69a152e1b0418f0b66f096f72f5, type: 2}
+  - {fileID: 2100000, guid: 29f6bd0ac3ce259459fd269099190ade, type: 2}
+  - {fileID: 2100000, guid: df8842780fd7bd149831ae7b5f432192, type: 2}
+  - {fileID: 2100000, guid: 9c99d746135f986478c637742c613fd8, type: 2}
+  - {fileID: 2100000, guid: 1cad94430a2c9b04a9a4c333e080b83a, type: 2}
+  - {fileID: 2100000, guid: f7364d6fab3935f4f9a2887b021d5cc1, type: 2}
+  - {fileID: 2100000, guid: 36b55f1a72444f44f9267de79d3e2a18, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

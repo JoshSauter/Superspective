@@ -5,6 +5,7 @@ using Saving;
 using System;
 
 namespace LevelSpecific.BlackRoom {
+	// TODO: Replace with MagicTrigger
 	public class TogglePortalRender : SuperspectiveObject<TogglePortalRender, TogglePortalRender.TogglePortalRenderSave> {
 		bool initialized = false;
 		public DoorOpenClose enableDoor;
@@ -31,13 +32,13 @@ namespace LevelSpecific.BlackRoom {
 		}
 
 		void ResumePortalRendering() {
-			portal.pauseRendering = false;
-			portal.otherPortal.pauseRendering = false;
+			portal.RenderMode = PortalRenderMode.Normal;
+			portal.otherPortal.RenderMode = PortalRenderMode.Normal;
 		}
 
 		void PausePortalRendering() {
-			portal.pauseRendering = true;
-			portal.otherPortal.pauseRendering = true;
+			portal.RenderMode = PortalRenderMode.Invisible;
+			portal.otherPortal.RenderMode = PortalRenderMode.Invisible;
 		}
 
 #region Saving

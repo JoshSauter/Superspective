@@ -11,10 +11,11 @@
             #pragma fragment frag
 
             #include "../Suberspective/SuberspectiveHelpers.cginc"
+			#include "../RecursivePortals/PortalSurfaceHelpers.cginc"
 			
 			half4 _CameraDepthNormalsTexture_ST;
 			uniform float _PortalScaleFactor = 1;
-            uniform float _PortalRenderingDisabled = 0;
+            uniform float _PortalRenderingMode = 0;
 
             struct PortalMaskV2F {
 	            SuberspectiveV2F suberspective;
@@ -34,7 +35,20 @@
 
 			// Only write the object's depth to the DepthNormalsTexture, leave the normal at whatever value it was
 			fixed4 frag(PortalMaskV2F i) : SV_Target {
-				clip(-_PortalRenderingDisabled);
+				switch (_PortalRenderingMode) {
+					case 0: // Normal portal rendering
+						break;
+					case 1: // Debug portal rendering
+						ClipDebugPortalSurface(i.suberspective.worldPos, _PortalNormal);
+						break;
+					case 2: // Portal off (invisible)
+					case 3: // Wall
+						discard;
+					    return fixed4(0,0,0,0);
+					default:
+						discard;
+					    return fixed4(0,0,0,0);
+					}
 				SuberspectiveClipOnly(i.suberspective);
 				fixed4 sample = tex2D(_CameraDepthNormalsTexture, i.suberspective.clipPos);
 				float sampleDepthValue;

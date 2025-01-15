@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DimensionObjectMechanics;
-using Saving;
 using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 using UnityEngine;
@@ -20,6 +19,8 @@ namespace PortalMechanics {
         private const string PORTAL_RENDERING_MODE_PROPERTY = "_PortalRenderingMode";
         private const string SHADER_PATH = "Shaders/Suberspective/SuberspectivePortal";
         private const string VOLUMETRIC_PORTAL_NAME = "Volumetric Portal";
+        private const float TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED = 1f;
+        private const int FRAMES_TO_WAIT_BEFORE_DISABLING_VP = 10;
         
         public static bool forceDebugRenderMode = Application.isEditor;
         public static bool forceVolumetricPortalsOn = false;
@@ -28,6 +29,7 @@ namespace PortalMechanics {
         private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
         
         [SerializeField]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private PortalRenderMode _renderMode = PortalRenderMode.Normal;
         public PortalRenderMode RenderMode {
             get => _renderMode;
@@ -46,41 +48,73 @@ namespace PortalMechanics {
         
         private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn ||
                                                          PlayerRemainsInPortal ||
-                                                         TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED;
+                                                         (otherPortal && otherPortal.TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED);
         
         [SerializeField]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private bool renderRecursivePortals = false;
         public bool RenderRecursivePortals => !Application.isEditor && renderRecursivePortals;
         public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
+
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
+        public bool turnOnNormalPortalRenderingWhenPlayerTeleports = false;
         
-        
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public bool changeCameraEdgeDetection;
         [ShowIf(nameof(changeCameraEdgeDetection))]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public BladeEdgeDetection.EdgeColorMode edgeColorMode;
         [ShowIf(nameof(changeCameraEdgeDetection))]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public Color edgeColor = Color.black;
         [ShowIf(nameof(changeCameraEdgeDetection))]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public Gradient edgeColorGradient;
         [ShowIf(nameof(changeCameraEdgeDetection))]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public Texture2D edgeColorGradientTexture;
         
         [SerializeField]
         [ShowIf(nameof(DEBUG))]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private RecursiveTextures internalRenderTexturesCopy;
         
         // Will be same as SharedPortalMaterial in most cases, but may reference a different material if e.g. the Portal is a DimensionObject
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public Material portalMaterial;
         
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public bool skipIsVisibleCheck = false; // Useful for very large portals where the isVisible check doesn't work well
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public bool pauseRenderingWhenNotInActiveScene = false;
         
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public SuperspectiveRenderer[] renderers;
         [SerializeField]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private SuperspectiveRenderer[] volumetricPortals;
         
         [SerializeField]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private float volumetricPortalThickness = 1f;
         private int consecutiveFramesVPShouldBeDisabled = 0;
+
+        private void RenderingAwake() {
+            portalMaterial = SharedPortalMaterial;
+            gameObject.layer = SuperspectivePhysics.PortalLayer;
+
+            InitializeRenderers();
+            foreach (var r in renderers) {
+                r.gameObject.layer = SuperspectivePhysics.PortalLayer;
+                r.SetSharedMaterial(portalMaterial);
+                r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, (int)EffectiveRenderMode);
+                if (changeScale) {
+                    r.SetFloat("_PortalScaleFactor", scaleFactor);
+                }
+            }
+
+            InitializeVolumetricPortals();
+        }
         
         private void InitializeRenderers() {
             if (!(renderers == null || renderers.Length == 0)) return;
@@ -186,6 +220,16 @@ namespace PortalMechanics {
             }
         }
         
+        public bool IsVisibleFrom(Camera cam) {
+            if (skipIsVisibleCheck) {
+                // Still don't render portals that are very far away
+                Vector3 closestPoint = ClosestPoint(Player.instance.PlayerCam.transform.position, true, true);
+                return Vector3.Distance(closestPoint, Player.instance.PlayerCam.transform.position) < Player.instance.PlayerCam.farClipPlane;
+            }
+			
+            return renderers.Any(r => r.r.IsVisibleFrom(cam)) || volumetricPortals.Any(vp => vp.r.IsVisibleFrom(cam));
+        }
+        
         public bool IsVolumetricPortalEnabled() {
             return volumetricPortals.Any(vp => vp.enabled && vp.gameObject.layer != SuperspectivePhysics.InvisibleLayer);
         }
@@ -248,5 +292,139 @@ namespace PortalMechanics {
                 vp.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
             }
         }
+        
+        public void EnableVolumetricPortal() {
+            bool anyVolumetricPortalIsDisabled = volumetricPortals.Any(vp => !vp.enabled);
+            if (anyVolumetricPortalIsDisabled) {
+                // Don't spam the console when we have the volumetric portal debug setting on
+                if (!forceVolumetricPortalsOn) {
+                    debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
+                }
+                foreach (var vp in volumetricPortals) {
+                    if (!PortalRenderingIsEnabled) continue;
+					
+                    vp.SetSharedMaterial(portalMaterial);
+                    vp.enabled = true;
+                }
+            }
+        }
+
+        public void DisableVolumetricPortal() {
+            bool anyVolumetricPortalIsEnabled = volumetricPortals.Any(vp => vp.enabled);
+            if (anyVolumetricPortalIsEnabled) {
+                debug.Log("Disabling Volumetric Portal(s) for " + gameObject.name);
+
+                foreach (var vp in volumetricPortals) {
+                    vp.enabled = false;
+                }
+            }
+        }
+        
+        // Allocate once to save GC every frame
+		readonly float[] floatGradientBuffer = new float[BladeEdgeDetection.GradientArraySize];
+		readonly Color[] colorGradientBuffer = new Color[BladeEdgeDetection.GradientArraySize];
+
+		private BladeEdgeDetection EdgeDetection => MaskBufferRenderTextures.instance.edgeDetection;
+		BladeEdgeDetection.EdgeColorMode EdgeColorMode => changeCameraEdgeDetection ? edgeColorMode : EdgeDetection.edgeColorMode;
+		Color EdgeColor => changeCameraEdgeDetection ? edgeColor : EdgeDetection.edgeColor;
+		Gradient EdgeColorGradient => changeCameraEdgeDetection ? edgeColorGradient : EdgeDetection.edgeColorGradient;
+		
+		void SetEdgeDetectionColorProperties() {
+			portalMaterial.SetInt(BladeEdgeDetection.ColorModeID, (int)EdgeColorMode);
+			switch (EdgeColorMode) {
+				case BladeEdgeDetection.EdgeColorMode.SimpleColor:
+					portalMaterial.SetColor(BladeEdgeDetection.EdgeColorID, EdgeColor);
+					break;
+				case BladeEdgeDetection.EdgeColorMode.Gradient:
+					SetEdgeColorGradient();
+					break;
+				case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
+					portalMaterial.SetTexture(BladeEdgeDetection.GradientTextureID, edgeColorGradientTexture);
+					break;
+			}
+		}
+		
+#region Helper Methods
+		/// <summary>
+		/// Sets the _GradientKeyTimes and _EdgeColorGradient float and Color arrays, respectively, in the BladeEdgeDetectionShader
+		/// Populates _GradientKeyTimes with the times of each colorKey in edgeColorGradient (as well as a 0 as the first key and a series of 1s to fill out the array at the end)
+		/// Populates _EdgeColorGradient with the colors of each colorKey in edgeColorGradient (as well as values for the times filled in as described above)
+		/// </summary>
+		void SetEdgeColorGradient() {
+			Color startColor = EdgeColorGradient.Evaluate(0);
+			Color endColor = EdgeColorGradient.Evaluate(1);
+			float startAlpha = startColor.a;
+			float endAlpha = endColor.a;
+	
+			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.colorKeys.Select(x => x.time), 1f));
+			portalMaterial.SetColorArray(BladeEdgeDetection.EdgeColorGradientID, GetGradientColorValues(startColor, EdgeColorGradient.colorKeys.Select(x => x.color), endColor));
+			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientAlphaKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.alphaKeys.Select(x => x.time), 1f));
+			portalMaterial.SetFloatArray(BladeEdgeDetection.AlphaGradientID, GetGradientFloatValues(startAlpha, EdgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
+	
+			portalMaterial.SetInt(BladeEdgeDetection.GradientModeID, EdgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
+	
+			SetFrustumCornersVector();
+		}
+	
+		void SetFrustumCornersVector() {
+			portalMaterial.SetVectorArray(BladeEdgeDetection.FrustumCorners, EdgeDetection.frustumCornersOrdered);
+		}
+	
+		// Actually just populates the float buffer with the values provided, then returns a reference to the float buffer
+		float[] GetGradientFloatValues(float startValue, IEnumerable<float> middleValues, float endValue) {
+			float[] middleValuesArray = middleValues.ToArray();
+			floatGradientBuffer[0] = startValue;
+			for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+				floatGradientBuffer[i] = middleValuesArray[i - 1];
+			}
+			for (int j = middleValuesArray.Length + 1; j < BladeEdgeDetection.GradientArraySize; j++) {
+				floatGradientBuffer[j] = endValue;
+			}
+			return floatGradientBuffer;
+		}
+	
+		// Actually just populates the color buffer with the values provided, then returns a reference to the color buffer
+		Color[] GetGradientColorValues(Color startValue, IEnumerable<Color> middleValues, Color endValue) {
+			Color[] middleValuesArray = middleValues.ToArray();
+			colorGradientBuffer[0] = startValue;
+			for (int i = 1; i < middleValuesArray.Length + 1; i++) {
+				colorGradientBuffer[i] = middleValuesArray[i - 1];
+			}
+			for (int j = middleValuesArray.Length + 1; j < BladeEdgeDetection.GradientArraySize; j++) {
+				colorGradientBuffer[j] = endValue;
+			}
+			return colorGradientBuffer;
+		}
+
+		void SwapEdgeDetectionColors() {
+			BladeEdgeDetection playerED = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
+
+			EDColors tempEDColors = new EDColors {
+				edgeColorMode = playerED.edgeColorMode,
+				edgeColor = playerED.edgeColor,
+				edgeColorGradient = playerED.edgeColorGradient,
+				edgeColorGradientTexture = playerED.edgeColorGradientTexture
+			};
+
+			CopyEdgeColors(from: this, to: playerED);
+
+			otherPortal.changeCameraEdgeDetection = true;
+			CopyEdgeColors(from: tempEDColors, to: otherPortal);
+		}
+        
+        private static void CopyEdgeColors(Portal from, BladeEdgeDetection to) {
+            to.edgeColorMode = from.edgeColorMode;
+            to.edgeColor = from.edgeColor;
+            to.edgeColorGradient = from.edgeColorGradient;
+            to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+        }
+
+        public static void CopyEdgeColors(EDColors from, Portal to) {
+            to.edgeColorMode = from.edgeColorMode;
+            to.edgeColor = from.edgeColor;
+            to.edgeColorGradient = from.edgeColorGradient;
+            to.edgeColorGradientTexture = from.edgeColorGradientTexture;
+        }
+#endregion
     }
 }

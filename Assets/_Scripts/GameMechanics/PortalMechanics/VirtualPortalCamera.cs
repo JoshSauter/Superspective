@@ -141,6 +141,8 @@ namespace PortalMechanics {
 		/// Will recursively render each portal surface visible in the scene before the Player's Camera draws the scene
 		/// </summary>
 		void RenderPortals() {
+			if (Portal.forceDebugRenderMode) return;
+			
 			List<Portal> allActivePortals = PortalManager.instance.activePortals;
 			Dictionary<Portal, RecursiveTextures> finishedPortalTextures = new Dictionary<Portal, RecursiveTextures>();
 			ClearRenderTextureBuffers();
@@ -258,12 +260,6 @@ namespace PortalMechanics {
 					visiblePortal.SetTexture(textures.mainTexture);
 					visiblePortal.SetDepthNormalsTexture(textures.depthNormalsTexture);
 				}
-				else {
-					bool wasPausedState = visiblePortal.pauseRendering;
-					visiblePortal.pauseRendering = true;
-					visiblePortal.ApplyPortalRenderingModeToRenderers();
-					visiblePortal.pauseRendering = wasPausedState;
-				}
 			}
 			SetCameraSettings(portalCamera, modifiedCamSettings);
 
@@ -271,10 +267,6 @@ namespace PortalMechanics {
 			while (renderStepTextures.Count <= index) {
 				renderStepTextures.Add(RecursiveTextures.CreateTextures($"VirtualPortalCamera_{index}", portalIdentifier));
 			}
-			
-			List<PillarDimensionObject> allRelevantPillarDimensionObjects = PillarDimensionObject.allPillarDimensionObjects
-				.Where(dimensionObj => dimensionObj.IsVisibleFrom(portalCamera))
-				.ToList();
 			
 			// Turn off the other portal's volumetric portal if it's enabled
 			portal.otherPortal.SetVolumetricHiddenForPortalRendering(true);

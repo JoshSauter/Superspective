@@ -75,14 +75,14 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         void TurnOffAllPortals() {
             foreach (var floor in floors.Values) {
                 foreach (Portal floorPortal in floor.floorPortals) {
-                    floorPortal.pauseRendering = true;
+                    floorPortal.RenderMode = PortalRenderMode.Invisible;
                 }
             }
         }
 
         void TurnOnPortalsForFloor(Floor floor) {
             foreach (Portal portal in floors[floor].floorPortals) {
-                portal.pauseRendering = false;
+                portal.RenderMode = PortalRenderMode.Normal;
             }
         }
 

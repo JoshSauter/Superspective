@@ -208,17 +208,17 @@ namespace MagicTriggerMechanics {
 				portal.Reference.MatchAction(
 					saveableObject => {
 						if (saveableObject is Portal loadedPortal) {
-							loadedPortal.pauseRendering = pauseRendering;
+							// loadedPortal.pauseRendering = pauseRendering;
 							if (logicAndRendering) {
-								//loadedPortal.pauseLogic = pauseRendering;
+								// loadedPortal.pauseLogic = pauseRendering;
 							}
 						}
 					},
 					serializedSaveObject => {
 						if (serializedSaveObject is Portal.PortalSave unloadedPortal) {
-							unloadedPortal.pauseRendering = pauseRendering;
+							// unloadedPortal.pauseRendering = pauseRendering;
 							if (logicAndRendering) {
-								//unloadedPortal.pauseLogic = pauseRendering;
+								// unloadedPortal.pauseLogic = pauseRendering;
 							}
 						}
 					}
