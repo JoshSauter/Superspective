@@ -176,6 +176,7 @@ public class LockedDoor : SuperspectiveObject<LockedDoor, LockedDoor.LockedDoorS
     public override void LoadSave(LockedDoorSave save) {
         state.LoadFromSave(save.stateSave);
         DoorOffset = save.curOffset;
+        invisibleCollider.enabled = ClosingOrClosed;
     }
 
     [Serializable]

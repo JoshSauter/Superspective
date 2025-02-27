@@ -14666,7 +14666,7 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 0}
-  startingScene: 32
+  startingScene: 28
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -14707,7 +14707,7 @@ MonoBehaviour:
     connectedLevels: 180000001400000016000000
   - level: 20
     _displayName: The Rose Room
-    connectedLevels: 20000000
+    connectedLevels: 2000000026000000
   - level: 18
     _displayName: The Cathedral
     connectedLevels: 13000000
@@ -14783,6 +14783,9 @@ MonoBehaviour:
   - level: 37
     _displayName: 
     connectedLevels: 
+  - level: 38
+    _displayName: 
+    connectedLevels: 1400000020000000
   activeSceneName: 
   loadedLevels: 
   currentlyLoadingLevels: 
@@ -17486,7 +17489,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.45
+  m_fontSize: 62.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21663,7 +21666,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 88.95
+  m_fontSize: 88.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -22554,8 +22557,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -396.5, z: 36}
+  m_LocalRotation: {x: 0, y: 0.92387956, z: 0, w: -0.3826834}
+  m_LocalPosition: {x: 881.5, y: 60.5, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -41497,7 +41500,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh3564330
+  m_Name: pb_Mesh2569424
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -55724,7 +55727,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.1
+  m_fontSize: 44
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

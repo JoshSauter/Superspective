@@ -33,6 +33,7 @@ namespace Deepblack {
         
         protected override void OnDisable() {
             base.OnDisable();
+            if (DeepblackEffect.instance == null) return;
             DeepblackEffect.instance.Unregister(this);
         }
 
