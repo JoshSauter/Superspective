@@ -96,13 +96,13 @@ namespace PictureTeleportMechanics {
 			TriggerCondition condition = new RendererNotVisibleCondition() {
 				targetRenderer = frameRenderer == null ? GetComponent<Renderer>() : frameRenderer
 			};
-			trigger.triggerConditionsNew.Add(condition);
+			trigger.triggerConditions.Add(condition);
 
 			// Add action
 			TriggerAction disableSelfScriptAction = new DisableSelfScriptAction() {
 				actionTiming = ActionTiming.OnceWhileOnStay
 			};
-			trigger.actionsToTriggerNew.Add(disableSelfScriptAction);
+			trigger.actionsToTrigger.Add(disableSelfScriptAction);
 
 			return trigger;
 		}

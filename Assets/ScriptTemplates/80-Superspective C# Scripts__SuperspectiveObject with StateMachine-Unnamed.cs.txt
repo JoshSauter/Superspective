@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Saving;
+using StateUtils;
+
+#ROOTNAMESPACEBEGIN#
+[RequireComponent(typeof(UniqueId))]
+public class #SCRIPTNAME# : SuperspectiveObject<#SCRIPTNAME#, #SCRIPTNAME#.#SCRIPTNAME#Save> {
+    
+    public enum State {
+        Off,
+        On
+    }
+    public StateMachine<State> state;
+
+    protected override void Awake() {
+        base.Awake();
+        #NOTRIM#
+        
+        state = this.StateMachine(State.Off);
+    }
+
+    protected override void Start() {
+        base.Start();
+        #NOTRIM#
+    }
+
+    void Update() {
+        if (GameManager.instance.IsCurrentlyLoading) return;
+        #NOTRIM#
+    }
+    
+#region Saving
+		[Serializable]
+		public class #SCRIPTNAME#Save : SaveObject<#SCRIPTNAME#> {
+            public StateMachine<State>.StateMachineSave stateSave;
+            
+			public #SCRIPTNAME#Save(#SCRIPTNAME# script) : base(script) {
+                this.stateSave = script.state.ToSave();
+			}
+		}
+
+        public override void LoadSave(#SCRIPTNAME#Save save) {
+            state.LoadFromSave(save.stateSave);
+        }
+#endregion
+}
+#ROOTNAMESPACEEND#

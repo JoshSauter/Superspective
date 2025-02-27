@@ -6,9 +6,8 @@ using Saving;
 using UnityEngine;
 
 // A trigger which will actually trigger OnTriggerEnter/Exit when an object is teleported into or out of it
-[RequireComponent(typeof(Collider))]
 public class BetterTrigger : MonoBehaviour {
-    private Collider trigger;
+    public Collider trigger;
     private HashSet<Collider> collidersInZone = new HashSet<Collider>();
 
     public List<BetterTriggers> listeners = new List<BetterTriggers>();

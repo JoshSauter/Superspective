@@ -34,20 +34,21 @@ namespace LevelSpecific.WhiteRoom {
         }
 
         public bool playSfx = true;
+        public State startingState = State.Lowered;
         public StateMachine<State> state;
 
         // Start is called before the first frame update
         protected override void Start() {
             base.Start();
 
-            state = this.StateMachine(State.Lowered);
+            state = this.StateMachine(startingState);
 
             StartCoroutine(StartCo());
         }
 
         protected override void OnValidate() {
             base.OnValidate();
-            if (state.State is State.Lowered or State.Raising) {
+            if (startingState is State.Lowered or State.Raising) {
                 SetHeight(minHeight);
             }
             else {
@@ -92,8 +93,14 @@ namespace LevelSpecific.WhiteRoom {
 
             var powerTrail = TriggeredByPowerTrail;
             if (powerTrail && powerTrail.pwr) {
-                powerTrail.pwr.OnPowerFinish += Raise;
-                powerTrail.pwr.OnDepowerBegin += Lower;
+                if (startingState is State.Lowered or State.Raising) {
+                    powerTrail.pwr.OnPowerFinish += Raise;
+                    powerTrail.pwr.OnDepowerBegin += Lower;
+                }
+                else {
+                    powerTrail.pwr.OnPowerFinish += Lower;
+                    powerTrail.pwr.OnDepowerBegin += Raise;
+                }
             }
         }
 
@@ -101,8 +108,14 @@ namespace LevelSpecific.WhiteRoom {
             base.OnDisable();
             var powerTrail = TriggeredByPowerTrail;
             if (powerTrail && powerTrail.pwr) {
-                powerTrail.pwr.OnPowerFinish -= Raise;
-                powerTrail.pwr.OnDepowerBegin -= Lower;
+                if (startingState is State.Lowered or State.Raising) {
+                    powerTrail.pwr.OnPowerFinish -= Raise;
+                    powerTrail.pwr.OnDepowerBegin -= Lower;
+                }
+                else {
+                    powerTrail.pwr.OnPowerFinish -= Lower;
+                    powerTrail.pwr.OnDepowerBegin -= Raise;
+                }
             }
         }
 

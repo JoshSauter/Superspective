@@ -3,6 +3,7 @@ using NovaMenuUI;
 using SuperspectiveUtils;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.PlayerLookSave> {
@@ -29,12 +30,19 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
     public float sensitivityY => 2f * Settings.Gameplay.YSensitivity / 100f;
 
     private float rotationY;
+    [ShowInInspector]
     public float RotationY {
         get => rotationY;
         set {
-            rotationY = value;
+            float clampedValue = Mathf.Clamp(value, -yClamp, yClamp);
+            rotationY = clampedValue;
             LookVertical(rotationY);
         }
+    }
+    // For bypassing the yClamp
+    public void ForceSetRotationY(float value) {
+        rotationY = value;
+        LookVertical(rotationY);
     }
 
     public float yClamp = 85;
@@ -116,6 +124,14 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
             if (PlayerButtonInput.instance.LeftStickHeld && !GameManager.instance.IsCurrentlyLoading) {
                 UnlockView();
             }
+        }
+        
+        Vector3 normalizedAngles = cameraContainerTransform.localEulerAngles;
+        normalizedAngles.x = (normalizedAngles.x > 180) ? normalizedAngles.x - 360 : normalizedAngles.x;
+        normalizedAngles.y = (normalizedAngles.y > 180) ? normalizedAngles.y - 360 : normalizedAngles.y;
+        normalizedAngles.z = (normalizedAngles.z > 180) ? normalizedAngles.z - 360 : normalizedAngles.z;
+        if (Mathf.Approximately(Mathf.Abs(normalizedAngles.y), 180)) {
+            Debug.LogError($"My life just got flip-turned upside down!");
         }
     }
 
@@ -262,6 +278,8 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
     void Look(Vector2 lookDirection) {
         LookHorizontal(lookDirection.x * lookAmountMultiplier * generalSensitivity * sensitivityX * outsideMultiplier);
         float diffY = lookDirection.y * lookAmountMultiplier * generalSensitivity * sensitivityY * outsideMultiplier;
+        
+        debug.Log($"Diff Y: {diffY:F3}. Rotation Y Before: {rotationY:F3}");
         // If we've been set to above the yClamp by something else, only allow movement back towards the clamp window
         if (Mathf.Abs(rotationY) > yClamp)
             rotationY = Mathf.Sign(rotationY) * Mathf.Min(Mathf.Abs(rotationY + diffY), Mathf.Abs(rotationY));
@@ -269,16 +287,17 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
             rotationY += diffY;
             rotationY = Mathf.Clamp(rotationY, -yClamp, yClamp);
         }
+        debug.Log($"Rotation Y After: {rotationY:F3}");
 
         LookVertical(rotationY);
     }
 
     void LookVertical(float rotation) {
-        cameraContainerTransform.localEulerAngles = new Vector3(
-            -rotation,
-            cameraContainerTransform.localEulerAngles.y,
-            cameraContainerTransform.localEulerAngles.z
-        );
+        float currentY = cameraContainerTransform.localEulerAngles.y;
+        float currentZ = cameraContainerTransform.localEulerAngles.z;
+
+        Quaternion newRotation = Quaternion.Euler(-rotation, currentY, currentZ);
+        cameraContainerTransform.localRotation = newRotation;
     }
 
     void LookHorizontal(float rotation) {

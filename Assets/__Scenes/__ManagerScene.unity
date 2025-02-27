@@ -1051,7 +1051,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &39042014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12678,7 +12678,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30178
+  m_Name: pb_Mesh35716
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -14666,7 +14666,7 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 0}
-  startingScene: 20
+  startingScene: 32
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -15231,105 +15231,33 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 441290176}
-  triggerConditionsOld:
-  - triggerCondition: 3
-    useLocalCoordinates: 0
-    triggerThreshold: 0.9
-    targetDirection: {x: -1, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 934.5, y: -103.75, z: 18}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1208848658}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620636676
-  actionsToTriggerNew:
-  - rid: 8677781628620636677
-  - rid: 8677781628620636678
+  triggerConditions:
+  - rid: 6430105143157194760
+  actionsToTrigger:
+  - rid: 6430105143157194761
+  - rid: 6430105143157194762
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620636676
+    - rid: 6430105143157194760
       type: {class: PlayerFacingPositionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.9
         targetPosition: {x: 934.5, y: -103.75, z: 18}
-    - rid: 8677781628620636677
+    - rid: 6430105143157194761
       type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
         unityEvent:
-          rid: 8677781628620636679
-    - rid: 8677781628620636678
+          rid: 6430105143157194763
+    - rid: 6430105143157194762
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
         actionTiming: 4
-    - rid: 8677781628620636679
+    - rid: 6430105143157194763
       type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
       data:
         m_PersistentCalls:
@@ -17558,7 +17486,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 63.5
+  m_fontSize: 62.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21735,7 +21663,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 77.5
+  m_fontSize: 88.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21826,7 +21754,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 2084211005}
+  m_Mesh: {fileID: 1333751825}
 --- !u!33 &610806467
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -21834,7 +21762,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 610806465}
-  m_Mesh: {fileID: 2084211005}
+  m_Mesh: {fileID: 1333751825}
 --- !u!23 &610806468
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -21842,7 +21770,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 610806465}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -22088,8 +22016,8 @@ MonoBehaviour:
     m_AreaError: 15
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
-  m_Mesh: {fileID: 2084211005}
-  m_VersionIndex: 2598
+  m_Mesh: {fileID: 1333751825}
+  m_VersionIndex: 2622
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -22626,8 +22554,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 159.87015, y: -739.2186, z: -351.841}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: -396.5, z: 36}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30958,7 +30886,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29542
+  m_Name: pb_Mesh35064
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31312,149 +31240,41 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 978358504}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: -1, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 180439627}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1800991429}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Hide
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620636680
-  actionsToTriggerNew:
-  - rid: 8677781628620636681
-  - rid: 8677781628620636682
-  - rid: 8677781628620636683
+  triggerConditions:
+  - rid: 6430105143157194764
+  actionsToTrigger:
+  - rid: 6430105143157194765
+  - rid: 6430105143157194766
+  - rid: 6430105143157194767
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620636680
+    - rid: 6430105143157194764
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: 0, y: -1, z: 0}
-    - rid: 8677781628620636681
+    - rid: 6430105143157194765
       type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
         unityEvent:
-          rid: 8677781628620636684
-    - rid: 8677781628620636682
+          rid: 6430105143157194768
+    - rid: 6430105143157194766
       type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
         unityEvent:
-          rid: 8677781628620636685
-    - rid: 8677781628620636683
+          rid: 6430105143157194769
+    - rid: 6430105143157194767
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
         actionTiming: 4
-    - rid: 8677781628620636684
+    - rid: 6430105143157194768
       type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
       data:
         m_PersistentCalls:
@@ -31471,7 +31291,7 @@ MonoBehaviour:
               m_StringArgument: 
               m_BoolArgument: 0
             m_CallState: 2
-    - rid: 8677781628620636685
+    - rid: 6430105143157194769
       type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
       data:
         m_PersistentCalls:
@@ -34220,7 +34040,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29728
+  m_Name: pb_Mesh35250
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -41671,6 +41491,171 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!43 &1333751825
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: pb_Mesh3564330
+  serializedVersion: 11
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 36
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 24
+    localAABB:
+      m_Center: {x: 0, y: -0.5, z: 0}
+      m_Extent: {x: 3000, y: 0.5, z: 3000}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000001000200010003000200040005000600050007000600080009000a0009000b000a000c000d000e000d000f000e00100011001200110013001200140015001600150017001600
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 24
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 24
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 40
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 1152
+    _typelessdata: 00803bc5000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803b45000080bf00803b45000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc5000080bf00803bc50000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803b450000000000803b450000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc50000000000803b45000080bf00803b450000803f000000000000000000000000000000000000803f000080bf00803b45000080bf00803b45000080bf00803bc50000803f000000000000000000000000000000000000803f000080bf00803bc5000080bf00803b450000000000803b450000803f000000000000000000000000000000000000803f000080bf00803b450000000000803b450000000000803bc50000803f000000000000000000000000000000000000803f000080bf00803bc50000000000803b45000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b45000080bf00803bc5000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc5000080bf00803b450000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b450000000000803bc50000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc50000000000803bc5000080bf00803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b45000080bf00803bc5000080bf00803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc5000080bf00803bc50000000000803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b450000000000803bc50000000000803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc50000000000803bc50000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803bc500803b4500803b450000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803b4500803b4500803bc50000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803bc500803bc500803b450000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803b4500803bc500803bc5000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803bc500803b45000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803bc500803bc5000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803b4500803b45000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803b45
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: -0.5, z: 0}
+    m_Extent: {x: 3000, y: 0.5, z: 3000}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  m_MeshMetrics[0]: 1
+  m_MeshMetrics[1]: 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1341799855
 GameObject:
   m_ObjectHideFlags: 0
@@ -43028,7 +43013,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 77.5
+  m_fontSize: 101
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -44570,7 +44555,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh32400
+  m_Name: pb_Mesh37942
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -45584,7 +45569,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30874
+  m_Name: pb_Mesh36412
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -46094,7 +46079,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1879048191
 --- !u!114 &1535199394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46756,7 +46741,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30662
+  m_Name: pb_Mesh36200
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -55171,106 +55156,34 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1734990132}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: -1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 12
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1800991429}
-          m_TargetAssemblyTypeName: ControlPrompt, Assembly-CSharp
-          m_MethodName: Display
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620636686
-  actionsToTriggerNew:
-  - rid: 8677781628620636687
-  - rid: 8677781628620636688
+  triggerConditions:
+  - rid: 6430105143157194770
+  actionsToTrigger:
+  - rid: 6430105143157194771
+  - rid: 6430105143157194772
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620636686
+    - rid: 6430105143157194770
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: 0, y: 0, z: -1}
-    - rid: 8677781628620636687
+    - rid: 6430105143157194771
       type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
         unityEvent:
-          rid: 8677781628620636689
-    - rid: 8677781628620636688
+          rid: 6430105143157194773
+    - rid: 6430105143157194772
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
         actionTiming: 4
-    - rid: 8677781628620636689
+    - rid: 6430105143157194773
       type: {class: UnityEvent, ns: UnityEngine.Events, asm: UnityEngine.CoreModule}
       data:
         m_PersistentCalls:
@@ -55811,7 +55724,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.85
+  m_fontSize: 44.1
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -57127,6 +57040,7 @@ GameObject:
   - component: {fileID: 1809741065}
   - component: {fileID: 1809741067}
   - component: {fileID: 1809741068}
+  - component: {fileID: 1809741081}
   - component: {fileID: 1809741070}
   - component: {fileID: 1809741075}
   - component: {fileID: 1809741071}
@@ -57264,7 +57178,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 1}
+  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -57293,7 +57207,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1866374519
+    m_Bits: 1866375031
   m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -57576,8 +57490,8 @@ MonoBehaviour:
     atime5: 0
     atime6: 0
     atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
+    m_Mode: 1
+    m_ColorSpace: 0
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
   gradientResolution: 100
@@ -57705,6 +57619,19 @@ MonoBehaviour:
   shaderFXAAPreset3: {fileID: 4800000, guid: c182fa94a5a0a4c02870641efcd38cd5, type: 3}
   shaderFXAAII: {fileID: 4800000, guid: cd5b323dcc592457790ff18b528f5e67, type: 3}
   shaderFXAAIII: {fileID: 4800000, guid: c547503fff0e8482ea5793727057041c, type: 3}
+--- !u!114 &1809741081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809741056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60ccd7810dae7e348b867c02ad2add69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intensityMultiplier: 1
 --- !u!1 &1812285093
 GameObject:
   m_ObjectHideFlags: 0
@@ -66103,171 +66030,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2082937693}
   m_CullTransparentMesh: 1
---- !u!43 &2084211005
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh41376
-  serializedVersion: 11
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 36
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 24
-    localAABB:
-      m_Center: {x: 0, y: -0.5, z: 0}
-      m_Extent: {x: 3000, y: 0.5, z: 3000}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 000001000200010003000200040005000600050007000600080009000a0009000b000a000c000d000e000d000f000e00100011001200110013001200140015001600150017001600
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 24
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 24
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 40
-      format: 0
-      dimension: 2
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 1152
-    _typelessdata: 00803bc5000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803b45000080bf00803b45000080bf00803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc5000080bf00803bc50000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803b450000000000803b450000000000803b4500000000000000000000803f000080bf0000000000000000000080bf00803bc50000000000803b45000080bf00803b450000803f000000000000000000000000000000000000803f000080bf00803b45000080bf00803b45000080bf00803bc50000803f000000000000000000000000000000000000803f000080bf00803bc5000080bf00803b450000000000803b450000803f000000000000000000000000000000000000803f000080bf00803b450000000000803b450000000000803bc50000803f000000000000000000000000000000000000803f000080bf00803bc50000000000803b45000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b45000080bf00803bc5000080bf00803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc5000080bf00803b450000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803b450000000000803bc50000000000803bc50000000000000000000080bf0000803f0000000000000000000080bf00803bc50000000000803bc5000080bf00803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b45000080bf00803bc5000080bf00803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc5000080bf00803bc50000000000803bc5000080bf00000000000000000000000000000000000080bf000080bf00803b450000000000803bc50000000000803b45000080bf00000000000000000000000000000000000080bf000080bf00803bc50000000000803bc50000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803bc500803b4500803b450000000000803b45000000000000803f000000000000803f0000000000000000000080bf00803b4500803b4500803bc50000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803bc500803bc500803b450000000000803bc5000000000000803f000000000000803f0000000000000000000080bf00803b4500803bc500803bc5000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803bc500803b45000080bf00803bc500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803bc500803bc5000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803b4500803b4500803b45000080bf00803b4500000000000080bf00000000000080bf0000000000000000000080bf00803bc500803b45
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: 0, y: -0.5, z: 0}
-    m_Extent: {x: 3000, y: 0.5, z: 3000}
-  m_MeshUsageFlags: 0
-  m_CookingOptions: 30
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &2086710651
 GameObject:
   m_ObjectHideFlags: 0
@@ -68327,7 +68089,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30608
+  m_Name: pb_Mesh36146
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2

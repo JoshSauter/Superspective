@@ -502,6 +502,8 @@ MonoBehaviour:
     RefIds:
     - rid: 8647374355792396312
       type: {class: SpacerVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
+      data:
+        spacerGO: {fileID: 1898054317181364004}
 --- !u!1 &1898054317181364056
 GameObject:
   m_ObjectHideFlags: 0

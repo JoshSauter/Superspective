@@ -47,7 +47,7 @@ namespace LevelSpecific.WhiteRoom {
             
             if (obeliskConnectingParticles.isPlaying) {
                 float t = Mathf.Clamp01(obeliskConnectingParticles.totalTime / ParticleAnimateTime);
-                obeliskConnectingBackdrop.localScale = new Vector3(1f, t, 1f);
+                obeliskConnectingBackdrop.localScale = new Vector3(1f, 0.5f*t, 1f);
             }
             else {
                 obeliskConnectingBackdrop.localScale = new Vector3(1f, 0, 1f);

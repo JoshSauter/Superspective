@@ -48,6 +48,7 @@ Material:
     - _CapsuleRadius: 0.25
     - _Channel: 0
     - _ColorChangeWidth: 30
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.15
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
@@ -64,7 +65,7 @@ Material:
     - __SuberspectiveBlendMode: 0
     - __ZWrite: 1
     m_Colors:
-    - _AngleFadeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _AngleFadeColor: {r: 0.94, g: 0.94, b: 0.94, a: 1}
     - _AngleFadeColor2: {r: 0.13235292, g: 0.13235292, b: 0.13235292, a: 1}
     - _Color: {r: 0.13235292, g: 0.13235292, b: 0.13235292, a: 1}
     - _Color2: {r: 1, g: 1, b: 1, a: 1}

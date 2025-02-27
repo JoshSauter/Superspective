@@ -39,20 +39,17 @@ public class ColorfulFog : MonoBehaviour
 
     protected Texture2D tmpGradientTexture;
 
-    Material fogMaterial = null;
+    private static Material fogMaterial = null;
 
     Material GetFogMaterial()
     {
-        if (fogMaterial == null)
-        {
-            if (fogShader == null)
-            {
+        if (fogMaterial == null) {
+            if (fogShader == null) {
                 Debug.LogError("fogShader is not assigned");
                 this.enabled = false;
                 return null;
             }
-            else
-            {
+            else {
                 fogMaterial = new Material(fogShader);
             }
         }

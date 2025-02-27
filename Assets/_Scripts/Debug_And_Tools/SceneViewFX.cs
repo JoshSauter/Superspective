@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using Deepblack;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -100,6 +101,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 			if (myCamera.GetComponent<GlowComposite>()) excludes.Add(myCamera.GetComponent<GlowComposite>());
 			if (myCamera.GetComponent<CameraZoom>()) excludes.Add(myCamera.GetComponent<CameraZoom>());
 			if (myCamera.GetComponent<NoiseScrambleOverlay>()) excludes.Add(myCamera.GetComponent<NoiseScrambleOverlay>());
+			if (myCamera.GetComponent<DeepblackEffect>()) excludes.Add(myCamera.GetComponent<DeepblackEffect>());
 			
 			result = result.Except(excludes).ToList();
 		}

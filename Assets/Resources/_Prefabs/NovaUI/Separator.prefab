@@ -1038,3 +1038,5 @@ MonoBehaviour:
     RefIds:
     - rid: 8647374355792396309
       type: {class: SeparatorVisuals, ns: NovaMenuUI, asm: Assembly-CSharp}
+      data:
+        separatorGO: {fileID: 7606550925544806976}

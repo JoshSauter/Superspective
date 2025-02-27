@@ -176,9 +176,9 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
         // Reset player position and maze state when the player leaves the maze
         state.AddTrigger(State.ResettingMaze, () => {
             // Transport the player outside of the maze
+            Player.instance.growShrink.SetScaleDirectly(.125f);
             Player.instance.transform.position = new Vector3(888.5f, 58.34f, -51f);
             Player.instance.transform.rotation = Quaternion.Euler(0, -90, 0f);
-            Player.instance.growShrink.SetScaleDirectly(.125f);
             Player.instance.cameraFollow.RecalculateWorldPositionLastFrame();
             
             PlayerMovement.instance.thisRigidbody.isKinematic = true;

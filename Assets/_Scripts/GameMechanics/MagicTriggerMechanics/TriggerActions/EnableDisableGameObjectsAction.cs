@@ -1,18 +1,29 @@
 using System;
 using System.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
     public class EnableDisableGameObjectsAction : TriggerAction {
+        [SceneObjectsOnly]
         public GameObject[] objectsToEnable;
+        [SceneObjectsOnly]
         public GameObject[] objectsToDisable;
         
         public override void Execute(MagicTrigger triggerScript) {
             foreach (var obj in objectsToEnable) {
+                if (obj == null) {
+                    triggerScript.debug.LogError($"Missing reference in {triggerScript.ID}!", true);
+                    continue;
+                }
                 obj.SetActive(true);
             }
             foreach (var obj in objectsToDisable) {
+                if (obj == null) {
+                    triggerScript.debug.LogError($"Missing reference in {triggerScript.ID}!", true);
+                    continue;
+                }
                 obj.SetActive(false);
             }
         }

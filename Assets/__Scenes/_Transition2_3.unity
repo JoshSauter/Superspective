@@ -228,58 +228,22 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 25690453}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: -1, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637024
-  actionsToTriggerNew:
-  - rid: 8677781628620637025
+  triggerConditions:
+  - rid: 6430105143157195058
+  actionsToTrigger:
+  - rid: 6430105143157195059
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637024
+    - rid: 6430105143157195058
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: -1, y: 0, z: 0}
-    - rid: 8677781628620637025
+    - rid: 6430105143157195059
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -874,7 +838,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1245572485}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1079,26 +1043,14 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 51020779}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: -0.866026, y: 0, z: 0.5}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld: []
-  triggerConditionsNew:
-  - rid: 8677781628620637026
-  actionsToTriggerNew: []
+  triggerConditions:
+  - rid: 6430105143157195060
+  actionsToTrigger: []
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637026
+    - rid: 6430105143157195060
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
@@ -1209,7 +1161,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037444
+  m_Name: pb_Mesh3785104
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6315,7 +6267,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1296105495}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -6398,7 +6350,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037622
+  m_Name: pb_Mesh3785282
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6666,7 +6618,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1167975975}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -6742,7 +6694,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037696
+  m_Name: pb_Mesh3785356
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -6907,7 +6859,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037414
+  m_Name: pb_Mesh3785074
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -12549,7 +12501,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 754314500}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -12632,7 +12584,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037742
+  m_Name: pb_Mesh3785402
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -12813,7 +12765,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2375782
+  m_Name: pb_Mesh992134
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18196,58 +18148,22 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 577477626}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 6
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 5
-    levelBackward: 9
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637027
-  actionsToTriggerNew:
-  - rid: 8677781628620637028
+  triggerConditions:
+  - rid: 6430105143157195061
+  actionsToTrigger:
+  - rid: 6430105143157195062
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637027
+    - rid: 6430105143157195061
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: 0, y: 0, z: 1}
-    - rid: 8677781628620637028
+    - rid: 6430105143157195062
       type: {class: ChangeLevelAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
@@ -18260,7 +18176,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2375754
+  m_Name: pb_Mesh992106
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -18425,7 +18341,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037580
+  m_Name: pb_Mesh3785240
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -23949,7 +23865,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 803307514}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -24216,7 +24132,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1555463865}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -24292,7 +24208,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037288
+  m_Name: pb_Mesh3784948
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26304,7 +26220,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1982641401}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -26366,7 +26282,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037770
+  m_Name: pb_Mesh3785430
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26662,26 +26578,14 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 790904831}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0.766045, y: 0, z: 0.642788}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld: []
-  triggerConditionsNew:
-  - rid: 8677781628620637029
-  actionsToTriggerNew: []
+  triggerConditions:
+  - rid: 6430105143157195063
+  actionsToTrigger: []
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637029
+    - rid: 6430105143157195063
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
@@ -26694,7 +26598,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037358
+  m_Name: pb_Mesh3785018
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -26977,7 +26881,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 318987094}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -28595,7 +28499,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1786569048}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -28928,7 +28832,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 105336134}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -29004,7 +28908,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2375952
+  m_Name: pb_Mesh992304
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31352,7 +31256,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1506238649}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -31446,7 +31350,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037714
+  m_Name: pb_Mesh3785374
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -31747,26 +31651,14 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1153134868}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld: []
-  triggerConditionsNew:
-  - rid: 8677781628620637030
-  actionsToTriggerNew: []
+  triggerConditions:
+  - rid: 6430105143157195064
+  actionsToTrigger: []
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637030
+    - rid: 6430105143157195064
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
@@ -31923,60 +31815,22 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1154466789}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: 0.866026, y: 0, z: 0.5}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 5
-    objectsToEnable: []
-    objectsToDisable:
-    - {fileID: 1866404569}
-    - {fileID: 2022815332}
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637031
-  actionsToTriggerNew:
-  - rid: 8677781628620637032
+  triggerConditions:
+  - rid: 6430105143157195065
+  actionsToTrigger:
+  - rid: 6430105143157195066
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637031
+    - rid: 6430105143157195065
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: 0.866026, y: 0, z: 0.5}
-    - rid: 8677781628620637032
+    - rid: 6430105143157195066
       type: {class: ToggleGameObjectsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -31991,7 +31845,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037238
+  m_Name: pb_Mesh3784898
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -34753,7 +34607,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1873483714}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -34814,7 +34668,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037184
+  m_Name: pb_Mesh3784844
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -34979,7 +34833,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037568
+  m_Name: pb_Mesh3785228
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -35144,7 +34998,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037224
+  m_Name: pb_Mesh3784884
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -35366,109 +35220,23 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1320025429}
-  triggerConditionsOld:
-  - triggerCondition: 2
-    useLocalCoordinates: 0
-    triggerThreshold: -0.42
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 520554757}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 3
-    objectsToEnable: []
-    objectsToDisable:
-    - {fileID: 324517371}
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 2
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable:
-    - {fileID: 0}
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 1
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637033
-  actionsToTriggerNew:
-  - rid: 8677781628620637034
-  - rid: 8677781628620637035
-  - rid: 8677781628620637036
+  triggerConditions:
+  - rid: 6430105143157195067
+  actionsToTrigger:
+  - rid: 6430105143157195068
+  - rid: 6430105143157195069
+  - rid: 6430105143157195070
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637033
+    - rid: 6430105143157195067
       type: {class: PlayerFacingAwayFromObjectCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: -0.42
         targetObject: {fileID: 520554757}
-    - rid: 8677781628620637034
+    - rid: 6430105143157195068
       type: {class: EnableDisableGameObjectsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -35476,7 +35244,7 @@ MonoBehaviour:
         objectsToEnable: []
         objectsToDisable:
         - {fileID: 324517371}
-    - rid: 8677781628620637035
+    - rid: 6430105143157195069
       type: {class: EnableDisableScriptsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -35484,7 +35252,7 @@ MonoBehaviour:
         scriptsToEnable:
         - {fileID: 0}
         scriptsToDisable: []
-    - rid: 8677781628620637036
+    - rid: 6430105143157195070
       type: {class: DisableSelfGameObjectAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -35569,7 +35337,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037592
+  m_Name: pb_Mesh3785252
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -37749,7 +37517,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1247780471}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -38481,7 +38249,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 621878312}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -42189,7 +41957,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1321622850}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -42646,7 +42414,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037756
+  m_Name: pb_Mesh3785416
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -44577,7 +44345,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 188923189}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -44818,7 +44586,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037458
+  m_Name: pb_Mesh3785118
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -45061,58 +44829,21 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1509211316}
-  triggerConditionsOld:
-  - triggerCondition: 2
-    useLocalCoordinates: 0
-    triggerThreshold: 0.3
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 478944354}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 3
-    objectsToEnable: []
-    objectsToDisable:
-    - {fileID: 98718692}
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637037
-  actionsToTriggerNew:
-  - rid: 8677781628620637038
+  triggerConditions:
+  - rid: 6430105143157195071
+  actionsToTrigger:
+  - rid: 6430105143157195072
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637037
+    - rid: 6430105143157195071
       type: {class: PlayerFacingAwayFromObjectCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.3
         targetObject: {fileID: 478944354}
-    - rid: 8677781628620637038
+    - rid: 6430105143157195072
       type: {class: EnableDisableGameObjectsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -45126,7 +44857,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037370
+  m_Name: pb_Mesh3785030
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -45422,60 +45153,22 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1619226687}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.01
-    targetDirection: {x: -0.951057, y: 0, z: -0.309017}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 5
-    objectsToEnable:
-    - {fileID: 1866404569}
-    - {fileID: 1154466786}
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637039
-  actionsToTriggerNew:
-  - rid: 8677781628620637040
+  triggerConditions:
+  - rid: 6430105143157195073
+  actionsToTrigger:
+  - rid: 6430105143157195074
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637039
+    - rid: 6430105143157195073
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.01
         useLocalCoordinates: 0
         targetDirection: {x: -0.951057, y: 0, z: -0.309017}
-    - rid: 8677781628620637040
+    - rid: 6430105143157195074
       type: {class: ToggleGameObjectsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -45588,76 +45281,30 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1659546914}
-  triggerConditionsOld:
-  - triggerCondition: 5
-    useLocalCoordinates: 0
-    triggerThreshold: 0.6
-    targetDirection: {x: -1, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  - triggerCondition: 0
-    useLocalCoordinates: 0
-    triggerThreshold: 0.6
-    targetDirection: {x: -1, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 0
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637041
-  - rid: 8677781628620637042
-  actionsToTriggerNew:
-  - rid: 8677781628620637043
+  triggerConditions:
+  - rid: 6430105143157195075
+  - rid: 6430105143157195076
+  actionsToTrigger:
+  - rid: 6430105143157195077
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637041
+    - rid: 6430105143157195075
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.6
         useLocalCoordinates: 0
         targetDirection: {x: -1, y: 0, z: 0}
-    - rid: 8677781628620637042
+    - rid: 6430105143157195076
       type: {class: PlayerFacingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.6
         useLocalCoordinates: 0
         targetDirection: {x: -1, y: 0, z: 0}
-    - rid: 8677781628620637043
+    - rid: 6430105143157195077
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -45843,84 +45490,22 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 1768016359}
-  triggerConditionsOld:
-  - triggerCondition: 2
-    useLocalCoordinates: 0
-    triggerThreshold: 0.1
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 520554757}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  actionsToTriggerOld:
-  - actionTiming: 4
-    action: 3
-    objectsToEnable:
-    - {fileID: 324517371}
-    - {fileID: 1320025427}
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  - actionTiming: 4
-    action: 1
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 1
-    backwardSameScenePillar: 1
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 1
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
-  triggerConditionsNew:
-  - rid: 8677781628620637044
-  actionsToTriggerNew:
-  - rid: 8677781628620637045
-  - rid: 8677781628620637046
+  triggerConditions:
+  - rid: 6430105143157195078
+  actionsToTrigger:
+  - rid: 6430105143157195079
+  - rid: 6430105143157195080
   playerIsInTriggerZone: 0
   references:
     version: 2
     RefIds:
-    - rid: 8677781628620637044
+    - rid: 6430105143157195078
       type: {class: PlayerFacingAwayFromObjectCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
       data:
         triggerThreshold: 0.1
         targetObject: {fileID: 520554757}
-    - rid: 8677781628620637045
+    - rid: 6430105143157195079
       type: {class: EnableDisableGameObjectsAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -45929,7 +45514,7 @@ MonoBehaviour:
         - {fileID: 324517371}
         - {fileID: 1320025427}
         objectsToDisable: []
-    - rid: 8677781628620637046
+    - rid: 6430105143157195080
       type: {class: DisableSelfGameObjectAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
       data:
@@ -46563,7 +46148,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 253198131}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -46639,7 +46224,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037432
+  m_Name: pb_Mesh3785092
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -47508,7 +47093,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1123464168}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -47748,7 +47333,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037532
+  m_Name: pb_Mesh3785192
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -47913,7 +47498,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2376044
+  m_Name: pb_Mesh992396
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -48350,7 +47935,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 435943060}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -48426,7 +48011,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh1037384
+  m_Name: pb_Mesh3785044
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -48889,7 +48474,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1487950698}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -51002,7 +50587,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 777646490}
-  m_VersionIndex: 42
+  m_VersionIndex: 60
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

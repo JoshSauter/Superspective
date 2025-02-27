@@ -92,9 +92,12 @@ Material:
     - _DepthBias: 0
     - _DetailNormalMapScale: 1
     - _DiffuseMagnitude: 0.072
+    - _DissolveAmount: 0
     - _DissolveBurnSize: 0.5
     - _DissolveEmissionAmount: 2
     - _DissolveValue: 0
+    - _DistanceFadeEffectMagnitude: 0
+    - _DistanceFadeEffectStartDistance: 0
     - _DstBlend: 10
     - _EmissionEnabled: 0
     - _FlatShading: 0

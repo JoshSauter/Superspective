@@ -753,60 +753,6 @@ namespace SuperspectiveUtils {
 
             return (xy + xz + yz + yx + zx + zy) / 6f;
         }
-        
-        // Subvectors of Vector3
-        public static Vector2 xy(this Vector3 v3) {
-            return new Vector2(v3.x, v3.y);
-        }
-
-        public static Vector2 xz(this Vector3 v3) {
-            return new Vector2(v3.x, v3.z);
-        }
-
-        public static Vector2 yz(this Vector3 v3) {
-            return new Vector2(v3.y, v3.z);
-        }
-
-        // Subvectors of Vector4
-        public static Vector2 xy(this Vector4 v4) {
-            return new Vector2(v4.x, v4.y);
-        }
-
-        public static Vector2 xz(this Vector4 v4) {
-            return new Vector2(v4.x, v4.z);
-        }
-
-        public static Vector2 xw(this Vector4 v4) {
-            return new Vector2(v4.x, v4.w);
-        }
-
-        public static Vector2 yz(this Vector4 v4) {
-            return new Vector2(v4.y, v4.z);
-        }
-
-        public static Vector2 yw(this Vector4 v4) {
-            return new Vector2(v4.y, v4.w);
-        }
-
-        public static Vector2 zw(this Vector4 v4) {
-            return new Vector2(v4.z, v4.w);
-        }
-
-        public static Vector3 xyz(this Vector4 v4) {
-            return new Vector3(v4.x, v4.y, v4.z);
-        }
-
-        public static Vector3 xyw(this Vector4 v4) {
-            return new Vector3(v4.x, v4.y, v4.w);
-        }
-
-        public static Vector3 xzw(this Vector4 v4) {
-            return new Vector3(v4.x, v4.z, v4.w);
-        }
-
-        public static Vector3 yzw(this Vector4 v4) {
-            return new Vector3(v4.y, v4.z, v4.w);
-        }
 
         public static float Vector3InverseLerp(Vector3 a, Vector3 b, Vector3 value) {
             Vector3 AB = b - a;
@@ -892,19 +838,64 @@ namespace SuperspectiveUtils {
 
     public static class ExtDebug {
         public static void DrawPlane(Vector3 point, Vector3 normal, float height, float width, Color color) {
-            // if (!Application.isPlaying) return;
             if (normal == Vector3.zero) return;
-            Quaternion rotation = Quaternion.LookRotation(normal);
-            Matrix4x4 trs = Matrix4x4.TRS(point, rotation, Vector3.one);
+
+            // Calculate two perpendicular vectors to the normal
+            Vector3 right = Vector3.Cross(normal, Vector3.up).normalized;
+            if (right == Vector3.zero) {
+                right = Vector3.Cross(normal, Vector3.right).normalized;
+            }
+            Vector3 up = Vector3.Cross(right, normal).normalized;
+
+            // Construct the transformation matrix directly
+            Matrix4x4 trs = Matrix4x4.TRS(point, Quaternion.identity, Vector3.one) * 
+                            new Matrix4x4(
+                                new Vector4(right.x, right.y, right.z, 0),
+                                new Vector4(up.x, up.y, up.z, 0),
+                                new Vector4(normal.x, normal.y, normal.z, 0),
+                                new Vector4(0, 0, 0, 1)
+                            );
+
             Gizmos.matrix = trs;
             Gizmos.color = new Color(color.r, color.g, color.b, 0.5f);
             float depth = 0.0001f;
-            Gizmos.DrawCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+            Gizmos.DrawCube(Vector3.zero, new Vector3(width, height, depth));
             Gizmos.color = new Color(color.r, color.g, color.b, 1f);
-            Gizmos.DrawWireCube(Vector3.up * height * 0.5f, new Vector3(width, height, depth));
+            Gizmos.DrawWireCube(Vector3.zero, new Vector3(width, height, depth));
             Gizmos.matrix = Matrix4x4.identity;
             Gizmos.color = Color.white;
         }
+        
+        // Draws a plane with a specified normal, right, and up vector
+        // Will always draw with a consistent orientation unlike the method above which tries to infer right and up from the normal
+        public static void DrawPlane(Vector3 point, Vector3 normal, Vector3 right, Vector3 up, float height, float width, Color color) {
+            if (normal == Vector3.zero || right == Vector3.zero || up == Vector3.zero) return;
+
+            // Ensure that right, up, and normal are orthonormal
+            right = right.normalized;
+            up = up.normalized;
+            normal = normal.normalized;
+
+            // Construct the transformation matrix directly
+            Matrix4x4 trs = Matrix4x4.TRS(point, Quaternion.identity, Vector3.one) *
+                            new Matrix4x4(
+                                new Vector4(right.x, right.y, right.z, 0),
+                                new Vector4(up.x, up.y, up.z, 0),
+                                new Vector4(normal.x, normal.y, normal.z, 0),
+                                new Vector4(0, 0, 0, 1)
+                            );
+
+            Gizmos.matrix = trs;
+            Gizmos.color = new Color(color.r, color.g, color.b, 0.5f);
+            float depth = 0.0001f;
+            Gizmos.DrawCube(Vector3.zero, new Vector3(width, height, depth));
+            Gizmos.color = new Color(color.r, color.g, color.b, 1f);
+            Gizmos.DrawWireCube(Vector3.zero, new Vector3(width, height, depth));
+            Gizmos.matrix = Matrix4x4.identity;
+            Gizmos.color = Color.white;
+        }
+
+
         
         //Draws just the box at where it is currently hitting.
         public static void DrawBoxCastOnHit(
@@ -1743,6 +1734,30 @@ namespace SuperspectiveUtils {
                         material.renderQueue = (int) RenderQueue.Transparent;
                         break;
                 }
+            }
+            
+            
+            public static void BlitWithDepth(RenderTexture source, RenderTexture destination, Material material) {
+                // Set the destination color buffer and the source depth buffer
+                Graphics.SetRenderTarget(destination.colorBuffer, source.depthBuffer);
+
+                // Set up orthographic projection
+                GL.PushMatrix();
+                GL.LoadOrtho();
+
+                // Use the material pass
+                material.SetPass(0);
+
+                // Draw a fullscreen quad
+                GL.Begin(GL.QUADS);
+    
+                GL.TexCoord2(0, 0); GL.Vertex3(0, 0, 0);
+                GL.TexCoord2(1, 0); GL.Vertex3(1, 0, 0);
+                GL.TexCoord2(1, 1); GL.Vertex3(1, 1, 0);
+                GL.TexCoord2(0, 1); GL.Vertex3(0, 1, 0);
+    
+                GL.End();
+                GL.PopMatrix();
             }
         }
     }

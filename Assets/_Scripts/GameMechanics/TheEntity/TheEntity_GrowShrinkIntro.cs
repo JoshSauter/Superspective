@@ -217,6 +217,7 @@ namespace TheEntity {
             state.AddTrigger(State.NotSpawned, () => {
                 distanceTraveled = 0;
                 currentIndex = 0;
+                GrowShrinkObject.SetScaleDirectly(GrowShrinkObject.startingScale);
                 transform.position = startPos;
                 staticWall.position = staticWall.position.WithX(staticWallStartX);
             });

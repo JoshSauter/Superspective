@@ -4739,8 +4739,8 @@ MonoBehaviour:
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
   DEBUG: 0
-  _id: {fileID: 0}
-  prefabPath: Prefabs/Interactables/PickUpCubes/MultiDimensionCube0
+  _id: {fileID: 2987867824161880409}
+  prefabPath: _Prefabs/Interactables/PickUpCubes/MultiDimensionCube1
   instantiatedAtRuntime: 1
   isAllowedToChangeScenes: 1
 --- !u!114 &2221574962254478033
@@ -4934,3 +4934,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trigger: {fileID: 0}

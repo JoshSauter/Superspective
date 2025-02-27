@@ -69,6 +69,7 @@ public static class SuperspectivePhysics {
 	private static int _portalLayer = -1;
 	private static int _hideFromPortalRendering = -1;
 	private static int _volumetricPortalLayer = -1;
+	private static int _inverseBloomLayer = -1;
 
 	private static int LazyLayer(ref int layer, string layerName) {
 		return layer < 0 ? layer = LayerMask.NameToLayer(layerName) : layer;
@@ -87,6 +88,7 @@ public static class SuperspectivePhysics {
 	public static int PortalLayer => LazyLayer(ref _portalLayer, "Portal");
 	public static int HideFromPortalLayer => LazyLayer(ref _hideFromPortalRendering, "HideFromPortalRendering");
 	public static int VolumetricPortalLayer => LazyLayer(ref _volumetricPortalLayer, "VolumetricPortal");
+	public static int InverseBloomLayer => LazyLayer(ref _inverseBloomLayer, "InverseBloom");
 	public static int PhysicsRaycastLayerMask =>
 		~((1 << IgnoreRaycastLayer) |
 		  (1 << TriggerZoneLayer) |

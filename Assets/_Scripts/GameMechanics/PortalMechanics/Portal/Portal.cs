@@ -278,8 +278,42 @@ namespace PortalMechanics {
 		/// <param name="renderMode">PortalRenderMode for the Portal to use.</param>
 		/// <param name="physicsMode">PortalPhysicsMode for the Portal to use.</param>
 		public void SetPortalModes(PortalRenderMode renderMode, PortalPhysicsMode physicsMode) {
+			SetPortalRenderingMode(renderMode);
+			SetPortalPhysicsMode(physicsMode);
+		}
+
+		/// <summary>
+		/// Sets the rendering mode for the portal and applies the settings to the renderers.
+		/// </summary>
+		/// <param name="renderMode">PortalRenderMode for the Portal to use.</param>
+		public void SetPortalRenderingMode(PortalRenderMode renderMode) {
 			RenderMode = renderMode;
+		}
+
+		/// <summary>
+		/// Sets the rendering mode for the portal and applies the settings to the renderers.
+		/// Provided for use with UnityEvents which don't support enums :(
+		/// </summary>
+		/// <param name="renderMode">int representing the PortalRenderMode for the Portal to use.</param>
+		public void SetPortalRenderingMode(int renderMode) {
+			SetPortalRenderingMode((PortalRenderMode)renderMode);
+		}
+
+		/// <summary>
+		/// Sets the physics mode for the portal and applies the settings to the colliders.
+		/// </summary>
+		/// <param name="physicsMode">PortalPhysicsMode for the Portal to use.</param>
+		public void SetPortalPhysicsMode(PortalPhysicsMode physicsMode) {
 			PhysicsMode = physicsMode;
+		}
+		
+		/// <summary>
+		/// Sets the physics mode for the portal and applies the settings to the colliders.
+		/// Provided for use with UnityEvents which don't support enums :(
+		/// </summary>
+		/// <param name="physicsMode">int representing the PortalPhysicsMode for the Portal to use.</param>
+		public void SetPortalPhysicsMode(int physicsMode) {
+			SetPortalPhysicsMode((PortalPhysicsMode)physicsMode);
 		}
 
 		public Vector3 ClosestPoint(Vector3 point, bool ignoreDisabledColliders = false, bool useInfinitelyThinBounds = false) {

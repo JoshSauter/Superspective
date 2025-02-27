@@ -128,7 +128,7 @@ Material:
     - _DissolveBurnColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
     - _DissolveColorAt0: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveColorAt1: {r: 1, g: 1, b: 1, a: 0}
-    - _EmissionColor: {r: 1.7207953, g: 0.135141, b: 0.135141, a: 1}
+    - _EmissionColor: {r: 1.7207954, g: 0.14415036, b: 0.14415036, a: 1}
     - _EndColor: {r: 1, g: 1, b: 1, a: 1}
     - _LargeSidePoint: {r: 0, g: 0, b: 0, a: 0}
     - _MaxRenderZone: {r: 0, g: 0, b: 0, a: 1}

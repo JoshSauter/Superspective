@@ -2,8 +2,8 @@
 using System.Collections;
 
 namespace SuperspectiveUtils {
-	// Adapted from https://github.com/nickhall/Unity-Procedural/blob/master/Splines/Assets/Plugins/MeshExtrusion.cs
 	public static class MeshUtils {
+		// Adapted from https://github.com/nickhall/Unity-Procedural/blob/master/Splines/Assets/Plugins/MeshExtrusion.cs
 		/*
 		* An algorithm to extrude an arbitrary mesh along a number of sections.
 	

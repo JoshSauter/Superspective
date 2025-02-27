@@ -237,8 +237,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c585d99796d38d4a8097086e2c1ddcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
+  thisDynamicObject: {fileID: 0}
   isReplaceable: 1
   isHeld: 0
   receptacleHeldIn: {fileID: 0}
@@ -251,19 +254,21 @@ MonoBehaviour:
   growShrinkObject: {fileID: 0}
   spawnedFrom:
     referencedObjId: 
+  lastRaycast:
+    distance: 0
+    allPortalsHit: []
+    effectivePortalsHit: []
   heldPickupObjectPhysicsMaterial: {fileID: 13400000, guid: e6f28b2263385da42a121b7f7daf4426,
     type: 2}
   interactable: 1
   rigidbodySleepingStateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
   freezeRotationStateMachine:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0
 --- !u!114 &5694432929352241937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,13 +281,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdacce54b553d1349a94f6f1fafa007b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
   portalCopyPrefab: {fileID: 8888495365991536659, guid: 0a97a235d72e22445b7d8d87bd12fac4,
     type: 3}
-  portal: {fileID: 0}
   colliders: []
   renderers: []
+  teleportedThisFixedUpdate: 0
 --- !u!114 &5678607679450239003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,12 +302,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
   growShrink: {fileID: 0}
   thisRigidbody: {fileID: 0}
+  thisCollider: {fileID: 0}
   useGravity: 1
-  gravityDirection: {x: 0, y: -1, z: 0}
+  onGround: 0
+  startingGravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
 --- !u!114 &-8051421512853098411
 MonoBehaviour:
@@ -314,8 +325,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
 --- !u!114 &-1455407386897224382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,8 +354,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabPath: Prefabs/Interactables/PickUpCubes/PickUpCube
-  isGlobal: 1
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  DEBUG: 0
+  _id: {fileID: -1455407386897224382}
+  prefabPath: _Prefabs/Interactables/PickUpCubes/PickUpCube
+  instantiatedAtRuntime: 1
+  isAllowedToChangeScenes: 1
 --- !u!114 &7486660522801237821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,8 +373,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fedb6bfdd22f1ef4fba2401cd0ce9fc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
   glow: {fileID: 0}
   _state: 0
   enabledHelpText: Pick up
@@ -378,16 +398,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a39cb98eca5ecef4abc00d1332820c1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: -1455407386897224382}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: -1455407386897224382}
   thisGravityObj: {fileID: 5678607679450239003}
   thisRigidbody: {fileID: 4725270764708023329}
+  thisCollider: {fileID: 0}
   minScale: 0
   maxScale: 0
-  _currentScale: 1
   startingScale: 1
   state:
     _state: 0
     _prevState: 0
-    _timeSinceStateChanged: 0
-    onStateChange: []
+    _time: 0

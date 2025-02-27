@@ -484,7 +484,7 @@ namespace PortalMechanics {
 				    targetDirection = Vector3.forward,
 				    triggerThreshold = 0f
 			    };
-			    trigger.triggerConditionsNew = new List<TriggerCondition>() {
+			    trigger.triggerConditions = new List<TriggerCondition>() {
 				    positionCondition,
 				    movementCondition
 			    };

@@ -1,10 +1,18 @@
 ﻿using System;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(UniqueId))]
 public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.RotateObjectSave> {
+    public enum RotateMode {
+        Simple,
+        Random
+    }
+    public RotateMode rotateMode;
+    private bool RandomRotateMode => rotateMode == RotateMode.Random;
     public bool importantToSave = false;
     public bool useLocalCoordinates = true;
 
@@ -12,8 +20,32 @@ public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.Rotat
     public float rotationsPerSecondY;
     public float rotationsPerSecondZ;
 
+    [ShowIf(nameof(RandomRotateMode))]
+    public Vector2 xRandomBetween;
+    [ShowIf(nameof(RandomRotateMode))]
+    public Vector2 yRandomBetween;
+    [ShowIf(nameof(RandomRotateMode))]
+    public Vector2 zRandomBetween;
+    [ShowIf(nameof(RandomRotateMode))]
+    public float randomLerpSpeed = 1f;
+
     // Update is called once per frame
     void Update() {
+        if (RandomRotateMode) {
+            float GetNextDelta() {
+                float rand = 2 * Random.value - 1; // Random value between -1 and 1
+                float delta = rand * Time.deltaTime * randomLerpSpeed / 10f;
+                return delta;
+            }
+
+            rotationsPerSecondX += GetNextDelta();
+            rotationsPerSecondX = Mathf.Clamp(rotationsPerSecondX, xRandomBetween.x, xRandomBetween.y);
+            rotationsPerSecondY += GetNextDelta();
+            rotationsPerSecondY = Mathf.Clamp(rotationsPerSecondY, yRandomBetween.x, yRandomBetween.y);
+            rotationsPerSecondZ += GetNextDelta();
+            rotationsPerSecondZ = Mathf.Clamp(rotationsPerSecondZ, zRandomBetween.x, zRandomBetween.y);
+        }
+        
         float rotX = Time.deltaTime * rotationsPerSecondX * 360;
         float rotY = Time.deltaTime * rotationsPerSecondY * 360;
         float rotZ = Time.deltaTime * rotationsPerSecondZ * 360;

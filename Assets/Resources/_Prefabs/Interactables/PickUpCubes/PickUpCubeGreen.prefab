@@ -237,8 +237,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c585d99796d38d4a8097086e2c1ddcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8496296933909590291}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8496296933909590291}
+  thisDynamicObject: {fileID: 0}
   isReplaceable: 1
   isHeld: 0
   receptacleHeldIn: {fileID: 0}
@@ -262,12 +265,10 @@ MonoBehaviour:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
   freezeRotationStateMachine:
     _state: 0
     _prevState: 0
     _time: 0
-    onStateChange: []
 --- !u!114 &3231100048451693160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,8 +281,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdacce54b553d1349a94f6f1fafa007b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8496296933909590291}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8496296933909590291}
   portalCopyPrefab: {fileID: 8888495365991536659, guid: fda0f93f264621c4dabb7471c083700c,
     type: 3}
   colliders: []
@@ -299,11 +302,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82209644233be1642b07ff8cdefffd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8496296933909590291}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8496296933909590291}
   growShrink: {fileID: 0}
   thisRigidbody: {fileID: 0}
+  thisCollider: {fileID: 0}
   useGravity: 1
+  onGround: 0
   startingGravityDirection: {x: 0, y: -1, z: 0}
   gravityMagnitude: 32
 --- !u!114 &8694482305907331905
@@ -331,8 +338,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fedb6bfdd22f1ef4fba2401cd0ce9fc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8496296933909590291}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8496296933909590291}
   glow: {fileID: 0}
   _state: 0
   enabledHelpText: Pick up
@@ -354,8 +363,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f670d988d2fac634884d668b5df97ec5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8496296933909590291}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 8496296933909590291}
 --- !u!114 &8496296933909590291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,6 +392,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575564a52d0f1964d8022fffa86333dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabPath: Prefabs/Interactables/PickUpCubes/PickUpCubeGreen
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  DEBUG: 0
+  _id: {fileID: 8496296933909590291}
+  prefabPath: _Prefabs/Interactables/PickUpCubes/PickUpCubeGreen
   instantiatedAtRuntime: 1
-  isGlobal: 1
+  isAllowedToChangeScenes: 1

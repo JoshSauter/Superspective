@@ -228,8 +228,16 @@ Shader "Hidden/JG/ColorfulFog"
 		half fogFac = ComputeFogFactor(max(0.0,g));
 
 		// Do not fog skybox
-		if ((1-_SkyboxFog) * rawDepth >= 0.999999)
-			fogFac = 1.0;
+		if (rawDepth >= 0.999999) {
+			if (1-_SkyboxFog) {
+				fogFac = 1;
+			}
+			else {
+				fogFac = 1-max(sceneColor.r, max(sceneColor.g, sceneColor.b));
+			}
+			
+			//
+		}
 
 		// Compute fog color
 		half4 fogColor = ComputeFogColor(i.interpolatedRay,colorMode);//_Colors[0];

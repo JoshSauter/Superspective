@@ -5,9 +5,9 @@ using System.Linq;
 using UnityEngine;
 
 namespace NovaMenuUI {
-// Consistent coloring for UI components, in the future could have multiple themes to swap colors all together
+    // Consistent coloring for UI components, in the future could have multiple themes to swap colors all together
     public enum UIStyleTheme {
-        Default,
+        Default
     }
     
     /// <summary>

@@ -3,8 +3,8 @@ using System.Collections;
 using System.Linq;
 using SuperspectiveUtils;
 using LevelManagement;
+using Sirenix.OdinInspector;
 using Sirenix.Utilities;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -18,6 +18,16 @@ namespace Saving {
 	// They are loaded before SaveableObjects so that the instance exists for other Component loads
     public class DynamicObject : SuperspectiveObject<DynamicObject, DynamicObject.DynamicObjectSave> {
 		public string prefabPath;
+		
+		[Button("Refresh Prefab Path")]
+		private void RefreshPrefabPath() {
+#if UNITY_EDITOR
+			prefabPath = AssetDatabase.GetAssetPath(this)
+				// Strip prefix and suffix to get the Resources-relative path
+				.Replace("Assets/Resources/", "")
+				.Replace(".prefab", "");
+#endif
+		}
 
 		// Expose the UniqueId as a property so that its GUID can be set by the DynamicObjectManager when created
 		public new UniqueId id => base.id;
@@ -26,7 +36,7 @@ namespace Saving {
 		public override bool SkipSave => false;
 		
 		[FormerlySerializedAs("wasInstantiatedAtRuntime")]
-		[ReadOnly]
+		[Unity.Collections.ReadOnly]
 		public bool instantiatedAtRuntime = true;
 		private string lastKnownID = "";
 		public string ID {
@@ -46,10 +56,7 @@ namespace Saving {
 			bool noScene = string.IsNullOrEmpty(SceneName);
 			if (noScene && string.IsNullOrEmpty(prefabPath)) {
 #if UNITY_EDITOR
-				prefabPath = AssetDatabase.GetAssetPath(this)
-					// Strip prefix and suffix to get the Resources-relative path
-					.Replace("Assets/Resources/", "")
-					.Replace(".prefab", "");
+				RefreshPrefabPath();
 #endif
 			}
 

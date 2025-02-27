@@ -5,6 +5,7 @@ using SerializableClasses;
 
 namespace MagicTriggerMechanics.TriggerActions {
     [Serializable]
+    // TODO: Rename to TogglePortalRendering to be consistent with naming conventions that the other actions use
     public class EnableDisablePortalRendering : TriggerAction {
         public bool logicAndRendering = false;
         public SuperspectiveReference<Portal, Portal.PortalSave>[] portalsToEnable;

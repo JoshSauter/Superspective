@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using SuperspectiveUtils;
+using UnityEngine;
 using UnityEngine.XR;
 
 [ExecuteInEditMode]
@@ -30,7 +31,11 @@ public class FastBloom : MonoBehaviour
     RenderTextureDescriptor opaqueDesc;
     Vector3 lm = new Vector3(0.2126f, 0.7152f, 0.0722f);
 
-    void OnRenderImage(RenderTexture source, RenderTexture destination)
+    void OnRenderImage(RenderTexture source, RenderTexture destination) {
+        PerformBloom(source, destination);
+    }
+
+    public void PerformBloom(RenderTexture source, RenderTexture destination)
     {
         if (BloomDiffusion == 0 && BloomAmount == 0)
         {
@@ -71,6 +76,8 @@ public class FastBloom : MonoBehaviour
             opaqueDesc.height = Mathf.Max(1, opaqueDesc.height >> 1);
             bloomTemp[i] = RenderTexture.GetTemporary(opaqueDesc);
             bloomTemp1[i] = RenderTexture.GetTemporary(opaqueDesc);
+            bloomTemp[i].Clear();
+            bloomTemp1[i].Clear();
         }
 
         Graphics.Blit(source, bloomTemp[0], material, 0);

@@ -7,7 +7,6 @@ using System;
 using System.Collections;
 using MagicTriggerMechanics.TriggerActions;
 using MagicTriggerMechanics.TriggerConditions;
-using NaughtyAttributes;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine.Serialization;
@@ -18,24 +17,19 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : SuperspectiveObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
-		[HorizontalLine(color: EColor.Yellow)]
-		[FormerlySerializedAs("triggerConditions")]
-		public List<TriggerCondition_Deprecated> triggerConditionsOld = new List<TriggerCondition_Deprecated>();
-		[HorizontalLine(color: EColor.Green)]
-		[FormerlySerializedAs("actionsToTrigger")]
-		public List<TriggerAction_Deprecated> actionsToTriggerOld = new List<TriggerAction_Deprecated>();
-		
-		[SerializeReference, Sirenix.OdinInspector.BoxGroup("Trigger Conditions")]
+		[FormerlySerializedAs("triggerConditionsNew")]
+		[SerializeReference, BoxGroup("Trigger Conditions")]
 		[GUIColor(1f, 1f, 0.8f)]
-		[Sirenix.OdinInspector.InfoBox("@NumConditionsLabel")]
-		public List<TriggerCondition> triggerConditionsNew = new List<TriggerCondition>();
-		[SerializeReference, Sirenix.OdinInspector.BoxGroup("Trigger Actions")]
+		[InfoBox("@NumConditionsLabel")]
+		public List<TriggerCondition> triggerConditions = new List<TriggerCondition>();
+		[FormerlySerializedAs("actionsToTriggerNew")]
+		[SerializeReference, BoxGroup("Trigger Actions")]
 		[GUIColor(0.8f, 1f, 0.8f)]
-		[Sirenix.OdinInspector.InfoBox("@NumActionsLabel")]
-		public List<TriggerAction> actionsToTriggerNew = new List<TriggerAction>();
+		[InfoBox("@NumActionsLabel")]
+		public List<TriggerAction> actionsToTrigger = new List<TriggerAction>();
 		
-		private string NumConditionsLabel => $"Conditions: {triggerConditionsNew.Count}";
-		private string NumActionsLabel => $"Actions: {actionsToTriggerNew.Count}";
+		private string NumConditionsLabel => $"Conditions: {triggerConditions.Count}";
+		private string NumActionsLabel => $"Actions: {actionsToTrigger.Count}";
 
 		#region events
 		public delegate void MagicAction(); 
@@ -52,8 +46,8 @@ namespace MagicTriggerMechanics {
 		public event MagicAction OnMagicTriggerExit;
 		#endregion
 
-		public bool AllConditionsSatisfied => triggerConditionsNew.TrueForAll(tc => tc.IsTriggered(transform));
-		public bool AllConditionsNegativelySatisfied => triggerConditionsNew.TrueForAll(tc => tc.IsReverseTriggered(transform));
+		public bool AllConditionsSatisfied => triggerConditions.TrueForAll(tc => tc.IsTriggered(transform));
+		public bool AllConditionsNegativelySatisfied => triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform));
 		
 		public bool playerIsInTriggerZone = false;
 		protected bool hasTriggeredOnStay = false;
@@ -189,19 +183,19 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected void ExecuteActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.Execute(this);
 			}
 		}
 		protected void ExecuteNegativeActionsForTiming(ActionTiming timing) {
-			foreach (var action in actionsToTriggerNew.Where(a => a.actionTiming.HasFlag(timing))) {
+			foreach (var action in actionsToTrigger.Where(a => a.actionTiming.HasFlag(timing))) {
 				action.NegativeExecute(this);
 			}
 		}
 
 		protected void PrintDebugInfo() {
 			string debugString = $"{gameObject.name}:\n";
-			foreach (var condition in triggerConditionsNew) {
+			foreach (var condition in triggerConditions) {
 				debugString += condition.GetDebugInfo(transform);
 			}
 			debug.Log(debugString);
@@ -215,7 +209,7 @@ namespace MagicTriggerMechanics {
 
 			for (int i = 0; i < save.triggerActionSaves.Length; i++) {
 				object saveData = save.triggerActionSaves[i];
-				actionsToTriggerNew[i].LoadSaveData(saveData, this);
+				actionsToTrigger[i].LoadSaveData(saveData, this);
 			}
 		}
 
@@ -229,7 +223,7 @@ namespace MagicTriggerMechanics {
 				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
 				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
 
-				triggerActionSaves = magicTrigger.actionsToTriggerNew.Select(a => a.GetSaveData(magicTrigger)).ToArray();
+				triggerActionSaves = magicTrigger.actionsToTrigger.Select(a => a.GetSaveData(magicTrigger)).ToArray();
 			}
 		}
 		#endregion

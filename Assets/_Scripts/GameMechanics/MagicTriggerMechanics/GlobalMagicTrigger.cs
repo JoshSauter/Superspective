@@ -32,8 +32,8 @@ namespace MagicTriggerMechanics {
 				PrintDebugInfo();
 			}
 
-			bool allConditionsSatisfied = triggerConditionsNew.TrueForAll(tc => tc.IsTriggered(transform));
-            bool allConditionsNegativelySatisfied = triggerConditionsNew.TrueForAll(tc => tc.IsReverseTriggered(transform));
+			bool allConditionsSatisfied = triggerConditions.TrueForAll(tc => tc.IsTriggered(transform));
+            bool allConditionsNegativelySatisfied = triggerConditions.TrueForAll(tc => tc.IsReverseTriggered(transform));
 			// Magic Events triggered
 			if (allConditionsSatisfied) {
 				debug.Log($"Triggering MagicTrigger for {gameObject.name}!");
@@ -66,7 +66,7 @@ namespace MagicTriggerMechanics {
 
         protected override void OnValidate() {
 	        base.OnValidate();
-			foreach (var action in actionsToTriggerNew) {
+			foreach (var action in actionsToTrigger) {
 				if (action != null && (action.actionTiming.HasFlag(ActionTiming.OnEnter) || action.actionTiming.HasFlag(ActionTiming.OnExit))) {
 					Debug.LogError("OnEnter and OnExit trigger action timings will not work for GlobalMagicTriggers");
 				}

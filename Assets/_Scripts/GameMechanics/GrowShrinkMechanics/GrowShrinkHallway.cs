@@ -201,7 +201,7 @@ namespace GrowShrink {
                 meshesByMaterial[material].Add(pbMesh);
             }
 
-            MeshCollider CombineMeshesForMaterial(Material material) {
+            ProBuilderMesh CombineMeshesForMaterial(Material material) {
                 ProBuilderMesh targetPbMesh = targetMeshByMaterial[material];
                 var pbMeshesForMaterial = meshesByMaterial[material];
                 var combineMeshes = pbMeshesForMaterial.Append(targetPbMesh).ToArray();                
@@ -218,7 +218,7 @@ namespace GrowShrink {
                 
                 targetPbMesh.Refresh();
 
-                return targetMeshCollider;
+                return targetPbMesh;
             }
 
             void ShrinkMeshCollider(MeshCollider meshCollider) {
@@ -285,7 +285,7 @@ namespace GrowShrink {
             originalTriggerZone.gameObject.SetActive(false);
             
             foreach (Material material in meshesByMaterial.Keys) {
-                ShrinkMeshCollider(CombineMeshesForMaterial(material));
+                CombineMeshesForMaterial(material).TransformVertices(TransformVertex);
             }
             targetPbMeshes = targetMeshByMaterial.Values.ToArray();
             
@@ -316,8 +316,8 @@ namespace GrowShrink {
             if (shrunkTriggerZone != null) {
                 Undo.DestroyObjectImmediate(this.shrunkTriggerZone.gameObject);
                 Undo.RecordObject(this, "GrowShrinkHallway: Remove Shrunk Trigger Zone");
-                shrunkTriggerZone = null;
             }
+            shrunkTriggerZone = null;
             
             if (PbMeshesNeedToBeSet) {
                 Undo.RecordObject(this, "GrowShrinkHallway: Set PB Meshes");
