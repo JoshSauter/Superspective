@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Saving;
 using SerializableClasses;
+using Sirenix.Utilities;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -63,6 +64,9 @@ namespace Editor {
                 }
 
                 SuperspectiveObject prevReference = cached.cachedReference;
+                if (cachedId.IsNullOrWhitespace()) {
+                    cached.cachedReference = null;
+                }
                 cached.cachedReference = EditorGUI.ObjectField(
                     referenceRect,
                     label.text,

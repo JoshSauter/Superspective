@@ -1,4 +1,5 @@
 ﻿using LevelManagement;
+using MagicTriggerMechanics.TriggerActions;
 using UnityEngine;
 
 namespace MagicTriggerMechanics {

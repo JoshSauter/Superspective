@@ -76,6 +76,18 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
+		public void AddTriggerAction(TriggerAction triggerAction) {
+			if (actionsToTrigger.Contains(triggerAction)) return;
+			
+			actionsToTrigger.Add(triggerAction);
+		}
+		
+		public void AddTriggerCondition(TriggerCondition triggerCondition) {
+			if (triggerConditions.Contains(triggerCondition)) return;
+			
+			triggerConditions.Add(triggerCondition);
+		}
+
 		public void ResetHasTriggeredOnStayState() {
 			StartCoroutine(ResetHasTriggeredOnStayStateAtEndOfPhysicsFrame());
 		}

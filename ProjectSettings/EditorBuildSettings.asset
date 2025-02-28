@@ -119,4 +119,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/_RoseRoomExit.unity
     guid: 00a7b470b63e42645a6cc8090f8a1d9d
+  - enabled: 1
+    path: Assets/PrototypeAndTesting/_TestScenes/PowerTrailTestScene.unity
+    guid: 0e34ba8ba7de0a041b8bd2ed17a328c7
+  - enabled: 1
+    path: Assets/__Scenes/_Fork_BlackRoom2.unity
+    guid: 233a64cf9972ff046b315e75fe4cbf97
   m_configObjects: {}

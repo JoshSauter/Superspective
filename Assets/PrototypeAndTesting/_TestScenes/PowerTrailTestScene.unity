@@ -3857,33 +3857,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 491816013}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 491816013}
   triggerConditions:
-  - triggerCondition: 8
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  - triggerCondition: 5
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: -2
+  - rid: -2
   actionsToTrigger: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &491816013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3930,10 +3919,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 491816013}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 491816013}
   channel: Portal1
   changeActiveSceneOnTeleport: 0
+  compositePortal: 0
+  doubleSidedPortals: 0
+  otherPortal: {fileID: 0}
+  dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
+  onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  _physicsMode: 0
+  changeScale: 0
+  scaleFactor: 1
+  maxScaleAllowed: 6
+  colliders: []
+  triggerColliders: []
+  trigger: {fileID: 491816012}
+  disableColliderWhilePaused: 0
+  _renderMode: 0
+  renderRecursivePortals: 0
+  turnOnNormalPortalRenderingWhenPlayerTeleports: 0
   changeCameraEdgeDetection: 0
   edgeColorMode: 0
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
@@ -3968,39 +3981,18 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   edgeColorGradientTexture: {fileID: 0}
-  renderRecursivePortals: 0
-  compositePortal: 0
-  doubleSidedPortals: 0
-  skipIsVisibleCheck: 0
-  changeScale: 0
-  scaleFactor: 1
-  maxScaleAllowed: 6
-  volumetricPortals:
-  - {fileID: 864216612}
-  volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
-  renderers:
-  - {fileID: 491816019}
-  colliders: []
-  triggerColliders: []
-  otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  disableColliderWhilePaused: 0
+  portalMaterial: {fileID: 0}
+  skipIsVisibleCheck: 0
   pauseRenderingWhenNotInActiveScene: 0
-  pauseRendering: 0
-  pauseLogic: 0
-  dimensionObject: {fileID: 0}
-  pillarDimensionObject: {fileID: 0}
-  trigger: {fileID: 491816012}
-  onPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
-  onOtherPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
+  renderers:
+  - {fileID: 491816019}
+  volumetricPortals:
+  - {fileID: 864216612}
+  volumetricPortalThickness: 1
 --- !u!114 &491816016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6053,8 +6045,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 705201490}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 705201490}
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -17473,8 +17467,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 705201490}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 705201490}
   state:
     _state: 0
     _prevState: 0
@@ -19307,33 +19303,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1016995196}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1016995196}
   triggerConditions:
-  - triggerCondition: 8
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  - triggerCondition: 5
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: -2
+  - rid: -2
   actionsToTrigger: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &1016995196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19380,10 +19365,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1016995196}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1016995196}
   channel: Portal2
   changeActiveSceneOnTeleport: 0
+  compositePortal: 0
+  doubleSidedPortals: 0
+  otherPortal: {fileID: 0}
+  dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
+  onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  _physicsMode: 0
+  changeScale: 0
+  scaleFactor: 1
+  maxScaleAllowed: 6
+  colliders: []
+  triggerColliders: []
+  trigger: {fileID: 1016995195}
+  disableColliderWhilePaused: 0
+  _renderMode: 0
+  renderRecursivePortals: 0
+  turnOnNormalPortalRenderingWhenPlayerTeleports: 0
   changeCameraEdgeDetection: 0
   edgeColorMode: 0
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
@@ -19418,39 +19427,18 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   edgeColorGradientTexture: {fileID: 0}
-  renderRecursivePortals: 0
-  compositePortal: 0
-  doubleSidedPortals: 0
-  skipIsVisibleCheck: 0
-  changeScale: 0
-  scaleFactor: 1
-  maxScaleAllowed: 6
-  volumetricPortals:
-  - {fileID: 1075861071}
-  volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
-  renderers:
-  - {fileID: 1016995202}
-  colliders: []
-  triggerColliders: []
-  otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  disableColliderWhilePaused: 0
+  portalMaterial: {fileID: 0}
+  skipIsVisibleCheck: 0
   pauseRenderingWhenNotInActiveScene: 0
-  pauseRendering: 0
-  pauseLogic: 0
-  dimensionObject: {fileID: 0}
-  pillarDimensionObject: {fileID: 0}
-  trigger: {fileID: 1016995195}
-  onPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
-  onOtherPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
+  renderers:
+  - {fileID: 1016995202}
+  volumetricPortals:
+  - {fileID: 1075861071}
+  volumetricPortalThickness: 1
 --- !u!114 &1016995199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20298,8 +20286,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1100334104}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1100334104}
   _pwr: {fileID: 1100334110}
   renderers: []
   powerNodes: {fileID: 1100334105}
@@ -21651,8 +21641,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1100334104}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1100334104}
   state:
     _state: 0
     _prevState: 0
@@ -22140,8 +22132,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1121270041}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1121270041}
   _pwr: {fileID: 1121270043}
   renderers:
   - {fileID: 1121270037}
@@ -22234,8 +22228,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1121270041}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1121270041}
   state:
     _state: 0
     _prevState: 0
@@ -23643,8 +23639,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1247923136}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1247923136}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -23662,7 +23660,6 @@ MonoBehaviour:
   visibilityState: 3
   collisionMatrix: 000000010000000000010000000000010000010101010101
   collisionLogic: {fileID: 0}
-  isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
 --- !u!114 &1247923136
@@ -25564,8 +25561,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1315186210}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 1
+  _id: {fileID: 1315186210}
   _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1315186209}
@@ -26179,8 +26178,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1315186210}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1315186210}
   state:
     _state: 0
     _prevState: 0
@@ -26521,33 +26522,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1411538285}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1411538285}
   triggerConditions:
-  - triggerCondition: 8
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  - triggerCondition: 5
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: -2
+  - rid: -2
   actionsToTrigger: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &1411538285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26594,10 +26584,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1411538285}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1411538285}
   channel: Portal1
   changeActiveSceneOnTeleport: 0
+  compositePortal: 0
+  doubleSidedPortals: 0
+  otherPortal: {fileID: 0}
+  dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
+  onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  _physicsMode: 0
+  changeScale: 0
+  scaleFactor: 1
+  maxScaleAllowed: 6
+  colliders: []
+  triggerColliders: []
+  trigger: {fileID: 1411538284}
+  disableColliderWhilePaused: 0
+  _renderMode: 0
+  renderRecursivePortals: 0
+  turnOnNormalPortalRenderingWhenPlayerTeleports: 0
   changeCameraEdgeDetection: 0
   edgeColorMode: 0
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
@@ -26632,39 +26646,18 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   edgeColorGradientTexture: {fileID: 0}
-  renderRecursivePortals: 0
-  compositePortal: 0
-  doubleSidedPortals: 0
-  skipIsVisibleCheck: 0
-  changeScale: 0
-  scaleFactor: 1
-  maxScaleAllowed: 6
-  volumetricPortals:
-  - {fileID: 2086800309}
-  volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
-  renderers:
-  - {fileID: 1411538291}
-  colliders: []
-  triggerColliders: []
-  otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  disableColliderWhilePaused: 0
+  portalMaterial: {fileID: 0}
+  skipIsVisibleCheck: 0
   pauseRenderingWhenNotInActiveScene: 0
-  pauseRendering: 0
-  pauseLogic: 0
-  dimensionObject: {fileID: 0}
-  pillarDimensionObject: {fileID: 0}
-  trigger: {fileID: 1411538284}
-  onPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
-  onOtherPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
+  renderers:
+  - {fileID: 1411538291}
+  volumetricPortals:
+  - {fileID: 2086800309}
+  volumetricPortalThickness: 1
 --- !u!114 &1411538288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27909,8 +27902,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4ea316fe3a25174f9d3994aac48de70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1581752674}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1581752674}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
@@ -27928,7 +27923,6 @@ MonoBehaviour:
   visibilityState: 3
   collisionMatrix: 000000010000000000010000000000010000010101010101
   collisionLogic: {fileID: 0}
-  isBeingDestroyed: 0
   useAdvancedChannelLogic: 0
   channelLogic: 
 --- !u!114 &1581752674
@@ -28432,8 +28426,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1583444904}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1583444904}
   _pwr: {fileID: 1583444910}
   renderers: []
   powerNodes: {fileID: 1583444905}
@@ -31753,8 +31749,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1583444904}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1583444904}
   state:
     _state: 0
     _prevState: 0
@@ -32325,8 +32323,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1716652306}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 1
+  _id: {fileID: 1716652306}
   _pwr: {fileID: 0}
   renderers: []
   powerNodes: {fileID: 1716652305}
@@ -32940,8 +32940,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1716652306}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1716652306}
   state:
     _state: 0
     _prevState: 0
@@ -33360,8 +33362,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1833302163}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1833302163}
   _pwr: {fileID: 1833302169}
   renderers: []
   powerNodes: {fileID: 1833302164}
@@ -34713,8 +34717,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1833302163}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1833302163}
   state:
     _state: 0
     _prevState: 0
@@ -35435,8 +35441,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1977453005}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1977453005}
   _pwr: {fileID: 1977453011}
   renderers: []
   powerNodes: {fileID: 1977453006}
@@ -38756,8 +38764,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1977453005}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1977453005}
   state:
     _state: 0
     _prevState: 0
@@ -39011,8 +39021,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c838c8f4153013640af2f4cb65d2af25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1996799287}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1996799287}
   _pwr: {fileID: 1996799293}
   renderers:
   - {fileID: 1996799291}
@@ -39514,8 +39526,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 1996799287}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 1996799287}
   state:
     _state: 0
     _prevState: 0
@@ -40737,33 +40751,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a1880d9db05db4d981cca54f2c9917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2086538053}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2086538053}
   triggerConditions:
-  - triggerCondition: 8
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
-  - triggerCondition: 5
-    useLocalCoordinates: 1
-    triggerThreshold: 0.01
-    targetDirection: {x: 0, y: 0, z: 1}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: -2
+  - rid: -2
   actionsToTrigger: []
   playerIsInTriggerZone: 0
   colliders: []
   triggerColliders: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &2086538053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40810,10 +40813,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cbcf6816a61d9d45b7ed2bbf4802092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2086538053}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2086538053}
   channel: Portal2
   changeActiveSceneOnTeleport: 0
+  compositePortal: 0
+  doubleSidedPortals: 0
+  otherPortal: {fileID: 0}
+  dimensionObject: {fileID: 0}
+  pillarDimensionObject: {fileID: 0}
+  onPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  onOtherPortalTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  _physicsMode: 0
+  changeScale: 0
+  scaleFactor: 1
+  maxScaleAllowed: 6
+  colliders: []
+  triggerColliders: []
+  trigger: {fileID: 2086538052}
+  disableColliderWhilePaused: 0
+  _renderMode: 0
+  renderRecursivePortals: 0
+  turnOnNormalPortalRenderingWhenPlayerTeleports: 0
   changeCameraEdgeDetection: 0
   edgeColorMode: 0
   edgeColor: {r: 0, g: 0, b: 0, a: 1}
@@ -40848,39 +40875,18 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   edgeColorGradientTexture: {fileID: 0}
-  renderRecursivePortals: 0
-  compositePortal: 0
-  doubleSidedPortals: 0
-  skipIsVisibleCheck: 0
-  changeScale: 0
-  scaleFactor: 1
-  maxScaleAllowed: 6
-  volumetricPortals:
-  - {fileID: 1303915699}
-  volumetricPortalThickness: 1
-  fallbackMaterial: {fileID: 0}
-  renderers:
-  - {fileID: 2086538059}
-  colliders: []
-  triggerColliders: []
-  otherPortal: {fileID: 0}
   internalRenderTexturesCopy:
     portalName: 
     mainTexture: {fileID: 0}
     depthNormalsTexture: {fileID: 0}
-  disableColliderWhilePaused: 0
+  portalMaterial: {fileID: 0}
+  skipIsVisibleCheck: 0
   pauseRenderingWhenNotInActiveScene: 0
-  pauseRendering: 0
-  pauseLogic: 0
-  dimensionObject: {fileID: 0}
-  pillarDimensionObject: {fileID: 0}
-  trigger: {fileID: 2086538052}
-  onPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
-  onOtherPortalTeleport:
-    m_PersistentCalls:
-      m_Calls: []
+  renderers:
+  - {fileID: 2086538059}
+  volumetricPortals:
+  - {fileID: 1303915699}
+  volumetricPortalThickness: 1
 --- !u!114 &2086538056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42568,8 +42574,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76a52273bfeb59746b394b93d47be951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2117780537}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2117780537}
   oneTimeButton: 0
   interactableObject: {fileID: 0}
   buttonPressCurve:
@@ -54004,8 +54012,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7072f58d8877b494fb044e6594bd4e0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 2117780537}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 2117780537}
   state:
     _state: 0
     _prevState: 0

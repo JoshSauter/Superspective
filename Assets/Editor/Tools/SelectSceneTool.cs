@@ -10,7 +10,7 @@ public class SelectSceneTool : EditorWindow {
 
     private static List<Levels> sceneHistory = new List<Levels>(); // Last 4 scenes
 
-    private const string SceneHistoryKey = "SelectSceneTool_RecentScenes"; // Key for persistence
+    private const string SCENE_HISTORY_KEY = "SelectSceneTool_RecentScenes"; // Key for persistence
 
     [MenuItem("Tools/Select Scene Tool %l")]
     public static void ShowWindow() {
@@ -99,12 +99,12 @@ public class SelectSceneTool : EditorWindow {
 
     private void SaveSceneHistory() {
         string serializedHistory = string.Join(",", sceneHistory);
-        EditorPrefs.SetString(SceneHistoryKey, serializedHistory);
+        EditorPrefs.SetString(SCENE_HISTORY_KEY, serializedHistory);
     }
 
     private void LoadSceneHistory() {
-        if (EditorPrefs.HasKey(SceneHistoryKey)) {
-            string serializedHistory = EditorPrefs.GetString(SceneHistoryKey);
+        if (EditorPrefs.HasKey(SCENE_HISTORY_KEY)) {
+            string serializedHistory = EditorPrefs.GetString(SCENE_HISTORY_KEY);
 
             sceneHistory = new List<Levels>();
             foreach (string levelName in serializedHistory.Split(',')) {

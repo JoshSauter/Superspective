@@ -7,6 +7,7 @@
 /DebugBuilds/
 /PlaytestBuilds/
 /Assets/AssetStoreTools*
+/UserSettings/
 
 # Visual Studio 2015 cache directory
 /.vs/

@@ -7,6 +7,14 @@ namespace MagicTriggerMechanics.TriggerActions {
         public void NegativeExecute(MagicTrigger triggerScript);
     }
 
+    [Flags]
+    public enum ActionTiming {
+        OnEnter = (1 << 0),
+        OnExit = (1 << 1),          // OnExit is triggered regardless of trigger conditions
+        OnceWhileOnStay = (1 << 2),
+        EveryFrameOnStay = (1 << 3)
+    }
+
     [Serializable]
     public abstract class TriggerAction : ITriggerAction {
         [EnumFlags]
