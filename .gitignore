@@ -43,4 +43,6 @@ sysinfo.txt
 
 # Backups
 *.bak/
-Assets/Resources/Materials/Overlay/SketchEffectMaterial.mat
+
+/Assets/Resources/Materials/Overlay/SketchEffectMaterial.mat
+/ProjectSettings/Packages/com.unity.probuilder/Settings.json

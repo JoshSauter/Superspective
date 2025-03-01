@@ -24,6 +24,12 @@ public class SketchOverlay : MonoBehaviour {
 	void OnDisable() {
 		intensityBeforeDisable = intensity;
 		intensity = 0f;
+
+		if (mat != null) {
+			mat.SetFloat("_Intensity", 0);
+			mat.SetTextureOffset("_SketchTex", Vector2.zero);
+			mat.SetTextureScale("_SketchTex", Vector2.one);
+		}
 	}
 
 	void OnEnable() {
