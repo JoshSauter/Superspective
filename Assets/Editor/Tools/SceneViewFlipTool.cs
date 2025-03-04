@@ -3,85 +3,84 @@ using UnityEngine;
 
 [InitializeOnLoad]
 public static class SceneViewFlipTool {
-    private static bool isFlipped = false;
+    private const string FLIPPED_MARKER = "FlippedEvent"; // Unique marker to prevent event-processing infinite recursion
+    private static SceneView CurrentSceneView => SceneView.lastActiveSceneView;
+    
+    private const string IS_FLIPPED_KEY = "SceneViewFlipTool.IsFlipped";
+    private static readonly BoolEditorSetting IsFlipped = new BoolEditorSetting(IS_FLIPPED_KEY, false);
+    
+    private const string ORIGINAL_PIVOT_KEY = "SceneViewFlipTool.OriginalPivot";
+    private static readonly Vector3EditorSetting OriginalPivot = new Vector3EditorSetting(ORIGINAL_PIVOT_KEY, Vector3.zero);
+
     private static Quaternion originalRotation;
 
     static SceneViewFlipTool() {
         SceneView.duringSceneGui += OnSceneGUI;
+        IsFlipped.onValueChanged += () => {
+            SceneView sceneView = CurrentSceneView;
+            Debug.Log($"Scene view is flipped: {IsFlipped.Value}");
+            if (IsFlipped) {
+                // Flip around the forward axis to turn upside-down
+                sceneView.rotation = Quaternion.AngleAxis(180f, sceneView.camera.transform.forward) * sceneView.rotation;
+            }
+            else {
+                sceneView.rotation = Quaternion.AngleAxis(-180f, sceneView.camera.transform.forward) * sceneView.rotation;
+            }
+        };
     }
 
     [MenuItem("Tools/Flip Scene View Camera _F8")] // Shortcut: F8 (no modifiers)
     private static void ToggleSceneViewFlip() {
-        SceneView sceneView = SceneView.lastActiveSceneView;
+        SceneView sceneView = CurrentSceneView;
         if (sceneView == null) return;
 
-        bool wasFlipped = isFlipped;
-        isFlipped = !isFlipped;
-
-        if (isFlipped && !wasFlipped) {
-            // Flip around the forward axis to turn upside-down
-            sceneView.rotation = Quaternion.AngleAxis(180f, sceneView.camera.transform.forward) * sceneView.rotation;
-        } else if (wasFlipped && !isFlipped) {
-            sceneView.rotation = Quaternion.AngleAxis(-180f, sceneView.camera.transform.forward) * sceneView.rotation;
-        }
+        IsFlipped.Value = !IsFlipped;
 
         sceneView.Repaint();
     }
 
     private static void OnSceneGUI(SceneView sceneView) {
-        if (!isFlipped) return;
+        if (!IsFlipped) return;
 
         Event e = Event.current;
-        if (e == null) return;
+        if (e == null || e.commandName == FLIPPED_MARKER) return;
 
-        if (e.type == EventType.MouseDrag) {
-            if (e.button == 1) { // Right Mouse Button (Orbit)
-                float rotationSpeed = GetRotationSpeed(sceneView);
-                sceneView.rotation = Quaternion.AngleAxis(-e.delta.x * rotationSpeed, Vector3.up) * sceneView.rotation;
-                sceneView.rotation = Quaternion.AngleAxis(e.delta.y * rotationSpeed, sceneView.camera.transform.right) * sceneView.rotation;
-                e.Use();
-            } 
-            else if (e.button == 2) { // Middle Mouse Button (Panning)
-                float panSpeed = GetPanSpeed(sceneView);
-                Vector3 right = sceneView.camera.transform.right;
-                Vector3 up = -sceneView.camera.transform.up; // Invert vertical panning
+        // Invert the mouse delta to simulate a flipped view
+        if (e.type == EventType.MouseDrag && e.button == 1) {
+            e.delta = new Vector2(-e.delta.x, e.delta.y);
+            e.commandName = FLIPPED_MARKER;
 
-                sceneView.pivot -= (right * e.delta.x + up * e.delta.y) * panSpeed;
-                e.Use();
-            }
+            //SendFlippedEvent(e, CurrentSceneView);
         }
 
-        // Prevent Unity from applying its default panning behavior after release
-        if (e.type == EventType.MouseUp && e.button == 2) {
-            GUIUtility.hotControl = 0;
-            e.Use();
-            SimulateRightClick();
-        }
-    }
-
-    private const float ROTATION_SPEED_MULTIPLIER = 0.006f;
-    private static float GetRotationSpeed(SceneView sceneView) {
-        return ROTATION_SPEED_MULTIPLIER * sceneView.size; // Scales rotation with zoom distance, similar to Unity's default behavior
-    }
-
-    private const float PAN_SPEED_MULTIPLIER = 0.0025f;
-    private static float GetPanSpeed(SceneView sceneView) {
-        return PAN_SPEED_MULTIPLIER * sceneView.size; // Matches Unity's default panning speed
+        DrawFlippedLabel(sceneView);
     }
     
-    private static void SimulateRightClick() {
-        Event mouseDown = new Event {
-            type = EventType.MouseDown,
-            button = 1, // Right-click
-            mousePosition = Vector2.zero
-        };
-        Event mouseUp = new Event {
-            type = EventType.MouseUp,
-            button = 1, // Right-click
-            mousePosition = Vector2.zero
+    // Ahh, ChatGPT, doing the things I have no interest in doing myself:
+    private static void DrawFlippedLabel(SceneView sceneView) {
+        Handles.BeginGUI(); // Start GUI rendering inside SceneView
+
+        // Get SceneView size
+        Rect sceneViewRect = sceneView.position;
+
+        // Define label position (slightly below the compass)
+        float labelWidth = 60f;
+        float labelHeight = 20f;
+        float xOffset = -20f; // Adjust to align properly under compass
+        float yOffset = 110f; // Distance from the compass
+
+        Vector2 labelPosition = new Vector2(sceneViewRect.width - labelWidth + xOffset, yOffset);
+
+        // Draw semi-transparent background box
+        GUIStyle boxStyle = new GUIStyle(GUI.skin.box) {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 12,
+            normal = { textColor = Color.white },
+            fontStyle = FontStyle.Bold
         };
 
-        SceneView.lastActiveSceneView.SendEvent(mouseDown);
-        SceneView.lastActiveSceneView.SendEvent(mouseUp);
+        GUI.Box(new Rect(labelPosition.x, labelPosition.y, labelWidth, labelHeight), "FLIPPED", boxStyle);
+
+        Handles.EndGUI(); // End GUI rendering
     }
 }
