@@ -59,13 +59,11 @@ namespace PortalMechanics {
         public CompositeMagicTrigger trigger;
         
         private bool teleportingPlayer = false;
-        [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f)]
-        public bool disableColliderWhilePaused = false;
         public readonly HashSet<PortalableObject> objectsInPortal = new HashSet<PortalableObject>();
 
         [ShowInInspector]
         [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f)]
-        public bool PortalLogicIsEnabled => otherPortal != null && PhysicsMode == PortalPhysicsMode.Normal && gameObject.activeSelf;
+        public bool PortalPhysicsIsEnabled => otherPortal != null && PhysicsMode == PortalPhysicsMode.Normal && gameObject.activeSelf;
         public bool PlayerRemainsInPortal => PlayerIsInThisPortal || (otherPortal != null && otherPortal.PlayerIsInThisPortal);
         private bool PlayerIsInThisPortal => trigger.playerIsInTriggerZone;
         private float PortalTriggerThickness => PORTAL_TRIGGER_THICKNESS / (changeScale ? ScaleFactor : 1f);
@@ -171,18 +169,15 @@ namespace PortalMechanics {
         }
         
         private void FixedUpdate() {
-			foreach (Collider c in colliders) {
-				c.isTrigger = PortalLogicIsEnabled;
-				if (disableColliderWhilePaused) {
-					c.enabled = PortalLogicIsEnabled;
-				}
+			// If the player moves to the backside of a double-sided portal, rotate the portals to match
+			bool wouldTeleportPlayersIfPortalWereFlipped = false;
+			if (doubleSidedPortals) {
+				transform.rotation = !isFlipped ? flippedRotation : startRotation; // Pretend the Portal were already flipped
+				wouldTeleportPlayersIfPortalWereFlipped = WouldTeleportPlayer; // If the Portal were flipped, would we be teleporting the player?
+				transform.rotation = isFlipped ? flippedRotation : startRotation; // Restore rotation
 			}
 
-			// If the player moves to the backside of a double-sided portal, rotate the portals to match
-			transform.rotation = !isFlipped ? flippedRotation : startRotation; // Pretend the Portal were already flipped
-			bool wouldTeleportPlayersIfPortalWereFlipped = WouldTeleportPlayer; // If the Portal were flipped, would we be teleporting the player?
-			transform.rotation = isFlipped ? flippedRotation : startRotation; // Restore rotation
-			if (doubleSidedPortals && PortalLogicIsEnabled && !PlayerRemainsInPortal && (Time.frameCount - globalLastTeleportedFrame > GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT) && !wouldTeleportPlayersIfPortalWereFlipped) {
+			if (doubleSidedPortals && PortalPhysicsIsEnabled && !PlayerRemainsInPortal && (Time.frameCount - globalLastTeleportedFrame > GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT) && !wouldTeleportPlayersIfPortalWereFlipped) {
 				Vector3 closestPoint = ClosestPoint(playerCamera.position, true, true);
 				Vector3 closestPointOtherPortal = otherPortal.ClosestPoint(playerCamera.position, true, true);
 				
@@ -215,7 +210,7 @@ namespace PortalMechanics {
 		}
         
 	    public void OnPortalTriggerEnter(Collider other) {
-			if (!PortalLogicIsEnabled || other.isTrigger) return;
+			if (!PortalPhysicsIsEnabled || other.isTrigger) return;
 			
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
@@ -234,7 +229,7 @@ namespace PortalMechanics {
 		}
 
 		public void OnPortalTriggerExit(Collider other) {
-			if (!PortalLogicIsEnabled || other.isTrigger) return;
+			if (!PortalPhysicsIsEnabled || other.isTrigger) return;
 			
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
@@ -255,7 +250,7 @@ namespace PortalMechanics {
 		}
 
 		public void OnPortalTriggerStay(Collider other) {
-			if (!PortalLogicIsEnabled || other.isTrigger) return;
+			if (!PortalPhysicsIsEnabled || other.isTrigger) return;
 
 			// Player teleports are handled through a CompositeMagicTrigger to make it easier to ensure they are
 			// in the right position and moving the correct direction before triggering teleport
@@ -360,7 +355,7 @@ namespace PortalMechanics {
 				yield break;
 			}
 
-			if (!PortalLogicIsEnabled) yield break;
+			if (!PortalPhysicsIsEnabled) yield break;
 			
 			teleportingPlayer = true;
 

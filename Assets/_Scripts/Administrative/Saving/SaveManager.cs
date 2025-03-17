@@ -132,8 +132,7 @@ namespace Saving {
                 saveManager.LoadSuperspectiveObjectsStateFromSaveFile(saveDataForLevel);
             }
 
-            // Load data for every object in each loaded scene (starting with the ManagerScene)
-            saveManagerForManagerLevel.LoadSuperspectiveObjectsStateFromSaveFile(save.managerLevel);
+            // Load data for every object in each loaded scene (starting with the ManagerScene which happens before the new scenes are loaded)
             foreach (var kv in loadedLevels) {
                 Levels level = kv.Key;
                 SaveDataForLevel saveDataForLevel = kv.Value;
@@ -360,7 +359,7 @@ namespace Saving {
         /// <param name="id"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T FindObjectById<T>(string id) where T : class, ISaveableObject {
+        public static T FindObjectById<T>(string id, bool suppressError = false) where T : class, ISaveableObject {
             // Log a warning because we want to try to avoid using this function wherever possible (except in the Editor, w/e)
             if (Application.isPlaying) {
                 Debug.LogWarning($"FindObjectById called for {id}. This is inefficient and should be avoided where possible.");
@@ -373,11 +372,15 @@ namespace Saving {
                 .ToList();
 
             if (matches.Count == 0) {
-                Debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?");
+                if (!suppressError) {
+                    Debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?");
+                }
                 return null;
             }
             else if (matches.Count > 1) {
-                Debug.LogError($"Multiple objects with id {id} found.");
+                if (!suppressError) {
+                    Debug.LogError($"Multiple objects with id {id} found.\nMatches:\n{string.Join("\n", matches.Select(m => m.FullPath()))}");
+                }
                 return matches[0] as T;
             }
             else {

@@ -223,6 +223,8 @@ namespace TheEntity {
             });
             
             state.WithUpdate(_ => {
+                if (!this.IsInActiveScene()) return;
+                
                 MoveStaticWall();
                 LookAtPlayer();
             });
@@ -263,6 +265,8 @@ namespace TheEntity {
         }
 
         private void LookAtPlayer() {
+            if (GameManager.instance.IsCurrentlyLoading) return;
+            
             Vector3 playerPos = Player.instance.transform.position;
 
             // As soon as the player falls past the entity, it should look up at the player through the portal

@@ -73,10 +73,10 @@ public class Settings : Singleton<Settings> {
 			AudioListener.volume = ((FloatSetting)allSettings[Audio.Volume.key]).value / 100f;
 		}
 		if (Changed(Audio.SFXVolume)) {
-			AudioManager.instance.sfxVolume = ((FloatSetting)allSettings[Audio.SFXVolume.key]).value / 100f;
+			AudioManager.instance.SfxVolume = ((FloatSetting)allSettings[Audio.SFXVolume.key]).value / 100f;
 		}
 		if (Changed(Audio.MusicVolume)) {
-			AudioManager.instance.musicVolume = ((FloatSetting)allSettings[Audio.MusicVolume.key]).value / 100f;
+			AudioManager.instance.MusicVolume = ((FloatSetting)allSettings[Audio.MusicVolume.key]).value / 100f;
 		}
 	}
 
@@ -99,7 +99,7 @@ public class Settings : Singleton<Settings> {
 		};
 		public static readonly FloatSetting MusicVolume = new FloatSetting {
 			key = "MusicVolume",
-			name = "Music Volume (what music?)",
+			name = "Music Volume",
 			value = 50,
 			defaultValue = 50,
 			minValue = 0,

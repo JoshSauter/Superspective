@@ -132,32 +132,74 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	// Getters //
 	/////////////
 	#region Getters
+	public Color GetMainColor() {
+		return GetColor(mainColor);
+	}
+	
 	public Color GetColor(string colorName) {
 		return GetPropBlock().GetColor(colorName);
 	}
+
+	public Color GetColor(int colorId) {
+		return GetPropBlock().GetColor(colorId);
+	}
 	
-	public Color GetMainColor() {
-		return GetColor(mainColor);
+	public Color[] GetColorArray(string propName) {
+		Vector4[] colorVecs = GetVectorArray(propName);
+		return colorVecs.Select(v => (Color)v).ToArray();
+	}
+	
+	public Color[] GetColorArray(int propId) {
+		Vector4[] colorVecs = GetVectorArray(propId);
+		return colorVecs.Select(v => (Color)v).ToArray();
 	}
 
 	public float GetFloat(string propName) {
 		return GetPropBlock().GetFloat(propName);
 	}
 
+	public float GetFloat(int propId) {
+		return GetPropBlock().GetFloat(propId);
+	}
+
 	public int GetInt(string propName) {
 		return GetPropBlock().GetInt(propName);
+	}
+	
+	public int GetInt(int propId) {
+		return GetPropBlock().GetInt(propId);
 	}
 	
 	public float[] GetFloatArray(string propName) {
 		return GetPropBlock().GetFloatArray(propName);
 	}
 	
+	public float[] GetFloatArray(int propId) {
+		return GetPropBlock().GetFloatArray(propId);
+	}
+	
 	public Texture GetTexture(string propName) {
 		return GetPropBlock().GetTexture(propName);
+	}
+	
+	public Texture GetTexture(int propId) {
+		return GetPropBlock().GetTexture(propId);
 	}
 
 	public Vector4 GetVector(string propName) {
 		return GetPropBlock().GetVector(propName);
+	}
+	
+	public Vector4 GetVector(int propId) {
+		return GetPropBlock().GetVector(propId);
+	}
+	
+	public Vector4[] GetVectorArray(string propName) {
+		return GetPropBlock().GetVectorArray(propName);
+	}
+	
+	public Vector4[] GetVectorArray(int propId) {
+		return GetPropBlock().GetVectorArray(propId);
 	}
 
 	#endregion
@@ -166,59 +208,97 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	// Setters //
 	/////////////
 	#region Setters
-	public void SetColor(string colorName, Color color) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetColor(colorName, color);
-		SetPropBlock(mpb);
-	}
-
 	public void SetMainColor(Color color) {
 		SetColor(mainColor, color);
 	}
+	
+	public void SetColor(string colorName, Color color) {
+		ApplySetting(mpb => mpb.SetColor(colorName, color));
+	}
+	
+	public void SetColor(int colorId, Color color) {
+		ApplySetting(mpb => mpb.SetColor(colorId, color));
+	}
+	
+	// Convenience pass-through for SetVectorArray
+	public void SetColorArray(string propName, Color[] colors) {
+		Vector4[] colorVecs = colors.Select(c => (Vector4)c).ToArray();
+		SetVectorArray(propName, colorVecs);
+	}
+	
+	// Convenience pass-through for SetVectorArray
+	public void SetColorArray(int propId, Color[] colors) {
+		Vector4[] colorVecs = colors.Select(c => (Vector4)c).ToArray();
+		SetVectorArray(propId, colorVecs);
+	}
 
 	public void SetFloat(string propName, float value) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetFloat(propName, value);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetFloat(propName, value));
+	}
+	
+	public void SetFloat(int propId, float value) {
+		ApplySetting(mpb => mpb.SetFloat(propId, value));
 	}
 
 	public void SetInt(string propName, int value) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetInt(propName, value);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetInt(propName, value));
+	}
+	
+	public void SetInt(int propId, int value) {
+		ApplySetting(mpb => mpb.SetInt(propId, value));
 	}
 	
 	public void SetFloatArray(string propName, float[] value) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetFloatArray(propName, value);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetFloatArray(propName, value));
+	}
+	
+	public void SetFloatArray(int propId, float[] value) {
+		ApplySetting(mpb => mpb.SetFloatArray(propId, value));
 	}
 
 	public void SetBuffer(string propName, ComputeBuffer buffer) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetBuffer(propName, buffer);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetBuffer(propName, buffer));
+	}
+	
+	public void SetBuffer(int propId, ComputeBuffer buffer) {
+		ApplySetting(mpb => mpb.SetBuffer(propId, buffer));
 	}
 
 	public void SetTexture(string propName, Texture value) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetTexture(propName, value);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetTexture(propName, value));
+	}
+	
+	public void SetTexture(int propId, Texture value) {
+		ApplySetting(mpb => mpb.SetTexture(propId, value));
 	}
 	
 	public void SetVector(string propName, Vector4 v) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetVector(propName, v);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetVector(propName, v));
+	}
+	
+	public void SetVector(int propId, Vector4 v) {
+		ApplySetting(mpb => mpb.SetVector(propId, v));
+	}
+
+	public void SetVectorArray(string propName, Vector4[] v) {
+		ApplySetting(mpb => mpb.SetVectorArray(propName, v));
+	}
+	
+	public void SetVectorArray(int propId, Vector4[] v) {
+		ApplySetting(mpb => mpb.SetVectorArray(propId, v));
 	}
 
 	public void SetMatrix(string propName, Matrix4x4 m) {
-		MaterialPropertyBlock mpb = GetPropBlock();
-		mpb.SetMatrix(propName, m);
-		SetPropBlock(mpb);
+		ApplySetting(mpb => mpb.SetMatrix(propName, m));
 	}
 	
-	private void SetPropBlock(MaterialPropertyBlock mpb) {
+	public void SetMatrix(int propId, Matrix4x4 m) {
+		ApplySetting(mpb => mpb.SetMatrix(propId, m));
+	}
+
+	private void ApplySetting(Action<MaterialPropertyBlock> setting) {
+		MaterialPropertyBlock mpb = GetPropBlock();
+		setting(mpb);
 		r.SetPropertyBlock(mpb);
 	}
 

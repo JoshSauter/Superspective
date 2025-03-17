@@ -91,6 +91,12 @@ namespace LevelSpecific.WhiteRoom {
         protected override void OnEnable() {
             base.OnEnable();
 
+            StartCoroutine(Co_OnEnable());
+        }
+
+        private IEnumerator Co_OnEnable() {
+            yield return new WaitWhile(() => !GameManager.instance.gameHasLoaded);
+            
             var powerTrail = TriggeredByPowerTrail;
             if (powerTrail && powerTrail.pwr) {
                 if (startingState is State.Lowered or State.Raising) {

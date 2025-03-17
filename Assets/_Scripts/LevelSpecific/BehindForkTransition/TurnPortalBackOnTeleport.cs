@@ -17,7 +17,7 @@ namespace LevelSpecific.BehindForkTransition {
             yield return new WaitUntil(() => gameObject.IsInActiveScene());
             
             pictureTeleport = GetComponent<PictureTeleport>();
-            pictureTeleport.OnPictureTeleport += () => portal.gameObject.SetActive(true);
+            pictureTeleport.OnPictureTeleport += () => portal.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
         }
     }
 }

@@ -67,12 +67,15 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
+    protected override void Awake() {
+        AddTriggerZone();
+    }
+    
     protected override void Start() {
         base.Start();
 
         stateMachine = this.StateMachine(State.Empty);
         
-        AddTriggerZone();
         colorCoded = GetComponent<ColorCoded>();
         InitializeStateMachine();
     }
@@ -218,7 +221,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         //triggerZoneGO.layer = LayerMask.NameToLayer("Ignore Raycast");
         //triggerZone = triggerZoneGO.AddComponent<BoxCollider>();
         triggerZone = gameObject.AddComponent<BoxCollider>();
-        gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+        gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
 
         triggerZone.size = new Vector3(receptacleSize * 0.25f, receptacleSize * 1.5f, receptacleSize * 0.25f);
         triggerZone.isTrigger = true;
@@ -372,7 +375,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         }
         ReleaseCubeFromReceptacleInstantly();
         Vector3 ejectionDirection = transform.up;
-        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(240f, 350f);
+        float forceMagnitude = forceMultiplier * UnityEngine.Random.Range(EXPEL_CUBE_FORCE - EXPEL_CUBE_FORCE_VARIANCE, EXPEL_CUBE_FORCE + EXPEL_CUBE_FORCE_VARIANCE);
         debug.Log($"Adding {ejectionDirection * forceMagnitude} force to cube {cubeToEject.ID}'s {(cubeToEject.thisRigidbody.isKinematic ? "Kinematic" : "Non-Kinematic")} Rigidbody to eject it from receptacle");
         cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
     }

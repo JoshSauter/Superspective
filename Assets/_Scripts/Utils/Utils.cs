@@ -278,6 +278,8 @@ namespace SuperspectiveUtils {
     }
 
     public static class ColorExt {
+        public static Color purple = new Color(0.45f, 0f, 1f);
+        
         public static Color WithAlphaFrom(this Color self, Color from) {
             return new Color(self.r, self.g, self.b, from.a);
         }
@@ -1496,6 +1498,12 @@ namespace SuperspectiveUtils {
         }
 
         public void LogWarning(object message, bool forceLog = false) {
+            if (forceLog || enabled.Invoke()) {
+                Debug.LogWarning(MessageWithContext(message, context), context);
+            }
+        }
+        
+        public void LogWarningWithContext(object message, Object context, bool forceLog = false) {
             if (forceLog || enabled.Invoke()) {
                 Debug.LogWarning(MessageWithContext(message, context), context);
             }

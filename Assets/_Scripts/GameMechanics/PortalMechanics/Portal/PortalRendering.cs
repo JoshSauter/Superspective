@@ -57,6 +57,7 @@ namespace PortalMechanics {
         public float VolumetricPortalThickness => volumetricPortalThickness * transform.localScale.z;
 
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
+        [Tooltip("If true, will automatically set the render mode to Normal when the player arrives through this portal.")]
         public bool turnOnNormalPortalRenderingWhenPlayerTeleports = false;
         
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
@@ -328,21 +329,30 @@ namespace PortalMechanics {
 		BladeEdgeDetection.EdgeColorMode EdgeColorMode => changeCameraEdgeDetection ? edgeColorMode : EdgeDetection.edgeColorMode;
 		Color EdgeColor => changeCameraEdgeDetection ? edgeColor : EdgeDetection.edgeColor;
 		Gradient EdgeColorGradient => changeCameraEdgeDetection ? edgeColorGradient : EdgeDetection.edgeColorGradient;
-		
-		void SetEdgeDetectionColorProperties() {
-			portalMaterial.SetInt(BladeEdgeDetection.ColorModeID, (int)EdgeColorMode);
-			switch (EdgeColorMode) {
-				case BladeEdgeDetection.EdgeColorMode.SimpleColor:
-					portalMaterial.SetColor(BladeEdgeDetection.EdgeColorID, EdgeColor);
-					break;
-				case BladeEdgeDetection.EdgeColorMode.Gradient:
-					SetEdgeColorGradient();
-					break;
-				case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
-					portalMaterial.SetTexture(BladeEdgeDetection.GradientTextureID, edgeColorGradientTexture);
-					break;
-			}
-		}
+
+        void SetEdgeDetectionColorProperties() {
+            void SetEdgeDetectionColorPropertiesForRenderer(SuperspectiveRenderer r) {
+                r.SetInt(BladeEdgeDetection.ColorModeID, (int)EdgeColorMode);
+                switch (EdgeColorMode) {
+                    case BladeEdgeDetection.EdgeColorMode.SimpleColor:
+                        r.SetColor(BladeEdgeDetection.EdgeColorID, EdgeColor);
+                        break;
+                    case BladeEdgeDetection.EdgeColorMode.Gradient:
+                        SetEdgeColorGradient(r);
+                        break;
+                    case BladeEdgeDetection.EdgeColorMode.ColorRampTexture:
+                        r.SetTexture(BladeEdgeDetection.GradientTextureID, edgeColorGradientTexture);
+                        break;
+                }
+            }
+            
+            foreach (var r in renderers) {
+                SetEdgeDetectionColorPropertiesForRenderer(r);
+            }
+            foreach (var vp in volumetricPortals) {
+                SetEdgeDetectionColorPropertiesForRenderer(vp);
+            }
+        }
 		
 #region Helper Methods
 		/// <summary>
@@ -350,24 +360,24 @@ namespace PortalMechanics {
 		/// Populates _GradientKeyTimes with the times of each colorKey in edgeColorGradient (as well as a 0 as the first key and a series of 1s to fill out the array at the end)
 		/// Populates _EdgeColorGradient with the colors of each colorKey in edgeColorGradient (as well as values for the times filled in as described above)
 		/// </summary>
-		void SetEdgeColorGradient() {
+		void SetEdgeColorGradient(SuperspectiveRenderer r) {
 			Color startColor = EdgeColorGradient.Evaluate(0);
 			Color endColor = EdgeColorGradient.Evaluate(1);
 			float startAlpha = startColor.a;
 			float endAlpha = endColor.a;
 	
-			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.colorKeys.Select(x => x.time), 1f));
-			portalMaterial.SetColorArray(BladeEdgeDetection.EdgeColorGradientID, GetGradientColorValues(startColor, EdgeColorGradient.colorKeys.Select(x => x.color), endColor));
-			portalMaterial.SetFloatArray(BladeEdgeDetection.GradientAlphaKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.alphaKeys.Select(x => x.time), 1f));
-			portalMaterial.SetFloatArray(BladeEdgeDetection.AlphaGradientID, GetGradientFloatValues(startAlpha, EdgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
+			r.SetFloatArray(BladeEdgeDetection.GradientKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.colorKeys.Select(x => x.time), 1f));
+			r.SetColorArray(BladeEdgeDetection.EdgeColorGradientID, GetGradientColorValues(startColor, EdgeColorGradient.colorKeys.Select(x => x.color), endColor));
+			r.SetFloatArray(BladeEdgeDetection.GradientAlphaKeyTimesID, GetGradientFloatValues(0f, EdgeColorGradient.alphaKeys.Select(x => x.time), 1f));
+			r.SetFloatArray(BladeEdgeDetection.AlphaGradientID, GetGradientFloatValues(startAlpha, EdgeColorGradient.alphaKeys.Select(x => x.alpha), endAlpha));
 	
-			portalMaterial.SetInt(BladeEdgeDetection.GradientModeID, EdgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
+			r.SetInt(BladeEdgeDetection.GradientModeID, EdgeColorGradient.mode == GradientMode.Blend ? 0 : 1);
 	
-			SetFrustumCornersVector();
+			SetFrustumCornersVector(r);
 		}
 	
-		void SetFrustumCornersVector() {
-			portalMaterial.SetVectorArray(BladeEdgeDetection.FrustumCorners, EdgeDetection.frustumCornersOrdered);
+		void SetFrustumCornersVector(SuperspectiveRenderer r) {
+			r.SetVectorArray(BladeEdgeDetection.FrustumCorners, EdgeDetection.frustumCornersOrdered);
 		}
 	
 		// Actually just populates the float buffer with the values provided, then returns a reference to the float buffer

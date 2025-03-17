@@ -623,6 +623,9 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
         isReplaceable = save.isReplaceable;
         interactable = save.interactable;
         isHeld = save.isHeld;
+        if (isHeld) {
+            Player.instance.heldObject = this;
+        }
         receptacleHeldIn = save.receptacleHeldIn?.GetOrNull();
         currentCooldown = save.currentCooldown;
             

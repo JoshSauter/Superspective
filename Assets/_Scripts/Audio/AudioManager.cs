@@ -21,7 +21,6 @@ namespace Audio {
 			public string id;
 			public string uniqueIdentifier => id.Split('/').FirstOrDefault();
 			public AudioName audioName;
-			public AudioType audioType = AudioType.SFX;
 			public float baseVolume = 1f;
 			public float timeRunning = 0f;
 			// audio.pitch may be modulated based on Time.timeScale or randomized pitch, this is the unmodified value
@@ -45,8 +44,12 @@ namespace Audio {
 				randomizedPitch = Random.Range(-pitchRandomness, pitchRandomness);
 				audio.pitch = basePitch + randomizedPitch;
 				audio.time = 0f;
-				audio.volume = baseVolume * ((audioType == AudioType.SFX) ? instance.sfxVolume : instance.musicVolume);
+				RefreshVolume();
 				audio.Play();
+			}
+			
+			public void RefreshVolume() {
+				audio.volume = baseVolume * (audioName.SfxOrMusic() == AudioType.SFX ? instance.SfxVolume : instance.MusicVolume);
 			}
 
 			public void Stop() {
@@ -190,14 +193,39 @@ namespace Audio {
 		}
 
 		// TODO: Use to control volume
-		public float sfxVolume = .50f;
-		public float musicVolume = .50f;
+		private float _sfxVolume = .50f;
+
+		public float SfxVolume {
+			get => _sfxVolume;
+			set {
+				if (Mathf.Approximately(_sfxVolume, value)) return;
+				
+				_sfxVolume = value;
+				foreach (var sfx in CurrentlyPlayingSfx) {
+					sfx.Value.RefreshVolume();
+				}
+			}
+		}
+		private float _musicVolume = 0.50f;
+		public float MusicVolume {
+			get => _musicVolume;
+			set {
+				if (Mathf.Approximately(_musicVolume, value)) return;
+				
+				_musicVolume = value;
+				foreach (var music in CurrentlyPlayingMusic) {
+					music.Value.RefreshVolume();
+				}
+			}
+		}
 
 		Transform soundsRoot;
 		private float timeElapsedBeforeAudioAllowedToPlay = 1f; // Presumably to prevent some buggy behavior when loading into a scene
 
 		private readonly Dictionary<AudioName, AudioSettings> defaultSettings = new Dictionary<AudioName, AudioSettings>();
 		private readonly Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
+		private Dictionary<string, AudioJob> CurrentlyPlayingMusic => audioJobs.Where(kv => kv.Value.audioName.SfxOrMusic() == AudioType.Music).ToDictionary();
+		private Dictionary<string, AudioJob> CurrentlyPlayingSfx => audioJobs.Where(kv => kv.Value.audioName.SfxOrMusic() == AudioType.Music).ToDictionary();
 
         // audioJobsToDebug is an optional whitelist of audio jobs to print debug log statements for (partial match)
         // if empty, will print debug log statements for any audio job

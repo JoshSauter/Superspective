@@ -129,7 +129,7 @@ namespace DissolveObjects {
             }
         }
 
-        protected override void Awake() {
+        protected override void Start() {
             base.Awake();
             if (renderers == null || renderers.Length == 0) {
                 renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();

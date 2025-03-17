@@ -5,6 +5,9 @@ using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 // Only handles the system governing interactable objects, all the juice for this is in InteractJuice.cs
 public class Interact : Singleton<Interact> {
@@ -166,6 +169,22 @@ public class Interact : Singleton<Interact> {
         if (raycastResult.DidHitObject) {
             nameOfFirstObjectHit = raycastResult.FirstObjectHit.collider.name;
             GameObject firstObjHit = raycastResult.FirstObjectHit.collider.gameObject;
+            #if UNITY_EDITOR
+            // In the editor, holding control and clicking on an object in the game world will select and focus it in the scene view
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0)) {
+                Selection.objects = new UnityEngine.Object[] { firstObjHit };
+                Type gameViewType = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
+                EditorWindow gameView = EditorWindow.GetWindow(gameViewType);
+                if (gameView != null) {
+                    gameView.maximized = false;
+                }
+                SceneView.lastActiveSceneView.FrameSelected();
+                SceneViewFX.instance.enabled = true;
+                SceneViewFX.instance.cachedEnableState = true;
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            } 
+            #endif
             interactable = firstObjHit.FindInParentsRecursively<InteractableObject>();
             if (interactable == null) {
                 interactable = firstObjHit.FindInParentsRecursively<PortalCopy>()?.originalPortalableObj.InteractObject;

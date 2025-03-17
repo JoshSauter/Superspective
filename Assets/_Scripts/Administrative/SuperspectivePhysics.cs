@@ -88,7 +88,10 @@ public static class SuperspectivePhysics {
 	public static int PortalLayer => LazyLayer(ref _portalLayer, "Portal");
 	public static int HideFromPortalLayer => LazyLayer(ref _hideFromPortalRendering, "HideFromPortalRendering");
 	public static int VolumetricPortalLayer => LazyLayer(ref _volumetricPortalLayer, "VolumetricPortal");
+	// TODO: Remove?:
 	public static int InverseBloomLayer => LazyLayer(ref _inverseBloomLayer, "InverseBloom");
+	
+	// For finding things the player can interact with in the game world
 	public static int PhysicsRaycastLayerMask =>
 		~((1 << IgnoreRaycastLayer) |
 		  (1 << TriggerZoneLayer) |
@@ -96,6 +99,9 @@ public static class SuperspectivePhysics {
 		  (1 << InvisibleLayer) |
 		  (1 << VisibilityMaskLayer) |
 		  (1 << CollideWithPlayerOnlyLayer));
+
+	// For finding solid objects that the player physically collides with
+	public static int PlayerPhysicsCollisionLayerMask => Player.instance.interactsWithPlayerLayerMask;
 	
 #endregion
 

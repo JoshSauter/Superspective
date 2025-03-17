@@ -81,3 +81,31 @@ public class Vector3EditorSetting : EditorSetting {
         return setting.Value;
     }
 }
+
+public class StringEditorSetting : EditorSetting {
+    private string _value;
+    public string Value {
+        get {
+            if (!hasLoaded) {
+                _value = EditorPrefs.GetString(key, _value);
+            }
+            
+            return _value;
+        }
+        set {
+            if (_value == value) return;
+            
+            _value = value;
+            EditorPrefs.SetString(key, _value);
+            onValueChanged?.Invoke();
+        }
+    }
+
+    public StringEditorSetting(string key, string defaultValue) : base(key) {
+        _value = defaultValue;
+    }
+    
+    public static implicit operator string(StringEditorSetting setting) {
+        return setting.Value;
+    }
+}

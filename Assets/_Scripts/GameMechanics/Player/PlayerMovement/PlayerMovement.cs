@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Audio;
 using SuperspectiveUtils;
-using LevelManagement;
-using NaughtyAttributes;
 using PortalMechanics;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using StateUtils;
 using UnityEngine;
 // Alias Settings.Gameplay.SprintBehaviorMode to a more readable name
@@ -25,10 +24,10 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     
     public bool PlayerIsAFK => afkDetectionComponent.state == AFKDetectionComponent.AFKState.AFK;
     
-    // Inspector properties, ShowNativeProperty only works on Monobehaviour classes
-    [ShowNativeProperty]
+    // Inspector properties, ShowInInspector only works on Monobehaviour classes
+    [ShowInInspector]
     public string GroundName => IsGrounded ? Grounded.Ground.name : "Not Grounded";
-    [ShowNativeProperty]
+    [ShowInInspector]
     public Vector3 GroundNormal => IsGrounded ? Grounded.contact.normal : Vector3.zero;
 
     public bool snapToGroundEnabled = true;
@@ -49,9 +48,6 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     public bool autoRun;
     public Rigidbody thisRigidbody;
 
-    [ShowNativeProperty]
-    public int numContactsThisFrame => allContactThisFrame.Count;
-    readonly List<ContactPoint> allContactThisFrame = new List<ContactPoint>();
     PlayerButtonInput input;
 
     private bool Stopped =>
@@ -64,7 +60,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 
     private float Scale => Player.instance.Scale;
 
-    [ShowNativeProperty]
+    [ShowInInspector]
     public Vector3 CurVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
 
     public float movespeedMultiplier = 1;
@@ -115,10 +111,10 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     }
 
     private GroundMovement.GroundedState Grounded => groundMovement.grounded;
-    [ShowNativeProperty]
+    [ShowInInspector]
     public bool IsGrounded => Grounded?.IsGrounded ?? false;
 
-    [ShowNativeProperty]
+    [ShowInInspector]
     bool StandingOnHeldObject => Grounded.StandingOnHeldObject;
 
     bool MoveDirectionHeld => Mathf.Abs(input.LeftStick.y) > 0  || Mathf.Abs(input.LeftStick.x) > 0;
@@ -135,6 +131,8 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     private const float SNAP_TO_GROUND_DISTANCE = 0.5f;
     private const float RESET_MOVE_DIRECTION_HELD_STATE_TIME = .25f;
     public bool pauseSnapToGround = false; // Hack fix to turn off snapping to ground when player is in a StaircaseRotate
+    
+    private float PlayerRadius => thisCollider == null ? 0 : thisCollider.radius * Scale;
 
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
@@ -218,7 +216,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 
         bool ShouldUseSprintSpeed() {
             if (endGameMovement != EndGameMovement.NotStarted) return false;
-            if (staircaseMovement.RecentlySteppedUp) return false;
+            if (staircaseMovement.RecentlySteppedUpOrDown) return false;
             if (autoRun) return true;
 
             if (ToggleSprint) {
@@ -239,7 +237,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     }
 
     void FixedUpdate() {
-        if (!GameManager.instance.gameHasLoaded) return;
+        if (GameManager.instance.IsCurrentlyLoading) return;
         if (movementEnabledState == MovementEnabledState.Disabled) {
             if (!thisRigidbody.isKinematic) {
                 thisRigidbody.velocity = Vector3.zero;
@@ -255,12 +253,14 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         groundMovement.UpdateGroundedState();
 
         jumpMovement.UpdateJumping();
-
+        
+        Vector3 desiredVelocity = Grounded.IsGrounded ? groundMovement.CalculateGroundMovement(Grounded.contact) : airMovement.CalculateAirMovement();
         if (snapToGroundEnabled) {
-            groundMovement.UpdateSnapToGround();
+            desiredVelocity = groundMovement.UpdateSnapToGround(desiredVelocity);
         }
         
-        bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && Grounded.IsGrounded && !staircaseMovement.RecentlySteppedUp && !MoveDirectionHeldRecently;
+        bool closeToGround = groundMovement.GroundRaycast(new Ray(BottomOfPlayer + transform.up * Scale, -transform.up), (1 + SNAP_TO_GROUND_DISTANCE) * Scale, out RaycastHit _, GroundMovement.IS_GROUND_THRESHOLD);
+        bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && closeToGround && !staircaseMovement.RecentlySteppedUpOrDown && !MoveDirectionHeldRecently;
 
         thisRigidbody.isKinematic = (Stopped || staircaseMovement.stepState != StaircaseMovement.StepState.Idle || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
 
@@ -270,29 +270,26 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         timeSlices.Add(new TimeSlice(Time.time, thisRigidbody.position));
 
         if (Stopped || Grounded.StandingOnHeldObject) {
-            allContactThisFrame.Clear();
             return;
         }
-
-        Vector3 desiredVelocity = Grounded.IsGrounded ? groundMovement.CalculateGroundMovement(Grounded.contact) : airMovement.CalculateAirMovement();
 
         groundMovement.UpdateLastGroundVelocity(desiredVelocity);
         
         // Prevent player from floating around on cubes they're holding...
-        if (Grounded.StandingOnHeldObject) desiredVelocity += 5 * Physics.gravity * Time.fixedDeltaTime;
+        if (Grounded.StandingOnHeldObject) desiredVelocity += Physics.gravity * (5 * Time.fixedDeltaTime);
 
         staircaseMovement.UpdateStaircase(desiredVelocity);
 
         // TODO: Check if all this is bugged in warped gravity
-        float movingBackward = Vector2.Dot(
-            new Vector2(desiredVelocity.x, desiredVelocity.z),
-            new Vector2(transform.forward.x, transform.forward.z)
-        );
-        if (movingBackward < -0.5f) {
-            float slowdownAmount = Mathf.InverseLerp(-.5f, -1, movingBackward);
-            desiredVelocity.x *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
-            desiredVelocity.z *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
-        }
+        //float movingBackward = Vector2.Dot(
+        //    new Vector2(desiredVelocity.x, desiredVelocity.z),
+        //    new Vector2(transform.forward.x, transform.forward.z)
+        //);
+        //if (movingBackward < -0.5f) {
+        //    float slowdownAmount = Mathf.InverseLerp(-.5f, -1, movingBackward);
+        //    desiredVelocity.x *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
+        //    desiredVelocity.z *= Mathf.Lerp(1, BACKWARDS_SPEED, slowdownAmount);
+        //}
 
         if (!input.LeftStickHeld && !input.JumpHeld && Grounded.Ground != null && Grounded.Ground.CompareTag("Staircase")) {
             thisRigidbody.constraints = RigidbodyConstraints.FreezeAll;
@@ -312,9 +309,8 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
             Vector3 positionBeforeCollisionResolution = transform.position;
             Vector3 thisFrameOffset = thisRigidbody.velocity * Time.fixedDeltaTime;
             transform.position += thisFrameOffset;
-            if (ResolveCollisions()) {
-                Vector3 offsetFromCollisionResolution = transform.position - positionBeforeCollisionResolution;
-                thisRigidbody.velocity = offsetFromCollisionResolution / Time.fixedDeltaTime;
+            if (ResolveCollisions(out Vector3 _)) {
+                thisRigidbody.velocity = (transform.position - positionBeforeCollisionResolution) / Time.fixedDeltaTime;
             }
             transform.position = positionBeforeCollisionResolution;
         }
@@ -326,24 +322,19 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
                 transform.up * projectedVertVelocity.magnitude * thisRigidbody.mass * WIND_RESISTANCE_MULTIPLIER
             );
         }
-
-        // We don't collide with other objects while kinematic, so keep the contactThisFrame data while we remain kinematic
-        CapsuleCollider capsuleCollider = thisCollider;
-        Vector3 capsuleCenter = transform.TransformPoint(capsuleCollider.center);
-        float capsuleHeight = capsuleCollider.height * Scale;
-        float capsuleRadius = capsuleCollider.radius * Scale;
-
-        Vector3 capsuleAxis = transform.up;
-        Vector3 p1 = capsuleCenter - capsuleAxis * (capsuleHeight * (0.5f - capsuleRadius)) - capsuleAxis.normalized * 0.01f * Scale;
-        Vector3 p2 = capsuleCenter + (capsuleAxis * (capsuleHeight * 0.5f - capsuleRadius));
-        if (!thisRigidbody.isKinematic || !Physics.CheckCapsule(p1, p2, capsuleRadius, Player.instance.interactsWithPlayerLayerMask, QueryTriggerInteraction.Ignore)) {
-            allContactThisFrame.Clear();
-        }
     }
-
-    void OnCollisionStay(Collision collision) {
-        // TODO: Don't use collision.contacts, it produces memory garbage
-        allContactThisFrame.AddRange(collision.contacts);
+        
+    private void DecomposeVector(Vector3 vector, out Vector3 vertical, out Vector3 horizontal) {
+        vertical = DecomposeVectorVertical(vector);
+        horizontal = DecomposeVectorHorizontal(vector);
+    }
+        
+    private Vector3 DecomposeVectorHorizontal(Vector3 vector) {
+        return vector - DecomposeVectorVertical(vector);
+    }
+        
+    private Vector3 DecomposeVectorVertical(Vector3 vector) {
+        return Vector3.Project(vector, transform.up);
     }
 
     public Vector3 ProjectHorizontalVelocity(Vector3 unprojectedVelocity) {
@@ -386,33 +377,36 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     }
 
     // Returns true if a collision was resolved
-    bool ResolveCollisions() {
+    private bool ResolveCollisions(out Vector3 offsetApplied) {
         Collider[] neighbors = CheckCapsule();
 
+        offsetApplied = Vector3.zero;
+        bool collisionResolved = false;
         for (int i = 0; i < neighbors.Length; i++) {
             Collider neighbor = neighbors[i];
             if (neighbor == thisCollider ||
                 Physics.GetIgnoreLayerCollision(SuperspectivePhysics.PlayerLayer, neighbor.gameObject.layer) ||
                 SuperspectivePhysics.CollisionsAreIgnored(thisCollider, neighbor)) continue;
 
-            Vector3 neighborPosition = neighbor.transform.position;
-            Quaternion neighborRotation = neighbor.transform.rotation;
-
-            Vector3 resolveDirection;
-            float resolveDistance;
-
-            if (Physics.ComputePenetration(
-                thisCollider, transform.position, transform.rotation,
-                neighbor, neighborPosition, neighborRotation,
-                out resolveDirection, out resolveDistance)) {
-                Debug.DrawRay(transform.position, resolveDirection * resolveDistance, new Color(8f, .15f, .10f));
-                transform.position += resolveDirection * resolveDistance;
-                Physics.SyncTransforms();
-                return true;
+            bool collisionExists = CollisionResolutionOffset(neighbor, out Vector3 offset);
+            if (collisionExists) {
+                transform.position += offset;
+                offsetApplied += offset;
             }
+            collisionResolved |= collisionExists;
         }
         
-        return false;
+        return collisionResolved;
+    }
+    
+    // Returns true if the colliders overlap, and sets the offset to the direction and distance to resolve the collision
+    private bool CollisionResolutionOffset(Collider neighbor, out Vector3 offset) {
+        bool collidersOverlap = Physics.ComputePenetration(
+            thisCollider, transform.position, transform.rotation,
+            neighbor, neighbor.transform.position, neighbor.transform.rotation,
+            out Vector3 offsetDirection, out float offsetMagnitude);
+        offset = collidersOverlap ? offsetDirection * offsetMagnitude : Vector3.zero;
+        return collidersOverlap;
     }
 
 #region events
@@ -420,7 +414,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 
     public PlayerMovementAction OnJump;
     public PlayerMovementAction OnJumpLanding;
-    public PlayerMovementAction OnStaircaseStepUp;
+    public PlayerMovementAction OnStaircaseStep;
 #endregion
 
 #region Saving

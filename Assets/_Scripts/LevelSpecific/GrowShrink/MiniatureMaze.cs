@@ -66,7 +66,7 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
         base.Awake();
 
         flashColors = this.GetOrAddComponent<FlashColors>();
-        flashColors.renderers.AddRange(solutionRenderers);
+        flashColors.renderers = solutionRenderers.Cast<Renderer>().ToList();
         flashColors.renderers.Add(solutionCheckButton.GetComponent<Renderer>());
         state = this.StateMachine(State.ShowingSolution);
         solutionImages = Resources.LoadAll<Sprite>("Images/MiniMazePuzzleSolutions/").OrderBy(s => int.Parse(s.name)).ToArray();

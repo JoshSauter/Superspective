@@ -23,7 +23,7 @@ public class UniqueId : MonoBehaviour, ISerializationCallbackReceiver {
         // Don't generate an ID for objects without scenes (prefabs)
         bool notInitialized = string.IsNullOrEmpty(uniqueId);
         if (notInitialized && HasScene) {
-            Debug.LogWarning($"{gameObject.name} in {gameObject.scene.name} has an uninitialized id. Creating one now.");
+            Debug.LogWarning($"{gameObject.name} in {gameObject.scene.name} has an uninitialized id. Creating one now.", gameObject);
             Guid guid = Guid.NewGuid();
             uniqueId = guid.ToString();
 		}

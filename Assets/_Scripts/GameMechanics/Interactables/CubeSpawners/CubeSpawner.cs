@@ -416,6 +416,9 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
             SceneManager.MoveGameObjectToScene(newCube.gameObject, gameObject.scene);
 
             newCube.isHeld = cubeSpawned.isHeld;
+            if (Player.instance.IsHoldingSomething) {
+                Player.instance.heldObject = newCube;
+            }
             newCubeGravity.useGravity = false;
             
             // Delete the temp cube from the spawner

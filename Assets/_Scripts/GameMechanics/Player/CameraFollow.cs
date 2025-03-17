@@ -40,14 +40,14 @@ public class CameraFollow : SuperspectiveObject<CameraFollow, CameraFollow.Camer
     protected override void OnEnable() {
         base.OnEnable();
         TeleportEnter.OnAnyTeleportSimple += RecalculateWorldPositionLastFrame;
-        Portal.OnAnyPortalTeleportSimple += RecalculateWorldPositionLastFrameForPlayer;
+        Portal.OnAnyPortalTeleportSimple += RecalculateWorldPositionLastFrameForMaybePlayer;
         Player.instance.look.OnViewLockExitFinish += HandleViewUnlockEnd;
     }
 
     protected override void OnDisable() {
         base.OnDisable();
         TeleportEnter.OnAnyTeleportSimple -= RecalculateWorldPositionLastFrame;
-        Portal.OnAnyPortalTeleportSimple -= RecalculateWorldPositionLastFrameForPlayer;
+        Portal.OnAnyPortalTeleportSimple -= RecalculateWorldPositionLastFrameForMaybePlayer;
         Player.instance.look.OnViewLockExitFinish -= HandleViewUnlockEnd;
     }
 
@@ -96,7 +96,7 @@ public class CameraFollow : SuperspectiveObject<CameraFollow, CameraFollow.Camer
         timeSinceCurrentLerpSpeedWasModified = 0f;
     }
 
-    public void RecalculateWorldPositionLastFrameForPlayer(Collider obj) {
+    public void RecalculateWorldPositionLastFrameForMaybePlayer(Collider obj) {
         if (obj.TaggedAsPlayer()) {
             RecalculateWorldPositionLastFrame();
         }

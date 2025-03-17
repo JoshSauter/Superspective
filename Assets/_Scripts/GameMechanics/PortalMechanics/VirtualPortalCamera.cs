@@ -477,7 +477,7 @@ namespace PortalMechanics {
 			// Oblique camera matrices break down when distance from camera to portal ~== clearSpaceBehindPortal so we render the default projection matrix when we are < 2*clearSpaceBehindPortal
 			Vector3 position = mainCamera.transform.position;
 			float distanceToPortal = Vector3.Distance(position, inPortal.ClosestPoint(position, useInfinitelyThinBounds: true)) * inPortal.ScaleFactor;
-			bool shouldUseDefaultProjectionMatrix = depth == 0 && (distanceToPortal < 2*clearSpaceBehindPortal || inPortal.IsVolumetricPortalEnabled());
+			bool shouldUseDefaultProjectionMatrix = depth == 0 && (distanceToPortal < 2*clearSpaceBehindPortal || inPortal.PlayerRemainsInPortal || outPortal.PlayerRemainsInPortal);
 			if (DEBUG) {
 				debugSphere.position = inPortal.ClosestPoint(position, useInfinitelyThinBounds: true);
 			}
@@ -497,7 +497,7 @@ namespace PortalMechanics {
 				portalCamera.projectionMatrix = newMatrix;
 			}
 			else {
-				debug.LogWarning("Too close to use oblique projection matrix, using default instead");
+				debug.LogWarningWithContext("Too close to use oblique projection matrix, using default instead", inPortal.gameObject);
 				portalCamera.projectionMatrix = mainCamera.projectionMatrix;
 			}
 			

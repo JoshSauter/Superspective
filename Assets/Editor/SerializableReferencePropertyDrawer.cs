@@ -19,6 +19,7 @@ namespace Editor {
 
         private static Dictionary<string, CachedReference> cachedReferences = new Dictionary<string, CachedReference>();
         private bool viewAsReference = true;
+        private bool invalidReference = false;
 
         public override void OnGUI(
             Rect position,
@@ -44,22 +45,28 @@ namespace Editor {
             Rect referenceRect = new Rect(position.x, position.y + 20, position.width, height);
             Rect idRect = new Rect(position.x, position.y + 20, position.width, height);
 
+            bool prevViewAsReference = viewAsReference;
             viewAsReference = EditorGUI.Toggle(sameSceneRect, "View as reference?", viewAsReference);
 
             if (viewAsReference) {
                 Type genericReferenceType = GetSaveableObjectType();
                 string cachedId = cached.cachedId;
+                string cachedReferenceId = cached.cachedReference?.ID ?? "";
 
-                if (cachedId != referencedObjId.stringValue) {
+                if (cachedId != referencedObjId.stringValue || cachedReferenceId != referencedObjId.stringValue) {
                     cachedId = referencedObjId.stringValue;
 
                     // If the current ID & sceneName are present, try to update the cached reference accordingly
                     if (!string.IsNullOrEmpty(cachedId)) {
-                        SuperspectiveObject match = SaveManager.FindObjectById<SuperspectiveObject>(cachedId);
-                        if (genericReferenceType.IsInstanceOfType(match)) {
-                            cached.cachedReference = match;
-                            cached.cachedId = cachedId;
-                        }
+                            SuperspectiveObject match = SaveManager.FindObjectById<SuperspectiveObject>(cachedId, invalidReference && prevViewAsReference == viewAsReference);
+                            if (genericReferenceType.IsInstanceOfType(match)) {
+                                invalidReference = false;
+                                cached.cachedReference = match;
+                                cached.cachedId = cachedId;
+                            }
+                            else if (match == null) {
+                                invalidReference = true;
+                            }
                     }
                 }
 
@@ -70,12 +77,13 @@ namespace Editor {
                 cached.cachedReference = EditorGUI.ObjectField(
                     referenceRect,
                     label.text,
-                    cached.cachedReference,
+                    invalidReference ? (UnityEngine.Object)null : cached.cachedReference,
                     genericReferenceType,
                     viewAsReference
                 ) as SuperspectiveObject;
 
                 if (cached.cachedReference != prevReference && cached.cachedReference != null) {
+                    invalidReference = false;
                     referencedObjId.stringValue = cached.cachedReference.ID;
                 }
             }

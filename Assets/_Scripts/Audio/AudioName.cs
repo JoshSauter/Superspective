@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -110,6 +106,11 @@ namespace Audio {
 				default:
 					return source.clip;
 			}
+		}
+		
+		public static AudioManager.AudioType SfxOrMusic(this AudioName audioType) {
+			// TODO: Expand this as needed (probably with a switch or something)
+			return audioType == AudioName.Music_Dusk ? AudioManager.AudioType.Music : AudioManager.AudioType.SFX;
 		}
 	}
 }

@@ -6,6 +6,7 @@ using GrowShrink;
 using UnityEngine;
 using SerializableClasses;
 using SuperspectiveUtils;
+using UnityEngine.Serialization;
 
 public class Player : SingletonSuperspectiveObject<Player, Player.PlayerSave> {
 	public PlayerLook look;
@@ -48,9 +49,9 @@ public class Player : SingletonSuperspectiveObject<Player, Player.PlayerSave> {
 		PickupObject.OnAnyPickup += onPickup;
 		PickupObject.OnAnyDrop += onDrop;
 		
-		int playerLayer = LayerMask.NameToLayer("Player");
+		int playerLayer = SuperspectivePhysics.PlayerLayer;
 		for (int layer = 0; layer < MAX_LAYERS; layer++) {
-			if (LayerMask.LayerToName(layer) == "Ignore Raycast") continue;
+			if (layer == SuperspectivePhysics.IgnoreRaycastLayer) continue;
 			
 			// Check if the layer can interact with the "Player" layer
 			if (!Physics.GetIgnoreLayerCollision(layer, playerLayer)) {

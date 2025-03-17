@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -34,7 +33,30 @@ public class FlashColors : SuperspectiveObject<FlashColors, FlashColors.FlashCol
     protected override void Awake() {
         base.Awake();
 
-        state = this.StateMachine(State.Idle);
+        if (renderers == null || renderers.Count == 0) {
+            renderers = GetComponentsInChildren<Renderer>().ToList();
+        }
+
+        if (state != null) {
+            float startingTime = state.Time;
+            state = this.StateMachine(state.State);
+            state.Time = startingTime;
+        }
+        else {
+            state = this.StateMachine(State.Idle);
+        }
+    }
+
+    protected override void Start() {
+        base.Start();
+
+        if (renderers == null || renderers.Count == 0) {
+            renderers = GetComponentsInChildren<Renderer>().ToList();
+        }
+        
+        if (state == State.Flashing) {
+            Flash(flashTimes, interval);
+        }
         
         state.AddTrigger(State.Idle, () => {
             foreach (Renderer r in renderers) {
@@ -61,6 +83,8 @@ public class FlashColors : SuperspectiveObject<FlashColors, FlashColors.FlashCol
     }
 
     public void CancelFlash() {
+        if (!hasInitialized) return;
+        
         state.Set(State.Idle);
     }
 

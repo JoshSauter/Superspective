@@ -42,7 +42,7 @@ public class Footsteps : MonoBehaviour {
 
     void Start() {
 		playerMovement = GetComponent<PlayerMovement>();
-		playerMovement.OnStaircaseStepUp += () => {
+		playerMovement.OnStaircaseStep += () => {
 			PlayFootstep(shouldForceStepSound, 0.125f);
 			shouldForceStepSound = !shouldForceStepSound;
 		};

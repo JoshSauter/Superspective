@@ -11311,8 +11311,6 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 0}
-  sfxVolume: 0.5
-  musicVolume: 0.5
   audioJobsToDebug:
   - 2627b3e9-cd51-4481-81b1-aea8c20c674a
 --- !u!4 &298879240
@@ -14666,7 +14664,7 @@ MonoBehaviour:
   scriptStartsDisabled: 0
   DEBUG: 0
   _id: {fileID: 0}
-  startingScene: 20
+  startingScene: 12
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -15243,6 +15241,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 6430105143157194760
       type: {class: PlayerFacingPositionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
@@ -15255,6 +15255,9 @@ MonoBehaviour:
         actionTiming: 4
         unityEvent:
           rid: 6430105143157194763
+        onlyTriggerForwards: 1
+        unityEventBackwards:
+          rid: -2
     - rid: 6430105143157194762
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
@@ -17489,7 +17492,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.75
+  m_fontSize: 59.75
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21666,7 +21669,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 42.4
+  m_fontSize: 85.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -22407,6 +22410,7 @@ MonoBehaviour:
   DEBUG: 0
   _id: {fileID: 623971857}
   staircaseMovement:
+    onlyDrawLatestDebug: 0
     stepState:
       _state: 0
       _prevState: 1
@@ -22419,7 +22423,7 @@ MonoBehaviour:
   groundMovement:
     lastGroundTouchedDebug: 
     grounded:
-      framesWaitedAfterLeavingGround: 0
+      lastGroundedTime: -1
     lastGroundVelocity: {x: 0, y: 0, z: 0}
   afkDetectionComponent:
     state:
@@ -22557,8 +22561,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 159.87015, y: -739.2186, z: -351.841}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: -396.5, z: 36}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22568,7 +22572,7 @@ Transform:
   - {fileID: 930866879}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -34.822, z: 0}
 --- !u!114 &623971850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31253,6 +31257,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 6430105143157194764
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
@@ -31266,12 +31272,18 @@ MonoBehaviour:
         actionTiming: 4
         unityEvent:
           rid: 6430105143157194768
+        onlyTriggerForwards: 1
+        unityEventBackwards:
+          rid: -2
     - rid: 6430105143157194766
       type: {class: UnityEventAction, ns: MagicTriggerMechanics.TriggerActions, asm: Assembly-CSharp}
       data:
         actionTiming: 4
         unityEvent:
           rid: 6430105143157194769
+        onlyTriggerForwards: 1
+        unityEventBackwards:
+          rid: -2
     - rid: 6430105143157194767
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
@@ -41500,7 +41512,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh2569424
+  m_Name: pb_Mesh3330010
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -43016,7 +43028,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50.4
+  m_fontSize: 101
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -55168,6 +55180,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 6430105143157194770
       type: {class: PlayerMovingDirectionCondition, ns: MagicTriggerMechanics.TriggerConditions,
         asm: Assembly-CSharp}
@@ -55181,6 +55195,9 @@ MonoBehaviour:
         actionTiming: 4
         unityEvent:
           rid: 6430105143157194773
+        onlyTriggerForwards: 1
+        unityEventBackwards:
+          rid: -2
     - rid: 6430105143157194772
       type: {class: DisableSelfScriptAction, ns: MagicTriggerMechanics.TriggerActions,
         asm: Assembly-CSharp}
@@ -55727,7 +55744,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 21
+  m_fontSize: 42.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

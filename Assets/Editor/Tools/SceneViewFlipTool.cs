@@ -8,9 +8,6 @@ public static class SceneViewFlipTool {
     
     private const string IS_FLIPPED_KEY = "SceneViewFlipTool.IsFlipped";
     private static readonly BoolEditorSetting IsFlipped = new BoolEditorSetting(IS_FLIPPED_KEY, false);
-    
-    private const string ORIGINAL_PIVOT_KEY = "SceneViewFlipTool.OriginalPivot";
-    private static readonly Vector3EditorSetting OriginalPivot = new Vector3EditorSetting(ORIGINAL_PIVOT_KEY, Vector3.zero);
 
     private static Quaternion originalRotation;
 
@@ -18,7 +15,6 @@ public static class SceneViewFlipTool {
         SceneView.duringSceneGui += OnSceneGUI;
         IsFlipped.onValueChanged += () => {
             SceneView sceneView = CurrentSceneView;
-            Debug.Log($"Scene view is flipped: {IsFlipped.Value}");
             if (IsFlipped) {
                 // Flip around the forward axis to turn upside-down
                 sceneView.rotation = Quaternion.AngleAxis(180f, sceneView.camera.transform.forward) * sceneView.rotation;
@@ -40,6 +36,8 @@ public static class SceneViewFlipTool {
     }
 
     private static void OnSceneGUI(SceneView sceneView) {
+        DrawFlippedLabel(sceneView);
+        
         if (!IsFlipped) return;
 
         Event e = Event.current;
@@ -49,11 +47,7 @@ public static class SceneViewFlipTool {
         if (e.type == EventType.MouseDrag && e.button == 1) {
             e.delta = new Vector2(-e.delta.x, e.delta.y);
             e.commandName = FLIPPED_MARKER;
-
-            //SendFlippedEvent(e, CurrentSceneView);
         }
-
-        DrawFlippedLabel(sceneView);
     }
     
     // Ahh, ChatGPT, doing the things I have no interest in doing myself:
@@ -64,22 +58,25 @@ public static class SceneViewFlipTool {
         Rect sceneViewRect = sceneView.position;
 
         // Define label position (slightly below the compass)
-        float labelWidth = 60f;
+        float labelWidth = IsFlipped ? 60f : 100f;
         float labelHeight = 20f;
-        float xOffset = -20f; // Adjust to align properly under compass
-        float yOffset = 110f; // Distance from the compass
+        float xOffset = IsFlipped ? -20f : 0f;
+        float yOffset = 110f;
 
         Vector2 labelPosition = new Vector2(sceneViewRect.width - labelWidth + xOffset, yOffset);
 
+        string text = IsFlipped ? "Flipped" : "Not Flipped";
+        Color textColor = IsFlipped ? Color.red : Color.green;
+        
         // Draw semi-transparent background box
         GUIStyle boxStyle = new GUIStyle(GUI.skin.box) {
             alignment = TextAnchor.MiddleCenter,
             fontSize = 12,
-            normal = { textColor = Color.white },
+            normal = { textColor = textColor },
             fontStyle = FontStyle.Bold
         };
 
-        GUI.Box(new Rect(labelPosition.x, labelPosition.y, labelWidth, labelHeight), "FLIPPED", boxStyle);
+        GUI.Box(new Rect(labelPosition.x, labelPosition.y, labelWidth, labelHeight), text, boxStyle);
 
         Handles.EndGUI(); // End GUI rendering
     }

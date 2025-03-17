@@ -242,6 +242,11 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         base.Awake();
         RecalculateDerivedValues();
     }
+    
+    protected override void Start() {
+        base.Start();
+        UpdateInvisibleWallsEnabled();
+    }
 
     private void RecalculateDerivedValues() {
         if (start == end) return; // Prevent division by zero or undefined axis
@@ -438,15 +443,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             Quaternion.FromToRotation(playerMovement.transform.up, -Physics.gravity.normalized) *
             playerMovement.transform.rotation;
 
-        invisibleWallEnabled = InvisibleWallShouldBeEnabled;
-        if (invisibleWallEnabled && invisibleWall == null) {
-            // This will log a warning if the invisible wall doesn't exist yet because we really should always bake it into the scene data
-            RegenerateInvisibleWall();
-        }
-
-        if (invisibleWall != null) {
-            invisibleWall.gameObject.SetActive(invisibleWallEnabled);
-        }
+        UpdateInvisibleWallsEnabled();
 
         // Rotate the player's camera
         if (!movePlayerVision) return;
@@ -474,6 +471,18 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             maxDistanceForGravAmplification,
             distanceFromPlayerToStairs
         );
+    }
+
+    private void UpdateInvisibleWallsEnabled() {
+        invisibleWallEnabled = InvisibleWallShouldBeEnabled;
+        if (invisibleWallEnabled && invisibleWall == null) {
+            // This will log a warning if the invisible wall doesn't exist yet because we really should always bake it into the scene data
+            RegenerateInvisibleWall();
+        }
+
+        if (invisibleWall != null) {
+            invisibleWall.gameObject.SetActive(invisibleWallEnabled);
+        }
     }
 
     private void OnDrawGizmosSelected() {
