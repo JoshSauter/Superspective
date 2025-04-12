@@ -14,20 +14,25 @@ namespace Saving {
     /// This class handles the common ID and registration logic for all saveable objects, as well as the DebugLogger.
     /// It also handles saving and restoring the active state of the GameObject and the enabled state of itself for saving and loading.
     /// </summary>
-    public abstract class SuperspectiveObject : MonoBehaviour, ISaveableObject {
+    public class SuperspectiveObject : MonoBehaviour, ISaveableObject {
         public string SceneName => (this != null) ? gameObject.scene.name : "";
         public Levels Level => !string.IsNullOrEmpty(SceneName) ? LevelManager.enumToSceneName[SceneName] : Levels.InvalidLevel;
         
         [OnInspectorGUI(nameof(UpdateInitialStates))]
         public bool gameObjectStartsInactive = false;
         public bool scriptStartsDisabled = false;
+
+        [HideInInspector]
+        public Vector3 _startPosition;
+        [HideInInspector]
+        public Quaternion _startRotation;
         
         protected bool hasInitialized = false;
         protected bool hasRegistered = false;
 
         /// <summary>
         /// Sets the gameObjectStartsInactive and scriptStartsDisabled values to the current state of the GameObject and the script.
-        ///
+        /// Also sets the _startPosition and _startRotation to the current position and rotation of the GameObject.
         /// This is necessary because if a script is not part of a loaded save file (e.g. it was never enabled at the time of the save),
         /// but is loaded currently, it still needs to reset its state to the initial state even though the save file doesn't know about it.
         /// This is done by having every SuperspectiveObject hook into the BeforeLoad event of the SaveManager to reset its state.
@@ -44,6 +49,11 @@ namespace Saving {
             }
             if (scriptStartsDisabled != !enabled) {
                 scriptStartsDisabled = !enabled;
+            }
+
+            if (transform.position != _startPosition || transform.rotation != _startRotation) {
+                _startPosition = transform.position;
+                _startRotation = transform.rotation;
             }
         }
         
@@ -96,6 +106,8 @@ namespace Saving {
         public virtual void LoadFromSave(SaveObject save) {
             gameObject.SetActive(save.isGameObjectActive);
             enabled = save.isScriptEnabled;
+            transform.position = save.position;
+            transform.rotation = save.rotation;
         }
 
         // Anything that doesn't specify types for associated SaveObject shouldn't have anything to actually save to disk
@@ -133,9 +145,13 @@ namespace Saving {
         /// This is called before a save is loaded, so that even objects which do not have an entry in the save file can be reset.
         /// </summary>
         public virtual void ResetState() {
+            if (this == null || gameObject == null) return;
+            
             debug.Log("ResetState for " + gameObject.name);
             gameObject.SetActive(!gameObjectStartsInactive);
             enabled = !scriptStartsDisabled;
+            transform.position = _startPosition;
+            transform.rotation = _startRotation;
         }
 
         // Registration is triggered off an event from SaveManagerForScene that happens after Awake but before Start

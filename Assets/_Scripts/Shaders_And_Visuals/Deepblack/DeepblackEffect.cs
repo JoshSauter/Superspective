@@ -4,6 +4,7 @@ using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Rendering;
+using SuperspectiveUtils;
 
 // Inverse Bloom effect darkening space around certain objects
 namespace Deepblack {
@@ -30,6 +31,7 @@ namespace Deepblack {
         private const string DARKENING_INTENSITY_KEYWORD = "_DarkeningIntensity";
         
         private const string DARKNESS_VALUE_KEYWORD = "_Darkness";
+        private const string FALLOFF_FACTOR_KEYWORD = "_FalloffFactor";
 
         public float intensityMultiplier = 1;
 
@@ -39,7 +41,10 @@ namespace Deepblack {
             public RenderTexture deepblackTexture;
             public RenderTexture bloomedTexture;
             
-            public bool IsNull => darknessMaskTexture == null || deepblackTexture == null || bloomedTexture == null;
+            public bool NeedsReinit => 
+                !darknessMaskTexture || !darknessMaskTexture.IsCreated() ||
+                !deepblackTexture || !deepblackTexture.IsCreated() ||
+                !bloomedTexture || !bloomedTexture.IsCreated();
 
             public void RecreateRenderTextures(int width, int height) {
                 Debug.LogWarning($"Recreating render textures with size {width}x{height}");
@@ -51,6 +56,7 @@ namespace Deepblack {
                     name = "Darkness Mask",
                     useMipMap = false
                 };
+                darknessMaskTexture.Create();
                 
                 // Deepblack texture
                 if (deepblackTexture != null) {
@@ -93,7 +99,7 @@ namespace Deepblack {
             }
         }
         
-        private readonly HashSet<DeepblackObject> deepblackObjects = new HashSet<DeepblackObject>();
+        private readonly NullSafeHashSet<DeepblackObject> deepblackObjects = new NullSafeHashSet<DeepblackObject>();
         
 #if UNITY_EDITOR
         // Show the HashSet as a List for debugging in the editor
@@ -140,6 +146,13 @@ namespace Deepblack {
             SuperspectiveScreen.instance.OnScreenResolutionChanged += renderTextures.RecreateRenderTextures;
         }
 
+        private void OnDisable() {
+            if (darknessMaskCommandBuffer != null) {
+                darknessMaskCommandBuffer.Dispose();
+                darknessMaskCommandBuffer = null;
+            }
+        }
+
         private CommandBuffer CreateDarknessMaskCommandBuffer() {
             CommandBuffer commandBuffer = new CommandBuffer();
             commandBuffer.name = "Darkness Mask";
@@ -148,7 +161,8 @@ namespace Deepblack {
             foreach (var deepblackObject in deepblackObjects) {
                 // Update the darkness value
                 // Note that we have to use a global float in order to update it from the CommandBuffer
-                commandBuffer.SetGlobalFloat(DARKNESS_VALUE_KEYWORD, deepblackObject.Darkness);
+                commandBuffer.SetGlobalFloat(DARKNESS_VALUE_KEYWORD, deepblackObject.darkness);
+                commandBuffer.SetGlobalFloat(FALLOFF_FACTOR_KEYWORD, deepblackObject.falloffFactor);
                 
                 // Render all the meshes of the DeepblackObject to the _DarknessMask texture with the specified darkness value as the brightness
                 foreach (var meshRenderer in deepblackObject.rendererMeshes.Keys) {
@@ -170,6 +184,11 @@ namespace Deepblack {
 
         [ImageEffectOpaque]
         void OnRenderImage(RenderTexture src, RenderTexture dest) {
+            // If the game is loading, skip the effect
+            if (GameManager.instance.IsCurrentlyLoading) {
+                Graphics.Blit(src, dest);
+                return;
+            }
             // Renders the darkness mask according to the darkness values of the DeepblackObjects, and blooms the resulting image
             RenderDeepblackObjectMask(src);
             
@@ -183,13 +202,13 @@ namespace Deepblack {
         
         private void RenderDeepblackObjectMask(RenderTexture src) {
             // Recreate anything missing:
-            if (renderTextures.IsNull) {
+            if (renderTextures.NeedsReinit) {
                 renderTextures.RecreateRenderTextures(SuperspectiveScreen.currentWidth, SuperspectiveScreen.currentHeight);
             }
             
             // This looks inefficient, but it's necessary to recreate the CommandBuffer every frame to update the darkness values of the DeepblackObjects
             // Otherwise, the values captured in a closure when the CommandBuffer is first created are used for that CommandBuffer forever
-            darknessMaskCommandBuffer?.Dispose();
+            darknessMaskCommandBuffer?.Clear();
             darknessMaskCommandBuffer = CreateDarknessMaskCommandBuffer();
             
             // Renders Darkness values into the _DarknessMask texture

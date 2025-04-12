@@ -5,7 +5,6 @@ using SuperspectiveUtils;
 using NaughtyAttributes;
 using System.Linq;
 
-[ExecuteInEditMode]
 public class InteractableGlow : MonoBehaviour {
 	public bool DEBUG = false;
 	InteractableGlowManager playerCamGlowController;
@@ -21,7 +20,7 @@ public class InteractableGlow : MonoBehaviour {
 	public float glowSpeed = 5f;
 	public bool recursiveChildRenderers = true;
 
-	public List<Renderer> renderers;
+	public NullSafeList<Renderer> renderers = new NullSafeList<Renderer>();
 	public Color currentColor {
 		get;
 		private set;
@@ -36,7 +35,7 @@ public class InteractableGlow : MonoBehaviour {
 			renderers = Utils.GetComponentsInChildrenRecursively<Renderer>(transform).ToList();
 		}
 		else {
-			renderers = new List<Renderer> { GetComponent<Renderer>() };
+			renderers = new NullSafeList<Renderer> { GetComponent<Renderer>() };
 		}
 		playerCamGlowController?.Add(this);
 

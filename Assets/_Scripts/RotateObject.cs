@@ -16,6 +16,7 @@ public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.Rotat
     public bool importantToSave = false;
     public bool useLocalCoordinates = true;
 
+    [Header("Starting rotation speeds")]
     public float rotationsPerSecondX;
     public float rotationsPerSecondY;
     public float rotationsPerSecondZ;

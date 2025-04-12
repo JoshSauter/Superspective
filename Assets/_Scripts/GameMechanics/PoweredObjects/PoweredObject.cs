@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using NaughtyAttributes;
 using PowerTrailMechanics;
 using UnityEngine;
 using Saving;
+using Sirenix.OdinInspector;
 using StateUtils;
 using UnityEngine.Events;
 
@@ -145,11 +143,11 @@ namespace PoweredObjects {
 
         public bool automaticallyFinishPowering = false;
         [ShowIf(nameof(automaticallyFinishPowering))]
-        [Label("Time to automatically finish powering")]
+        [Header("Time to automatically finish powering")]
         public float automaticFinishPoweringTime;
         public bool automaticallyFinishDepowering = false;
         [ShowIf(nameof(automaticallyFinishDepowering))]
-        [Label("Time to automatically finish depowering")]
+        [Header("Time to automatically finish depowering")]
         public float automaticFinishDepoweringTime;
 
         public bool PowerIsOn {

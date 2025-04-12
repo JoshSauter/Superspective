@@ -17543,7 +17543,7 @@ MonoBehaviour:
   doorRight: {fileID: 491339482015028656}
   maxOffset: 3
   poweredFrom:
-    referencedObjId: PoweredObject_04cc229f-18c2-4df1-bad9-59350491070f
+    referencedObjId: 
   powerTrail:
     referencedObjId: 
   powerTrailDistance: 0

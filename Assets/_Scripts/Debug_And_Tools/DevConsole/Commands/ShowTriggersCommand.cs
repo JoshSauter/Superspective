@@ -1,10 +1,9 @@
-using System;
 using UnityEngine;
 
 namespace DeveloperConsole {
     public class ShowTriggersCommand : ConsoleCommand {
-        private int TriggerZoneMask = 1 << SuperspectivePhysics.TriggerZoneLayer;
-        private Camera PlayerCam = Player.instance.PlayerCam;
+        private readonly int TriggerZoneMask = 1 << SuperspectivePhysics.TriggerZoneLayer;
+        private readonly Camera PlayerCam = Player.instance.PlayerCam;
         
         public ShowTriggersCommand(string commandWord) : base(commandWord) { }
         

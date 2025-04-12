@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace MagicTriggerMechanics.TriggerConditions {
@@ -9,19 +10,48 @@ namespace MagicTriggerMechanics.TriggerConditions {
     
     [Serializable]
     public abstract class TriggerCondition : ITriggerCondition {
+        public bool mustBeTriggeredForPeriodOfTime = false;
+        // If mustBeTriggeredForPeriodOfTime is true, then triggerTime is the time that the condition must be true for
+        [ShowIf(nameof(mustBeTriggeredForPeriodOfTime))]
+        public float triggerTime = 1.0f;
+        [ShowIf(nameof(mustBeTriggeredForPeriodOfTime))]
+        [ReadOnly]
+        public float timeTriggered = 0.0f;
+        [ShowIf(nameof(mustBeTriggeredForPeriodOfTime))]
+        [ReadOnly]
+        public float timeTriggeredReverse = 0.0f;
+        
         protected abstract float Evaluate(Transform triggerTransform);
 
         public virtual string GetDebugInfo(Transform transform) {
             float triggerValue = Evaluate(transform);
-            return $"Type: {GetType().Name}\nPass ?: {IsTriggered(transform)}\nTriggerValue: {triggerValue}\n";
+            return $"Type: {GetType().Name}\nPass ?: {Evaluate(transform) > 0}\nTriggerValue: {triggerValue}\n";
+        }
+
+        protected bool IsTriggeredHelper(Func<bool> condition, ref float time) {
+            if (mustBeTriggeredForPeriodOfTime) {
+                if (condition.Invoke()) {
+                    time += Time.deltaTime;
+                    if (time >= triggerTime) {
+                        return true;
+                    }
+                }
+                else {
+                    time = 0.0f;
+                }
+
+                return false;
+            }
+            
+            return condition.Invoke();
         }
         
         public virtual bool IsTriggered(Transform triggerTransform) {
-            return Evaluate(triggerTransform) > 0;
+            return IsTriggeredHelper(() => Evaluate(triggerTransform) > 0, ref timeTriggered);
         }
 
         public virtual bool IsReverseTriggered(Transform triggerTransform) {
-            return Evaluate(triggerTransform) < 0;
+            return IsTriggeredHelper(() => Evaluate(triggerTransform) < 0, ref timeTriggeredReverse);
         }
     }
 
@@ -31,11 +61,11 @@ namespace MagicTriggerMechanics.TriggerConditions {
         public float triggerThreshold = 0.01f;
         
         public override bool IsTriggered(Transform triggerTransform) {
-            return Evaluate(triggerTransform) > triggerThreshold;
+            return IsTriggeredHelper(() => Evaluate(triggerTransform) > triggerThreshold, ref timeTriggered);
         }
         
         public override bool IsReverseTriggered(Transform triggerTransform) {
-            return Evaluate(triggerTransform) < triggerThreshold;
+            return IsTriggeredHelper(() => Evaluate(triggerTransform) < triggerThreshold, ref timeTriggeredReverse);
         }
 
         public override string GetDebugInfo(Transform transform) {

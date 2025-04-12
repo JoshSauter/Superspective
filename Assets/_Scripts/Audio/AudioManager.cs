@@ -247,6 +247,8 @@ namespace Audio {
 		}
 
 		void Update() {
+			if (GameManager.instance.IsCurrentlyLoading) return;
+			
 			// Perform update actions for running audio jobs that have one
 			foreach (var updateJob in updateAudioJobs) {
 				AudioJob job = audioJobs[updateJob.Key];
@@ -445,9 +447,6 @@ namespace Audio {
 		}
 		
 #region Saving
-		// There's only one AudioManager so we don't need a UniqueId here
-		public override string ID => "AudioManager";
-
 		public override void LoadSave(AudioManagerSave save) {
 			StartCoroutine(LoadSaveDelayedCoroutine(save));
 		}

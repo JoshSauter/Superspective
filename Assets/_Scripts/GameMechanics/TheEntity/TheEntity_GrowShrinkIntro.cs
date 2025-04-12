@@ -63,6 +63,10 @@ namespace TheEntity {
         }
 
         public StateMachine<State> state;
+        
+        // SetPath state
+        float distanceTraveled = 0;
+        int currentIndex = 0;
 
         public enum ResetPlayerState : byte {
             OutOfRange,
@@ -78,6 +82,8 @@ namespace TheEntity {
         private const float HEIGHT_OFF_GROUND = 1f;
         private const float MOVE_SPEED = 5f;
         private const float CLOSE_ENOUGH_DISTANCE = .125f; // To transition from GoingToSetPath -> SetPath, SetPath -> Watching
+        private const float PLAYER_LOOKING_AT_ENTITY_THRESHOLD = 0.75f;
+        private const float PLAYER_LOOKING_AT_ENTITY_MAX_DISTANCE = 125f;
 
         private float ResetPlayerDistance => RESET_PLAYER_DISTANCE * Player.instance.Scale;
         private float HeightOffGround => HEIGHT_OFF_GROUND * Scale;
@@ -131,7 +137,7 @@ namespace TheEntity {
             resetPlayerState.AddStateTransition(ResetPlayerState.WithinRange, ResetPlayerState.OutOfRange,
                 () => state == State.NotSpawned || SuperspectivePhysics.ShortestDistance(Player.instance.transform.position, transform.position) >= ResetPlayerDistance);
             resetPlayerState.AddTrigger(ResetPlayerState.WithinRange, RESET_PLAYER_TIME, () => {
-                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(1);
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue($"{ID}_EntityWithinRange", 1);
                 MiniatureMaze.instance.state.Set(MiniatureMaze.State.ResettingMaze);
                 state.Set(State.NotSpawned);
             });
@@ -185,10 +191,6 @@ namespace TheEntity {
                 // Move towards the player
                 transform.position = Vector3.MoveTowards(transform.position, desiredPos, MoveSpeed * Time.deltaTime);
             });
-
-            // These variables are used in the lambda closure below to keep track of state
-            float distanceTraveled = 0;
-            int currentIndex = 0;
             
             // Follow a set path to the jumping off platform
             state.WithUpdate(State.SetPath, _ => {
@@ -227,6 +229,20 @@ namespace TheEntity {
                 
                 MoveStaticWall();
                 LookAtPlayer();
+
+                if (NoiseScrambleOverlayObject.scramblerState == NoiseScrambleOverlayObject.ScramblerState.Off) return;
+                
+                // If the player is looking at the entity, set the noise scramble overlay value to some value between 0 and 1
+                Transform playerCam = Player.instance.PlayerCam.transform;
+                Vector3 shortestVectorPlayerToEntity = SuperspectivePhysics.ShortestVectorPointToPoint(playerCam.position, transform.position);
+                float playerLookingAtEntity = Vector3.Dot(Player.instance.PlayerCam.transform.forward, shortestVectorPlayerToEntity.normalized);
+                if (playerLookingAtEntity > PLAYER_LOOKING_AT_ENTITY_THRESHOLD) {
+                    float t = (playerLookingAtEntity - PLAYER_LOOKING_AT_ENTITY_THRESHOLD) / (1 - PLAYER_LOOKING_AT_ENTITY_THRESHOLD);
+                    
+                    float distanceMultiplier = Mathf.InverseLerp(PLAYER_LOOKING_AT_ENTITY_MAX_DISTANCE, 0, shortestVectorPlayerToEntity.magnitude / Player.instance.Scale);
+                    Debug.Log($"PlayerLookingAtEntity: {playerLookingAtEntity}, t: {t}, distanceMultiplier: {distanceMultiplier}");
+                    NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue($"{ID}_PlayerLookAtEntity", Mathf.Clamp01(t * distanceMultiplier));
+                }
             });
         }
 
@@ -266,12 +282,14 @@ namespace TheEntity {
 
         private void LookAtPlayer() {
             if (GameManager.instance.IsCurrentlyLoading) return;
-            
+
+            // If the player is this amount underneath the entity, the entity should look up through the portal at the player
+            const float PLAYER_SHOULD_BE_CONSIDERED_ABOVE_THRESHOLD = 20f;
             Vector3 playerPos = Player.instance.transform.position;
 
             // As soon as the player falls past the entity, it should look up at the player through the portal
             // Otherwise the player has to pass through the portal before it will look up, and it will snap upwards
-            if (playerPos.y < transform.position.y - 10) {
+            if (playerPos.y < transform.position.y - PLAYER_SHOULD_BE_CONSIDERED_ABOVE_THRESHOLD) {
                 playerPos += Vector3.up * InfFallingRepeatDistance;
             }
 
@@ -311,6 +329,11 @@ namespace TheEntity {
             desiredPos = save.desiredPos;
             staticWallStartX = save.staticWallStartX;
             hasPlayedBanner = save.hasPlayedBanner;
+            particleSystemTransform.localScale = save.particleSystemTransformLocalScale;
+            distanceTraveled = save.distanceTraveled;
+            currentIndex = save.currentIndex;
+
+            SetActive();
         }
 
         [Serializable]
@@ -321,6 +344,9 @@ namespace TheEntity {
             public SerializableVector3 desiredPos;
             public float staticWallStartX;
             public bool hasPlayedBanner;
+            public SerializableVector3 particleSystemTransformLocalScale;
+            public float distanceTraveled;
+            public int currentIndex;
 
             public TheEntity_GrowShrinkIntroSave(TheEntity_GrowShrinkIntro script) : base(script) {
                 this.stateSave = script.state.ToSave();
@@ -329,6 +355,9 @@ namespace TheEntity {
                 this.desiredPos = script.desiredPos;
                 this.staticWallStartX = script.staticWallStartX;
                 this.hasPlayedBanner = script.hasPlayedBanner;
+                this.particleSystemTransformLocalScale = script.particleSystemTransform.localScale;
+                this.distanceTraveled = script.distanceTraveled;
+                this.currentIndex = script.currentIndex;
             }
         }
 

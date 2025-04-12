@@ -4,10 +4,10 @@ using Saving;
 using UnityEngine;
 
 public class Headbob : SuperspectiveObject<Headbob, Headbob.HeadbobSave> {
-    const float minPeriod = .24f;
-    const float maxPeriod = .87f;
-    const float minAmplitude = .5f;
-    const float maxAmplitude = 1.25f;
+    public const float minPeriod = .24f;
+    public const float maxPeriod = .87f;
+    public const float minAmplitude = .5f;
+    public const float maxAmplitude = 1.25f;
 
     public AnimationCurve viewBobCurve;
 
@@ -40,21 +40,25 @@ public class Headbob : SuperspectiveObject<Headbob, Headbob.HeadbobSave> {
     }
 
     void FixedUpdate() {
-        Vector3 playerVelocity = playerMovement.ProjectHorizontalVelocity(playerMovement.AverageVelocityRecently) / Player.instance.Scale;
+        Vector3 playerVelocity = playerMovement.ProjectedHorizontalVelocity() / Player.instance.Scale;
         // Don't bob faster when we artificially speed up the player
         float playerSpeed = playerVelocity.magnitude / playerMovement.movespeedMultiplier;
         if (playerMovement.IsGrounded && playerSpeed > 0.2f && !NoClipMode.instance.noClipOn) {
+            float prevPeriod = curPeriod;
             curPeriod = Mathf.Lerp(maxPeriod, minPeriod, Mathf.InverseLerp(0, 20f, playerSpeed));
+            float prevAmplitude = curAmplitude;
             curAmplitude = headbobAmount * Mathf.Lerp(
                 minAmplitude,
                 maxAmplitude,
                 Mathf.InverseLerp(0, 20f, playerSpeed)
             );
 
+            float prevT = t;
             t += Time.fixedDeltaTime / curPeriod;
             t = Mathf.Repeat(t, 1f);
 
             float thisFrameBobAmount = viewBobCurve.Evaluate(t) * effectiveAmplitude;
+            debug.Log($"Player Speed: {playerSpeed}\nHeadbob Delta: {thisFrameBobAmount - curBobAmount}\nPeriod Delta: {curPeriod - prevPeriod}\nAmplitude Delta: {curAmplitude - prevAmplitude}");
             curBobAmount = thisFrameBobAmount;
         }
         else {

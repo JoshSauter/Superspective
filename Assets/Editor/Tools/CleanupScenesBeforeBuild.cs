@@ -32,6 +32,10 @@ public class CleanupScenesBeforeBuild : EditorWindow {
         if (GUILayout.Button("Fix broken ProBuilder meshes in all scenes")) {
             IdentifyBrokenProBuilderMeshesTool.UnfuckBrokenProbuilderMeshes();
         }
+
+        if (GUILayout.Button("Turn off all DEBUG flags in open scenes")) {
+            SelectOrDisableAllDebug.Execute(true);
+        }
         
         // TODO: Add other cleanup tasks here, formalize this tool
     }

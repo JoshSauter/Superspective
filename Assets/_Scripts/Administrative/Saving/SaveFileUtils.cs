@@ -72,7 +72,7 @@ namespace Saving {
                 string saveFilename = saveMetadataWithScreenshot.metadata.saveFilename;
                 // Handle data save construction and saving to disk
                 SaveData saveData = SaveData.CreateSaveDataFromCurrentState();
-                if (!saveData.managerLevel.serializedSaveObjects.ContainsKey("Player")) {
+                if (!saveData.managerLevel.serializedSaveObjects.ContainsKey(Player.instance.ID)) {
                     Debug.LogError("Player not found in serialized save objects! Here are the serialized save objects:" + string.Join(", ", saveData.managerLevel.serializedSaveObjects.Keys));
                 }
 

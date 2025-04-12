@@ -87,7 +87,7 @@ public partial class PlayerMovement {
 
         public void UpdateStaircase(Vector3 desiredVelocity) {
             Vector3 horizontalVelocity = m.ProjectHorizontalVelocity(desiredVelocity);
-            if (GravityRotateZone.playerIsInAnyGravityRotateZone) return;
+            if (GravityRotateZone.anyCurrentlyRotatingPlayer) return;
             
             switch (stepState.State) {
                 case StepState.Idle:
@@ -104,7 +104,10 @@ public partial class PlayerMovement {
         }
         
         private void MoveAlongStep() {
-            if (currentStep == null) return;
+            if (currentStep == null) {
+                stepState.Set(StepState.Idle);
+                return;
+            }
 
             //if (CheckCapsuleAtOffset(m.thisCollider, currentStep.stepOffset)) {
             //    m.debug.Log("Collided with something while trying to step. Cancelling movement.");
@@ -332,33 +335,31 @@ public partial class PlayerMovement {
             
             bool wasWallHitBackToPlayer = Physics.Raycast(raycastBackToPlayerOrigin, -horizontalOffset.normalized, out RaycastHit backToPlayerWallHit, horizontalOffset.magnitude, SuperspectivePhysics.PlayerPhysicsCollisionLayerMask);
             wasWallHitBackToPlayer = wasWallHitBackToPlayer && Vector3.Dot(transform.up, backToPlayerWallHit.normal) <= (1 - STEP_NORMAL_THRESHOLD);
-            if (wasWallHitBackToPlayer) {
-                Vector3 wallHitPosition = backToPlayerWallHit.point;
-                Vector3 wallNormal = backToPlayerWallHit.normal;
-                
-                // Project the player's position onto the wall's plane
-                Vector3 closestPointOnWall = playerPos - Vector3.Dot(playerPos - wallHitPosition, wallNormal) * wallNormal;
-                
-                // Decompose wallHitPosition into vertical and horizontal components
-                Vector3 wallHitHorizontal = m.DecomposeVectorHorizontal(wallHitPosition);
+            
+            if (!wasWallHitBackToPlayer) return null;
+            
+            Vector3 wallHitPosition = backToPlayerWallHit.point;
+            Vector3 wallNormal = backToPlayerWallHit.normal;
+            
+            // Project the player's position onto the wall's plane
+            Vector3 closestPointOnWall = playerPos - Vector3.Dot(playerPos - wallHitPosition, wallNormal) * wallNormal;
+            
+            // Decompose wallHitPosition into vertical and horizontal components
+            Vector3 wallHitHorizontal = m.DecomposeVectorHorizontal(wallHitPosition);
 
-                // Decompose closestPointOnWall into vertical and horizontal components
-                Vector3 closestPointHorizontal = m.DecomposeVectorHorizontal(closestPointOnWall);
-                
-                // Perform the horizontal lerp
-                Vector3 stepDownWallHorizontal = Vector3.Lerp(wallHitHorizontal, closestPointHorizontal, MOVEMENT_VS_WALL_LERP_VALUE);
+            // Decompose closestPointOnWall into vertical and horizontal components
+            Vector3 closestPointHorizontal = m.DecomposeVectorHorizontal(closestPointOnWall);
+            
+            // Perform the horizontal lerp
+            Vector3 stepDownWallHorizontal = Vector3.Lerp(wallHitHorizontal, closestPointHorizontal, MOVEMENT_VS_WALL_LERP_VALUE);
 
-                // Use the vertical component from validStepHit.point
-                Vector3 stepDownWallVertical = m.DecomposeVectorVertical(validStepHit.point);
-                
-                // Using the closest point on the wall feels too much like it's ignoring the player's movement direction, so we'll use this point instead
-                Vector3 stepDownWallPoint = stepDownWallHorizontal + stepDownWallVertical;
-                Vector3 finalPlacementHorizontalOffset = playerRadiusOffsetMagnitude * Vector3.Lerp(horizontalVelocity.normalized, wallNormal, MOVEMENT_VS_WALL_LERP_VALUE).normalized;
-                desiredStepPosition = stepDownWallPoint + finalPlacementHorizontalOffset;
-            }
-            else {
-                desiredStepPosition += playerRadiusOffsetMagnitude * horizontalVelocity.normalized;
-            }
+            // Use the vertical component from validStepHit.point
+            Vector3 stepDownWallVertical = m.DecomposeVectorVertical(validStepHit.point);
+            
+            // Using the closest point on the wall feels too much like it's ignoring the player's movement direction, so we'll use this point instead
+            Vector3 stepDownWallPoint = stepDownWallHorizontal + stepDownWallVertical;
+            Vector3 finalPlacementHorizontalOffset = playerRadiusOffsetMagnitude * Vector3.Lerp(horizontalVelocity.normalized, wallNormal, MOVEMENT_VS_WALL_LERP_VALUE).normalized;
+            desiredStepPosition = stepDownWallPoint + finalPlacementHorizontalOffset;
 
             if (m.DEBUG) {
                 Vector3 destination = wasWallHitBackToPlayer ? backToPlayerWallHit.point : raycastBackToPlayerOrigin - horizontalOffset;

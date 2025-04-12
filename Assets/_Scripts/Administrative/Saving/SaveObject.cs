@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using LevelManagement;
+using SerializableClasses;
 using UnityEngine;
 using SuperspectiveUtils;
 
@@ -14,6 +15,9 @@ namespace Saving {
         public Levels level;
         public bool isGameObjectActive;
         public bool isScriptEnabled;
+        public SerializableVector3 position;
+        public SerializableQuaternion rotation;
+        // Scale always handled by GrowShrinkObject
 
         protected SaveObject() { }
 
@@ -25,6 +29,8 @@ namespace Saving {
                 this.level = superspectiveObject.Level;
                 this.isGameObjectActive = superspectiveObject.gameObject.activeSelf;
                 this.isScriptEnabled = superspectiveObject.enabled;
+                this.position = superspectiveObject.transform.position;
+                this.rotation = superspectiveObject.transform.rotation;
             }
             catch (Exception e) {
                 if (superspectiveObject != null) {

@@ -67,9 +67,6 @@ namespace LevelSpecific.BlackRoom {
 			ActivePuzzle = save.activePuzzle;
 		}
 
-		// There's only one of these so we don't need a UniqueId here
-		public override string ID => "ColorPuzzleManager";
-
 		[Serializable]
 		public class ColorPuzzleManagerSave : SaveObject<ColorPuzzleManager> {
 			public int activePuzzle;

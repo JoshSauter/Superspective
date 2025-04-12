@@ -191,6 +191,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 
     private bool playerStillInTriggerZone = false;
     void OnTriggerStay(Collider other) {
+        if (GameManager.instance.IsCurrentlyLoading) return;
         if (!enabled) return;
         if (gameObject.layer == SuperspectivePhysics.InvisibleLayer) return;
         if (other.TaggedAsPlayer()) {
@@ -321,7 +322,9 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         }
 
         if (cube.TryGetComponent(out DynamicObject dynamicObject)) {
-            dynamicObject.ChangeScene(gameObject.scene);
+            if (!dynamicObject.ChangeScene(gameObject.scene)) {
+                debug.LogWarning($"Didn't move {cube.ID} to {gameObject.scene.name} (Might have already been in it).");
+            }
         }
 
         stateMachine.Set(State.CubeEnterRotate);

@@ -12,7 +12,7 @@ namespace Saving {
         where T : SuperspectiveObject
         where S : SaveObject<T> {
         
-        public override string ID => typeof(T).Name;
+        public override string ID => $"{typeof(T).Name}_Singleton";
         static T _instance = null;
 
         public static T instance {

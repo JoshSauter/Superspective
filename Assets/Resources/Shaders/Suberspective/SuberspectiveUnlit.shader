@@ -79,12 +79,12 @@ Shader "Suberspective/SuberspectiveUnlit" {
                 fixed4 col = tex2D(_MainTex, i.uv_MainTex) * _Color;
             	
             	// This is possibly set to false by PowerTrail
-            	half emissionEnabled = 1;
+            	half emissionEnabled = _EmissionEnabled;
             	SuberspectiveRender(i, col, emissionEnabled);
             	
             	fixed4 emissionSample = tex2D(_EmissionMap, i.uv_EmissionMap);
             	// Emission Sample Color -> Grayscale conversion:
-            	float emissionBrightness = _EmissionEnabled * dot(emissionSample.rgb, float3(0.2126, 0.7152, 0.0722));
+            	float emissionBrightness = emissionEnabled * dot(emissionSample.rgb, float3(0.2126, 0.7152, 0.0722));
             	col += emissionEnabled * emissionBrightness * emissionSample.a * _EmissionColor;
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

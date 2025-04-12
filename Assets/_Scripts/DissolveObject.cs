@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
-using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace DissolveObjects {
@@ -69,6 +70,8 @@ namespace DissolveObjects {
         [Range(0f, 1f)]
         public float dissolveAmount = 0.25f;
         public float materializeTime = 2f;
+        [Range(0f, 1f)]
+        public float physicsThreshold = MATERIALIZE_COLLIDER_THRESHOLD;
         public float burnSize = 0.1f;
         public Color burnColor = new Color(.3f,.6f,.9f,1);
         public float burnEmissionBrightness = 2f;
@@ -88,6 +91,11 @@ namespace DissolveObjects {
         private int[] cachedLayers;
 
         private DimensionObject thisDimensionObj;
+        
+        public UnityEvent onMaterializeBegin;
+        public UnityEvent onDematerializeBegin;
+        public UnityEvent onMaterializeFinish;
+        public UnityEvent onDematerializeFinish;
 
         [Button("Dematerialize")]
         public void Dematerialize() {
@@ -130,7 +138,7 @@ namespace DissolveObjects {
         }
 
         protected override void Start() {
-            base.Awake();
+            base.Start();
             if (renderers == null || renderers.Length == 0) {
                 renderers = gameObject.GetComponentsInChildrenRecursively<Renderer>();
             }
@@ -183,6 +191,25 @@ namespace DissolveObjects {
             // Add state transitions for finishing an animation
             stateMachine.AddStateTransition(State.Materializing, State.Materialized, () => dissolveAmount <= 0);
             stateMachine.AddStateTransition(State.Dematerializing, State.Dematerialized, () => dissolveAmount >= 1);
+
+            stateMachine.OnStateChangeSimple += () => {
+                switch (stateMachine.State) {
+                    case State.Materialized:
+                        onMaterializeFinish?.Invoke();
+                        break;
+                    case State.Dematerializing:
+                        onDematerializeBegin?.Invoke();
+                        break;
+                    case State.Dematerialized:
+                        onDematerializeFinish?.Invoke();
+                        break;
+                    case State.Materializing:
+                        onMaterializeBegin?.Invoke();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            };
             
             // Set dissolveAmount to 1 or 0 when entering Materialized or Dematerialized states
             stateMachine.WithUpdate(State.Materialized, _ => {
@@ -231,7 +258,7 @@ namespace DissolveObjects {
                         break;
                     case State.Dematerializing:
                     case State.Materializing:
-                        colliderShouldBeEnabled = 1-dissolveAmount > MATERIALIZE_COLLIDER_THRESHOLD;
+                        colliderShouldBeEnabled = 1-dissolveAmount > physicsThreshold;
                         break;
                     case State.Dematerialized:
                         colliderShouldBeEnabled = false;
@@ -278,6 +305,7 @@ namespace DissolveObjects {
         public class DissolveObjectSave : SaveObject<DissolveObject> {
             public StateMachine<State>.StateMachineSave stateSave;
             public float materializeTime;
+            public float physicsThreshold;
             public float dissolveAmount;
             public float burnSize;
             public SerializableColor burnColor;
@@ -289,6 +317,7 @@ namespace DissolveObjects {
             public DissolveObjectSave(DissolveObject dissolveObject) : base(dissolveObject) {
                 this.stateSave = dissolveObject.stateMachine.ToSave();
                 this.materializeTime = dissolveObject.materializeTime;
+                this.physicsThreshold = dissolveObject.physicsThreshold;
                 this.dissolveAmount = dissolveObject.dissolveAmount;
                 this.burnSize = dissolveObject.burnSize;
                 this.burnColor = dissolveObject.burnColor;

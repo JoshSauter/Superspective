@@ -91,9 +91,6 @@ public class NoClipMode : SingletonSuperspectiveObject<NoClipMode, NoClipMode.No
 	}
 
 	#region Saving
-	// There's only one player so we don't need a UniqueId here
-	public override string ID => "NoClipMode";
-
 	public override void LoadSave(NoClipSave save) {
 		// There's a better way to do this than setting the inverse and then toggling, but w/e
 		noClipOn = !save.noClipOn;

@@ -152,6 +152,16 @@ namespace StateUtils {
             }
         }
 
+        /// <summary>
+        /// Immediately change to the given state, and set the time since state changed to the given value
+        /// </summary>
+        /// <param name="newState">Which state to immediately change to</param>
+        /// <param name="newTime">Time since state changed to set to for new state</param>
+        public void Set(T newState, float newTime) {
+            State = newState;
+            _time = newTime;
+        }
+
 #region AddStateTransition
         /// <summary>
         /// Automatically transition between states at a given time

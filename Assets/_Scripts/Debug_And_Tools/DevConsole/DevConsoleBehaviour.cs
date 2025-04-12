@@ -56,6 +56,7 @@ namespace DeveloperConsole {
                 new ToggleUICommand("toggleUI"),
                 new ChangeScaleCommand("changeScale"),
                 new HideCullEverythingLayerCommand("hideCullMask"),
+                new ShowInvisibleWallsCommand("showInvisibleWalls"),
                 new ShowTriggersCommand("showTriggers"),
                 new ShowVolumetricPortalsCommand("showVolumetricPortals"),
                 new SetFarClipPlaneCommand("setFarClipPlane"),

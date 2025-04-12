@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SuperspectiveUtils;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
 using PBMesh = UnityEngine.ProBuilder.ProBuilderMesh;
@@ -80,6 +81,8 @@ public static class MergeProBuilderMeshesRecursivelyTool {
     public static void MergeProBuilderMeshesByMaterial () {
         foreach (Transform selectedRoot in Selection.GetFiltered<Transform>(SelectionMode.Editable)) {
             MergeProBuilderMeshesByMaterialUnderRootWithUndo(selectedRoot);
+            // Mark the scene as dirty so the changes are saved
+            EditorSceneManager.MarkSceneDirty(selectedRoot.gameObject.scene);
         }
     }
 

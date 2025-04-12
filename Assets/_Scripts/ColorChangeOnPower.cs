@@ -146,6 +146,8 @@ public class ColorChangeOnPower : SuperspectiveObject<ColorChangeOnPower, ColorC
     }
 
     void Update() {
+        if (GameManager.instance.IsCurrentlyLoading) return;
+        
         if (timeElapsedSinceStateChange < timeToChangeColor) timeElapsedSinceStateChange += Time.deltaTime;
 
         float t = timeElapsedSinceStateChange / timeToChangeColor;

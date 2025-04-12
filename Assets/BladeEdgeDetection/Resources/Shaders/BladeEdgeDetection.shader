@@ -12,6 +12,7 @@
 	SubShader {
 		Tags { "RenderType" = "Transparent" }
 		Pass {
+			Name "EdgeDetection"
 			Cull Off
 			ZTest Always
 			ZWrite Off
@@ -275,10 +276,10 @@
 			}
 
 			float4 GradientFromTexture(float distance) {
-				return tex2D(_GradientTexture, distance);
+				return tex2D(_GradientTexture, float2(distance, 0.5));
 			}
 
-			fixed4 FinalColor(fixed4 original, float depthRatio, float normalDiff, float depth, float3 ray, int allSamplesBehindPortal, int isEdgeOfPortal, fixed4 portalEdgeColor) {
+			fixed4 FinalColor(float depthRatio, float normalDiff, float depth, float3 ray, int allSamplesBehindPortal, int isEdgeOfPortal, fixed4 portalEdgeColor) {
 				// Only normal differences should be considered at Portal edges
 				int depthEdge = min(depthRatio > DEPTH_THRESHOLD_CONSTANT, 1-isEdgeOfPortal);
 				int normalEdge = normalDiff > NORMAL_THRESHOLD_CONSTANT;
@@ -303,9 +304,9 @@
 				edgeColor = (1-allSamplesBehindPortal)*edgeColor + allSamplesBehindPortal*portalEdgeColor;
 
 				// Return values for normal render mode and debug mode
-				fixed4 edgeDetectResult = ((1 - isEdge) * original) + (isEdge * lerp(original, edgeColor, edgeColor.a * edgeWeight));
+				fixed4 edgeDetectResult = isEdge * fixed4(edgeColor.rgb, edgeColor.a * edgeWeight);
 				// Debug colors are: Red if this is a depth-difference edge, Green if this is a normal-difference edge, yellow if both
-				fixed4 debugColors = depthEdge * fixed4(1,0,0,1) + normalEdge * fixed4(0,1,0,1);
+				fixed4 debugColors = fixed4(0,0,0,1) + depthEdge * fixed4(1,0,0,0) + normalEdge * fixed4(0,1,0,0);
 
 				return (_DebugMode * debugColors) + (1-_DebugMode) * edgeDetectResult;
 			}
@@ -414,16 +415,16 @@
 				// minDepthValue check to get rid of lines from CullEverything material against nothing
 				if (minDepthValue > .99) {
 #ifdef CHECK_PORTAL_DEPTH
-					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
+					return FinalColor(0, 0, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
-					return FinalColor(original, 0, 0, minDepthValue, uvPositions.ray, 0, 0, original);
+					return FinalColor(0, 0, minDepthValue, uvPositions.ray, 0, 0, original);
 #endif
 				}
 
 #ifdef FILL_IN_ARTIFACTS
 				// If this pixel seems to be an artifact due to all depths being dissimilar, color it in with an adjacent pixel (and exit edge detection)
 				if (allDepthsAreDissimilar > 0) {
-					return FinalColor(tex2D(_MainTex, uvPositions.UVs[2]), 0, 0, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
+					return FinalColor(0, 0, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
 				}
 #endif
 
@@ -493,12 +494,33 @@
 				}
 
 #ifdef CHECK_PORTAL_DEPTH
-				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
+				return FinalColor(maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
-				return FinalColor(original, maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
+				return FinalColor(maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));
 #endif
 			}
 			ENDCG
+		}
+		Pass {
+		    Name "Composite"
+		    ZTest Always
+		    ZWrite Off
+		    Cull Off
+
+		    CGPROGRAM
+		    #include "UnityCG.cginc"
+		    #pragma vertex vert_img
+		    #pragma fragment FragComposite
+
+		    sampler2D _MainTex;
+		    sampler2D _EdgeOutputTex;
+
+		    float4 FragComposite(v2f_img i) : SV_Target {
+		      float4 sceneColor = tex2D(_MainTex, i.uv);
+		      float4 edgeColor = tex2D(_EdgeOutputTex, i.uv);
+		      return lerp(sceneColor, edgeColor, edgeColor.a);
+		    }
+		    ENDCG
 		}
 	}
 }

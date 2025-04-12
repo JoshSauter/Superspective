@@ -48,10 +48,20 @@ public class SuperspectiveRenderer : MonoBehaviour {
 
 	private MaterialPropertyBlock _mpb;
 	private MaterialPropertyBlock GetPropBlock() {
+		if (this == null || gameObject == null || r == null) return null;
+
 		_mpb ??= new MaterialPropertyBlock();
-		r.GetPropertyBlock(_mpb);
+
+		try {
+			r.GetPropertyBlock(_mpb);
+		} catch (Exception e) {
+			Debug.LogWarning($"GetPropertyBlock failed on {gameObject.name}: {e.Message}", this);
+			return null;
+		}
+
 		return _mpb;
 	}
+
 
 	// SuperspectiveRenderer.enabled = false will disable the underlying renderer
 	public new bool enabled {
@@ -137,11 +147,11 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 	
 	public Color GetColor(string colorName) {
-		return GetPropBlock().GetColor(colorName);
+		return GetPropBlock()?.GetColor(colorName) ?? default;
 	}
 
 	public Color GetColor(int colorId) {
-		return GetPropBlock().GetColor(colorId);
+		return GetPropBlock()?.GetColor(colorId) ?? default;
 	}
 	
 	public Color[] GetColorArray(string propName) {
@@ -155,51 +165,51 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 
 	public float GetFloat(string propName) {
-		return GetPropBlock().GetFloat(propName);
+		return GetPropBlock()?.GetFloat(propName) ?? 0;
 	}
 
 	public float GetFloat(int propId) {
-		return GetPropBlock().GetFloat(propId);
+		return GetPropBlock()?.GetFloat(propId) ?? 0;
 	}
 
 	public int GetInt(string propName) {
-		return GetPropBlock().GetInt(propName);
+		return GetPropBlock()?.GetInt(propName) ?? 0;
 	}
 	
 	public int GetInt(int propId) {
-		return GetPropBlock().GetInt(propId);
+		return GetPropBlock()?.GetInt(propId) ?? 0;
 	}
 	
 	public float[] GetFloatArray(string propName) {
-		return GetPropBlock().GetFloatArray(propName);
+		return GetPropBlock()?.GetFloatArray(propName);
 	}
 	
 	public float[] GetFloatArray(int propId) {
-		return GetPropBlock().GetFloatArray(propId);
+		return GetPropBlock()?.GetFloatArray(propId);
 	}
 	
 	public Texture GetTexture(string propName) {
-		return GetPropBlock().GetTexture(propName);
+		return GetPropBlock()?.GetTexture(propName);
 	}
 	
 	public Texture GetTexture(int propId) {
-		return GetPropBlock().GetTexture(propId);
+		return GetPropBlock()?.GetTexture(propId);
 	}
 
 	public Vector4 GetVector(string propName) {
-		return GetPropBlock().GetVector(propName);
+		return GetPropBlock()?.GetVector(propName) ?? default;
 	}
 	
 	public Vector4 GetVector(int propId) {
-		return GetPropBlock().GetVector(propId);
+		return GetPropBlock()?.GetVector(propId) ?? default;
 	}
 	
 	public Vector4[] GetVectorArray(string propName) {
-		return GetPropBlock().GetVectorArray(propName);
+		return GetPropBlock()?.GetVectorArray(propName);
 	}
 	
 	public Vector4[] GetVectorArray(int propId) {
-		return GetPropBlock().GetVectorArray(propId);
+		return GetPropBlock()?.GetVectorArray(propId);
 	}
 
 	#endregion
@@ -298,6 +308,8 @@ public class SuperspectiveRenderer : MonoBehaviour {
 
 	private void ApplySetting(Action<MaterialPropertyBlock> setting) {
 		MaterialPropertyBlock mpb = GetPropBlock();
+		if (mpb == null) return;
+		
 		setting(mpb);
 		r.SetPropertyBlock(mpb);
 	}
@@ -310,19 +322,19 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	void PrintPropBlockValue(PropBlockType pbType, string key) {
 		switch (pbType) {
 			case PropBlockType.Color:
-				Debug.Log($"{key}: {GetPropBlock().GetColor(key)}");
+				Debug.Log($"{key}: {GetPropBlock()?.GetColor(key)}");
 				break;
 			case PropBlockType.Float:
-				Debug.Log($"{key}: {GetPropBlock().GetFloat(key)}");
+				Debug.Log($"{key}: {GetPropBlock()?.GetFloat(key)}");
 				break;
 			case PropBlockType.Int:
-				Debug.Log($"{key}: {GetPropBlock().GetInt(key)}");
+				Debug.Log($"{key}: {GetPropBlock()?.GetInt(key)}");
 				break;
 			case PropBlockType.Vector:
-				Debug.Log($"{key}: {GetPropBlock().GetVector(key)}");
+				Debug.Log($"{key}: {GetPropBlock()?.GetVector(key)}");
 				break;
 			case PropBlockType.FloatArray:
-				Debug.Log($"{key}: {string.Join(", ", GetPropBlock().GetFloatArray(key))}");
+				Debug.Log($"{key}: {string.Join(", ", GetPropBlock()?.GetFloatArray(key))}");
 				break;
 			case PropBlockType.ColorOnMaterial:
 				Debug.Log($"{key}: {string.Join(", ", r.material.GetColor(key))}");

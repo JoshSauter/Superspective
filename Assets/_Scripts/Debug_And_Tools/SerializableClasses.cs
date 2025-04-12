@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Linq;
 using Library.Functional;
 using NovaMenuUI;
+using Sirenix.Utilities;
 using SuperspectiveUtils;
 using UnityEngine.Serialization;
 
@@ -444,6 +445,10 @@ namespace SerializableClasses {
 
 		// Get the referenced object if it exists, or null if it doesn't
 		public T GetOrNull() {
+			if (referencedObjId.IsNullOrWhitespace()) {
+				Debug.LogWarning("Calling GetOrNull() on a SuperspectiveReference with no ID");
+				return null;
+			}
 			return Reference?.Match(
 				saveableObject => saveableObject,
 				other => null

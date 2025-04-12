@@ -1,4 +1,5 @@
 using System;
+using SuperspectiveAttributes;
 using UnityEngine;
 
 namespace MagicTriggerMechanics.TriggerConditions {
@@ -6,6 +7,7 @@ namespace MagicTriggerMechanics.TriggerConditions {
     public class PlayerInDirectionFromPointCondition : ThresholdTriggerCondition {
         public bool useLocalCoordinates;
         public Vector3 targetDirection;
+        [ScenePosition]
         public Vector3 targetPosition;
         
         protected override float Evaluate(Transform triggerTransform) {

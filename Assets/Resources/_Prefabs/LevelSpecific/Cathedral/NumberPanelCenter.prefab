@@ -357,6 +357,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 258049248693470635}
   oneTimeButton: 0
@@ -464,6 +466,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 258049248693470635}
   state:
@@ -1011,6 +1015,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 8544038721500222810}
   currentValueDisplay: {fileID: 1168760970}
@@ -5707,6 +5713,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 1
   _id: {fileID: 4562047940476477240}
   _pwr: {fileID: 0}
@@ -5743,6 +5751,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4562047940476477240}
   state:

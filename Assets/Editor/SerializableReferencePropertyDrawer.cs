@@ -51,7 +51,15 @@ namespace Editor {
             if (viewAsReference) {
                 Type genericReferenceType = GetSaveableObjectType();
                 string cachedId = cached.cachedId;
-                string cachedReferenceId = cached.cachedReference?.ID ?? "";
+                string cachedReferenceId = "";
+                if (cached.cachedReference) {
+                    try {
+                        cachedReferenceId = cached.cachedReference?.ID;
+                    }
+                    catch (MissingReferenceException) {
+                        cached.cachedReference = null;
+                    }
+                }
 
                 if (cachedId != referencedObjId.stringValue || cachedReferenceId != referencedObjId.stringValue) {
                     cachedId = referencedObjId.stringValue;

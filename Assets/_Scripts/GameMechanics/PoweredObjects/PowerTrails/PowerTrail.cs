@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
 using System.Linq;
-using NaughtyAttributes;
 using Audio;
 using Saving;
 using PoweredObjects;
+using Sirenix.OdinInspector;
 using UnityEngine.Serialization;
 using static Audio.AudioManager;
 
@@ -16,7 +16,7 @@ namespace PowerTrailMechanics {
 		public delegate void PowerTrailUpdateAction(float prevDistance, float newDistance);
 		public PowerTrailUpdateAction OnPowerTrailUpdate;
 		
-		[Label("Power")]
+		[Header("Power")]
 		[SerializeField]
 		private PoweredObject _pwr;
 		public PoweredObject pwr {
@@ -35,8 +35,8 @@ namespace PowerTrailMechanics {
 		public NodeSystem powerNodes;
 		public List<NodeTrailInfo> trailInfo = new List<NodeTrailInfo>();
 		public List<NodeTrailInfo> simplePath = new List<NodeTrailInfo>();
-		[ShowNativeProperty]
-		public int simplePathNodes => simplePath.Count;
+		[ShowInInspector, ReadOnly]
+		public int SimplePathNodes => simplePath.Count;
 
 		public int numAudioSources = 2; // Max one per simplePath segment
 
@@ -65,14 +65,18 @@ namespace PowerTrailMechanics {
 		public bool useDurationInsteadOfSpeed = false;
 		public bool useSeparateSpeedsForPowerOnOff = false;
 		// Just used for NaughtyAttributes
-		bool useSameSpeedsForPowerOnOff => !useSeparateSpeedsForPowerOnOff;
-		[ShowIf(nameof(useDurationInsteadOfSpeed))]
+		private bool DisplayTargetDuration => useDurationInsteadOfSpeed;
+		private bool DisplayTargetDurationPowerOff => useDurationInsteadOfSpeed && useSeparateSpeedsForPowerOnOff;
+		private bool DisplaySpeed => !useDurationInsteadOfSpeed;
+		private bool DisplaySpeedPowerOff => !useDurationInsteadOfSpeed && useSeparateSpeedsForPowerOnOff;
+		
+		[ShowIf(nameof(DisplayTargetDuration))]
 		public float targetDuration = 3f;
-		[ShowIf(EConditionOperator.And, nameof(useDurationInsteadOfSpeed), nameof(useSeparateSpeedsForPowerOnOff))]
+		[ShowIf(nameof(DisplayTargetDurationPowerOff))]
 		public float targetDurationPowerOff = 3f;
-		[HideIf(nameof(useDurationInsteadOfSpeed))]
+		[ShowIf(nameof(DisplaySpeed))]
 		public float speed = 15f;
-		[HideIf(EConditionOperator.Or, nameof(useDurationInsteadOfSpeed), nameof(useSameSpeedsForPowerOnOff))]
+		[ShowIf(nameof(DisplaySpeedPowerOff))]
 		public float speedPowerOff = 15f;
 		public float powerTrailRadius = 0.15f;
 		public bool skipStartupShutdownSounds = false;
@@ -110,9 +114,9 @@ namespace PowerTrailMechanics {
 		public float maxDistance = 0f;
 		public float targetFillAmount = 1f; // 0-1 value representing how much distance/maxDistance to allow the PowerTrail to fill
 
-		[ShowNativeProperty]
+		[ShowInInspector]
 		public bool IsFullyPowered => distance >= maxDistance;
-		[ShowNativeProperty]
+		[ShowInInspector]
 		public bool IsFullyDepowered => distance <= 0;
 		bool isInitialized = false;
 

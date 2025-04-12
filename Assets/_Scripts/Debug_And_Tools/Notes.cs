@@ -1,14 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 /// <summary>
-///  Literally just a way to put notes on an object in the inspector
+/// Literally just a way to put notes on an object in the inspector.
+/// Now dynamically determines the number of lines based on content.
 /// </summary>
 public class Notes : MonoBehaviour {
-    [Title("Notes")] // Optional: Adds a title for better organization
-    [MultiLineProperty(10)] // Sets the height of the text box to fit ~10 lines
-    [HideLabel] // Removes the label to make it cleaner
-    public string notes;
+#if UNITY_EDITOR
+    private const int MIN_LINE_COUNT = 2;
+    private const int MAX_LINE_COUNT = 20;
+    
+    [Title("Notes")]
+    [HideLabel]
+    [SerializeField, TextArea(MIN_LINE_COUNT, MAX_LINE_COUNT)]
+    public string notes = "";
+#endif
 }

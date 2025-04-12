@@ -4,36 +4,30 @@ using System.Linq;
 using Audio;
 using NaughtyAttributes;
 using Saving;
+using SerializableClasses;
 using SuperspectiveUtils;
 using UnityEngine;
 using ScramblerReference = SerializableClasses.SuperspectiveReference<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave>;
 
 public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOverlay, NoiseScrambleOverlay.NoiseScrambleOverlaySave>, CustomAudioJob {
-    public static Dictionary<string, ScramblerReference> scramblers = new Dictionary<string, ScramblerReference>();
+    public static readonly Dictionary<string, ScramblerReference> scramblers = new Dictionary<string, ScramblerReference>();
     [SerializeField]
     Shader noiseShader;
 
     private Material mat;
-    
-    public override string ID => "NoiseScrambleOverlay";
 
     public const float MAX_VOLUME_DISTANCE = 10f;
     public const float ZERO_VOLUME_DISTANCE = 75;
 
-    private float timeWhenGlobalValueSet = -1;
-    private float _globalValue = -1;
-    private float GlobalValue {
-        get => _globalValue;
-        set {
-            if (value < 0) {
-                timeWhenGlobalValueSet = -1;
-            }
-            else {
-                timeWhenGlobalValueSet = Time.time;
-            }
-            _globalValue = value;
-        }
+    private const float GLOBAL_VALUE_LIFETIME = 0.15f;
+
+    [Serializable]
+    public struct GlobalValueSetter {
+        public float time;
+        public float value;
     }
+    private Dictionary<string, GlobalValueSetter> globalValueSetters = new Dictionary<string, GlobalValueSetter>();
+    private float GlobalValue => globalValueSetters.Any() ? globalValueSetters.Max(kv => kv.Value.value) : 0f;
     
     [ShowNativeProperty]
     float MinDistance {
@@ -85,9 +79,9 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
     }
 
     private void LateUpdate() {
-        if (timeWhenGlobalValueSet > 0 && Time.time - timeWhenGlobalValueSet > 0.15f) {
-            GlobalValue = -1;
-        }
+        globalValueSetters = globalValueSetters
+            .Where(kv => Time.time - kv.Value.time <= GLOBAL_VALUE_LIFETIME)
+            .ToDictionary();
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination) {
@@ -100,10 +94,10 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
             return;
         }
         #endif
-        
-        
-        debug.Log($"Intensity: {Intensity}");
-        mat.SetFloat("_Intensity", Intensity);
+
+        float intensity = Intensity;
+        debug.Log($"Intensity: {intensity}");
+        mat.SetFloat("_Intensity", intensity);
         Graphics.Blit(source, destination, mat);
     }
 
@@ -123,23 +117,23 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
     }
     
     // Used to override the noise scramble overlay value with some value. Needs to be called every frame to keep the override
-    public void SetNoiseScrambleOverlayValue(float overrideValue) {
-        this.GlobalValue = overrideValue;
+    public void SetNoiseScrambleOverlayValue(string id, float overrideValue) {
+        globalValueSetters[id] = new GlobalValueSetter() {
+            time = Time.time,
+            value = overrideValue
+        };
     }
 
     public override void LoadSave(NoiseScrambleOverlaySave save) {
-        _globalValue = save.globalValue;
-        timeWhenGlobalValueSet = save.timeWhenOverrideValueSet;
+        this.globalValueSetters = save.globalValueSetters;
     }
 
     [Serializable]
     public class NoiseScrambleOverlaySave : SaveObject<NoiseScrambleOverlay> {
-        public float globalValue;
-        public float timeWhenOverrideValueSet;
+        public SerializableDictionary<string, GlobalValueSetter> globalValueSetters;
 
         public NoiseScrambleOverlaySave(NoiseScrambleOverlay script) : base(script) {
-            this.globalValue = script.GlobalValue;
-            this.timeWhenOverrideValueSet = script.timeWhenGlobalValueSet;
+            this.globalValueSetters = script.globalValueSetters;
         }
     }
 }

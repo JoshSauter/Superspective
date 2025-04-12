@@ -17,7 +17,7 @@ using UnityEditor;
 namespace Saving {
     public static partial class SaveManager {
         
-        public static bool DEBUG = false;
+        public static bool DEBUG = true;
         public static bool isCurrentlyLoadingSave = false;
         public static readonly Dictionary<Levels, SaveManagerForLevel> saveManagers = new Dictionary<Levels, SaveManagerForLevel>();
         private static SaveManagerCache cache = new SaveManagerCache();
@@ -55,7 +55,7 @@ namespace Saving {
         /// <param name="saveMetadataWithScreenshot">Metadata for the save</param>
         /// <returns>JobHandle for the asynchronous Save process</returns>
         public static JobHandle Save(SaveMetadataWithScreenshot saveMetadataWithScreenshot) {
-            Debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
+            debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
             BeforeSave?.Invoke();
             return SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
         }
@@ -66,7 +66,7 @@ namespace Saving {
         /// <param name="saveMetadata">Metadata for the save file to be loaded</param>
         public static async void Load(SaveMetadataWithScreenshot saveMetadata) {
             string saveName = saveMetadata.metadata.saveFilename;
-            Debug.Log($"--- Loading Save File: {saveName} ---");
+            debug.Log($"--- Loading Save File: {saveName} ---");
             
             // Updating this at beginning and end of Load to make sure loading knows that a load just happened as well as mark the finish time
             realTimeOfLastLoad = Time.realtimeSinceStartup;
@@ -74,7 +74,7 @@ namespace Saving {
             isCurrentlyLoadingSave = true;
             
             if (LevelManager.instance.IsCurrentlySwitchingScenes || LevelManager.instance.isCurrentlySwitchingScenes) {
-                Debug.Log("Waiting for in-progress scene loading to finish before starting load...");
+                debug.Log("Waiting for in-progress scene loading to finish before starting load...");
                 await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes && !LevelManager.instance.isCurrentlySwitchingScenes);
             }
 
@@ -99,9 +99,9 @@ namespace Saving {
             SaveManagerForLevel saveManagerForManagerLevel = GetOrCreateSaveManagerForLevel(Levels.ManagerScene);
             saveManagerForManagerLevel.LoadSuperspectiveObjectsStateFromSaveFile(save.managerLevel);
 
-            Debug.Log("Waiting for scenes to be loaded...");
+            debug.Log("Waiting for scenes to be loaded...");
             await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
-            Debug.Log("All scenes loaded into memory, loading save...");
+            debug.Log("All scenes loaded into memory, loading save...");
 
             // Load records of all DynamicObjects from disk
             save.dynamicObjects.LoadSaveFile();
@@ -121,8 +121,8 @@ namespace Saving {
                 .Except(loadedLevels)
                 .ToDictionary();
             
-            Debug.Log($"Loaded levels: {string.Join(", ", loadedLevels.Keys)}");
-            Debug.Log($"Unloaded levels: {string.Join(", ", unloadedLevels.Keys)}");
+            debug.Log($"Loaded levels: {string.Join(", ", loadedLevels.Keys)}");
+            debug.Log($"Unloaded levels: {string.Join(", ", unloadedLevels.Keys)}");
             
             // Restore state for all unloaded scenes from the save file
             foreach (var kv in unloadedLevels) {
@@ -362,7 +362,7 @@ namespace Saving {
         public static T FindObjectById<T>(string id, bool suppressError = false) where T : class, ISaveableObject {
             // Log a warning because we want to try to avoid using this function wherever possible (except in the Editor, w/e)
             if (Application.isPlaying) {
-                Debug.LogWarning($"FindObjectById called for {id}. This is inefficient and should be avoided where possible.");
+                debug.LogWarning($"FindObjectById called for {id}. This is inefficient and should be avoided where possible.");
             }
 
             List<MonoBehaviour> matches = Resources.FindObjectsOfTypeAll<MonoBehaviour>()
@@ -373,13 +373,13 @@ namespace Saving {
 
             if (matches.Count == 0) {
                 if (!suppressError) {
-                    Debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?");
+                    debug.LogError($"No object with id {id} found! Maybe in a scene that's not loaded?", true);
                 }
                 return null;
             }
             else if (matches.Count > 1) {
                 if (!suppressError) {
-                    Debug.LogError($"Multiple objects with id {id} found.\nMatches:\n{string.Join("\n", matches.Select(m => m.FullPath()))}");
+                    debug.LogError($"Multiple objects with id {id} found.\nMatches:\n{string.Join("\n", matches.Select(m => m.FullPath()))}", true);
                 }
                 return matches[0] as T;
             }

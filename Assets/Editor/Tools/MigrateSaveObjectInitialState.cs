@@ -49,6 +49,8 @@ public class MigrateSaveObjectInitialState : EditorWindow {
         foreach (var superspectiveObject in superspectiveObjects) {
             superspectiveObject.gameObjectStartsInactive = !superspectiveObject.gameObject.activeSelf;
             superspectiveObject.scriptStartsDisabled = !superspectiveObject.enabled;
+            superspectiveObject._startPosition = superspectiveObject.transform.position;
+            superspectiveObject._startRotation = superspectiveObject.transform.rotation;
             
             EditorSceneManager.MarkSceneDirty(superspectiveObject.gameObject.scene);
         }

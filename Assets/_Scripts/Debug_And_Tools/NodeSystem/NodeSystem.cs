@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
-using NaughtyAttributes;
-using Random = UnityEngine.Random;
+using Sirenix.OdinInspector;
+using Sirenix.Utilities;
+using SuperspectiveUtils;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -85,7 +85,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		}
 	}
 
-	[ShowNativeProperty]
+	[ShowInInspector]
 	public bool NodeSelected => selectedNodesIndices.Count > 0;
 	
 	public Vector3 WorldPos(Node n) {
@@ -168,7 +168,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		set => _selectedNodes = value;
 	}
 
-	[ShowNativeProperty]
+	[ShowInInspector, ReadOnly]
 	public int Count => allNodes?.Count ?? 0;
 
 	void OnEnable() {
@@ -498,7 +498,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		return newNodes;
 	}
 	
-	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across X")]
+	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Selected Nodes Across X")]
 	public static void DuplicateAcrossX() {
 		RunForAllSelectedNodeSystems(ns => {
 			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
@@ -513,7 +513,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 
-	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across Y")]
+	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Selected Nodes Across Y")]
 	public static void DuplicateAcrossY() {
 		RunForAllSelectedNodeSystems(ns => {
 			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
@@ -528,7 +528,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 	
-	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Nodes Across Z")]
+	[MenuItem("Custom/Power Trails/Symmetry/Duplicate Selected Nodes Across Z")]
 	public static void DuplicateAcrossZ() {
 		RunForAllSelectedNodeSystems(ns => {
 			Dictionary<Node, HashSet<Node>> rootsAndLeafs = ns.FindRelativeRootsAndLeafsOfSelected(ns.selectedNodes);
@@ -543,7 +543,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 	
-	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across X")]
+	[MenuItem("Custom/Power Trails/Symmetry/Mirror NodeSystem Across X")]
 	public static void MirrorAcrossX() {
 		RunForAllSelectedNodeSystems(ns => {
 			for (int i = 0; i < ns.serializedNodes.Count; i++) {
@@ -558,7 +558,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 
-	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across Y")]
+	[MenuItem("Custom/Power Trails/Symmetry/Mirror NodeSystem Across Y")]
 	public static void MirrorAcrossY() {
 		RunForAllSelectedNodeSystems(ns => {
 			for (int i = 0; i < ns.serializedNodes.Count; i++) {
@@ -573,7 +573,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 
-	[MenuItem("Custom/Power Trails/Symmetry/Mirror Across Z")]
+	[MenuItem("Custom/Power Trails/Symmetry/Mirror NodeSystem Across Z")]
 	public static void MirrorAcrossZ() {
 		RunForAllSelectedNodeSystems(ns => {
 			for (int i = 0; i < ns.serializedNodes.Count; i++) {
@@ -592,6 +592,17 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 	public static void SelectAllNodes() {
 		RunForAllSelectedNodeSystems(ns => {
 			ns.selectedNodes = new HashSet<Node>(ns.allNodes);
+		});
+	}
+
+	[MenuItem("Custom/Power Trails/Select All Children Recursively")]
+	public static void SelectAllChildrenNodes() {
+		RunForAllSelectedNodeSystems(ns => {
+			List<Node> children = new List<Node>();
+			ns.selectedNodes.ForEach(node => ns.GetAllNodesRecursively(node, ref children));
+			ns.selectedNodes = children.ToHashSet();
+			
+			Debug.Log($"Selected {children.Count} children in {ns.FullPath()}.");
 		});
 	}
 
@@ -619,7 +630,7 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 		});
 	}
 
-	static bool temp = false;
+	private bool temp = false;
 	[MenuItem("Custom/Power Trails/Add Child _F2")]
 	public static void AddChild() {
 		RunForAllSelectedNodes((ns, node) => {
@@ -630,11 +641,9 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 					offset = (newNode.pos - node.pos).normalized * DISTANCE_TO_SPAWN_NEW_NODE_AT;
 					break;
 				case NodeBuildMode.Staircase:
-					offset = temp ? ns.staircaseDirection1 : ns.staircaseDirection2;
-					temp = !temp;
+					offset = ns.temp ? ns.staircaseDirection1 : ns.staircaseDirection2;
 					break;
 				case NodeBuildMode.BuildDirections:
-					ns.buildDirectionIndex = (ns.buildDirectionIndex + 1) % ns.buildDirections.Length;
 					offset = ns.buildDirections[ns.buildDirectionIndex];
 					break;
 				default:
@@ -643,6 +652,21 @@ public class NodeSystem : MonoBehaviour, ISerializationCallbackReceiver {
 
 			newNode.pos += offset;
 			return newNode;
+		});
+		
+		RunForAllSelectedNodeSystems(ns => {
+			switch (ns.buildMode) {
+				case NodeBuildMode.StraightLine:
+					break;
+				case NodeBuildMode.Staircase:
+					ns.temp = !ns.temp;
+					break;
+				case NodeBuildMode.BuildDirections:
+					ns.buildDirectionIndex = (ns.buildDirectionIndex + 1) % ns.buildDirections.Length;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		});
 	}
 

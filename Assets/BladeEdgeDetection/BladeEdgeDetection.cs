@@ -137,7 +137,12 @@ public class BladeEdgeDetection : SuperspectiveObject<BladeEdgeDetection, BladeE
 		shaderMaterial.SetFloat(DepthWeightMinID, depthWeightMin);
 		shaderMaterial.SetFloat(NormalWeightMinID, normalWeightMin);
 		
-		Graphics.Blit(source, destination, shaderMaterial);
+		RenderTexture edgeOutput = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
+		Graphics.Blit(source, edgeOutput, shaderMaterial, 0); // Pass 0: Edge Detection
+		shaderMaterial.SetTexture("_EdgeOutputTex", edgeOutput);
+		
+		Graphics.Blit(source, destination, shaderMaterial, 1); // Pass 1: Composite
+		RenderTexture.ReleaseTemporary(edgeOutput);
 	}
 
 	/// <summary>

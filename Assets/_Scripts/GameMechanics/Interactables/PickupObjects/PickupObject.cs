@@ -310,7 +310,7 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
         ResolveCollision();
 
         playerCamPosLastFrame = playerCam.transform.position;
-        playerLastPos = PlayerMovement.instance.LastPlayerPosition;
+        playerLastPos = PlayerMovement.instance.lastPlayerPosition;
     }
     
     public void OnLeftMouseButtonDown() {

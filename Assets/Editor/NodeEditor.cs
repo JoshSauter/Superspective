@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PowerTrailMechanics;
-using SuperspectiveUtils;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(NodeSystem))]
-public class NodeEditor : UnityEditor.Editor {
+public class NodeEditor : OdinEditor {
     private float timeSinceLastNodeSelected => Time.realtimeSinceStartup - timeWhenLastNodeSelected;
     private float timeWhenLastNodeSelected;
     private const float doubleClickTime = .25f;
@@ -14,36 +13,36 @@ public class NodeEditor : UnityEditor.Editor {
     Camera sceneViewCam;
     SceneView sv;
     
-    void OnSceneGUI() {
+    public void OnSceneGUI() {
         // get the chosen game object
-        NodeSystem t = target as NodeSystem;
+        NodeSystem ns = target as NodeSystem;
 
         if (sv == null || sceneViewCam == null) {
             sv = EditorWindow.GetWindow<SceneView>();
             sceneViewCam = sv.camera;
         }
 
-        if (t == null || t.rootNode == null) return;
+        if (ns == null || ns.rootNode == null) return;
 
         Event current = Event.current;
         bool isMultiSelect = current.shift || current.control;
-        int controlID = GUIUtility.GetControlID(t.GetHashCode(), FocusType.Passive);
-        Node nodeToSelect = NodeToSelect(t);
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0) {
+        int controlID = GUIUtility.GetControlID(ns.GetHashCode(), FocusType.Passive);
+        Node nodeToSelect = NodeToSelect(ns);
+        if (current.type == EventType.MouseDown && current.button == 0) {
             if (nodeToSelect != null) {
                 // Same Node selected, either ignore or double-click to open modal
-                if (t.selectedNodes.Contains(nodeToSelect)) {
+                if (ns.selectedNodes.Contains(nodeToSelect)) {
                     if (timeSinceLastNodeSelected < doubleClickTime) {
                         // If we double-clicked a Node, deselect all other Nodes and open the NodeEditorWindow
-                        t.selectedNodes = new HashSet<Node>() {nodeToSelect};
+                        ns.selectedNodes = new HashSet<Node>() {nodeToSelect};
                         NodeEditorWindow.ShowNodeEditorWindow();
                     }
                     else {
                         if (isMultiSelect) {
-                            t.selectedNodes.Remove(nodeToSelect);
+                            ns.selectedNodes.Remove(nodeToSelect);
                         }
                         else {
-                            t.selectedNodes = new HashSet<Node>() {nodeToSelect};
+                            ns.selectedNodes = new HashSet<Node>() {nodeToSelect};
                         }
                         timeWhenLastNodeSelected = Time.realtimeSinceStartup;
                     }
@@ -51,14 +50,31 @@ public class NodeEditor : UnityEditor.Editor {
                 // Different Node selected, select it
                 else {
                     if (isMultiSelect) {
-                        t.selectedNodes.Add(nodeToSelect);
+                        ns.selectedNodes.Add(nodeToSelect);
                     }
                     else {
-                        t.selectedNodes = new HashSet<Node>() {nodeToSelect};
+                        ns.selectedNodes = new HashSet<Node>() {nodeToSelect};
                     }
                     timeWhenLastNodeSelected = Time.realtimeSinceStartup;
                     Event.current.Use();
                 }
+            }
+        }
+        else if (current.type == EventType.KeyDown && current.keyCode == KeyCode.F) {
+            if (ns.selectedNodes != null && ns.selectedNodes.Count > 0) {
+                Vector3[] worldPositions = ns.selectedNodes
+                    .Select(n => ns.transform.TransformPoint(n.pos))
+                    .ToArray();
+
+                // Create bounds around all selected node positions
+                Bounds bounds = new Bounds(worldPositions[0], Vector3.zero);
+                foreach (var pos in worldPositions.Skip(1)) {
+                    bounds.Encapsulate(pos);
+                }
+
+                // Focus the Scene view on the bounds
+                SceneView.lastActiveSceneView.Frame(bounds, instant: false);
+                current.Use(); // Consume the event
             }
         }
 
@@ -66,21 +82,21 @@ public class NodeEditor : UnityEditor.Editor {
             if (nodeToSelect != null) HandleUtility.AddDefaultControl(controlID);
         }
 
-        DrawLinesRecursively(t, t.rootNode);
+        DrawLinesRecursively(ns, ns.rootNode);
         
         EditorGUI.BeginChangeCheck();
-        foreach (Node selectedNode in t.selectedNodes) {
-            Vector3 newPosition = t.transform.TransformPoint(selectedNode.pos);
+        foreach (Node selectedNode in ns.selectedNodes) {
+            Vector3 newPosition = ns.transform.TransformPoint(selectedNode.pos);
             if (selectedNode != null) {
                 Quaternion rotation = Tools.pivotRotation == PivotRotation.Global || selectedNode.IsRootNode ?
-                    t.transform.rotation :
+                    ns.transform.rotation :
                     Quaternion.LookRotation(selectedNode.parent.pos-selectedNode.pos);
-                newPosition = Handles.PositionHandle(t.transform.TransformPoint(selectedNode.pos), rotation);
+                newPosition = Handles.PositionHandle(ns.transform.TransformPoint(selectedNode.pos), rotation);
             }
             if (EditorGUI.EndChangeCheck()) {
-                Undo.RecordObject(t, "Change node position");
-                Vector3 offset = t.transform.InverseTransformPoint(newPosition) - selectedNode.pos;
-                foreach (Node allSelectedNodes in t.selectedNodes) {
+                Undo.RecordObject(ns, "Change node position");
+                Vector3 offset = ns.transform.InverseTransformPoint(newPosition) - selectedNode.pos;
+                foreach (Node allSelectedNodes in ns.selectedNodes) {
                     allSelectedNodes.pos += offset;
                 }
             }
@@ -100,15 +116,23 @@ public class NodeEditor : UnityEditor.Editor {
     }
 
     void DrawLinesRecursively(NodeSystem system, Node curNode) {
+        Color handleColor = Handles.color;
+        bool curNodeSelected = system.selectedNodes.Contains(curNode);
         foreach (Node child in curNode.children) {
             if (child != null) {
+                bool childSelected = system.selectedNodes.Contains(child);
+                
+                Handles.color = curNodeSelected || childSelected ? Color.yellow : Color.white;
                 Handles.DrawLine(
                     system.transform.TransformPoint(curNode.pos),
                     system.transform.TransformPoint(child.pos)
                 );
+                Handles.color = handleColor;
                 DrawLinesRecursively(system, child);
             }
         }
+        
+        Handles.color = handleColor;
     }
 
     Node NodeToSelect(NodeSystem t) {

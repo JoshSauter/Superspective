@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 using SuperspectiveUtils;
 
@@ -11,7 +9,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	BladeEdgeDetection edgeDetection;
 	CommandBuffer commandBuffer;
 
-	HashSet<InteractableGlow> glowableObjects = new HashSet<InteractableGlow>();
+	readonly NullSafeHashSet<InteractableGlow> glowableObjects = new NullSafeHashSet<InteractableGlow>();
 
 	public const int blurIterations = 4;
 
@@ -72,9 +70,8 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 			if (glowObject.renderers == null) continue;
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
-			for (int j = 0; j < glowObject.renderers.Count; j++) {
-				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterialLarger : prePassMaterial);
+			foreach (var r in glowObject.renderers) {
+				commandBuffer.DrawRenderer(r, glowObject.useLargerPrepassMaterial ? prePassMaterialLarger : prePassMaterial);
 			}
 		}
 
@@ -86,9 +83,8 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 			if (glowObject.renderers == null) continue;
 			commandBuffer.SetGlobalColor(glowColorID, GetColor(glowObject));
 
-			for (int j = 0; j < glowObject.renderers.Count; j++) {
-				//Debug.Log(glowObject.name + "length: " + glowObject.Renderers.Length);
-				commandBuffer.DrawRenderer(glowObject.renderers[j], glowObject.useLargerPrepassMaterial ? prePassMaterial : prePassMaterialSmaller);
+			foreach (var r in glowObject.renderers) {
+				commandBuffer.DrawRenderer(r, glowObject.useLargerPrepassMaterial ? prePassMaterial : prePassMaterialSmaller);
 			}
 		}
 

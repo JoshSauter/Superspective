@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
+using SuperspectiveUtils;
 
 namespace Deepblack {
     [RequireComponent(typeof(UniqueId))]
     public class DeepblackObject : SuperspectiveObject<DeepblackObject, DeepblackObject.DeepblackObjectSave> {
-        [SerializeField]
-        private float darkness = 10f;
-        public float Darkness => darkness;
+        public float darkness = 1.5f;
+
+        public float falloffFactor = 0.025f;
         
         public Renderer[] renderers;
-        public readonly Dictionary<Renderer, Mesh> rendererMeshes = new Dictionary<Renderer, Mesh>();
+        public readonly NullSafeDictionary<Renderer, Mesh> rendererMeshes = new NullSafeDictionary<Renderer, Mesh>();
 
         protected override void Awake() {
             base.Awake();
@@ -28,6 +30,13 @@ namespace Deepblack {
         
         protected override void OnEnable() {
             base.OnEnable();
+
+            StartCoroutine(Co_OnEnable());
+        }
+
+        private IEnumerator Co_OnEnable() {
+            var wait = new WaitUntil(() => GameManager.instance.gameHasLoaded);
+            yield return wait;
             DeepblackEffect.instance.Register(this);
         }
         

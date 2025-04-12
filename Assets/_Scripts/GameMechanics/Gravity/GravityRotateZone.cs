@@ -9,20 +9,49 @@ using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
 public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityRotateZone.GravityRotateZoneSave>, BetterTriggers {
-    public static bool playerIsInAnyGravityRotateZone = false;
+    public static bool anyCurrentlyRotatingPlayer = false;
 
     public enum RotateMode {
-        Convex, // e.g. walking from a floor down some stairs to a wall
-        Concave // e.g. walking from a floor up some stairs to a wall
+        Convex,              // e.g. walking from a floor down some stairs to a wall
+        ConvexBidirectional, // e.g. when building a "half-pipe" which the player can enter from either direction, such as in _RoseRoomExit
+        Concave              // e.g. walking from a floor up some stairs to a wall
+    }
+
+    public enum InvisibleWallsMode {
+        None,             // No invisible walls
+        OnlyWhenRotating, // Invisible walls only when the player is actively rotating
+        Always            // Invisible walls always enabled (by always I mean always when the player is in the rotation zone, regardless of whether they're rotating or not)
     }
     
     [BoxGroup("Primary Settings")]
     [LabelText("Invisible Walls Enabled")]
     [GUIColor(.456f, .567f, .678f)]
     [Tooltip("Whether the invisible walls are enabled when the player is actively changing gravity directions.")]
-    public bool invisibleWallsSetting = false;
-    private const float INVISIBLE_WALL_TOLERANCE = 0.05f; // Amount of tolerance in the lerp value to enable the invisible wall
-    private bool InvisibleWallShouldBeEnabled => invisibleWallsSetting && playerIsInThisGravityRotateZone && t is > INVISIBLE_WALL_TOLERANCE and < 1 - INVISIBLE_WALL_TOLERANCE;
+    [OnValueChanged(nameof(RegenerateTriggerZone))]
+    public InvisibleWallsMode invisibleWallsSetting = InvisibleWallsMode.OnlyWhenRotating;
+    private bool InvisibleWallShouldBeEnabled {
+        get {
+            switch (invisibleWallsSetting) {
+                case InvisibleWallsMode.None:
+                    return false;
+                case InvisibleWallsMode.OnlyWhenRotating:
+                    return currentlyRotatingPlayer && playerIsInRotationZone;
+                case InvisibleWallsMode.Always:
+                    if (playerIsInRotationZone) return true;
+                    if (!playerIsInTriggerZone) return false;
+                    
+                    // Secondary condition: Player is near the top of a rotating staircase, but without rotating. Don't let them walk/jump off the side
+                    Vector3 playerWorldPos = PlayerMovement.instance.BottomOfPlayer;
+                    Vector3 desiredGravityLocal = GetStartOrEndGravityDirection(playerWorldPos);
+                    Vector3 playerGravityLocal = transform.InverseTransformDirection(Physics.gravity);
+                    bool incongruentGravity = Vector3.Dot(playerGravityLocal.normalized, desiredGravityLocal.normalized) < 0.5f;
+                    
+                    return incongruentGravity;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
     
     [NaughtyAttributes.HorizontalLine]
     
@@ -30,16 +59,17 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     [LabelText("Rotate Mode")]
     [GUIColor(1, 1, 0.5f)]
     [Tooltip("Whether the player rotates in a convex or concave manner.\n\nConvex: e.g. walking from a floor down some stairs to a wall.\nConcave: e.g. walking from a floor up some stairs to a wall.")]
-    [OnValueChanged(nameof(RecalculateDerivedValues))]
+    [OnValueChanged(nameof(RegenerateTriggerZone))]
     public RotateMode rotateMode = RotateMode.Convex;
-    private bool IsConvex => rotateMode == RotateMode.Convex;
     private bool IsConcave => rotateMode == RotateMode.Concave;
+    private bool IsConvex => !IsConcave; // Accounts for ConvexBidirectional as well
+    private bool IsBidirectional => rotateMode == RotateMode.ConvexBidirectional;
     
     [BoxGroup("Primary Settings")]
     [LabelText("Pivot Point")]
     [GUIColor(1, 1, 0.5f)]
     [Tooltip("The center point around which gravity rotation occurs. Specified in local space.")]
-    [OnValueChanged(nameof(RecalculateDerivedValues))]
+    [OnValueChanged(nameof(RegenerateTriggerZone))]
     public Vector3 pivotPoint;
     public Vector3 WorldPivotPoint => transform.TransformPoint(pivotPoint);
 
@@ -49,7 +79,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     [GUIColor(0.5f, 1, 0.5f)]
     [LabelText("Start Point")]
     [Tooltip("Defines the starting position of the gravity rotation. Specified in local space.")]
-    [OnValueChanged(nameof(RecalculateDerivedValues))]
+    [OnValueChanged(nameof(RegenerateTriggerZone))]
     public Vector3 start = Vector3.right * 5;
     public Vector3 WorldStart => transform.TransformPoint(start);
     
@@ -73,7 +103,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     [GUIColor(1, 0.5f, 0.5f)]
     [LabelText("End Point")]
     [Tooltip("Defines the ending position of the gravity rotation. Specified in local space.")]
-    [OnValueChanged(nameof(RecalculateDerivedValues))]
+    [OnValueChanged(nameof(RegenerateTriggerZone))]
     public Vector3 end = Vector3.up * 5;
     public Vector3 WorldEnd => transform.TransformPoint(end);
     
@@ -164,10 +194,26 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     [BoxGroup("State")]
     [ReadOnly]
     [GUIColor(0.875f, .65f, 1f)]
-    [LabelText("Player Is In This Gravity Rotate Zone")]
-    [Tooltip("Whether the player is currently in this gravity rotate zone.")]
+    [LabelText("Player Is In Trigger Zone")]
+    [Tooltip("Whether the player is currently within any part of the trigger zone (regardless if they're actually rotating).")]
     [SerializeField]
-    public bool playerIsInThisGravityRotateZone = false;
+    public bool playerIsInTriggerZone = false;
+    
+    [BoxGroup("State")]
+    [ReadOnly]
+    [GUIColor(0.875f, .65f, 1f)]
+    [LabelText("Player Is In Rotation Zone")]
+    [Tooltip("Whether the player is currently within the rotation part of the trigger zone (regardless if they're actually rotating), determined by the interpolation value being between 0 and 1.")]
+    [SerializeField]
+    public bool playerIsInRotationZone = false;
+    
+    [BoxGroup("State")]
+    [ReadOnly]
+    [GUIColor(0.875f, .65f, 1f)]
+    [LabelText("Currently Rotating Player")]
+    [Tooltip("Whether the player is currently rotating in this gravity rotate zone.")]
+    [SerializeField]
+    public bool currentlyRotatingPlayer = false;
 
     [BoxGroup("State")]
     [ReadOnly]
@@ -247,17 +293,24 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         base.Start();
         UpdateInvisibleWallsEnabled();
     }
+    
+    public void InvertGravityDirections() {
+        startGravity *= -1;
+        endGravity *= -1;
+    }
 
-    private void RecalculateDerivedValues() {
-        if (start == end) return; // Prevent division by zero or undefined axis
+    private bool RecalculateDerivedValues() {
+        if (start == end) return false; // Prevent division by zero or undefined axis
 
         // Compute rotation axis as the normal of the plane defined by pivot, start, and end
         rotationAxis = Vector3.Cross(StartDirection, EndDirection).normalized;
 
         // Compute total rotation angle in degrees, validate it's 90 degrees
         totalAngle = Vector3.SignedAngle(StartDirection, EndDirection, rotationAxis);
+        bool isValid = true;
         if (!Mathf.Approximately(totalAngle, 90)) {
             Debug.LogError($"Start and End points are not 90 degrees apart. Total angle is {totalAngle} degrees.");
+            isValid = false;
         }
 
         gravityLineStart = pivotPoint + start.normalized * (start.magnitude - startHitboxSize.y / 2f);
@@ -267,10 +320,12 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             artificialGravityAmplification = false;
         }
         gravAmplificationFactor = 1;
+        
+        return isValid;
     }
 
-    public float GetLerpValue(Vector3 position) {
-        Vector3 projectedPosition = Vector3.ProjectOnPlane(position, rotationAxis);
+    public float GetLerpValue(Vector3 localPosition) {
+        Vector3 projectedPosition = Vector3.ProjectOnPlane(localPosition, rotationAxis);
         if (IsConvex) {
             Vector3 playerVector = projectedPosition - pivotPoint;
 
@@ -284,38 +339,50 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         }
         else {
             Vector3 closestPointOnLine = projectedPosition.GetClosestPointOnFiniteLine(gravityLineStart, gravityLineEnd);
-            float t = Utils.Vector3InverseLerp(gravityLineStart, gravityLineEnd, closestPointOnLine);
+            float temp = Utils.Vector3InverseLerp(gravityLineStart, gravityLineEnd, closestPointOnLine);
 
-            return Easing.InverseSmoothStep(t);
+            return Mathf.Clamp01(Easing.InverseSmoothStep(temp));
         }
     }
 
-    public Vector3 GetInterpolatedGravityDirection(Vector3 worldPosition) {
-        Vector3 position = transform.InverseTransformPoint(worldPosition);
-        float nextT = Mathf.Clamp01(GetLerpValue(position));
-        Vector3 desiredGravity = Vector3.Lerp(startGravity, endGravity, nextT).normalized;
-        
-        debug.Log($"Position: {position}, prev t: {t}, next t: {nextT}, t speed: {(nextT - t) / Time.fixedDeltaTime} Gravity: {desiredGravity}");
-        t = nextT;
-        return desiredGravity;
+    // ReSharper disable once ParameterHidesMember
+    private Vector3 GetInterpolatedGravityDirection(float t) {
+        return Vector3.Lerp(startGravity, endGravity, Mathf.Clamp01(t)).normalized;
     }
 
-    public Vector3 GetStartOrEndGravityDirection(Vector3 worldPosition) {
-        Vector3 position = transform.InverseTransformPoint(worldPosition);
-        float t = Mathf.Clamp01(GetLerpValue(position));
-        
-        return t < 0.5f ? startGravity : endGravity;
+    public Vector3 GetStartOrEndGravityDirection(Vector3 worldPos) {
+        Vector3 localPos = transform.InverseTransformPoint(worldPos);
+        float lerpValue = GetLerpValue(localPos);
+        return Mathf.Clamp01(lerpValue) < 0.5f ? startGravity : endGravity;
     }
     
     bool ValidateGravityDirection(Vector3 testGravityDirectionLocal, out Vector3 matchingGravityDirectionLocal) {
+        const float DOT_TOLERANCE = 0.95f;
+        bool IsMatch(Vector3 a, Vector3 b) => Vector3.Dot(a.normalized, b.normalized) > DOT_TOLERANCE;
+        
         // Check if the test gravity direction is close to either start or end gravity direction
-        if (Vector3.Dot(testGravityDirectionLocal.normalized, startGravity.normalized) > 0.95f) {
+        if (IsMatch(testGravityDirectionLocal, startGravity)) {
             matchingGravityDirectionLocal = startGravity;
             return true;
         }
-        else if (Vector3.Dot(testGravityDirectionLocal.normalized, endGravity.normalized) > 0.95f) {
+        if (IsMatch(testGravityDirectionLocal, endGravity)) {
             matchingGravityDirectionLocal = endGravity;
             return true;
+        }
+        
+        // For bidirectional rotation mode, check if the test gravity direction is close to the opposite of start or end gravity direction
+        // If it is, invert the gravity directions and return true
+        if (IsBidirectional) {
+            if (IsMatch(testGravityDirectionLocal, -startGravity)) {
+                InvertGravityDirections();
+                matchingGravityDirectionLocal = startGravity;
+                return true;
+            }
+            if (IsMatch(testGravityDirectionLocal, -endGravity)) {
+                InvertGravityDirections();
+                matchingGravityDirectionLocal = endGravity;
+                return true;
+            }
         }
 
         matchingGravityDirectionLocal = Vector3.zero;
@@ -352,71 +419,75 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         return ValidateEntry(gravityObj.transform.position, gravityObj.GravityDirection);
     }
 
-    private void PlayerEnterRotateZone() {
-        playerIsInAnyGravityRotateZone = true;
-        playerIsInThisGravityRotateZone = true;
+    private void PlayerInRotateZone(Vector3 playerWorldPos, float lerpValue) {
+        Vector3 desiredGravityLocal = GetInterpolatedGravityDirection(lerpValue).normalized;
             
-        PlayerMovement playerMovement = PlayerMovement.instance;
-        Vector3 playerWorldPos = playerMovement.BottomOfPlayer;
-
-        Vector3 desiredGravityLocal = GetInterpolatedGravityDirection(playerWorldPos).normalized;
-        SetGravityForPlayer(desiredGravityLocal, 1, false);
+        // Artificially amp up the gravity magnitude as the player is further from the line connecting the start and end planes (purple line in scene view)
+        float nextGravAmplificationFactor;
+        if (artificialGravityAmplification) {
+            nextGravAmplificationFactor = GetGravityAmplificationFactor(playerWorldPos);
+        }
+        else {
+            nextGravAmplificationFactor = 1;
+        }
+        SetGravityForPlayer(desiredGravityLocal, nextGravAmplificationFactor);
     }
 
-    private void GravityObjectEnterRotateZone(GravityObject gravityObj) {
+    private void GravityObjectInRotateZone(GravityObject gravityObj) {
         allGravityObjectsInZone.Add(gravityObj);
-            
-        Vector3 desiredGravityDirection = GetInterpolatedGravityDirection(gravityObj.transform.position).normalized;
+        
+        Vector3 worldPos = gravityObj.transform.position;
+        Vector3 localPos = transform.InverseTransformPoint(worldPos);
+        float lerpValue = GetLerpValue(localPos);
+        Vector3 desiredGravityDirection = GetInterpolatedGravityDirection(lerpValue).normalized;
         SetGravityForGravityObject(gravityObj, desiredGravityDirection);
     }
 
-    public void OnBetterTriggerEnter(Collider other) {
-        if (other.TaggedAsPlayer() && ValidateEntryConditionsForPlayer()) {
-            PlayerEnterRotateZone();
+    public void OnBetterTriggerStay(Collider other) {
+        if (other.TaggedAsPlayer()) {
+            playerIsInTriggerZone = true;
+            
+            // Update whether the player is in the rotation zone based on their position, and the invisible walls if this changes
+            // Note that because invisible walls may be enabled even if the player never validly entered the rotation zone, we do this check first regardless of currentlyRotatingPlayer or not
+            bool playerWasInRotationZone = playerIsInRotationZone;
+            Vector3 playerWorldPos = PlayerMovement.instance.BottomOfPlayer;
+            Vector3 playerLocalPos = transform.InverseTransformPoint(playerWorldPos);
+            float lerpValue = GetLerpValue(playerLocalPos);
+            t = lerpValue; // Store the lerp value for debugging purposes
+            playerIsInRotationZone = lerpValue is > LERP_TOLERANCE_FOR_PLAYER_ENTRY and < 1 - LERP_TOLERANCE_FOR_PLAYER_ENTRY;
+            if (playerWasInRotationZone != playerIsInRotationZone) {
+                UpdateInvisibleWallsEnabled();
+            }
+            
+            // If the player is not already currently rotating, check if we should start rotating
+            currentlyRotatingPlayer |= ValidateEntryConditionsForPlayer();
+            anyCurrentlyRotatingPlayer |= currentlyRotatingPlayer;
+            if (!currentlyRotatingPlayer) return;
+
+            PlayerInRotateZone(playerWorldPos, lerpValue);
         }
-        else if (other.gameObject.TryGetComponent(out GravityObject gravityObj) && ValidateEntryConditionsForGravityObject(gravityObj)) {
-            GravityObjectEnterRotateZone(gravityObj);
+        else if (other.gameObject.TryGetComponent(out GravityObject gravityObj) && (allGravityObjectsInZone.Contains(gravityObj) || ValidateEntryConditionsForGravityObject(gravityObj))) {
+            GravityObjectInRotateZone(gravityObj);
         }
     }
 
-    public void OnBetterTriggerStay(Collider other) {
-        if (other.TaggedAsPlayer() && (playerIsInThisGravityRotateZone || ValidateEntryConditionsForPlayer())) {
-            if (!playerIsInThisGravityRotateZone) {
-                PlayerEnterRotateZone();
-            }
-            playerIsInAnyGravityRotateZone = true;
-            playerIsInThisGravityRotateZone = true;
-            
-            PlayerMovement playerMovement = PlayerMovement.instance;
-            Vector3 playerWorldPos = playerMovement.BottomOfPlayer;
-
-            Vector3 desiredGravityLocal = GetInterpolatedGravityDirection(playerWorldPos).normalized;
-            
-            // Artificially amp up the gravity magnitude as the player is further from the line connecting the start and end planes (purple line in scene view)
-            float nextGravAmplificationFactor;
-            if (artificialGravityAmplification) {
-                nextGravAmplificationFactor = GetGravityAmplificationFactor(playerWorldPos);
-            }
-            else {
-                nextGravAmplificationFactor = 1;
-            }
-            SetGravityForPlayer(desiredGravityLocal, nextGravAmplificationFactor);
-        }
-        else if (other.gameObject.TryGetComponent(out GravityObject gravityObj) && (allGravityObjectsInZone.Contains(gravityObj) || ValidateEntryConditionsForGravityObject(gravityObj))) {
-            GravityObjectEnterRotateZone(gravityObj);
-        }
+    public void OnBetterTriggerEnter(Collider c) {
+        // Not needed, covered by OnBetterTriggerStay
     }
 
     public void OnBetterTriggerExit(Collider other) {
-        if (other.TaggedAsPlayer() && playerIsInThisGravityRotateZone) {
-            playerIsInAnyGravityRotateZone = false;
-            playerIsInThisGravityRotateZone = false;
+        if (other.TaggedAsPlayer()) {
+            playerIsInTriggerZone = false;
             
-            PlayerMovement playerMovement = PlayerMovement.instance;
-            Vector3 playerWorldPos = playerMovement.BottomOfPlayer;
-            Vector3 desiredGravityLocal = GetStartOrEndGravityDirection(playerWorldPos).normalized;
+            Vector3 desiredGravityLocal = GetStartOrEndGravityDirection(PlayerMovement.instance.BottomOfPlayer).normalized;
+            // We don't want to suddenly change the player's gravity if, for instance, they walked up a stair without rotating and are now facing a wall at the top
+            if (Vector3.Dot(desiredGravityLocal, Physics.gravity.normalized) > 0.05f) {
+                SetGravityForPlayer(desiredGravityLocal, 1, false);
+            }
             
-            SetGravityForPlayer(desiredGravityLocal, 1, false);
+            currentlyRotatingPlayer = false;
+            anyCurrentlyRotatingPlayer = false;
+            playerIsInRotationZone = false;
         }
         else if (other.gameObject.TryGetComponent(out GravityObject gravityObj) && allGravityObjectsInZone.Contains(gravityObj)) {
             Vector3 desiredGravityDirection = GetStartOrEndGravityDirection(other.transform.position).normalized;
@@ -462,6 +533,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         gravityObj.GravityDirection = desiredGravityWorld;
     }
 
+    // Depends on more than just the lerp value, so we need the player's position passed in
     private float GetGravityAmplificationFactor(Vector3 playerWorldPos) {
         Vector3 position = transform.InverseTransformPoint(playerWorldPos);
         Vector3 playerPositionOnPlane = Vector3.ProjectOnPlane(position, rotationAxis);
@@ -485,23 +557,42 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         }
     }
 
+#region Gizmos
     private void OnDrawGizmosSelected() {
         Vector3 worldPivot = WorldPivotPoint;
         Vector3 worldStart = WorldStart;
         Vector3 worldEnd = WorldEnd;
         Vector3 worldAxis = WorldRotationAxis;
+        Vector3 worldStartGravity = WorldStartGravity;
+        Vector3 worldEndGravity = WorldEndGravity;
 
+        bool isBidirectional = IsBidirectional;
         float sphereRadiusStart = startHitboxSize.magnitude / 100f;
         float sphereRadiusEnd = endHitboxSize.magnitude / 100f;
         float sphereRadiusMiddle = sphereRadiusEnd + sphereRadiusStart / 2f;
+        float gravityLineLength = 5f;
         
-        // Draw spheres at the start, end, and pivot points
+        // Draw spheres at the start, end, and pivot points, as well as gravity rotation directions
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(worldPivot, sphereRadiusMiddle);
         Gizmos.color = Color.green;
         Gizmos.DrawSphere(worldStart, sphereRadiusStart);
+        Vector3 gravityRay = worldStartGravity.normalized * gravityLineLength;
+        Gizmos.DrawRay(worldStart, gravityRay);
+        Gizmos.DrawSphere(worldStart + gravityRay, sphereRadiusStart / 2f);
+        if (isBidirectional) {
+            Gizmos.DrawRay(worldStart, -gravityRay);
+            Gizmos.DrawSphere(worldStart - gravityRay, sphereRadiusStart / 2f);
+        }
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(worldEnd, sphereRadiusEnd);
+        gravityRay = worldEndGravity.normalized * gravityLineLength;
+        Gizmos.DrawRay(worldEnd, gravityRay);
+        Gizmos.DrawSphere(worldEnd + gravityRay, sphereRadiusEnd / 2f);
+        if (isBidirectional) {
+            Gizmos.DrawRay(worldEnd, -gravityRay);
+            Gizmos.DrawSphere(worldEnd - gravityRay, sphereRadiusEnd / 2f);
+        }
         
         // Draw planes at the hitboxes
         float height = startHitboxSize.y;
@@ -556,7 +647,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         Vector3 playerLocalPos = transform.InverseTransformPoint(PlayerMovement.instance.BottomOfPlayer);
         Vector3 projectedPlayerLocalPos = Vector3.ProjectOnPlane(playerLocalPos, rotationAxis);
         Vector3 projectedPlayerWorldPos = transform.TransformPoint(projectedPlayerLocalPos);
-        if (playerIsInThisGravityRotateZone) {
+        if (playerIsInRotationZone) {
             // Draw the line from the player to the pivot point
             Gizmos.color = new Color(1f, 1f, .5f);
             Gizmos.DrawSphere(projectedPlayerWorldPos, sphereRadiusMiddle);
@@ -591,12 +682,13 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         int clampedIndex = Mathf.Clamp(selectedVertex, 0, _vertices.Length - 1);
         Gizmos.DrawSphere(transform.TransformPoint(_vertices[clampedIndex]), sphereRadiusMiddle);
         
-        if (_invisibleWallVertices == null) return;
-        Gizmos.color = Color.black;
-        foreach (Vector3 invisibleWallVertex in _invisibleWallVertices) {
-            Gizmos.DrawSphere(transform.TransformPoint(invisibleWallVertex), 0.085f);
-        }
+        // if (_invisibleWallVertices == null) return;
+        // Gizmos.color = Color.black;
+        // foreach (Vector3 invisibleWallVertex in _invisibleWallVertices) {
+        //     Gizmos.DrawSphere(transform.TransformPoint(invisibleWallVertex), 0.085f);
+        // }
     }
+#endregion
 
 #region Dynamic Hitbox Generation
 
@@ -606,20 +698,17 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     private Vector3[] _vertices;
     [ShowIf(nameof(DEBUG))]
     [GUIColor(0, 1f, 1f)]
-    [Range(0, NUM_VERTICES-1)]
+    [Range(0, NUM_VERTICES_CONCAVE-1)]
     public int selectedVertex = 0;
-    private const int NUM_VERTICES = 10;
+    private const int NUM_VERTICES_CONVEX = 10;
+    private const int NUM_VERTICES_CONCAVE = 12;
     
     private Mesh _invisibleWallMesh;
-    [SerializeField]
-    [HideInInspector]
-    private Vector3[] _invisibleWallVertices;
-    private const int NUM_VERTICES_CONCAVE_INVIS_WALL = 12;
 
     [ContextMenu("Regenerate Trigger Zone")]
     [Button("Regenerate Trigger Zone")]
     private void RegenerateTriggerZone() {
-        RecalculateDerivedValues();
+        if (!RecalculateDerivedValues()) return;
         
         if (_triggerZoneMesh == null) {
             _triggerZoneMesh = new Mesh() {
@@ -645,7 +734,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
         this.GetOrAddComponent<BetterTrigger>().trigger = triggerZone;
 
-        if (invisibleWallsSetting) {
+        if (invisibleWallsSetting != InvisibleWallsMode.None) {
             RegenerateInvisibleWall();
         }
     }
@@ -655,7 +744,6 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             debug.LogWarning("Regenerating invisible wall in play mode. You should really bake this into the scene.", true);
         }
         
-        SetInvisWallVertices();
         int[] triangles = GetInvisWallTriangles();
         
         if (_invisibleWallMesh == null) {
@@ -667,7 +755,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             _invisibleWallMesh.Clear();
         }
         
-        _invisibleWallMesh.vertices = _invisibleWallVertices;
+        _invisibleWallMesh.vertices = _vertices;
         _invisibleWallMesh.triangles = triangles;
         _invisibleWallMesh.RecalculateBounds();
         _invisibleWallMesh.RecalculateNormals();
@@ -692,7 +780,6 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             _triggerZoneMesh.Clear();
         }
 
-        _triggerZoneMesh = null;
         _vertices = null;
 
         ClearInvisibleWall();
@@ -709,54 +796,42 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         }
         
         _invisibleWallMesh = null;
-        _invisibleWallVertices = null;
     }
 
     private void SetVertices() {
-        _vertices = new Vector3[NUM_VERTICES];
-        
-        // First 4 vertices are the corners of the start hitbox
-        Vector3 startPoint = start;
-        Vector3 endPoint = end;
-        if (IsConcave) {
-            startPoint += EndDirection * startHitboxSize.y / 2f;
-            endPoint += StartDirection * endHitboxSize.y / 2f;
-        }
-        
-        Vector3 xDelta = rotationAxis * startHitboxSize.x / 2f;
-        Vector3 yDirection = IsConvex ? StartDirection : EndDirection;
-        Vector3 yDelta = yDirection * startHitboxSize.y / 2f;
-        _vertices[0] = startPoint + xDelta + yDelta;
-        _vertices[1] = startPoint + xDelta - yDelta;
-        _vertices[2] = startPoint - xDelta + yDelta;
-        _vertices[3] = startPoint - xDelta - yDelta;
-        
-        // Next 4 vertices are the corners of the end hitbox
-        xDelta = rotationAxis * endHitboxSize.x / 2f;
-        yDirection = IsConvex ? EndDirection : StartDirection;
-        yDelta = yDirection * endHitboxSize.y / 2f;
-        _vertices[4] = endPoint + xDelta + yDelta;
-        _vertices[5] = endPoint + xDelta - yDelta;
-        _vertices[6] = endPoint - xDelta + yDelta;
-        _vertices[7] = endPoint - xDelta - yDelta;
-        
-        // Last 2 vertices are where the outer edges of the hitboxes intersect
-        Vector3 xOffset = rotationAxis * Mathf.Max(startHitboxSize.x, endHitboxSize.x) / 2f;
         if (IsConvex) {
+            _vertices = new Vector3[NUM_VERTICES_CONVEX];
+        
+            // First 4 vertices are the corners of the start hitbox
+            Vector3 startPoint = start;
+            Vector3 endPoint = end;
+            
+            Vector3 xDelta = rotationAxis * startHitboxSize.x / 2f;
+            Vector3 yDirection = StartDirection;
+            Vector3 yDelta = yDirection * startHitboxSize.y / 2f;
+            _vertices[0] = startPoint + xDelta + yDelta;
+            _vertices[1] = startPoint + xDelta - yDelta;
+            _vertices[2] = startPoint - xDelta + yDelta;
+            _vertices[3] = startPoint - xDelta - yDelta;
+        
+            // Next 4 vertices are the corners of the end hitbox
+            xDelta = rotationAxis * endHitboxSize.x / 2f;
+            yDirection = EndDirection;
+            yDelta = yDirection * endHitboxSize.y / 2f;
+            _vertices[4] = endPoint + xDelta + yDelta;
+            _vertices[5] = endPoint + xDelta - yDelta;
+            _vertices[6] = endPoint - xDelta + yDelta;
+            _vertices[7] = endPoint - xDelta - yDelta;
+        
+            // Last 2 vertices are where the outer edges of the hitboxes intersect
+            Vector3 xOffset = rotationAxis * Mathf.Max(startHitboxSize.x, endHitboxSize.x) / 2f;
             Vector3 projected0 = Vector3.ProjectOnPlane(_vertices[0], rotationAxis);
             Vector3 projected4 = Vector3.ProjectOnPlane(_vertices[4], rotationAxis);
             _vertices[8] = projected0 + projected4 + xOffset;
             _vertices[9] = projected0 + projected4 - xOffset;
         }
         else {
-            _vertices[8] = pivotPoint + xOffset;
-            _vertices[9] = pivotPoint - xOffset;
-        }
-    }
-
-    private void SetInvisWallVertices() {
-        if (IsConcave) {
-            _invisibleWallVertices = new Vector3[NUM_VERTICES_CONCAVE_INVIS_WALL];
+            _vertices = new Vector3[NUM_VERTICES_CONCAVE];
             
             Vector3 sideOffsetStart = rotationAxis * startHitboxSize.x / 2f;
             Vector3 sideOffsetEnd = rotationAxis * endHitboxSize.x / 2f;
@@ -765,36 +840,19 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             Vector3 heightStart = EndDirection * startHitboxSize.y;
             Vector3 heightEnd = StartDirection * endHitboxSize.y;
             
-            _invisibleWallVertices[0] = start + sideOffsetStart;
-            _invisibleWallVertices[1] = gravityLineStart + sideOffsetStart;
-            _invisibleWallVertices[2] = _invisibleWallVertices[0] + heightStart;
-            _invisibleWallVertices[3] = gravityLineEnd + sideOffsetEnd;
-            _invisibleWallVertices[4] = end + sideOffsetEnd;
-            _invisibleWallVertices[5] = _invisibleWallVertices[4] + heightEnd;
+            _vertices[0] = start + sideOffsetStart;
+            _vertices[1] = gravityLineStart + sideOffsetStart;
+            _vertices[2] = _vertices[0] + heightStart;
+            _vertices[3] = gravityLineEnd + sideOffsetEnd;
+            _vertices[4] = end + sideOffsetEnd;
+            _vertices[5] = _vertices[4] + heightEnd;
             
-            int half = NUM_VERTICES_CONCAVE_INVIS_WALL / 2;
-            for (int i = half; i < NUM_VERTICES_CONCAVE_INVIS_WALL; i++) {
+            int half = NUM_VERTICES_CONCAVE / 2;
+            for (int i = half; i < NUM_VERTICES_CONCAVE; i++) {
                 int referenceIndex = i - half;
                 Vector3 offset = -2f * (referenceIndex < half ? sideOffsetStart : sideOffsetEnd);
-                _invisibleWallVertices[i] = _invisibleWallVertices[referenceIndex] + offset;
+                _vertices[i] = _vertices[referenceIndex] + offset;
             }
-        }
-        else {
-            _invisibleWallVertices = new Vector3[NUM_VERTICES];
-
-            // Left wall
-            _invisibleWallVertices[0] = _vertices[0];
-            _invisibleWallVertices[1] = _vertices[1];
-            _invisibleWallVertices[2] = _vertices[8];
-            _invisibleWallVertices[3] = _vertices[5];
-            _invisibleWallVertices[4] = _vertices[4];
-            
-            // Right wall
-            _invisibleWallVertices[5] = _vertices[2];
-            _invisibleWallVertices[6] = _vertices[3];
-            _invisibleWallVertices[7] = _vertices[7];
-            _invisibleWallVertices[8] = _vertices[6];
-            _invisibleWallVertices[9] = _vertices[9];
         }
     }
 
@@ -812,18 +870,27 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
                 8, 7, 6,
                 8, 9, 7,
                 11, 9, 8,
-                11, 10, 9
+                11, 10, 9,
+                // Top wall
+                5, 11, 8,
+                2, 5, 8,
+                // End wall
+                4, 10, 5,
+                5, 10, 11,
+                // Start wall
+                0, 2, 8,
+                0, 8, 6
             };
         }
         else {
             return new int[] {
-                0, 1, 2,
-                1, 3, 2,
-                2, 3, 4,
+                0, 1, 8,
+                1, 5, 8,
+                5, 4, 8,
 
-                9, 6, 5,
-                9, 7, 6,
-                9, 8, 7
+                2, 9, 3,
+                3, 9, 7,
+                6, 7, 9
             };
         }
     }
@@ -832,6 +899,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
 #region Saving
     [Serializable]
     public class GravityRotateZoneSave : SaveObject<GravityRotateZone> {
+        public InvisibleWallsMode invisibleWallsSetting;
         public RotateMode rotateMode;
         public SerializableVector3 pivotPoint;
         public SerializableVector3 start;
@@ -848,11 +916,15 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         public SerializableVector3 gravityLineEnd;
         public SerializableVector3 rotationAxis;
         public float totalAngle;
-        public bool playerIsInThisGravityRotateZone;
+        public bool playerIsInTriggerZone;
+        public bool playerIsInRotationZone;
+        public bool currentlyRotatingPlayer;
         public float t;
         public float gravAmplificationFactor;
+        public bool invisibleWallEnabled;
 
         public GravityRotateZoneSave(GravityRotateZone script) : base(script) {
+            this.invisibleWallsSetting = script.invisibleWallsSetting;
             this.rotateMode = script.rotateMode;
             this.pivotPoint = script.pivotPoint;
             this.start = script.start;
@@ -869,13 +941,17 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             this.gravityLineEnd = script.gravityLineEnd;
             this.rotationAxis = script.rotationAxis;
             this.totalAngle = script.totalAngle;
-            this.playerIsInThisGravityRotateZone = script.playerIsInThisGravityRotateZone;
+            this.playerIsInTriggerZone = script.playerIsInTriggerZone;
+            this.playerIsInRotationZone = script.playerIsInRotationZone;
+            this.currentlyRotatingPlayer = script.currentlyRotatingPlayer;
             this.t = script.t;
             this.gravAmplificationFactor = script.gravAmplificationFactor;
+            this.invisibleWallEnabled = script.invisibleWallEnabled;
         }
     }
 
     public override void LoadSave(GravityRotateZoneSave save) {
+        invisibleWallsSetting = save.invisibleWallsSetting;
         rotateMode = save.rotateMode;
         pivotPoint = save.pivotPoint;
         start = save.start;
@@ -892,11 +968,12 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
         gravityLineEnd = save.gravityLineEnd;
         rotationAxis = save.rotationAxis;
         totalAngle = save.totalAngle;
-        playerIsInThisGravityRotateZone = save.playerIsInThisGravityRotateZone;
+        playerIsInTriggerZone = save.playerIsInTriggerZone;
+        playerIsInRotationZone = save.playerIsInRotationZone;
+        currentlyRotatingPlayer = save.currentlyRotatingPlayer;
         t = save.t;
         gravAmplificationFactor = save.gravAmplificationFactor;
-
-        RegenerateTriggerZone();
+        invisibleWallEnabled = save.invisibleWallEnabled;
     }
     #endregion
 }

@@ -165,7 +165,7 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
                 float t = time / NOISE_OVERLAY_FADE_IN_TIME;
             
                 // Fade in the noise scramble overlay
-                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(t);
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue($"{ID}_MazeFailed", t);
 
                 if (t >= 1) {
                     state.Set(State.ResettingMaze);
@@ -199,12 +199,13 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
         });
         state.AddStateTransition(State.ResettingMaze, State.ShowingSolution, NOISE_OVERLAY_FADE_OUT_DELAY + NOISE_OVERLAY_FADE_OUT_TIME);
         state.WithUpdate(State.ResettingMaze, time => {
+            string scrambleOverlayId = $"{ID}_ResettingMaze";
             if (time < NOISE_OVERLAY_FADE_OUT_DELAY) {
-                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(1);
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(scrambleOverlayId, 1);
             }
             else {
                 float t = (time - NOISE_OVERLAY_FADE_OUT_DELAY) / NOISE_OVERLAY_FADE_OUT_TIME;
-                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(1 - t);
+                NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue(scrambleOverlayId, 1 - t);
             }
         });
     }

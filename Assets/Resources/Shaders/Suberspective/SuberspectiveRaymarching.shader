@@ -52,7 +52,7 @@
 			sampler2D _BumpMap;
 			float _EmissionAmount;
 
-            #define MAX_STEPS 50
+            #define MAX_STEPS 35
             
             float worldSDF(in float3 pos) {
                 //float sphere = sphereSDF(repeatRegular(pos, 96), (1 + 0.5 * _SinTime.z) * 56);

@@ -13,7 +13,6 @@ float FallbackSDF(float3 p) {
 
 float CalculateSoftShadow(float3 pos, float3 lightDir, int maxShadowSteps, float shadowSoftness) {
     float shadow = 1.0;
-    float dist = 0.02; // Initial shadow ray step size
     float minDistance = 1.0;
     float t = 0.01;
 

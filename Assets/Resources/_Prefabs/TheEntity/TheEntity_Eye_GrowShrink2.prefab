@@ -1260,47 +1260,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a48fecd64aada3048a27d6eda5928cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 8642991293400903971}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 1
+  _id: {fileID: 8642991293400903971}
   triggerConditions:
-  - triggerCondition: 1
-    useLocalCoordinates: 0
-    triggerThreshold: 0.98
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 1564262938057083488}
-    targetRenderer: {fileID: 0}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: -2
   actionsToTrigger:
-  - actionTiming: 4
-    action: 2
-    objectsToEnable: []
-    objectsToDisable: []
-    scriptsToEnable:
-    - {fileID: 6108605634599347811}
-    scriptsToDisable:
-    - {fileID: 5697582354651518441}
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  - rid: -2
   playerIsInTriggerZone: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &6063526556936621026
 GameObject:
   m_ObjectHideFlags: 0
@@ -2568,48 +2541,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e24dba1f0c1231d4cb0b55c7a5298ceb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 5508102343342577908}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
   DEBUG: 0
+  _id: {fileID: 5508102343342577908}
   triggerConditions:
-  - triggerCondition: 7
-    useLocalCoordinates: 0
-    triggerThreshold: 0
-    targetDirection: {x: 0, y: 0, z: 0}
-    targetObject: {fileID: 0}
-    targetRenderer: {fileID: 4611976444248210443}
-    targetPosition: {x: 0, y: 0, z: 0}
-    targetLevels: 
-    targetPlayerScaleRange: {x: 0, y: 0}
-    allowTriggeringWhileInsideObject: 0
+  - rid: 8276649114594443266
   actionsToTrigger:
-  - actionTiming: 4
-    action: 3
-    objectsToEnable:
-    - {fileID: 0}
-    objectsToDisable:
-    - {fileID: 6063526556936621026}
-    scriptsToEnable: []
-    scriptsToDisable: []
-    onlyTriggerForward: 0
-    levelForward: 0
-    levelBackward: 0
-    forwardSameScenePillar: 0
-    backwardSameScenePillar: 0
-    powerTrail: {fileID: 0}
-    setPowerIsOn: 0
-    dimensionObjects: []
-    visibilityState: 0
-    flythroughCameraLevel: 0
-    logicAndRendering: 0
-    portalsToEnable: []
-    portalsToDisable: []
-    unityEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    collidersToEnable: []
-    collidersToDisable: []
+  - rid: 8276649114594443267
   playerIsInTriggerZone: 0
   sceneMustBeActive: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 8276649114594443266
+      type: {class: RendererNotVisibleCondition, ns: MagicTriggerMechanics.TriggerConditions,
+        asm: Assembly-CSharp}
+      data:
+        targetRenderer: {fileID: 4611976444248210443}
+    - rid: 8276649114594443267
+      type: {class: DisableSelfGameObjectAction, ns: MagicTriggerMechanics.TriggerActions,
+        asm: Assembly-CSharp}
+      data:
+        actionTiming: 4
 --- !u!1 &8314035864205638408
 GameObject:
   m_ObjectHideFlags: 0

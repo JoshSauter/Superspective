@@ -81,9 +81,6 @@ public class Player : SingletonSuperspectiveObject<Player, Player.PlayerSave> {
 		Physics.gravity = save.gravity;
 	}
 	
-	// There's only one player so we don't need a UniqueId here
-	public override string ID => "Player";
-
 	[Serializable]
 	public class PlayerSave : SaveObject<Player> {
 		public SerializableVector3 position;

@@ -228,8 +228,6 @@ namespace LevelSpecific.BlackRoom {
             state.LoadFromSave(save.stateSave);
         }
 
-        public override string ID => "BlackRoomMainConsole";
-
         [Serializable]
         public class BlackRoomMainConsoleSave : SaveObject<BlackRoomMainConsole> {
             public StateMachine<State>.StateMachineSave stateSave;

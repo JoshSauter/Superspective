@@ -59,7 +59,7 @@ partial class PlayerMovement {
         // Dot(face normal, transform.up) must be greater than this value to be considered "ground"
         public const float IS_GROUND_THRESHOLD = 0.675f;
         // Dot(face normal, transform.up) must be greater than this value to be for snap-to-ground to occur
-        public const float SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD = 0.9f;
+        public const float SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD = 0.88f;
 
         // Given as a ratio of the player's radius, how far we should check for ground in front/behind/left/right of the player if it's not directly underneath
         private const float BACKUP_GROUND_RAYCAST_DISTANCE = 0.25f;
@@ -204,7 +204,7 @@ partial class PlayerMovement {
         }
 
         public Vector3 UpdateSnapToGround(Vector3 desiredVelocity) {
-            if (m.pauseSnapToGround || !grounded.IsGrounded || m.Jumping || m.staircaseMovement.RecentlySteppedUpOrDown) return desiredVelocity;
+            if (m.pauseSnapToGround || !grounded.IsGrounded || !m.JumpReady || m.staircaseMovement.RecentlySteppedUpOrDown) return desiredVelocity;
             
             Vector3 horizontalVelocity = m.DecomposeVectorHorizontal(desiredVelocity);
             Vector3 rayOrigin = m.BottomOfPlayer + transform.up * m.Scale + horizontalVelocity * Time.fixedDeltaTime;
@@ -224,6 +224,8 @@ partial class PlayerMovement {
                 m.debug.Log($"Before position: {beforePos}\nAfter position: {afterPos}\nOffset: {offset}");
             
                 Debug.DrawRay(hit.point, hit.normal, Color.cyan, 0.15f);
+                
+                Player.instance.cameraFollow.RecalculateWorldPositionLastFrame();
 
                 return horizontalVelocity;
             }

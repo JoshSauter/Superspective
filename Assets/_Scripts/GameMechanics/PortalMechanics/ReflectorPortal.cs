@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace PortalMechanics {
     public class ReflectorPortal : Portal {
+        [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f)]
         public Transform outTransform;
 
         protected override int PortalsRequiredToActivate => 1;

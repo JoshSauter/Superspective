@@ -45,8 +45,12 @@ namespace TheEntity {
             }
         }
 
+        [SerializeField]
         private MagicTrigger lookAtEyeTrigger;
+        [SerializeField]
         private MagicTrigger lookAwayFromEyeTrigger;
+
+        private Coroutine blinkCoroutine;
 
         protected override void Awake() {
             base.Awake();
@@ -59,10 +63,18 @@ namespace TheEntity {
             base.Start();
             
             state.AddTrigger(EyeState.Despawned, () => RestoreAllInvisibleObjects());
+            state.AddTrigger(EyeState.Noticed, () => {
+                if (blinkCoroutine != null) {
+                    StopCoroutine(blinkCoroutine);
+                }
+
+                StartCoroutine(TheEntity.BlinkController(this, eyeTransform, () => .25f));
+            });
+            
             InvisibleObject.gameObject.SetActive(false);
             eyeTransform.SetParent(Location.ornamentRoot, false);
             RestoreAllInvisibleObjects(locationIndex);
-            StartCoroutine(TheEntity.BlinkController(this, eyeTransform, () => state == EyeState.Noticed ? 0.5f : 1f));
+            blinkCoroutine = StartCoroutine(TheEntity.BlinkController(this, eyeTransform, () => 1f));
         }
         
         protected override void OnEnable() {
@@ -77,9 +89,6 @@ namespace TheEntity {
         }
 
         private void SubscribeEvents() {
-            lookAtEyeTrigger = eyeTransform.GetComponentInChildrenOnly<MagicTrigger>();
-            lookAwayFromEyeTrigger = eyeTransform.GetComponent<GlobalMagicTrigger>();
-            
             lookAtEyeTrigger.OnMagicTriggerStayOneTime += SetToNoticed;
             lookAwayFromEyeTrigger.OnMagicTriggerStayOneTime += SetToDespawned;
         }

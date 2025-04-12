@@ -61,6 +61,7 @@ public static class SuperspectivePhysics {
 	private static int _ignoreRaycastLayer = -1;
 	private static int _blockRaycastOnlyLayer = -1;
 	private static int _triggerZoneLayer = -1;
+	private static int _invisibleWallLayer = -1;
 	private static int _playerLayer = -1;
 	private static int _invisibleLayer = -1;
 	private static int _collideWithPlayerOnlyLayer = -1;
@@ -80,6 +81,7 @@ public static class SuperspectivePhysics {
 	public static int IgnoreRaycastLayer => LazyLayer(ref _ignoreRaycastLayer, "Ignore Raycast");
 	public static int BlockRaycastOnlyLayer => LazyLayer(ref _blockRaycastOnlyLayer, "BlockRaycastOnly");
 	public static int TriggerZoneLayer => LazyLayer(ref _triggerZoneLayer, "TriggerZone");
+	public static int InvisibleWallLayer => LazyLayer(ref _invisibleWallLayer, "InvisibleWallForPlayerOnly");
 	public static int PlayerLayer => LazyLayer(ref _playerLayer, "Player");
 	public static int InvisibleLayer => LazyLayer(ref _invisibleLayer,"Invisible");
 	public static int CollideWithPlayerOnlyLayer => LazyLayer(ref _collideWithPlayerOnlyLayer, "CollideWithPlayerOnly");
@@ -88,8 +90,6 @@ public static class SuperspectivePhysics {
 	public static int PortalLayer => LazyLayer(ref _portalLayer, "Portal");
 	public static int HideFromPortalLayer => LazyLayer(ref _hideFromPortalRendering, "HideFromPortalRendering");
 	public static int VolumetricPortalLayer => LazyLayer(ref _volumetricPortalLayer, "VolumetricPortal");
-	// TODO: Remove?:
-	public static int InverseBloomLayer => LazyLayer(ref _inverseBloomLayer, "InverseBloom");
 	
 	// For finding things the player can interact with in the game world
 	public static int PhysicsRaycastLayerMask =>

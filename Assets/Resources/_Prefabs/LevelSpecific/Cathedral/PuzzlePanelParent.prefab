@@ -4747,6 +4747,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4589337593553540818}
   _pwr: {fileID: 0}
@@ -4783,6 +4785,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4589337593553540818}
   state:
@@ -6051,6 +6055,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4031967379648318881}
   currentValueDisplay: {fileID: 1834143664076625145}
@@ -14781,6 +14787,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664177481990}
   oneTimeButton: 0
@@ -14865,6 +14873,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664177481990}
   glow: {fileID: 0}
@@ -14911,6 +14921,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664177481990}
   state:
@@ -14987,6 +14999,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 3701876309933440621}
   floorPuzzle: {fileID: 0}
@@ -15518,6 +15532,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664374385925}
   treatChildrenAsOneObjectRecursively: 1
@@ -16173,6 +16189,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664506403153}
   _pwr: {fileID: 0}
@@ -16209,6 +16227,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1834143664506403153}
   state:

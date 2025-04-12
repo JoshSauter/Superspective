@@ -31,12 +31,14 @@ namespace PortalMechanics {
 		[Tooltip("Enable composite portals if there are multiple renderers that make up the portal surface. Ensure that these renderers are the only children of the portal gameObject.")]
 		[TabGroup("General"), GUIColor(.65f, 1f, .65f)]
 		public bool compositePortal = false;
-		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal) if the player moves around to the backside")]
+		[Tooltip("Double-sided portals will rotate 180 degrees (along with otherPortal if it is also double-sided) if the player moves around to the backside\n\nExample: A is double-sided, B is not. A appears to be a portal to the same place on either side.\nExample: Both are double-sided, the player can enter either side on either portal.")]
 		[TabGroup("General"), GUIColor(.65f, 1f, .65f)]
 		public bool doubleSidedPortals = false;
 		private bool isFlipped = false;
-		private Quaternion startRotation, flippedRotation;
+		private Quaternion startRotation, flippedRotation; // Note: double-sided portals won't work with dynamically rotating portal unless you change this implementation
 		public void FlipPortal() {
+			if (!doubleSidedPortals) return;
+			
 			debug.Log($"Flipping from {(isFlipped ? "flipped" : "not flipped")} to {(!isFlipped ? "flipped" : "not flipped")}\nFrameCount: {Time.frameCount}, LastTeleportedFrame: {globalLastTeleportedFrame}, ShouldTeleportPlayer: {WouldTeleportPlayer}");
 			isFlipped = !isFlipped;
 			transform.rotation = isFlipped ? flippedRotation : startRotation;
@@ -79,6 +81,7 @@ namespace PortalMechanics {
 		public delegate void SimplePortalTeleportAction(Collider objectTeleported);
 		public delegate void PortalPlayerTeleportAction(Portal inPortal);
 		public delegate void SimplePortalPlayerTeleportAction();
+		public delegate void TeleportOffsetAction(Vector3 teleportOffset);
 
 		// Any object teleported in this Portal
 		public event PortalTeleportAction BeforePortalTeleport;
@@ -112,6 +115,9 @@ namespace PortalMechanics {
 		public static event SimplePortalPlayerTeleportAction BeforeAnyPortalPlayerTeleportSimple;
 		public static event SimplePortalPlayerTeleportAction OnAnyPortalPlayerTeleportSimple;
 		
+		// Player teleported in this portal (offset version)
+		public static event TeleportOffsetAction OnAnyPortalPlayerTeleportOffset;
+		
 		public UnityEvent onPortalTeleport;
 		public UnityEvent onOtherPortalTeleport;
 		#endregion
@@ -128,10 +134,19 @@ namespace PortalMechanics {
 			}
 		}
 
-		[MenuItem("CONTEXT/Portal/Select other side of portal")]
-		public static void SelectOtherSideOfPortal(MenuCommand command) {
-			Portal thisPortal = (Portal)command.context;
-			Selection.objects = GetOtherPortals(thisPortal).Select(p => p.gameObject).ToArray();
+		[MenuItem("My Tools/Portal/Select other side of portal _p")]
+		public static void SelectOtherSideOfPortal() {
+			try {
+				Portal portal = Selection.activeGameObject.GetComponent<Portal>();
+				if (portal == null) {
+					return;
+				}
+				
+				Selection.objects = GetOtherPortals(portal).Select(p => p.gameObject).ToArray();
+			}
+			catch (Exception _) {
+				// ignored
+			}
 		}
 
 		static Portal GetOtherPortal(Portal thisPortal) {
@@ -194,7 +209,7 @@ namespace PortalMechanics {
 			ApplyPortalRenderingModeToRenderers();
 
 			startRotation = transform.rotation;
-			flippedRotation = Quaternion.AngleAxis(180f, Vector3.up) * startRotation;
+			flippedRotation = Quaternion.AngleAxis(180f, transform.up) * startRotation;
 		}
 
 		protected override void Init() {
@@ -429,7 +444,7 @@ namespace PortalMechanics {
 			}
 		}
 
-		void TriggerEventsAfterTeleport(Collider objBeingTeleported) {
+		void TriggerEventsAfterTeleport(Collider objBeingTeleported, Vector3 offset) {
 			OnPortalTeleport?.Invoke(this, objBeingTeleported);
 			OnAnyPortalTeleport?.Invoke(this, objBeingTeleported);
 			OnPortalTeleportSimple?.Invoke(objBeingTeleported);
@@ -442,6 +457,7 @@ namespace PortalMechanics {
 				OnAnyPortalPlayerTeleport?.Invoke(this);
 				OnPortalPlayerTeleport?.Invoke(this);
 				OnPortalTeleportPlayerSimple?.Invoke();
+				OnAnyPortalPlayerTeleportOffset?.Invoke(offset);
 			}
 		}
 

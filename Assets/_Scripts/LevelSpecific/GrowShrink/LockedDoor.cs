@@ -31,6 +31,7 @@ public class LockedDoor : SuperspectiveObject<LockedDoor, LockedDoor.LockedDoorS
     public StateMachine<State> state;
     public Collider invisibleCollider;
     public Transform doorLeft, doorRight;
+    public Transform[] otherLeft, otherRight;
 
     // Config
     private const float CAMERA_SHAKE_INTENSITY = 5f;
@@ -147,6 +148,18 @@ public class LockedDoor : SuperspectiveObject<LockedDoor, LockedDoor.LockedDoorS
         set {
             doorLeft.localPosition = doorLeft.localPosition.WithX(Mathf.Clamp(-value, -maxOffset, 0));
             doorRight.localPosition = doorRight.localPosition.WithX(Mathf.Clamp(value, 0, maxOffset));
+
+            if (otherLeft != null) {
+                foreach (Transform t in otherLeft) {
+                    t.localPosition = t.localPosition.WithX(Mathf.Clamp(-value, -maxOffset, 0));
+                }
+            }
+
+            if (otherRight != null) {
+                foreach (Transform t in otherRight) {
+                    t.localPosition = t.localPosition.WithX(Mathf.Clamp(value, 0, maxOffset));
+                }
+            }
         }
     }
 

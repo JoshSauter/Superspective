@@ -214,6 +214,7 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
                 cameraContainerTransform.rotation = rotationBeforeViewLock;
 
                 Player.instance.cameraFollow.enabled = true;
+                PlayerMovement.instance.pauseSnapToGround = false;
                 Interact.instance.enabled = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 OnViewLockExitFinish?.Invoke();
@@ -228,6 +229,7 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
     void InitializeLockingView(ViewLockObject lockObject, ViewLockInfo lockInfo) {
         debug.Log("Locking view for " + lockObject.gameObject.name);
         PlayerMovement.instance.StopMovement();
+        PlayerMovement.instance.pauseSnapToGround = true;
         Player.instance.cameraFollow.enabled = false;
         SuperspectiveScreen.instance.playerCamera.transform.localPosition = Vector3.zero;
         Interact.instance.enabled = false;
@@ -356,9 +358,6 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
 
         Frozen = save.frozenOverride;
     }
-    
-    // There's only one PlayerLook so we don't need a UniqueId here
-    public override string ID => "PlayerLook";
 
     [Serializable]
     public class PlayerLookSave : SaveObject<PlayerLook> {

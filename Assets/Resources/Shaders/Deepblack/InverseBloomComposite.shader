@@ -5,8 +5,11 @@ Shader "Hidden/InverseBloomComposite" {
         _DarkeningIntensity ("Darkening Intensity", Float) = 1.0
     }
     SubShader {
-        Tags { "RenderType"="Opaque" }
         Pass {
+            ZTest Always
+            ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -38,7 +41,7 @@ Shader "Hidden/InverseBloomComposite" {
                 fixed4 darknessSample = saturate(tex2D(_BloomedDarknessMask, i.uv));
                 float darkness = _DarkeningIntensity * max(darknessSample.r, max(darknessSample.g, darknessSample.b));
 
-                return color * (1.0 - darkness);
+                return fixed4(color.rgb * (1.0 - darkness), color.a);
             }
             ENDCG
         }

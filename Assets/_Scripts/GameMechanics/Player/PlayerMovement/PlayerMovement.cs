@@ -10,6 +10,7 @@ using SerializableClasses;
 using Sirenix.OdinInspector;
 using StateUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 // Alias Settings.Gameplay.SprintBehaviorMode to a more readable name
 using SprintBehaviorMode = Settings.Gameplay.SprintBehaviorMode;
 
@@ -64,6 +65,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     public Vector3 CurVelocity => (thisRigidbody == null) ? Vector3.zero : thisRigidbody.velocity;
 
     public float movespeedMultiplier = 1;
+    public Vector3 lastPlayerPosition;
 
     private float movespeed;
     protected float EffectiveMovespeed => movespeed * Scale;
@@ -82,34 +84,6 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     }
     public EndGameMovement endGameMovement;
 
-    public struct TimeSlice {
-        public float time;
-        public Vector3 position;
-
-        public TimeSlice(float time, Vector3 pos) {
-            this.time = time;
-            this.position = pos;
-        }
-    }
-
-    private const int MAX_TIME_SLICES = 10;
-    public List<TimeSlice> timeSlices = new List<TimeSlice>();
-
-    public Vector3 LastPlayerPosition => timeSlices.Count > 0 ? timeSlices[timeSlices.Count - 1].position : transform.position;
-    public Vector3 AverageVelocityRecently {
-        get {
-            if (thisRigidbody.isKinematic) return Vector3.zero;
-            if (timeSlices.Count == 0) return Vector3.zero;
-
-            Vector3 avgDelta = Vector3.zero;
-            for (int i = 1; i < timeSlices.Count; i++) {
-                avgDelta += (timeSlices[i].position - timeSlices[i-1].position) / (timeSlices[i].time - timeSlices[i-1].time);
-            }
-
-            return avgDelta / timeSlices.Count;
-        }
-    }
-
     private GroundMovement.GroundedState Grounded => groundMovement.grounded;
     [ShowInInspector]
     public bool IsGrounded => Grounded?.IsGrounded ?? false;
@@ -120,6 +94,7 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     bool MoveDirectionHeld => Mathf.Abs(input.LeftStick.y) > 0  || Mathf.Abs(input.LeftStick.x) > 0;
 
     bool Jumping => jumpMovement.jumpState == JumpMovement.JumpState.Jumping;
+    bool JumpReady => jumpMovement.jumpState == JumpMovement.JumpState.JumpReady;
     bool MoveDirectionHeldRecently => moveDirectionHeldRecentlyState == MoveDirectionInputState.HeldRecently;
 
     public enum MoveDirectionInputState : byte {
@@ -129,8 +104,9 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     
     private StateMachine<MoveDirectionInputState> moveDirectionHeldRecentlyState;
     private const float SNAP_TO_GROUND_DISTANCE = 0.5f;
+    private const float USE_GRAVITY_DISTANCE_FROM_GROUND_THRESHOLD = 0.1f;
     private const float RESET_MOVE_DIRECTION_HELD_STATE_TIME = .25f;
-    public bool pauseSnapToGround = false; // Hack fix to turn off snapping to ground when player is in a StaircaseRotate
+    public bool pauseSnapToGround = false; // Hack fix to turn off snapping to ground
     
     private float PlayerRadius => thisCollider == null ? 0 : thisCollider.radius * Scale;
 
@@ -178,14 +154,8 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         yield return new WaitUntil(() => GameManager.instance.gameHasLoaded);
         thisRigidbody.isKinematic = false;
 
-        TeleportEnter.BeforeAnyTeleport += (enter, exit, player) => {
-            TransformTimeSlicesUponTeleport(enter.transform, exit.transform);
-        };
-
-        Portal.BeforeAnyPortalTeleport += (inPortal, teleported) => {
-            if (!teleported.TaggedAsPlayer()) return;
-
-            TransformTimeSlicesUponTeleport(inPortal.transform, inPortal.otherPortal.transform);
+        Portal.OnAnyPortalPlayerTeleportOffset += offset => {
+            lastPlayerPosition += offset;
         };
         
         Settings.Gameplay.SprintByDefault.OnValueChanged += (sprintByDefault) => {
@@ -197,17 +167,6 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
                 movespeed = WalkSpeed;
             }
         };
-    }
-
-    void TransformTimeSlicesUponTeleport(Transform teleportIn, Transform teleportOut) {
-        for (int i = 0; i < timeSlices.Count; i++) {
-            TimeSlice timeSlice = timeSlices[i];
-            Vector3 timeSliceWorldPos = timeSlice.position;
-            Vector3 timeSliceLocalPos = teleportIn.InverseTransformPoint(timeSliceWorldPos);
-            Vector3 timeSliceTransformedWorldPos = teleportOut.TransformPoint(timeSliceLocalPos);
-            timeSlice.position = timeSliceTransformedWorldPos;
-            timeSlices[i] = timeSlice;
-        }
     }
 
     void Update() {
@@ -238,6 +197,9 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 
     void FixedUpdate() {
         if (GameManager.instance.IsCurrentlyLoading) return;
+
+        lastPlayerPosition = transform.position;
+        
         if (movementEnabledState == MovementEnabledState.Disabled) {
             if (!thisRigidbody.isKinematic) {
                 thisRigidbody.velocity = Vector3.zero;
@@ -253,21 +215,18 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         groundMovement.UpdateGroundedState();
 
         jumpMovement.UpdateJumping();
+
+        thisRigidbody.useGravity = !IsGrounded || Vector3.Dot(transform.up, (BottomOfPlayer - groundMovement.grounded.contact.point)) > USE_GRAVITY_DISTANCE_FROM_GROUND_THRESHOLD;
         
         Vector3 desiredVelocity = Grounded.IsGrounded ? groundMovement.CalculateGroundMovement(Grounded.contact) : airMovement.CalculateAirMovement();
-        if (snapToGroundEnabled) {
+        if (snapToGroundEnabled && thisRigidbody.useGravity) {
             desiredVelocity = groundMovement.UpdateSnapToGround(desiredVelocity);
         }
         
         bool closeToGround = groundMovement.GroundRaycast(new Ray(BottomOfPlayer + transform.up * Scale, -transform.up), (1 + SNAP_TO_GROUND_DISTANCE) * Scale, out RaycastHit _, GroundMovement.IS_GROUND_THRESHOLD);
         bool stopPlayerWhenStanding = !pauseSnapToGround && !Jumping && closeToGround && !staircaseMovement.RecentlySteppedUpOrDown && !MoveDirectionHeldRecently;
 
-        thisRigidbody.isKinematic = (Stopped || staircaseMovement.stepState != StaircaseMovement.StepState.Idle || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
-
-        if (timeSlices.Count >= MAX_TIME_SLICES) {
-            timeSlices.RemoveAt(0);
-        }
-        timeSlices.Add(new TimeSlice(Time.time, thisRigidbody.position));
+        thisRigidbody.isKinematic = !thisRigidbody.useGravity && (Stopped || staircaseMovement.stepState != StaircaseMovement.StepState.Idle || stopPlayerWhenStanding) && (endGameMovement == EndGameMovement.NotStarted);
 
         if (Stopped || Grounded.StandingOnHeldObject) {
             return;
@@ -297,8 +256,6 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         else {
             thisRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
         }
-
-        thisRigidbody.useGravity = !IsGrounded;
 
         if (!thisRigidbody.isKinematic && staircaseMovement.stepState == StaircaseMovement.StepState.Idle) {
             // debug.Log($"Player velocity: {thisRigidbody.velocity:F2}\nSetting it to: {desiredVelocity}");
@@ -435,9 +392,6 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
         thisRigidbody.useGravity = save.thisRigidbodyUseGravity;
         thisRigidbody.mass = save.thisRigidbodyMass;
     }
-    
-    // There's only one player so we don't need a UniqueId here
-    public override string ID => "PlayerMovement";
 
     [Serializable]
     public class PlayerMovementSave : SaveObject<PlayerMovement> {

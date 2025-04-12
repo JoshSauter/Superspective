@@ -167,15 +167,23 @@ namespace Saving {
 			}
 		}
 
-		public void ChangeScene(Scene newScene) {
+		public bool ChangeScene(Scene newScene) {
 			if (isAllowedToChangeScenes && gameObject.scene != newScene) {
+				if (!newScene.IsValid() || !newScene.isLoaded) {
+					debug.LogError($"Can't move {gameObject.FullPath()} to {newScene.name}. Scene is not valid or not loaded.", true);
+					return false;
+				}
+				
 				Levels oldLevel = Level;
 				gameObject.transform.SetParent(null);
 				// Move the GameObject to the new scene
 				SceneManager.MoveGameObjectToScene(gameObject, newScene);
 				// Update the record of the DynamicObject in DynamicObjectManager
 				DynamicObjectManager.ChangeDynamicObjectLevel(this, oldLevel, newScene.name.ToLevel());
+				return true;
 			}
+
+			return false;
 		}
 		
 		public override void LoadSave(DynamicObjectSave save) {

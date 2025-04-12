@@ -24,11 +24,11 @@ public class SelectOrDisableAllDebug : EditorWindow {
         turnOffDebug = EditorGUILayout.Toggle("Turn off all DEBUG?", turnOffDebug);
 
         if (GUILayout.Button("Execute")) {
-            Execute();
+            Execute(turnOffDebug);
         }
     }
 
-    private void Execute() {
+    public static void Execute(bool turnOffDebug) {
         GameObject[] selectedGameObjects = Selection.gameObjects;
         List<SuperspectiveObject> saveableObjects = new List<SuperspectiveObject>();
 
@@ -72,7 +72,7 @@ public class SelectOrDisableAllDebug : EditorWindow {
         Selection.objects = saveableObjects.ToArray();
     }
 
-    private void GetSaveableObjectsRecursive(Transform parent, List<SuperspectiveObject> saveableObjects) {
+    private static void GetSaveableObjectsRecursive(Transform parent, List<SuperspectiveObject> saveableObjects) {
         SuperspectiveObject[] thisObjSaveableObjects = parent.GetComponents<SuperspectiveObject>();
         if (thisObjSaveableObjects != null && thisObjSaveableObjects.Length > 0) {
             saveableObjects.AddRange(thisObjSaveableObjects);
@@ -83,7 +83,7 @@ public class SelectOrDisableAllDebug : EditorWindow {
         }
     }
 
-    private GameObject[] GetAllRootGameObjectsInLoadedScenes() {
+    private static GameObject[] GetAllRootGameObjectsInLoadedScenes() {
         List<GameObject> rootObjects = new List<GameObject>();
         for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++) {
             UnityEngine.SceneManagement.Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
@@ -95,7 +95,7 @@ public class SelectOrDisableAllDebug : EditorWindow {
         return rootObjects.ToArray();
     }
 
-    private List<SuperspectiveObject> DisableDebug(List<SuperspectiveObject> saveableObjects) {
+    private static List<SuperspectiveObject> DisableDebug(List<SuperspectiveObject> saveableObjects) {
         Undo.RecordObjects(saveableObjects.ToArray(), "Disable DEBUG on SaveableObjects");
         
         HashSet<SuperspectiveObject> disabledObjects = new HashSet<SuperspectiveObject>();

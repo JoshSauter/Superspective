@@ -49,7 +49,7 @@ Shader "Suberspective/SuberspectiveRaymarching2" {
             #pragma vertex SuberspectiveVert
             #pragma fragment frag
 
-            #define MAX_STEPS 50
+            #define MAX_STEPS 35
             
             float worldSDF(in float3 pos) {
             	float sinTime = (_SinTime.y + 1) / 2.0;

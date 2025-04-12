@@ -41,7 +41,7 @@ namespace LevelManagement {
 	// When adding a new Level to this enum, make sure you also add it to the LevelManager inspector,
 	// and add the scene to Build Settings as well
 	// ALSO NOTE: Be careful not to fuck up the serialization
-	// Next level: 39
+	// Next level: 40
 	[Serializable]
 	public enum Levels {
 		InvalidLevel = -1,
@@ -67,8 +67,9 @@ namespace LevelManagement {
 		MetaEdgeDetection = 16,
 		ForkCathedral = 18,
 		ForkWhiteRoomBlackHallway = 19,
-		ForkWhiteRoom3 = 20,
+		RoseRoom = 20,
 		RoseRoomExit = 38,
+		RoseRoomExit2 = 39,
 		TransitionWhiteRoomFork = 21,
 		ForkOctagon = 22,
 		ForkBlackRoom2 = 23,
@@ -228,8 +229,9 @@ namespace LevelManagement {
 			{ Levels.ForkWhiteRoom, "_Fork_WhiteRoom" },
 			{ Levels.WhiteRoom1BackRoom, "_WhiteRoom1_BackRoom" },
 			{ Levels.TransitionWhiteRoomFork, "_TransitionWhiteRoom_Fork" },
-			{ Levels.ForkWhiteRoom3, "_Fork_WhiteRoom3" },
-			{ Levels.RoseRoomExit, "_RoseRoomExit"},
+			{ Levels.RoseRoom, "_RoseRoom" },
+			{ Levels.RoseRoomExit, "_RoseRoomExit" },
+			{ Levels.RoseRoomExit2, "_RoseRoomExit_2" },
 			{ Levels.ForkCathedral, "_Fork_Cathedral" },
 			{ Levels.ForkWhiteRoomBlackHallway, "_WhiteRoom_BlackHallway" },
 			{ Levels.BehindForkTransition, "_BehindForkTransition" },
@@ -726,9 +728,6 @@ namespace LevelManagement {
 #endif
 
 #region Saving
-		// There's only one LevelManager so we don't need a UniqueId here
-		public override string ID => "LevelManager";
-
 		public override void LoadSave(LevelManagerSave save) {
 			initialized = save.initialized;
 			queuedActiveSceneSwitch = save.queuedActiveSceneSwitch;

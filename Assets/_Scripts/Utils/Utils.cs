@@ -201,6 +201,40 @@ namespace SuperspectiveUtils {
     
             return new AnimationCurve(reversedKeyframes);
         }
+        
+        /// <summary>
+        /// Inverse evaluate the curve to find the x value that corresponds to the target y value. Up to the user to supply working values.
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <param name="targetY"></param>
+        /// <param name="xMin"></param>
+        /// <param name="xMax"></param>
+        /// <param name="tolerance"></param>
+        /// <param name="maxIterations"></param>
+        /// <returns></returns>
+        public static float InverseEvaluate(this AnimationCurve curve, float targetY, float xMin, float xMax, float tolerance = 0.001f, int maxIterations = 10) {
+            float low = xMin;
+            float high = xMax;
+            int iterations = 0;
+
+            while (iterations < maxIterations) {
+                float mid = (low + high) / 2f;
+                float y = curve.Evaluate(mid);
+
+                if (Mathf.Abs(y - targetY) < tolerance)
+                    return mid;
+
+                if (y < targetY)
+                    low = mid;
+                else
+                    high = mid;
+
+                iterations++;
+            }
+
+            return (low + high) / 2f; // Best estimate
+        }
+
     }
 
 

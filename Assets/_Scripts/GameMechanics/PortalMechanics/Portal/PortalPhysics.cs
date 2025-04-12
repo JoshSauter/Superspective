@@ -334,9 +334,11 @@ namespace PortalMechanics {
 			
 			TriggerEventsBeforeTeleport(portalableObject.colliders[0]);
 
+			Vector3 prevPosition = portalableObject.transform.position;
 			TransformObject(portalableObject.transform, transformVelocity);
+			Vector3 offset = portalableObject.transform.position - prevPosition;
 			
-			TriggerEventsAfterTeleport(portalableObject.colliders[0]);
+			TriggerEventsAfterTeleport(portalableObject.colliders[0], offset);
 		}
         
 		public void TeleportPlayer(Transform player) {
@@ -365,7 +367,9 @@ namespace PortalMechanics {
 			debug.Log("Teleporting player!");
 
 			// Position
+			Vector3 prevPosition = player.position;
 			player.position = TransformPoint(player.position);
+			Vector3 offset = player.position - prevPosition;
 
 			// Rotation
 			player.rotation = TransformRotation(player.rotation);
@@ -405,7 +409,7 @@ namespace PortalMechanics {
 				}
 			}
 
-			TriggerEventsAfterTeleport(player.GetComponent<Collider>());
+			TriggerEventsAfterTeleport(player.GetComponent<Collider>(), offset);
 			// Replacing with delayed disabling of VP
 			// DisableVolumetricPortal();
 			otherPortal.EnableVolumetricPortal();

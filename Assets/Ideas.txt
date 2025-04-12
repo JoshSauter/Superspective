@@ -6,6 +6,8 @@ Mechanics:
  - Can stand on PickupCubes in other dimension
  - Teleporting picture frames
  - PickupSpheres that power nearby PowerTrail (have to make it travel along the PowerTrail path or something)
+ 
+ - PickupCubes which, when dropped, set their gravity to "away from the player". Or, that the player can "plaster" into a target gravity direction through some ability.
 
  Story:
   - Analogue for predetermination and lack of free will, perhaps at the end giving the player a choice that leads to one of two endings
