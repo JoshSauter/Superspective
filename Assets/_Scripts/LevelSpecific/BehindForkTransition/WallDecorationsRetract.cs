@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Saving;
+using SerializableClasses;
 using UnityEngine;
 
 namespace LevelSpecific.BehindForkTransition {
-    public class WallDecorationsRetract : MonoBehaviour {
+    public class WallDecorationsRetract : SuperspectiveObject<WallDecorationsRetract, WallDecorationsRetract.WallDecorationsRetractSave> {
         public ViewLockObject painting;
 
         void Update() {
@@ -19,6 +19,19 @@ namespace LevelSpecific.BehindForkTransition {
             else {
                 transform.localScale = Vector3.one;
             }
+        }
+
+        [Serializable]
+        public class WallDecorationsRetractSave : SaveObject<WallDecorationsRetract> {
+            public SerializableVector3 localScale;
+
+            public WallDecorationsRetractSave(WallDecorationsRetract script) : base(script) {
+                localScale = script.transform.localScale;
+            }
+        }
+        
+        public override void LoadSave(WallDecorationsRetractSave save) {
+            transform.localScale = save.localScale;
         }
     }
 }

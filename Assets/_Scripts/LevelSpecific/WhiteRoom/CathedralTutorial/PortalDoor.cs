@@ -184,7 +184,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
         
         [Serializable]
         public class PortalDoorSave : SaveObject<PortalDoor> {
-            public StateMachine<DoorState>.StateMachineSave stateSave;
+            public StateMachineSave<DoorState> stateSave;
 
             public PortalDoorSave(PortalDoor portalDoor) : base(portalDoor) {
                 this.stateSave = portalDoor.state.ToSave();

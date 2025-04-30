@@ -76,6 +76,14 @@ namespace MagicTriggerMechanics {
 			}
 		}
 
+		public void ClearTriggerActions() {
+			actionsToTrigger.Clear();
+		}
+		
+		public void ClearTriggerConditions() {
+			triggerConditions.Clear();
+		}
+
 		public void AddTriggerAction(TriggerAction triggerAction) {
 			if (actionsToTrigger.Contains(triggerAction)) return;
 			
@@ -216,9 +224,6 @@ namespace MagicTriggerMechanics {
 		#region Saving
 
 		public override void LoadSave(MagicTriggerSave save) {
-			hasTriggeredOnStay = save.hasTriggeredOnStay;
-			hasNegativeTriggeredOnStay = save.hasNegativeTriggeredOnStay;
-
 			for (int i = 0; i < save.triggerActionSaves.Length; i++) {
 				object saveData = save.triggerActionSaves[i];
 				actionsToTrigger[i].LoadSaveData(saveData, this);
@@ -228,13 +233,8 @@ namespace MagicTriggerMechanics {
 		[Serializable]
 		public class MagicTriggerSave : SaveObject<MagicTrigger> {
 			public object[] triggerActionSaves;
-			public bool hasTriggeredOnStay;
-			public bool hasNegativeTriggeredOnStay;
 
 			public MagicTriggerSave(MagicTrigger magicTrigger) : base(magicTrigger) {
-				this.hasTriggeredOnStay = magicTrigger.hasTriggeredOnStay;
-				this.hasNegativeTriggeredOnStay = magicTrigger.hasNegativeTriggeredOnStay;
-
 				triggerActionSaves = magicTrigger.actionsToTrigger.Select(a => a.GetSaveData(magicTrigger)).ToArray();
 			}
 		}

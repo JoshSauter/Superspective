@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ObjectSerializationUtils {
@@ -6,11 +7,11 @@ namespace ObjectSerializationUtils {
     //src: http://stackoverflow.com/questions/1446547/how-to-convert-an-object-to-a-byte-array-in-c-sharp
     //NOTE: You need add [Serializable] attribute in your class to enable serialization
     public static class ObjectSerializationExtension {
+        private static readonly byte[] NullMarker = Array.Empty<byte>();
 
         public static byte[] SerializeToByteArray(this object obj) {
-            if (obj == null) {
-                return null;
-            }
+            if (obj == null) return NullMarker;
+            
             BinaryFormatter bf = new BinaryFormatter();
             using MemoryStream ms = new MemoryStream();
             bf.Serialize(ms, obj);
@@ -18,16 +19,11 @@ namespace ObjectSerializationUtils {
         }
 
         public static T Deserialize<T>(this byte[] byteArray) where T : class {
-            if (byteArray == null) {
-                return null;
-            }
+            if (byteArray == null || byteArray.Length == 0) return null;
 
-            using MemoryStream memStream = new MemoryStream();
+            using MemoryStream memStream = new MemoryStream(byteArray);
             BinaryFormatter binForm = new BinaryFormatter();
-            memStream.Write(byteArray, 0, byteArray.Length);
-            memStream.Seek(0, SeekOrigin.Begin);
-            T obj = (T)binForm.Deserialize(memStream);
-            return obj;
+            return (T)binForm.Deserialize(memStream);
         }
     }
 }

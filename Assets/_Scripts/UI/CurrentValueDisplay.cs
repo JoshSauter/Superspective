@@ -4,6 +4,7 @@ using SuperspectiveUtils;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueId))]
+// TODO: This probably shouldn't live under UI since it's not an overlay
 public class CurrentValueDisplay : ValueDisplay {
     public SpriteRenderer currentValueDisplayLo;
     

@@ -169,15 +169,9 @@ public class SquareDoor : SuperspectiveObject<SquareDoor, SquareDoor.SquareDoorS
 #region Saving
 		[Serializable]
 		public class SquareDoorSave : SaveObject<SquareDoor> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            
-			public SquareDoorSave(SquareDoor script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
+			public SquareDoorSave(SquareDoor script) : base(script) { }
 		}
 
-        public override void LoadSave(SquareDoorSave save) {
-            state.LoadFromSave(save.stateSave);
-        }
+        public override void LoadSave(SquareDoorSave save) { }
 #endregion
 }

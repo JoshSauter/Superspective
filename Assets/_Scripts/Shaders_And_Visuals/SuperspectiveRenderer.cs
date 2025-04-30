@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using DimensionObjectMechanics;
+using Sirenix.OdinInspector;
+using SuperspectiveUtils;
 using UnityEngine;
-using NaughtyAttributes;
+using Debug = UnityEngine.Debug;
 
 [RequireComponent(typeof(Renderer))]
 public class SuperspectiveRenderer : MonoBehaviour {
@@ -47,8 +50,34 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 
 	private MaterialPropertyBlock _mpb;
+
+	private const bool DEBUG_SUPERPSPECTIVE_RENDERER_CRASH = false;
+	private static HashSet<string> loggedStackLocations = new HashSet<string>(); // Temp debug collection
 	private MaterialPropertyBlock GetPropBlock() {
-		if (this == null || gameObject == null || r == null) return null;
+		if (DEBUG_SUPERPSPECTIVE_RENDERER_CRASH) {
+			var stackTrace = new StackTrace(1, true); // skip this frame, include file info
+			var frames = stackTrace.GetFrames();
+			if (frames != null) {
+				foreach (var frame in frames) {
+					var file = frame.GetFileName();
+					var line = frame.GetFileLineNumber();
+					if (string.IsNullOrEmpty(file) || line == 0) continue; // skip if no useful info
+
+					string location = $"{file}:{line}";
+					if (loggedStackLocations.Add(location)) {
+						// Was newly added -> first time we've seen this location
+						var method = frame.GetMethod();
+						var className = method.DeclaringType?.Name ?? "<no class>";
+						var methodName = method.Name;
+						Debug.Log($"First call to GetPropBlock from {className}.{methodName} at {location}");
+					}
+
+					break; // only log the first relevant frame
+				}
+			}
+		}
+
+		if (!this || !gameObject || !r) return null;
 
 		_mpb ??= new MaterialPropertyBlock();
 
@@ -232,12 +261,14 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	
 	// Convenience pass-through for SetVectorArray
 	public void SetColorArray(string propName, Color[] colors) {
+		if (colors == null) return;
 		Vector4[] colorVecs = colors.Select(c => (Vector4)c).ToArray();
 		SetVectorArray(propName, colorVecs);
 	}
 	
 	// Convenience pass-through for SetVectorArray
 	public void SetColorArray(int propId, Color[] colors) {
+		if (colors == null) return;
 		Vector4[] colorVecs = colors.Select(c => (Vector4)c).ToArray();
 		SetVectorArray(propId, colorVecs);
 	}
@@ -259,26 +290,32 @@ public class SuperspectiveRenderer : MonoBehaviour {
 	}
 	
 	public void SetFloatArray(string propName, float[] value) {
+		if (value == null) return;
 		ApplySetting(mpb => mpb.SetFloatArray(propName, value));
 	}
 	
 	public void SetFloatArray(int propId, float[] value) {
+		if (value == null) return;
 		ApplySetting(mpb => mpb.SetFloatArray(propId, value));
 	}
 
 	public void SetBuffer(string propName, ComputeBuffer buffer) {
+		if (buffer == null) return;
 		ApplySetting(mpb => mpb.SetBuffer(propName, buffer));
 	}
 	
 	public void SetBuffer(int propId, ComputeBuffer buffer) {
+		if (buffer == null) return;
 		ApplySetting(mpb => mpb.SetBuffer(propId, buffer));
 	}
 
 	public void SetTexture(string propName, Texture value) {
+		if (value == null) return;
 		ApplySetting(mpb => mpb.SetTexture(propName, value));
 	}
 	
 	public void SetTexture(int propId, Texture value) {
+		if (value == null) return;
 		ApplySetting(mpb => mpb.SetTexture(propId, value));
 	}
 	

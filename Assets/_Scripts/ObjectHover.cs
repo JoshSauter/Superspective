@@ -91,59 +91,14 @@ public class ObjectHover : SuperspectiveObject<ObjectHover, ObjectHover.ObjectHo
 
 #region Saving
 
-    public override void LoadSave(ObjectHoverSave save) {
-        useLocalCoordinates = save.useLocalCoordinates;
-        yAmplitude = save.yAmplitude;
-        zAmplitude = save.zAmplitude;
-        xAmplitude = save.xAmplitude;
-        loopMode = save.loopMode;
-        periodOffset = save.periodOffset;
-        period = save.period;
-        up = save.up;
-        forward = save.forward;
-        right = save.right;
-        transform.position = save.position;
-        currentOffset = save.currentOffset;
-        hoveringPaused = save.hoveringPaused;
-        timeElapsed = save.timeElapsed;
-    }
+    public override void LoadSave(ObjectHoverSave save) { }
 
     // Many usages of ObjectHover have no gameplay impact and do not need to be saved. Mark importantToSave as true if you want to save it
     public override bool SkipSave => !importantToSave;
 
     [Serializable]
     public class ObjectHoverSave : SaveObject<ObjectHover> {
-        public SerializableVector3 currentOffset;
-        public SerializableVector3 up;
-        public SerializableVector3 forward;
-        public SerializableVector3 right;
-        public SerializableVector3 position;
-        public float zAmplitude;
-        public float xAmplitude;
-        public float yAmplitude;
-        public float periodOffset;
-        public float period;
-        public float timeElapsed;
-        public LoopMode loopMode;
-        public bool hoveringPaused;
-        public bool useLocalCoordinates;
-
-        public ObjectHoverSave(ObjectHover script) : base(script) {
-            useLocalCoordinates = script.useLocalCoordinates;
-            yAmplitude = script.yAmplitude;
-            zAmplitude = script.zAmplitude;
-            xAmplitude = script.xAmplitude;
-            loopMode = script.loopMode;
-            periodOffset = script.periodOffset;
-            period = script.period;
-            up = script.up;
-            forward = script.forward;
-            right = script.right;
-            position = script.transform.position;
-            currentOffset = script.currentOffset;
-            hoveringPaused = script.hoveringPaused;
-            timeElapsed = script.timeElapsed;
-        }
+        public ObjectHoverSave(ObjectHover script) : base(script) { }
     }
 #endregion
 }

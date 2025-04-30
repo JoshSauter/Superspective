@@ -17,7 +17,7 @@ namespace NovaMenuUI {
         private DebugLogger debug {
             get {
                 if (_debug == null) {
-                    _debug = new DebugLogger(gameObject, () => DEBUG);
+                    _debug = new DebugLogger(gameObject, gameObject.FullPath(), () => DEBUG);
                 }
 
                 return _debug;

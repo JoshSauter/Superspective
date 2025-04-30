@@ -68,7 +68,7 @@ public class ColorChangeOnPower : SuperspectiveObject<ColorChangeOnPower, ColorC
 
         if (!IsMulti()) {
             if (poweredObjectToReactTo == null) {
-                new DebugLogger(this).LogError($"PoweredObjectToReactTo is null on {poweredObjectToReactTo.FullPath()}, disabling color change script");
+                debug.LogError($"PoweredObjectToReactTo is null on {poweredObjectToReactTo.FullPath()}, disabling color change script", true);
                 enabled = false;
                 return;
             }
@@ -213,16 +213,6 @@ public class ColorChangeOnPower : SuperspectiveObject<ColorChangeOnPower, ColorC
 #region Saving
 
     public override void LoadSave(ColorChangeOnPowerSave save) {
-        timing = save.timing;
-        useMaterialAsStartColor = save.useMaterialAsStartColor;
-        useMaterialAsEndColor = save.useMaterialAsEndColor;
-        depoweredColor = save.depoweredColor;
-        depoweredEmission = save.depoweredEmission;
-        poweredColor = save.poweredColor;
-        poweredEmission = save.poweredEmission;
-        colorChangeAnimationCurve = save.colorChangeAnimationCurve;
-        timeElapsedSinceStateChange = save.timeElapsedSinceStateChange;
-
         if (save.currentColor != null && save.currentEmission != null) SetColor(save.currentColor, save.currentEmission);
     }
 
@@ -230,29 +220,10 @@ public class ColorChangeOnPower : SuperspectiveObject<ColorChangeOnPower, ColorC
 
     [Serializable]
     public class ColorChangeOnPowerSave : SaveObject<ColorChangeOnPower> {
-        public SerializableAnimationCurve colorChangeAnimationCurve;
         public SerializableColor currentColor;
         public SerializableColor currentEmission;
-        public SerializableColor depoweredColor;
-        public SerializableColor depoweredEmission;
-        public SerializableColor poweredColor;
-        public SerializableColor poweredEmission;
-        public float timeElapsedSinceStateChange;
-        public ActivationTiming timing;
-        public bool useMaterialAsStartColor;
-        public bool useMaterialAsEndColor;
 
         public ColorChangeOnPowerSave(ColorChangeOnPower colorChange) : base(colorChange) {
-            timing = colorChange.timing;
-            useMaterialAsStartColor = colorChange.useMaterialAsStartColor;
-            useMaterialAsEndColor = colorChange.useMaterialAsEndColor;
-            depoweredColor = colorChange.depoweredColor;
-            depoweredEmission = colorChange.depoweredEmission;
-            poweredColor = colorChange.poweredColor;
-            poweredEmission = colorChange.poweredEmission;
-            colorChangeAnimationCurve = colorChange.colorChangeAnimationCurve;
-            timeElapsedSinceStateChange = colorChange.timeElapsedSinceStateChange;
-
             if (colorChange.renderers != null && colorChange.renderers.Length > 0) {
                 currentColor = colorChange.renderers[0].GetMainColor();
                 currentEmission = colorChange.renderers[0].GetColor("_EmissionColor");

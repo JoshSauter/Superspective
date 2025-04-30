@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
 using System.Linq;
-using NaughtyAttributes;
 using System;
-using UnityStandardAssets.ImageEffects;
+using Sirenix.OdinInspector;
 using UnityEngine.Assertions;
-using UnityEngine.Serialization;
 
 namespace PortalMechanics {
 	// Container for memoizing edge detection color state
@@ -99,7 +96,7 @@ namespace PortalMechanics {
 		static readonly Rect[] fullScreenRect = new Rect[1] { new Rect(0, 0, 1, 1) };
 
 		void Start() {
-			debug = new DebugLogger(gameObject, () => DEBUG);
+			debug = new DebugLogger(gameObject, "VirtualPortalCamera", () => DEBUG);
 			mainCamera = SuperspectiveScreen.instance.playerCamera;
 			portalCamera = GetComponent<Camera>();
 			mainCameraEdgeDetection = mainCamera.GetComponent<BladeEdgeDetection>();

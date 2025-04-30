@@ -134,36 +134,15 @@ namespace PictureTeleportMechanics {
         #region Saving
 
         public override void LoadSave(PictureTeleportSave save) {
-            targetPosition = save.targetPosition;
-            targetRotation = save.targetRotation;
-            targetCameraPosition = save.targetCameraPosition;
-            targetCameraRotation = save.targetCameraRotation;
-            targetLookY = save.targetLookY;
-            startSsaoIntensity = save.startSsaoIntensity;
             ssao.m_OcclusionIntensity = save.curSsaoIntensity;
-            ssaoBlendTimeRemaining = save.ssaoBlendTimeRemaining;
         }
 
         [Serializable]
         public class PictureTeleportSave : SaveObject<PictureTeleport> {
-            public SerializableVector3 targetPosition;
-            public SerializableVector3 targetRotation;
-            public SerializableVector3 targetCameraPosition;
-            public SerializableVector3 targetCameraRotation;
-            public float targetLookY;
-            public float startSsaoIntensity;
             public float curSsaoIntensity;
-            public float ssaoBlendTimeRemaining;
 
             public PictureTeleportSave(PictureTeleport script) : base(script) {
-                this.targetPosition = script.targetPosition;
-                this.targetRotation = script.targetRotation;
-                this.targetCameraPosition = script.targetCameraPosition;
-                this.targetCameraRotation = script.targetCameraRotation;
-                this.targetLookY = script.targetLookY;
-                this.startSsaoIntensity = script.startSsaoIntensity;
                 this.curSsaoIntensity = script.ssao.m_OcclusionIntensity;
-                this.ssaoBlendTimeRemaining = script.ssaoBlendTimeRemaining;
             }
         }
         #endregion

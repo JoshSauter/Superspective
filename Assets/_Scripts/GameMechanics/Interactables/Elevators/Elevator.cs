@@ -109,41 +109,11 @@ public class Elevator : SuperspectiveObject<Elevator, Elevator.ElevatorSave> {
 
 #region Saving
 
-    public override void LoadSave(ElevatorSave save) {
-        state.LoadFromSave(save.stateSave);
-        speedMultiplierCurve = save.speedMultiplierCurve;
-        speed = save.speed;
-        acceleration = save.acceleration;
-        changeDirectionAcceleration = save.changeDirectionAcceleration;
-        minHeight = save.minHeight;
-        maxHeight = save.maxHeight;
-        curVelocity = save.curVelocity;
-        direction = save.direction;
-    }
+    public override void LoadSave(ElevatorSave save) { }
     
 	[Serializable]
 	public class ElevatorSave : SaveObject<Elevator> {
-        public StateMachine<ElevatorState>.StateMachineSave stateSave;
-        public SerializableAnimationCurve speedMultiplierCurve;
-        public float speed;
-        public float acceleration;
-        public float changeDirectionAcceleration;
-        public float minHeight;
-        public float maxHeight;
-        public float curVelocity;
-        public int direction;
-        
-		public ElevatorSave(Elevator script) : base(script) {
-            this.stateSave = script.state.ToSave();
-            this.speedMultiplierCurve = script.speedMultiplierCurve;
-            this.speed = script.speed;
-            this.acceleration = script.acceleration;
-            this.changeDirectionAcceleration = script.changeDirectionAcceleration;
-            this.minHeight = script.minHeight;
-            this.maxHeight = script.maxHeight;
-            this.curVelocity = script.curVelocity;
-            this.direction = script.direction;
-        }
+		public ElevatorSave(Elevator script) : base(script) { }
 	}
 #endregion
 }

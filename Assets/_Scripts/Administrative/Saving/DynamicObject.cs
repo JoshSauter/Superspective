@@ -5,6 +5,7 @@ using SuperspectiveUtils;
 using LevelManagement;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
+using SuperspectiveAttributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -36,19 +37,26 @@ namespace Saving {
 		public override bool SkipSave => false;
 		
 		[FormerlySerializedAs("wasInstantiatedAtRuntime")]
-		[Unity.Collections.ReadOnly]
+		[Unity.Collections.ReadOnly, DoNotSave]
 		public bool instantiatedAtRuntime = true;
+		[DoNotSave]
 		private string lastKnownID = "";
-		public string ID {
+		public override string ID {
 			get {
 				if (id == null) return lastKnownID;
 				lastKnownID = id.uniqueId;
 				return id.uniqueId;
 			}
 		}
-        
-		[FormerlySerializedAs("isGlobal")]
-		public bool isAllowedToChangeScenes = true;
+
+		public enum GlobalMode : byte {
+			None,
+			NoContactSceneChange,
+			Global
+		}
+		public GlobalMode globalMode = GlobalMode.None;
+		private bool SceneCanChange => globalMode != GlobalMode.None;
+		private bool SceneCanChangeOnContact => globalMode == GlobalMode.Global;
 
 		protected override void OnValidate() {
 			base.OnValidate();
@@ -121,7 +129,6 @@ namespace Saving {
 		// DynamicObject.Destroy should be used instead of Object.Destroy to ensure proper record keeping
 		// for when the object is explicitly destroyed (not just from a scene change, etc)
 		public override void Destroy() {
-			Unregister();
 			bool unregistered = SaveManager.UnregisterDynamicObject(ID);
 			bool markedAsDestroyed = DynamicObjectManager.MarkDynamicObjectAsDestroyed(this);
 
@@ -152,7 +159,7 @@ namespace Saving {
 
 		// DynamicObjects are moved between scenes as they hit objects from various scenes
 		void OnCollisionEnter(Collision collision) {
-			if (isAllowedToChangeScenes) {
+			if (SceneCanChangeOnContact) {
 				Scene sceneOfContact = collision.collider.gameObject.scene;
 				if (sceneOfContact.name == LevelManager.ManagerScene) {
 					return;
@@ -168,7 +175,7 @@ namespace Saving {
 		}
 
 		public bool ChangeScene(Scene newScene) {
-			if (isAllowedToChangeScenes && gameObject.scene != newScene) {
+			if (SceneCanChange && gameObject.scene != newScene) {
 				if (!newScene.IsValid() || !newScene.isLoaded) {
 					debug.LogError($"Can't move {gameObject.FullPath()} to {newScene.name}. Scene is not valid or not loaded.", true);
 					return false;
@@ -187,9 +194,8 @@ namespace Saving {
 		}
 		
 		public override void LoadSave(DynamicObjectSave save) {
-			prefabPath = save.prefabPath;
-			isAllowedToChangeScenes = save.isGlobal;
 			if (save.level.IsValid()) {
+				prefabPath = save.prefabPath;
 				ChangeScene(SceneManager.GetSceneByName(save.level.ToName()));
 			}
 		}
@@ -197,11 +203,9 @@ namespace Saving {
 		[Serializable]
 		public class DynamicObjectSave : SaveObject<DynamicObject> {
 			public string prefabPath;
-			public bool isGlobal;
-
+			
 			public DynamicObjectSave(DynamicObject obj) : base(obj) {
 				this.prefabPath = obj.prefabPath;
-				this.isGlobal = obj.isAllowedToChangeScenes;
 			}
 
 			// Similar to DynamicObject.Destroy but for objects in unloaded scenes

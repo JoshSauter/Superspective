@@ -1,7 +1,6 @@
 ﻿using PortalMechanics;
 using PowerTrailMechanics;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LevelSpecific.Fork {

@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using PowerTrailMechanics;
 using Audio;
 using Saving;
 using System;
 using SerializableClasses;
-using System.Linq;
+using SuperspectiveAttributes;
 
 namespace LevelSpecific.WhiteRoom {
-    public class WhiteRoom3Exit : SuperspectiveObject<WhiteRoom3Exit, WhiteRoom3Exit.WhiteRoom3ExitSave> {
+    public class RoseRoom : SuperspectiveObject<RoseRoom, RoseRoom.RoseRoomSave> {
         public CubeReceptacle[] puzzleReceptacles;
         public PowerTrail[] powerTrails;
 
+        [SaveUnityObject]
         public ParticleSystem obeliskConnectingParticles;
         public Transform obeliskConnectingBackdrop;
 
@@ -34,6 +34,9 @@ namespace LevelSpecific.WhiteRoom {
         void Update() {
             if (this.InstaSolvePuzzle()) {
                 cheatSolved = !cheatSolved;
+                foreach (var powerTrail in powerTrails) {
+                    powerTrail.pwr.PowerIsOn = cheatSolved;
+                }
             }
             
             if (Solved && !wasSolvedLastFrame) {
@@ -58,23 +61,17 @@ namespace LevelSpecific.WhiteRoom {
 
 #region Saving
 
-        public override void LoadSave(WhiteRoom3ExitSave save) {
-            numSolved = save.numSolved;
-            wasSolvedLastFrame = save.wasSolvedLastFrame;
+        public override void LoadSave(RoseRoomSave save) {
             obeliskConnectingBackdrop.localScale = save.obeliskConnectorBackgroundScale;
         }
 
-        public override string ID => "WhiteRoom3Exit";
+        public override string ID => "RoseRoom";
 
         [Serializable]
-        public class WhiteRoom3ExitSave : SaveObject<WhiteRoom3Exit> {
+        public class RoseRoomSave : SaveObject<RoseRoom> {
             public SerializableVector3 obeliskConnectorBackgroundScale;
-            public int numSolved;
-            public bool wasSolvedLastFrame;
 
-            public WhiteRoom3ExitSave(WhiteRoom3Exit exit) : base(exit) {
-                this.numSolved = exit.numSolved;
-                this.wasSolvedLastFrame = exit.wasSolvedLastFrame;
+            public RoseRoomSave(RoseRoom exit) : base(exit) {
                 this.obeliskConnectorBackgroundScale = exit.obeliskConnectingBackdrop.localScale;
             }
         }

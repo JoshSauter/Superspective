@@ -8,6 +8,7 @@ using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
 using StateUtils;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,6 +17,7 @@ using Random = UnityEngine.Random;
 using PickupObjectReference = SerializableClasses.SuperspectiveReference<PickupObject, PickupObject.PickupObjectSave>;
 
 [RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
+// TODO: Known bug: Saving while a cube is in the spawner, then loading, will cause the cube to be loaded in somewhere else, forcing the player to have to respawn the cube
 public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpawnerSave>, BetterTriggers {
     public DimensionObject backWall;
     public Button button;
@@ -29,8 +31,9 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
     // Instead, we should instantiate a simpler cube prefab, and then swap it out with a real one when the player removes it from the spawner
     public DynamicObject cubeInSpawnerPrefab;
     public DynamicObject cubePrefab;
+    [SaveUnityObject]
     public PickupObject cubeSpawned;
-    [Header("Cube grabbed from spawner:")]
+    [Header("Cube grabbed from spawner:"), SaveUnityObject]
     public PickupObjectReference cubeGrabbedFromSpawner;
     // Colliders to suspend collision with while the cube is in the spawner
     public Collider[] temporarilyIgnoreColliders;
@@ -227,7 +230,7 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
         if (spawnState != SpawnState.NoCubeSpawned) return;
 
         DynamicObject newCubeDynamicObj = Instantiate(cubeInSpawnerPrefab, transform);
-        newCubeDynamicObj.isAllowedToChangeScenes = false; // Not global until retrieved from cube spawner
+        newCubeDynamicObj.globalMode = DynamicObject.GlobalMode.None; // Not global until retrieved from cube spawner
         PickupObject newCube = newCubeDynamicObj.GetComponent<PickupObject>();
         GravityObject newCubeGravity = newCubeDynamicObj.GetComponent<GravityObject>();
         Rigidbody newCubeRigidbody = newCube.thisRigidbody;
@@ -398,7 +401,7 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
             foreach (Collider ignoreCollider in temporarilyIgnoreColliders) {
                 SuperspectivePhysics.RestoreCollision(ignoreCollider, cubeCollider, ID);
             }
-            cube.GetComponent<DynamicObject>().isAllowedToChangeScenes = true; // Restore isGlobal behavior when retrieved from spawner
+            cube.GetComponent<DynamicObject>().globalMode = DynamicObject.GlobalMode.Global; // Restore isGlobal behavior when retrieved from spawner
 
             // When the cube is removed from the spawner, swap it out with the real cube prefab
             DynamicObject newCubeDynamicObj = Instantiate(cubePrefab, transform);
@@ -470,34 +473,21 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
 #region Saving
 
     public override void LoadSave(CubeSpawnerSave save) {
-        cubeSpawned = save.cubeSpawned?.GetOrNull();
         if (cubeSpawned != null) {
             AffixSpawnedCubeWithParentDimensionObject(cubeSpawned);
         }
         cubeGrabbedFromSpawner = save.cubeGrabbedFromSpawner;
         spawnState.LoadFromSave(save.spawnStateSave);
-        despawnState.LoadFromSave(save.despawnStateSave);
-        cubeDespawning = save.cubeDespawning?.GetOrNull();
-        cubeDespawnSizeCurve = save.cubeDespawnSizeCurve;
     }
 
     [Serializable]
     public class CubeSpawnerSave : SaveObject<CubeSpawner> {
-        public StateMachine<SpawnState>.StateMachineSave spawnStateSave;
-        public StateMachine<DespawnState>.StateMachineSave despawnStateSave;
-        public PickupObjectReference cubeSpawned;
+        public StateMachineSave<SpawnState> spawnStateSave;
         public PickupObjectReference cubeGrabbedFromSpawner;
 
-        public PickupObjectReference cubeDespawning;
-        public SerializableAnimationCurve cubeDespawnSizeCurve;
-
         public CubeSpawnerSave(CubeSpawner spawner) : base(spawner) {
-            this.cubeSpawned = spawner.cubeSpawned;
             this.cubeGrabbedFromSpawner = spawner.cubeGrabbedFromSpawner;
             spawnStateSave = spawner.spawnState.ToSave();
-            despawnStateSave = spawner.despawnState.ToSave();
-            this.cubeDespawning = spawner.cubeDespawning;
-            this.cubeDespawnSizeCurve = spawner.cubeDespawnSizeCurve;
         }
 
         public void HandleSpawnedCubeBeingDestroyed() {

@@ -25,7 +25,7 @@
 			float _DebugMode;
 
 			#pragma multi_compile __ DOUBLE_SIDED_EDGES
-			#pragma multi_compile __ CHECK_PORTAL_DEPTH
+			#pragma multi_compile __ RENDER_PORTALS
 
 			// Constants
 			#define NUM_SAMPLES 9
@@ -72,8 +72,8 @@
 			// Edge gradient from texture
 			sampler2D _GradientTexture;
 
-#ifdef CHECK_PORTAL_DEPTH
-			// If enabled, will check if all samples are within a portal. If so, don't draw an edge here
+#ifdef RENDER_PORTALS
+			// If enabled, will check if all samples are within a portal. If so, use the edge colors of the portal
 			#include "../../../Resources/Shaders/RecursivePortals/PortalSurfaceHelpers.cginc"
 #endif
 
@@ -83,7 +83,7 @@
 			half4 _MainTex_ST;
 
 			// Depth + Normal texture information, gathered from Unity's built-in global shader variables
-#ifndef CHECK_PORTAL_DEPTH // PortalSurfaceHelpers.cginc brings in _CameraDepthNormalsTexture
+#ifndef RENDER_PORTALS // PortalSurfaceHelpers.cginc brings in _CameraDepthNormalsTexture
 			sampler2D _CameraDepthNormalsTexture;
 #endif
 			half4 _CameraDepthNormalsTexture_ST;
@@ -343,7 +343,7 @@
 
 				// Check depth and normal similarity with surrounding samples
 				half allDepthsAreDissimilar = 1;
-#ifdef CHECK_PORTAL_DEPTH
+#ifdef RENDER_PORTALS
 				int centerSampleBehindPortal = SampleBehindPortal(uvPositions.UVs[0]);
 				int allSurroundingSamplesBehindPortal = 1;
 				int someSurroundingSamplesBehindPortal = centerSampleBehindPortal;
@@ -362,7 +362,7 @@
 					// Keep track of whether all depths appear different before any double-checks
 					allDepthsAreDissimilar *= (1 - thisDepthIsSimilar);
 
-#ifdef CHECK_PORTAL_DEPTH
+#ifdef RENDER_PORTALS
 					// "if (x >= SAMPLE_RANGE_START) allSamplesBehindPortal = allSamplesBehindPortal * SampleBehindPortal"
 					int xInRange = step(SAMPLE_RANGE_START, x);
 					int thisSampleIsBehindPortal = SampleBehindPortal(uvPositions.UVs[x]);
@@ -405,7 +405,7 @@
 					maxNormalDiff = max(maxNormalDiff, normalDiff * step(SAMPLE_RANGE_START, x));
 				}
 
-#ifdef CHECK_PORTAL_DEPTH
+#ifdef RENDER_PORTALS
 				// If center sample is behind portal, check if any other sample is NOT behind a portal mask
 				int isEdgeOfPortal = max(min(1-centerSampleBehindPortal, someSurroundingSamplesBehindPortal), min(centerSampleBehindPortal, 1-allSurroundingSamplesBehindPortal));
 				int allSamplesBehindPortal = allSurroundingSamplesBehindPortal & centerSampleBehindPortal; // AND
@@ -414,7 +414,7 @@
 				
 				// minDepthValue check to get rid of lines from CullEverything material against nothing
 				if (minDepthValue > .99) {
-#ifdef CHECK_PORTAL_DEPTH
+#ifdef RENDER_PORTALS
 					return FinalColor(0, 0, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
 					return FinalColor(0, 0, minDepthValue, uvPositions.ray, 0, 0, original);
@@ -493,7 +493,7 @@
 					maxNormalDiff *= 1-max(gradientIsSimilar, max(crossIsSimilar, xCrossIsSimilar));
 				}
 
-#ifdef CHECK_PORTAL_DEPTH
+#ifdef RENDER_PORTALS
 				return FinalColor(maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, allSamplesBehindPortal, isEdgeOfPortal, portalEdgeColor);
 #else
 				return FinalColor(maxDepthRatio, maxNormalDiff, minDepthValue, uvPositions.ray, 0, 0, fixed4(0,0,0,0));

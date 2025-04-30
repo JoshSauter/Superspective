@@ -60,7 +60,7 @@ public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.Gr
 
     protected override void Start() {
         base.Start();
-        thisRigidbody.useGravity = false;
+        thisRigidbody.useGravity = false; // We will simulate the gravity here so don't let the Rigidbody do it
 
         PortalableObject portalableObject = GetComponent<PortalableObject>();
         if (portalableObject != null) portalableObject.OnObjectTeleported += ReorientGravityAfterPortaling;
@@ -118,13 +118,6 @@ public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.Gr
         
         thisCollider.gameObject.layer = tempLayer;
 
-        if (onGround) {
-            debug.Log("On ground");
-        }
-        else {
-            debug.Log("Not on ground");
-        }
-
         return onGround;
     }
     
@@ -155,26 +148,11 @@ public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.Gr
 
 #region Saving
 
-    public override void LoadSave(GravityObjectSave save) {
-        useGravity = save.useGravity;
-        GravityDirection = save.gravityDirection;
-        gravityMagnitude = save.gravityMagnitude;
-        onGround = save.onGround;
-    }
+    public override void LoadSave(GravityObjectSave save) { }
 
     [Serializable]
     public class GravityObjectSave : SaveObject<GravityObject> {
-        public SerializableVector3 gravityDirection;
-        public float gravityMagnitude;
-        public bool useGravity;
-        public bool onGround;
-
-        public GravityObjectSave(GravityObject obj) : base(obj) {
-            useGravity = obj.useGravity;
-            gravityDirection = obj.GravityDirection;
-            gravityMagnitude = obj.gravityMagnitude;
-            onGround = obj.onGround;
-        }
+        public GravityObjectSave(GravityObject obj) : base(obj) { }
     }
 #endregion
 }

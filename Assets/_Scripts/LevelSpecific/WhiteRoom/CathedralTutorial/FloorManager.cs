@@ -124,7 +124,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         [Serializable]
         public class FloorManagerSave : SaveObject<FloorManager> {
-            public StateMachine<Floor>.StateMachineSave stateSave;
+            public StateMachineSave<Floor> stateSave;
             public int currentValue;
             
             public FloorManagerSave(FloorManager script) : base(script) {

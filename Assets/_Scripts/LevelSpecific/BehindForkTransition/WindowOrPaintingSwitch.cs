@@ -1,11 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using PowerTrailMechanics;
+using Saving;
 using UnityEngine;
 
 namespace LevelSpecific.BehindForkTransition {
-    public class WindowOrPaintingSwitch : MonoBehaviour {
+    public class WindowOrPaintingSwitch : SuperspectiveObject<WindowOrPaintingSwitch, WindowOrPaintingSwitch.WindowOrPaintingSwitchSave> {
         public GameObject window;
         public GameObject painting;
         public PowerTrail powerTrail;
@@ -18,6 +16,16 @@ namespace LevelSpecific.BehindForkTransition {
                 window.SetActive(!paintingActive);
                 painting.SetActive(paintingActive);
             }
+        }
+        
+        public override void LoadSave(WindowOrPaintingSwitchSave save) {
+            window.SetActive(!paintingActive);
+            painting.SetActive(paintingActive);
+        }
+        
+        [System.Serializable]
+        public class WindowOrPaintingSwitchSave : SaveObject<WindowOrPaintingSwitch> {
+            public WindowOrPaintingSwitchSave(WindowOrPaintingSwitch script) : base(script) { }
         }
     }
 }

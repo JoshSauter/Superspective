@@ -165,10 +165,11 @@ namespace Saving {
         /// </summary>
         /// <param name="metadataWithScreenshot">Contains the saveFilename used for creating the file path for saving</param>
         /// <param name="dependsOn">JobHandle to depend on e.g. "Finish writing the data before writing the metadata"</param>
-        public static JobHandle WriteMetadataToDisk(SaveMetadataWithScreenshot metadataWithScreenshot, JobHandle dependsOn) {
-            WriteSaveMetadataJob writeSaveMetadataJob = CreateWriteMetadataToDiskJob(metadataWithScreenshot);
+        public static JobHandle WriteMetadataToDisk(SaveMetadataWithScreenshot metadataWithScreenshot, JobHandle dependsOn, bool allowOverwrite = false) {
+            WriteSaveMetadataJob writeSaveMetadataJob = CreateWriteMetadataToDiskJob(metadataWithScreenshot, allowOverwrite);
             JobHandle metadataWriteJobHandle = writeSaveMetadataJob.Schedule(dependsOn);
-            LevelManager.instance.StartCoroutine(WriteMetadataJobCompleteCallback(metadataWriteJobHandle, writeSaveMetadataJob.metadataBytes));
+            string filePath = MetadataFilePath(metadataWithScreenshot.metadata.saveFilename);
+            LevelManager.instance.StartCoroutine(WriteMetadataJobCompleteCallback(metadataWriteJobHandle, writeSaveMetadataJob.metadataBytes, filePath, allowOverwrite));
             return metadataWriteJobHandle;
         }
 
@@ -177,15 +178,16 @@ namespace Saving {
         /// Schedules a job to write the metadata to disk, and then starts a coroutine to handle the completion of the job.
         /// </summary>
         /// <param name="metadataWithScreenshot">Contains the saveFilename used for creating the file path for saving</param>
-        public static JobHandle WriteMetadataToDisk(SaveMetadataWithScreenshot metadataWithScreenshot) {
-            WriteSaveMetadataJob writeSaveMetadataJob = CreateWriteMetadataToDiskJob(metadataWithScreenshot);
+        public static JobHandle WriteMetadataToDisk(SaveMetadataWithScreenshot metadataWithScreenshot, bool allowOverwrite = false) {
+            WriteSaveMetadataJob writeSaveMetadataJob = CreateWriteMetadataToDiskJob(metadataWithScreenshot, allowOverwrite);
             JobHandle metadataWriteJobHandle = writeSaveMetadataJob.Schedule();
-            LevelManager.instance.StartCoroutine(WriteMetadataJobCompleteCallback(metadataWriteJobHandle, writeSaveMetadataJob.metadataBytes));
+            string filePath = MetadataFilePath(metadataWithScreenshot.metadata.saveFilename);
+            LevelManager.instance.StartCoroutine(WriteMetadataJobCompleteCallback(metadataWriteJobHandle, writeSaveMetadataJob.metadataBytes, filePath, allowOverwrite));
             return metadataWriteJobHandle;
         }
 
         // Common functionality whether we depend on another job to finish or not
-        private static WriteSaveMetadataJob CreateWriteMetadataToDiskJob(SaveMetadataWithScreenshot metadataWithScreenshot) {
+        private static WriteSaveMetadataJob CreateWriteMetadataToDiskJob(SaveMetadataWithScreenshot metadataWithScreenshot, bool allowOverwrite = false) {
             SaveMetadata metadata = metadataWithScreenshot.metadata;
             Texture2D screenshot = metadataWithScreenshot.screenshot;
             
@@ -208,12 +210,16 @@ namespace Saving {
             bytesToSave.AddRange(screenshotByteArray);
             
             string saveMetadataFile = MetadataFilePath(metadataWithScreenshot.metadata.saveFilename);
+            string tempMetadataFile = saveMetadataFile + ".tmp";
             
-            FixedString512Bytes saveMetadataFileFixed = new FixedString512Bytes(saveMetadataFile);
+            FixedString512Bytes tempMetadataFileFixed = new FixedString512Bytes(tempMetadataFile);
             NativeArray<byte> nativeBytesToSave = new NativeArray<byte>(bytesToSave.ToArray(), Allocator.Persistent);
+            
+            Debug.Log($"Creating metadata file at {tempMetadataFile}...");
             return new WriteSaveMetadataJob {
                 metadataBytes = nativeBytesToSave,
-                saveMetadataFile = saveMetadataFileFixed
+                saveMetadataTempFile = tempMetadataFileFixed,
+                allowOverwrite = allowOverwrite
             };
         }
         
@@ -411,14 +417,43 @@ namespace Saving {
             dataBytes.Dispose();
         }
         
-        private static IEnumerator WriteMetadataJobCompleteCallback(JobHandle jobHandle, NativeArray<byte> metadataBytes) {
+        private static IEnumerator WriteMetadataJobCompleteCallback(JobHandle jobHandle, NativeArray<byte> metadataBytes, string filePath, bool allowOverwrite) {
             yield return new WaitUntil(() => jobHandle.IsCompleted);
-            
+
             jobHandle.Complete();
-            metadataBytes.Dispose();
-            
+            if (metadataBytes.IsCreated) {
+                metadataBytes.Dispose();
+            }
+
+            try {
+                string tempFilePath = filePath + ".tmp";
+
+                if (File.Exists(tempFilePath)) {
+                    if (File.Exists(filePath)) {
+                        if (allowOverwrite) {
+                            Debug.Log($"Overwriting existing metadata file: {filePath}");
+                            File.Delete(filePath);
+                        }
+                        else {
+                            Debug.LogWarning($"Not overwriting existing file: {filePath}. Skipping move.");
+                            File.Delete(tempFilePath); // Clean up the temp file
+                            yield break;
+                        }
+                    }
+
+                    File.Move(tempFilePath, filePath);
+                    Debug.Log($"Metadata saved successfully: {filePath}");
+                } else {
+                    Debug.Log($"No temp metadata file found at {tempFilePath} — assuming save was skipped.");
+                }
+            }
+            catch (Exception e) {
+                Debug.LogError($"Error moving metadata file: {e}");
+            }
+
             OnSavesChanged?.Invoke();
         }
+
         
         private static IEnumerator DeleteSaveJobCompleteCallback(JobHandle jobHandle, string saveFileName) {
             yield return new WaitUntil(() => jobHandle.IsCompleted);
@@ -498,15 +533,28 @@ namespace Saving {
 
     struct WriteSaveMetadataJob : IJob {
         public NativeArray<byte> metadataBytes;
-        public FixedString512Bytes saveMetadataFile;
+        public FixedString512Bytes saveMetadataTempFile;
+        public bool allowOverwrite;
 
         public void Execute() {
-            string saveMetadataFilePath = saveMetadataFile.ConvertToString();
-            string saveMetadataDirectory = string.Join("/", saveMetadataFilePath.Split("/").SkipLast(1));
-                
-            // Create the directory if it does not yet exist (idempotent)
+            string saveMetadataTempFilePath = saveMetadataTempFile.ConvertToString();
+            string saveMetadataDirectory = string.Join("/", saveMetadataTempFilePath.Split("/").SkipLast(1));
             Directory.CreateDirectory(saveMetadataDirectory);
-            File.WriteAllBytes(saveMetadataFilePath, metadataBytes.ToArray());
+
+            string realFilePath = saveMetadataTempFilePath.Substring(0, saveMetadataTempFilePath.Length - 4); // remove ".tmp"
+
+            if (!allowOverwrite) {
+                if (File.Exists(saveMetadataTempFilePath)) {
+                    Debug.LogWarning($"Skipping metadata write because temp file already exists: {saveMetadataTempFilePath}");
+                    return;
+                }
+                if (File.Exists(realFilePath)) {
+                    Debug.LogWarning($"Skipping metadata write because real file already exists: {realFilePath}");
+                    return;
+                }
+            }
+
+            File.WriteAllBytes(saveMetadataTempFilePath, metadataBytes.ToArray());
         }
     }
     

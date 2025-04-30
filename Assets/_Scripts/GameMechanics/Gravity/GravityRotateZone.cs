@@ -444,6 +444,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     }
 
     public void OnBetterTriggerStay(Collider other) {
+        if (GameManager.instance.IsCurrentlyLoading) return;
         if (other.TaggedAsPlayer()) {
             playerIsInTriggerZone = true;
             
@@ -476,6 +477,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     }
 
     public void OnBetterTriggerExit(Collider other) {
+        if (GameManager.instance.IsCurrentlyLoading) return;
         if (other.TaggedAsPlayer()) {
             playerIsInTriggerZone = false;
             
@@ -899,82 +901,9 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
 #region Saving
     [Serializable]
     public class GravityRotateZoneSave : SaveObject<GravityRotateZone> {
-        public InvisibleWallsMode invisibleWallsSetting;
-        public RotateMode rotateMode;
-        public SerializableVector3 pivotPoint;
-        public SerializableVector3 start;
-        public SerializableVector2 startHitboxSize;
-        public SerializableVector3 startGravity;
-        public SerializableVector3 end;
-        public SerializableVector2 endHitboxSize;
-        public SerializableVector3 endGravity;
-        public bool artificialGravityAmplification;
-        public float gravAmplificationMagnitude;
-        public float maxDistanceForGravAmplification;
-        public float minDistanceForGravAmplification;
-        public SerializableVector3 gravityLineStart;
-        public SerializableVector3 gravityLineEnd;
-        public SerializableVector3 rotationAxis;
-        public float totalAngle;
-        public bool playerIsInTriggerZone;
-        public bool playerIsInRotationZone;
-        public bool currentlyRotatingPlayer;
-        public float t;
-        public float gravAmplificationFactor;
-        public bool invisibleWallEnabled;
-
-        public GravityRotateZoneSave(GravityRotateZone script) : base(script) {
-            this.invisibleWallsSetting = script.invisibleWallsSetting;
-            this.rotateMode = script.rotateMode;
-            this.pivotPoint = script.pivotPoint;
-            this.start = script.start;
-            this.startHitboxSize = script.startHitboxSize;
-            this.startGravity = script.startGravity;
-            this.end = script.end;
-            this.endHitboxSize = script.endHitboxSize;
-            this.endGravity = script.endGravity;
-            this.artificialGravityAmplification = script.artificialGravityAmplification;
-            this.gravAmplificationMagnitude = script.gravAmplificationMagnitude;
-            this.maxDistanceForGravAmplification = script.maxDistanceForGravAmplification;
-            this.minDistanceForGravAmplification = script.minDistanceForGravAmplification;
-            this.gravityLineStart = script.gravityLineStart;
-            this.gravityLineEnd = script.gravityLineEnd;
-            this.rotationAxis = script.rotationAxis;
-            this.totalAngle = script.totalAngle;
-            this.playerIsInTriggerZone = script.playerIsInTriggerZone;
-            this.playerIsInRotationZone = script.playerIsInRotationZone;
-            this.currentlyRotatingPlayer = script.currentlyRotatingPlayer;
-            this.t = script.t;
-            this.gravAmplificationFactor = script.gravAmplificationFactor;
-            this.invisibleWallEnabled = script.invisibleWallEnabled;
-        }
+        public GravityRotateZoneSave(GravityRotateZone script) : base(script) { }
     }
 
-    public override void LoadSave(GravityRotateZoneSave save) {
-        invisibleWallsSetting = save.invisibleWallsSetting;
-        rotateMode = save.rotateMode;
-        pivotPoint = save.pivotPoint;
-        start = save.start;
-        startHitboxSize = save.startHitboxSize;
-        startGravity = save.startGravity;
-        end = save.end;
-        endHitboxSize = save.endHitboxSize;
-        endGravity = save.endGravity;
-        artificialGravityAmplification = save.artificialGravityAmplification;
-        gravAmplificationMagnitude = save.gravAmplificationMagnitude;
-        maxDistanceForGravAmplification = save.maxDistanceForGravAmplification;
-        minDistanceForGravAmplification = save.minDistanceForGravAmplification;
-        gravityLineStart = save.gravityLineStart;
-        gravityLineEnd = save.gravityLineEnd;
-        rotationAxis = save.rotationAxis;
-        totalAngle = save.totalAngle;
-        playerIsInTriggerZone = save.playerIsInTriggerZone;
-        playerIsInRotationZone = save.playerIsInRotationZone;
-        currentlyRotatingPlayer = save.currentlyRotatingPlayer;
-        t = save.t;
-        gravAmplificationFactor = save.gravAmplificationFactor;
-        invisibleWallEnabled = save.invisibleWallEnabled;
-    }
+    public override void LoadSave(GravityRotateZoneSave save) { }
     #endregion
 }
-

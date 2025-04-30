@@ -38,17 +38,12 @@ public class BlackRoomMiniSpotlight : SuperspectiveObject<BlackRoomMiniSpotlight
 #region Saving
 
 	public override void LoadSave(BlackRoomMiniSpotlightSave save) {
-		isOn = save.isOn;
 		SetLights(isOn);
 	}
 
 	[Serializable]
 	public class BlackRoomMiniSpotlightSave : SaveObject<BlackRoomMiniSpotlight> {
-		public bool isOn;
-        
-		public BlackRoomMiniSpotlightSave(BlackRoomMiniSpotlight script) : base(script) {
-			this.isOn = script.isOn;
-		}
+		public BlackRoomMiniSpotlightSave(BlackRoomMiniSpotlight script) : base(script) { }
 	}
 #endregion
 }

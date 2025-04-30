@@ -74,22 +74,13 @@ namespace LevelSpecific.BlackRoom {
 
 #region Saving
 
-		public override void LoadSave(ColorPuzzleSave save) {
-			solved = save.solved;
-			isActive = save.isActive;
-		}
+		public override void LoadSave(ColorPuzzleSave save) { }
 
 		public override string ID => $"BlackRoom_ColorPuzzle{transform.GetSiblingIndex()}";
 
 		[Serializable]
 		public class ColorPuzzleSave : SaveObject<ColorPuzzle> {
-			public bool solved;
-			public bool isActive;
-			
-			public ColorPuzzleSave(ColorPuzzle colorPuzzle) : base(colorPuzzle) {
-				this.solved = colorPuzzle.solved;
-				this.isActive = colorPuzzle.isActive;
-			}
+			public ColorPuzzleSave(ColorPuzzle colorPuzzle) : base(colorPuzzle) { }
 		}
 	}
 #endregion

@@ -175,6 +175,8 @@ namespace Deepblack {
         }
 
         public void Register(DeepblackObject obj) {
+            if (!obj) return;
+            
             deepblackObjects.Add(obj);
         }
 

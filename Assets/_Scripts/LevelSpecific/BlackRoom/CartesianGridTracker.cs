@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using SuperspectiveUtils;
+﻿using SuperspectiveUtils;
 using SwizzleUtils;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LevelSpecific.BlackRoom {
 	public class CartesianGridTracker : MonoBehaviour {

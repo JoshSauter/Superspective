@@ -219,42 +219,12 @@ namespace Interactables {
 
 #region Saving
 
-        public override void LoadSave(ButtonSave save) {
-            stateMachine.LoadFromSave(save.stateSave);
-            buttonPressCurve = save.buttonPressCurve;
-            buttonUnpressCurve = save.buttonUnpressCurve;
-            unpressAfterPress = save.unpressAfterPress;
-            pressDistance = save.pressDistance;
-            timeBetweenPressEndDepressStart = save.timeBetweenPressEndDepressStart;
-            timeToPressButton = save.timeToPressButton;
-            timeToUnpressButton = save.timeToUnpressButton;
-            oneTimeButton = save.oneTimeButton;
-        }
+        public override void LoadSave(ButtonSave save) { }
 
         [Serializable]
         public class ButtonSave : SaveObject<Button> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public SerializableAnimationCurve buttonPressCurve;
-            public SerializableAnimationCurve buttonUnpressCurve;
-            public bool unpressAfterPress;
-            public float pressDistance;
-            public float timeBetweenPressEndDepressStart;
-            public float timeToPressButton;
-            public float timeToUnpressButton;
-            public bool oneTimeButton;
 
-            public ButtonSave(Button button) : base(button) {
-                stateSave = button.stateMachine.ToSave();
-                buttonPressCurve = button.buttonPressCurve;
-                buttonUnpressCurve = button.buttonUnpressCurve;
-                timeToPressButton = button.timeToPressButton;
-                timeToUnpressButton = button.timeToUnpressButton;
-                pressDistance = button.pressDistance;
-
-                unpressAfterPress = button.unpressAfterPress;
-                timeBetweenPressEndDepressStart = button.timeBetweenPressEndDepressStart;
-                oneTimeButton = button.oneTimeButton;
-            }
+            public ButtonSave(Button button) : base(button) { }
         }
 
 #endregion

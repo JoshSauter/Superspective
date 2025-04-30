@@ -108,10 +108,10 @@ public class BladeEdgeDetection : SuperspectiveObject<BladeEdgeDetection, BladeE
 			shaderMaterial.DisableKeyword("DOUBLE_SIDED_EDGES");
 		}
 		if (checkPortalDepth) {
-			shaderMaterial.EnableKeyword("CHECK_PORTAL_DEPTH");
+			shaderMaterial.EnableKeyword("RENDER_PORTALS");
 		}
 		else {
-			shaderMaterial.DisableKeyword("CHECK_PORTAL_DEPTH");
+			shaderMaterial.DisableKeyword("RENDER_PORTALS");
 		}
 		// Note: Depth sensitivity originally calibrated for camera with a far plane of 400, this normalizes it for other cameras
 		shaderMaterial.SetFloat(DepthSensitivityID, depthSensitivity * DepthSensitivityMultiplier * (thisCamera.farClipPlane/400));
@@ -139,10 +139,26 @@ public class BladeEdgeDetection : SuperspectiveObject<BladeEdgeDetection, BladeE
 		
 		RenderTexture edgeOutput = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
 		Graphics.Blit(source, edgeOutput, shaderMaterial, 0); // Pass 0: Edge Detection
+		if (DEBUG) {
+			Graphics.Blit(edgeOutput, debugEdges);
+		}
+
 		shaderMaterial.SetTexture("_EdgeOutputTex", edgeOutput);
 		
 		Graphics.Blit(source, destination, shaderMaterial, 1); // Pass 1: Composite
 		RenderTexture.ReleaseTemporary(edgeOutput);
+	}
+
+	public RenderTexture _debug;
+
+	public RenderTexture debugEdges {
+		get {
+			if (!_debug) {
+				_debug = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+			}
+
+			return _debug;
+		}
 	}
 
 	/// <summary>
@@ -240,55 +256,14 @@ public class BladeEdgeDetection : SuperspectiveObject<BladeEdgeDetection, BladeE
 
 #region Saving
 
-	public override void LoadSave(BladeEdgeDetectionSave save) {
-		debugMode = save.debugMode;
-		checkPortalDepth = save.checkPortalDepth;
-		depthSensitivity = save.depthSensitivity;
-		normalSensitivity = save.normalSensitivity;
-		sampleDistance = save.sampleDistance;
-		weightedEdgeMode = save.weightedEdgeMode;
-		depthWeightEffect = save.depthWeightEffect;
-		normalWeightEffect = save.normalWeightEffect;
-		depthWeightMin = save.depthWeightMin;
-		normalWeightMin = save.normalWeightMin;
-		edgeColorMode = save.edgeColorMode;
-		edgeColor = save.edgeColor;
-		edgeColorGradient = save.edgeColorGradient;
-	}
+	public override void LoadSave(BladeEdgeDetectionSave save) { }
 
 	public override string ID => $"{gameObject.name}_BladeEdgeDetection";
 
 	[Serializable]
 	public class BladeEdgeDetectionSave : SaveObject<BladeEdgeDetection> {
-		public readonly SerializableColor edgeColor;
-		public readonly SerializableGradient edgeColorGradient;
-		public readonly float depthWeightEffect;
-		public readonly float normalWeightEffect;
-		public readonly float depthSensitivity;
-		public readonly float normalSensitivity;
-		public readonly float depthWeightMin;
-		public readonly float normalWeightMin;
-		public readonly int sampleDistance;
-		public readonly WeightedEdgeMode weightedEdgeMode;
-		public readonly EdgeColorMode edgeColorMode;
-		public readonly bool debugMode;
-		public readonly bool checkPortalDepth;
 
-		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) : base(edgeDetection) {
-			this.debugMode = edgeDetection.debugMode;
-			this.checkPortalDepth = edgeDetection.checkPortalDepth;
-			this.depthSensitivity = edgeDetection.depthSensitivity;
-			this.normalSensitivity = edgeDetection.normalSensitivity;
-			this.sampleDistance = edgeDetection.sampleDistance;
-			this.weightedEdgeMode = edgeDetection.weightedEdgeMode;
-			this.depthWeightEffect = edgeDetection.depthWeightEffect;
-			this.normalWeightEffect = edgeDetection.normalWeightEffect;
-			this.edgeColorMode = edgeDetection.edgeColorMode;
-			this.edgeColor = edgeDetection.edgeColor;
-			this.edgeColorGradient = edgeDetection.edgeColorGradient;
-			this.depthWeightMin = edgeDetection.depthWeightMin;
-			this.normalWeightMin = edgeDetection.normalWeightMin;
-		}
+		public BladeEdgeDetectionSave(BladeEdgeDetection edgeDetection) : base(edgeDetection) { }
 	}
 #endregion
 }

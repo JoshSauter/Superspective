@@ -162,23 +162,11 @@ public class DimensionPillar : SuperspectiveObject<DimensionPillar, DimensionPil
 
 #region Saving
 
-	public override void LoadSave(DimensionPillarSave save) {
-		initialized = save.initialized;
-		maxBaseDimension = save.maxDimension;
-		curBaseDimension = save.curDimension;
-	}
+	public override void LoadSave(DimensionPillarSave save) { }
 
 	[Serializable]
 	public class DimensionPillarSave : SaveObject<DimensionPillar> {
-		public bool initialized;
-		public int maxDimension;
-		public int curDimension;
-
-		public DimensionPillarSave(DimensionPillar dimensionPillar) : base(dimensionPillar) {
-			this.initialized = dimensionPillar.initialized;
-			this.maxDimension = dimensionPillar.maxBaseDimension;
-			this.curDimension = dimensionPillar.curBaseDimension;
-		}
+		public DimensionPillarSave(DimensionPillar dimensionPillar) : base(dimensionPillar) { }
 	}
 	#endregion
 }

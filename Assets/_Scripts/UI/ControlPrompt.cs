@@ -123,17 +123,11 @@ public class ControlPrompt : SuperspectiveObject<ControlPrompt, ControlPrompt.Co
     
 #region Saving
 
-    public override void LoadSave(ControlPromptSave save) {
-        state.LoadFromSave(save.stateSave);
-    }
+    public override void LoadSave(ControlPromptSave save) { }
 
     [Serializable]
 	public class ControlPromptSave : SaveObject<ControlPrompt> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public ControlPromptSave(ControlPrompt script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public ControlPromptSave(ControlPrompt script) : base(script) { }
 	}
 #endregion
 }

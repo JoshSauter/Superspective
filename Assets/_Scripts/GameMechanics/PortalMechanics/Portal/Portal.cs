@@ -158,7 +158,7 @@ namespace PortalMechanics {
 		}
 
 		[Button("Initialize Portal")]
-		public void InitializePortal() {
+		public virtual void InitializePortal() {
 			if (!gameObject.activeInHierarchy) return;
 			try {
 				CreateCompositeTrigger();
@@ -481,45 +481,18 @@ namespace PortalMechanics {
 #region Saving
 
 		public override void LoadSave(PortalSave save) {
-			channel = save.channel;
-			changeActiveSceneOnTeleport = save.changeActiveSceneOnTeleport;
-			changeCameraEdgeDetection = save.changeCameraEdgeDetection;
-			edgeColorMode = save.edgeColorMode;
-			edgeColor = save.edgeColor;
-			edgeColorGradient = save.edgeColorGradient;
-			renderRecursivePortals = save.renderRecursivePortals;
-			compositePortal = save.compositePortal;
-			teleportingPlayer = save.teleportingPlayer;
-			PhysicsMode = save.physicsMode;
-			RenderMode = save.renderMode;
+			this.RenderMode = save.renderMode;
+			this.PhysicsMode = save.physicsMode;
 		}
 		
 		[Serializable]
 		public class PortalSave : SaveObject<Portal> {
-			public SerializableGradient edgeColorGradient;
-			public SerializableColor edgeColor;
-			public string channel;
-			public BladeEdgeDetection.EdgeColorMode edgeColorMode;
-			public bool changeActiveSceneOnTeleport;
-			public bool changeCameraEdgeDetection;
-			public bool renderRecursivePortals;
-			public bool compositePortal;
-			public bool teleportingPlayer;
-			public PortalPhysicsMode physicsMode;
 			public PortalRenderMode renderMode;
+			public PortalPhysicsMode physicsMode;
 
 			public PortalSave(Portal portal) : base(portal) {
-				this.channel = portal.channel;
-				this.changeActiveSceneOnTeleport = portal.changeActiveSceneOnTeleport;
-				this.changeCameraEdgeDetection = portal.changeCameraEdgeDetection;
-				this.edgeColorMode = portal.edgeColorMode;
-				this.edgeColor = portal.edgeColor;
-				this.edgeColorGradient = portal.edgeColorGradient;
-				this.renderRecursivePortals = portal.renderRecursivePortals;
-				this.compositePortal = portal.compositePortal;
-				this.teleportingPlayer = portal.teleportingPlayer;
-				this.physicsMode = portal.PhysicsMode;
 				this.renderMode = portal.RenderMode;
+				this.physicsMode = portal.PhysicsMode;
 			}
 		}
 		#endregion

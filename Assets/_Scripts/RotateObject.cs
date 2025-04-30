@@ -57,10 +57,6 @@ public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.Rotat
 #region Saving
 
     public override void LoadSave(RotateObjectSave save) {
-        useLocalCoordinates = save.useLocalCoordinates;
-        rotationsPerSecondX = save.rotationsPerSecondX;
-        rotationsPerSecondY = save.rotationsPerSecondY;
-        rotationsPerSecondZ = save.rotationsPerSecondZ;
         if (useLocalCoordinates) {
             transform.localRotation = save.rotation;
         }
@@ -75,16 +71,8 @@ public class RotateObject : SuperspectiveObject<RotateObject, RotateObject.Rotat
     [Serializable]
     public class RotateObjectSave : SaveObject<RotateObject> {
         public SerializableQuaternion rotation;
-        public float rotationsPerSecondX;
-        public float rotationsPerSecondY;
-        public float rotationsPerSecondZ;
-        public bool useLocalCoordinates;
 
         public RotateObjectSave(RotateObject rotate) : base(rotate) {
-            this.useLocalCoordinates = rotate.useLocalCoordinates;
-            this.rotationsPerSecondX = rotate.rotationsPerSecondX;
-            this.rotationsPerSecondY = rotate.rotationsPerSecondY;
-            this.rotationsPerSecondZ = rotate.rotationsPerSecondZ;
             this.rotation = rotate.useLocalCoordinates ? rotate.transform.localRotation : rotate.transform.rotation;
         }
     }

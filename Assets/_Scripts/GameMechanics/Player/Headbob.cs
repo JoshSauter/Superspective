@@ -71,28 +71,14 @@ public class Headbob : SuperspectiveObject<Headbob, Headbob.HeadbobSave> {
 
 #region Saving
 
-    public override void LoadSave(HeadbobSave save) {
-        curBobAmount = save.curBobAmount;
-        t = save.t;
-        curPeriod = save.curPeriod;
-        curAmplitude = save.curAmplitude;
-    }
+    public override void LoadSave(HeadbobSave save) { }
     
     public override string ID => "Headbob";
 
     [Serializable]
     public class HeadbobSave : SaveObject<Headbob> {
-        public float curAmplitude;
-        public float curBobAmount;
-        public float curPeriod;
-        public float t;
 
-        public HeadbobSave(Headbob headbob) : base(headbob) {
-            curBobAmount = headbob.curBobAmount;
-            t = headbob.t;
-            curPeriod = headbob.curPeriod;
-            curAmplitude = headbob.curAmplitude;
-        }
+        public HeadbobSave(Headbob headbob) : base(headbob) { }
     }
 #endregion
 }

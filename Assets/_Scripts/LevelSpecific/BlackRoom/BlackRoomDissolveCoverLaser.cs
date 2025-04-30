@@ -1,13 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Audio;
 using DissolveObjects;
-using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using StateUtils;
-using SuperspectiveUtils;
+using SuperspectiveAttributes;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
@@ -24,14 +21,16 @@ namespace LevelSpecific.BlackRoom {
         private const float TIME_BEFORE_DISSOLVE_BEGIN = 1f;
         private const float TIME_BEFORE_LASER_PARTICLE_START = 0.15f;
         public static readonly int EMISSION_PROPERTY = Shader.PropertyToID("_EmissionColor");
+        [SaveUnityObject]
         public ParticleSystem laser;
+        [SaveUnityObject]
         private DissolveObject coverFiringAt;
         [ColorUsage(false, true)]
         public Color startingEmission = Color.black;
 
         public BlackRoomMainConsole mainConsole;
         public ColorPuzzleManager colorPuzzleManager;
-        public Renderer puzzleIsSolvedIndicator;
+        public SuperspectiveRenderer puzzleIsSolvedIndicator;
 
         private Vector3 TargetParticleEndPosition => (coverFiringAt == null)
             ? Vector3.zero
@@ -39,6 +38,8 @@ namespace LevelSpecific.BlackRoom {
 
         protected override void Start() {
             base.Start();
+            startingEmission = puzzleIsSolvedIndicator.GetColor(EMISSION_PROPERTY);
+            
             state = this.StateMachine(LaserState.Idle);
             
             state.AddStateTransition(LaserState.FiringAtCover, LaserState.Idle, laser.main.duration);
@@ -60,9 +61,6 @@ namespace LevelSpecific.BlackRoom {
                     }
                 }
             });
-
-            // Getting the sharedMaterial value because the actual Material may have been dimmed by now
-            startingEmission = puzzleIsSolvedIndicator.sharedMaterial.GetColor(EMISSION_PROPERTY);
         }
 
         public void FireAt(DissolveObject cover) {
@@ -94,12 +92,13 @@ namespace LevelSpecific.BlackRoom {
             }
         }
 
+        // TODO: Replace all this with SuperspectiveRenderer using MaterialPropertyBlocks
         private void UpdateEmission() {
             if (state.State != LaserState.FiringAtCover) return;
             
             float t = state.Time / laser.main.duration;
             Color emission = Color.Lerp(startingEmission, Color.black, t);
-            puzzleIsSolvedIndicator.material.SetColor(EMISSION_PROPERTY, emission);
+            puzzleIsSolvedIndicator.SetColor(EMISSION_PROPERTY, emission);
         }
 
         // As the origin of the particle system bobs up and down, the distance the particles need to travel changes slightly
@@ -131,22 +130,16 @@ namespace LevelSpecific.BlackRoom {
         }
 
         public override void LoadSave(BlackRoomDissolveCoverLaserSave save) {
-            state.LoadFromSave(save.stateSave);
-            coverFiringAt = save.coverFiringAt?.GetOrNull();
-            laser.LoadFromSerializable(save.laser);
+            if (laser.isPlaying) {
+                LookAtCover();
+                UpdateParticles();
+                UpdateEmission();
+            }
         }
 
         [Serializable]
         public class BlackRoomDissolveCoverLaserSave : SaveObject<BlackRoomDissolveCoverLaser> {
-            public StateMachine<LaserState>.StateMachineSave stateSave;
-            public SuperspectiveReference<DissolveObject, DissolveObject.DissolveObjectSave> coverFiringAt;
-            public SerializableParticleSystem laser;
-
-            public BlackRoomDissolveCoverLaserSave(BlackRoomDissolveCoverLaser script) : base(script) {
-                stateSave = script.state.ToSave();
-                coverFiringAt = script.coverFiringAt;
-                laser = script.laser;
-            }
+            public BlackRoomDissolveCoverLaserSave(BlackRoomDissolveCoverLaser script) : base(script) { }
         }
     }
 }

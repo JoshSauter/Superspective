@@ -81,42 +81,15 @@ public class ObjectScale : SuperspectiveObject<ObjectScale, ObjectScale.ObjectSc
 #region Saving
 
     public override void LoadSave(ObjectScaleSave save) {
-        minSize = save.minSize;
-        maxSize = save.maxSize;
-        period = save.period;
-        startScale = save.startScale;
-        timeElapsed = save.timeElapsed;
         transform.localScale = save.scale;
-        mode = save.mode;
-        minScale = save.minScale;
-        maxScale = save.maxScale;
-        animationMode = save.animationMode;
     }
 
     [Serializable]
     public class ObjectScaleSave : SaveObject<ObjectScale> {
-        public SerializableVector3 startScale;
         public SerializableVector3 scale;
-        public float maxSize;
-        public float minSize;
-        public float period;
-        public float timeElapsed;
-        public Mode mode;
-        public SerializableVector3 minScale;
-        public SerializableVector3 maxScale;
-        public AnimationMode animationMode;
 
         public ObjectScaleSave(ObjectScale script) : base(script) {
-            minSize = script.minSize;
-            maxSize = script.maxSize;
-            period = script.period;
-            startScale = script.startScale;
-            timeElapsed = script.timeElapsed;
             scale = script.transform.localScale;
-            mode = script.mode;
-            minScale = script.minScale;
-            maxScale = script.maxScale;
-            animationMode = script.animationMode;
         }
     }
 #endregion

@@ -33,7 +33,7 @@ namespace Saving {
 
             private static bool DEBUG = false;
             private static DebugLogger _debug;
-            private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, () => DEBUG);
+            private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, "SaveManagerForLevel", () => DEBUG);
 
             /// <summary>
             /// Register a SuperspectiveObject, if it's not already registered.
@@ -172,6 +172,8 @@ namespace Saving {
                 dynamicObjects.Add(id, dynamicObject);
                 
                 debug.Log($"{dynamicObjects.Count} dynamic objects in {level}");
+
+                RegisterSuperspectiveObjectInScene(dynamicObject); // DynamicObjects are also SuperspectiveObjects
                 
                 return true;
             }
@@ -193,6 +195,9 @@ namespace Saving {
                 dynamicObjects.Remove(id);
                 
                 debug.Log($"{dynamicObjects.Count} dynamic objects in {level}");
+
+                UnregisterSuperspectiveObjectInScene(id); // DynamicObjects are also SuperspectiveObjects
+                
                 return true;
             }
 
@@ -522,6 +527,7 @@ namespace Saving {
                 var foundDynamicObj = LookForMissingSaveableObject<DynamicObject>(id);
                 if (foundDynamicObj != null) {
                     dynamicObjects.Add(id, foundDynamicObj);
+                    superspectiveObjects.Add(id, foundDynamicObj); // DynamicObjects are also SuperspectiveObjects
                     return foundDynamicObj;
                 }
 

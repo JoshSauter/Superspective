@@ -65,18 +65,12 @@ public class NoiseScrambleOverlayObject : SuperspectiveObject<NoiseScrambleOverl
 #region Saving
 
 	public override void LoadSave(NoiseScrambleOverlayObjectSave save) {
-		scramblerState.LoadFromSave(save.stateSave);
-		
 		RegisterScrambler();
 	}
 
 	[Serializable]
 	public class NoiseScrambleOverlayObjectSave : SaveObject<NoiseScrambleOverlayObject> {
-		public StateMachine<ScramblerState>.StateMachineSave stateSave;
-
-		public NoiseScrambleOverlayObjectSave(NoiseScrambleOverlayObject script) : base(script) {
-			stateSave = script.scramblerState.ToSave();
-		}
+		public NoiseScrambleOverlayObjectSave(NoiseScrambleOverlayObject script) : base(script) { }
 	}
 #endregion
 }

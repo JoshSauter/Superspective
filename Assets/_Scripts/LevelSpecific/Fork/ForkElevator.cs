@@ -33,7 +33,6 @@ namespace LevelSpecific.Fork {
 		}
 		float timeElapsedSinceStateChange = 0f;
 
-
 		public PowerTrail initialPowerTrail;
 		public AnimationCurve lockBarAnimation;
 		public Transform[] lockBars;
@@ -267,13 +266,7 @@ namespace LevelSpecific.Fork {
 #region Saving
 
 		public override void LoadSave(ForkElevatorSave save) {
-			state = save.state;
 			otherObjectsInElevator = save.otherObjectsInElevator.ToList();
-			goingDown = save.goingDown;
-			timeElapsedSinceStateChange = save.timeElapsedSinceStateChange;
-			raisedHeight = save.raisedHeight;
-			loweredHeight = save.loweredHeight;
-			curSpeed = save.curSpeed;
 			playerStandingInElevator = save.playerStandingInElevator;
 			transform.parent.position = save.position;
 		}
@@ -282,21 +275,9 @@ namespace LevelSpecific.Fork {
 		public class ForkElevatorSave : SaveObject<ForkElevator> {
 			public SerializableVector3 position;
 			public PickupObjectRef[] otherObjectsInElevator;
-			public State state;
-			public float timeElapsedSinceStateChange;
-			public float raisedHeight;
-			public float loweredHeight;
-			public float curSpeed;
-			public bool goingDown;
 			public bool playerStandingInElevator;
 
 			public ForkElevatorSave(ForkElevator elevator) : base(elevator) {
-				this.state = elevator.state;
-				this.goingDown = elevator.goingDown;
-				this.timeElapsedSinceStateChange = elevator.timeElapsedSinceStateChange;
-				this.raisedHeight = elevator.raisedHeight;
-				this.loweredHeight = elevator.loweredHeight;
-				this.curSpeed = elevator.curSpeed;
 				this.playerStandingInElevator = elevator.playerStandingInElevator;
 				this.otherObjectsInElevator = elevator.otherObjectsInElevator.ToArray();
 				this.position = elevator.transform.parent.position;

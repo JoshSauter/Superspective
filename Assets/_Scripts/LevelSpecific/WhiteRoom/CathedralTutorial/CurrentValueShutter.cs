@@ -86,7 +86,7 @@ public class CurrentValueShutter : SuperspectiveObject<CurrentValueShutter, Curr
 
     [Serializable]
 	public class CurrentValueShutterSave : SaveObject<CurrentValueShutter> {
-        public StateMachine<State>.StateMachineSave stateSave;
+        public StateMachineSave<State> stateSave;
         public float lerpTime;
         public bool isSetToOpen;
         

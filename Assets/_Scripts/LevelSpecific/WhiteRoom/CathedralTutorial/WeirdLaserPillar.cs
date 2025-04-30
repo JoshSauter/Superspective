@@ -68,7 +68,7 @@ public class WeirdLaserPillar : SuperspectiveObject<WeirdLaserPillar, WeirdLaser
 
 	[Serializable]
 	public class WeirdLaserPillarSave : SaveObject<WeirdLaserPillar> {
-        public StateMachine<State>.StateMachineSave stateSave;
+        public StateMachineSave<State> stateSave;
         public SerializableParticleSystem particleSystemSave;
         
 		public WeirdLaserPillarSave(WeirdLaserPillar script) : base(script) {

@@ -6,6 +6,7 @@ using Audio;
 using LevelManagement;
 using Saving;
 using StateUtils;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -20,6 +21,7 @@ public class LevelChangeBanner : SingletonSuperspectiveObject<LevelChangeBanner,
         public bool skipSfx;
     }
     public Banner[] banners;
+    [DoNotSave]
     public Dictionary<string, Banner> levelToBanner = new Dictionary<string, Banner>();
     private HashSet<string> bannersPlayed = new HashSet<string>();
     
@@ -230,7 +232,7 @@ public class LevelChangeBanner : SingletonSuperspectiveObject<LevelChangeBanner,
 
     [Serializable]
     public class LevelChangeBannerSave : SaveObject<LevelChangeBanner> {
-        public StateMachine<State>.StateMachineSave state;
+        public StateMachineSave<State> state;
         public string lastBannerLoaded;
         public string queuedBanner;
         public string currentlyPlayingBanner;

@@ -7,6 +7,7 @@ using System.Linq;
 using LevelManagement;
 using Saving;
 using SerializableClasses;
+using SuperspectiveAttributes;
 using Random = UnityEngine.Random;
 
 namespace Audio {
@@ -222,6 +223,7 @@ namespace Audio {
 		Transform soundsRoot;
 		private float timeElapsedBeforeAudioAllowedToPlay = 1f; // Presumably to prevent some buggy behavior when loading into a scene
 
+		[DoNotSave]
 		private readonly Dictionary<AudioName, AudioSettings> defaultSettings = new Dictionary<AudioName, AudioSettings>();
 		private readonly Dictionary<string, AudioJob> audioJobs = new Dictionary<string, AudioJob>();
 		private Dictionary<string, AudioJob> CurrentlyPlayingMusic => audioJobs.Where(kv => kv.Value.audioName.SfxOrMusic() == AudioType.Music).ToDictionary();
@@ -464,7 +466,7 @@ namespace Audio {
 			
 			serializableCustomUpdateAudioJobs = save.customAudioJobs;
 			serializableUpdateAudioOnGameObject = save.audioJobOnGameObjects;
-			Dictionary<string, AudioJob.AudioJobSave> savedAudioJobs = save.audioJobSaves;
+			Dictionary<string, AudioJob.AudioJobSave> savedAudioJobs = save.audioJobs;
 			
 			foreach (var kv in savedAudioJobs) {
 				audioJobs[kv.Key] = kv.Value.LoadAudioJob();
@@ -518,12 +520,12 @@ namespace Audio {
 
 		[Serializable]
 		public class AudioManagerSave : SaveObject<AudioManager> {
-			public SerializableDictionary<string, AudioJob.AudioJobSave> audioJobSaves;
+			public SerializableDictionary<string, AudioJob.AudioJobSave> audioJobs;
 			public SerializableDictionary<string, SuperspectiveReference> customAudioJobs;
 			public SerializableDictionary<string, SuperspectiveReference> audioJobOnGameObjects;
 
 			public AudioManagerSave(AudioManager audioManager) : base(audioManager) {
-				this.audioJobSaves = audioManager.audioJobs.MapValues(value => new AudioJob.AudioJobSave(value));
+				this.audioJobs = audioManager.audioJobs.MapValues(value => new AudioJob.AudioJobSave(value));
 				this.customAudioJobs = audioManager.serializableCustomUpdateAudioJobs;
 				this.audioJobOnGameObjects = audioManager.serializableUpdateAudioOnGameObject;
 			}

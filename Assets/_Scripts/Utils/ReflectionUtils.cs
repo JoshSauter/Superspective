@@ -1,8 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Saving;
 
 namespace SuperspectiveUtils {
-    public static class ReflectionHelper {
+    public static class ReflectionExt {
+        public static string GetReadableTypeName(this Type type) {
+            if (!type.IsGenericType)
+                return type.Name;
+
+            string typeName = type.Name;
+            int backtickIndex = typeName.IndexOf('`');
+            if (backtickIndex > 0)
+                typeName = typeName.Substring(0, backtickIndex);
+
+            Type[] genericArgs = type.GetGenericArguments();
+            string genericArgsJoined = string.Join(", ", genericArgs.Select(GetReadableTypeName));
+            return $"{typeName}<{genericArgsJoined}>";
+        }
+        
+        // Stops when we reach SuperspectiveObject, used for implicit save/load of fields
+        public static IEnumerable<Type> TraverseTypeHierarchy(this Type type) {
+            for (; type != null; type = type.BaseType) {
+                if (type == typeof(SuperspectiveObject)) {
+                    yield return type;
+                    yield break;
+                }
+                yield return type;
+            }
+        }
+        
         //...
         // here are methods described in the post 
         // http://dotnetfollower.com/wordpress/2012/12/c-how-to-set-or-get-value-of-a-private-or-internal-property-through-the-reflection/

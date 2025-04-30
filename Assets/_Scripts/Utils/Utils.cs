@@ -604,7 +604,8 @@ namespace SuperspectiveUtils {
         }
 
         public static bool IsInLoadedScene(this GameObject o) {
-            return LevelManager.instance.loadedLevels.Contains(o.scene.name.ToLevel());
+            Levels level = o.scene.name.ToLevel();
+            return level == Levels.ManagerScene || LevelManager.instance.loadedLevels.Contains(level);
         }
 
         public static bool TaggedAsPlayer(this Component c) {
@@ -794,35 +795,6 @@ namespace SuperspectiveUtils {
             Vector3 AB = b - a;
             Vector3 AV = value - a;
             return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
-        }
-    }
-
-    public class RunningAverage {
-        readonly int maxSize;
-        readonly List<float> samples;
-
-        public RunningAverage(int maxSize) {
-            samples = new List<float>();
-            this.maxSize = maxSize;
-        }
-
-        public void AddValue(float value) {
-            if (samples.Count == maxSize) samples.RemoveAt(0);
-            samples.Add(value);
-        }
-
-        public float Average() {
-            return Average(maxSize);
-        }
-
-        public float Average(int lastNSamples) {
-            float sum = 0;
-            int maxIndex = Mathf.Min(lastNSamples, samples.Count);
-            for (int i = 0; i < maxIndex; i++) {
-                sum += samples[i];
-            }
-
-            return sum / maxIndex;
         }
     }
     
@@ -1491,9 +1463,9 @@ namespace SuperspectiveUtils {
         readonly string id = "";
         readonly bool idSet;
 
-        public DebugLogger(Object context) : this(context, () => true) {}
+        public DebugLogger(Object context, string id) : this(context, id, () => true) {}
 
-        public DebugLogger(Object context, Func<bool> enabled) {
+        public DebugLogger(Object context, string id, Func<bool> enabled) {
             this.enabled = enabled;
             this.context = context;
 
@@ -1501,7 +1473,7 @@ namespace SuperspectiveUtils {
                 ISaveableObject saveableContext = (context as GameObject).GetComponent<ISaveableObject>();
                 if (saveableContext != null) {
                     try {
-                        id = saveableContext.ID;
+                        this.id = id;
                         idSet = true;
                     }
                     catch {

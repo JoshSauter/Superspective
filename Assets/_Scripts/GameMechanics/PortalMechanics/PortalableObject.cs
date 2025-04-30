@@ -6,6 +6,7 @@ using UnityEngine;
 using Saving;
 using SerializableClasses;
 using StateUtils;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 
 namespace PortalMechanics {
@@ -98,6 +99,7 @@ namespace PortalMechanics {
             RaycastGoesThroughPortal,
             RaycastDoesNotGoThroughPortal
         }
+        [DoNotSave]
         private StateMachine<HeldThroughPortalResetState> heldThroughPortalResetState;
         // Time that a cube should be held NOT through a portal before resetting the held through portal
         // As determined by the player's raycast hits
@@ -278,19 +280,22 @@ namespace PortalMechanics {
                 SetPortalHeldThrough(portalHeldThrough);
             }
             
-            heldThroughPortalResetState.LoadFromSave(save.heldThroughPortalResetStateSave);
+            // Here for load ordering purposes only
+            if (heldThroughPortalResetState != null && save.heldThroughPortalResetStateSave != null) {
+                heldThroughPortalResetState.LoadFromSave(save.heldThroughPortalResetStateSave);
+            }
         }
 
         [Serializable]
         public class PortalableObjectSave : SaveObject<PortalableObject> {
             public SuperspectiveReference<Portal, Portal.PortalSave> portalSittingInRef;
             public SuperspectiveReference<Portal, Portal.PortalSave> portalHeldThroughRef;
-            public StateMachine<HeldThroughPortalResetState>.StateMachineSave heldThroughPortalResetStateSave;
+            public StateMachineSave<HeldThroughPortalResetState> heldThroughPortalResetStateSave;
 
             public PortalableObjectSave(PortalableObject script) : base(script) {
                 portalSittingInRef = script._portal;
                 portalHeldThroughRef = script._portalHeldThrough;
-                heldThroughPortalResetStateSave = script.heldThroughPortalResetState.ToSave();
+                heldThroughPortalResetStateSave = script.heldThroughPortalResetState?.ToSave();
             }
         }
 #endregion

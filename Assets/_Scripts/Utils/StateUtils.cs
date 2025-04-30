@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
+using Saving;
+using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityObject = UnityEngine.Object;
@@ -36,6 +38,8 @@ namespace StateUtils {
         public event OnStateChangeEvent OnStateChange;
         public event OnStateChangeEventSimple OnStateChangeSimple;
 
+        private DebugLogger debug;
+
         public T State {
             get {
                 InitIdempotent();
@@ -52,6 +56,8 @@ namespace StateUtils {
         }
 
         private void ForceSetState(T newState) {
+            debug?.Log($"Changing state from {_state} to {newState}");
+            
             float prevTimeSinceStateChanged = _time;
             _time = 0f;
             _prevState = _state;
@@ -114,6 +120,10 @@ namespace StateUtils {
             this._state = startingState;
             this._prevState = _state;
             this._time = 0f;
+
+            if (_owner is SuperspectiveObject so) {
+                debug = so.debug;
+            }
             
             InitIdempotent();
         }
@@ -133,6 +143,10 @@ namespace StateUtils {
             this._time = 0f;
             this.useFixedUpdateInstead = useFixedUpdateInstead;
             this.useRealTime = useRealTime;
+            
+            if (_owner is SuperspectiveObject so) {
+                debug = so.debug;
+            }
             
             InitIdempotent();
         }
@@ -515,16 +529,17 @@ namespace StateUtils {
         }
 
 #region Serialization
+
+        public override string ToString() {
+            return $"({State}|{Time:F3}s)";
+        }
+        
         /// <summary>
         /// Creates a serializable object containing the current state and time since state changed
         /// </summary>
         /// <returns>Serializable object containing the current state and time since state changed</returns>
-        public StateMachineSave ToSave() {
-            StateMachineSave save = new StateMachineSave {
-                timeSinceStateChanged = Time,
-                state = State,
-                prevState = PrevState
-            };
+        public StateMachineSave<T> ToSave() {
+            StateMachineSave<T> save = new StateMachineSave<T>(this);
             return save;
         }
 
@@ -533,7 +548,7 @@ namespace StateUtils {
         /// </summary>
         /// <param name="save">Serializable object containing the state and time since state changed to be loaded</param>
         /// <param name="triggerEvents">Whether or not to trigger OnStateChange events when loading the state</param>
-        public void LoadFromSave(StateMachineSave save, bool triggerEvents = false) {
+        public void LoadFromSave(StateMachineSave<T> save, bool triggerEvents = false) {
             this.InitIdempotent();
             if (triggerEvents) {
                 this.ForceSetState(save.state);
@@ -545,15 +560,25 @@ namespace StateUtils {
             this._time = save.timeSinceStateChanged;
         }
 #endregion
+    }
+    
+    [Serializable]
+    public class StateMachineSave<T> where T : Enum, IConvertible {
+        public StateMachineSave(StateMachine<T> stateMachine) {
+            timeSinceStateChanged = stateMachine.Time;
+            state = stateMachine.State;
+            prevState = stateMachine.PrevState;
+        }
         
-        [Serializable]
-        // Simple serializable class containing the state and time since state changed, for saving and loading
-        public class StateMachineSave {
-            public float timeSinceStateChanged;
-            public T state;
-            public T prevState;
+        public float timeSinceStateChanged;
+        public T state;
+        public T prevState;
+
+        public override string ToString() {
+            return $"({state}|{timeSinceStateChanged:F3}s)";
         }
     }
+
 
     public static class StateMachineExt {
         // Allows creation of StateMachine with a MonoBehaviour owner, which ensures proper event cleanup when the owner is destroyed

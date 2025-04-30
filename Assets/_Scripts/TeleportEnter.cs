@@ -2,6 +2,7 @@
 using MagicTriggerMechanics;
 using UnityEngine;
 
+// TODO: Deprecate this in favor of using Portals w/ invisible render mode
 [RequireComponent(typeof(MagicTrigger))]
 public class TeleportEnter : MonoBehaviour {
     public bool DEBUG;
@@ -15,7 +16,7 @@ public class TeleportEnter : MonoBehaviour {
 
     // Use this for initialization
     void Awake() {
-        debug = new DebugLogger(this, () => DEBUG);
+        debug = new DebugLogger(this, "TeleportEnter (Deprecate this please)", () => DEBUG);
         teleportEnter = GetComponent<Collider>();
         trigger = GetComponent<MagicTrigger>();
 

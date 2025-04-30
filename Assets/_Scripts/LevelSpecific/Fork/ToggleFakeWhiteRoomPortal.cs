@@ -1,10 +1,7 @@
 using PortalMechanics;
 using Saving;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using SuperspectiveUtils;
-using UnityEngine;
 
 namespace LevelSpecific.Fork {
     public class ToggleFakeWhiteRoomPortal : SuperspectiveObject<ToggleFakeWhiteRoomPortal, ToggleFakeWhiteRoomPortal.ToggleFakeWhiteRoomPortalSave> {
@@ -12,37 +9,53 @@ namespace LevelSpecific.Fork {
         public Portal fakeWhiteRoomPortal;
         BladeEdgeDetection edgeDetection;
 
+        private bool bothPortalsDisabled = true;
         bool edgesAreWhite = false;
 
         protected override void Start() {
             base.Start();
             edgeDetection = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
-            realWhiteRoomPortal.gameObject.SetActive(!edgesAreWhite);
-            fakeWhiteRoomPortal.gameObject.SetActive(edgesAreWhite);
+            UpdatePortals();
         }
 
         void Update() {
             edgesAreWhite = edgeDetection.EdgesAreWhite();
-            realWhiteRoomPortal.gameObject.SetActive(!edgesAreWhite);
-            fakeWhiteRoomPortal.gameObject.SetActive(edgesAreWhite);
+            UpdatePortals();
+        }
+        
+        public void SetBothPortalsDisabled(bool value) {
+            bothPortalsDisabled = value;
+            UpdatePortals();
+        }
+
+        void UpdatePortals() {
+            if (bothPortalsDisabled) {
+                realWhiteRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                fakeWhiteRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                return;
+            }
+            if (edgesAreWhite) {
+                realWhiteRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                fakeWhiteRoomPortal.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
+            }
+            else {
+                realWhiteRoomPortal.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
+                fakeWhiteRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+            }
         }
 
 #region Saving
 
         public override void LoadSave(ToggleFakeWhiteRoomPortalSave save) {
-            edgesAreWhite = save.edgesAreWhite;
+            UpdatePortals();
         }
 
         public override string ID => "ToggleFakeWhiteRoomPortal";
 
         [Serializable]
         public class ToggleFakeWhiteRoomPortalSave : SaveObject<ToggleFakeWhiteRoomPortal> {
-            public bool edgesAreWhite;
-
-            public ToggleFakeWhiteRoomPortalSave(ToggleFakeWhiteRoomPortal toggle) : base(toggle) {
-                this.edgesAreWhite = toggle.edgesAreWhite;
-            }
+            public ToggleFakeWhiteRoomPortalSave(ToggleFakeWhiteRoomPortal toggle) : base(toggle) { }
         }
 #endregion
     }

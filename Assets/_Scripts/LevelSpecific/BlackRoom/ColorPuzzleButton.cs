@@ -9,10 +9,10 @@ using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 
-[RequireComponent(typeof(UniqueId), typeof(InteractableObject))]
+[RequireComponent(typeof(UniqueId), typeof(InteractableObject), typeof(SuperspectiveRenderer))]
 public class ColorPuzzleButton : SuperspectiveObject<ColorPuzzleButton, ColorPuzzleButton.ColorPuzzleButtonSave> {
 	public ColorPuzzle colorPuzzle;
-	private new Renderer renderer;
+	private new SuperspectiveRenderer renderer;
 	private InteractableObject interact;
 	private BlackRoomMainConsole MainConsole => BlackRoomMainConsole.instance;
 	private ColorPuzzleManager ColorPuzzleManager => ColorPuzzleManager.instance;
@@ -51,7 +51,7 @@ public class ColorPuzzleButton : SuperspectiveObject<ColorPuzzleButton, ColorPuz
 	    
 	    state = this.StateMachine(State.Off);
 
-	    renderer = GetComponent<Renderer>();
+	    renderer = GetComponent<SuperspectiveRenderer>();
     }
 
     protected override void Start() {
@@ -113,29 +113,29 @@ public class ColorPuzzleButton : SuperspectiveObject<ColorPuzzleButton, ColorPuz
     }
     
     void Update() {
-	    Color curColor = renderer.GetColorFromRenderer();
-	    Color curEmission = renderer.GetHDRColorFromRenderer(EmissionProp);
+	    Color curColor = renderer.GetMainColor();
+	    Color curEmission = renderer.GetColor(EmissionProp);
 	    
 	    switch (state.State) {
 		    case State.Off:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, offColor, Time.deltaTime * LERP_SPEED));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, Color.clear, Time.deltaTime * LERP_SPEED), EmissionProp);
+			    renderer.SetMainColor(Color.Lerp(curColor, offColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetColor(EmissionProp, Color.Lerp(curEmission, Color.clear, Time.deltaTime * LERP_SPEED));
 			    break;
 		    case State.On:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, onColor, Time.deltaTime * LERP_SPEED));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, onEmission, Time.deltaTime * LERP_SPEED), EmissionProp);
+			    renderer.SetMainColor(Color.Lerp(curColor, onColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetColor(EmissionProp, Color.Lerp(curEmission, onEmission, Time.deltaTime * LERP_SPEED));
 			    if (this.InstaSolvePuzzle()) {
 				    state.Set(State.Correct);
 			    }
 			    break;
 		    case State.Incorrect:
 			    float t = 0.5f + 0.5f*Mathf.Cos(state.Time * INCORRECT_FLASH_TIMES * 2 * Mathf.PI/INCORRECT_FLASH_DURATION + Mathf.PI);
-			    renderer.SetColorForRenderer(Color.Lerp(onColor, incorrectColor, t));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(onEmission, incorrectEmission, t), EmissionProp);
+			    renderer.SetMainColor(Color.Lerp(onColor, incorrectColor, t));
+			    renderer.SetColor(EmissionProp, Color.Lerp(onEmission, incorrectEmission, t));
 			    break;
 		    case State.Correct:
-			    renderer.SetColorForRenderer(Color.Lerp(curColor, correctColor, Time.deltaTime * LERP_SPEED));
-			    renderer.SetHDRColorForRenderer(Color.Lerp(curEmission, correctEmission, Time.deltaTime * LERP_SPEED), EmissionProp);
+			    renderer.SetMainColor(Color.Lerp(curColor, correctColor, Time.deltaTime * LERP_SPEED));
+			    renderer.SetColor(EmissionProp, Color.Lerp(curEmission, correctEmission, Time.deltaTime * LERP_SPEED));
 			    break;
 		    default:
 			    throw new ArgumentOutOfRangeException();
@@ -144,17 +144,11 @@ public class ColorPuzzleButton : SuperspectiveObject<ColorPuzzleButton, ColorPuz
     
 #region Saving
 
-	public override void LoadSave(ColorPuzzleButtonSave save) {
-		state.LoadFromSave(save.stateSave);
-	}
+	public override void LoadSave(ColorPuzzleButtonSave save) { }
 
 	[Serializable]
 	public class ColorPuzzleButtonSave : SaveObject<ColorPuzzleButton> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public ColorPuzzleButtonSave(ColorPuzzleButton script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public ColorPuzzleButtonSave(ColorPuzzleButton script) : base(script) { }
 	}
 #endregion
 }

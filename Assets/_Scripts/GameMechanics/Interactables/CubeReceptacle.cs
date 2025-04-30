@@ -8,6 +8,7 @@ using SuperspectiveUtils;
 using Saving;
 using SerializableClasses;
 using StateUtils;
+using SuperspectiveAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -35,6 +36,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     public DissolveObject lockDissolve;
     public float receptacleSize = 1f;
     public float receptableDepth = 0.5f;
+    [SaveUnityObject]
     public PickupObject cubeInReceptacle;
     public bool playSound = true;
     public bool playPuzzleCompleteSound = false;
@@ -67,12 +69,10 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     
     public Transform GetObjectToPlayAudioOn(AudioManager.AudioJob _) => transform;
 
-    protected override void Awake() {
-        AddTriggerZone();
-    }
-    
     protected override void Start() {
         base.Start();
+        
+        AddTriggerZone();
 
         stateMachine = this.StateMachine(State.Empty);
         
@@ -129,6 +129,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
             cubeThatWasInReceptacle.interactable = true;
             cubeThatWasInReceptacle.isReplaceable = true;
             triggerZone.enabled = false;
+            debug.Log($"Trigger zone enabled: {triggerZone.enabled}", true);
 
             cubeThatWasInReceptacle.receptacleHeldIn = null;
             cubeThatWasInReceptacle.RecalculateRigidbodyKinematics();
@@ -136,6 +137,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         });
 
         stateMachine.OnStateChangeSimple += () => {
+            debug.Log($"Switching to {stateMachine.State}", true);
             switch (stateMachine.State) {
                 case State.Empty:
                     OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
@@ -200,6 +202,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         }
         if (playerStillInTriggerZone) return;
         if (other.isTrigger) return;
+        if (!triggerZone.enabled) return;
         
         PickupObject cube = other.gameObject.FindInParentsRecursively<PickupObject>();
         if (cube != null && cubeInReceptacle == null) StartCubeEnter(cube);
@@ -398,7 +401,9 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 
     protected override void OnDisable() {
         base.OnDisable();
-        triggerZone.enabled = false;
+        if (triggerZone) {
+            triggerZone.enabled = false;
+        }
     }
 
     void ReleaseCubeFromReceptacle() {
@@ -423,15 +428,6 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 #region Saving
 
     public override void LoadSave(CubeReceptacleSave save) {
-        stateMachine.LoadFromSave(save.stateSave);
-
-        startRot = save.startRot;
-        endRot = save.endRot;
-
-        startPos = save.startPos;
-        endPos = save.endPos;
-
-        cubeInReceptacle = save.cubeInReceptacle?.GetOrNull();
         if (cubeInReceptacle != null) {
             cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
         }
@@ -439,21 +435,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 
     [Serializable]
     public class CubeReceptacleSave : SaveObject<CubeReceptacle> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        public SuperspectiveReference<PickupObject, PickupObject.PickupObjectSave> cubeInReceptacle;
-        public SerializableVector3 endPos;
-        public SerializableQuaternion endRot;
-        public SerializableVector3 startPos;
-        public SerializableQuaternion startRot;
-
-        public CubeReceptacleSave(CubeReceptacle receptacle) : base(receptacle) {
-            stateSave = receptacle.stateMachine.ToSave();
-            startRot = receptacle.startRot;
-            endRot = receptacle.endRot;
-            startPos = receptacle.startPos;
-            endPos = receptacle.endPos;
-            cubeInReceptacle = receptacle.cubeInReceptacle;
-        }
+        public CubeReceptacleSave(CubeReceptacle receptacle) : base(receptacle) { }
     }
 #endregion
 }

@@ -187,19 +187,16 @@ public class LockedDoor : SuperspectiveObject<LockedDoor, LockedDoor.LockedDoorS
 #region Saving
 
     public override void LoadSave(LockedDoorSave save) {
-        state.LoadFromSave(save.stateSave);
-        DoorOffset = save.curOffset;
+        DoorOffset = save.doorOffset;
         invisibleCollider.enabled = ClosingOrClosed;
     }
 
     [Serializable]
 	public class LockedDoorSave : SaveObject<LockedDoor> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        public float curOffset;
-        
-		public LockedDoorSave(LockedDoor script) : base(script) {
-            this.stateSave = script.state.ToSave();
-            this.curOffset = script.DoorOffset;
+        public float doorOffset;
+
+        public LockedDoorSave(LockedDoor script) : base(script) {
+            doorOffset = script.DoorOffset;
         }
 	}
 #endregion

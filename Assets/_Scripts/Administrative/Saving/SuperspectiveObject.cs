@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SuperspectiveUtils;
 using LevelManagement;
 using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -19,15 +22,19 @@ namespace Saving {
         public Levels Level => !string.IsNullOrEmpty(SceneName) ? LevelManager.enumToSceneName[SceneName] : Levels.InvalidLevel;
         
         [OnInspectorGUI(nameof(UpdateInitialStates))]
+        [DoNotSave]
         public bool gameObjectStartsInactive = false;
+        [DoNotSave]
         public bool scriptStartsDisabled = false;
 
-        [HideInInspector]
+        [HideInInspector, DoNotSave]
         public Vector3 _startPosition;
-        [HideInInspector]
+        [HideInInspector, DoNotSave]
         public Quaternion _startRotation;
         
+        [DoNotSave]
         protected bool hasInitialized = false;
+        [DoNotSave]
         protected bool hasRegistered = false;
 
         /// <summary>
@@ -57,9 +64,10 @@ namespace Saving {
             }
         }
         
+        [DoNotSave]
         public bool DEBUG = false;
         DebugLogger _debug;
-        public DebugLogger debug => _debug ??= new DebugLogger(gameObject, () => DEBUG);
+        public DebugLogger debug => _debug ??= new DebugLogger(gameObject, ID, () => DEBUG);
         
         [SerializeField]
         protected UniqueId _id;
@@ -80,7 +88,7 @@ namespace Saving {
                 
 
                 string suffix = id != null ? $"_{id.uniqueId}" : "";
-                return $"{GetType().Name}{suffix}";
+                return $"{GetType().GetReadableTypeName()}{suffix}";
             }
         }
         
@@ -88,6 +96,21 @@ namespace Saving {
             get {
                 string lastPart = ID.Split('_').Last();
                 return lastPart.IsGuid() ? lastPart : ID;
+            }
+        }
+        
+        // Yeah you shouldn't rely on exception handling for logic flow, but this is the least intrusive way I can add support needed at this moment.
+        public virtual bool HasValidId {
+            get {
+                try {
+                    // Attempt to retrieve the ID
+                    var id = ID;
+                    return true;
+                }
+                catch {
+                    // Safely handle invalid ID
+                    return false;
+                }
             }
         }
 
@@ -106,15 +129,59 @@ namespace Saving {
         public virtual void LoadFromSave(SaveObject save) {
             gameObject.SetActive(save.isGameObjectActive);
             enabled = save.isScriptEnabled;
-            transform.position = save.position;
-            transform.rotation = save.rotation;
+            
+            transform.localRotation = save.localRotation;
+            if (transform is RectTransform rectTransform) {
+                rectTransform.anchoredPosition = save.anchoredPosition;
+                rectTransform.localScale = save.localScale;
+            }
+            else {
+                debug.Log($"Loading local position {save.localPosition}. Current local position is {transform.localPosition}.");
+                transform.localPosition = save.localPosition;
+            }
+
+            // (Serialized Type name, field FieldInfo)
+            List<(string, FieldInfo)> fieldsUpdatedImplicitly = new List<(string, FieldInfo)>();
+            foreach (var kv in save.implicitlySavedFields.Dictionary) {
+                string fieldName = kv.Key;
+                object data = kv.Value;
+                
+                FieldInfo field = this.GetType()
+                    .TraverseTypeHierarchy()
+                    .Select(t => t.GetField(fieldName, SaveSerializationUtils.FIELD_TAGS))
+                    .FirstOrDefault(f => f != null);
+
+                if (field == null) {
+                    debug.LogError($"Field {fieldName} not found on {GetType().GetReadableTypeName()}", true);
+                    continue;
+                }
+                
+                object value = field.GetValue(this);
+                if (!SaveSerializationUtils.TryGetDeserializedData(data, field.FieldType, ref value)) {
+                    debug.LogError($"Field {fieldName} ({field.FieldType.GetReadableTypeName()}) not deserialized from {GetType().GetReadableTypeName()}", true);
+                }
+                field.SetValue(this, value);
+                fieldsUpdatedImplicitly.Add((data?.GetType().GetReadableTypeName() ?? "(null)", field));
+            }
+            debug.Log($"{fieldsUpdatedImplicitly.Count} implicitly loaded fields:\n{GetDebugStringForImplicitlyLoadedFields(fieldsUpdatedImplicitly)}");
         }
 
-        // Anything that doesn't specify types for associated SaveObject shouldn't have anything to actually save to disk
-        // unless the active or enabled state has been modified
+        private string GetDebugStringForImplicitlyLoadedFields(List<(string, FieldInfo)> fields) {
+            return string.Join("\n", fields.Select(f => {
+                string serializedTypeName = f.Item1;
+                FieldInfo field = f.Item2;
+                Type fieldType = field.FieldType;
+                string fieldTypeName = fieldType.GetReadableTypeName();
+
+                string typeDetails = (serializedTypeName == fieldTypeName || serializedTypeName == "(null)") ? fieldTypeName : $"{serializedTypeName} -> {fieldTypeName}";
+                string valueDetails = field.GetValue(this)?.ToString() ?? "(null)";
+                return $"{field.Name} ({typeDetails}) = {valueDetails}";
+            }));
+        }
+
+        [DoNotSave]
         public virtual bool SkipSave {
-            // We only want to skip the save if the active state of the GameObject and the enabled state of the script are the same as the initial state
-            get => !this || (!gameObjectStartsInactive == gameObject.activeSelf && !scriptStartsDisabled == enabled);
+            get => !this;
             set { }
         }
         
@@ -124,6 +191,10 @@ namespace Saving {
         /// </summary>
         protected virtual void Init() {
             SaveManager.BeforeLoad += ResetState;
+        }
+
+        protected virtual void OnDisable() {
+            SaveManager.BeforeLoad -= ResetState;
         }
 
         [ContextMenu("Copy SceneName to clipboard")]
@@ -142,17 +213,19 @@ namespace Saving {
         /// Resets the state of the SuperspectiveObject to its initial state.
         /// Inheritors can override this method to reset their own state.
         ///
-        /// This is called before a save is loaded, so that even objects which do not have an entry in the save file can be reset.
+        /// This is called after a save is loaded, so that even objects which do not have an entry in the save file can be reset.
         /// </summary>
         public virtual void ResetState() {
             if (this == null || gameObject == null) return;
             
-            debug.Log("ResetState for " + gameObject.name);
+            debug.Log("ResetState for " + gameObject.name + $"\nInitial pos: {_startPosition}, current pos: {transform.position}\nInitial rot: {_startRotation}, current rot: {transform.rotation}");
             gameObject.SetActive(!gameObjectStartsInactive);
             enabled = !scriptStartsDisabled;
             transform.position = _startPosition;
             transform.rotation = _startRotation;
         }
+        
+        private string TypeName => this.GetType().GetReadableTypeName();
 
         // Registration is triggered off an event from SaveManagerForScene that happens after Awake but before Start
         // This allows modifications to IDs (such as with MultiDimensionCube) to take effect before registration
@@ -162,11 +235,11 @@ namespace Saving {
             }
             
             if (!SaveManager.Register(this)) {
-                debug.LogError($"Failed to register SaveableObject with id {ID} in scene {SceneName}, destroying self.", true);
+                debug.LogError($"Failed to register {TypeName} with id {ID} in scene {SceneName}, destroying self.", true);
                 Destroy(gameObject);
             }
             else {
-                debug.Log($"Registered SaveableObject with id {ID} in scene {SceneName}");
+                debug.Log($"Registered {TypeName} with id {ID} in scene {SceneName}");
                 hasRegistered = true;
             }
         }
@@ -200,6 +273,8 @@ namespace Saving {
                   LevelManager.instance.currentlyLoadingLevels.Contains(Level))) {
                 return;
             }
+
+            UpdateInitialStates();
 
             LevelManager.instance.BeforeSceneRestoreState += RegisterOnLevelChangeEvents;
             LevelManager.instance.BeforeSceneSerializeState += RegisterOnLevelChangeEvents;
@@ -245,12 +320,8 @@ namespace Saving {
             StartCoroutine(InitCoroutine());
         }
 
-        protected virtual void OnDisable() {
-            SaveManager.BeforeLoad -= ResetState;
-        }
-
         /// <summary>
-        /// Register this SaveableObject with the SaveManagerForScene when the scene changes, then stop listening for scene changes
+        /// Register this SuperspectiveObject with the SaveManagerForScene when the scene changes, then stop listening for scene changes
         /// </summary>
         /// <param name="level">Level switched to, compared against this.Level to know when to trigger</param>
         void RegisterOnLevelChangeEvents(Levels levelSwitchedTo) {
@@ -304,15 +375,15 @@ namespace Saving {
 
         /// <summary>
         /// Generic method to load the save data from the SaveObject.
-        /// This is the method that should be called by SaveManager, not LoadSave.
-        /// LoadSave is just provided so that inheriting classes can override it to load their own save data, and is invoked from this method.
+        /// The similarly named LoadSave is just provided so that inheriting classes can override it to load their own save data, and is invoked from this method.
+        /// Thus, this is the method that should be called by SaveManager, not LoadSave.
         /// </summary>
         /// <param name="savedObject"></param>
         public override void LoadFromSave(SaveObject savedObject) {
             base.LoadFromSave(savedObject);
             
             if (savedObject is not S save) {
-                debug.LogError($"SaveObject is not of type {typeof(S).Name}");
+                debug.LogError($"SaveObject is not of type {typeof(S).GetReadableTypeName()}");
                 return;
             }
 
@@ -322,6 +393,7 @@ namespace Saving {
         // Type-specific method to load the save data from the SaveObject
         public abstract void LoadSave(S save);
 
+        [DoNotSave]
         public override bool SkipSave { get; set; }
     }
 }

@@ -499,20 +499,11 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 
 #region Saving
 
-	public override void LoadSave(MultiDimensionCubeSave save) {
-		stateMachine.LoadFromSave(save.state);
-		materializeMultiplier = save.materializeMultiplier;
-	}
+	public override void LoadSave(MultiDimensionCubeSave save) { }
 
 	[Serializable]
 	public class MultiDimensionCubeSave : SaveObject<MultiDimensionCube> {
-		public StateMachine<State>.StateMachineSave state;
-		public float materializeMultiplier;
-
-		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) : base(multiDimensionCube) {
-			this.state = multiDimensionCube.stateMachine.ToSave();
-			this.materializeMultiplier = multiDimensionCube.materializeMultiplier;
-		}
+		public MultiDimensionCubeSave(MultiDimensionCube multiDimensionCube) : base(multiDimensionCube) { }
 	}
 #endregion
 }

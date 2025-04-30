@@ -393,37 +393,26 @@ namespace LevelSpecific.WhiteRoom {
 #region Saving
 
         public override void LoadSave(CathedralPuzzleSave save) {
-            _hexState = save.hexState;
-            timeSinceHexStateChanged = save.timeSinceHexStateChanged;
             for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
                 floatGradientBuffer[i] = save.floatGradientBuffer[i];
                 colorGradientBuffer[i] = save.colorGradientBuffer[i];
             }
-
-            hasBeenSolvedBefore = save.hasBeenSolvedBefore;
         }
 
-        public override string ID => "WhiteRoomPuzzle2";
+        public override string ID => "CathedralPuzzle";
 
         [Serializable]
         public class CathedralPuzzleSave : SaveObject<CathedralPuzzle> {
             public SerializableColor[] colorGradientBuffer;
             public float[] floatGradientBuffer;
-            public HexState hexState;
-            public float timeSinceHexStateChanged;
-            public bool hasBeenSolvedBefore;
             
             public CathedralPuzzleSave(CathedralPuzzle script) : base(script) {
-                this.hexState = script.hexState;
-                this.timeSinceHexStateChanged = script.timeSinceHexStateChanged;
                 this.floatGradientBuffer = new float[GRADIENT_ARRAY_SIZE];
                 this.colorGradientBuffer = new SerializableColor[GRADIENT_ARRAY_SIZE];
                 for (int i = 0; i < GRADIENT_ARRAY_SIZE; i++) {
                     this.floatGradientBuffer[i] = script.floatGradientBuffer[i];
                     this.colorGradientBuffer[i] = script.colorGradientBuffer[i];
                 }
-
-                this.hasBeenSolvedBefore = script.hasBeenSolvedBefore;
             }
         }
 #endregion

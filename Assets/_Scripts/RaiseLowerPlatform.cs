@@ -222,29 +222,11 @@ namespace LevelSpecific.WhiteRoom {
         
 #region Saving
     
-        public override void LoadSave(RaiseLowerPlatformSave save) {
-            state.LoadFromSave(save.stateSave);
-            raiseLowerSpeed = save.raiseLowerSpeed;
-            maxHeight = save.maxHeight;
-            minHeight = save.minHeight;
-            playSfx = save.playSfx;
-        }
+        public override void LoadSave(RaiseLowerPlatformSave save) { }
 
         [Serializable]
         public class RaiseLowerPlatformSave : SaveObject<RaiseLowerPlatform> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public float raiseLowerSpeed;
-            public float maxHeight;
-            public float minHeight;
-            public bool playSfx;
-
-            public RaiseLowerPlatformSave(RaiseLowerPlatform script) : base(script) {
-                stateSave = script.state.ToSave();
-                raiseLowerSpeed = script.raiseLowerSpeed;
-                maxHeight = script.maxHeight;
-                minHeight = script.minHeight;
-                playSfx = script.playSfx;
-            }
+            public RaiseLowerPlatformSave(RaiseLowerPlatform script) : base(script) { }
         }
 #endregion
 

@@ -180,35 +180,11 @@ public class Panel : SuperspectiveObject<Panel, Panel.PanelSave>, CustomAudioJob
 
 #region Saving
 
-    public override void LoadSave(PanelSave save) {
-        state = save.state;
-        timeSinceStateChange = save.timeSinceStateChange;
-        gemColor = save.gemColor;
-        startColor = save.startColor;
-        endColor = save.endColor;
-        colorLerpTime = save.colorLerpTime;
-        soundActivated = save.soundActivated;
-    }
+    public override void LoadSave(PanelSave save) { }
 
     [Serializable]
     public class PanelSave : SaveObject<Panel> {
-        public SerializableColor startColor;
-        public SerializableColor endColor;
-        public SerializableColor gemColor;
-        public float colorLerpTime;
-        public float timeSinceStateChange;
-        public State state;
-        public bool soundActivated;
-
-        public PanelSave(Panel script) : base(script) {
-            state = script.state;
-            timeSinceStateChange = script.timeSinceStateChange;
-            gemColor = script.gemColor;
-            startColor = script.startColor;
-            endColor = script.endColor;
-            colorLerpTime = script.colorLerpTime;
-            soundActivated = script.soundActivated;
-        }
+        public PanelSave(Panel script) : base(script) { }
     }
 #endregion
 }

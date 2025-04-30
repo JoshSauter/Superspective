@@ -405,19 +405,12 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
 #region Saving
 
     public override void LoadSave(MiniatureMazeSave save) {
-        SelectSolution(save.currentSolutionIndex);
-        state.LoadFromSave(save.stateSave);
+        SelectSolution(currentSolutionIndex);
     }
 
     [Serializable]
 	public class MiniatureMazeSave : SaveObject<MiniatureMaze> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        public int currentSolutionIndex;
-        
-		public MiniatureMazeSave(MiniatureMaze script) : base(script) {
-            this.stateSave = script.state.ToSave();
-            this.currentSolutionIndex = script.currentSolutionIndex;
-        }
+		public MiniatureMazeSave(MiniatureMaze script) : base(script) { }
 	}
 #endregion
 }

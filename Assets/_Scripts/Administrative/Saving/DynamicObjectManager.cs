@@ -134,12 +134,12 @@ namespace Saving {
 
 		public static bool ChangeDynamicObjectLevel(DynamicObject dynamicObject, Levels oldLevel, Levels newLevel) {
 			string id = dynamicObject.ID;
-			if (!allDynamicObjectRecords.ContainsKey(id)) {
+			if (!allDynamicObjectRecords.TryGetValue(id, out DynamicObjectRecord objectRecord)) {
 				Debug.LogError($"Trying to change scene for DynamicObject {dynamicObject}, but there is no entry for id {id}");
 				return false;
 			}
 
-			if (allDynamicObjectRecords[id].level == newLevel) {
+			if (objectRecord.level == newLevel) {
 				Debug.LogWarning($"Trying to change level for DynamicObject {dynamicObject}, but existing entry for id {id} is already in {newLevel}. Nothing to do.");
 				return true;
 			}

@@ -1,9 +1,10 @@
 ﻿
 using System;
 using NaughtyAttributes;
+using Saving;
 using UnityEngine;
 
-public class FlashingColor : MonoBehaviour {
+public class FlashingColor : SuperspectiveObject<FlashingColor, FlashingColor.FlashingColorSave> {
     public enum Mode {
         Additive,
         Subtractive,
@@ -125,4 +126,12 @@ public class FlashingColor : MonoBehaviour {
         timesToFlash = times;
         state = State.Flashing;
     }
+    
+    public override void LoadSave(FlashingColorSave save) { }
+    
+    [Serializable]
+    public class FlashingColorSave : SaveObject<FlashingColor> {
+        public FlashingColorSave(FlashingColor script) : base(script) { }
+    }
+
 }

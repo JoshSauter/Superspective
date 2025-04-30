@@ -10,6 +10,7 @@ using SuperspectiveUtils;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
+// TODO: Probably shouldn't live in UI folder since it's not an overlay
 public class ValueDisplay : SuperspectiveObject<ValueDisplay, ValueDisplay.ValueDisplaySave> {
 	protected const int MIN = -80;
 	protected const int MAX = 80;
@@ -26,6 +27,7 @@ public class ValueDisplay : SuperspectiveObject<ValueDisplay, ValueDisplay.Value
 		get => _displayedValue;
 		private set {
 			value = Mathf.Clamp(value, MIN, MAX);
+			// TODO: Isn't this condition inverted? Same for the SpriteAlpha below
 			if (Mathf.Approximately(value, _displayedValue)) {
 				int valueAsInt = Mathf.CeilToInt(Mathf.Abs(value));
 				currentValueDisplay.sprite = base9Symbols[valueAsInt];

@@ -70,7 +70,7 @@ public class CubeReceptacleDisappearAfterUse : SuperspectiveObject<CubeReceptacl
 
     [Serializable]
 	public class CubeReceptacleDisappearAfterUseSave : SaveObject<CubeReceptacleDisappearAfterUse> {
-        public StateMachine<State>.StateMachineSave stateSave;
+        public StateMachineSave<State> stateSave;
         
 		public CubeReceptacleDisappearAfterUseSave(CubeReceptacleDisappearAfterUse script) : base(script) {
             this.stateSave = script.state.ToSave();

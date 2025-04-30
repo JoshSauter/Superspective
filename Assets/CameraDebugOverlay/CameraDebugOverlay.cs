@@ -3,6 +3,8 @@ using System.Collections;
 
 [ExecuteInEditMode]
 public class CameraDebugOverlay : MonoBehaviour {
+	public Gradient g;
+	
 	[SerializeField]
 	Material mat;
 	//[SerializeField]

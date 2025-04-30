@@ -377,13 +377,8 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 #region Saving
 
     public override void LoadSave(PlayerMovementSave save) {
-        autoRun = save.autoRun;
         jumpMovement.jumpState.LoadFromSave(save.jumpStateSave);
         staircaseMovement.stepState.LoadFromSave(save.stepStateSave);
-        movementEnabledState = save.movementEnabledState;
-            
-        movespeed = save.movespeed;
-        movespeedMultiplier = save.movespeedMultiplier;
 
         thisRigidbody.isKinematic = save.thisRigidbodyKinematic;
         if (!thisRigidbody.isKinematic) {
@@ -395,25 +390,16 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
 
     [Serializable]
     public class PlayerMovementSave : SaveObject<PlayerMovement> {
-        public StateMachine<JumpMovement.JumpState>.StateMachineSave jumpStateSave;
-        public StateMachine<StaircaseMovement.StepState>.StateMachineSave stepStateSave;
+        public StateMachineSave<JumpMovement.JumpState> jumpStateSave;
+        public StateMachineSave<StaircaseMovement.StepState> stepStateSave;
         public SerializableVector3 thisRigidbodyVelocity;
-        public float movespeed;
-        public float movespeedMultiplier;
         public float thisRigidbodyMass;
-        public MovementEnabledState movementEnabledState;
-        public bool autoRun;
         public bool thisRigidbodyKinematic;
         public bool thisRigidbodyUseGravity;
 
         public PlayerMovementSave(PlayerMovement playerMovement) : base(playerMovement) {
-            autoRun = playerMovement.autoRun;
             jumpStateSave = playerMovement.jumpMovement.jumpState.ToSave();
             stepStateSave = playerMovement.staircaseMovement.stepState.ToSave();
-            movementEnabledState = playerMovement.movementEnabledState;
-            
-            movespeed = playerMovement.movespeed;
-            movespeedMultiplier = playerMovement.movespeedMultiplier;
 
             thisRigidbodyVelocity = playerMovement.thisRigidbody.velocity;
             thisRigidbodyKinematic = playerMovement.thisRigidbody.isKinematic;

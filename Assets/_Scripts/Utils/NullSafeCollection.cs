@@ -15,7 +15,7 @@ namespace SuperspectiveUtils {
         protected readonly Func<T, bool> IsValid;
 
         internal NullSafeCollectionBase(Func<T, bool> isValid = null) {
-            IsValid = isValid ?? (obj => obj != null);
+            IsValid = isValid ?? (obj => obj);
         }
 
         protected bool IsInvalid(T obj) => !IsValid(obj);

@@ -112,35 +112,15 @@ public class CameraFollow : SuperspectiveObject<CameraFollow, CameraFollow.Camer
 
 #region Saving
 
-    public override void LoadSave(CameraFollowSave save) {
-        currentLerpSpeed = save.currentLerpSpeed;
-        relativeStartPosition = save.relativeStartPosition;
-        relativePositionLastFrame = save.relativePositionLastFrame;
-        worldPositionLastFrame = save.worldPositionLastFrame;
-        timeSinceCurrentLerpSpeedWasModified = save.timeSinceCurrentLerpSpeedWasModified;
-    }
+    public override void LoadSave(CameraFollowSave save) { }
     
     // There's only one player so we don't need a UniqueId here
     public override string ID => "CameraFollow";
 
     [Serializable]
     public class CameraFollowSave : SaveObject<CameraFollow> {
-        public SerializableVector3 relativePositionLastFrame;
-        public SerializableVector3 relativeStartPosition;
-        public SerializableVector3 worldPositionLastFrame;
-        public float currentLerpSpeed;
-        public float timeSinceCurrentLerpSpeedWasModified;
 
-        public CameraFollowSave(CameraFollow cam) : base(cam) {
-            // Hack to allow parameterless constructor for interpolation function
-            if (cam == null) return;
-            
-            currentLerpSpeed = cam.currentLerpSpeed;
-            relativeStartPosition = cam.relativeStartPosition;
-            relativePositionLastFrame = cam.relativePositionLastFrame;
-            worldPositionLastFrame = cam.worldPositionLastFrame;
-            timeSinceCurrentLerpSpeedWasModified = cam.timeSinceCurrentLerpSpeedWasModified;
-        }
+        public CameraFollowSave(CameraFollow cam) : base(cam) { }
     }
 #endregion
 }

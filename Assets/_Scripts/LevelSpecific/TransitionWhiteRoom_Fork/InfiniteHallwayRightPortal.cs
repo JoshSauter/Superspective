@@ -125,19 +125,13 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
     
 #region Saving
 
-        public override void LoadSave(Save save) {
-            rightHallwayState.LoadFromSave(save.stateSave);
-        }
+        public override void LoadSave(Save save) { }
 
         public override string ID => "InfiniteHallwayRightPortal";
         
         [Serializable]
         public class Save : SaveObject<InfiniteHallwayRightPortal> {
-            public StateMachine<RightHallwayState>.StateMachineSave stateSave;
-            
-            public Save(InfiniteHallwayRightPortal script) : base(script) {
-                stateSave = script.rightHallwayState.ToSave();
-            }
+            public Save(InfiniteHallwayRightPortal script) : base(script) { }
         }
 #endregion
     }

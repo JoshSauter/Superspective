@@ -26,6 +26,8 @@ namespace Saving {
 
         public static event SaveAction BeforeSave;
         public static event SaveAction BeforeLoad;
+        public static event SaveAction AfterSave;
+        public static event SaveAction AfterLoad;
 
         private static float realTimeOfLastLoad = 0f;
         public static float RealtimeSinceLastLoad => Time.realtimeSinceStartup - realTimeOfLastLoad;
@@ -34,7 +36,7 @@ namespace Saving {
         public static float TimeSinceLastLoad => Time.time - timeOfLastLoad;
 
         private static DebugLogger _debug;
-        private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, () => DEBUG);
+        private static DebugLogger debug => _debug ??= new DebugLogger(LevelManager.instance, "SaveManager", () => DEBUG);
 
         public static SaveManagerForLevel GetOrCreateSaveManagerForLevel(Levels level) {
             if (!level.IsValid()) {
@@ -58,6 +60,7 @@ namespace Saving {
             debug.Log($"--- Saving Save File: {saveMetadataWithScreenshot.metadata.displayName} ---");
             BeforeSave?.Invoke();
             return SaveFileUtils.WriteSaveToDisk(saveMetadataWithScreenshot);
+            AfterSave?.Invoke();
         }
 
         /// <summary>
@@ -101,6 +104,7 @@ namespace Saving {
 
             debug.Log("Waiting for scenes to be loaded...");
             await TaskEx.WaitUntil(() => !LevelManager.instance.IsCurrentlySwitchingScenes);
+            await Task.Yield();
             debug.Log("All scenes loaded into memory, loading save...");
 
             // Load records of all DynamicObjects from disk
@@ -143,7 +147,7 @@ namespace Saving {
             // Update the lastLoadedTime for this save
             DateTime now = DateTime.Now;
             saveMetadata.metadata.lastLoadedTimestamp = now.Ticks;
-            SaveFileUtils.WriteMetadataToDisk(saveMetadata);
+            SaveFileUtils.WriteMetadataToDisk(saveMetadata, true);
 
             // Play the level change banner and remove the black overlay
             LevelChangeBanner.instance.PlayBanner(LevelManager.instance.ActiveScene);
@@ -151,6 +155,8 @@ namespace Saving {
             MainCanvas.instance.blackOverlayState = MainCanvas.BlackOverlayState.FadingOut;
             realTimeOfLastLoad = Time.realtimeSinceStartup;
             isCurrentlyLoadingSave = false;
+            
+            AfterLoad?.Invoke();
         }
 
         private static string SettingsFilePath => $"{Application.persistentDataPath}/settings.ini";
@@ -199,6 +205,7 @@ namespace Saving {
         /// <returns>True if the DynamicObject was registered successfully, false otherwise.</returns>
         public static bool RegisterDynamicObject(DynamicObject dynamicObject) {
             cache.AddDynamicObject(dynamicObject);
+            cache.AddSuperspectiveObject(dynamicObject); // DynamicObjects are also SuperspectiveObjects
             
             return GetOrCreateSaveManagerForLevel(dynamicObject.Level).RegisterDynamicObjectInScene(dynamicObject);
         }
@@ -250,13 +257,11 @@ namespace Saving {
             // Unregister the DynamicObject from the old scene and register it in the new scene
             oldLevelSaveManager.UnregisterDynamicObjectInScene(dynamicObj.ID);
             newLevelSaveManager.RegisterDynamicObjectInScene(dynamicObj);
-            // DynamicObjects are also SuperspectiveObjects
-            oldLevelSaveManager.UnregisterSuperspectiveObjectInScene(dynamicObj.ID);
-            newLevelSaveManager.RegisterSuperspectiveObjectInScene(dynamicObj);
 
             // Migrate all associated SuperspectiveObjects to the new scene
             List<SuperspectiveObject> associatedSuperspectiveObjects = GetAllAssociatedSuperspectiveObjects(dynamicObj.AssociationID);
             foreach (SuperspectiveObject associatedSuperspectiveObject in associatedSuperspectiveObjects) {
+                if (associatedSuperspectiveObject == dynamicObj) continue; // DynamicObject already migrated manually
                 oldLevelSaveManager.UnregisterSuperspectiveObjectInScene(associatedSuperspectiveObject.ID);
                 newLevelSaveManager.RegisterSuperspectiveObjectInScene(associatedSuperspectiveObject);
             }
@@ -293,7 +298,7 @@ namespace Saving {
         public static List<SuperspectiveObject> GetAllAssociatedSuperspectiveObjects(string associationId) {
             return GetAllAssociatedIds(associationId).Select(associatedId => {
                 Levels levelForAssociatedId = cache.GetLevelForSuperspectiveObject(associatedId);
-                return GetOrCreateSaveManagerForLevel(levelForAssociatedId).GetSuperspectiveObjectInScene(associatedId).LeftOrDefault();
+                return GetOrCreateSaveManagerForLevel(levelForAssociatedId).GetSuperspectiveObjectInScene(associatedId).LeftOrDefault;
             }).ToList();
         }
 

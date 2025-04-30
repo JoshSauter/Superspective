@@ -459,16 +459,8 @@ namespace PowerTrailMechanics {
 #region Saving
 
 		public override void LoadSave(PowerTrailSave save) {
-			reverseDirection = save.reverseVisibility;
-			useDurationInsteadOfSpeed = save.useDurationInsteadOfSpeed;
-			useSeparateSpeedsForPowerOnOff = save.useSeparateSpeedsForPowerOnOff;
-			targetDuration = save.targetDuration;
-			targetDurationPowerOff = save.targetDurationPowerOff;
-			speed = save.speed;
-			speedPowerOff = save.speedPowerOff;
-			powerTrailRadius = save.powerTrailRadius;
-			distance = save.distance;
-			maxDistance = save.maxDistance;
+			PauseRendering = _pauseRendering;
+			
 			// If we're at min or max distance, bring us in ever so slightly so that it re-finishes the animation
 			if (Mathf.Approximately(distance, maxDistance)) {
 				distance -= 0.00001f;
@@ -480,29 +472,7 @@ namespace PowerTrailMechanics {
 
 		[Serializable]
 		public class PowerTrailSave : SaveObject<PowerTrail> {
-			public bool reverseVisibility;
-			public bool useDurationInsteadOfSpeed;
-			public bool useSeparateSpeedsForPowerOnOff;
-			public float targetDuration;
-			public float targetDurationPowerOff;
-			public float speed;
-			public float speedPowerOff;
-			public float powerTrailRadius;
-			public float distance;
-			public float maxDistance;
-
-			public PowerTrailSave(PowerTrail powerTrail) : base(powerTrail) {
-				this.reverseVisibility = powerTrail.reverseDirection;
-				this.useDurationInsteadOfSpeed = powerTrail.useDurationInsteadOfSpeed;
-				this.useSeparateSpeedsForPowerOnOff = powerTrail.useSeparateSpeedsForPowerOnOff;
-				this.targetDuration = powerTrail.targetDuration;
-				this.targetDurationPowerOff = powerTrail.targetDurationPowerOff;
-				this.speed = powerTrail.speed;
-				this.speedPowerOff = powerTrail.speedPowerOff;
-				this.powerTrailRadius = powerTrail.powerTrailRadius;
-				this.distance = powerTrail.distance;
-				this.maxDistance = powerTrail.maxDistance;
-			}
+			public PowerTrailSave(PowerTrail powerTrail) : base(powerTrail) { }
 		}
 #endregion
 
@@ -533,8 +503,8 @@ namespace PowerTrailMechanics {
 			Gizmos.color = prevColor;
 		}
 
-		Color unselectedColor = new Color(.15f, .85f, .25f);
-		Color selectedColor = new Color(.95f, .95f, .15f);
+		readonly Color unselectedColor = new Color(.15f, .85f, .25f);
+		readonly Color selectedColor = new Color(.95f, .95f, .15f);
 		void DrawGizmosRecursively(Node curNode) {
 			Gizmos.color = powerNodes.selectedNodes.Contains(curNode) ? selectedColor : unselectedColor;
 

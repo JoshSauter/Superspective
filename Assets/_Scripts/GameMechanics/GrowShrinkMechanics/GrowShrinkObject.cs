@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using NaughtyAttributes;
 using PortalMechanics;
 using UnityEngine;
 using Saving;
+using SerializableClasses;
+using Sirenix.OdinInspector;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityStandardAssets.ImageEffects;
@@ -21,6 +22,7 @@ namespace GrowShrink {
         public float minScale, maxScale;
         private float _currentScale = 1;
 
+        private bool hasInitializedStartingScale = false;
         public float startingScale = 1f;
         
         // Change the SSAO to blend the teleport
@@ -53,7 +55,7 @@ namespace GrowShrink {
             }
         }
 
-        [ShowNativeProperty]
+        [ShowInInspector]
         public float CurrentScale {
             get => _currentScale;
             private set {
@@ -66,8 +68,8 @@ namespace GrowShrink {
 
         public enum State {
             NotInHallway,
-            EnteredSmallSide,
-            EnteredLargeSide
+            Growing,
+            Shrinking
         }
 
         public StateMachine<State> state;
@@ -87,8 +89,12 @@ namespace GrowShrink {
         protected override void Start() {
             base.Start();
 
-            if (Math.Abs(startingScale - CurrentScale) > float.Epsilon) {
-                SetScaleDirectly(startingScale);
+            if (!hasInitializedStartingScale) {
+                if (Math.Abs(startingScale - CurrentScale) > float.Epsilon) {
+                    SetScaleDirectly(startingScale);
+                }
+
+                hasInitializedStartingScale = true;
             }
         }
 
@@ -119,9 +125,9 @@ namespace GrowShrink {
         private float MinScale(float scaleFactor) {
             switch (state.State) {
                 case State.NotInHallway:
-                case State.EnteredSmallSide:
+                case State.Growing:
                     return 1f;
-                case State.EnteredLargeSide:
+                case State.Shrinking:
                     return 1 / scaleFactor;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -131,9 +137,9 @@ namespace GrowShrink {
         private float MaxScale(float scaleFactor) {
             switch (state.State) {
                 case State.NotInHallway:
-                case State.EnteredLargeSide:
+                case State.Shrinking:
                     return 1f;
-                case State.EnteredSmallSide:
+                case State.Growing:
                     return scaleFactor;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -141,7 +147,9 @@ namespace GrowShrink {
         }
 
         public void EnteredHallway(GrowShrinkHallway hallway, bool enteredSmallSide) {
-            state.Set(enteredSmallSide ? State.EnteredSmallSide : State.EnteredLargeSide);
+            if (state != State.NotInHallway) return;
+            
+            state.Set(enteredSmallSide ? State.Growing : State.Shrinking);
             minScale = CurrentScale * MinScale(hallway.scaleFactor);
             debug.Log($"minScale = {CurrentScale} * {MinScale(hallway.scaleFactor)}");
             maxScale = CurrentScale * MaxScale(hallway.scaleFactor);
@@ -160,7 +168,7 @@ namespace GrowShrink {
         }
 
         public void SetScaleDirectly(float targetScale, bool adjustPlayerPosition = true) {
-            // Debug.LogWarning($"{ID}: SetScaleDirectly: setting scale to {targetScale} from {currentScale}");
+            //Debug.LogWarning($"{ID}: SetScaleDirectly: setting scale to {targetScale} from {CurrentScale}");
             float targetScaleClamped = Mathf.Clamp01(targetScale);
             // Calculate scale change ratio
             float scaleChangeRatio = targetScale / CurrentScale;
@@ -207,25 +215,25 @@ namespace GrowShrink {
         }
 
 #region Saving
+
         public override void LoadSave(GrowShrinkObjectSave save) {
-            minScale = save.minScale;
-            maxScale = save.maxScale;
-            CurrentScale = save.currentScale;
-            state.LoadFromSave(save.stateSave);
+            transform.localScale = save.transformLocalScale;
+            thisRigidbody.mass = save.thisRigidbodyMass;
+            if (!thisRigidbody.isKinematic) {
+                thisRigidbody.velocity = save.thisRigidbodyVelocity;
+            }
         }
 
         [Serializable]
         public class GrowShrinkObjectSave : SaveObject<GrowShrinkObject> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public float minScale;
-            public float maxScale;
-            public float currentScale;
+            public SerializableVector3 transformLocalScale;
+            public float thisRigidbodyMass;
+            public SerializableVector3 thisRigidbodyVelocity;
 
             public GrowShrinkObjectSave(GrowShrinkObject script) : base(script) {
-                this.minScale = script.minScale;
-                this.maxScale = script.maxScale;
-                this.currentScale = script.CurrentScale;
-                this.stateSave = script.state.ToSave();
+                transformLocalScale = script.transform.localScale;
+                thisRigidbodyMass = script.thisRigidbody.mass;
+                thisRigidbodyVelocity = script.thisRigidbody.velocity;
             }
         }
 

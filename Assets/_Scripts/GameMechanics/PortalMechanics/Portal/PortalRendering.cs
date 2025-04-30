@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using DimensionObjectMechanics;
 using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 
 namespace PortalMechanics {
     public enum PortalRenderMode : byte {
-        Normal = 0,    // Render the portal as normal
-        Debug = 1,     // Render the grid lines showing the location of portals only
-        Invisible = 2, // Don't render the portal surface at all
-        Wall = 3       // Render the portal surface as a wall of flat color
+        Normal = 0,       // Render the portal as normal
+        Debug = 1,        // Render the grid lines showing the location of portals only
+        Invisible = 2,    // Don't render the portal surface at all
+        Wall = 3,         // Render the portal surface as a wall of flat color
+        DimensionWall = 4 // Render the portal as if it were a DimensionWall (RevealerPortals)
     }
     
     public partial class Portal {
@@ -25,11 +27,8 @@ namespace PortalMechanics {
         public static bool forceDebugRenderMode = Application.isEditor;
         public static bool forceVolumetricPortalsOn = false;
         
-        private static Material _sharedPortalMaterial;
-        private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
-        
         [SerializeField]
-        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
+        [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f), DoNotSave]
         private PortalRenderMode _renderMode = PortalRenderMode.Normal;
         public PortalRenderMode RenderMode {
             get => _renderMode;
@@ -39,16 +38,17 @@ namespace PortalMechanics {
             }
         }
         // This is what is actually rendering to the screen, rather than the logical RenderMode		
-        private PortalRenderMode EffectiveRenderMode => forceDebugRenderMode ? PortalRenderMode.Debug : RenderMode;
+        protected virtual PortalRenderMode EffectiveRenderMode => forceDebugRenderMode ? PortalRenderMode.Debug : RenderMode;
         
         public bool PortalRenderingIsEnabled => otherPortal != null &&
                                                 gameObject.activeSelf &&
                                                 RenderMode == PortalRenderMode.Normal &&
                                                 (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
         
-        private bool VolumetricPortalsShouldBeEnabled => forceVolumetricPortalsOn ||
-                                                         PlayerRemainsInPortal ||
-                                                         (otherPortal && otherPortal.TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED);
+        private bool VolumetricPortalsShouldBeEnabled => ExtraVolumetricPortalsEnabledCondition &&
+            (forceVolumetricPortalsOn || PlayerRemainsInPortal || (otherPortal && otherPortal.TimeSinceLastTeleport < TIME_TO_WAIT_AFTER_TELEPORT_BEFORE_VP_IS_DISABLED));
+        // Hook to allow RevealerPortals to add an extra condition for enabling volumetric portals
+        protected virtual bool ExtraVolumetricPortalsEnabledCondition => true;
         
         [SerializeField]
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
@@ -83,6 +83,8 @@ namespace PortalMechanics {
         // Will be same as SharedPortalMaterial in most cases, but may reference a different material if e.g. the Portal is a DimensionObject
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public Material portalMaterial;
+        private static Material _sharedPortalMaterial;
+        private static Material SharedPortalMaterial => _sharedPortalMaterial ??= new Material(Resources.Load<Shader>(SHADER_PATH));
         
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         public bool skipIsVisibleCheck = false; // Useful for very large portals where the isVisible check doesn't work well
@@ -93,22 +95,27 @@ namespace PortalMechanics {
         public SuperspectiveRenderer[] renderers;
         [SerializeField]
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
-        private SuperspectiveRenderer[] volumetricPortals;
+        protected SuperspectiveRenderer[] volumetricPortals;
         
         [SerializeField]
         [TabGroup("Rendering"), GUIColor(0.35f, 0.75f, .9f)]
         private float volumetricPortalThickness = 1f;
         private int consecutiveFramesVPShouldBeDisabled = 0;
+        
+        protected virtual int PortalLayer => SuperspectivePhysics.PortalLayer;
+        protected virtual int VolumetricPortalLayer => SuperspectivePhysics.VolumetricPortalLayer;
 
         private void RenderingAwake() {
             portalMaterial = SharedPortalMaterial;
-            gameObject.layer = SuperspectivePhysics.PortalLayer;
+            gameObject.layer = PortalLayer;
 
             InitializeRenderers();
             foreach (var r in renderers) {
-                r.gameObject.layer = SuperspectivePhysics.PortalLayer;
+                r.gameObject.layer = PortalLayer;
                 r.SetSharedMaterial(portalMaterial);
-                r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, (int)EffectiveRenderMode);
+                if (EffectiveRenderMode != PortalRenderMode.DimensionWall) {
+                    r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, (int)EffectiveRenderMode);
+                }
                 if (changeScale) {
                     r.SetFloat("_PortalScaleFactor", scaleFactor);
                 }
@@ -141,7 +148,7 @@ namespace PortalMechanics {
 
             if (volumetricPortals != null && volumetricPortals.Length > 0) {
                 foreach (var vp in volumetricPortals){
-                    vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
+                    vp.gameObject.layer = VolumetricPortalLayer;
                 }
                 return;
             }
@@ -154,7 +161,7 @@ namespace PortalMechanics {
 
                     vp.enabled = false;
                     vp.SetSharedMaterial(portalMaterial);
-                    vp.gameObject.layer = SuperspectivePhysics.VolumetricPortalLayer;
+                    vp.gameObject.layer = VolumetricPortalLayer;
                     volumetricPortalsList.Add(vp);
                 }
                 catch (Exception e) {
@@ -192,6 +199,18 @@ namespace PortalMechanics {
             SetTexturesForRenderers(renderers);
             SetTexturesForRenderers(volumetricPortals);
         }
+
+        protected void SetMaterial(Material newMaterial) {
+            portalMaterial = newMaterial;
+            
+            foreach (var r in renderers) {
+                r.SetSharedMaterial(newMaterial);
+            }
+            
+            foreach (var vp in volumetricPortals) {
+                vp.SetSharedMaterial(newMaterial);
+            }
+        }
         
         // When a Portal is part of a DimensionObject, a new Material will be created with the DIMENSION_OBJECT keyword enabled
         // This updates our Material reference to the new dimension object material
@@ -202,7 +221,7 @@ namespace PortalMechanics {
         }
         
         // Called before render process begins, either enable or disable the volumetric portals for this frame
-        private void LateUpdate() {
+        protected virtual void LateUpdate() {
             SetEdgeDetectionColorProperties();
             //debug.Log(volumetricPortalsShouldBeEnabled);
             if (VolumetricPortalsShouldBeEnabled) {
@@ -236,7 +255,7 @@ namespace PortalMechanics {
         }
 
         public void SetVolumetricHiddenForPortalRendering(bool hidden) {
-            int targetLayer = hidden ? SuperspectivePhysics.InvisibleLayer : SuperspectivePhysics.VolumetricPortalLayer;
+            int targetLayer = hidden ? SuperspectivePhysics.InvisibleLayer : VolumetricPortalLayer;
             foreach (SuperspectiveRenderer vp in volumetricPortals) {
                 vp.gameObject.layer = targetLayer;
             }
@@ -284,12 +303,18 @@ namespace PortalMechanics {
             Vector3 intoPortal = IntoPortalVector;
 			
             foreach (SuperspectiveRenderer r in renderers) {
-                r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+                if (EffectiveRenderMode != PortalRenderMode.DimensionWall) {
+                    r.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+                }
+
                 r.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
             }
 
             foreach (SuperspectiveRenderer vp in volumetricPortals) {
-                vp.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+                if (EffectiveRenderMode != PortalRenderMode.DimensionWall) {
+                    vp.SetFloat(PORTAL_RENDERING_MODE_PROPERTY, renderMode);
+                }
+
                 vp.SetVector(PORTAL_NORMAL_PROPERTY, intoPortal);
             }
         }
@@ -302,7 +327,7 @@ namespace PortalMechanics {
                     debug.Log("Enabling Volumetric Portal(s) for " + gameObject.name);
                 }
                 foreach (var vp in volumetricPortals) {
-                    if (!PortalRenderingIsEnabled) continue;
+                    if (!(PortalRenderingIsEnabled || EffectiveRenderMode == PortalRenderMode.DimensionWall)) continue;
 					
                     vp.SetSharedMaterial(portalMaterial);
                     vp.enabled = true;

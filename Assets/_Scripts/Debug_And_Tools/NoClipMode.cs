@@ -15,7 +15,7 @@ public class NoClipMode : SingletonSuperspectiveObject<NoClipMode, NoClipMode.No
 
 	float speed;
 	public float middleMouseVerticalSpeed = 4;
-	private bool allowGodModeInNonDevBuild = true;
+	private readonly bool allowGodModeInNonDevBuild = true;
 	public bool noClipOn = false;
 	private const float MIN_SPEED = 0.01f;
 	private const float BASE_SPEED = 25;
@@ -81,8 +81,11 @@ public class NoClipMode : SingletonSuperspectiveObject<NoClipMode, NoClipMode.No
     }
 
 	void ToggleNoClip() {
-		speed = BASE_SPEED;
-		noClipOn = !noClipOn;
+		EnableDisableNoClip(!noClipOn);
+	}
+
+	void EnableDisableNoClip(bool enable) {
+		noClipOn = enable;
 		debug.Log(noClipOn ? "Enabling noclip" : "Disabling noclip");
 		playerMovement.enabled = !noClipOn;
 		playerRigidbody.isKinematic = noClipOn;
@@ -92,18 +95,12 @@ public class NoClipMode : SingletonSuperspectiveObject<NoClipMode, NoClipMode.No
 
 	#region Saving
 	public override void LoadSave(NoClipSave save) {
-		// There's a better way to do this than setting the inverse and then toggling, but w/e
-		noClipOn = !save.noClipOn;
-		ToggleNoClip();
+		EnableDisableNoClip(noClipOn);
 	}
 
 	[Serializable]
 	public class NoClipSave : SaveObject<NoClipMode> {
-		public bool noClipOn;
-
-		public NoClipSave(NoClipMode noClip) : base(noClip) {
-			this.noClipOn = noClip.noClipOn;
-		}
+		public NoClipSave(NoClipMode noClip) : base(noClip) { }
 	}
 	#endregion
 }

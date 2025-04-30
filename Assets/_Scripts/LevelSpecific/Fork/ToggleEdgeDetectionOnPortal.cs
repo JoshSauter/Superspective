@@ -1,13 +1,10 @@
 ﻿using System;
 using MagicTriggerMechanics;
 using PortalMechanics;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Saving;
 
 namespace LevelSpecific.Fork {
-	public class ToggleEdgeDetectionOnPortal : MonoBehaviour {
-		// TODO: Make Saveable
+	public class ToggleEdgeDetectionOnPortal : SuperspectiveObject<ToggleEdgeDetectionOnPortal, ToggleEdgeDetectionOnPortal.ToggleEdgeDetectionOnPortalSave> {
 		public Portal inPortal;
 		public Portal outPortal;
 		public MagicTrigger trigger;
@@ -30,7 +27,9 @@ namespace LevelSpecific.Fork {
 			}
 		}
 
-		void Start() {
+		protected override void Start() {
+			base.Start();
+			
 			inPortalEdgeColors = new EDColors {
 				edgeColorMode = inPortal.edgeColorMode,
 				edgeColor = inPortal.edgeColor,
@@ -55,5 +54,13 @@ namespace LevelSpecific.Fork {
 		void ResetOutPortalEdgeDetection() {
 			Portal.CopyEdgeColors(from: outPortalEdgeColors, outPortal);
 		}
+		
+		public override void LoadSave(ToggleEdgeDetectionOnPortalSave save) { }
+		
+		[Serializable]
+		public class ToggleEdgeDetectionOnPortalSave : SaveObject<ToggleEdgeDetectionOnPortal> {
+			public ToggleEdgeDetectionOnPortalSave(ToggleEdgeDetectionOnPortal script) : base(script) { }
+		}
+
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MagicTriggerMechanics {
+    // TODO: Use BetterTriggers here
     public class CompositeMagicTriggerPiece : MonoBehaviour {
         public CompositeMagicTrigger compositeTrigger;
 

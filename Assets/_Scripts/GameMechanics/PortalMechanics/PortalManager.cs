@@ -16,7 +16,7 @@ namespace PortalMechanics {
 		Camera portalCamera;
 
 		void Awake() {
-			debug = new DebugLogger(this, () => DEBUG);
+			debug = new DebugLogger(this, "PortalManager", () => DEBUG);
 		}
 
 		void Start() {

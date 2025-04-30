@@ -110,7 +110,7 @@ public class Letterboxing : SingletonSuperspectiveObject<Letterboxing, Letterbox
 
 	[Serializable]
 	public class LetterboxingSave : SaveObject<Letterboxing> {
-        public StateMachine<State>.StateMachineSave stateSave;
+        public StateMachineSave<State> stateSave;
         
 		public LetterboxingSave(Letterboxing script) : base(script) {
             this.stateSave = script.state.ToSave();

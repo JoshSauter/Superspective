@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using PoweredObjects;
 using PowerTrailMechanics;
 using UnityEngine;
@@ -57,17 +55,11 @@ public class MiniatureMazeNode : SuperspectiveObject<MiniatureMazeNode, Miniatur
 
 #region Saving
 
-    public override void LoadSave(MiniatureMazeNodeSave save) {
-        state.LoadFromSave(save.stateSave);
-    }
+    public override void LoadSave(MiniatureMazeNodeSave save) { }
 
     [Serializable]
 	public class MiniatureMazeNodeSave : SaveObject<MiniatureMazeNode> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public MiniatureMazeNodeSave(MiniatureMazeNode script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public MiniatureMazeNodeSave(MiniatureMazeNode script) : base(script) { }
 	}
 #endregion
 }

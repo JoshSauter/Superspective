@@ -57,9 +57,7 @@ public class CameraZoom : SuperspectiveObject<CameraZoom, CameraZoom.CameraZoomS
 #region Saving
 
 	public override void LoadSave(CameraZoomSave save) {
-		defaultFOV = save.defaultFOV;
-		mainCamera.fieldOfView = currentFOV;
-		zoomed = save.zoomed;
+		mainCamera.fieldOfView = save.currentFOV;
 	}
 
 	// There's only one player so we don't need a UniqueId here
@@ -67,14 +65,10 @@ public class CameraZoom : SuperspectiveObject<CameraZoom, CameraZoom.CameraZoomS
 
 	[Serializable]
 	public class CameraZoomSave : SaveObject<CameraZoom> {
-		public float defaultFOV;
 		public float currentFOV;
-		public bool zoomed;
 
 		public CameraZoomSave(CameraZoom zoom) : base(zoom) {
-			this.defaultFOV = zoom.defaultFOV;
 			this.currentFOV = zoom.currentFOV;
-			this.zoomed = zoom.zoomed;
 		}
 	}
 #endregion

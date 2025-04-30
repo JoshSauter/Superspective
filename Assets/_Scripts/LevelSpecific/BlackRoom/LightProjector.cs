@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Saving;
 using System;
-using SerializableClasses;
 
 namespace LevelSpecific.BlackRoom {
 	public class LightProjector : SuperspectiveObject<LightProjector, LightProjector.LightProjectorSave> {
@@ -147,44 +146,14 @@ namespace LevelSpecific.BlackRoom {
 #region Saving
 
 		public override void LoadSave(LightProjectorSave save) {
-			currentSize = save.currentSize;
-
-			curSideToSideAnimTime = save.curSideToSideAnimTime;
-			desiredSideToSideAnimTime = save.desiredSideToSideAnimTime;
-				
-			desiredCircumferenceRotation = save.desiredCircumferenceRotation;
-			curCircumferenceRotation = save.curCircumferenceRotation;
-				
-			curUpAndDownAnimTime = save.curUpAndDownAnimTime;
-			desiredUpAndDownAnimTime = save.desiredUpAndDownAnimTime;
-
-			ChangeFrustumSize(1);
+			ChangeFrustumSize(1); // Forces refresh of scale changes
 		}
 
 		public override string ID => $"{gameObject.name}";
 
 		[Serializable]
 		public class LightProjectorSave : SaveObject<LightProjector> {
-			public SerializableQuaternion desiredCircumferenceRotation;
-			public SerializableQuaternion curCircumferenceRotation;
-			public float currentSize;
-			public float curSideToSideAnimTime;
-			public float desiredSideToSideAnimTime;
-			public float curUpAndDownAnimTime;
-			public float desiredUpAndDownAnimTime;
-
-			public LightProjectorSave(LightProjector lightProjector) : base(lightProjector) {
-				this.currentSize = lightProjector.currentSize;
-
-				this.curSideToSideAnimTime = lightProjector.curSideToSideAnimTime;
-				this.desiredSideToSideAnimTime = lightProjector.desiredSideToSideAnimTime;
-
-				this.desiredCircumferenceRotation = lightProjector.desiredCircumferenceRotation;
-				this.curCircumferenceRotation = lightProjector.curCircumferenceRotation;
-
-				this.curUpAndDownAnimTime = lightProjector.curUpAndDownAnimTime;
-				this.desiredUpAndDownAnimTime = lightProjector.desiredUpAndDownAnimTime;
-			}
+			public LightProjectorSave(LightProjector lightProjector) : base(lightProjector) { }
 		}
 #endregion
 	}

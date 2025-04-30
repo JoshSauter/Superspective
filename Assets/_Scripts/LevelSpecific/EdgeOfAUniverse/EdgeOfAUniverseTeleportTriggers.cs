@@ -120,17 +120,11 @@ public class EdgeOfAUniverseTeleportTriggers : SuperspectiveObject<EdgeOfAUniver
     
 #region Saving
 
-    public override void LoadSave(EdgeOfAUniverseTeleportTriggersSave save) {
-        state.LoadFromSave(save.stateSave);
-    }
+    public override void LoadSave(EdgeOfAUniverseTeleportTriggersSave save) { }
 
     [Serializable]
 	public class EdgeOfAUniverseTeleportTriggersSave : SaveObject<EdgeOfAUniverseTeleportTriggers> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public EdgeOfAUniverseTeleportTriggersSave(EdgeOfAUniverseTeleportTriggers script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public EdgeOfAUniverseTeleportTriggersSave(EdgeOfAUniverseTeleportTriggers script) : base(script) { }
 	}
 #endregion
 }

@@ -108,21 +108,13 @@ public class WeightedPressurePlate : SuperspectiveObject<WeightedPressurePlate, 
 
     public void OnBetterTriggerStay(Collider c) { }
 
-    public override void LoadSave(WeightedPressurePlateSave save) {
-        state.LoadFromSave(save.stateSave);
-        targetWeight = save.targetWeight;
-    }
+    public override void LoadSave(WeightedPressurePlateSave save) { }
 
 #region Saving
 		[Serializable]
 		public class WeightedPressurePlateSave : SaveObject<WeightedPressurePlate> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public float targetWeight;
             
-			public WeightedPressurePlateSave(WeightedPressurePlate script) : base(script) {
-                this.targetWeight = script.targetWeight;
-                this.stateSave = script.state.ToSave();
-			}
+			public WeightedPressurePlateSave(WeightedPressurePlate script) : base(script) { }
 		}
 #endregion
 }

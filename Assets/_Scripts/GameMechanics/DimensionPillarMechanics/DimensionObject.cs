@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SuperspectiveUtils;
-using SuperspectiveUtils.ShaderUtils;
 using System.Linq;
 using Saving;
 using System;
 using DimensionObjectMechanics;
 using NaughtyAttributes;
 using PortalMechanics;
+using SuperspectiveAttributes;
 
 public enum VisibilityState {
 	Invisible,
@@ -58,6 +58,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
 	public bool includeInactiveGameObjects = false;
 
+	[DoNotSave]
 	protected bool initialized = false;
 	[Range(0, NUM_CHANNELS-1)]
 	public int channel;
@@ -190,6 +191,9 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 #region Physics
 	void SetupDimensionCollisionLogic() {
 		if (colliders != null && colliders.Length > 0) {
+			if (ignoreCollisionsTriggerZone != null) {
+				Debug.LogError(ignoreCollisionsTriggerZone.FullPath());
+			}
 			ignoreCollisionsTriggerZone = CreateTriggerZone();
 		}
 	}
@@ -255,10 +259,10 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		
 		void CheckMaskIsSet(DimensionObject dimObj) {
 			if (!dimObj.EffectiveMaskSolution.HasBitmaskSet) {
-				Debug.LogWarning("Mask render solution is null for " + dimObj.gameObject.name);
+				Debug.LogWarning("Mask render solution is null for " + dimObj.gameObject.name, dimObj.gameObject);
 				dimObj.ValidateAndApplyChannelLogic();
 				if (!dimObj.EffectiveMaskSolution.HasBitmaskSet) {
-					Debug.LogError("Mask render solution is still null for " + dimObj.gameObject.name);
+					Debug.LogError("Mask render solution is still null for " + dimObj.gameObject.name, dimObj.gameObject);
 				}
 			}
 		}
@@ -679,41 +683,20 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 #region Saving
 
 	public override void LoadSave(DimensionObjectSave save) {
-		treatChildrenAsOneObjectRecursively = save.treatChildrenAsOneObjectRecursively;
-		ignoreChildrenWithDimensionObject = save.ignoreChildrenWithDimensionObject;
-		disableColliderWhileInvisible = save.disableColliderWhileInvisible;
-		initialized = save.initialized;
-		channel = save.channel;
-		reverseVisibilityStates = save.reverseVisibilityStates;
-		ignorePartiallyVisibleLayerChanges = save.ignorePartiallyVisibleLayerChanges;
-		startingVisibilityState = (VisibilityState)save.startingVisibilityState;
-		visibilityState = (VisibilityState)save.visibilityState;
+		startingVisibilityState = save.startingVisibilityState;
+		visibilityState = save.visibilityState;
 		
 		SwitchVisibilityState(visibilityState, true);
 	}
 
 	[Serializable]
 	public class DimensionObjectSave : SaveObject<DimensionObject> {
-		public bool treatChildrenAsOneObjectRecursively;
-		public bool ignoreChildrenWithDimensionObject;
-		public bool disableColliderWhileInvisible;
-		public bool initialized;
-		public int channel;
-		public bool reverseVisibilityStates;
-		public bool ignorePartiallyVisibleLayerChanges;
-		public int startingVisibilityState;
-		public int visibilityState;
+		public VisibilityState startingVisibilityState;
+		public VisibilityState visibilityState;
 
 		public DimensionObjectSave(DimensionObject dimensionObj) : base(dimensionObj) {
-			this.treatChildrenAsOneObjectRecursively = dimensionObj.treatChildrenAsOneObjectRecursively;
-			this.ignoreChildrenWithDimensionObject = dimensionObj.ignoreChildrenWithDimensionObject;
-			this.disableColliderWhileInvisible = dimensionObj.disableColliderWhileInvisible;
-			this.initialized = dimensionObj.initialized;
-			this.channel = dimensionObj.channel;
-			this.reverseVisibilityStates = dimensionObj.reverseVisibilityStates;
-			this.ignorePartiallyVisibleLayerChanges = dimensionObj.ignorePartiallyVisibleLayerChanges;
-			this.startingVisibilityState = (int)dimensionObj.startingVisibilityState;
-			this.visibilityState = (int)dimensionObj.visibilityState;
+			this.startingVisibilityState = dimensionObj.startingVisibilityState;
+			this.visibilityState = dimensionObj.visibilityState;
 		}
 	}
 #endregion

@@ -48,15 +48,9 @@ namespace Deepblack {
 
         [Serializable]
         public class DeepblackObjectSave : SaveObject<DeepblackObject> {
-            public float darkness;
-            
-            public DeepblackObjectSave(DeepblackObject saveableObject) : base(saveableObject) {
-                darkness = saveableObject.darkness;
-            }
+            public DeepblackObjectSave(DeepblackObject saveableObject) : base(saveableObject) { }
         }
 
-        public override void LoadSave(DeepblackObjectSave save) {
-            darkness = save.darkness;
-        }
+        public override void LoadSave(DeepblackObjectSave save) { }
     }
 }

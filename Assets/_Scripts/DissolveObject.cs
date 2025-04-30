@@ -4,6 +4,7 @@ using Saving;
 using SerializableClasses;
 using Sirenix.OdinInspector;
 using StateUtils;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,6 +29,7 @@ namespace DissolveObjects {
         public StateMachine<State> stateMachine;
 
         private bool IsInvisibleDimensionObj => thisDimensionObj != null && thisDimensionObj.visibilityState == VisibilityState.Invisible;
+        [DoNotSave]
         private bool hasSubscribedToResetLayers = false;
         private bool SubscribedToResetLayers {
             get => thisDimensionObj != null && hasSubscribedToResetLayers;
@@ -55,9 +57,6 @@ namespace DissolveObjects {
             
             ApplyLayers(defaultLayers);
         }
-        
-        [ReadOnly]
-        public float timeSinceStateChanged = 0f;
 
         private const float MATERIALIZE_COLLIDER_THRESHOLD = 0.25f;
         private const string DISSOLVE_AMOUNT_PROP = "_DissolveAmount";
@@ -96,6 +95,9 @@ namespace DissolveObjects {
         public UnityEvent onDematerializeBegin;
         public UnityEvent onMaterializeFinish;
         public UnityEvent onDematerializeFinish;
+        
+        [DoNotSave]
+        bool hasInitializedStateMachine = false;
 
         [Button("Dematerialize")]
         public void Dematerialize() {
@@ -174,6 +176,8 @@ namespace DissolveObjects {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            ApplyCurrentState();
         }
 
         protected override void OnEnable() {
@@ -182,7 +186,6 @@ namespace DissolveObjects {
             InitializeStateMachine();
         }
 
-        bool hasInitializedStateMachine = false;
         public void InitializeStateMachine() {
             if (hasInitializedStateMachine) return;
             hasInitializedStateMachine = true;
@@ -285,48 +288,22 @@ namespace DissolveObjects {
                     
                 renderer.SetPropertyBlock(mpb);
             }
+
+            foreach (var renderer in renderers) {
+                if (!DEBUG) continue;
+                renderer.GetPropertyBlock(mpb);
+            }
         }
         
 #region Saving
 
-        public override void LoadSave(DissolveObjectSave save) {
-            stateMachine.LoadFromSave(save.stateSave);
-            materializeTime = save.materializeTime;
-            dissolveAmount = save.dissolveAmount;
-            burnSize = save.burnSize;
-            burnColor = save.burnColor;
-            burnEmissionBrightness = save.burnEmissionBrightness;
-            advancedOptions = save.advancedOptions;
-            dissolveAnimationCurve = save.dissolveAnimationCurve;
-            cachedLayers = (int[])save.cachedLayers.Clone();
-        }
+        public override void LoadSave(DissolveObjectSave save) { }
 
         [Serializable]
         public class DissolveObjectSave : SaveObject<DissolveObject> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public float materializeTime;
-            public float physicsThreshold;
-            public float dissolveAmount;
-            public float burnSize;
-            public SerializableColor burnColor;
-            public float burnEmissionBrightness;
-            public bool advancedOptions;
-            public SerializableAnimationCurve dissolveAnimationCurve;
-            public int[] cachedLayers;
-            
-            public DissolveObjectSave(DissolveObject dissolveObject) : base(dissolveObject) {
-                this.stateSave = dissolveObject.stateMachine.ToSave();
-                this.materializeTime = dissolveObject.materializeTime;
-                this.physicsThreshold = dissolveObject.physicsThreshold;
-                this.dissolveAmount = dissolveObject.dissolveAmount;
-                this.burnSize = dissolveObject.burnSize;
-                this.burnColor = dissolveObject.burnColor;
-                this.burnEmissionBrightness = dissolveObject.burnEmissionBrightness;
-                this.advancedOptions = dissolveObject.advancedOptions;
-                this.dissolveAnimationCurve = dissolveObject.dissolveAnimationCurve;
-                this.cachedLayers = (int[])dissolveObject.cachedLayers.Clone();
-            }
+            public DissolveObjectSave(DissolveObject dissolveObject) : base(dissolveObject) { }
         }
+
 #endregion
     }
 }

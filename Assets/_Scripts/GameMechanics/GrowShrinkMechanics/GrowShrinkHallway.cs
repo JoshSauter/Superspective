@@ -384,17 +384,14 @@ namespace GrowShrink {
 #region Saving
 
         public override void LoadSave(GrowShrinkHallwaySave save) {
-            scaleFactor = save.scaleFactor;
             growShrinkObjects = save.growShrinkObjects;
         }
 
         [Serializable]
         public class GrowShrinkHallwaySave : SaveObject<GrowShrinkHallway> {
-            public float scaleFactor;
             public SerializableDictionary<string, SuperspectiveReference<GrowShrinkObject>> growShrinkObjects;
 
             public GrowShrinkHallwaySave(GrowShrinkHallway script) : base(script) {
-                scaleFactor = script.scaleFactor;
                 growShrinkObjects = script.growShrinkObjects;
             }
         }

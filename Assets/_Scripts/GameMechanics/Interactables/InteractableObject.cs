@@ -107,16 +107,10 @@ public class InteractableObject : SuperspectiveObject<InteractableObject, Intera
         return this == other;
     }
 
-    public override void LoadSave(InteractableObjectSave save) {
-        state = save.state;
-    }
+    public override void LoadSave(InteractableObjectSave save) { }
 
     [Serializable]
     public class InteractableObjectSave : SaveObject<InteractableObject> {
-        public InteractableState state;
-        
-        public InteractableObjectSave(InteractableObject script) : base(script) {
-            this.state = script.state;
-        }
+        public InteractableObjectSave(InteractableObject script) : base(script) { }
     }
 }

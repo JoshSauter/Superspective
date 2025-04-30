@@ -42,16 +42,11 @@ public class AscensionPillar : SuperspectiveObject<AscensionPillar, AscensionPil
 #region Saving
 
     public override void LoadSave(AscensionPillarSave save) {
-        state.LoadFromSave(save.stateSave);
     }
 
     [Serializable]
 	public class AscensionPillarSave : SaveObject<AscensionPillar> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public AscensionPillarSave(AscensionPillar script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public AscensionPillarSave(AscensionPillar script) : base(script) { }
 	}
 #endregion
 }

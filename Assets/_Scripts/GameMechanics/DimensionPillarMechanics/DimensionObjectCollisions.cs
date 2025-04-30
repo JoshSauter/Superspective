@@ -1,4 +1,5 @@
-﻿using DimensionObjectMechanics;
+﻿using System.Collections;
+using DimensionObjectMechanics;
 using Saving;
 using SuperspectiveUtils;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 		base.Init();
 
 		if (id == null) id = gameObject.GetOrAddComponent<UniqueId>();
+		
+		//SaveManager.AfterSave += 1
 	}
 	
 	void Update() {
@@ -18,9 +21,17 @@ public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 			debug.LogError("DimensionObjectCollisions script is missing a DimensionObject reference, self-destructing.", true);
 			Destroy(gameObject);
 		}
+
+		transform.localPosition = Vector3.zero;
 	}
 
 	public void OnBetterTriggerEnter(Collider other) {
+		if (SaveManager.isCurrentlyLoadingSave) {
+			// Handle it after the game is loaded
+			dimensionObject.debug.LogWarning($"Game is loading, waiting to set collision with {other.FullPath()}.");
+			StartCoroutine(AfterGameLoaded(other));
+			return;
+		}
 		if (GameManager.instance.IsCurrentlyLoading) return;
 		if (dimensionObject == null) return;
 
@@ -32,4 +43,14 @@ public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 	public void OnBetterTriggerExit(Collider other) {}
 
 	public void OnBetterTriggerStay(Collider c) {}
+
+	private IEnumerator AfterGameLoaded(Collider other) {
+		yield return new WaitWhile(() => SaveManager.isCurrentlyLoadingSave);
+		if (dimensionObject == null || other == null) yield break;
+
+		dimensionObject.debug.LogWarning($"Game has loaded, setting collision with {other.FullPath()}.");
+		foreach (Collider thisCollider in dimensionObject.colliders) {
+			DimensionObjectManager.instance.SetCollision(other, thisCollider, dimensionObject.ID);
+		}
+	}
 }

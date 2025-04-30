@@ -323,41 +323,17 @@ namespace TheEntity {
 #region Saving
 
         public override void LoadSave(TheEntity_GrowShrinkIntroSave save) {
-            state.LoadFromSave(save.stateSave);
-            resetPlayerState.LoadFromSave(save.resetPlayerStateSave);
-            startPos = save.startPos;
-            desiredPos = save.desiredPos;
-            staticWallStartX = save.staticWallStartX;
-            hasPlayedBanner = save.hasPlayedBanner;
             particleSystemTransform.localScale = save.particleSystemTransformLocalScale;
-            distanceTraveled = save.distanceTraveled;
-            currentIndex = save.currentIndex;
 
             SetActive();
         }
 
         [Serializable]
         public class TheEntity_GrowShrinkIntroSave : SaveObject<TheEntity_GrowShrinkIntro> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            public StateMachine<ResetPlayerState>.StateMachineSave resetPlayerStateSave;
-            public SerializableVector3 startPos;
-            public SerializableVector3 desiredPos;
-            public float staticWallStartX;
-            public bool hasPlayedBanner;
             public SerializableVector3 particleSystemTransformLocalScale;
-            public float distanceTraveled;
-            public int currentIndex;
 
             public TheEntity_GrowShrinkIntroSave(TheEntity_GrowShrinkIntro script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.resetPlayerStateSave = script.resetPlayerState.ToSave();
-                this.startPos = script.startPos;
-                this.desiredPos = script.desiredPos;
-                this.staticWallStartX = script.staticWallStartX;
-                this.hasPlayedBanner = script.hasPlayedBanner;
                 this.particleSystemTransformLocalScale = script.particleSystemTransform.localScale;
-                this.distanceTraveled = script.distanceTraveled;
-                this.currentIndex = script.currentIndex;
             }
         }
 

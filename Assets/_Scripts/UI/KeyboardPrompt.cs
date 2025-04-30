@@ -73,20 +73,20 @@ public class KeyboardPrompt : MonoBehaviour {
         bool SettingMatchesKey(KeybindSetting setting) {
             KeyboardAndMouseInput compareTo = setting.defaultValue;
             if (defaultKeyboardAndMouseInput.isLeft) {
-                if (compareTo.primary != null && compareTo.primary.isLeft && compareTo.primary.LeftOrDefault() == defaultKeyboardAndMouseInput.LeftOrDefault()) {
+                if (compareTo.primary != null && compareTo.primary.isLeft && compareTo.primary.LeftOrDefault == defaultKeyboardAndMouseInput.LeftOrDefault) {
                     return true;
                 }
-                else if (compareTo.secondary != null && compareTo.secondary.isLeft && compareTo.secondary.LeftOrDefault() == defaultKeyboardAndMouseInput.LeftOrDefault()) {
+                else if (compareTo.secondary != null && compareTo.secondary.isLeft && compareTo.secondary.LeftOrDefault == defaultKeyboardAndMouseInput.LeftOrDefault) {
                     return true;
                 }
 
                 return false;
             }
             else {
-                if (compareTo.primary != null && compareTo.primary.isRight && compareTo.primary.RightOrDefault() == defaultKeyboardAndMouseInput.RightOrDefault()) {
+                if (compareTo.primary != null && compareTo.primary.isRight && compareTo.primary.RightOrDefault == defaultKeyboardAndMouseInput.RightOrDefault) {
                     return true;
                 }
-                else if (compareTo.secondary != null && compareTo.secondary.isRight && compareTo.secondary.RightOrDefault() == defaultKeyboardAndMouseInput.RightOrDefault()) {
+                else if (compareTo.secondary != null && compareTo.secondary.isRight && compareTo.secondary.RightOrDefault == defaultKeyboardAndMouseInput.RightOrDefault) {
                     return true;
                 }
 

@@ -337,9 +337,9 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
 		[Serializable]
 		public class ElevatorButtonSave : SaveObject<ElevatorButton> {
-			public StateMachine<ButtonState>.StateMachineSave buttonStateSave;
-			public StateMachine<ElevatorState>.StateMachineSave elevatorStateSave;
-			public StateMachine<FloorState>.StateMachineSave floorStateSave;
+			public StateMachineSave<ButtonState> buttonStateSave;
+			public StateMachineSave<ElevatorState> elevatorStateSave;
+			public StateMachineSave<FloorState> floorStateSave;
 
 			public ElevatorButtonSave(ElevatorButton script) : base(script) {
 				this.buttonStateSave = script.buttonState.ToSave();

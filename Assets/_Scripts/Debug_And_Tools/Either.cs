@@ -53,14 +53,10 @@ namespace Library.Functional {
 
             if (!isLeft) rightAction(right);
         }
+        
+        public TL LeftOrDefault => Match(l => l, r => default);
 
-        public TL LeftOrDefault() {
-            return Match(l => l, r => default);
-        }
-
-        public TR RightOrDefault() {
-            return Match(l => default, r => r);
-        }
+        public TR RightOrDefault => Match(l => default, r => r);
 
         public static implicit operator Either<TL, TR>(TL left) {
             return new Either<TL, TR>(left);

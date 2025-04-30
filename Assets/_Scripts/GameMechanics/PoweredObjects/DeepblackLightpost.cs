@@ -14,13 +14,11 @@ public class DeepblackLightpost : Lightpost {
 
     private Color startColor;
     
-    protected void Awake() {
+    protected override void Awake() {
+        base.Awake();
+        
         if (deepblack == null) {
             deepblack = gameObject.GetOrAddComponent<DeepblackObject>();
-        }
-
-        if (r == null) {
-            r = this.GetOrAddComponent<SuperspectiveRenderer>();
         }
 
         startColor = r.GetMainColor();

@@ -55,7 +55,7 @@ public class SceneViewFX : Singleton<SceneViewFX> {
 	}
 
 	void OnEnable() {
-		debug = new DebugLogger(this, () => DEBUG);
+		debug = new DebugLogger(this, "SceneViewFX", () => DEBUG);
 
 		DebugPrintState("OnEnable()");
 		if (instance != null && instance != this) {

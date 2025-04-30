@@ -54,13 +54,20 @@ namespace LevelSpecific.BlackRoom {
 			}
 			projectorTurnedOn = false;
 		}
+		
+		void RestoreProjector() {
+			if (projectorTurnedOn) {
+				TurnOnProjector();
+			}
+			else {
+				TurnOffProjector();
+			}
+		}
 
 #region Saving
 
 		public override void LoadSave(ProjectorPowerButtonSave save) {
-			if (save.projectorTurnedOn) {
-				TurnOnProjector();
-			}
+			RestoreProjector();
 		}
 
 		public override bool SkipSave => !gameObject.activeInHierarchy;
@@ -69,11 +76,7 @@ namespace LevelSpecific.BlackRoom {
 
 		[Serializable]
 		public class ProjectorPowerButtonSave : SaveObject<ProjectorPowerButton> {
-			public bool projectorTurnedOn;
-
-			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) : base(projectorPowerButton) {
-				this.projectorTurnedOn = projectorPowerButton.projectorTurnedOn;
-			}
+			public ProjectorPowerButtonSave(ProjectorPowerButton projectorPowerButton) : base(projectorPowerButton) { }
 		}
 #endregion
 	}

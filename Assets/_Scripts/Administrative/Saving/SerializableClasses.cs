@@ -1,17 +1,15 @@
 ﻿using Saving;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Library.Functional;
-using NovaMenuUI;
 using Sirenix.Utilities;
 using SuperspectiveUtils;
-using UnityEngine.Serialization;
 
 namespace SerializableClasses {
 	using DynamicObjectReference = Either<DynamicObject, DynamicObject.DynamicObjectSave>;
+	
 	/// <summary>
 	/// Since unity doesn't flag the Vector2 as serializable, we
 	/// need to create our own version. This one will automatically convert
@@ -30,7 +28,7 @@ namespace SerializableClasses {
 
 		// Returns a string representation of the object
 		public override string ToString() {
-			return string.Format("[{0}, {1}]", x, y);
+			return $"[{x}, {y}]";
 		}
 
 		// Automatic conversion from SerializableVector2 to Vector2
@@ -116,10 +114,9 @@ namespace SerializableClasses {
 
 	[Serializable]
 	public class SerializableColor {
-
 		public float[] colorStore = new float[4] { 1F, 1F, 1F, 1F };
 		public Color Color {
-			get { return new Color(colorStore[0], colorStore[1], colorStore[2], colorStore[3]); }
+			get => new(colorStore[0], colorStore[1], colorStore[2], colorStore[3]);
 			set { colorStore = new float[4] { value.r, value.g, value.b, value.a }; }
 		}
 
@@ -345,6 +342,10 @@ namespace SerializableClasses {
 	/// </summary>
 	[Serializable]
 	public class SuperspectiveReference {
+		public override string ToString() {
+			return referencedObjId;
+		}
+		
 		public string referencedObjId;
 		
 		// Implicit SerializableReference creation from SaveableObject
@@ -390,7 +391,7 @@ namespace SerializableClasses {
 	[Serializable]
 	public class SuperspectiveReference<T> : SuperspectiveReference where T : SuperspectiveObject {
 		public T GetOrNull() {
-			return SaveManager.GetSuperspectiveObjectById(referencedObjId).LeftOrDefault() as T;
+			return SaveManager.GetSuperspectiveObjectById(referencedObjId).LeftOrDefault as T;
 		}
 
 		// Implicit SerializableReference creation from SaveableObject
@@ -398,6 +399,10 @@ namespace SerializableClasses {
 			return obj != null ? new SuperspectiveReference<T> {
 				referencedObjId = obj.ID
 			} : null;
+		}
+
+		public override string ToString() {
+			return $"{typeof(T).GetReadableTypeName()}: {referencedObjId}";
 		}
 	}
 
@@ -423,11 +428,11 @@ namespace SerializableClasses {
 			set {
 				if (value != null) {
 					value.MatchAction(
-						saveableObject => {
-							referencedObjId = saveableObject.ID;
+						superspectiveObject => {
+							referencedObjId = superspectiveObject.ID;
 						},
-						serializedSaveObject => {
-							referencedObjId = serializedSaveObject.ID;
+						saveObject => {
+							referencedObjId = saveObject.ID;
 						}
 					);
 				}
@@ -466,11 +471,16 @@ namespace SerializableClasses {
 		}
 
 		// Only use this if you know you have a SerializableReference of a particular type:
-		// Actually don't use this unless you really need to (like for a migration script)
+		// Actually don't use this unless you really need to; like for a migration script,
+		// or the serialization/deserialization reflection code for the save system, which checks the typing before calling this
 		public static SuperspectiveReference<T, S> FromGenericReference(SuperspectiveReference reference) {
 			return new SuperspectiveReference<T, S>() {
 				referencedObjId = reference.referencedObjId
 			};
+		}
+
+		public override string ToString() {
+			return $"{typeof(T).GetReadableTypeName()}|{typeof(S).GetReadableTypeName()}: {referencedObjId}";
 		}
 	}
 
@@ -542,11 +552,13 @@ namespace SerializableClasses {
 	public class SerializableParticleSystem {
 		public uint randomSeed;
 		public float time;
+		public bool wasPlaying;
 
 		public static implicit operator SerializableParticleSystem(ParticleSystem ps) {
 			return new SerializableParticleSystem {
 				randomSeed = ps.randomSeed,
-				time = ps.time
+				time = ps.time,
+				wasPlaying = ps.isPlaying
 			};
 		}
 	}
@@ -555,155 +567,17 @@ namespace SerializableClasses {
 		public static void LoadFromSerializable(this ParticleSystem ps, SerializableParticleSystem serializable) {
 			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 			ps.randomSeed = serializable.randomSeed;
-			ps.Simulate(serializable.time);
-			ps.Play();
-		}
-	}
+        
+			// Simulate to the correct time
+			ps.Simulate(serializable.time, true, true, true);
 
-	public abstract class SerializableSetting {
-		public string key;
-		public string value;
-
-		public abstract void RestoreSettingValue(Setting setting);
-
-		public static SerializableSetting From(Setting setting) {
-			switch (setting) {
-				case SmallIntSetting smallIntSetting:
-					return SerializableFloatSetting.From(smallIntSetting);
-				case FloatSetting floatSetting:
-					return SerializableFloatSetting.From(floatSetting);
-				case DropdownSetting dropdownSetting:
-					return SerializableDropdownSetting.From(dropdownSetting);
-				case KeybindSetting keybindSetting:
-					return SerializableKeybindSetting.From(keybindSetting);
-				case TextAreaSetting textAreaSetting:
-					return SerializableTextAreaSetting.From(textAreaSetting);
-				case ToggleSetting toggleSetting:
-					return SerializableToggleSetting.From(toggleSetting);
-				default: throw new ArgumentOutOfRangeException($"{setting.GetType()} not handled in switch statement");
+			// Restore play/pause state properly
+			if (serializable.wasPlaying && serializable.time < ps.main.duration) {
+				ps.Play(true);
 			}
-		}
-	}
-
-	[Serializable]
-	public class SerializableFloatSetting : SerializableSetting {
-		[FormerlySerializedAs("value")]
-		public float floatValue;
-
-		public override void RestoreSettingValue(Setting setting) {
-			if (setting is FloatSetting fs) {
-				fs.value = floatValue;
+			else {
+				ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 			}
-		}
-
-		public static SerializableSetting From(FloatSetting setting) {
-			return new SerializableFloatSetting() {
-				key = setting.key,
-				floatValue = setting.value
-			};
-		}
-	}
-
-	[Serializable]
-	public class SerializableDropdownSetting : SerializableSetting {
-		public List<string> selectedKeys;
-
-		public override void RestoreSettingValue(Setting setting) {
-			if (setting is DropdownSetting ds) {
-				ds.dropdownSelection.RestoreSelection(selectedKeys, (key, option) => option.DisplayName == key);
-			}
-		}
-
-		public static SerializableSetting From(DropdownSetting setting) {
-			return new SerializableDropdownSetting() {
-				key = setting.key,
-				selectedKeys = setting.dropdownSelection.allSelections.Keys.ToList()
-			};
-		}
-	}
-
-	[Serializable]
-	public class SerializableKeybindSetting : SerializableSetting {
-		public string primary;
-		public string secondary;
-
-		public override void RestoreSettingValue(Setting setting) {
-			if (setting is not KeybindSetting kbs) return;
-
-			Either<int, KeyCode> FromString(string s) {
-				switch (s) {
-					case "":
-						return null;
-					case "Left Mouse":
-						return new Either<int, KeyCode>(0);
-					case "Right Mouse":
-						return new Either<int, KeyCode>(1);
-					case "Middle Mouse":
-						return new Either<int, KeyCode>(2);
-					default: {
-						if (s.StartsWith("MB") && int.TryParse(s.Substring(2), out int mouseButton)) {
-							// We display the mouse button as 1 higher so subtract 1 (e.g. "MB4" actually has a mouse button value of 3)
-							return new Either<int, KeyCode>(mouseButton - 1);
-						}
-						else if (KeyCode.TryParse(s, out KeyCode key)) {
-							return new Either<int, KeyCode>(key);
-						}
-						else {
-							return null;
-						}
-					}
-				}
-			}
-
-			Either<int, KeyCode> primaryKeybind = FromString(this.primary);
-			Either<int, KeyCode> secondaryKeybind = FromString(this.secondary);
-
-			kbs.value.SetMapping(primaryKeybind, secondaryKeybind);
-		}
-
-		public static SerializableSetting From(KeybindSetting setting) {
-			return new SerializableKeybindSetting() {
-				key = setting.key,
-				primary = setting.value.displayPrimary,
-				secondary = setting.value.displaySecondary
-			};
-		}
-	}
-
-	[Serializable]
-	public class SerializableTextAreaSetting : SerializableSetting {
-		public string text;
-
-		public override void RestoreSettingValue(Setting setting) {
-			if (setting is not TextAreaSetting tas) return;
-			
-			tas.Text = text;
-		}
-
-		public static SerializableSetting From(TextAreaSetting setting) {
-			return new SerializableTextAreaSetting() {
-				key = setting.key,
-				text = setting.Text
-			};
-		}
-	}
-
-	[Serializable]
-	public class SerializableToggleSetting : SerializableSetting {
-		[FormerlySerializedAs("value")]
-		public bool boolValue;
-
-		public override void RestoreSettingValue(Setting setting) {
-			if (setting is not ToggleSetting ts) return;
-			
-			ts.value = boolValue;
-		}
-
-		public static SerializableSetting From(ToggleSetting setting) {
-			return new SerializableToggleSetting() {
-				key = setting.key,
-				boolValue = setting.value
-			};
 		}
 	}
 }

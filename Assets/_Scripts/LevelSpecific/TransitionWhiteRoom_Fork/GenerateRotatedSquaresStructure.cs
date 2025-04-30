@@ -1,11 +1,10 @@
 ﻿using SuperspectiveUtils;
-using NaughtyAttributes;
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace LevelSpecific.TransitionWhiteRoom_Fork {
+	// Not used, but generates some cool looking structures. 
 	public class GenerateRotatedSquaresStructure : MonoBehaviour {
 		public GameObject copy;
 		public float rotationAngle = 15f;
@@ -28,8 +27,7 @@ namespace LevelSpecific.TransitionWhiteRoom_Fork {
 
 				Debug.LogError(scale);
 
-				GameObject go = Instantiate(copy);
-				//go.transform.SetParent(transform);
+				GameObject go = Instantiate(copy, transform, true);
 				go.transform.position = curPos;
 				go.transform.rotation = Quaternion.Euler(0, curRotation, 0);
 				go.transform.localScale = new Vector3(scale, heightOfEachStep, scale);

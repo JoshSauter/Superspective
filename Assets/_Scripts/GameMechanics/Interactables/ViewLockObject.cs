@@ -133,17 +133,14 @@ public class ViewLockObject : SuperspectiveObject<ViewLockObject, ViewLockObject
     }
 
     public override void LoadSave(ViewLockObjectSave save) {
-        _state = save.state;
         hitbox.enabled = save.colliderEnabled;
     }
 
     [Serializable]
     public class ViewLockObjectSave : SaveObject<ViewLockObject> {
-        public PlayerLook.ViewLockState state;
         public bool colliderEnabled;
 
         public ViewLockObjectSave(ViewLockObject viewLockObject) : base(viewLockObject) {
-            state = viewLockObject.state;
             colliderEnabled = viewLockObject.hitbox.enabled;
         }
     }

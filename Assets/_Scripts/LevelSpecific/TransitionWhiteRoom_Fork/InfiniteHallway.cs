@@ -4,10 +4,10 @@ using PortalMechanics;
 using UnityEngine;
 using Saving;
 using StateUtils;
-using SuperspectiveUtils;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(UniqueId))]
-public class InfiniteHallwayNew : SuperspectiveObject<InfiniteHallwayNew, InfiniteHallwayNew.InfiniteHallwayNewSave> {
+public class InfiniteHallway : SuperspectiveObject<InfiniteHallway, InfiniteHallway.InfiniteHallwayNewSave> {
     // The bottom portal (in the hallway) jumps around depending on the state of the hallway
     private readonly Vector3 BOT_PORTAL_ENTRANCE_POSITION = Vector3.right * 2;
     private readonly Vector3 BOT_PORTAL_ENTRANCE_DIRECTION = Vector3.left;
@@ -17,7 +17,8 @@ public class InfiniteHallwayNew : SuperspectiveObject<InfiniteHallwayNew, Infini
     private const int MAX_INF_TELEPORT_FOR_TEXT = 7; // How many times we can move the text before we should just turn it off
     
     public TeleportEnter infiniteTeleporter;
-    public GlobalMagicTrigger goingNowhereText;
+    [FormerlySerializedAs("goingNowhereText")]
+    public GlobalMagicTrigger goingNowhereTextDisableTrigger;
     public int timesInfTeleported = 0;
     
     public Portal bottomPortal;
@@ -35,6 +36,8 @@ public class InfiniteHallwayNew : SuperspectiveObject<InfiniteHallwayNew, Infini
     }
     public StateMachine<State> state;
 
+    private Vector3 TeleportOffset => infiniteTeleporter.teleportExit.transform.position - infiniteTeleporter.teleportEnter.transform.position;
+
     protected override void Awake() {
         base.Awake();
         
@@ -43,11 +46,11 @@ public class InfiniteHallwayNew : SuperspectiveObject<InfiniteHallwayNew, Infini
     }
     
     void MoveText(Collider teleportEnter, Collider teleportExit, GameObject player) {
-        goingNowhereText.transform.position += (teleportExit.transform.position - teleportEnter.transform.position);
+        goingNowhereTextDisableTrigger.transform.position += TeleportOffset;
         timesInfTeleported++;
         if (timesInfTeleported >= MAX_INF_TELEPORT_FOR_TEXT) {
             // Turn on the GlobalMagicTrigger that will disable the text when the player looks away
-            goingNowhereText.enabled = true;
+            goingNowhereTextDisableTrigger.enabled = true;
         }
     }
 
@@ -135,16 +138,14 @@ public class InfiniteHallwayNew : SuperspectiveObject<InfiniteHallwayNew, Infini
     
 #region Saving
 		[Serializable]
-		public class InfiniteHallwayNewSave : SaveObject<InfiniteHallwayNew> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            
-			public InfiniteHallwayNewSave(InfiniteHallwayNew script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
+		public class InfiniteHallwayNewSave : SaveObject<InfiniteHallway> {
+			public InfiniteHallwayNewSave(InfiniteHallway script) : base(script) { }
 		}
 
         public override void LoadSave(InfiniteHallwayNewSave save) {
-            state.LoadFromSave(save.stateSave);
+            infiniteTeleporter.enabled = state != State.ConnectedExits;
+            inArrowsUpper.enabled = state == State.ConnectedExits;
+            correctAnswerTriggers.SetActive(state == State.ConnectedExits);
         }
 #endregion
 }

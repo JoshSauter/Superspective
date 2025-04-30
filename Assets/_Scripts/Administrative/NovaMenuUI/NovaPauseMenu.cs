@@ -37,6 +37,8 @@ namespace NovaMenuUI {
         public NovaButton SettingsButton;
         public NovaButton ExitGameButton;
         public NovaButton BugReportButton;
+        public NovaButton DiscordButton;
+        public ClipMask DiscordButtonHoverText;
 
         [Header("Other Menus")]
         private readonly List<INovaMenu> allSubMenus = new List<INovaMenu>();
@@ -81,6 +83,13 @@ namespace NovaMenuUI {
                     OpenPauseMenu(currentMenuState != MenuState.Off);
                 }
             }
+
+            if (DiscordButton.hoverState == NovaButton.HoverState.Hovered) {
+                DiscordButtonHoverText.Tint = DiscordButtonHoverText.Tint.WithAlpha(Mathf.Lerp(DiscordButtonHoverText.Tint.a, 1f, Time.unscaledDeltaTime * 5f));
+            }
+            else {
+                DiscordButtonHoverText.Tint = DiscordButtonHoverText.Tint.WithAlpha(Mathf.Lerp(DiscordButtonHoverText.Tint.a, 0f, Time.unscaledDeltaTime * 2f));
+            }
         }
 
         void ResetAllButtons() {
@@ -102,6 +111,7 @@ namespace NovaMenuUI {
             SettingsButton.OnClick += _ => OpenSettingsMenu();
             ExitGameButton.OnClick += _ => GameManager.instance.QuitGame();
             BugReportButton.OnClick += _ => OpenBugReportDialog();
+            DiscordButton.OnClick += _ => Application.OpenURL("https://discord.gg/SbBuvgmjJ6");
         }
 
         private void OpenBugReportDialog() {

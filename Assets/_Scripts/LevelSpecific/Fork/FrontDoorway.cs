@@ -74,17 +74,11 @@ public class FrontDoorway : SuperspectiveObject<FrontDoorway, FrontDoorway.Front
     
 #region Saving
 
-	public override void LoadSave(FrontDoorwaySave save) {
-		state.LoadFromSave(save.stateSave);
-	}
+	public override void LoadSave(FrontDoorwaySave save) { }
 
 	[Serializable]
 	public class FrontDoorwaySave : SaveObject<FrontDoorway> {
-        public StateMachine<State>.StateMachineSave stateSave;
-        
-		public FrontDoorwaySave(FrontDoorway script) : base(script) {
-            this.stateSave = script.state.ToSave();
-		}
+		public FrontDoorwaySave(FrontDoorway script) : base(script) { }
 	}
 #endregion
 }

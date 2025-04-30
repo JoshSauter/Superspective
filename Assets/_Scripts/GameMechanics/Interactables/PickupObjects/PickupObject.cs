@@ -225,7 +225,7 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
         // Don't allow clicks in the menu to propagate to picking up/dropping the cube
         if (NovaPauseMenu.instance.PauseMenuIsOpen) currentCooldown = PICKUP_DROP_COOLDOWN;
 
-        if (thisDynamicObject) thisDynamicObject.isAllowedToChangeScenes = !isHeld;
+        if (thisDynamicObject) thisDynamicObject.globalMode = isHeld ? DynamicObject.GlobalMode.NoContactSceneChange : DynamicObject.GlobalMode.Global;
         
         if (isHeld) {
             interactableGlow.TurnOnGlow();
@@ -234,10 +234,10 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
             Scene activeScene = SceneManager.GetSceneByName(LevelManager.instance.activeSceneName);
             if (gameObject.scene != activeScene && thisDynamicObject) {
                 // Force scene change regardless of normal settings
-                bool temp = thisDynamicObject.isAllowedToChangeScenes;
-                thisDynamicObject.isAllowedToChangeScenes = true;
+                DynamicObject.GlobalMode temp = thisDynamicObject.globalMode;
+                thisDynamicObject.globalMode = DynamicObject.GlobalMode.NoContactSceneChange;
                 thisDynamicObject.ChangeScene(activeScene);
-                thisDynamicObject.isAllowedToChangeScenes = temp;
+                thisDynamicObject.globalMode = temp;
             }
         }
         else {
@@ -614,40 +614,30 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
 
         if (thisRigidbody != null) {
             thisRigidbody.position = transform.position;
-            thisRigidbody.velocity = save.velocity;
-            thisRigidbody.angularVelocity = save.angularVelocity;
-            thisRigidbody.mass = save.mass;
             thisRigidbody.isKinematic = save.kinematicRigidbody;
+            if (!thisRigidbody.isKinematic) {
+                thisRigidbody.velocity = save.velocity;
+                thisRigidbody.angularVelocity = save.angularVelocity;
+            }
+            thisRigidbody.mass = save.mass;
         }
-
+        
         isReplaceable = save.isReplaceable;
-        interactable = save.interactable;
-        isHeld = save.isHeld;
         if (isHeld) {
             Player.instance.heldObject = this;
         }
-        receptacleHeldIn = save.receptacleHeldIn?.GetOrNull();
-        currentCooldown = save.currentCooldown;
-            
-        rigidbodySleepingStateMachine.LoadFromSave(save.rigidbodySleepingStateMachineSave);
     }
 
     [Serializable]
     public class PickupObjectSave : SaveObject<PickupObject> {
-        public StateMachine<RigidbodySleepingState>.StateMachineSave rigidbodySleepingStateMachineSave;
-        public SuperspectiveReference<CubeReceptacle, CubeReceptacle.CubeReceptacleSave> receptacleHeldIn;
-        public SerializableVector3 playerCamPosLastFrame;
         public SerializableVector3 position;
         public SerializableQuaternion rotation;
         public SerializableVector3 angularVelocity;
         public SerializableVector3 localScale;
         public SerializableVector3 velocity;
         public float mass;
-        public float currentCooldown;
-        public bool interactable;
-        public bool isHeld;
-        public bool isReplaceable;
         public bool kinematicRigidbody;
+        public bool isReplaceable;
 
         public PickupObjectSave(PickupObject obj) : base(obj) {
             position = obj.transform.position;
@@ -660,14 +650,8 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
                 mass = obj.thisRigidbody.mass;
                 kinematicRigidbody = obj.thisRigidbody.isKinematic;
             }
-
+            
             isReplaceable = obj.isReplaceable;
-            interactable = obj.interactable;
-            isHeld = obj.isHeld;
-            receptacleHeldIn = obj.receptacleHeldIn;
-            currentCooldown = obj.currentCooldown;
-
-            rigidbodySleepingStateMachineSave = obj.rigidbodySleepingStateMachine.ToSave();
         }
     }
 #endregion

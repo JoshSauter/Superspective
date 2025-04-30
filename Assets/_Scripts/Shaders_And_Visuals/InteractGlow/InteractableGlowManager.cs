@@ -37,7 +37,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 	/// On Awake, we cache various values and setup our command buffer to be called Before Image Effects.
 	/// </summary>
 	void Awake() {
-		debug = new DebugLogger(gameObject, () => DEBUG);
+		debug = new DebugLogger(gameObject, "InteractableGlowManager", () => DEBUG);
 		prePassMaterial = new Material(Shader.Find("Hidden/GlowCmdShader"));
 		prePassMaterialLarger = new Material(Shader.Find("Hidden/GlowCmdShaderLarger"));
 		prePassMaterialSmaller = new Material(Shader.Find("Hidden/GlowCmdShaderSmaller"));

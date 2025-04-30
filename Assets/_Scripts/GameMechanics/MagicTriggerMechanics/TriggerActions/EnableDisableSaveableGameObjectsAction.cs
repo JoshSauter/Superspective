@@ -12,8 +12,8 @@ namespace MagicTriggerMechanics.TriggerActions {
         protected GameObject GameObjectFromReference(SuperspectiveReference reference) {
             var maybeReference = reference.Reference;
             return maybeReference.isLeft
-                ? maybeReference.LeftOrDefault().gameObject
-                : throw new Exception($"Reference {maybeReference.RightOrDefault().ID} in level {maybeReference.RightOrDefault().level} is not loaded!");
+                ? maybeReference.LeftOrDefault.gameObject
+                : throw new Exception($"Reference {maybeReference.RightOrDefault.ID} in level {maybeReference.RightOrDefault.level} is not loaded!");
         }
 
         protected void SetEnabled(bool enabled, SuperspectiveReference[] objects, MagicTrigger triggerScript) {

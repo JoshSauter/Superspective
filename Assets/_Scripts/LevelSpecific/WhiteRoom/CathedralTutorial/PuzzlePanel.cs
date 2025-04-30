@@ -245,7 +245,7 @@ namespace LevelSpecific.WhiteRoom.CathedralTutorial {
 
         [Serializable]
         public class PuzzlePanelSave : SaveObject<PuzzlePanel> {
-            public StateMachine<PuzzleState>.StateMachineSave stateSave;
+            public StateMachineSave<PuzzleState> stateSave;
             
             public PuzzlePanelSave(PuzzlePanel script) : base(script) {
                 this.stateSave = script.state.ToSave();

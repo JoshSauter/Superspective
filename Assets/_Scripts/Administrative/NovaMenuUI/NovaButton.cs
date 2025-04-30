@@ -114,7 +114,7 @@ namespace NovaMenuUI {
             clickState = this.StateMachine(ClickState.Idle, false, true);
             hoverState = this.StateMachine(HoverState.NotHovered, false, true);
 
-            debug = new DebugLogger(gameObject, () => DEBUG);
+            debug = new DebugLogger(gameObject, gameObject.FullPath(), () => DEBUG);
 
             novaInteractable = GetComponent<Interactable>();
             if (BackgroundUIBlock == null) {

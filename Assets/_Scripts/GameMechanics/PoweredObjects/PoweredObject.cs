@@ -6,6 +6,7 @@ using Saving;
 using Sirenix.OdinInspector;
 using StateUtils;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace PoweredObjects {
     public enum MultiMode : byte {
@@ -262,42 +263,34 @@ namespace PoweredObjects {
 #region Saving
 
         public override void LoadSave(PoweredObjectSave save) {
-            state.LoadFromSave(save.stateSave);
-            automaticFinishPoweringTime = save.automaticFinishPoweringTime;
-            automaticFinishDepoweringTime = save.automaticFinishDepoweringTime;
-            automaticallyFinishPowering = save.automaticallyFinishPowering;
-            automaticallyFinishDepowering = save.automaticallyFinishDepowering;
+            state.LoadFromSave(save.state);
         }
 
         [Serializable]
         public class PoweredObjectSave : SaveObject<PoweredObject> {
-            public StateMachine<PowerState>.StateMachineSave stateSave;
-            public float automaticFinishPoweringTime;
-            public float automaticFinishDepoweringTime;
-            public bool automaticallyFinishPowering;
-            public bool automaticallyFinishDepowering;
+            public StateMachineSave<PowerState> state;
             
             // Provided so that Power can be set even when the object is unloaded
             public bool PowerIsOn {
-                get => stateSave.state is PowerState.PartiallyPowered or PowerState.Powered;
+                get => state.state is PowerState.PartiallyPowered or PowerState.Powered;
                 set {
                     if (value == PowerIsOn) return;
 
-                    switch (stateSave.state) {
+                    switch (state.state) {
                         case PowerState.PartiallyDepowered:
                         case PowerState.Depowered:
                             if (value) {
-                                stateSave.prevState = stateSave.state;
-                                stateSave.state = PowerState.PartiallyPowered;
-                                stateSave.timeSinceStateChanged = 0;
+                                state.prevState = state.state;
+                                state.state = PowerState.PartiallyPowered;
+                                state.timeSinceStateChanged = 0;
                             }
                             break;
                         case PowerState.PartiallyPowered:
                         case PowerState.Powered:
                             if (!value) {
-                                stateSave.prevState = stateSave.state;
-                                stateSave.state = PowerState.PartiallyDepowered;
-                                stateSave.timeSinceStateChanged = 0;
+                                state.prevState = state.state;
+                                state.state = PowerState.PartiallyDepowered;
+                                state.timeSinceStateChanged = 0;
                             }
                             break;
                         default:
@@ -307,11 +300,7 @@ namespace PoweredObjects {
             }
             
             public PoweredObjectSave(PoweredObject script) : base(script) {
-                this.stateSave = script.state.ToSave();
-                this.automaticFinishPoweringTime = script.automaticFinishPoweringTime;
-                this.automaticFinishDepoweringTime = script.automaticFinishDepoweringTime;
-                this.automaticallyFinishPowering = script.automaticallyFinishPowering;
-                this.automaticallyFinishDepowering = script.automaticallyFinishDepowering;
+                this.state = script.state.ToSave();
             }
         }
 #endregion

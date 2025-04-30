@@ -16,7 +16,7 @@ namespace GrowShrink {
 		private DebugLogger debug {
 			get {
 				if (_debug == null) {
-					_debug = new DebugLogger(this, () => DEBUG);
+					_debug = new DebugLogger(this, this.FullPath(), () => DEBUG);
 				}
 
 				return _debug;
@@ -42,7 +42,7 @@ namespace GrowShrink {
 		void Start() {
 			SetupBoundaries(GetComponent<MeshCollider>());
 			bounds = GetComponent<Renderer>().bounds;
-			debug = new DebugLogger(this, () => DEBUG);
+			debug = new DebugLogger(this, this.FullPath(), () => DEBUG);
 		}
 
 		public static string GetId(Collider c) => c.GetComponent<UniqueId>()?.uniqueId ?? c.gameObject.FullPath();
@@ -53,6 +53,7 @@ namespace GrowShrink {
 		}
 
 		public void OnBetterTriggerEnter(Collider other) {
+			if (GameManager.instance.IsCurrentlyLoading) return;
 			string id = GetId(other);
 			float i = GetValue(other.transform.position);
 
@@ -63,6 +64,8 @@ namespace GrowShrink {
 		}
 
 		public void OnBetterTriggerStay(Collider other) {
+			if (GameManager.instance.IsCurrentlyLoading) return;
+			
 			string id = GetId(other);
 			float i = GetValue(other.transform.position);
 
@@ -72,6 +75,7 @@ namespace GrowShrink {
 		}
 
 		public void OnBetterTriggerExit(Collider other) {
+			if (GameManager.instance.IsCurrentlyLoading) return;
 			string id = GetId(other);
 			float i = GetValue(positionsLastFrame[other]);
 			positionsLastFrame.Remove(other);

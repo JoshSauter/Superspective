@@ -5,6 +5,7 @@ using Saving;
 using StateUtils;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TheEntity {
     public class TheEntity_GrowShrink2 : SuperspectiveObject<TheEntity_GrowShrink2, TheEntity_GrowShrink2.TheEntity_GrowShrink2Save> {
@@ -30,20 +31,13 @@ namespace TheEntity {
         [Serializable]
         public struct PotentialLocation {
             public Transform ornamentRoot;
-            public Transform invisibleObject;
+            [FormerlySerializedAs("invisibleObject")]
+            public Transform normalGeometry;
         }
         public List<PotentialLocation> potentialLocations;
         
         public Transform eyeTransform;
-        private Transform InvisibleObject {
-            get {
-                if (locationIndex < 0) {
-                    locationIndex = UnityEngine.Random.Range(0, potentialLocations.Count);
-                }
-                
-                return potentialLocations[locationIndex].invisibleObject;
-            }
-        }
+        private Transform NormalGeometryAtLocation => Location.normalGeometry;
 
         [SerializeField]
         private MagicTrigger lookAtEyeTrigger;
@@ -56,13 +50,13 @@ namespace TheEntity {
             base.Awake();
 
             state = this.StateMachine(EyeState.Unnoticed);
-            RestoreAllInvisibleObjects();
+            UpdateLocation();
         }
 
         protected override void Start() {
             base.Start();
             
-            state.AddTrigger(EyeState.Despawned, () => RestoreAllInvisibleObjects());
+            state.AddTrigger(EyeState.Despawned, () => UpdateLocation());
             state.AddTrigger(EyeState.Noticed, () => {
                 if (blinkCoroutine != null) {
                     StopCoroutine(blinkCoroutine);
@@ -71,9 +65,9 @@ namespace TheEntity {
                 StartCoroutine(TheEntity.BlinkController(this, eyeTransform, () => .25f));
             });
             
-            InvisibleObject.gameObject.SetActive(false);
+            NormalGeometryAtLocation.gameObject.SetActive(false);
             eyeTransform.SetParent(Location.ornamentRoot, false);
-            RestoreAllInvisibleObjects(locationIndex);
+            UpdateLocation(locationIndex);
             blinkCoroutine = StartCoroutine(TheEntity.BlinkController(this, eyeTransform, () => 1f));
         }
         
@@ -98,13 +92,9 @@ namespace TheEntity {
             lookAwayFromEyeTrigger.OnMagicTriggerStayOneTime -= SetToDespawned;
         }
 
-        private void RestoreAllInvisibleObjects(int indexToSkip = -1) {
+        private void UpdateLocation(int locationIndex = -1) {
             for (int i = 0; i < potentialLocations.Count; i++) {
-                if (i == indexToSkip) {
-                    continue;
-                }
-                
-                potentialLocations[i].invisibleObject.gameObject.SetActive(true);
+                potentialLocations[i].normalGeometry.gameObject.SetActive(i != locationIndex);
             }
         }
 
@@ -114,19 +104,12 @@ namespace TheEntity {
 #region Saving
 
         public override void LoadSave(TheEntity_GrowShrink2Save save) {
-            state.LoadFromSave(save.state);
-            locationIndex = save.locationIndex;
+            UpdateLocation(locationIndex);
         }
 
         [Serializable]
         public class TheEntity_GrowShrink2Save : SaveObject<TheEntity_GrowShrink2> {
-            public StateMachine<EyeState>.StateMachineSave state;
-            public int locationIndex;
-
-            public TheEntity_GrowShrink2Save(TheEntity_GrowShrink2 script) : base(script) {
-                state = script.state.ToSave();
-                locationIndex = script.locationIndex;
-            }
+            public TheEntity_GrowShrink2Save(TheEntity_GrowShrink2 script) : base(script) { }
         }
 #endregion
     }

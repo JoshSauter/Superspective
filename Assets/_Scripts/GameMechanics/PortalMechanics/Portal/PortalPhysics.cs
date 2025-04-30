@@ -6,6 +6,7 @@ using LevelManagement;
 using MagicTriggerMechanics;
 using MagicTriggerMechanics.TriggerConditions;
 using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace PortalMechanics {
         private const int GLOBAL_FRAMES_TO_WAIT_AFTER_TELEPORT = 5;
         
         [SerializeField]
-        [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f)]
+        [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f), DoNotSave]
         private PortalPhysicsMode _physicsMode = PortalPhysicsMode.Normal;
         public PortalPhysicsMode PhysicsMode {
             get => _physicsMode;
@@ -65,11 +66,12 @@ namespace PortalMechanics {
         [TabGroup("Physics"), GUIColor(0.95f, 0.55f, .55f)]
         public bool PortalPhysicsIsEnabled => otherPortal != null && PhysicsMode == PortalPhysicsMode.Normal && gameObject.activeSelf;
         public bool PlayerRemainsInPortal => PlayerIsInThisPortal || (otherPortal != null && otherPortal.PlayerIsInThisPortal);
-        private bool PlayerIsInThisPortal => trigger.playerIsInTriggerZone;
-        private float PortalTriggerThickness => PORTAL_TRIGGER_THICKNESS / (changeScale ? ScaleFactor : 1f);
+        protected bool PlayerIsInThisPortal => trigger.playerIsInTriggerZone;
+        protected float PortalTriggerThickness => PORTAL_TRIGGER_THICKNESS / (changeScale ? ScaleFactor : 1f);
         
         private Vector3 lastPlayerPositionProcessed;
-		
+
+        protected virtual bool AllowRaycastPortalTeleporting => true;
         private static int globalLastTeleportedFrame = 0;
         private float lastTeleportedTime = 0f;
 
@@ -134,6 +136,7 @@ namespace PortalMechanics {
 					case MeshCollider meshCollider:
 						// Copy the collider's properties to the trigger collider
 						raycastBlocker = raycastBlockerGO.PasteComponent(meshCollider);
+						((MeshCollider)raycastBlocker).convex = true;
 						raycastBlocker.isTrigger = true;
 
 						meshCollider.convex = true;
@@ -168,7 +171,7 @@ namespace PortalMechanics {
 			}
         }
         
-        private void FixedUpdate() {
+        protected virtual void FixedUpdate() {
 			// If the player moves to the backside of a double-sided portal, rotate the portals to match
 			bool wouldTeleportPlayersIfPortalWereFlipped = false;
 			if (doubleSidedPortals) {
@@ -202,7 +205,7 @@ namespace PortalMechanics {
 
 			// This is a low-frame rate edge case bugfix to check the player's trajectory to see if it passed through the portal
 			// If it did, we need to teleport them (even if they didn't end up in the trigger zone on any frame)
-			if (ShouldRaycastTeleportPlayer()) {
+			if (AllowRaycastPortalTeleporting && ShouldRaycastTeleportPlayer()) {
 				debug.Log("Teleporting player due to Raycast check! Usually this implies a low frame rate.");
 				TeleportPlayer(Player.instance.transform);
 			}
@@ -341,7 +344,7 @@ namespace PortalMechanics {
 			TriggerEventsAfterTeleport(portalableObject.colliders[0], offset);
 		}
         
-		public void TeleportPlayer(Transform player) {
+		public virtual void TeleportPlayer(Transform player) {
 			StartCoroutine(Co_TeleportPlayer(player));
 		}
 		
@@ -385,15 +388,7 @@ namespace PortalMechanics {
 			}
 
 			if (changeActiveSceneOnTeleport) {
-				// TODO: Investigate crash that happens when switching scenes rapidly without the following check
 				LevelManager.instance.SwitchActiveScene(otherPortal.Level);
-				// TODO: Can't reproduce the crash anymore, but if it starts happening, uncomment the following lines
-				// if (LevelManager.instance.IsCurrentlySwitchingScenes) {
-				// 	Debug.LogError($"Tried to switch scenes due to {ID} teleport but LevelManager is still loading!");
-				// }
-				// else {
-				// 	LevelManager.instance.SwitchActiveScene(otherPortal.gameObject.scene.name);
-				// }
 			}
 
 			// If the out portal is also a PillarDimensionObject, update the active pillar's curDimension to match the out portal's Dimension

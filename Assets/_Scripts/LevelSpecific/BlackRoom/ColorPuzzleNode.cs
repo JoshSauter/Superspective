@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using Saving;
 using StateUtils;
+using SuperspectiveUtils;
 using UnityEngine;
 
 namespace LevelSpecific.BlackRoom {
-	public class ColorPuzzleNode : MonoBehaviour {
+	public class ColorPuzzleNode : MonoBehaviour { // Revisit saving: doesn't work because we're duplicating the object at runtime SuperspectiveObject<ColorPuzzleNode, ColorPuzzleNode.ColorPuzzleNodeSave> {
+		//public override string ID => $"{this.FullPath()}.{GetType().Name}";
+		
 		public StateMachine<PuzzleNodeState> state;
 
 		public enum PuzzleNodeState {
@@ -38,7 +40,9 @@ namespace LevelSpecific.BlackRoom {
 		public delegate void SolutionNodeStateChange(ColorPuzzleNode node, bool solved);
 		public static event SolutionNodeStateChange OnSolutionNodeStateChange;
 
-		void Start() {
+		protected void Start() {
+			//base.Start();
+			
 			thisRenderer = GetComponent<SuperspectiveRenderer>();
 			solutionColor = thisRenderer.GetMainColor();
 			solutionEmissionColor = thisRenderer.GetColor("_EmissionColor");
@@ -46,13 +50,17 @@ namespace LevelSpecific.BlackRoom {
 			thisRenderer.SetColor("_EmissionColor", unsolvedEmissionColor);
 		}
 
-		void OnEnable() {
+		protected void OnEnable() {
+			//base.OnEnable();
+			
 			state = this.StateMachine(PuzzleNodeState.NotSolved);
 			
 			state.OnStateChangeSimple += TriggerEvent;
 		}
 
-		void OnDisable() {
+		protected void OnDisable() {
+			//base.OnDisable();
+			
 			state.OnStateChangeSimple -= TriggerEvent;
 		}
 
@@ -139,5 +147,14 @@ namespace LevelSpecific.BlackRoom {
 			Physics.Raycast(toProjector, out hitInfo, distance);
 			return Physics.Raycast(toProjector, distance);
 		}
+		
+		
+		//public override void LoadSave(ColorPuzzleNodeSave save) { }
+		//
+		//[Serializable]
+		//public class ColorPuzzleNodeSave : SaveObject<ColorPuzzleNode> {
+		//	public ColorPuzzleNodeSave(ColorPuzzleNode script) : base(script) { }
+		//}
+
 	}
 }

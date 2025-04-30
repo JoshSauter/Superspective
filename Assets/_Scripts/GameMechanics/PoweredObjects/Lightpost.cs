@@ -1,11 +1,15 @@
-﻿using PowerTrailMechanics;
+﻿using System;
+using PowerTrailMechanics;
 using System.Collections;
 using PoweredObjects;
+using Saving;
 using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 using UnityEngine;
 
-public class Lightpost : MonoBehaviour {
+[RequireComponent(typeof(UniqueId))]
+public class Lightpost : SuperspectiveObject<Lightpost, Lightpost.LightpostSave> {
+
     protected virtual bool IsEmissive => true;
     
     [ShowIf(nameof(DistanceMode))]
@@ -47,12 +51,17 @@ public class Lightpost : MonoBehaviour {
         }
     }
 
-    IEnumerator Start() {
+    protected override void Awake() {
+        base.Awake();
+        
         if (r == null) {
             r = this.GetOrAddComponent<SuperspectiveRenderer>();
         }
+    }
 
-        yield return null;
+    protected override void Start() {
+        base.Start();
+
         startEmission = r.GetColor(EMISSION_COLOR_KEY);
     }
 
@@ -73,7 +82,16 @@ public class Lightpost : MonoBehaviour {
         }
     }
 
+    public override void LoadSave(LightpostSave save) {
+        UpdateVisuals();
+    }
+
     protected virtual void UpdateVisuals() {
         r.SetColor(EMISSION_COLOR_KEY, Color.Lerp(startEmission, emissiveColor, t));
+    }
+    
+    [Serializable]
+    public class LightpostSave : SaveObject<Lightpost> {
+        public LightpostSave(Lightpost saveableObject) : base(saveableObject) { }
     }
 }

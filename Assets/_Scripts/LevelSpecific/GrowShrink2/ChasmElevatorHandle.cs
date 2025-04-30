@@ -166,7 +166,7 @@ public class ChasmElevatorHandle : SuperspectiveObject<ChasmElevatorHandle, Chas
 
     [Serializable]
 	public class ChasmElevatorHandleSave : SaveObject<ChasmElevatorHandle> {
-        public StateMachine<HandleState>.StateMachineSave stateSave;
+        public StateMachineSave<HandleState> stateSave;
         public SerializableVector3 localPosition;
         public float heightAudioLastPlayedAt;
         public float desiredHeight;

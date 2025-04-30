@@ -5,6 +5,7 @@ using NaughtyAttributes;
 using UnityEngine;
 
 [RequireComponent(typeof(BetterTrigger))]
+// TODO: Deprecate this in favor of GravityRotateZone
 public class StaircaseRotate : MonoBehaviour, BetterTriggers {
     public static bool playerIsInAnyStaircaseRotateZone = false;
     public bool DEBUG;
@@ -185,6 +186,8 @@ public class StaircaseRotate : MonoBehaviour, BetterTriggers {
     }
 
     private void OnDrawGizmos() {
+        if (Player.instance == null) return;
+        
         float sphereSize = .25f * Player.instance.Scale;
         Color originalColor = Gizmos.color;
         Gizmos.color = Color.red;

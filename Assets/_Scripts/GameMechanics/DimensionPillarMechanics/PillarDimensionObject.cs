@@ -6,6 +6,7 @@ using SuperspectiveUtils;
 using System;
 using PortalMechanics;
 using Saving;
+using SuperspectiveAttributes;
 using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
 // DimensionObjectBase.baseDimension is the lower dimension that this object exists in
@@ -15,7 +16,7 @@ using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPill
 public class PillarDimensionObject : DimensionObject {
 	public static readonly HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
 
-	[SerializeField]
+	[DoNotSave, SerializeField]
 	[Range(0, 7)]
 	int _dimension = 0;
 	public int Dimension {
@@ -196,8 +197,7 @@ public class PillarDimensionObject : DimensionObject {
 		disableColliderWhileInvisible = false;
 		if (thisObjectMoves) {
 			if (thisRigidbody == null && GetComponent<Rigidbody>() == null) {
-				DebugLogger tempDebug = new DebugLogger(gameObject);
-				tempDebug.LogError($"{gameObject.name} moves, but no rigidbody could be found (Consider setting it manually)");
+				debug.LogError($"{gameObject.name} moves, but no rigidbody could be found (Consider setting it manually)", true);
 				thisObjectMoves = false;
 			}
 			else if (thisRigidbody == null) {
@@ -232,7 +232,12 @@ public class PillarDimensionObject : DimensionObject {
 
 	public override bool ShouldCollideWithDimensionObject(DimensionObject other) {
 		if (other is PillarDimensionObject otherPillarDimensionObj) {
-			if (activePillar == null) return true;
+			if (activePillar == null) {
+				activePillar = DetermineActivePillar();
+				if (activePillar == null) {
+					return true;
+				}
+			}
 
 			if (!pillarPlanes.ContainsKey(activePillar.ID)) {
 				DeterminePlanes(activePillar);
@@ -249,42 +254,42 @@ public class PillarDimensionObject : DimensionObject {
 			return other.ShouldCollideWithDimensionObject(this);
 		}
 	}
+	
+	DimensionPillar DetermineActivePillar() {
+		DimensionPillar FindNearestDimensionPillar() {
+			// Only look for a new closest pillar if the object moved or we don't already have one
+			if (!(IsMoving || activePillar == null)) {
+				return activePillar;
+			}
+				
+			if (DimensionPillar.allPillars.Count > 0) {
+				return DimensionPillar.allPillars.Values
+					// Only consider pillars which are loaded and enabled
+					.Where(pillarRef => pillarRef.GetOrNull()?.enabled ?? false)
+					.Select(pillarRef => pillarRef.GetOrNull())
+					// Find the closest pillar
+					.OrderBy(pillar => Vector3.Distance(pillar.transform.position, transform.position))
+					.FirstOrDefault();
+			}
+			else {
+				return null;
+			}
+		}
+			
+		if (pillars != null && pillars.Length > 0) {
+			// Only consider pillars which are loaded and enabled
+			return pillars.Where(reference => reference.GetOrNull()?.enabled ?? false)
+				.Select(reference => reference.GetOrNull())
+				.FirstOrDefault();
+		}
+		else {
+			return FindNearestDimensionPillar();
+		}
+	}
 
 	void Update() {
 		if (!hasInitialized) return;
 		if (GameManager.instance.IsCurrentlyLoading) return;
-		
-		DimensionPillar DetermineActivePillar() {
-			DimensionPillar FindNearestDimensionPillar() {
-				// Only look for a new closest pillar if the object moved or we don't already have one
-				if (!(IsMoving || activePillar == null)) {
-					return activePillar;
-				}
-				
-				if (DimensionPillar.allPillars.Count > 0) {
-					return DimensionPillar.allPillars.Values
-						// Only consider pillars which are loaded and enabled
-						.Where(pillarRef => pillarRef.GetOrNull()?.enabled ?? false)
-						.Select(pillarRef => pillarRef.GetOrNull())
-						// Find the closest pillar
-						.OrderBy(pillar => Vector3.Distance(pillar.transform.position, transform.position))
-						.FirstOrDefault();
-				}
-				else {
-					return null;
-				}
-			}
-			
-			if (pillars != null && pillars.Length > 0) {
-				// Only consider pillars which are loaded and enabled
-				return pillars.Where(reference => reference.GetOrNull()?.enabled ?? false)
-					.Select(reference => reference.GetOrNull())
-					.FirstOrDefault();
-			}
-			else {
-				return FindNearestDimensionPillar();
-			}
-		}
 		
 		DimensionPillar prevPillar = activePillar;
 		activePillar = DetermineActivePillar();
@@ -687,7 +692,7 @@ public class PillarDimensionObject : DimensionObject {
 	}
 
 	#region Saving
-	// When inheriting from a SuperspectiveObject, we need to override th CreateSave method to return the type of SaveObject that has the data we want to save
+	// When inheriting from a SuperspectiveObject, we need to override the CreateSave method to return the type of SaveObject that has the data we want to save
 	// Otherwise the SaveObject will be of the base class save object type
 	public override SaveObject CreateSave() {
 		return new PillarDimensionObjectSave(this);

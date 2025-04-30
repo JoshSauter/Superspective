@@ -35,6 +35,7 @@ namespace Saving {
                     Debug.LogError($"ID {id} is already registered in scene {alreadyRegisteredLevel} but is being registered in scene {dynamicObj.Level}");
                 }
                 levelLookupForDynamicObjectId[id] = dynamicObj.Level;
+                levelLookupForId[id] = dynamicObj.Level;
                 
                 // Register DynamicObject Association ID
                 string associationId = dynamicObj.AssociationID;
@@ -48,7 +49,7 @@ namespace Saving {
             
             public bool RemoveDynamicObject(string id) {
                 string associationId = id.GetAssociationId();
-                return levelLookupForDynamicObjectId.Remove(id) && RemoveAssociationId(associationId, id);
+                return (levelLookupForId.Remove(id) || levelLookupForDynamicObjectId.Remove(id)) && RemoveAssociationId(associationId, id);
             }
 
             public void Clear() {
@@ -96,7 +97,7 @@ namespace Saving {
                 
                 levelLookupForDynamicObjectId[id] = level;
                 // DynamicObjects are SuperspectiveObjects too
-                levelLookupForId[id] = level;
+                // levelLookupForId[id] = level; This actually happens in the foreach because GetAssociatedIds(id) always contains the ID itself
                 
                 // Update the level of all associated IDs
                 HashSet<string> associatedIds = GetAssociatedIds(id);

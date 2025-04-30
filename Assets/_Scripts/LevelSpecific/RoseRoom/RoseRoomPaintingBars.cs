@@ -47,8 +47,6 @@ namespace LevelSpecific.WhiteRoom {
 #region Saving
 
         public override void LoadSave(RoseRoomPaintingBarsSave save) {
-            barsWereUpLastFrame = save.barsWereUpLastFrame;
-            barsAreUp = save.barsAreUp;
             invisibleWall.SetActive(save.invisibleWallActive);
             for (int i = 0; i < bars.Length; i++) {
                 bars[i].transform.position = save.barPositions[i];
@@ -60,13 +58,9 @@ namespace LevelSpecific.WhiteRoom {
         [Serializable]
         public class RoseRoomPaintingBarsSave : SaveObject<RoseRoomPaintingBars> {
             public List<SerializableVector3> barPositions;
-            public bool barsWereUpLastFrame;
-            public bool barsAreUp;
             public bool invisibleWallActive;
 
             public RoseRoomPaintingBarsSave(RoseRoomPaintingBars roseRoomPaintingBars) : base(roseRoomPaintingBars) {
-                this.barsWereUpLastFrame = roseRoomPaintingBars.barsWereUpLastFrame;
-                this.barsAreUp = roseRoomPaintingBars.barsAreUp;
                 this.invisibleWallActive = roseRoomPaintingBars.invisibleWall.activeSelf;
                 this.barPositions = roseRoomPaintingBars.bars.Select<GameObject, SerializableVector3>(b => b.transform.position).ToList();
             }

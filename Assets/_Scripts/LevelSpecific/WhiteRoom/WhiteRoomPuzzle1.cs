@@ -1,20 +1,16 @@
-using MagicTriggerMechanics;
 using PowerTrailMechanics;
 using Saving;
 using SerializableClasses;
 using System;
 using System.Collections;
 using DissolveObjects;
+using PortalMechanics;
 using SuperspectiveUtils;
-using Library.Functional;
 using UnityEngine;
-using UnityEngine.Serialization;
-using DimensionObjectReference = SerializableClasses.SuperspectiveReference<DimensionObject, DimensionObject.DimensionObjectSave>;
-using MaybeDimensionObject = Library.Functional.Either<DimensionObject, DimensionObject.DimensionObjectSave>;
 
 public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomPuzzle1.WhiteRoomPuzzle1Save> {
     public PowerTrail powerTrail;
-    public MagicTrigger fakePortalTrigger;
+    public RevealerPortal revealerPortal;
 
 	// Fake portal movement
     public GameObject fakePortal;
@@ -32,19 +28,6 @@ public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomP
 	public GameObject buttonPedestal;
 	public DissolveObject dissolveBridge;
 	private bool ShouldRevealButtonPedestal => dissolveBridge.stateMachine != DissolveObject.State.Dematerialized && dimension1.visibilityState == VisibilityState.Visible;
-
-	// Fake portal plane needs to temporarily disappear if the player walks backwards through it
-	public GameObject fakePortalPlane;
-	public GameObject restoreFakePortalPlaneTrigger;
-
-	// We trade out the ToCathedral DimensionObject for ToCathedral PillarDimensionObject after player walks through fake portal
-	// These are SerializableReferences because they come from another scene (WhiteRoomBackRoom)
-	public DimensionObjectReference archToNextRoomReference;
-
-	MaybeDimensionObject archToNextRoom => gameObject.IsInActiveScene() ? archToNextRoomReference.Reference : null;
-
-	public DimensionObjectReference holeCoverReference;
-	MaybeDimensionObject holeCover => gameObject.IsInActiveScene() ? holeCoverReference.Reference : null;
 	
 	public enum State : byte {
         Unsolved,
@@ -65,36 +48,12 @@ public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomP
 				case State.Unsolved:
 					fakePortalTargetPos = fakePortalUnsolvedPos;
 					fakePortalLerpSpeed = FAKE_PORTAL_LERP_SPEED_DOWN;
-					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Invisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.Invisible
-					);
-					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Invisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.Invisible
-					);
 					break;
 				case State.FakePortalPowered:
 					fakePortalTargetPos = fakePortalSolvedPos;
 					fakePortalLerpSpeed = FAKE_PORTAL_LERP_SPEED_UP;
-					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.PartiallyVisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.PartiallyVisible
-					);
-					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.PartiallyVisible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.PartiallyVisible
-					);
 					break;
 				case State.WalkedThroughFakePortal:
-					archToNextRoom?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Visible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.Visible
-					);
-					holeCover?.MatchAction(
-						dimensionObject => dimensionObject.SwitchVisibilityState(VisibilityState.Visible, true),
-						saveObject => saveObject.visibilityState = (int) VisibilityState.Visible
-					);
 					break;
 				default:
 					break;
@@ -122,19 +81,12 @@ public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomP
 		yield return new WaitUntil(() => gameObject.IsInActiveScene());
 		state = State.Unsolved;
 
-		fakePortalTrigger.OnMagicTriggerStayOneTime += () => {
-			if (state == State.FakePortalPowered) {
+		revealerPortal.revealState.OnStateChangeSimple += () => {
+			if (revealerPortal.revealState == RevealerPortal.RevealState.Visible) {
 				state = State.WalkedThroughFakePortal;
 			}
-		};
-		fakePortalTrigger.OnNegativeMagicTriggerStayOneTime += () => {
-			if (state == State.WalkedThroughFakePortal) {
+			else if (state == State.WalkedThroughFakePortal) {
 				state = State.FakePortalPowered;
-			}
-			// Player walks backwards through wrong side of fake portal, hide the illusion temporarily
-			else if (state == State.FakePortalPowered) {
-				fakePortalPlane.SetActive(false);
-				restoreFakePortalPlaneTrigger.SetActive(true);
 			}
 		};
 
@@ -199,12 +151,8 @@ public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomP
 #region Saving
 
 	public override void LoadSave(WhiteRoomPuzzle1Save save) {
-		state = save.state;
 		fakePortal.transform.position = save.fakePortalPos;
 		fakePortal.SetActive(save.fakePortalActive);
-		fakePortalPlane.SetActive(save.fakePortalPlaneActive);
-		restoreFakePortalPlaneTrigger.SetActive(save.restoreFakePortalPlaneTriggerActive);
-		fakePortalLerpSpeed = save.fakePortalLerpSpeed;
 	}
 
 	public override string ID => "WhiteRoomPuzzle1";
@@ -212,19 +160,11 @@ public class WhiteRoomPuzzle1 : SuperspectiveObject<WhiteRoomPuzzle1, WhiteRoomP
 	[Serializable]
 	public class WhiteRoomPuzzle1Save : SaveObject<WhiteRoomPuzzle1> {
 		public SerializableVector3 fakePortalPos;
-		public State state;
 		public bool fakePortalActive;
-		public bool fakePortalPlaneActive;
-		public bool restoreFakePortalPlaneTriggerActive;
-		public float fakePortalLerpSpeed;
 
 		public WhiteRoomPuzzle1Save(WhiteRoomPuzzle1 script) : base(script) {
-			this.state = script.state;
 			this.fakePortalPos = script.fakePortal.transform.position;
 			this.fakePortalActive = script.fakePortal.activeSelf;
-			this.fakePortalPlaneActive = script.fakePortalPlane.activeSelf;
-			this.restoreFakePortalPlaneTriggerActive = script.restoreFakePortalPlaneTrigger.activeSelf;
-			this.fakePortalLerpSpeed = script.fakePortalLerpSpeed;
 		}
 	}
 #endregion

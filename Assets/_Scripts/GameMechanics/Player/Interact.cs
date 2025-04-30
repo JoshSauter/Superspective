@@ -49,7 +49,7 @@ public class Interact : Singleton<Interact> {
     // Use this for initialization
     void Start() {
         layerMask = SuperspectivePhysics.PhysicsRaycastLayerMask;
-        debug = new DebugLogger(this, () => DEBUG);
+        debug = new DebugLogger(this, "Interact", () => DEBUG);
         if (reticle == null) {
             Debug.LogError("Reticle not set in Interact script, disabling script");
             enabled = false;

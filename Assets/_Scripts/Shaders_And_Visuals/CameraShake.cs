@@ -164,21 +164,29 @@ public class CameraShake : SingletonSuperspectiveObject<CameraShake, CameraShake
     float UpdateCameraShakeEvent(CameraShakeEvent shakeEvent) {
         shakeEvent.time += Time.deltaTime;
         
-        if (shakeEvent.time >= shakeEvent.duration) {
+        if (shakeEvent.time >= shakeEvent.duration || shakeEvent.locationProvider == null) {
             return -1;
         }
 
-        // Don't bother computing distance if the spatial is set to 2D
-        if (shakeEvent.spatial == 0) {
-            return shakeEvent.intensity * (1 - Mathf.InverseLerp(0, shakeEvent.duration, shakeEvent.time));
+        try {
+            Vector3 location = shakeEvent.locationProvider.Invoke();
+
+            // Don't bother computing distance if the spatial is set to 2D
+            if (shakeEvent.spatial == 0) {
+                return shakeEvent.intensity * (1 - Mathf.InverseLerp(0, shakeEvent.duration, shakeEvent.time));
+            }
+        
+            float distance = SuperspectivePhysics.ShortestDistance(Player.instance.transform.position, location);
+            float rawDistanceMultiplier = Easing.EaseInOut(1 - Mathf.InverseLerp(FULL_SHAKE_DISTANCE, NO_SHAKE_DISTANCE, distance));
+            float distanceMultiplier = Mathf.Lerp(1, rawDistanceMultiplier, shakeEvent.spatial);
+            float intensity = shakeEvent.intensity * distanceMultiplier * shakeEvent.intensityCurve.Evaluate(shakeEvent.time / shakeEvent.duration);
+        
+            return intensity;
         }
-        
-        float distance = SuperspectivePhysics.ShortestDistance(Player.instance.transform.position, shakeEvent.locationProvider.Invoke());
-        float rawDistanceMultiplier = Easing.EaseInOut(1 - Mathf.InverseLerp(FULL_SHAKE_DISTANCE, NO_SHAKE_DISTANCE, distance));
-        float distanceMultiplier = Mathf.Lerp(1, rawDistanceMultiplier, shakeEvent.spatial);
-        float intensity = shakeEvent.intensity * distanceMultiplier * shakeEvent.intensityCurve.Evaluate(shakeEvent.time / shakeEvent.duration);
-        
-        return intensity;
+        catch (Exception e) {
+            debug.LogError($"Error in camera shake event: {e.Message}\n{e.StackTrace}");
+            return -1;
+        }
     }
     
 #region Saving

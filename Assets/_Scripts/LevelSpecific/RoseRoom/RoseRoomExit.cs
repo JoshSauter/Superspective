@@ -63,15 +63,9 @@ public class RoseRoomExit : SuperspectiveObject<RoseRoomExit, RoseRoomExit.RoseR
 #region Saving
 		[Serializable]
 		public class RoseRoomExitSave : SaveObject<RoseRoomExit> {
-            public StateMachine<State>.StateMachineSave stateSave;
-            
-			public RoseRoomExitSave(RoseRoomExit script) : base(script) {
-                this.stateSave = script.state.ToSave();
-			}
+			public RoseRoomExitSave(RoseRoomExit script) : base(script) { }
 		}
 
-        public override void LoadSave(RoseRoomExitSave save) {
-            state.LoadFromSave(save.stateSave);
-        }
+        public override void LoadSave(RoseRoomExitSave save) { }
 #endregion
 }

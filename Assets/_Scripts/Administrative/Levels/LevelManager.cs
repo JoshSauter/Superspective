@@ -11,10 +11,10 @@ using UnityEngine.SceneManagement;
 using SuperspectiveUtils;
 using Saving;
 using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
-
 #endif
 
 namespace LevelManagement {
@@ -107,7 +107,9 @@ namespace LevelManagement {
 				return _defaultPlayerSettings;
 			}
 		}
+		[DoNotSave]
 		public bool defaultPlayerPosition = false;
+		[DoNotSave]
 		bool hasLoadedDefaultPlayerPosition = false;
 
 		[Button("Set default player position")]
@@ -143,6 +145,12 @@ namespace LevelManagement {
 			
 			string sceneName = GetSceneName();
 			LoadDefaultPlayerPosition(sceneName.ToLevel());
+			
+#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				SceneView.lastActiveSceneView.LookAt(Player.instance.transform.position, SceneView.lastActiveSceneView.rotation, 5f);
+			}
+#endif
 			
 			// Hijacking this to display level banner on load, even when it's already the active scene
 			LevelChangeBanner.instance.PlayBanner(enumToSceneName[sceneName]);
@@ -254,6 +262,7 @@ namespace LevelManagement {
 			{ Levels.Ascension1, "_Ascension1" },
 			{ Levels.EdgeOfAUniverse, "_EdgeOfAUniverse" }
 		};
+		[DoNotSave]
 		public string activeSceneName;
 		public Levels ActiveScene => activeSceneName.ToLevel();
 		public List<Levels> loadedLevels;
@@ -261,6 +270,7 @@ namespace LevelManagement {
 		public List<Levels> currentlyUnloadingLevels;
 		QueuedSceneSwitch queuedActiveSceneSwitch;
 		
+		[DoNotSave]
 		public bool isCurrentlySwitchingScenes;
 
 		[Serializable]
@@ -386,18 +396,18 @@ namespace LevelManagement {
 							SaveManager.Load(mostRecentlyLoadedSave);
 						}
 						else {
-							SwitchActiveScene(startingScene, true, false, false, false);
+							SwitchActiveScene(startingScene, true, false, false, false, FinishInitialLoading);
 							initialized = true;
 						}
 					});
 				}
 				else {
-					SwitchActiveScene(startingScene, true, false, false, false);
+					SwitchActiveScene(startingScene, true, false, false, false, FinishInitialLoading);
 					initialized = true;
 				}
 			}
 #else
-			SwitchActiveScene(startingScene, true, false, false, false);
+			SwitchActiveScene(startingScene, true, false, false, false, FinishInitialLoading);
 			initialized = true;
 #endif
 		}
@@ -408,6 +418,15 @@ namespace LevelManagement {
 			if (queuedActiveSceneSwitch != null && !IsCurrentlySwitchingScenes) {
 				queuedActiveSceneSwitch.Invoke(debug);
 				queuedActiveSceneSwitch = null;
+			}
+		}
+
+		void FinishInitialLoading() {
+			foreach (Levels level in loadedLevels) {
+				Scene loadedScene = SceneManager.GetSceneByName(level.ToName());
+				if (loadedScene.isLoaded) {
+					FinishLoadingScene(loadedScene);
+				}
 			}
 		}
 
@@ -652,13 +671,18 @@ namespace LevelManagement {
 		/// Callback for a finished async level load.
 		/// Marks scene as active if it's name matches activeSceneName.
 		/// Removes scene name from currentlyLoadingSceneNames and adds it to loadedSceneNames.
+		/// Registers all saveable SuperspectiveObjects present in the scene (active + inactive).
 		/// </summary>
 		/// <param name="loadedScene">Scene that finished loading</param>
 		void FinishLoadingScene(Scene loadedScene) {
+			debug.Log($"Finished loading scene {loadedScene.name}");
+			
+			// RegisterAllSuperspectiveObjectsInScene(loadedScene);
+			
 			if (loadedScene.name == ManagerScene) {
 				return;
 			}
-
+			
 			Levels loadedLevel = loadedScene.name.ToLevel();
 
 			try {
@@ -680,12 +704,25 @@ namespace LevelManagement {
 			}
 		}
 
+		// TODO: Incorporate this into the save system to more gracefully handle inactive objects
+		private void RegisterAllSuperspectiveObjectsInScene(Scene loadedScene) {
+			foreach (GameObject root in loadedScene.GetRootGameObjects()) {
+				foreach (var superspectiveObject in root.GetComponentsInChildren<SuperspectiveObject>(true)) {
+					if (!superspectiveObject || superspectiveObject.SkipSave) continue;
+					
+					superspectiveObject.debug.Log($"[FinishLoadingScene] Registering {superspectiveObject.ID} in scene {loadedScene.name}.");
+					superspectiveObject.Register();
+				}
+			}
+		}
+
 		/// <summary>
 		/// Callback for a finished async level unload.
 		/// Removes the scene from currentlyUnloadingSceneNames.
 		/// </summary>
 		/// <param name="unloadedScene">Scene that finished unloading</param>
 		void FinishUnloadingScene(Scene unloadedScene) {
+			debug.Log($"Finished unloading scene {unloadedScene.name}");
 			if (unloadedScene.name == activeSceneName) {
 				debug.LogError("Just unloaded the active scene!");
 			}
@@ -729,21 +766,15 @@ namespace LevelManagement {
 
 #region Saving
 		public override void LoadSave(LevelManagerSave save) {
-			initialized = save.initialized;
-			queuedActiveSceneSwitch = save.queuedActiveSceneSwitch;
 			SwitchActiveScene(save.activeScene.ToLevel(), false, false, false, false);
 		}
 		
 		[Serializable]
 		public class LevelManagerSave : SaveObject<LevelManager> {
-			public bool initialized;
 			public string activeScene;
-			public QueuedSceneSwitch queuedActiveSceneSwitch;
 
 			public LevelManagerSave(LevelManager levelManager) : base(levelManager) {
-				this.initialized = levelManager.initialized;
 				this.activeScene = levelManager.activeSceneName;
-				this.queuedActiveSceneSwitch = levelManager.queuedActiveSceneSwitch;
 			}
 		}
 #endregion

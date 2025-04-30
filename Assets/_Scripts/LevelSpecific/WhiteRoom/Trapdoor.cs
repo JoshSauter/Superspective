@@ -2,10 +2,12 @@
 using System.Linq;
 using SuperspectiveUtils;
 using PowerTrailMechanics;
+using Saving;
 using UnityEngine;
 
 namespace LevelSpecific.WhiteRoom {
-    public class Trapdoor : MonoBehaviour {
+    [RequireComponent(typeof(UniqueId))]
+    public class Trapdoor : SuperspectiveObject<Trapdoor, Trapdoor.TrapdoorSave> {
         public PowerTrail powerTrailToReactTo;
         
         public enum State {
@@ -36,7 +38,8 @@ namespace LevelSpecific.WhiteRoom {
 
         Transform[] trapdoorPieces;
 
-        void Awake() {
+        protected override void Awake() {
+            base.Awake();
             trapdoorPieces = transform.GetChildren().Take(2).ToArray();
         }
 
@@ -111,6 +114,13 @@ namespace LevelSpecific.WhiteRoom {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+        
+        public override void LoadSave(TrapdoorSave save) { }
+        
+        [Serializable]
+        public class TrapdoorSave : SaveObject<Trapdoor> {
+            public TrapdoorSave(Trapdoor saveableObject) : base(saveableObject) { }
         }
     }
 }

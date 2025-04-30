@@ -12,6 +12,7 @@ namespace LevelSpecific.Fork {
         public Portal fakeBlackRoomPortal;
         BladeEdgeDetection edgeDetection;
 
+        private bool bothPortalsDisabled = true;
         bool edgesAreBlack = true;
         bool playerIsInFakeBlackRoom = false;
 
@@ -19,8 +20,7 @@ namespace LevelSpecific.Fork {
             base.Start();
             edgeDetection = SuperspectiveScreen.instance.playerCamera.GetComponent<BladeEdgeDetection>();
 
-            realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
-            fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);
+            UpdatePortals();
         }
 
         protected override void Init() {
@@ -41,8 +41,29 @@ namespace LevelSpecific.Fork {
 
         void Update() {
             edgesAreBlack = edgeDetection.EdgesAreBlack();
-            realBlackRoomPortal.gameObject.SetActive(!edgesAreBlack);
-            fakeBlackRoomPortal.gameObject.SetActive(edgesAreBlack);
+            UpdatePortals();
+        }
+
+        public void SetBothPortalsDisabled(bool value) {
+            bothPortalsDisabled = value;
+            UpdatePortals();
+        }
+
+        void UpdatePortals() {
+            if (bothPortalsDisabled) {
+                realBlackRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                fakeBlackRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                return;
+            }
+            
+            if (edgesAreBlack) {
+                realBlackRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+                fakeBlackRoomPortal.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
+            }
+            else {
+                realBlackRoomPortal.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
+                fakeBlackRoomPortal.SetPortalModes(PortalRenderMode.Invisible, PortalPhysicsMode.None);
+            }
         }
         
         public void UpdateAudioJob(AudioManager.AudioJob job) {
@@ -59,22 +80,13 @@ namespace LevelSpecific.Fork {
 
 #region Saving
 
-        public override void LoadSave(ToggleFakeBlackRoomPortalSave save) {
-            edgesAreBlack = save.edgesAreBlack;
-            playerIsInFakeBlackRoom = save.playerIsInFakeBlackRoom;
-        }
+        public override void LoadSave(ToggleFakeBlackRoomPortalSave save) { }
 
         public override string ID => "ToggleFakeBlackRoomPortal";
 
         [Serializable]
         public class ToggleFakeBlackRoomPortalSave : SaveObject<ToggleFakeBlackRoomPortal> {
-            public bool edgesAreBlack;
-            public bool playerIsInFakeBlackRoom;
-
-            public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) : base(toggle) {
-                this.edgesAreBlack = toggle.edgesAreBlack;
-                this.playerIsInFakeBlackRoom = toggle.playerIsInFakeBlackRoom;
-            }
+            public ToggleFakeBlackRoomPortalSave(ToggleFakeBlackRoomPortal toggle) : base(toggle) { }
         }
 #endregion
     }

@@ -131,7 +131,7 @@ public class FlashColors : SuperspectiveObject<FlashColors, FlashColors.FlashCol
 
     [Serializable]
 	public class FlashColorsSave : SaveObject<FlashColors> {
-        public StateMachine<State>.StateMachineSave stateSave;
+        public StateMachineSave<State> stateSave;
         public List<SerializableColor> startColors;
         public List<SerializableColor> startEmissions;
         

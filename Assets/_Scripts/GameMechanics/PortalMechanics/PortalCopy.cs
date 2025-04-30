@@ -32,7 +32,7 @@ public class PortalCopy : MonoBehaviour {
     }
 
 	void Start() {
-        debug = new DebugLogger(gameObject, () => DEBUG);
+        debug = new DebugLogger(gameObject, originalPortalableObj.ID, () => DEBUG);
 
         // copyToOriginalMaterialMap = renderers.SelectMany(r => {
         //     List<Material> originalMaterials = originalPortalableObj.renderers.ToList().Find(r2 => r.name == r2.name).sharedMaterials.ToList();
