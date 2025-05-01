@@ -30,12 +30,19 @@ public class KeyboardPrompt : MonoBehaviour {
             promptImage = gameObject.GetOrAddComponent<Image>();
         }
         
+        UpdateKeybind();
+        
+        Settings.OnSettingsChanged += UpdateKeybind;
+    }
+
+    private void UpdateKeybind() {
         var maybeKeybind = GetKeybind();
         if (maybeKeybind.IsEmpty()) {
             Debug.LogError($"No keybind setting matches {defaultKey}");
             enabled = false;
+            return;
         }
-
+        
         keybind = maybeKeybind.Get();
     }
 

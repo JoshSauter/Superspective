@@ -87,7 +87,7 @@ public partial class PlayerMovement {
 
         public void UpdateStaircase(Vector3 desiredVelocity) {
             Vector3 horizontalVelocity = m.ProjectHorizontalVelocity(desiredVelocity);
-            if (GravityRotateZone.anyCurrentlyRotatingPlayer) return;
+            if (Player.instance.IsCurrentlyRotating) return;
             
             switch (stepState.State) {
                 case StepState.Idle:

@@ -12,6 +12,7 @@ public enum InputType {
 	Interact,
 	Zoom,
 	AlignObject,
+	ExitLockedView,
 	Pause,
 	Jump,
 	Sprint,
@@ -262,6 +263,8 @@ public class PlayerButtonInput : Singleton<PlayerButtonInput> {
 	public bool ZoomPressed => Settings.Keybinds.Zoom.Pressed || InputTelemetry.KeyPressSimulated(InputType.Zoom);
 
 	public bool AlignObjectPressed => Settings.Keybinds.AlignObject.Pressed || InputTelemetry.KeyPressSimulated(InputType.AlignObject);
+	
+	public bool ExitLockedViewPressed => Settings.Keybinds.ExitLockedView.Pressed || InputTelemetry.KeyPressSimulated(InputType.ExitLockedView);
 	
 	public bool PausePressed => Settings.Keybinds.Pause.Pressed || InputTelemetry.KeyPressSimulated(InputType.Pause);
 	

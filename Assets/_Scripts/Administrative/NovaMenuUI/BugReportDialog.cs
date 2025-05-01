@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using LevelManagement;
 using Nova;
 using UnityEngine;
 using Saving;
@@ -167,6 +168,7 @@ namespace NovaMenuUI {
             }
 
             wForm.AddField("Version", Application.version);
+            wForm.AddField("Scene reported from", LevelManager.instance.activeSceneName);
 
             return wForm;
         }

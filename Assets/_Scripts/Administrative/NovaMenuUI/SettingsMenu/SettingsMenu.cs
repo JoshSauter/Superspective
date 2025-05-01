@@ -68,6 +68,8 @@ namespace NovaMenuUI {
             Dictionary<string, Setting> dirtiedSettingsByKey = settingsCopy
                 .Where(IsDirty)
                 .ToDictionary();
+
+            if (dirtiedSettingsByKey.Count == 0) return;
             
             Debug.Log($"The following settings are dirty: {string.Join(",", dirtiedSettingsByKey.Keys)}");
             

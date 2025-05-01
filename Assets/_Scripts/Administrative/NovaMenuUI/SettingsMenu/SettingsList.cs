@@ -166,6 +166,7 @@ namespace NovaMenuUI {
                     settingsItems.Add(HeaderSettingsItem.Of("Interaction"));
                     AddSettingCopy(Settings.Keybinds.Interact);
                     AddSettingCopy(Settings.Keybinds.AlignObject);
+                    AddSettingCopy(Settings.Keybinds.ExitLockedView);
                     AddSettingCopy(Settings.Keybinds.Zoom);
                     //settingsItems.Add(new SpacerSettingItem());
                     //AddSettingCopy(Settings.Keybinds.Pause);

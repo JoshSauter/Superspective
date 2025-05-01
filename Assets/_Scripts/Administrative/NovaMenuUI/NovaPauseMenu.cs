@@ -74,12 +74,13 @@ namespace NovaMenuUI {
             }
 
             if (PlayerButtonInput.instance.PausePressed) {
+                bool playerViewUnlocked = PlayerLook.instance.state == PlayerLook.ViewLockState.ViewUnlocked;
                 if (PauseMenuIsOpen) {
                     if (allSubMenus.TrueForAll(subMenu => subMenu.CanClose)) {
                         ClosePauseMenu();
                     }
                 }
-                else {
+                else if (playerViewUnlocked) {
                     OpenPauseMenu(currentMenuState != MenuState.Off);
                 }
             }

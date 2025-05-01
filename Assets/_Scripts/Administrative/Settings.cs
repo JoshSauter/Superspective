@@ -11,6 +11,9 @@ using SerializableClasses;
 using SuperspectiveUtils;
 
 public class Settings : Singleton<Settings> {
+	public delegate void SettingsChangedAction();
+	public static event SettingsChangedAction OnSettingsChanged;
+	
 	public static readonly Dictionary<string, Setting> allSettings = new Dictionary<string, Setting>();
 
 	public static Setting GetSetting(string key) {
@@ -78,6 +81,9 @@ public class Settings : Singleton<Settings> {
 		if (Changed(Audio.MusicVolume)) {
 			AudioManager.instance.MusicVolume = ((FloatSetting)allSettings[Audio.MusicVolume.key]).value / 100f;
 		}
+		
+		// TODO: Probably replace all those ^ with subscribers to this event
+		OnSettingsChanged?.Invoke();
 	}
 
 	public static class Audio {
@@ -382,7 +388,7 @@ public class Settings : Singleton<Settings> {
 		public static readonly KeybindSetting Sprint = new KeybindSetting("Sprint", new KeyboardAndMouseInput(KeyCode.LeftShift, KeyCode.RightShift));
 		// public static readonly KeybindSetting AutoRun = new KeybindSetting("Auto Run", new KeyboardAndMouseInput(KeyCode.BackQuote));
 		public static readonly KeybindSetting Interact = new KeybindSetting("Interact", new KeyboardAndMouseInput(0, KeyCode.E)); // Left-mouse default
-
+		public static readonly KeybindSetting ExitLockedView = new KeybindSetting("Exit Locked View", new KeyboardAndMouseInput(KeyCode.Escape));
 		public static readonly KeybindSetting Zoom = new KeybindSetting("Zoom", new KeyboardAndMouseInput(1)); // Right-mouse default
 		public static readonly KeybindSetting AlignObject = new KeybindSetting("Align Object", new KeyboardAndMouseInput(2)); // Middle-mouse default
 		public static readonly KeybindSetting Pause = new KeybindSetting("Pause", new KeyboardAndMouseInput(KeyCode.Escape));
@@ -445,6 +451,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Keybinds.Sprint);
 	    // AddSetting(Keybinds.AutoRun);
 	    AddSetting(Keybinds.Interact);
+	    AddSetting(Keybinds.ExitLockedView);
 	    AddSetting(Keybinds.Zoom);
 	    AddSetting(Keybinds.AlignObject);
 	    AddSetting(Keybinds.Pause);

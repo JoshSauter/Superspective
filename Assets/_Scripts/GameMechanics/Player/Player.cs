@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using GrowShrink;
 using UnityEngine;
 using SerializableClasses;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine.Serialization;
 
@@ -16,11 +17,15 @@ public class Player : SingletonSuperspectiveObject<Player, Player.PlayerSave> {
 	// Returns the position of the camera adjusted to be aligned with the player's body
 	public Vector3 AdjustedCamPos => PlayerCam.transform.position.GetClosestPointOnFiniteLine(movement.BottomOfPlayer, movement.TopOfPlayer);
 	public CameraFollow cameraFollow;
+	[SaveUnityObject]
 	public PickupObject heldObject;
+	[SaveUnityObject]
+	public GravityRotateZone rotatingInGravityZone;
 
 	public float Scale => growShrink != null ? growShrink.CurrentScale : 1f;
 	public GrowShrinkObject growShrink;
 	public bool IsHoldingSomething => heldObject != null;
+	public bool IsCurrentlyRotating => rotatingInGravityZone != null;
 
 	public CapsuleCollider CapsuleCollider => movement.thisCollider;
 	public new Collider collider;

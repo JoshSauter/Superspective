@@ -9,8 +9,6 @@ using SuperspectiveUtils;
 
 [RequireComponent(typeof(UniqueId), typeof(BetterTrigger))]
 public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityRotateZone.GravityRotateZoneSave>, BetterTriggers {
-    public static bool anyCurrentlyRotatingPlayer = false;
-
     public enum RotateMode {
         Convex,              // e.g. walking from a floor down some stairs to a wall
         ConvexBidirectional, // e.g. when building a "half-pipe" which the player can enter from either direction, such as in _RoseRoomExit
@@ -35,7 +33,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
                 case InvisibleWallsMode.None:
                     return false;
                 case InvisibleWallsMode.OnlyWhenRotating:
-                    return currentlyRotatingPlayer && playerIsInRotationZone;
+                    return CurrentlyRotatingPlayer && playerIsInRotationZone;
                 case InvisibleWallsMode.Always:
                     if (playerIsInRotationZone) return true;
                     if (!playerIsInTriggerZone) return false;
@@ -213,7 +211,20 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
     [LabelText("Currently Rotating Player")]
     [Tooltip("Whether the player is currently rotating in this gravity rotate zone.")]
     [SerializeField]
-    public bool currentlyRotatingPlayer = false;
+    private bool _currentlyRotatingPlayer = false;
+    public bool CurrentlyRotatingPlayer {
+        get => _currentlyRotatingPlayer;
+        set {
+            if (value) {
+                Player.instance.rotatingInGravityZone = this;
+            }
+            else if (Player.instance.rotatingInGravityZone == this) {
+                Player.instance.rotatingInGravityZone = null;
+            }
+            
+            _currentlyRotatingPlayer = value;
+        }
+    }
 
     [BoxGroup("State")]
     [ReadOnly]
@@ -461,9 +472,8 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
             }
             
             // If the player is not already currently rotating, check if we should start rotating
-            currentlyRotatingPlayer |= ValidateEntryConditionsForPlayer();
-            anyCurrentlyRotatingPlayer |= currentlyRotatingPlayer;
-            if (!currentlyRotatingPlayer) return;
+            CurrentlyRotatingPlayer |= ValidateEntryConditionsForPlayer();
+            if (!CurrentlyRotatingPlayer) return;
 
             PlayerInRotateZone(playerWorldPos, lerpValue);
         }
@@ -487,8 +497,7 @@ public class GravityRotateZone : SuperspectiveObject<GravityRotateZone, GravityR
                 SetGravityForPlayer(desiredGravityLocal, 1, false);
             }
             
-            currentlyRotatingPlayer = false;
-            anyCurrentlyRotatingPlayer = false;
+            CurrentlyRotatingPlayer = false;
             playerIsInRotationZone = false;
         }
         else if (other.gameObject.TryGetComponent(out GravityObject gravityObj) && allGravityObjectsInZone.Contains(gravityObj)) {

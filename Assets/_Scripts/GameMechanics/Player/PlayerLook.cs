@@ -121,7 +121,7 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
         }
 
         if (state == ViewLockState.ViewLocked) {
-            if (PlayerButtonInput.instance.LeftStickHeld && !GameManager.instance.IsCurrentlyLoading) {
+            if ((PlayerButtonInput.instance.ExitLockedViewPressed || PlayerButtonInput.instance.LeftStickHeld) && !GameManager.instance.IsCurrentlyLoading) {
                 UnlockView();
             }
         }
