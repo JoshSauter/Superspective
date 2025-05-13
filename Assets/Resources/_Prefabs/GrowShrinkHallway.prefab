@@ -43271,8 +43271,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29291c8be0cdd684cb284e0eb26a7071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 3308433070078336312}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
+  _id: {fileID: 3308433070078336312}
   scaleFactor: 8
   originalTriggerZone: {fileID: 1374521707365610448}
   pbMeshes:
@@ -43442,27 +43446,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15b9dccdde384941952e99284fca409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _id: {fileID: 3308433070078336312}
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 1
+  _id: {fileID: 3308433070078336312}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 0
+  channelLogic: 
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 
+  activePillar: {fileID: 0}
+  pillars: []
   _dimension: 0
   camQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -43483,8 +43493,6 @@ MonoBehaviour:
   invisibleRange:
     min: 0
     max: 0
-  activePillar: {fileID: 0}
-  pillars: []
   lastPillarPlanes:
     objectBounds:
       min: 0
@@ -67256,6 +67264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaf372ed91b34b346993fa4ad58b0c43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trigger: {fileID: 0}
 --- !u!1 &9111837760291276710
 GameObject:
   m_ObjectHideFlags: 0

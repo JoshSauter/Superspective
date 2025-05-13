@@ -39189,22 +39189,25 @@ MonoBehaviour:
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 0
+  channelLogic: 'Ex: "(2 && 3) || !1"'
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 'Ex: "(2 && 3) || !1"'
+  activePillar: {fileID: 0}
+  pillars:
+  - referencedObjId: 
   _dimension: 1
   camQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -39225,9 +39228,6 @@ MonoBehaviour:
   invisibleRange:
     min: 0
     max: 0
-  activePillar: {fileID: 0}
-  pillars:
-  - referencedObjId: 
   lastPillarPlanes:
     objectBounds:
       min: 0
@@ -50045,22 +50045,25 @@ MonoBehaviour:
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 0
+  channelLogic: 'Ex: "(2 && 3) || !1"'
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 'Ex: "(2 && 3) || !1"'
+  activePillar: {fileID: 0}
+  pillars:
+  - referencedObjId: 
   _dimension: 1
   camQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -50081,9 +50084,6 @@ MonoBehaviour:
   invisibleRange:
     min: 0
     max: 0
-  activePillar: {fileID: 0}
-  pillars:
-  - referencedObjId: 
   lastPillarPlanes:
     objectBounds:
       min: 0
@@ -53004,22 +53004,25 @@ MonoBehaviour:
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 0
+  channelLogic: 'Ex: "(2 && 3) || !1"'
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 'Ex: "(2 && 3) || !1"'
+  activePillar: {fileID: 0}
+  pillars:
+  - referencedObjId: 
   _dimension: 0
   camQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -53040,9 +53043,6 @@ MonoBehaviour:
   invisibleRange:
     min: 0
     max: 0
-  activePillar: {fileID: 0}
-  pillars:
-  - referencedObjId: 
   lastPillarPlanes:
     objectBounds:
       min: 0
@@ -67629,22 +67629,25 @@ MonoBehaviour:
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 0
+  channelLogic: 'Ex: "(2 && 3) || !1"'
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 2
   visibilityState: 2
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 'Ex: "(2 && 3) || !1"'
+  activePillar: {fileID: 0}
+  pillars:
+  - referencedObjId: 
   _dimension: 0
   camQuadrant: 0
   dimensionShiftQuadrant: 0
@@ -67665,9 +67668,6 @@ MonoBehaviour:
   invisibleRange:
     min: 0
     max: 0
-  activePillar: {fileID: 0}
-  pillars:
-  - referencedObjId: 
   lastPillarPlanes:
     objectBounds:
       min: 0

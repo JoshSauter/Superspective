@@ -29,6 +29,21 @@ public class GameManager : Singleton<GameManager> {
     [ShowInInspector]
     public static float timeScale = 1f;
 
+    public bool justResumed = false;
+    private void OnApplicationFocus(bool hasFocus) {
+        Cursor.lockState = hasFocus ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !hasFocus;
+        if (hasFocus) {
+            justResumed = true;
+        }
+    }
+
+    private void Update() {
+        if (justResumed) {
+            justResumed = false;
+        }
+    }
+
     private void OnVersionChange() {
         #if UNITY_EDITOR
         if (string.IsNullOrEmpty(version)) return;
@@ -82,6 +97,7 @@ public class GameManager : Singleton<GameManager> {
         Time.timeScale = 1f;
         SuperspectivePhysics.ResetState();
         SaveManager.ClearAllState();
+        gameHasLoaded = false;
         SceneManager.LoadScene(this.gameObject.scene.buildIndex);
     }
     

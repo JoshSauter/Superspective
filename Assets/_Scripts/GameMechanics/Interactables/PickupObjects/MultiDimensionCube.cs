@@ -286,13 +286,13 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 						// Different dimension, corporeal cube should be invisible
 						UpdateDissolveValuesCorporeal(1);
 						UpdateDissolveValuesInverted(0);
-						SetPortalCopyVisibility(false);
+						SetPortalCopyVisibility(true);
 					}
 					else {
 						// Same dimension, corporeal cube should be visible
 						UpdateDissolveValuesCorporeal(0);
 						UpdateDissolveValuesInverted(0);
-						SetPortalCopyVisibility(true);
+						SetPortalCopyVisibility(false);
 					}
 					break;
 				case State.Materializing:
@@ -355,7 +355,7 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 	}
 
 	void SetPortalCopyVisibility(bool swappedDimensions) {
-		// debug.Log($"Setting portal copy visibility to {swappedDimensions}");
+		debug.Log($"Setting portal copy visibility. Swapped dimensions: {swappedDimensions}");
 		if (swappedDimensions) {
 			CubeFramePortalCopy.gameObject.layer = SuperspectivePhysics.InvisibleLayer;
 			CorporealGlassPortalCopy.gameObject.layer = SuperspectivePhysics.InvisibleLayer;

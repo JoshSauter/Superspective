@@ -275,6 +275,8 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
 
     private Vector3 debugTargetPos = Vector3.zero;
     void FixedUpdate() {
+        if (!GameManager.instance.gameHasLoaded) return;
+        
         if (thisCollider.sharedMaterial != EffectivePhysicsMaterial) thisCollider.sharedMaterial = EffectivePhysicsMaterial;
         
         if (isHeld && shouldFollow) {

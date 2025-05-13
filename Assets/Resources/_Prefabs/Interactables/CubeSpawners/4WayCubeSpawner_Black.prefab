@@ -5965,6 +5965,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4761543464424773622}
   oneTimeButton: 0
@@ -6049,6 +6051,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 4761543464424773622}
   state:
@@ -15251,27 +15255,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 9159098428069207411}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 7
+  channelLogic: 
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 
 --- !u!1 &1604229267482999240
 GameObject:
   m_ObjectHideFlags: 0
@@ -19404,6 +19410,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 926819900885713275}
   oneTimeButton: 0
@@ -19488,6 +19496,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 926819900885713275}
   state:
@@ -25846,6 +25856,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 1800292824753110223}
   backWall: {fileID: 397035597883030330}
@@ -26711,6 +26723,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 3565964922392890559}
   backWall: {fileID: 7338413209451497441}
@@ -30833,27 +30847,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 7053804071272952999}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 6
+  channelLogic: 
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 
 --- !u!1 &3440788723039553833
 GameObject:
   m_ObjectHideFlags: 0
@@ -37188,6 +37204,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 2525454345288631922}
   backWall: {fileID: 5689951913202945523}
@@ -41513,27 +41531,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 2445400558110752290}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 4
+  channelLogic: 
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 
 --- !u!1 &5222183634145934024
 GameObject:
   m_ObjectHideFlags: 0
@@ -47873,6 +47893,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 8645477226722014228}
   oneTimeButton: 0
@@ -47957,6 +47979,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 8645477226722014228}
   state:
@@ -56094,6 +56118,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 2468637175006909361}
   oneTimeButton: 0
@@ -56178,6 +56204,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 2468637175006909361}
   state:
@@ -63593,27 +63621,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 2046790504245767043}
   treatChildrenAsOneObjectRecursively: 1
   ignoreChildrenWithDimensionObject: 1
   includeInactiveGameObjects: 0
+  useAdvancedChannelLogic: 0
   channel: 5
+  channelLogic: 
   reverseVisibilityStates: 0
-  ignorePartiallyVisibleLayerChanges: 0
-  disableColliderWhileInvisible: 1
   bypassRaycastCheck: 0
   automaticallySetRenderersIfEmpty: 1
   renderers: []
+  renderersToSkip: []
   automaticallySetCollidersIfEmpty: 1
   colliders: []
+  collidersToSkip: []
   ignoreCollisionsTriggerZone: {fileID: 0}
   startingVisibilityState: 1
   visibilityState: 1
   collisionMatrix: 010000000000000100000000000001000101000000010101
   collisionLogic: {fileID: 0}
-  useAdvancedChannelLogic: 0
-  channelLogic: 
 --- !u!1 &8160803845895462908
 GameObject:
   m_ObjectHideFlags: 0
@@ -66561,6 +66591,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameObjectStartsInactive: 0
   scriptStartsDisabled: 0
+  _startPosition: {x: 0, y: 0, z: 0}
+  _startRotation: {x: 0, y: 0, z: 0, w: 0}
   DEBUG: 0
   _id: {fileID: 5157729750459156697}
   backWall: {fileID: 523463248612432502}

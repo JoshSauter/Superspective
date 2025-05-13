@@ -73,7 +73,7 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
     private bool _frozenOverride;
 
     public bool Frozen {
-        get => _frozenOverride || NovaPauseMenu.instance.PauseMenuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn);
+        get => _frozenOverride || NovaPauseMenu.instance.PauseMenuIsOpen || ((int)EndOfPlaytestMessage.instance.state > (int)EndOfPlaytestMessage.State.BackgroundFadingIn) || GameManager.instance.justResumed;
         set => _frozenOverride = value;
     } 
 

@@ -21,8 +21,8 @@ namespace Saving {
     public static class SaveFileUtils {
         // Paths for saving metadata and data
         private static string SavePath => $"{Application.persistentDataPath}/Saves";
-        private static string SaveMetadataPath => $"{SavePath}/Metadata";
-        public static string SaveDataPath => $"{SavePath}/Data";
+        private static string SaveMetadataPath => $"{SavePath}/{Application.version}/Metadata";
+        public static string SaveDataPath => $"{SavePath}/{Application.version}/Data";
 
         // Delegate for notifying changes in saves
         public delegate void SaveUpdateAction();
@@ -580,4 +580,24 @@ namespace Saving {
             metadataBytes.CopyFrom(allBytesArray);
         }
     }
+    
+    // Util for cleaning up old save path directories. Now we use version-specific directories instead.
+    public static class SaveFolderCleaner {
+        public static void CleanOldSaves() {
+            string savePath = Path.Combine(Application.persistentDataPath, "Saves");
+            string metadataPath = Path.Combine(savePath, "Metadata");
+            string dataPath = Path.Combine(savePath, "Data");
+
+            if (Directory.Exists(metadataPath)) {
+                Debug.Log($"[Save Cleanup] Deleting old metadata folder: {metadataPath}");
+                Directory.Delete(metadataPath, true);
+            }
+
+            if (Directory.Exists(dataPath)) {
+                Debug.Log($"[Save Cleanup] Deleting old data folder: {dataPath}");
+                Directory.Delete(dataPath, true);
+            }
+        }
+    }
+
 }

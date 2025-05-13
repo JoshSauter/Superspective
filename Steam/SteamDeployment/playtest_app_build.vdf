@@ -1,0 +1,11 @@
+"AppBuild"
+{
+    "AppID" "2239510"
+    "Desc" "0.1.0"
+    "BuildOutput" "C:\\Superspective\\SteamUpload\\output"
+    "ContentRoot" "."
+    "Depots"
+    {
+        "2239511" "playtest_windows_depot.vdf"
+    }
+}

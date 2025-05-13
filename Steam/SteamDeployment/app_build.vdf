@@ -1,0 +1,11 @@
+"AppBuild"
+{
+    "AppID" "2239490"                                      // Your Steam App ID
+    "Desc" "0.1.0"                              // Human-readable version description (for internal tracking)
+    "BuildOutput" "C:\\Superspective\\SteamUpload\\output" // Local temp folder where SteamPipe writes intermediate manifest/delta files during upload
+    "ContentRoot" "."
+    "Depots"
+    {
+        "2239491" "windows_depot.vdf"        // Reference to the depot config
+    }
+}

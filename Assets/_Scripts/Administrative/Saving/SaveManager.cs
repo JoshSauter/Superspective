@@ -16,6 +16,10 @@ using UnityEditor;
 
 namespace Saving {
     public static partial class SaveManager {
+        static SaveManager() {
+            // TODO: Probably remove this and go back to old version-agnostic Save data path when you decide to support backwards-compatibility
+            SaveFolderCleaner.CleanOldSaves();
+        }
         
         public static bool DEBUG = true;
         public static bool isCurrentlyLoadingSave = false;

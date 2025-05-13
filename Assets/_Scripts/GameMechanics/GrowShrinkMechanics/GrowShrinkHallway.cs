@@ -247,22 +247,25 @@ namespace GrowShrink {
             }
 
             // Set up CombineMesh gameObject for the shrunk trigger zone
-            GameObject shrunkTriggerZoneGO = Instantiate(originalTriggerZone.gameObject, geometryRoot, false);
+            Material triggerZoneMaterial = originalTriggerZone.GetComponent<MeshRenderer>().sharedMaterial;
+            GameObject shrunkTriggerZoneGO = new GameObject($"{originalTriggerZone.gameObject.name}_Shrunk", typeof(MeshFilter), typeof(MeshCollider), typeof(MeshRenderer));
             Undo.RegisterCreatedObjectUndo(shrunkTriggerZoneGO, "GrowShrinkHallway: Create Shrunk Trigger Zone");
-            shrunkTriggerZoneGO.name = $"{originalTriggerZone.gameObject.name}_Shrunk";
             Undo.RecordObject(shrunkTriggerZoneGO.transform, "GrowShrinkHallway: Set Shrunk Trigger Zone Transform");
+            shrunkTriggerZoneGO.transform.SetParent(geometryRoot);
             shrunkTriggerZoneGO.transform.SetSiblingIndex(1);
             shrunkTriggerZoneGO.transform.position = originalTriggerZone.transform.position;
             shrunkTriggerZoneGO.transform.rotation = originalTriggerZone.transform.rotation;
-            
-            // Remove the PB mesh filter because it doesn't seem to allow setting the mesh value
-            Undo.DestroyObjectImmediate(shrunkTriggerZoneGO.GetComponent<ProBuilderMesh>());
             
             // Add a normal Unity MeshFilter instead
             MeshFilter shrunkTriggerMeshFilter = shrunkTriggerZoneGO.GetOrAddComponent<MeshFilter>();
             Undo.RegisterCreatedObjectUndo(shrunkTriggerMeshFilter, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh Filter");
             MeshCollider shrunkTriggerCollider = shrunkTriggerZoneGO.GetOrAddComponent<MeshCollider>();
             Undo.RegisterCreatedObjectUndo(shrunkTriggerCollider, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh Collider");
+            shrunkTriggerCollider.convex = true;
+            shrunkTriggerCollider.isTrigger = true;
+            MeshRenderer shrunkTriggerMeshRenderer = shrunkTriggerZoneGO.GetOrAddComponent<MeshRenderer>();
+            Undo.RegisterCreatedObjectUndo(shrunkTriggerMeshRenderer, "GrowShrinkHallway: Create Shrunk Trigger Zone Mesh Renderer");
+            shrunkTriggerMeshRenderer.sharedMaterial = triggerZoneMaterial;
             shrunkTriggerZone = shrunkTriggerZoneGO.GetOrAddComponent<GrowShrinkTransitionTrigger>();
             Undo.RegisterCreatedObjectUndo(shrunkTriggerZone, "GrowShrinkHallway: Create Shrunk Trigger Zone Transition Trigger");
 

@@ -116,7 +116,7 @@ namespace NovaMenuUI {
                     AddSettingCopy(Settings.Video.VSync);
                     AddSettingCopy(Settings.Video.AntiAliasingEnabled);
                     AddSettingCopy(Settings.Video.LetterboxingEnabled);
-                    AddSettingCopy(Settings.Video.PortalDownsampleAmount);
+                    // AddSettingCopy(Settings.Video.PortalDownsampleAmount);
                     AddSettingCopy(Settings.Gameplay.CameraShake);
                     AddSettingCopy(Settings.Video.DoubleThickEdges);
                     break;
@@ -168,8 +168,8 @@ namespace NovaMenuUI {
                     AddSettingCopy(Settings.Keybinds.AlignObject);
                     AddSettingCopy(Settings.Keybinds.ExitLockedView);
                     AddSettingCopy(Settings.Keybinds.Zoom);
-                    //settingsItems.Add(new SpacerSettingItem());
-                    //AddSettingCopy(Settings.Keybinds.Pause);
+                    // settingsItems.Add(new SpacerSettingItem());
+                    // AddSettingCopy(Settings.Keybinds.Pause);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

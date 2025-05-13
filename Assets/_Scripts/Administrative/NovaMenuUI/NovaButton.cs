@@ -14,9 +14,13 @@ namespace NovaMenuUI {
         
         private Color BackgroundColor => backgroundColorOverride != Color.clear ? backgroundColorOverride : Style.NovaButton.DefaultBgColor;
         private Color HoverBgColor => hoverColorOverride != Color.clear ? hoverColorOverride : Style.NovaButton.HoverBgColor;
+        private Color ClickHeldBgColor => clickHeldBackgroundColorOverride != Color.clear ? clickHeldBackgroundColorOverride : Style.NovaButton.ClickHeldBgColor;
+        private Color ClickedBgColor => clickedBackgroundColorOverride != Color.clear ? clickedBackgroundColorOverride : Style.NovaButton.ClickedBgColor;
         
         public Color backgroundColorOverride = Color.clear;
         public Color hoverColorOverride = Color.clear;
+        public Color clickHeldBackgroundColorOverride = Color.clear;
+        public Color clickedBackgroundColorOverride = Color.clear;
         
         public bool DEBUG;
         public DebugLogger debug;
@@ -198,11 +202,11 @@ namespace NovaMenuUI {
                         endTextColor = Style.NovaButton.DefaultComponentColor;
                         break;
                     case ClickState.ClickHeld:
-                        endBgColor = Style.NovaButton.ClickHeldBgColor;
+                        endBgColor = ClickHeldBgColor;
                         endTextColor = Style.NovaButton.ClickHeldComponentColor;
                         break;
                     case ClickState.Clicked:
-                        endBgColor = Style.NovaButton.ClickedBgColor;
+                        endBgColor = ClickedBgColor;
                         endTextColor = Style.NovaButton.ClickedComponentColor;
                         break;
                     default:

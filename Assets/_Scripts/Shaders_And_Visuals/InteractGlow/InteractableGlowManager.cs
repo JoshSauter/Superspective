@@ -121,7 +121,7 @@ public class InteractableGlowManager : Singleton<InteractableGlowManager> {
 
 	Color GetColor(InteractableGlow objGlow) {
 		Color color = new Color();
-		if (edgeDetection == null || objGlow.overrideGlowColor) {
+		if (edgeDetection == null || objGlow.OverrideGlowColor) {
 			color = objGlow.currentColor;
 		}
 		else {

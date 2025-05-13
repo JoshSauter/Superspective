@@ -173,6 +173,7 @@ public class Interact : Singleton<Interact> {
             // In the editor, holding control and clicking on an object in the game world will select and focus it in the scene view
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0)) {
                 Selection.objects = new UnityEngine.Object[] { firstObjHit };
+                EditorGUIUtility.PingObject(firstObjHit); // <-- Highlights in Hierarchy
                 Type gameViewType = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
                 EditorWindow gameView = EditorWindow.GetWindow(gameViewType);
                 if (gameView != null) {

@@ -40,11 +40,7 @@ public class RoseRoomExit : SuperspectiveObject<RoseRoomExit, RoseRoomExit.RoseR
         state = this.StateMachine(State.Exterior);
         
         roots = new GameObject[] { exteriorRoot, interiorCurvedRoot };
-        state.OnStateChangeSimple += () => {
-            for (int i = 0; i < roots.Length; i++) {
-                roots[i].SetActive(i == (int)state.State);
-            }
-        };
+        state.OnStateChangeSimple += UpdateState;
     }
 
     public void SetAsExterior() {
@@ -55,9 +51,10 @@ public class RoseRoomExit : SuperspectiveObject<RoseRoomExit, RoseRoomExit.RoseR
         state.Set(State.InteriorCurved);
     }
 
-    void Update() {
-        if (GameManager.instance.IsCurrentlyLoading) return;
-        
+    private void UpdateState() {
+        for (int i = 0; i < roots.Length; i++) {
+            roots[i].SetActive(i == (int)state.State);
+        }
     }
     
 #region Saving
@@ -66,6 +63,8 @@ public class RoseRoomExit : SuperspectiveObject<RoseRoomExit, RoseRoomExit.RoseR
 			public RoseRoomExitSave(RoseRoomExit script) : base(script) { }
 		}
 
-        public override void LoadSave(RoseRoomExitSave save) { }
+        public override void LoadSave(RoseRoomExitSave save) {
+            UpdateState();
+        }
 #endregion
 }

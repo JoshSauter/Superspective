@@ -46,7 +46,7 @@ class UnloadScenesBeforePlay {
 
         int numScenes = SceneManager.sceneCount;
         List<Scene> scenesToUnload = new List<Scene>();
-        List<Scene> dirtyScenes = new List<Scene>();
+        HashSet<Scene> dirtyScenes = new HashSet<Scene>();
         bool saveAllScenes = false; // Tracks whether Save All was selected in the dialog
         for (int i = 0; i < numScenes; i++) {
             Scene scene = SceneManager.GetSceneAt(i);
@@ -63,37 +63,41 @@ class UnloadScenesBeforePlay {
         
         List<Scene> scenesSaved = new List<Scene>();
         foreach (Scene sceneToUnload in scenesToUnload) {
-            
-            string dirtySceneNames = string.Join("\n", dirtyScenes.Except(scenesSaved).Select(s => s.name));
-            const int SAVE_SCENE = 0;
-            const int DONT_SAVE = 1;
-            const int SAVE_ALL_SCENES = 2;
-            int choice = saveAllScenes ? SAVE_ALL_SCENES : EditorUtility.DisplayDialogComplex(
-                "Save Scenes?",
-                $"Scene: {sceneToUnload.name}\n\nThe following scenes have unsaved changes:\n{dirtySceneNames}\n\nWhat would you like to do?",
-                "Save", // Option 0
-                "Don't Save", // Option 1
-                "Save All" // Option 2
-            );
-            
-            bool saveScene = false;
-            switch (choice) {
-                case SAVE_SCENE:
-                    saveScene = true;
-                    break;
-                case DONT_SAVE:
-                    break;
-                case SAVE_ALL_SCENES:
-                    saveScene = true;
-                    saveAllScenes = true;
-                    break;
+            // If the scene is dirty, prompt the user to save it
+            if (dirtyScenes.Contains(sceneToUnload)) {
+                string dirtySceneNames = string.Join("\n", dirtyScenes.Except(scenesSaved).Select(s => s.name));
+                const int SAVE_SCENE = 0;
+                const int DONT_SAVE = 1;
+                const int SAVE_ALL_SCENES = 2;
+                int choice = saveAllScenes
+                    ? SAVE_ALL_SCENES
+                    : EditorUtility.DisplayDialogComplex(
+                        "Save Scenes?",
+                        $"Scene: {sceneToUnload.name}\n\nThe following scenes have unsaved changes:\n{dirtySceneNames}\n\nWhat would you like to do?",
+                        "Save", // Option 0
+                        "Don't Save", // Option 1
+                        "Save All" // Option 2
+                    );
+
+                bool saveScene = false;
+                switch (choice) {
+                    case SAVE_SCENE:
+                        saveScene = true;
+                        break;
+                    case DONT_SAVE:
+                        break;
+                    case SAVE_ALL_SCENES:
+                        saveScene = true;
+                        saveAllScenes = true;
+                        break;
+                }
+
+                if (saveScene) {
+                    EditorSceneManager.SaveScene(sceneToUnload);
+                    scenesSaved.Add(sceneToUnload);
+                }
             }
 
-            if (saveScene) {
-                EditorSceneManager.SaveScene(sceneToUnload);
-                scenesSaved.Add(sceneToUnload);
-            }
-            
             EditorApplication.delayCall += () => {
                 try {
                     EditorSceneManager.CloseScene(sceneToUnload, true);

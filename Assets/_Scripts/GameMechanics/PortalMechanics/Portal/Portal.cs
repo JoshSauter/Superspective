@@ -196,10 +196,6 @@ namespace PortalMechanics {
 		
 		protected override void Start() {
 			base.Start();
-
-			if (dimensionObject != null) {
-				dimensionObject.ignorePartiallyVisibleLayerChanges = true;
-			}
 			
 			playerCamera = SuperspectiveScreen.instance.playerCamera.transform;
 			playerCameraFollow = playerCamera.GetComponent<CameraFollow>();

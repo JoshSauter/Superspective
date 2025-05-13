@@ -292,10 +292,12 @@ namespace DimensionObjectMechanics {
                 aDimensionObjects = collidersAffectedByDimensionObjects[a];
                 bDimensionObjects = collidersAffectedByDimensionObjects[b];
 
+                bool channelOverlapExists = false;
                 foreach (DimensionObject aDimensionObject in aDimensionObjects) {
                     // Check if all bDimensionObjects satisfy ShouldCollideWithDimensionObject
                     foreach (DimensionObject bDimensionObject in bDimensionObjects) {
                         if (!aDimensionObject.HasChannelOverlapWith(bDimensionObject)) continue;
+                        channelOverlapExists = true;
                         
                         if (!aDimensionObject.ShouldCollideWithDimensionObject(bDimensionObject)) {
                             // If any collision check fails, return false immediately
@@ -304,9 +306,9 @@ namespace DimensionObjectMechanics {
                         }
                     }
                 }
-                // If all checks pass, return true
-                collisionsCache.AddCollision(a, b, CollisionCacheValue.CollisionNotIgnored);
-                return true;
+                // If all checks pass, return true if some channel overlap exists, false otherwise
+                collisionsCache.AddCollision(a, b, channelOverlapExists ? CollisionCacheValue.CollisionNotIgnored : CollisionCacheValue.CollisionIgnored);
+                return channelOverlapExists;
             }
             
             bool collidersShouldInteract = CollidersShouldInteract();

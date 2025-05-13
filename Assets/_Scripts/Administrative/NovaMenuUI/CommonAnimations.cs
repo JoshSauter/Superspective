@@ -1,4 +1,5 @@
 using Nova;
+using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -33,6 +34,41 @@ namespace NovaMenuUI {
         public void Update(float percentDone) {
             float t = Easing.EaseInOut(percentDone);
             UIBlock.Color = Color.Lerp(startColor, endColor, t);
+        }
+    }
+
+    public enum PositionFormat {
+        Pixels,
+        Percent
+    }
+    struct MenuMovementAnimation : IAnimation {
+        public UIBlock2D blockMoving;
+        public PositionFormat positionType;
+        private bool IsUsingPercent => positionType == PositionFormat.Percent;
+        
+        [ShowIf(nameof(IsUsingPercent))]
+        public Vector3 startPercent;
+        [ShowIf(nameof(IsUsingPercent))]
+        public Vector3 endPercent;
+        
+        [HideIf(nameof(IsUsingPercent))]
+        public Vector3 startPixels;
+        [HideIf(nameof(IsUsingPercent))]
+        public Vector3 endPixels;
+
+        public void Update(float percentDone) {
+            float t = Easing.EaseInOut(percentDone);
+            Vector3 start = IsUsingPercent ? startPercent : startPixels;
+            Vector3 end = IsUsingPercent ? endPercent : endPixels;
+            
+            Vector3 newPos = Vector3.Lerp(start, end, t);
+            
+            if (IsUsingPercent) {
+                blockMoving.Position.Percent = newPos;
+            }
+            else {
+                blockMoving.Position.Raw = newPos;
+            }
         }
     }
 }

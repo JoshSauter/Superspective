@@ -75,6 +75,8 @@ namespace PortalMechanics {
         private static int globalLastTeleportedFrame = 0;
         private float lastTeleportedTime = 0f;
 
+        protected virtual int PortalTriggerZoneLayer => SuperspectivePhysics.TriggerZoneLayer;
+
         private void PhysicsAwake() {
 	        if (colliders == null || colliders.Length == 0) {
 		        if (compositePortal) {
@@ -157,7 +159,7 @@ namespace PortalMechanics {
 			InitializeCompositeTrigger();
 
 			foreach (var c in triggerColliders) {
-				c.gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
+				c.gameObject.layer = PortalTriggerZoneLayer;
 				if (c.gameObject != this.gameObject) {
 					// PortalColliders handle non-player objects passing through portals
 					c.gameObject.AddComponent<NonPlayerPortalTriggerZone>().portal = this;
@@ -451,7 +453,7 @@ namespace PortalMechanics {
 				// Use OverlapCapsule to approximate the trajectory as a capsule
 				Vector3 capsuleStart = start;
 				Vector3 capsuleEnd = end;
-				float radius = Player.instance.CapsuleCollider.radius;
+				float radius = Player.instance.CapsuleCollider.radius * Player.instance.Scale;
 
 				Collider[] hits = Physics.OverlapCapsule(capsuleStart, capsuleEnd, radius, 1 << SuperspectivePhysics.TriggerZoneLayer, QueryTriggerInteraction.Collide);
 				debug.Log($"Number of hits: {hits.Length}\nTriggerColliders:\n{string.Join("\n", triggerColliders.Select(tc => $"{tc.name}: {LayerMask.LayerToName(tc.gameObject.layer)}"))}");

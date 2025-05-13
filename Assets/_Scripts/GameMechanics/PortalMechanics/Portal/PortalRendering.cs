@@ -33,6 +33,7 @@ namespace PortalMechanics {
         public PortalRenderMode RenderMode {
             get => _renderMode;
             set {
+                debug.Log($"Setting RenderMode to {value} from {_renderMode} for {gameObject.FullPath()}");
                 _renderMode = value;
                 ApplyPortalRenderingModeToRenderers();
             }

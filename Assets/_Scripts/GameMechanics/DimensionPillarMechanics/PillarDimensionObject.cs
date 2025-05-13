@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using NaughtyAttributes;
 using SuperspectiveUtils;
 using System;
 using PortalMechanics;
 using Saving;
+using Sirenix.OdinInspector;
 using SuperspectiveAttributes;
 using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPillar, DimensionPillar.DimensionPillarSave>;
 
@@ -14,9 +14,17 @@ using PillarReference = SerializableClasses.SuperspectiveReference<DimensionPill
 // it will act as a baseDimension+1 object when the pillar is in that dimension.
 [RequireComponent(typeof(UniqueId))]
 public class PillarDimensionObject : DimensionObject {
+	private static Color _GUI_PILLAR = new Color(0.65f, 0.65f, .95f);
 	public static readonly HashSet<PillarDimensionObject> allPillarDimensionObjects = new HashSet<PillarDimensionObject>();
+	
+	// The active pillar that this object is setting its visibility state based off of
+	[TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
+	public DimensionPillar activePillar;
+	// Optional allow-list of pillars to react to, else will react to any active pillar
+	[TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
+	public PillarReference[] pillars;
 
-	[DoNotSave, SerializeField]
+	[DoNotSave, SerializeField, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	[Range(0, 7)]
 	int _dimension = 0;
 	public int Dimension {
@@ -66,32 +74,25 @@ public class PillarDimensionObject : DimensionObject {
 		SameSide,
 		Right
 	}
-	[ReadOnly]
+	[ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	public Quadrant camQuadrant;
-	[ReadOnly]
+	[ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	public Quadrant dimensionShiftQuadrant;
 
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private float minAngle;
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private float maxAngle;
 
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionRange objectBounds;
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionRange visibleRange;
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionRange partiallyVisibleRange;
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionRange partiallyInvisibleRange;
-	[SerializeField]
-	[ReadOnly]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionRange invisibleRange;
 
 	[Serializable]
@@ -153,25 +154,25 @@ public class PillarDimensionObject : DimensionObject {
 		public float maxDistance;
 	}
 
-	// The active pillar that this object is setting its visibility state based off of
-	public DimensionPillar activePillar;
-	// Optional allow-list of pillars to react to, else will react to any active pillar
-	public PillarReference[] pillars;
 	// Key == pillar.ID
 	readonly Dictionary<string, DimensionPillarPlanes> pillarPlanes = new Dictionary<string, DimensionPillarPlanes>();
-	[SerializeField]
+	[SerializeField, ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	private DimensionPillarPlanes lastPillarPlanes;
 
 	Vector3 minAngleVector, maxAngleVector;
 
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public bool thisObjectMoves = false;
 	bool IsMoving => thisObjectMoves && (thisRigidbody == null || !thisRigidbody.IsSleeping());
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS)), ShowIf(nameof(thisObjectMoves))]
 	public Rigidbody thisRigidbody;
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public Collider colliderBoundsOverride;
 
 	Vector3 PlayerCamPos => Player.instance.AdjustedCamPos;
 
 	// For context about rest of current state
+	[ReadOnly, TabGroup("Pillar"), GUIColor(nameof(_GUI_PILLAR))]
 	public Cam camSetUpFor;
 
 	protected override void OnEnable() {
@@ -193,8 +194,6 @@ public class PillarDimensionObject : DimensionObject {
 	protected override void Awake() {
 		base.Awake();
 		
-		// PillarDimensionObjects continue to interact with other objects even while in other dimensions
-		disableColliderWhileInvisible = false;
 		if (thisObjectMoves) {
 			if (thisRigidbody == null && GetComponent<Rigidbody>() == null) {
 				debug.LogError($"{gameObject.name} moves, but no rigidbody could be found (Consider setting it manually)", true);
@@ -468,15 +467,19 @@ public class PillarDimensionObject : DimensionObject {
 
 		DimensionPillarPlanes thisPillarPlanes = pillarPlanes[pillar.ID];
 		if (thisPillarPlanes.visibleRange.Contains(testDimension)) {
+			//debug.Log($"Test dimension was in the visible range: {testDimension:F3} in [{thisPillarPlanes.visibleRange.min:F3}, {thisPillarPlanes.visibleRange.max:F3}]");
 			return VisibilityState.Visible;
 		}
 		if (thisPillarPlanes.partiallyVisibleRange.Contains(testDimension)) {
+			//debug.Log($"Test dimension was in the partially visible range: {testDimension:F3} in [{thisPillarPlanes.partiallyVisibleRange.min:F3}, {thisPillarPlanes.partiallyVisibleRange.max:F3}]");
 			return VisibilityState.PartiallyVisible;
 		}
 		if (thisPillarPlanes.partiallyInvisibleRange.Contains(testDimension)) {
+			//debug.Log($"Test dimension was in the partially invisible range: {testDimension:F3} in [{thisPillarPlanes.partiallyInvisibleRange.min:F3}, {thisPillarPlanes.partiallyInvisibleRange.max:F3}]");
 			return VisibilityState.PartiallyInvisible;
 		}
 		if (thisPillarPlanes.invisibleRange.Contains(testDimension)) {
+			//debug.Log($"Test dimension was in the invisible range: {testDimension:F3} in [{thisPillarPlanes.invisibleRange.min:F3}, {thisPillarPlanes.invisibleRange.max:F3}]");
 			return VisibilityState.Invisible;
 		}
 		

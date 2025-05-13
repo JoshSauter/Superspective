@@ -3,7 +3,7 @@ using NovaMenuUI;
 using UnityEngine;
 
 public class CustomCursor : MonoBehaviour {
-    private readonly Vector2 cursorHotspot = new Vector2(12, 8);
+    private readonly Vector2 cursorHotspot = new Vector2(0, 0);
     public Texture2D cursor; // Used as default
     public Texture2D cursorFull; // Used when hovering over something interactable
 

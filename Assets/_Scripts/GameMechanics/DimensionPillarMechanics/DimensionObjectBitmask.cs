@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
+#if UNITY_EDITOR
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities.Editor;
+using UnityEditor;
+using UnityEngine;
+#endif
+
 namespace DimensionObjectMechanics {
 	public readonly struct DimensionObjectBitmask {
 		// number of bits in the bitmask (256)
@@ -11,6 +18,8 @@ namespace DimensionObjectMechanics {
 		
 		// Store the 256 bit bitmask as 8 uints (32 bits each)
 		private readonly uint[] bitmask;
+		
+		public uint[] RawBitmask => bitmask;
 
 		/// <summary>
 		/// Returns a new DimensionObjectBitmask with all values set to 1
@@ -185,4 +194,49 @@ namespace DimensionObjectMechanics {
 			return "Accepted channels:\n[76543210] <- Channels\n " + string.Join(" \n ", acceptedChannels.Select(PrintChannel));
 		}
 	}
+
+#if UNITY_EDITOR
+	public class DimensionObjectBitmaskDrawer : OdinValueDrawer<DimensionObjectBitmask> {
+		static bool rawBitmaskFoldout = true;
+		static bool prettyPrintFoldout = true;
+
+		protected override void DrawPropertyLayout(GUIContent label) {
+			bool isExpanded = Property.State.Expanded;
+			isExpanded = SirenixEditorGUI.Foldout(isExpanded, label);
+			Property.State.Expanded = isExpanded;
+
+			if (!isExpanded) {
+				return;
+			}
+
+			EditorGUI.indentLevel++;
+
+			if (ValueEntry.SmartValue.RawBitmask == null) {
+				EditorGUILayout.LabelField("No bitmask set.");
+				EditorGUI.indentLevel--;
+				return;
+			}
+
+			SirenixEditorGUI.InfoMessageBox($"IsEmpty: {ValueEntry.SmartValue.IsEmpty}\nIsEverything: {ValueEntry.SmartValue.IsEverything}");
+
+			rawBitmaskFoldout = SirenixEditorGUI.Foldout(rawBitmaskFoldout, "Raw Bitmask (Hex)");
+			if (rawBitmaskFoldout) {
+				EditorGUI.indentLevel++;
+				for (int i = 0; i < ValueEntry.SmartValue.RawBitmask.Length; i++) {
+					EditorGUILayout.SelectableLabel($"[{i}] 0x{ValueEntry.SmartValue.RawBitmask[i]:X8}", GUILayout.Height(EditorGUIUtility.singleLineHeight));
+				}
+				EditorGUI.indentLevel--;
+			}
+
+			prettyPrintFoldout = SirenixEditorGUI.Foldout(prettyPrintFoldout, "Debug Pretty Print");
+			if (prettyPrintFoldout) {
+				EditorGUI.indentLevel++;
+				EditorGUILayout.HelpBox(ValueEntry.SmartValue.DebugPrettyPrint(), MessageType.None);
+				EditorGUI.indentLevel--;
+			}
+
+			EditorGUI.indentLevel--;
+		}
+	}
+#endif
 }

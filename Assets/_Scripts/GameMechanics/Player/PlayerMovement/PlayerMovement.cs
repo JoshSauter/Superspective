@@ -196,9 +196,12 @@ public partial class PlayerMovement : SingletonSuperspectiveObject<PlayerMovemen
     }
 
     void FixedUpdate() {
-        if (GameManager.instance.IsCurrentlyLoading) return;
-
         lastPlayerPosition = transform.position;
+
+        if (!GameManager.instance.gameHasLoaded) {
+            thisRigidbody.isKinematic = true;
+            return;
+        }
         
         if (movementEnabledState == MovementEnabledState.Disabled) {
             if (!thisRigidbody.isKinematic) {

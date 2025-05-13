@@ -1,0 +1,11 @@
+"DepotBuildConfig"
+{
+    "DepotID" "2239491"
+    "ContentRoot" "__BUILD_PATH__"               // Local path on your machine where Unity build output lives
+    "FileMapping"
+    {
+        "LocalPath" "*"                           // Include all files under ContentRoot
+        "DepotPath" "."                           // Place files at root of install folder on player's machine
+        "recursive" "1"
+    }
+}

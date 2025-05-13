@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Collections;
 using SuperspectiveUtils;
-using NaughtyAttributes;
 using System.Linq;
+using Sirenix.OdinInspector;
 
 public class InteractableGlow : MonoBehaviour {
 	public bool DEBUG = false;
@@ -11,9 +9,10 @@ public class InteractableGlow : MonoBehaviour {
 
 	public InteractableObject interactableObject;
 	public bool useLargerPrepassMaterial = false;
-	public bool overrideGlowColor = false;
-	[ShowIf("overrideGlowColor")]
-	public Color glowColor = Color.white;
+	[ShowInInspector]
+	public bool OverrideGlowColor => interactableObject?.overrideGlowColor ?? false;
+	[ShowInInspector, ShowIf(nameof(OverrideGlowColor))]
+	public Color GlowColor => interactableObject?.glowColor ?? Color.black;
 
 	[Range(0.0f, 1.0f)]
 	public float glowAmount = 0;
@@ -75,7 +74,7 @@ public class InteractableGlow : MonoBehaviour {
 		if (Mathf.Sign(targetGlowAmount - glowAmount) != Mathf.Sign(diff)) {
 			glowAmount = targetGlowAmount;
 		}
-		currentColor = Color.Lerp(Color.clear, glowColor, glowAmount);
+		currentColor = Color.Lerp(Color.clear, GlowColor, glowAmount);
 
 		if (glowAmount == 0) {
 			enabled = false;

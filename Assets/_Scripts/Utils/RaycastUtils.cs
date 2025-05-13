@@ -276,6 +276,9 @@ namespace SuperspectiveUtils {
                 result = hitObject.transform.parent?.GetComponent<Portal>();
             }
 
+            // Revealer portals are not valid redirectors of raycasts
+            if (result is RevealerPortal) return null;
+            
             return result;
         }
 

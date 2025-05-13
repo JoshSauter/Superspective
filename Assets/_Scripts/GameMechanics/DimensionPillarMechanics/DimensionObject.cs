@@ -6,8 +6,7 @@ using System.Linq;
 using Saving;
 using System;
 using DimensionObjectMechanics;
-using NaughtyAttributes;
-using PortalMechanics;
+using Sirenix.OdinInspector;
 using SuperspectiveAttributes;
 
 public enum VisibilityState {
@@ -15,7 +14,7 @@ public enum VisibilityState {
 	PartiallyVisible,
 	Visible,
 	PartiallyInvisible,
-};
+}
 
 public static class VisibilityStateExt {
 	public static VisibilityState Opposite(this VisibilityState visibilityState) {
@@ -36,6 +35,10 @@ public static class VisibilityStateExt {
 
 [RequireComponent(typeof(UniqueId))]
 public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObject.DimensionObjectSave> {
+	protected static Color _GUI_RENDERING = new Color(0.35f, 0.75f, .9f);
+	protected static Color _GUI_PHYSICS = new Color(0.95f, 0.55f, .55f);
+	protected static Color _GUI_GENERAL = new Color(.65f, 1f, .65f);
+	
 	public const int NUM_CHANNELS = 8;
 	private const string IGNORE_COLLISIONS_TRIGGER_ZONE_NAME = "IgnoreCollisionsTriggerZone";
 	
@@ -52,32 +55,70 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	
 	public override string ID => $"{gameObject.name}_{base.ID}";
 
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
 	public bool treatChildrenAsOneObjectRecursively = false;
-	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
+	[ShowIf(nameof(treatChildrenAsOneObjectRecursively)), TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
 	public bool ignoreChildrenWithDimensionObject = true; // Only skips children with DimensionObject scripts that MATCH THE CHANNEL of this one
-	[ShowIf(nameof(treatChildrenAsOneObjectRecursively))]
+	[ShowIf(nameof(treatChildrenAsOneObjectRecursively)), TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
 	public bool includeInactiveGameObjects = false;
 
 	[DoNotSave]
 	protected bool initialized = false;
-	[Range(0, NUM_CHANNELS-1)]
+	
+	// Channel logic config
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
+	public bool useAdvancedChannelLogic = false;
+	[Range(0, NUM_CHANNELS-1), TabGroup("General"), GUIColor(nameof(_GUI_GENERAL)), HideIf(nameof(useAdvancedChannelLogic))]
 	public int channel;
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL)), ShowIf(nameof(useAdvancedChannelLogic))]
+	public string channelLogic = "";
+	private DimensionObjectBitmask maskSolution;
+	private DimensionObjectBitmask inverseMaskSolution;
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL)), ShowInInspector]
+	public DimensionObjectBitmask EffectiveMaskSolution => InverseShouldBeEnabled ? inverseMaskSolution : maskSolution;
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
 	public bool reverseVisibilityStates = false;
-	// Set to true by Portals to keep them on only Portal or Invisible layers since VisibleButNoPlayerCollision layer
-	// prevents them from being rendered to PortalMask camera
-	public bool ignorePartiallyVisibleLayerChanges = false;
-	public bool disableColliderWhileInvisible = true;
 
 	// If true, this object will not check the visibility mask when checking if a raycast hit this object
+	[TabGroup("General"), GUIColor(nameof(_GUI_GENERAL))]
 	public bool bypassRaycastCheck = false;
 
+	[TabGroup("Rendering"), GUIColor(nameof(_GUI_RENDERING))]
 	public bool automaticallySetRenderersIfEmpty = true;
+	[TabGroup("Rendering"), GUIColor(nameof(_GUI_RENDERING))]
 	public SuperspectiveRenderer[] renderers;
+	[TabGroup("Rendering"), GUIColor(nameof(_GUI_RENDERING)), ShowIf(nameof(automaticallySetRenderersIfEmpty))]
+	public SuperspectiveRenderer[] renderersToSkip;
+	
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public bool automaticallySetCollidersIfEmpty = true;
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public Collider[] colliders;
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS)), ShowIf(nameof(automaticallySetRenderersIfEmpty))]
+	public Collider[] collidersToSkip;
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public SphereCollider ignoreCollisionsTriggerZone;
 
+	private Color GUIVisibilityStateColor(VisibilityState forState) {
+		switch (GetEffectiveVisibilityState(forState)) {
+			case VisibilityState.Invisible:
+				return new Color(0.95f, 0.55f, .55f);
+			case VisibilityState.PartiallyVisible:
+				return new Color(1, 1, 0.5f);
+			case VisibilityState.Visible:
+				return new Color(.65f, 1f, .65f);
+			case VisibilityState.PartiallyInvisible:
+				return new Color(0.95f, 0.75f, .45f);
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
+
+	private Color StartingVisibilityStateColor => GUIVisibilityStateColor(startingVisibilityState);
+	private Color VisibilityStateColor => GUIVisibilityStateColor(visibilityState);
+	[BoxGroup("Visibility State"), GUIColor(nameof(StartingVisibilityStateColor))]
 	public VisibilityState startingVisibilityState = VisibilityState.Visible;
+	[BoxGroup("Visibility State"), GUIColor(nameof(VisibilityStateColor))]
 	public VisibilityState visibilityState = VisibilityState.Visible;
 
 	/// <summary>
@@ -114,15 +155,21 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		{ VisibilityState.PartiallyInvisible, new HashSet<VisibilityState> { VisibilityState.Invisible, VisibilityState.Visible } }
 	};
 
+	[HideInInspector]
 	public bool[] collisionMatrix = new bool[COLLISION_MATRIX_COLS * COLLISION_MATRIX_ROWS] {
 		 true, false, false, false, false, false,
 		false,  true, false, false, false, false,
 		false, false,  true, false,  true,  true,
 		false, false, false,  true,  true,  true
 	};
+
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
+	public DimensionObjectCollisionMatrix collisionMatrixNew = new DimensionObjectCollisionMatrix();
+
 	public const int COLLISION_MATRIX_ROWS = 4;
 	// First 4 columns are VisibilityStates, 5 is Player and 6 is Other Non-DimensionObjects
 	public const int COLLISION_MATRIX_COLS = 6;
+	[TabGroup("Physics"), GUIColor(nameof(_GUI_PHYSICS))]
 	public DimensionObjectCollisions collisionLogic;
 	
 	protected override void OnValidate() {
@@ -136,13 +183,6 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 			};
 		}
 	}
-	
-	// Channel logic config
-	public bool useAdvancedChannelLogic = false;
-	public string channelLogic = "";
-	private DimensionObjectBitmask maskSolution;
-	private DimensionObjectBitmask inverseMaskSolution;
-	public DimensionObjectBitmask EffectiveMaskSolution => InverseShouldBeEnabled ? inverseMaskSolution : maskSolution;
 
 	protected override void Init() {
 		base.Init();
@@ -287,15 +327,21 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	}
 
 	public virtual bool ShouldCollideWithNonDimensionObjects() {
+		return collisionMatrixNew.ShouldCollideWithNonDimensionObjects(EffectiveVisibilityState);
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 1];
 	}
 
 	public virtual bool ShouldCollideWithPlayer() {
+		return collisionMatrixNew.ShouldCollideWithPlayer(EffectiveVisibilityState);
 		return collisionMatrix[(int)visibilityState * COLLISION_MATRIX_COLS + COLLISION_MATRIX_COLS - 2];
 	}
 	
 	public virtual bool ShouldCollideWithDimensionObject(DimensionObject other) {
 		bool ShouldCollideInSameChannel() {
+			bool thisCollidesWithOther = collisionMatrixNew.ShouldCollide(EffectiveVisibilityState, other.EffectiveVisibilityState);
+			bool otherCollidesWithThis = other.collisionMatrixNew.ShouldCollide(other.EffectiveVisibilityState, EffectiveVisibilityState);
+			return thisCollidesWithOther && otherCollidesWithThis;
+			
 			int thisVisibility = (int)EffectiveVisibilityState;
 			int otherVisibility = (int)other.EffectiveVisibilityState;
 			return collisionMatrix[thisVisibility * COLLISION_MATRIX_COLS + otherVisibility] && other.collisionMatrix[otherVisibility * COLLISION_MATRIX_COLS + thisVisibility];
@@ -307,6 +353,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	}
 
 	public void SetCollision(VisibilityState thisVisibility, VisibilityState otherVisibility, bool shouldCollide) {
+		collisionMatrixNew.SetCollision(thisVisibility, otherVisibility, shouldCollide);
 		collisionMatrix[(int)thisVisibility * COLLISION_MATRIX_COLS + (int)otherVisibility] = shouldCollide;
 		collisionMatrix[(int)otherVisibility * COLLISION_MATRIX_COLS + (int)thisVisibility] = shouldCollide;
 	}
@@ -408,7 +455,10 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 			// Children who have DimensionObject scripts are treated on only by their own settings
 			if (parent != transform && ignoreChildrenWithDimensionObject && parent.TryGetComponent(out DimensionObject dimObj) && HasMaskOverlapWith(dimObj)) return;
 
-			result.AddRange(parent.GetComponents<Collider>());
+			Collider[] collidersOnThisTransform = parent.GetComponents<Collider>();
+			if (collidersToSkip != null && collidersOnThisTransform.Any(collidersToSkip.Contains)) return;
+
+			result.AddRange(collidersOnThisTransform);
 
 			foreach (Transform child in parent) {
 				GetCollidersRecursively(child);
@@ -432,7 +482,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 			if (thisRenderer == null && GetComponent<Renderer>() != null) {
 				thisRenderer = gameObject.AddComponent<SuperspectiveRenderer>();
 			}
-			if (thisRenderer != null) {
+			if (thisRenderer != null && !renderersToSkip.Contains(thisRenderer)) {
 				allRenderers.Add(thisRenderer);
 			}
 		}
@@ -453,6 +503,8 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		if (thisRenderer == null && parent.GetComponent<Renderer>() != null) {
 			thisRenderer = parent.gameObject.AddComponent<SuperspectiveRenderer>();
 		}
+
+		if (renderersToSkip != null && renderersToSkip.Contains(thisRenderer)) return;
 
 		if (thisRenderer != null) {
 			renderersSoFar.Add(thisRenderer);
@@ -550,7 +602,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		}
 	}
 	
-	[Button("Apply boolean expression")]
+	[NaughtyAttributes.Button("Apply boolean expression")]
 	public void ValidateAndApplyChannelLogic() {
 		if (useAdvancedChannelLogic) {
 			ValidateAndApplyAdvancedChannelLogic();

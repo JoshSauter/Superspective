@@ -240,7 +240,7 @@ namespace TheEntity {
                     float t = (playerLookingAtEntity - PLAYER_LOOKING_AT_ENTITY_THRESHOLD) / (1 - PLAYER_LOOKING_AT_ENTITY_THRESHOLD);
                     
                     float distanceMultiplier = Mathf.InverseLerp(PLAYER_LOOKING_AT_ENTITY_MAX_DISTANCE, 0, shortestVectorPlayerToEntity.magnitude / Player.instance.Scale);
-                    Debug.Log($"PlayerLookingAtEntity: {playerLookingAtEntity}, t: {t}, distanceMultiplier: {distanceMultiplier}");
+                    debug.Log($"PlayerLookingAtEntity: {playerLookingAtEntity}, t: {t}, distanceMultiplier: {distanceMultiplier}");
                     NoiseScrambleOverlay.instance.SetNoiseScrambleOverlayValue($"{ID}_PlayerLookAtEntity", Mathf.Clamp01(t * distanceMultiplier));
                 }
             });

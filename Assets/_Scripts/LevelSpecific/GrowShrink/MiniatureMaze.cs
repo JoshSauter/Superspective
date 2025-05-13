@@ -274,6 +274,10 @@ public class MiniatureMaze : SingletonSuperspectiveObject<MiniatureMaze, Miniatu
         if (state != State.MazeSolved) {
             state.Set(State.PlayerInMaze);
         }
+        else {
+            // Player already solved the maze and is now returning to this area. We need to immediately restore the portal rendering
+            portalToBetweenWorlds.SetPortalModes(PortalRenderMode.Normal, PortalPhysicsMode.Normal);
+        }
     }
     
     public void PlayerExitedMaze() {

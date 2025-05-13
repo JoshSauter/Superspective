@@ -19,6 +19,7 @@ namespace PortalMechanics {
 
         protected override PortalRenderMode EffectiveRenderMode => PortalRenderMode.DimensionWall;
         protected override int PortalLayer => SuperspectivePhysics.VisibilityMaskLayer;
+        protected override int PortalTriggerZoneLayer => SuperspectivePhysics.VisibilityMaskLayer;
         protected override int VolumetricPortalLayer => SuperspectivePhysics.VisibilityMaskLayer;
 
         protected override bool ExtraVolumetricPortalsEnabledCondition => revealState == RevealState.PartiallyVisible;
@@ -224,7 +225,7 @@ namespace PortalMechanics {
             });
             
             // And the player must not be in the trigger zone
-            Collider[] colliders = trigger.colliders.Length > 0 ? trigger.colliders : trigger.GetComponentsInChildren<Collider>();
+            Collider[] colliders = (trigger?.colliders?.Length ?? 0) > 0 ? trigger.colliders : trigger.GetComponentsInChildren<Collider>();
             foreach (var c in colliders) {
                 lookAwayTrigger.AddTriggerCondition(new PlayerOutsideOfColliderCondition() {
                     targetObject = c

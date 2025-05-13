@@ -55,6 +55,8 @@ namespace GrowShrink {
             }
         }
 
+        private const float EDGE_DETECTION_SENSITIVITY_UPPER_BOUND = 8f;
+
         [ShowInInspector]
         public float CurrentScale {
             get => _currentScale;
@@ -186,6 +188,9 @@ namespace GrowShrink {
             if (this.TaggedAsPlayer()) {
                 Physics.gravity *= scaleChangeRatio;
 
+                debug.Log($"Changing near clip plane from {Player.instance.PlayerCam.nearClipPlane} to {Player.instance.PlayerCam.nearClipPlane * scaleChangeRatio}");
+                Player.instance.PlayerCam.nearClipPlane *= scaleChangeRatio;
+
                 if (adjustPlayerPosition) {
                     // When the player's scale changes, we need to move the player up or down so that the player's feet stay on the ground
                     Vector3 topOfPlayer = Player.instance.movement.TopOfPlayer;
@@ -200,7 +205,7 @@ namespace GrowShrink {
                 
                 // Change the EdgeDetection sensitivity to show small geometry outlines properly as player shrinks (no change for growing)
                 if (targetScale < 1) {
-                    BladeEdgeDetection.depthSensitivity = 1 / targetScale;
+                    BladeEdgeDetection.depthSensitivity = Mathf.Min(1 / targetScale, EDGE_DETECTION_SENSITIVITY_UPPER_BOUND);
                 }
                 else {
                     // TODO: Instead of hardcoded 1, determine the original sensitivity

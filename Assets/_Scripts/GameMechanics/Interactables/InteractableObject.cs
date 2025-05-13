@@ -58,8 +58,6 @@ public class InteractableObject : SuperspectiveObject<InteractableObject, Intera
             glow = thisRendererParent.gameObject.GetOrAddComponent<InteractableGlow>();
             glow.recursiveChildRenderers = recursiveChildRenderers;
             glow.useLargerPrepassMaterial = useLargerPrepassMaterial;
-            glow.overrideGlowColor = overrideGlowColor;
-            glow.glowColor = glowColor;
             glow.interactableObject = this;
         }
 

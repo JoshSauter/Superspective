@@ -17,6 +17,10 @@ using UnityEditor;
 namespace MagicTriggerMechanics {
 	[RequireComponent(typeof(UniqueId))]
 	public class MagicTrigger : SuperspectiveObject<MagicTrigger, MagicTrigger.MagicTriggerSave>, BetterTriggers {
+		private static LayerMask ExcludedLayers =>
+			(1 << SuperspectivePhysics.PortalLayer) |
+			(1 << SuperspectivePhysics.VisibilityMaskLayer);
+		
 		[FormerlySerializedAs("triggerConditionsNew")]
 		[SerializeReference, BoxGroup("Trigger Conditions")]
 		[GUIColor(1f, 1f, 0.8f)]
@@ -64,7 +68,7 @@ namespace MagicTriggerMechanics {
 		}
 
 		protected virtual void UpdateLayers() {
-			if (gameObject.layer != SuperspectivePhysics.PortalLayer) {
+			if ((ExcludedLayers & (1 << gameObject.layer)) == 0) {
 				gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
 			}
 		}

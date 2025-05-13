@@ -417,7 +417,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Video.VSync);
 	    AddSetting(Video.AntiAliasingEnabled);
 	    AddSetting(Video.LetterboxingEnabled);
-	    AddSetting(Video.PortalDownsampleAmount);
+	    // AddSetting(Video.PortalDownsampleAmount); Currently bugged w/ Dimension objects. Also just doesn't look good.
 	    AddSetting(Video.DoubleThickEdges);
 	    
 	    // Gameplay Settings

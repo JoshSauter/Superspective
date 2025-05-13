@@ -28,12 +28,14 @@ public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 	public void OnBetterTriggerEnter(Collider other) {
 		if (SaveManager.isCurrentlyLoadingSave) {
 			// Handle it after the game is loaded
-			dimensionObject.debug.LogWarning($"Game is loading, waiting to set collision with {other.FullPath()}.");
+			debug.LogWarning($"Game is loading, waiting to set collision with {other.FullPath()}.");
 			StartCoroutine(AfterGameLoaded(other));
 			return;
 		}
 		if (GameManager.instance.IsCurrentlyLoading) return;
 		if (dimensionObject == null) return;
+		
+		debug.Log($"Determining collision between {dimensionObject.ID} and {other.FullPath()}...");
 
 		foreach (Collider thisCollider in dimensionObject.colliders) {
 			DimensionObjectManager.instance.SetCollision(other, thisCollider, dimensionObject.ID);
@@ -48,7 +50,7 @@ public class DimensionObjectCollisions : SuperspectiveObject, BetterTriggers {
 		yield return new WaitWhile(() => SaveManager.isCurrentlyLoadingSave);
 		if (dimensionObject == null || other == null) yield break;
 
-		dimensionObject.debug.LogWarning($"Game has loaded, setting collision with {other.FullPath()}.");
+		debug.LogWarning($"Game has loaded, setting collision with {other.FullPath()}.");
 		foreach (Collider thisCollider in dimensionObject.colliders) {
 			DimensionObjectManager.instance.SetCollision(other, thisCollider, dimensionObject.ID);
 		}
