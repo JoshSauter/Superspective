@@ -7,6 +7,7 @@ using PowerTrailMechanics;
 using SuperspectiveUtils;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
 using StateUtils;
 using SuperspectiveAttributes;
 using UnityEngine;
@@ -219,12 +220,13 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     public event CubeReceptacleActionSimple OnCubeReleaseEndSimple;
     public UnityEvent onCubeHoldEnd;
 
+    [ContextMenu("Add Trigger Zone"), Button("Initialize Trigger Zone")]
     void AddTriggerZone() {
         //GameObject triggerZoneGO = new GameObject("TriggerZone");
         //triggerZoneGO.transform.SetParent(transform, false);
         //triggerZoneGO.layer = LayerMask.NameToLayer("Ignore Raycast");
         //triggerZone = triggerZoneGO.AddComponent<BoxCollider>();
-        triggerZone = gameObject.AddComponent<BoxCollider>();
+        triggerZone = gameObject.GetOrAddComponent<BoxCollider>();
         gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
 
         triggerZone.size = new Vector3(receptacleSize * 0.25f, receptacleSize * 1.5f, receptacleSize * 0.25f);
