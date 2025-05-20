@@ -280,6 +280,7 @@ public class PlayerLook : SingletonSuperspectiveObject<PlayerLook, PlayerLook.Pl
     void Look(Vector2 lookDirection) {
         LookHorizontal(lookDirection.x * lookAmountMultiplier * generalSensitivity * sensitivityX * outsideMultiplier);
         float diffY = lookDirection.y * lookAmountMultiplier * generalSensitivity * sensitivityY * outsideMultiplier;
+        if (Settings.Gameplay.InvertY) diffY = -diffY;
         
         debug.Log($"Diff Y: {diffY:F3}. Rotation Y Before: {rotationY:F3}");
         // If we've been set to above the yClamp by something else, only allow movement back towards the clamp window

@@ -285,6 +285,12 @@ public class Settings : Singleton<Settings> {
 			minValue = 5,
 			maxValue = 100
 		};
+		public static readonly ToggleSetting InvertY = new ToggleSetting() {
+			key = "InvertY",
+			name = "Invert Y Axis",
+			value = false,
+			defaultValue = false
+		};
 
 		public static readonly ToggleSetting ShowInteractionHelp = new ToggleSetting() {
 			key = "ShowInteractionHelp",
@@ -428,6 +434,7 @@ public class Settings : Singleton<Settings> {
 	    AddSetting(Gameplay.GeneralSensitivity);
 	    AddSetting(Gameplay.XSensitivity);
 	    AddSetting(Gameplay.YSensitivity);
+	    AddSetting(Gameplay.InvertY);
 	    AddSetting(Gameplay.ShowDisabledReason);
 	    AddSetting(Gameplay.ShowInteractionHelp);
 	    

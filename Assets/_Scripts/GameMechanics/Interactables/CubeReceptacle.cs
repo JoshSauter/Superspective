@@ -21,16 +21,17 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 
     public enum State : byte {
         Empty,
+        OnCooldown,
         CubeEnterRotate,
         CubeEnterTranslate,
         CubeInReceptacle,
         CubeExiting
     }
 
-    const float rotateTime = 0.25f;
-    const float translateTime = 0.5f;
-    const float afterReleaseCooldown = 1f;
-    const float timeToRelease = .25f;
+    const float ROTATE_TIME = 0.25f;
+    const float TRANSLATE_TIME = 0.5f;
+    const float AFTER_RELEASE_COOLDOWN = 1f;
+    const float TIME_TO_RELEASE = .25f;
 
     public bool makesCubeIrreplaceable = true;
     public bool lockCubeInPlace = false;
@@ -86,7 +87,8 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     }
 
     private void InitializeStateMachine() {
-        stateMachine.AddTrigger(State.Empty, afterReleaseCooldown, RestoreTriggerZoneAfterCooldown);
+        stateMachine.AddStateTransition(State.OnCooldown, State.Empty, AFTER_RELEASE_COOLDOWN);
+        
         stateMachine.AddTrigger(State.CubeInReceptacle, () => {
             if (cubeInReceptacle == null) return;
             
@@ -108,7 +110,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
             }
         });
         
-        stateMachine.AddStateTransition(State.CubeEnterRotate, State.CubeEnterTranslate, rotateTime);
+        stateMachine.AddStateTransition(State.CubeEnterRotate, State.CubeEnterTranslate, ROTATE_TIME);
         stateMachine.AddTrigger(State.CubeEnterTranslate, () => {
             if (cubeInReceptacle == null) return;
             
@@ -119,18 +121,16 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
             endPos = transform.TransformPoint(0, 1 - receptableDepth, 0);
         });
         
-        stateMachine.AddStateTransition(State.CubeEnterTranslate, State.CubeInReceptacle, translateTime);
+        stateMachine.AddStateTransition(State.CubeEnterTranslate, State.CubeInReceptacle, TRANSLATE_TIME);
 
-        stateMachine.AddStateTransition(State.CubeExiting, State.Empty, timeToRelease);
-        stateMachine.AddTrigger(State.Empty, () => {
+        stateMachine.AddStateTransition(State.CubeExiting, State.OnCooldown, TIME_TO_RELEASE);
+        stateMachine.AddTrigger(s => s is State.Empty or State.OnCooldown, () => {
             if (cubeInReceptacle == null) return;
             
             PickupObject cubeThatWasInReceptacle = cubeInReceptacle;
             cubeThatWasInReceptacle.shouldFollow = true;
             cubeThatWasInReceptacle.interactable = true;
             cubeThatWasInReceptacle.isReplaceable = true;
-            triggerZone.enabled = false;
-            debug.Log($"Trigger zone enabled: {triggerZone.enabled}", true);
 
             cubeThatWasInReceptacle.receptacleHeldIn = null;
             cubeThatWasInReceptacle.RecalculateRigidbodyKinematics();
@@ -140,7 +140,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         stateMachine.OnStateChangeSimple += () => {
             debug.Log($"Switching to {stateMachine.State}", true);
             switch (stateMachine.State) {
-                case State.Empty:
+                case State.OnCooldown:
                     OnCubeReleaseEnd?.Invoke(this, cubeInReceptacle);
                     OnCubeReleaseEndSimple?.Invoke();
                     if (lockCubeInPlace) {
@@ -148,6 +148,8 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
                     }
 
                     pwr.state.Set(PowerState.Depowered);
+                    break;
+                case State.Empty:
                     break;
                 case State.CubeEnterRotate:
                     OnCubeHoldStart?.Invoke(this, cubeInReceptacle);
@@ -254,13 +256,14 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         if (stateMachine.Time == 0) return;
         float t;
         switch (stateMachine.State) {
+            case State.OnCooldown:
             case State.Empty:
                 break;
             case State.CubeInReceptacle:
                 if (cubeInReceptacle == null) {
                     // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
                     stateMachine.Set(State.CubeExiting);
-                    stateMachine.Set(State.Empty);
+                    stateMachine.Set(State.OnCooldown);
                 }
                 
                 
@@ -272,11 +275,11 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
                 if (cubeInReceptacle == null) {
                     // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
                     stateMachine.Set(State.CubeExiting);
-                    stateMachine.Set(State.Empty);
+                    stateMachine.Set(State.OnCooldown);
                     break;
                 }
 
-                t = stateMachine.Time / rotateTime;
+                t = stateMachine.Time / ROTATE_TIME;
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 cubeInReceptacle.transform.rotation = Quaternion.Lerp(startRot, endRot, t);
                 break;
@@ -284,21 +287,21 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
                 if (cubeInReceptacle == null) {
                     // Trigger both ReleaseStart and ReleaseEnd events if the cube disappears while in the receptacle (i.e. replaced by a spawner)
                     stateMachine.Set(State.CubeExiting);
-                    stateMachine.Set(State.Empty);
+                    stateMachine.Set(State.OnCooldown);
                     break;
                 }
 
-                t = stateMachine.Time / translateTime;
+                t = stateMachine.Time / TRANSLATE_TIME;
 
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 break;
             case State.CubeExiting:
                 if (cubeInReceptacle == null) {
-                    stateMachine.Set(State.Empty);
+                    stateMachine.Set(State.OnCooldown);
                     break;
                 }
 
-                t = stateMachine.Time / timeToRelease;
+                t = stateMachine.Time / TIME_TO_RELEASE;
 
                 cubeInReceptacle.transform.position = Vector3.Lerp(startPos, endPos, t);
                 cubeInReceptacle.transform.rotation = startRot;
@@ -307,6 +310,11 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     }
 
     void StartCubeEnter(PickupObject cube) {
+        // There must not already be a cube in the receptacle, and the state must be Empty
+        if (cubeInReceptacle != null || stateMachine.State != State.Empty) {
+            return;
+        }
+        
         cube.receptacleHeldIn = this;
         
         Rigidbody cubeRigidbody = cube.GetComponent<Rigidbody>();
@@ -314,7 +322,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         cube.interactable = false;
         cubeInReceptacle = cube;
         cube.thisGravity.useGravity = false;
-        cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
+        cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle_Callback;
 
         startRot = cubeInReceptacle.transform.rotation;
         endRot = RightAngleRotations.GetNearestRelativeToTransform(startRot, transform);
@@ -337,7 +345,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
 
     public void ReleaseCubeFromReceptacleInstantly() {
         if (cubeInReceptacle == null) return;
-        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
+        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle_Callback;
         stateMachine.Set(State.CubeExiting);
 
         if (playSound) {
@@ -353,9 +361,8 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         cubeThatWasInReceptacle.interactable = true;
         cubeThatWasInReceptacle.isReplaceable = true;
         cubeThatWasInReceptacle.thisGravity.useGravity = !cubeThatWasInReceptacle.isHeld;
-        triggerZone.enabled = false;
 
-        stateMachine.Set(State.Empty);
+        stateMachine.Set(State.OnCooldown);
         cubeInReceptacle = null;
     }
 
@@ -388,8 +395,8 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         cubeToEject.thisRigidbody.AddForce(ejectionDirection * forceMagnitude, ForceMode.Impulse);
     }
 
-    void ReleaseFromReceptacle() {
-        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle;
+    void ReleaseFromReceptacle_Callback() {
+        cubeInReceptacle.OnPickupSimple -= ReleaseFromReceptacle_Callback;
         ReleaseCubeFromReceptacle();
     }
 
@@ -423,15 +430,11 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         startRot = cubeInReceptacle.transform.rotation;
     }
 
-    void RestoreTriggerZoneAfterCooldown() {
-        triggerZone.enabled = true;
-    }
-
 #region Saving
 
     public override void LoadSave(CubeReceptacleSave save) {
         if (cubeInReceptacle != null) {
-            cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle;
+            cubeInReceptacle.OnPickupSimple += ReleaseFromReceptacle_Callback;
         }
     }
 

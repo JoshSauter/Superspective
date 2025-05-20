@@ -133,6 +133,7 @@ namespace NovaMenuUI {
                     AddSettingCopy(Settings.Gameplay.GeneralSensitivity);
                     AddSettingCopy(Settings.Gameplay.XSensitivity);
                     AddSettingCopy(Settings.Gameplay.YSensitivity);
+                    AddSettingCopy(Settings.Gameplay.InvertY);
                     settingsItems.Add(new SpacerSettingItem());
                     settingsItems.Add(HeaderSettingsItem.Of("UI"));
                     AddSettingCopy(Settings.Video.LetterboxingEnabled);
