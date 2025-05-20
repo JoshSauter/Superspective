@@ -43,7 +43,7 @@ namespace PortalMechanics {
         
         public bool PortalRenderingIsEnabled => otherPortal != null &&
                                                 gameObject.activeSelf &&
-                                                RenderMode == PortalRenderMode.Normal &&
+                                                EffectiveRenderMode == PortalRenderMode.Normal &&
                                                 (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
         
         private bool VolumetricPortalsShouldBeEnabled => ExtraVolumetricPortalsEnabledCondition &&

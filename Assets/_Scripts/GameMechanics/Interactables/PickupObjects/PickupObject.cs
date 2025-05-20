@@ -115,7 +115,7 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
         Frozen
     }
     [SerializeField, ReadOnly]
-    private StateMachine<FreezeRotationState> freezeRotationStateMachine;
+    public StateMachine<FreezeRotationState> freezeRotationStateMachine;
 
     protected override void OnDisable() {
         base.OnDisable();

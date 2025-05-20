@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using SuperspectiveUtils;
 using System;
+using DimensionObjectMechanics;
 using PortalMechanics;
 using Saving;
 using Sirenix.OdinInspector;
@@ -324,6 +325,12 @@ public class PillarDimensionObject : DimensionObject {
 		}
 		
 		UpdateStateForCamera(Cam.Player, activePillar, true);
+	}
+
+	void FixedUpdate() {
+		if (IsMoving) {
+			DimensionObjectManager.instance.RefreshDimensionObject(this);
+		}
 	}
 	
 	/////////////////////////////

@@ -457,7 +457,9 @@ namespace PortalMechanics {
 
 				Collider[] hits = Physics.OverlapCapsule(capsuleStart, capsuleEnd, radius, 1 << SuperspectivePhysics.TriggerZoneLayer, QueryTriggerInteraction.Collide);
 				debug.Log($"Number of hits: {hits.Length}\nTriggerColliders:\n{string.Join("\n", triggerColliders.Select(tc => $"{tc.name}: {LayerMask.LayerToName(tc.gameObject.layer)}"))}");
-				return hits.Contains(triggerCollider);
+				return hits
+					.Where(c => !SuperspectivePhysics.CollisionsAreIgnored(c, Player.instance.CapsuleCollider))
+					.Contains(triggerCollider);
 			}
 
 

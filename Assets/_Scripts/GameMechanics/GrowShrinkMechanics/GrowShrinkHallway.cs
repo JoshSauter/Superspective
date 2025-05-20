@@ -13,7 +13,12 @@ using UnityEngine.ProBuilder.MeshOperations;
 namespace GrowShrink {
     [RequireComponent(typeof(UniqueId))]
     public class GrowShrinkHallway : SuperspectiveObject<GrowShrinkHallway, GrowShrinkHallway.GrowShrinkHallwaySave> {
+        public bool onlyAcceptWithinScaleRange = false;
+        [ShowIf(nameof(onlyAcceptWithinScaleRange))]
+        public Vector2 scaleRange = new Vector2(.2f, 5f);
         public float scaleFactor = 4;
+        
+        private bool ScaleIsAccepted(float scale) => !onlyAcceptWithinScaleRange || (scale >= scaleRange.x && scale <= scaleRange.y);
 
         private GrowShrinkTransitionTrigger EffectiveTriggerZone => shrunkTriggerZone ? shrunkTriggerZone : originalTriggerZone;
         public GrowShrinkTransitionTrigger originalTriggerZone;
@@ -35,8 +40,8 @@ namespace GrowShrink {
         // Note to self: If the results of this look fucked up, check that the pivot points for combined mesh & trigger zone hitbox are the same
         [Button("Compile")]
         void Compile() {
-            Undo.SetCurrentGroupName("Compile GrowShrinkHallway");
             int compileGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Compile GrowShrinkHallway");
             
             Decompile(true);
 
@@ -298,7 +303,9 @@ namespace GrowShrink {
         }
 
         [Button("Decompile")]
-        public void Decompile(bool isPartOfParentOperation = false) {
+        public void Decompile() => Decompile(false);
+
+        public void Decompile(bool isPartOfParentOperation) {
             if (!isPartOfParentOperation) {
                 Undo.SetCurrentGroupName("Decompile GrowShrinkHallway");
             }
@@ -358,7 +365,7 @@ namespace GrowShrink {
             string id = GetId(c);
             if (!growShrinkObjects.ContainsKey(id)) {
                 GrowShrinkObject growShrinkObj = GrowShrinkObject.collidersAffectedByGrowShrinkObjects.GetOrNull(c);
-                if (growShrinkObj == null) return;
+                if (growShrinkObj == null || !ScaleIsAccepted(growShrinkObj.CurrentScale)) return;
                 growShrinkObjects[id] = growShrinkObj;
             }
 
@@ -376,7 +383,7 @@ namespace GrowShrink {
             string id = GetId(c);
             if (!growShrinkObjects.ContainsKey(id)) {
                 GrowShrinkObject growShrinkObj = c.GetComponent<GrowShrinkObject>();
-                if (growShrinkObj == null) return;
+                if (growShrinkObj == null || !ScaleIsAccepted(growShrinkObj.CurrentScale)) return;
                 growShrinkObjects[id] = growShrinkObj;
             }
 

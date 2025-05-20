@@ -28,10 +28,10 @@ public class RoseRoomExit : SuperspectiveObject<RoseRoomExit, RoseRoomExit.RoseR
 
         interiorReflectorPortal.OnPortalTeleportPlayerSimple += () => {
             if (LevelManager.instance.ActiveScene == Levels.RoseRoomExit) {
-                LevelManager.instance.SwitchActiveScene(Levels.RoseRoomExit2);
+                LevelManager.instance.SwitchActiveScene(Levels.RoseRoomExit2, false);
             }
             else if (LevelManager.instance.ActiveScene == Levels.RoseRoomExit2) {
-                LevelManager.instance.SwitchActiveScene(Levels.RoseRoomExit);
+                LevelManager.instance.SwitchActiveScene(Levels.RoseRoomExit, false);
             }
         };
     }

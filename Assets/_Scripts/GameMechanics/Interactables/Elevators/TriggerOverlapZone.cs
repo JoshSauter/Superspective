@@ -11,6 +11,9 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
     public bool playerInZone;
     public readonly HashSet<Collider> objectsInZone = new HashSet<Collider>();
     public readonly Dictionary<Collider, Rigidbody> rigidbodiesInZone = new Dictionary<Collider, Rigidbody>();
+    
+    public delegate void ColliderAddedAction(Collider other);
+    public event ColliderAddedAction OnColliderAdded;
 
     private void Awake() {
         gameObject.layer = SuperspectivePhysics.TriggerZoneLayer;
@@ -25,13 +28,7 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
             playerInZone = true;
         }
         else {
-            objectsInZone.Add(other);
-            if (!rigidbodiesInZone.ContainsKey(other)) {
-                Rigidbody maybeRigidbody = other.GetComponentInParent<Rigidbody>();
-                if (maybeRigidbody) {
-                    rigidbodiesInZone.Add(other, maybeRigidbody);
-                }
-            }
+            AddCollider(other);
         }
     }
 
@@ -40,7 +37,7 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
             playerInZone = true;
         }
         else {
-            objectsInZone.Add(other);
+            AddCollider(other);
         }
     }
 
@@ -49,10 +46,26 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
             playerInZone = false;
         }
         else {
-            objectsInZone.Remove(other);
-            if (rigidbodiesInZone.ContainsKey(other)) {
-                rigidbodiesInZone.Remove(other);
+            RemoveCollider(other);
+        }
+    }
+
+    private void AddCollider(Collider c) {
+        if (!objectsInZone.Add(c)) return;
+        
+        if (!rigidbodiesInZone.ContainsKey(c)) {
+            Rigidbody maybeRigidbody = c.GetComponentInParent<Rigidbody>();
+            if (maybeRigidbody) {
+                rigidbodiesInZone.Add(c, maybeRigidbody);
             }
+        }
+        OnColliderAdded?.Invoke(c);
+    }
+
+    private void RemoveCollider(Collider c) {
+        objectsInZone.Remove(c);
+        if (rigidbodiesInZone.ContainsKey(c)) {
+            rigidbodiesInZone.Remove(c);
         }
     }
 }
