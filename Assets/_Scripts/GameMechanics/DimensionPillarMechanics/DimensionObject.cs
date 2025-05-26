@@ -41,6 +41,13 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	
 	public const int NUM_CHANNELS = 8;
 	private const string IGNORE_COLLISIONS_TRIGGER_ZONE_NAME = "IgnoreCollisionsTriggerZone";
+
+	public enum RefreshMode {
+		None,
+		Rendering,
+		Physics,
+		All
+	}
 	
 #region events
 	public delegate void DimensionObjectStateChangeAction(DimensionObject context);
@@ -199,7 +206,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		yield return new WaitUntil(() => gameObject.IsInLoadedScene());
 		yield return null;
 		
-		SwitchVisibilityState(startingVisibilityState, true);
+		SwitchVisibilityState(startingVisibilityState, DimensionObject.RefreshMode.All, true);
 		initialized = true;
 	}
 
@@ -229,11 +236,8 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	// Physics Logic //
 	///////////////////
 #region Physics
-	void SetupDimensionCollisionLogic() {
+	public void SetupDimensionCollisionLogic() {
 		if (colliders != null && colliders.Length > 0) {
-			if (ignoreCollisionsTriggerZone != null) {
-				Debug.LogError(ignoreCollisionsTriggerZone.FullPath());
-			}
 			ignoreCollisionsTriggerZone = CreateTriggerZone();
 		}
 	}
@@ -266,15 +270,24 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		size.z /= transform.lossyScale.z;
 		Vector3 center = (max + min) / 2f;
 
-		GameObject triggerGO = new GameObject(IGNORE_COLLISIONS_TRIGGER_ZONE_NAME) {
-			layer = SuperspectivePhysics.IgnoreRaycastLayer
-		};
-		triggerGO.transform.SetParent(transform, false);
-		SphereCollider trigger = triggerGO.AddComponent<SphereCollider>();
+		GameObject triggerGO;
+		bool triggerExists = ignoreCollisionsTriggerZone != null;
+		if (triggerExists) {
+			triggerGO = ignoreCollisionsTriggerZone.gameObject;
+			triggerGO.name = IGNORE_COLLISIONS_TRIGGER_ZONE_NAME;
+			triggerGO.layer = SuperspectivePhysics.IgnoreRaycastLayer;
+		}
+		else {
+			triggerGO = new GameObject(IGNORE_COLLISIONS_TRIGGER_ZONE_NAME) {
+				layer = SuperspectivePhysics.IgnoreRaycastLayer
+			};
+		}
+		triggerGO.transform.SetParent(transform, triggerExists);
+		SphereCollider trigger = triggerGO.GetOrAddComponent<SphereCollider>();
 		trigger.radius = Mathf.Max(size.x, size.y, size.z);
 		trigger.center = transform.InverseTransformPoint(center);
 		trigger.isTrigger = true;
-		collisionLogic = triggerGO.AddComponent<DimensionObjectCollisions>();
+		collisionLogic = triggerGO.GetOrAddComponent<DimensionObjectCollisions>();
 		collisionLogic.id = id;
 		collisionLogic.dimensionObject = this;
 
@@ -371,11 +384,11 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 	// State Change Logic //
 	////////////////////////
 #region State Change
-	public void SwitchEffectiveVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
-		SwitchVisibilityState(reverseVisibilityStates ? nextState.Opposite() : nextState, ignoreTransitionRules, sendEvents, suppressLogs);
+	public void SwitchEffectiveVisibilityState(VisibilityState nextState, RefreshMode refreshMode = RefreshMode.All, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
+		SwitchVisibilityState(reverseVisibilityStates ? nextState.Opposite() : nextState, refreshMode, ignoreTransitionRules, sendEvents, suppressLogs);
 	}
 
-	public void SwitchVisibilityState(VisibilityState nextState, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
+	public void SwitchVisibilityState(VisibilityState nextState, RefreshMode refreshMode = RefreshMode.All, bool ignoreTransitionRules = false, bool sendEvents = true, bool suppressLogs = false) {
 		if (!(ignoreTransitionRules || IsValidNextState(nextState))) return;
 
 		if (!suppressLogs) {
@@ -383,8 +396,22 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		}
 
 		visibilityState = nextState;
-		
-		DimensionObjectManager.instance.RefreshDimensionObject(this);
+
+		switch (refreshMode) {
+			case RefreshMode.None:
+				break;
+			case RefreshMode.Rendering:
+				DimensionObjectManager.instance.RefreshRendering(this);
+				break;
+			case RefreshMode.Physics:
+				DimensionObjectManager.instance.RefreshPhysics(this);
+				break;
+			case RefreshMode.All:
+				DimensionObjectManager.instance.RefreshDimensionObject(this);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(refreshMode), refreshMode, null);
+		}
 
 		if (sendEvents) {
 			OnStateChangeImmediate?.Invoke(this);
@@ -738,7 +765,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		startingVisibilityState = save.startingVisibilityState;
 		visibilityState = save.visibilityState;
 		
-		SwitchVisibilityState(visibilityState, true);
+		SwitchVisibilityState(visibilityState, DimensionObject.RefreshMode.All, true);
 	}
 
 	[Serializable]

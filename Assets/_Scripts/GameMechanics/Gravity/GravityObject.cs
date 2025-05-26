@@ -7,6 +7,7 @@ using SerializableClasses;
 using Sirenix.OdinInspector;
 using SuperspectiveUtils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(UniqueId))]
@@ -30,7 +31,10 @@ public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.Gr
         get => GravityRotation * Vector3.down;
         set => GravityRotation = Quaternion.FromToRotation(Vector3.down, value.normalized);
     }
+    [SerializeField]
     public float gravityMagnitude = SuperspectivePhysics.originalGravity.magnitude;
+    private float GravityMagnitude => (overrideGravityMagnitude > 0) ? overrideGravityMagnitude : gravityMagnitude;
+    public float overrideGravityMagnitude = -1;
 
     private int RaycastLayermask => SuperspectivePhysics.PhysicsRaycastLayerMask;
 
@@ -73,7 +77,7 @@ public class GravityObject : SuperspectiveObject<GravityObject, GravityObject.Gr
         if (useGravity) {
             onGround = IsOnGround();
             
-            thisRigidbody.AddForce(GravityDirection * gravityMagnitude / (onGround ? Mathf.Max(1, Scale) : 1f), ForceMode.Acceleration);
+            thisRigidbody.AddForce(GravityDirection * GravityMagnitude / (onGround ? Mathf.Max(1, Scale) : 1f), ForceMode.Acceleration);
         }
         else {
             onGround = false;

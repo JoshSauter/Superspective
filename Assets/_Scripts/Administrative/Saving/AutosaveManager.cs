@@ -22,8 +22,8 @@ namespace Saving {
         private const float AUTOSAVE_DISABLED_AFTER_LOAD_DELAY = 30f;
 
         private HashSet<Levels> levelsToSkipAutosaveOnLoad = new HashSet<Levels>() {
-            Levels.GrowShrinkIntroBetweenWorlds,
-            Levels.GrowShrinkIntroDarkSide
+            Levels.LocusMinimusBetweenWorlds,
+            Levels.LocusMinimusDarkSide
         };
 
         private bool TimedAutosaveEnabled => Settings.Autosave.AutosaveEnabled && Settings.Autosave.AutosaveOnTimer;

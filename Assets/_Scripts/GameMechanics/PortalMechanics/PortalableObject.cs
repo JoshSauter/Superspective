@@ -193,7 +193,9 @@ namespace PortalMechanics {
             if (_portal == portalEntered) {
                 debug.LogWarning("Already in portal, not entering again");
                 return;
-            };
+            }
+
+            if (portalEntered is RevealerPortal) return;
             
             debug.Log($"{gameObject.FullPath()} entering portal {portalEntered.name}");
 
@@ -205,6 +207,8 @@ namespace PortalMechanics {
         }
 
         public void ExitPortal(Portal portalExited) {
+            if (portalExited is RevealerPortal) return;
+            
             debug.Log($"{gameObject.FullPath()} exiting portal {portalExited.name}");
 
             portalExited.OnPortalTeleport -= OnPortalTeleport;

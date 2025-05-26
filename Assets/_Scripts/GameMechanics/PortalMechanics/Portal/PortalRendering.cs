@@ -43,6 +43,7 @@ namespace PortalMechanics {
         
         public bool PortalRenderingIsEnabled => otherPortal != null &&
                                                 gameObject.activeSelf &&
+                                                (pillarDimensionObject == null || pillarDimensionObject.EffectiveVisibilityState != VisibilityState.Invisible) &&
                                                 EffectiveRenderMode == PortalRenderMode.Normal &&
                                                 (!pauseRenderingWhenNotInActiveScene || IsInActiveScene);
         

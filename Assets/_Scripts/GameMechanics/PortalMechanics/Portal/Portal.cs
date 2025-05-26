@@ -72,6 +72,7 @@ namespace PortalMechanics {
 		[TabGroup("General"), GUIColor(.65f, 1f, .65f)]
 		public DimensionObject dimensionObject;
 		// May or may not exist on a Portal, affects PortalableObjects that are also PillarDimensionObjects by setting their dimension to the outPortal's dimension
+		// Also used when detecting if a raycast hit a Portal that is also a PillarDimensionObject
 		[TabGroup("General"), GUIColor(.65f, 1f, .65f)]
 		public PillarDimensionObject pillarDimensionObject;
 

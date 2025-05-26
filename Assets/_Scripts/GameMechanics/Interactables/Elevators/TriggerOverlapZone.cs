@@ -11,6 +11,7 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
     public bool playerInZone;
     public readonly HashSet<Collider> objectsInZone = new HashSet<Collider>();
     public readonly Dictionary<Collider, Rigidbody> rigidbodiesInZone = new Dictionary<Collider, Rigidbody>();
+    public readonly Dictionary<Collider, PickupObject> pickupObjectsInZone = new Dictionary<Collider, PickupObject>();
     
     public delegate void ColliderAddedAction(Collider other);
     public event ColliderAddedAction OnColliderAdded;
@@ -57,6 +58,12 @@ public class TriggerOverlapZone : MonoBehaviour, BetterTriggers {
             Rigidbody maybeRigidbody = c.GetComponentInParent<Rigidbody>();
             if (maybeRigidbody) {
                 rigidbodiesInZone.Add(c, maybeRigidbody);
+            }
+        }
+        if (!pickupObjectsInZone.ContainsKey(c)) {
+            PickupObject maybePickup = c.transform.FindInParentsRecursively<PickupObject>();
+            if (maybePickup) {
+                pickupObjectsInZone.Add(c, maybePickup);
             }
         }
         OnColliderAdded?.Invoke(c);

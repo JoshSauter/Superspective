@@ -46,12 +46,12 @@ public class FrontDoorway : SuperspectiveObject<FrontDoorway, FrontDoorway.Front
 	    bool edgesAreBlack = EdgeDetection.EdgesAreBlack();
 	    visibilityMask.enabled = state != State.Open && edgesAreBlack && portalEdgeColors.portalEdgesAreWhite;
 	    if (edgesAreWhite) {
-		    movingDoorway.SwitchVisibilityState(VisibilityState.Invisible, true);
-		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.Visible, true);
+		    movingDoorway.SwitchVisibilityState(VisibilityState.Invisible, DimensionObject.RefreshMode.All, true);
+		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.Visible, DimensionObject.RefreshMode.All, true);
 	    }
 	    else {
-		    movingDoorway.SwitchVisibilityState(VisibilityState.PartiallyInvisible, true);
-		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.PartiallyVisible, true);
+		    movingDoorway.SwitchVisibilityState(VisibilityState.PartiallyInvisible, DimensionObject.RefreshMode.All, true);
+		    staticOpenDoorway.SwitchVisibilityState(VisibilityState.PartiallyVisible, DimensionObject.RefreshMode.All, true);
 	    }
 
 	    float t;

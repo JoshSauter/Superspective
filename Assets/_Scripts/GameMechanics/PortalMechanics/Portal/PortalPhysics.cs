@@ -73,6 +73,7 @@ namespace PortalMechanics {
 
         protected virtual bool AllowRaycastPortalTeleporting => true;
         private static int globalLastTeleportedFrame = 0;
+        [DoNotSave]
         private float lastTeleportedTime = 0f;
 
         protected virtual int PortalTriggerZoneLayer => SuperspectivePhysics.TriggerZoneLayer;

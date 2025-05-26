@@ -278,6 +278,9 @@ namespace SuperspectiveUtils {
 
             // Revealer portals are not valid redirectors of raycasts
             if (result is RevealerPortal) return null;
+
+            // If we hit a Portal that is part of an invisible PillarDimensionObject, ignore the hit
+            if (result != null && result.pillarDimensionObject != null && result.pillarDimensionObject.EffectiveVisibilityState == VisibilityState.Invisible) return null;
             
             return result;
         }

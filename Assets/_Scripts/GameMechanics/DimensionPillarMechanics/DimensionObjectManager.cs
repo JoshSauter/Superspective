@@ -113,7 +113,7 @@ namespace DimensionObjectMechanics {
         /// Refresh the renderers for a DimensionObject, updating their shader properties and layers as needed.
         /// </summary>
         /// <param name="dimensionObject">DimensionObject to refresh renderers for</param>
-        public void RefreshRenderersForDimensionObject(DimensionObject dimensionObject) {
+        public void RefreshRendering(DimensionObject dimensionObject) {
             foreach (SuperspectiveRenderer r in dimensionObject.renderers) {
                 if (renderersAffectedByDimensionObjects[r].Contains(dimensionObject)) {
                     RefreshRenderer(r);
@@ -205,7 +205,7 @@ namespace DimensionObjectMechanics {
         /// Refresh the colliders for a DimensionObject, updating their collision state based on ALL the DimensionObjects affecting each of them.
         /// </summary>
         /// <param name="dimensionObject">DimensionObject to refresh colliders for</param>
-        public void RefreshCollidersForDimensionObject(DimensionObject dimensionObject) {
+        public void RefreshPhysics(DimensionObject dimensionObject) {
             foreach (Collider c in dimensionObject.colliders) {
                 if (collidersAffectedByDimensionObjects[c].Contains(dimensionObject)) {
                     RefreshCollider(c, dimensionObject.ID);
@@ -437,8 +437,8 @@ namespace DimensionObjectMechanics {
         /// </summary>
         /// <param name="dimensionObject">DimensionObject to refresh rendering and physics for</param>
         public void RefreshDimensionObject(DimensionObject dimensionObject) {
-            RefreshRenderersForDimensionObject(dimensionObject);
-            RefreshCollidersForDimensionObject(dimensionObject);
+            RefreshRendering(dimensionObject);
+            RefreshPhysics(dimensionObject);
         }
 
         // Only used for debugging

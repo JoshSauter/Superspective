@@ -53,9 +53,11 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
                                             freezeRigidbodyDueToNearbyPlayer ||
                                             IsHeldInReceptacle ||
                                             (CubeIsTooBigToPickUp && rigidbodySleepingStateMachine == RigidbodySleepingState.Sleeping);
+    
     public Rigidbody thisRigidbody;
     public Collider thisCollider;
 
+    public MultiDimensionCube multiDimensionCube;
     public PortalableObject portalableObject;
     public GrowShrinkObject growShrinkObject;
     public CubeSpawnerReference spawnedFrom;
@@ -70,7 +72,8 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
 
     public float Scale => (growShrinkObject != null ? growShrinkObject.CurrentScale : 1f);
     public float MinOfPlayerCubeScales => Mathf.Min(Player.instance.Scale, Scale);
-    
+
+    private bool IsMultiDimensionCubeInOtherDimension => multiDimensionCube != null && multiDimensionCube.IsInOtherDimension;
     public bool CubeIsTooBigToPickUp => Scale > MAX_SCALE_DIFFERENCE_BETWEEN_PLAYER_CUBE * Player.instance.Scale;
     
     const float scaleMultiplier = 1.5f;
@@ -174,6 +177,7 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
 
         if (portalableObject == null) portalableObject = GetComponent<PortalableObject>();
         if (growShrinkObject == null) growShrinkObject = GetComponent<GrowShrinkObject>();
+        if (multiDimensionCube == null) multiDimensionCube = GetComponent<MultiDimensionCube>();
     }
 
     protected override void Start() {
@@ -209,7 +213,10 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
         RecalculateRigidbodyKinematics();
         
         if (interactable) {
-            if (CubeIsTooBigToPickUp) {
+            if (IsMultiDimensionCubeInOtherDimension) {
+                interactableObject.SetAsInteractable("Materialize");
+            }
+            else if (CubeIsTooBigToPickUp) {
                 interactableObject.SetAsDisabled("(Too large)");
             }
             else {
@@ -316,7 +323,15 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
     }
     
     public void OnLeftMouseButtonDown() {
-        Pickup();
+        if (IsMultiDimensionCubeInOtherDimension && CubeIsTooBigToPickUp) {
+            thisGravity.overrideGravityMagnitude = Physics.gravity.magnitude;
+            rigidbodySleepingStateMachine.Set(RigidbodySleepingState.Moving);
+            SetRigidbodyIsKinematic(false);
+            multiDimensionCube.Materialize();
+        }
+        else {
+            Pickup();
+        }
     }
 
     void UpdatePlayerPositionLastFrameAfterPortal(Portal inPortal) {
@@ -464,6 +479,7 @@ public class PickupObject : SuperspectiveObject<PickupObject, PickupObject.Picku
     }
 
     private void UpdateGravity() {
+        thisGravity.overrideGravityMagnitude = -1;
         Vector3 targetGravityDirection = Physics.gravity.normalized;
         if (portalableObject && portalableObject.IsHeldThroughPortal) {
             targetGravityDirection = portalableObject.PortalHeldThrough.TransformDirection(Physics.gravity.normalized);

@@ -73,29 +73,62 @@ namespace Saving {
         protected UniqueId _id;
         public UniqueId id {
             get {
-                if (_id == null && this != null && this.gameObject != null) {
+                if (UniqueIdNeedsInit) {
                     _id = this.GetComponent<UniqueId>();
                 }
                 return _id;
             }
-            set => _id = value;
+            set {
+                _id = value;
+                ClearCachedIds();
+            }
+        }
+
+        private string _cachedId, _cachedAssociationId;
+
+        private bool UniqueIdNeedsInit => _id == null && this != null && this.gameObject != null;
+        private void ClearCachedIds() {
+            _cachedId = null; // Refresh the cached ID next time ID is accessed
+            _cachedAssociationId = null; // Refresh the cached AssociationID next time AssociationID is accessed
         }
         public virtual string ID {
             get {
+                if (!string.IsNullOrEmpty(_cachedId)) {
+                    return _cachedId;
+                }
+                
                 if (id == null || string.IsNullOrEmpty(id.uniqueId)) {
                     throw new Exception($"{gameObject.name}.{GetType().Name} in {gameObject.scene.name} doesn't have a uniqueId set");
                 }
-                
 
                 string suffix = id != null ? $"_{id.uniqueId}" : "";
-                return $"{GetType().GetReadableTypeName()}{suffix}";
+                _cachedId = $"{GetType().GetReadableTypeName()}{suffix}";
+                return _cachedId;
+            }
+            set {
+                if (UniqueIdNeedsInit) {
+                    id = this.GetComponent<UniqueId>();
+                }
+                
+                if (id != null) {
+                    id.uniqueId = value.GetAssociationId();
+                    ClearCachedIds();
+                }
+                else {
+                    debug.LogError($"ID {value} set on {gameObject.name} in {gameObject.scene.name} but no UniqueId component found", true);
+                }
             }
         }
         
         public virtual string AssociationID {
             get {
+                if (!string.IsNullOrEmpty(_cachedAssociationId)) {
+                    return _cachedAssociationId;
+                }
+                
                 string lastPart = ID.Split('_').Last();
-                return lastPart.IsGuid() ? lastPart : ID;
+                _cachedAssociationId = lastPart.IsGuid() ? lastPart : ID;
+                return _cachedAssociationId;
             }
         }
         
@@ -146,13 +179,14 @@ namespace Saving {
                 string fieldName = kv.Key;
                 object data = kv.Value;
                 
-                FieldInfo field = this.GetType()
+                FieldInfo field = this
+                    .GetType()
                     .TraverseTypeHierarchy()
                     .Select(t => t.GetField(fieldName, SaveSerializationUtils.FIELD_TAGS))
-                    .FirstOrDefault(f => f != null);
+                    .FirstOrDefault(f => f != null && !f.IsDefined(typeof(DoNotSaveAttribute), true));
 
                 if (field == null) {
-                    debug.LogError($"Field {fieldName} not found on {GetType().GetReadableTypeName()}", true);
+                    debug.LogWarning($"Field {fieldName} not found on {GetType().GetReadableTypeName()}", true);
                     continue;
                 }
                 

@@ -18,7 +18,7 @@ partial class PlayerMovement {
         }
         const float JUMP_COOLDOWN = 0.2f; // Time after landing before jumping is available again
         const float MIN_JUMP_TIME = 0.5f; // as long as underMinJumpTime
-        const float DESIRED_JUMP_HEIGHT = 2.672f; // TODO: Slightly lower jump height in GrowShrink2
+        const float DESIRED_JUMP_HEIGHT = 2.672f; // TODO: Slightly lower jump height in LocusMaximus
         
         // Properties
         float JumpForce => CalculatedJumpForce(DESIRED_JUMP_HEIGHT * m.Scale, m.thisRigidbody.mass, Physics.gravity.magnitude);

@@ -284,7 +284,8 @@ public class CubeSpawner : SuperspectiveObject<CubeSpawner, CubeSpawner.CubeSpaw
         
         newCube.transform.SetParent(cubeParent.transform);
         parentDimensionObj.InitializeRenderersAndColliders(true);
-        parentDimensionObj.SwitchVisibilityState(VisibilityState.PartiallyVisible, true);
+        parentDimensionObj.SetupDimensionCollisionLogic();
+        parentDimensionObj.SwitchVisibilityState(VisibilityState.PartiallyVisible, DimensionObject.RefreshMode.All, true);
         parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyVisible, false);
         parentDimensionObj.SetCollision(VisibilityState.Visible, VisibilityState.PartiallyInvisible, true);
         parentDimensionObj.SetCollisionForPlayer(VisibilityState.PartiallyVisible, false);

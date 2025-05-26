@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 #if UNITY_EDITOR
 using Sirenix.OdinInspector.Editor;
@@ -11,6 +12,8 @@ using UnityEngine;
 
 namespace DimensionObjectMechanics {
 	public readonly struct DimensionObjectBitmask {
+		private static Dictionary<BitmaskKey, float[]> shaderDataCache = new Dictionary<BitmaskKey, float[]>();
+		
 		// number of bits in the bitmask (256)
 		private const int BITMASK_SIZE = 1 << DimensionObject.NUM_CHANNELS;
 		// number of uints (32 bits each) required to store the bitmask (8)
@@ -18,6 +21,7 @@ namespace DimensionObjectMechanics {
 		
 		// Store the 256 bit bitmask as 8 uints (32 bits each)
 		private readonly uint[] bitmask;
+		private readonly BitmaskKey key;
 		
 		public uint[] RawBitmask => bitmask;
 
@@ -60,11 +64,19 @@ namespace DimensionObjectMechanics {
 		public bool IsEverything => bitmask.All(bit => bit == 0xFFFFFFFF);
 		
 		// Conversion to float[] for use in passing to shaders
-		public float[] ShaderData => bitmask
-			// Reinterpret the uint as a float by preserving the binary bits
-			// We'll use the bits from the float to convert back to a uint in the shader before using it as a bitmask
-			.Select(bitmaskElement => BitConverter.ToSingle(BitConverter.GetBytes(bitmaskElement), 0))
-			.ToArray();
+		public float[] ShaderData {
+			get {
+				if (!shaderDataCache.ContainsKey(key)) {
+					shaderDataCache[key] = bitmask
+						// Reinterpret the uint as a float by preserving the binary bits
+						// We'll use the bits from the float to convert back to a uint in the shader before using it as a bitmask
+						.Select(bitmaskElement => BitConverter.ToSingle(BitConverter.GetBytes(bitmaskElement), 0))
+						.ToArray();
+				}
+
+				return shaderDataCache[key];
+			}
+		}
 
 		/// <summary>
 		/// Constructor for a DimensionObjectBitmask with a single acceptable channel
@@ -90,6 +102,8 @@ namespace DimensionObjectMechanics {
 					this.bitmask[bitmaskIndex] |= bitmaskValue;
 				}
 			}
+
+			this.key = new BitmaskKey(this.bitmask);
 		}
 
 		/// <summary>
@@ -111,6 +125,8 @@ namespace DimensionObjectMechanics {
 					this.bitmask[bitmaskIndex] |= bitmaskValue;
 				}
 			}
+			
+			this.key = new BitmaskKey(this.bitmask);
 		}
 		
 		/// <summary>
@@ -123,6 +139,7 @@ namespace DimensionObjectMechanics {
 			}
 			
 			this.bitmask = bitmask;
+			this.key = new BitmaskKey(this.bitmask);
 		}
 
 		/// <summary>
@@ -194,6 +211,59 @@ namespace DimensionObjectMechanics {
 			return "Accepted channels:\n[76543210] <- Channels\n " + string.Join(" \n ", acceptedChannels.Select(PrintChannel));
 		}
 	}
+
+	// Optimized key for Dictionary lookups
+	public readonly struct BitmaskKey : IEquatable<BitmaskKey> {
+		public readonly uint A;
+		public readonly uint B;
+		public readonly uint C;
+		public readonly uint D;
+		public readonly uint E;
+		public readonly uint F;
+		public readonly uint G;
+		public readonly uint H;
+
+		public BitmaskKey(uint[] bitmask) {
+			if (bitmask.Length != 8)
+				throw new ArgumentException("Bitmask must be 8 elements long");
+
+			A = bitmask[0];
+			B = bitmask[1];
+			C = bitmask[2];
+			D = bitmask[3];
+			E = bitmask[4];
+			F = bitmask[5];
+			G = bitmask[6];
+			H = bitmask[7];
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Equals(BitmaskKey other) =>
+			A == other.A && B == other.B && C == other.C && D == other.D &&
+			E == other.E && F == other.F && G == other.G && H == other.H;
+
+		public override bool Equals(object obj) =>
+			obj is BitmaskKey other && Equals(other);
+
+		public override int GetHashCode() {
+			unchecked {
+				int hash = 17;
+				hash = hash * 31 + A.GetHashCode();
+				hash = hash * 31 + B.GetHashCode();
+				hash = hash * 31 + C.GetHashCode();
+				hash = hash * 31 + D.GetHashCode();
+				hash = hash * 31 + E.GetHashCode();
+				hash = hash * 31 + F.GetHashCode();
+				hash = hash * 31 + G.GetHashCode();
+				hash = hash * 31 + H.GetHashCode();
+				return hash;
+			}
+		}
+
+		public static bool operator ==(BitmaskKey left, BitmaskKey right) => left.Equals(right);
+		public static bool operator !=(BitmaskKey left, BitmaskKey right) => !left.Equals(right);
+	}
+
 
 #if UNITY_EDITOR
 	public class DimensionObjectBitmaskDrawer : OdinValueDrawer<DimensionObjectBitmask> {

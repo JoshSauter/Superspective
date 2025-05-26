@@ -43,6 +43,8 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     public bool playSound = true;
     public bool playPuzzleCompleteSound = false;
 
+    public PillarDimensionObject pillarDimensionObject;
+
     private PoweredObject _pwr;
     public PoweredObject pwr {
         get {
@@ -80,6 +82,9 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
         
         colorCoded = GetComponent<ColorCoded>();
         InitializeStateMachine();
+        
+        // May or may not exist, used to determine whether the cube receptacle is in another dimension than the cube
+        pillarDimensionObject = GetComponentInParent<PillarDimensionObject>();
     }
 
     private bool AcceptedColor(GameObject other) {
@@ -198,6 +203,7 @@ public class CubeReceptacle : SuperspectiveObject<CubeReceptacle, CubeReceptacle
     void OnTriggerStay(Collider other) {
         if (GameManager.instance.IsCurrentlyLoading) return;
         if (!enabled) return;
+        if (pillarDimensionObject != null && pillarDimensionObject.EffectiveVisibilityState == VisibilityState.Invisible) return;
         if (gameObject.layer == SuperspectivePhysics.InvisibleLayer) return;
         if (other.TaggedAsPlayer()) {
             playerStillInTriggerZone = true;

@@ -66,12 +66,13 @@ namespace Saving {
 			DynamicObject newObject = InstantiateInScene(prefab, dynamicObjSave.level.ToName());
 			newObject.prefabPath = dynamicObjSave.prefabPath;
 
-			newObject.id.uniqueId = id;
+			newObject.ID = id;
 			newObject.LoadSave(dynamicObjSave);
 			newObject.Register();
 			OnDynamicObjectCreated?.Invoke(id);
 			// Any SuperspectiveObjects on the newly created DynamicObject need to register themselves before Start(), do it now
 			foreach (var superspectiveObject in newObject.transform.GetComponentsInChildrenRecursively<SuperspectiveObject>()) {
+				superspectiveObject.ID = id;
 				superspectiveObject.Register();
 			}
 			return newObject;

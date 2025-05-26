@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 
@@ -52,6 +53,7 @@ partial class PlayerMovement {
             public bool StandingOnHeldObject => IsStandingOnHeldObject(contact);
 
             public GroundContact contact;
+            [DoNotSave]
             public float lastGroundedTime = -1;
         }
 

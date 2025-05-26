@@ -87,16 +87,16 @@ EditorBuildSettings:
     path: Assets/__Scenes/_Fork_Cathedral_Tutorial.unity
     guid: c71c7f54e8aca7b4eb1647b2068c2a77
   - enabled: 1
-    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntro.unity
+    path: Assets/__Scenes/LocusMinimus/_LocusMinimus.unity
     guid: 1d418f6f1bb8d8541846171806d5f724
   - enabled: 1
     path: Assets/__Scenes/__TitleCard.unity
     guid: 3e9f0103632db3047a4c4816312e0ae8
   - enabled: 1
-    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntroDarkSide.unity
+    path: Assets/__Scenes/LocusMinimus/_LocusMinimusDarkSide.unity
     guid: 7d15e4f6d02b4c243b793251276bc8a0
   - enabled: 1
-    path: Assets/__Scenes/GrowShrinkIntro/_GrowShrinkIntroBetweenWorlds.unity
+    path: Assets/__Scenes/LocusMinimus/_LocusMinimusBetweenWorlds.unity
     guid: f7b848d1cf8fca147bdcb840c4e24484
   - enabled: 1
     path: Assets/__Scenes/_TransitionWhiteRoom3GrowShrinkIntro.unity
@@ -105,7 +105,7 @@ EditorBuildSettings:
     path: Assets/__Scenes/_EdgeOfAUniverse.unity
     guid: 95f001b7ba173c04280aaa680885fc52
   - enabled: 1
-    path: Assets/__Scenes/_GrowShrink2.unity
+    path: Assets/__Scenes/_LocusMaximus.unity
     guid: 1e2c2dfdea77a854a98afd75a799251d
   - enabled: 1
     path: Assets/__Scenes/Ascension/_Ascension0.unity
@@ -128,4 +128,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/__Scenes/RoseRoom/_RoseRoomExit_2.unity
     guid: aa87bef5f6e9e374491e112d816fc3da
+  - enabled: 1
+    path: Assets/__Scenes/_LocusMaximusExit.unity
+    guid: c558d44718c37ce45bb4a432f76f5030
   m_configObjects: {}

@@ -109,8 +109,10 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 	[FormerlySerializedAs("materializeTime")]
 	public float materializeMultiplier = 5;
 
+	public bool IsInOtherDimension => corporealCubeDimensionObj.visibilityState != VisibilityState.Visible;
+
 	void MaterializeIfHeldInOtherDimension() {
-		bool shouldMaterialize = corporealCubeDimensionObj.visibilityState != VisibilityState.Visible;
+		bool shouldMaterialize = IsInOtherDimension;
 		if (PortalableObject.IsHeldThroughPortal) {
 			Portal portal = PortalableObject.PortalHeldThrough;
 		
@@ -296,8 +298,8 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 					}
 					break;
 				case State.Materializing:
-					corporealCubeDimensionObj.SwitchEffectiveVisibilityState(VisibilityState.Visible, true, false, true);
-					invertedCubeDimensionObj.SwitchEffectiveVisibilityState(VisibilityState.Visible, true, false, true);
+					corporealCubeDimensionObj.SwitchEffectiveVisibilityState(VisibilityState.Visible, DimensionObject.RefreshMode.Rendering, true, false, true);
+					invertedCubeDimensionObj.SwitchEffectiveVisibilityState(VisibilityState.Visible, DimensionObject.RefreshMode.Rendering, true, false, true);
 					debug.Log($"Pillar dimension: {_pillarDimension}, Cube dimension: {_cubeDimension}, Portal dimension: {_portalDimension}\nState: {stateMachine.State}\nEffective VisibilityState (corporeal): {corporealCubeDimensionObj.EffectiveVisibilityState}\nEffective VisibilityState (inverted): {invertedCubeDimensionObj.EffectiveVisibilityState}\nFor OnPreRenderPortal for {portal.name}");
 
 					Assert.IsFalse(corporealDimensionBeforeMaterialize == -1, "Corporeal dimension before materialize is not set");
@@ -330,8 +332,8 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 		raymarchRenderer.gameObject.layer = _raymarchLayerPreRender;
 		
 		if (stateMachine == State.Materializing) {
-			corporealCubeDimensionObj.SwitchVisibilityState(corporealVisibilityStateBeforeRenderPortal, true, false, true);
-			invertedCubeDimensionObj.SwitchVisibilityState(invertedVisibilityStateBeforeRenderPortal, true, false, true);
+			corporealCubeDimensionObj.SwitchVisibilityState(corporealVisibilityStateBeforeRenderPortal, DimensionObject.RefreshMode.Rendering, true, false, true);
+			invertedCubeDimensionObj.SwitchVisibilityState(invertedVisibilityStateBeforeRenderPortal, DimensionObject.RefreshMode.Rendering, true, false, true);
 		}
 		UpdateDissolveValues();
 		SetPortalCopyVisibility();
@@ -483,7 +485,7 @@ public class MultiDimensionCube : SuperspectiveObject<MultiDimensionCube, MultiD
 		}
 	}
 
-	void Materialize() {
+	public void Materialize() {
 		stateMachine.Set(State.Materializing);
 		
 		VisibilityState desiredState = corporealCubeDimensionObj.visibilityState.Opposite();

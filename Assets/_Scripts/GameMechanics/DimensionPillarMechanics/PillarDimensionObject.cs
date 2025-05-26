@@ -217,7 +217,7 @@ public class PillarDimensionObject : DimensionObject {
 			camSetUpFor = Cam.Player;
 			DetermineQuadrantForPlayerCam();
 			dimensionShiftQuadrant = DetermineQuadrant(activePillar.transform.position + activePillar.DimensionShiftVector);
-			UpdateState(activePillar, true);
+			UpdateState(activePillar, RefreshMode.All, true);
 		}
 	}
 
@@ -324,7 +324,7 @@ public class PillarDimensionObject : DimensionObject {
 			HandlePillarChanged();
 		}
 		
-		UpdateStateForCamera(Cam.Player, activePillar, true);
+		UpdateStateForCamera(Cam.Player, activePillar, RefreshMode.All, true);
 	}
 
 	void FixedUpdate() {
@@ -356,13 +356,13 @@ public class PillarDimensionObject : DimensionObject {
 			// Assumes the out portal's activePillar is the same as this object's activePillar
 			// TODO: Add support for different activePillars
 			int outOfPortalDimension = portalDimensionObj.Dimension;
-			UpdateStateForCamera(Cam.Portal, activePillar, false, true, outOfPortalDimension);
+			UpdateStateForCamera(Cam.Portal, activePillar, RefreshMode.Rendering, false, true, outOfPortalDimension);
 		}
 	}
 
-	public void UpdateStateForPlayerCamera(bool sendEvents = true, bool suppressLogs = false) {
+	public void UpdateStateForPlayerCamera(bool sendEvents, bool suppressLogs) {
 		if (activePillar == null) return;
-		UpdateStateForCamera(Cam.Player, activePillar, false, true, -1);
+		UpdateStateForCamera(Cam.Player, activePillar, RefreshMode.Rendering, false, true, -1);
 	}
 
 	void OnPostRenderPortal(Portal _) => UpdateStateForPlayerCamera(false, true);
@@ -373,15 +373,16 @@ public class PillarDimensionObject : DimensionObject {
 	/// </summary>
 	/// <param name="cam">Cam to use for camSetUpFor. What camera are we trying to update state for?</param>
 	/// <param name="pillar">Active DimensionPillar to update state for</param>
+	/// <param name="refreshMode">Whether to refresh the rendering, physics, or both for the DimensionObject</param>
 	/// <param name="sendEvents">If false, will suppress OnStateChange events</param>
 	/// <param name="suppressLogs">If true, will suppress debug logs (to avoid spamming the console log)</param>
 	/// <param name="baseDimensionOverride">If provided, will use this value as the base dimension instead of the current one</param>
-	public void UpdateStateForCamera(Cam cam, DimensionPillar pillar, bool sendEvents = false, bool suppressLogs = false, int baseDimensionOverride = -1) {
+	public void UpdateStateForCamera(Cam cam, DimensionPillar pillar, RefreshMode refreshMode, bool sendEvents = false, bool suppressLogs = false, int baseDimensionOverride = -1) {
 		camSetUpFor = cam;
 		camQuadrant = DetermineQuadrant(cam.CamPos());
 		
 		// Don't trigger state change events when we're just doing it for the rendering
-		UpdateState(pillar, false, sendEvents, suppressLogs, baseDimensionOverride);
+		UpdateState(pillar, refreshMode, false, sendEvents, suppressLogs, baseDimensionOverride);
 	}
 
 	/// <summary>
@@ -389,16 +390,17 @@ public class PillarDimensionObject : DimensionObject {
 	/// Will update the visibility state if it has changed.
 	/// </summary>
 	/// <param name="pillar">DimensionPillar to update state with respect to</param>
+	/// <param name="refreshMode">Whether to refresh the rendering, physics, or both for the DimensionObject</param>
 	/// <param name="forceUpdate">If true, will call SwitchVisibilityState even if the state has not changed</param>
 	/// <param name="sendEvents">If false, will suppress OnStateChange events</param>
 	/// <param name="suppressLogs">If true, will suppress debug logs (to avoid spamming the console log)</param>
 	/// <param name="baseDimensionOverride">If provided, will use this value as the base dimension instead of the current one</param>
-	void UpdateState(DimensionPillar pillar, bool forceUpdate = false, bool sendEvents = true, bool suppressLogs = false, int baseDimensionOverride = -1) {
+	void UpdateState(DimensionPillar pillar, RefreshMode refreshMode, bool forceUpdate = false, bool sendEvents = true, bool suppressLogs = false, int baseDimensionOverride = -1) {
 		int baseDimension = baseDimensionOverride >= 0 ? baseDimensionOverride : pillar.curBaseDimension;
 		VisibilityState nextState = DetermineVisibilityState(pillar, camSetUpFor.CamPos(), baseDimension);
 
 		if (nextState != visibilityState || forceUpdate) {
-			SwitchVisibilityState(nextState, true, sendEvents, suppressLogs);
+			SwitchVisibilityState(nextState, refreshMode, true, sendEvents, suppressLogs);
 		}
 	}
 
