@@ -16,8 +16,8 @@ namespace DimensionObjectMechanics {
         // We use these to keep track of which DimensionObjects are affecting which colliders and renderers.
         // This way, we can figure out exactly how each renderer and collider
         // should behave based on the DimensionObjects that are affecting them.
-        private static readonly Dictionary<Collider, ListHashSet<DimensionObject>> collidersAffectedByDimensionObjects = new Dictionary<Collider, ListHashSet<DimensionObject>>();
-        private static readonly Dictionary<SuperspectiveRenderer, ListHashSet<DimensionObject>> renderersAffectedByDimensionObjects = new Dictionary<SuperspectiveRenderer, ListHashSet<DimensionObject>>();
+        private static readonly Dictionary<Collider, ListHashSet<DimensionObject>> dimensionObjectsAffectingColliders = new Dictionary<Collider, ListHashSet<DimensionObject>>();
+        private static readonly Dictionary<SuperspectiveRenderer, ListHashSet<DimensionObject>> dimensionObjectsAffectingRenderers = new Dictionary<SuperspectiveRenderer, ListHashSet<DimensionObject>>();
         
         // We keep a cache of computed collisions for each collider pair so that we don't recompute them
         // every call to ShouldCollideWithDimensionObject, and so that we can recompute them when needed, such as when a DimensionObject changes state
@@ -30,6 +30,41 @@ namespace DimensionObjectMechanics {
         // We keep track of the original layers of GameObjects that are affected by DimensionObjects
         // so that we can restore them when they are no longer invisible
         private static readonly Dictionary<GameObject, int> originalLayers = new Dictionary<GameObject, int>();
+
+        /// <summary>
+        /// Looks for any null UnityObjects in the caches and removes them
+        /// </summary>
+        public void CleanCache() {
+            foreach (var key in dimensionObjectsAffectingColliders.Keys.ToList()) {
+                if (key == null) {
+                    dimensionObjectsAffectingColliders.Remove(key);
+                }
+                else {
+                    ListHashSet<DimensionObject> dimObjs = dimensionObjectsAffectingColliders[key];
+                    foreach (var dimObj in dimObjs.ToList()) {
+                        if (dimObj == null) {
+                            dimObjs.Remove(dimObj);
+                        }
+                    }
+                }
+            }
+            foreach (var key in dimensionObjectsAffectingRenderers.Keys.ToList()) {
+                if (key == null) {
+                    dimensionObjectsAffectingRenderers.Remove(key);
+                }
+                else {
+                    ListHashSet<DimensionObject> dimObjs = dimensionObjectsAffectingRenderers[key];
+                    foreach (var dimObj in dimObjs.ToList()) {
+                        if (dimObj == null) {
+                            dimObjs.Remove(dimObj);
+                        }
+                    }
+                }
+            }
+            
+            collisionsCache.CleanCache();
+            // dimensionObjectMaterials cache can stick around
+        }
 	
 #region Registration
         /// <summary>
@@ -39,10 +74,10 @@ namespace DimensionObjectMechanics {
         /// <param name="dimensionObject">DimensionObject affecting the Collider</param>
         public static void RegisterCollider(Collider collider, DimensionObject dimensionObject) {
             dimensionObject.debug.Log($"Registering {collider.name} for {dimensionObject.ID}");
-            if (!collidersAffectedByDimensionObjects.ContainsKey(collider)) {
-                collidersAffectedByDimensionObjects[collider] = new ListHashSet<DimensionObject>();
+            if (!dimensionObjectsAffectingColliders.ContainsKey(collider)) {
+                dimensionObjectsAffectingColliders[collider] = new ListHashSet<DimensionObject>();
             }
-            collidersAffectedByDimensionObjects[collider].Add(dimensionObject);
+            dimensionObjectsAffectingColliders[collider].Add(dimensionObject);
         }
 
         /// <summary>
@@ -51,10 +86,10 @@ namespace DimensionObjectMechanics {
         /// <param name="renderer">SuperspectiveRenderer to register</param>
         /// <param name="dimensionObject">DimensionObject affecting the Renderer</param>
         public static void RegisterRenderer(SuperspectiveRenderer renderer, DimensionObject dimensionObject) {
-            if (!renderersAffectedByDimensionObjects.ContainsKey(renderer)) {
-                renderersAffectedByDimensionObjects[renderer] = new ListHashSet<DimensionObject>();
+            if (!dimensionObjectsAffectingRenderers.ContainsKey(renderer)) {
+                dimensionObjectsAffectingRenderers[renderer] = new ListHashSet<DimensionObject>();
             }
-            renderersAffectedByDimensionObjects[renderer].Add(dimensionObject);
+            dimensionObjectsAffectingRenderers[renderer].Add(dimensionObject);
         }
 	
         /// <summary>
@@ -65,13 +100,13 @@ namespace DimensionObjectMechanics {
         public static void UnregisterCollider(Collider collider, DimensionObject dimensionObject) {
             dimensionObject.debug.Log($"Unregistering {collider.name} from {dimensionObject.ID}");
             
-            if (collidersAffectedByDimensionObjects.TryGetValue(collider, out ListHashSet<DimensionObject> dimObjs)) {
+            if (dimensionObjectsAffectingColliders.TryGetValue(collider, out ListHashSet<DimensionObject> dimObjs)) {
                 dimObjs.Remove(dimensionObject);
             }
             
             // If there are no more DimensionObjects affecting this collider, we can remove it from the dictionary
-            if (!collidersAffectedByDimensionObjects.ContainsKey(collider) || collidersAffectedByDimensionObjects[collider].Count == 0) {
-                collidersAffectedByDimensionObjects.Remove(collider);
+            if (!dimensionObjectsAffectingColliders.ContainsKey(collider) || dimensionObjectsAffectingColliders[collider].Count == 0) {
+                dimensionObjectsAffectingColliders.Remove(collider);
                 
                 // If we're removing the last DimensionObject affecting this collider, we can restore the original layer
                 if (originalLayers.ContainsKey(collider.gameObject)) {
@@ -90,13 +125,13 @@ namespace DimensionObjectMechanics {
         /// <param name="renderer">SuperspectiveRenderer to unregister</param>
         /// <param name="dimensionObject">DimensionObject no longer affecting the Renderer</param>
         public static void UnregisterRenderer(SuperspectiveRenderer renderer, DimensionObject dimensionObject) {
-            if (renderersAffectedByDimensionObjects.TryGetValue(renderer, out ListHashSet<DimensionObject> dimObjs)) {
+            if (dimensionObjectsAffectingRenderers.TryGetValue(renderer, out ListHashSet<DimensionObject> dimObjs)) {
                 dimObjs.Remove(dimensionObject);
             }
             
             // If there are no more DimensionObjects affecting this renderer, we can remove it from the dictionary
-            if (!renderersAffectedByDimensionObjects.ContainsKey(renderer) || renderersAffectedByDimensionObjects[renderer].Count == 0) {
-                renderersAffectedByDimensionObjects.Remove(renderer);
+            if (!dimensionObjectsAffectingRenderers.ContainsKey(renderer) || dimensionObjectsAffectingRenderers[renderer].Count == 0) {
+                dimensionObjectsAffectingRenderers.Remove(renderer);
                 
                 // If we're removing the last DimensionObject affecting this renderer, we can restore the original layer
                 if (originalLayers.ContainsKey(renderer.gameObject)) {
@@ -115,7 +150,7 @@ namespace DimensionObjectMechanics {
         /// <param name="dimensionObject">DimensionObject to refresh renderers for</param>
         public void RefreshRendering(DimensionObject dimensionObject) {
             foreach (SuperspectiveRenderer r in dimensionObject.renderers) {
-                if (renderersAffectedByDimensionObjects[r].Contains(dimensionObject)) {
+                if (dimensionObjectsAffectingRenderers[r].Contains(dimensionObject)) {
                     RefreshRenderer(r);
                 }
             }
@@ -133,7 +168,7 @@ namespace DimensionObjectMechanics {
             GameObject rendererGameObject = r.gameObject;
             
             // Get all the DimensionObjects that are affecting this renderer
-            ListHashSet<DimensionObject> dimensionObjects = renderersAffectedByDimensionObjects[r];
+            ListHashSet<DimensionObject> dimensionObjects = dimensionObjectsAffectingRenderers[r];
 
             (bool anyIsInvisible, DimensionObjectBitmask finalBitmask) = GetDimensionObjectBitmask(dimensionObjects);
             
@@ -195,7 +230,7 @@ namespace DimensionObjectMechanics {
         /// <param name="r">Renderer to get DimensionObjects for</param>
         /// <returns>ListHashSet of DimensionObjects affecting the Renderer</returns>
         public ListHashSet<DimensionObject> GetDimensionObjectsAffectingRenderer(SuperspectiveRenderer r) {
-            return renderersAffectedByDimensionObjects[r];
+            return dimensionObjectsAffectingRenderers[r];
         }
 #endregion
 
@@ -207,7 +242,7 @@ namespace DimensionObjectMechanics {
         /// <param name="dimensionObject">DimensionObject to refresh colliders for</param>
         public void RefreshPhysics(DimensionObject dimensionObject) {
             foreach (Collider c in dimensionObject.colliders) {
-                if (collidersAffectedByDimensionObjects[c].Contains(dimensionObject)) {
+                if (dimensionObjectsAffectingColliders[c].Contains(dimensionObject)) {
                     RefreshCollider(c, dimensionObject.ID);
                 }
             }
@@ -247,8 +282,8 @@ namespace DimensionObjectMechanics {
                 return;
             }
                 
-            bool aIsAffected = collidersAffectedByDimensionObjects.ContainsKey(a);
-            bool bIsAffected = collidersAffectedByDimensionObjects.ContainsKey(b);
+            bool aIsAffected = dimensionObjectsAffectingColliders.ContainsKey(a);
+            bool bIsAffected = dimensionObjectsAffectingColliders.ContainsKey(b);
             ListHashSet<DimensionObject> aDimensionObjects;
             ListHashSet<DimensionObject> bDimensionObjects = new ListHashSet<DimensionObject>();
             
@@ -276,7 +311,7 @@ namespace DimensionObjectMechanics {
                     Collider affected = aIsAffected ? a : b;
                     Collider unaffected = aIsAffected ? b : a;
                     
-                    ListHashSet<DimensionObject> affectingDimensionObjects = collidersAffectedByDimensionObjects[affected];
+                    ListHashSet<DimensionObject> affectingDimensionObjects = dimensionObjectsAffectingColliders[affected];
                     // Avoid using LINQ to avoid heap allocations
                     foreach (DimensionObject dimObj in affectingDimensionObjects) {
                         if (!dimObj.ShouldCollideWithNonDimensionCollider(unaffected)) {
@@ -289,8 +324,8 @@ namespace DimensionObjectMechanics {
                 }
                 
                 // If both colliders are affected, we need to check if they should interact with each other
-                aDimensionObjects = collidersAffectedByDimensionObjects[a];
-                bDimensionObjects = collidersAffectedByDimensionObjects[b];
+                aDimensionObjects = dimensionObjectsAffectingColliders[a];
+                bDimensionObjects = dimensionObjectsAffectingColliders[b];
 
                 bool channelOverlapExists = false;
                 foreach (DimensionObject aDimensionObject in aDimensionObjects) {
@@ -351,8 +386,8 @@ namespace DimensionObjectMechanics {
                 }
             }
             
-            bool aIsAffected = collidersAffectedByDimensionObjects.ContainsKey(a);
-            bool bIsAffected = collidersAffectedByDimensionObjects.ContainsKey(b);
+            bool aIsAffected = dimensionObjectsAffectingColliders.ContainsKey(a);
+            bool bIsAffected = dimensionObjectsAffectingColliders.ContainsKey(b);
             
             // If neither collider is affected by any DimensionObjects, they should interact
             if (!aIsAffected && !bIsAffected) {
@@ -365,7 +400,7 @@ namespace DimensionObjectMechanics {
                 Collider affected = aIsAffected ? a : b;
                 Collider unaffected = aIsAffected ? b : a;
                 
-                ListHashSet<DimensionObject> affectingDimensionObjects = collidersAffectedByDimensionObjects[affected];
+                ListHashSet<DimensionObject> affectingDimensionObjects = dimensionObjectsAffectingColliders[affected];
                 // Avoid using LINQ to avoid heap allocations
                 foreach (DimensionObject dimObj in affectingDimensionObjects) {
                     if (!dimObj.ShouldCollideWithNonDimensionCollider(unaffected)) {
@@ -378,8 +413,8 @@ namespace DimensionObjectMechanics {
             }
             
             // If both colliders are affected, we need to check if they should interact with each other
-            ListHashSet<DimensionObject> aDimensionObjects = collidersAffectedByDimensionObjects[a];
-            ListHashSet<DimensionObject> bDimensionObjects = collidersAffectedByDimensionObjects[b];
+            ListHashSet<DimensionObject> aDimensionObjects = dimensionObjectsAffectingColliders[a];
+            ListHashSet<DimensionObject> bDimensionObjects = dimensionObjectsAffectingColliders[b];
 
             foreach (DimensionObject aDimensionObject in aDimensionObjects) {
                 // Check if all bDimensionObjects satisfy ShouldCollideWithDimensionObject
@@ -405,13 +440,13 @@ namespace DimensionObjectMechanics {
         /// <returns></returns>
         public bool RaycastHitCollider(Collider c) {
             // If this collider isn't affected by any DimensionObjects, we can skip this check
-            if (!collidersAffectedByDimensionObjects.ContainsKey(c)) return true;
+            if (!dimensionObjectsAffectingColliders.ContainsKey(c)) return true;
             
             // Get the visibility bitmask value at the cursor position
             int maskValue = MaskBufferRenderTextures.instance.visibilityMaskValue;
             
             // Get the combined/effective bitmask for this collider
-            ListHashSet<DimensionObject> allDimensionObjects = collidersAffectedByDimensionObjects[c];
+            ListHashSet<DimensionObject> allDimensionObjects = dimensionObjectsAffectingColliders[c];
             ListHashSet<DimensionObject> dimensionObjects = new ListHashSet<DimensionObject>();
             for (int i = 0; i < allDimensionObjects.Count; i++) {
                 DimensionObject dimObj = allDimensionObjects[i];
@@ -443,8 +478,8 @@ namespace DimensionObjectMechanics {
 
         // Only used for debugging
         public DimensionObjectBitmask GetDimensionObjectBitmask(SuperspectiveRenderer r) {
-            if (!renderersAffectedByDimensionObjects.ContainsKey(r)) return DimensionObjectBitmask.Zero;
-            return GetDimensionObjectBitmask(renderersAffectedByDimensionObjects[r]).Item2;
+            if (!dimensionObjectsAffectingRenderers.ContainsKey(r)) return DimensionObjectBitmask.Zero;
+            return GetDimensionObjectBitmask(dimensionObjectsAffectingRenderers[r]).Item2;
         }
         
         /// <summary>
@@ -551,6 +586,30 @@ public class CollisionsCache {
             }
                 
             collisionsCache.Remove(collider);
+        }
+    }
+
+    /// <summary>
+    /// Looks for null Colliders in the cache and removes them.
+    /// </summary>
+    public void CleanCache() {
+        foreach (var key in collisionsCache.Keys.ToList()) {
+            if (key == null) {
+                collisionsCache.Remove(key);
+            }
+            else {
+                Dictionary<Collider, CollisionCacheValue> valueDict = collisionsCache[key];
+                foreach (var otherKey in valueDict.Keys.ToList()) {
+                    if (otherKey == null) {
+                        valueDict.Remove(otherKey);
+                    }
+                }
+                
+                // If the valueDict is empty after removing null colliders, remove the key from the cache
+                if (valueDict.Count == 0) {
+                    collisionsCache.Remove(key);
+                }
+            }
         }
     }
 }

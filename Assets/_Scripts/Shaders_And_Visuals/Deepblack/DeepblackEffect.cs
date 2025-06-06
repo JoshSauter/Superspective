@@ -34,6 +34,16 @@ namespace Deepblack {
         private const string FALLOFF_FACTOR_KEYWORD = "_FalloffFactor";
 
         public float intensityMultiplier = 1;
+#if UNITY_EDITOR
+        public bool enableInEditor = false;
+#endif
+
+        public bool AllowedToRender => true
+#if UNITY_EDITOR
+            && enableInEditor;
+#else
+            ;
+#endif
 
         [Serializable]
         private class RenderTextures {
@@ -187,7 +197,7 @@ namespace Deepblack {
         [ImageEffectOpaque]
         void OnRenderImage(RenderTexture src, RenderTexture dest) {
             // If the game is loading, skip the effect
-            if (GameManager.instance.IsCurrentlyLoading) {
+            if (GameManager.instance.IsCurrentlyLoading || !AllowedToRender) {
                 Graphics.Blit(src, dest);
                 return;
             }

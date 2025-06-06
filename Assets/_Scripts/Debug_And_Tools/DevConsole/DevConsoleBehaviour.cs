@@ -56,10 +56,12 @@ namespace DeveloperConsole {
                 new ToggleUICommand("toggleUI"),
                 new ChangeScaleCommand("changeScale"),
                 new HideCullEverythingLayerCommand("hideCullMask"),
+                new ShowBeforeAfterScreenshotOverlayCommand("showBeforeAfterScreenshotOverlay"),
                 new ShowInvisibleWallsCommand("showInvisibleWalls"),
                 new ShowTriggersCommand("showTriggers"),
                 new ShowVolumetricPortalsCommand("showVolumetricPortals"),
                 new SetFarClipPlaneCommand("setFarClipPlane"),
+                new SetGravityCommand("setGravityMagnitude"),
                 new SetTimeScaleCommand("setTimeScale"),
                 new TogglePortalDebuggingCommand("togglePortalDebugging"),
                 #if UNITY_EDITOR

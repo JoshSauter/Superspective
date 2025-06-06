@@ -401,7 +401,7 @@ namespace PortalMechanics {
 					// Need to recalculate the camQuadrant of the PillarDimensionObject after teleporting the player
 					var originalQuadrant = otherPortal.pillarDimensionObject.camQuadrant;
 					otherPortal.pillarDimensionObject.DetermineQuadrantForPlayerCam();
-					activePillar.curBaseDimension = otherPortal.pillarDimensionObject.Dimension;
+					activePillar.curBaseDimension = otherPortal.pillarDimensionObject.GetPillarDimensionWhere(v => v == VisibilityState.Visible);
 					activePillar.dimensionWall.UpdateStateForCamera(Cam.Player, activePillar.dimensionWall.RadsOffsetForDimensionWall(Cam.Player.CamPos()));
 					otherPortal.pillarDimensionObject.camQuadrant = originalQuadrant;
 				}

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Reflection;
+using DimensionObjectMechanics;
 using SuperspectiveUtils;
 using LevelManagement;
 using Library.Functional;
@@ -131,6 +132,9 @@ namespace Saving {
             
             debug.Log($"Loaded levels: {string.Join(", ", loadedLevels.Keys)}");
             debug.Log($"Unloaded levels: {string.Join(", ", unloadedLevels.Keys)}");
+            
+            // Clean the DimensionObjectManager caches of any null references from loading
+            DimensionObjectManager.instance.CleanCache();
             
             // Restore state for all unloaded scenes from the save file
             foreach (var kv in unloadedLevels) {

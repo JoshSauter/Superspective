@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DeveloperConsole;
+using DimensionObjectMechanics;
 using LevelManagement;
 using NaughtyAttributes;
 using NovaMenuUI;
@@ -95,6 +96,7 @@ public class GameManager : Singleton<GameManager> {
 
     public void RestartGame() {
         Time.timeScale = 1f;
+        DimensionObjectManager.instance.CleanCache();
         SuperspectivePhysics.ResetState();
         SaveManager.ClearAllState();
         gameHasLoaded = false;

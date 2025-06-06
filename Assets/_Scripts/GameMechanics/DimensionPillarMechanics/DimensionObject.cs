@@ -765,7 +765,7 @@ public class DimensionObject : SuperspectiveObject<DimensionObject, DimensionObj
 		startingVisibilityState = save.startingVisibilityState;
 		visibilityState = save.visibilityState;
 		
-		SwitchVisibilityState(visibilityState, DimensionObject.RefreshMode.All, true);
+		SwitchVisibilityState(visibilityState, RefreshMode.All, true);
 	}
 
 	[Serializable]
