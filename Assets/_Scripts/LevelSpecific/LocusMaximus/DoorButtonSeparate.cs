@@ -26,10 +26,10 @@ public class DoorButtonSeparate : MonoBehaviour {
         endPosRight = startPos + Vector3.left * OPEN_DISTANCE;
         
         button.OnButtonPressBegin += _ => {
-            timeAtLastChange = Time.time;
+            timeAtLastChange = SuperspectiveTime.Time;
         };
         button.OnButtonUnpressBegin += _ => {
-            timeAtLastChange = Time.time;
+            timeAtLastChange = SuperspectiveTime.Time;
         };
     }
 
@@ -37,7 +37,7 @@ public class DoorButtonSeparate : MonoBehaviour {
         Vector3 desiredPosLeft = button.pwr.PowerIsOn ? endPosLeft : startPos;
         Vector3 desiredPosRight = button.pwr.PowerIsOn ? endPosRight : startPos;
         
-        float timeSinceChange = Time.time - timeAtLastChange;
+        float timeSinceChange = SuperspectiveTime.Time - timeAtLastChange;
         float t = Easing.EaseInOut(timeSinceChange / OPEN_TIME);
         
         buttonLeft.localPosition = Vector3.Lerp(buttonLeft.localPosition, desiredPosLeft, t);

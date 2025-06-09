@@ -53,7 +53,6 @@ partial class PlayerMovement {
             public bool StandingOnHeldObject => IsStandingOnHeldObject(contact);
 
             public GroundContact contact;
-            [DoNotSave]
             public float lastGroundedTime = -1;
         }
 
@@ -101,10 +100,10 @@ partial class PlayerMovement {
             // Was a ground object found?
             if (isGroundedNow) {
                 grounded.contact = groundContactPoint;
-                grounded.lastGroundedTime = Time.time;
+                grounded.lastGroundedTime = SuperspectiveTime.Time;
             }
             // If we were grounded before, and we're not now, wait a little bit before saying that the player is ungrounded
-            else if (grounded.IsGrounded && Time.time - grounded.lastGroundedTime > TIME_TO_WAIT_AFTER_LEAVING_GROUND) {
+            else if (grounded.IsGrounded && SuperspectiveTime.Time - grounded.lastGroundedTime > TIME_TO_WAIT_AFTER_LEAVING_GROUND) {
                 grounded.IsGrounded = false;
             }
         }
@@ -213,7 +212,7 @@ partial class PlayerMovement {
             
             if (GroundRaycast(new Ray(rayOrigin, -transform.up), (1 + SNAP_TO_GROUND_DISTANCE) * m.Scale, out RaycastHit hit, SNAP_TO_GROUND_DOT_NORMAL_THRESHOLD, BackupRaycastMode.ForwardOnly)) {
                 // If we're snapping to the ground, then we are grounded on it. Refresh the grounded state framesWaited counter
-                grounded.lastGroundedTime = Time.time;
+                grounded.lastGroundedTime = SuperspectiveTime.Time;
                 
                 Vector3 beforePos = m.BottomOfPlayer;
                 // Snap the player to the ground

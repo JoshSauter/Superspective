@@ -14557,7 +14557,7 @@ MonoBehaviour:
   _startRotation: {x: -0, y: -0, z: -0, w: 1}
   DEBUG: 0
   _id: {fileID: 0}
-  startingScene: 34
+  startingScene: 28
   defaultPlayerPosition: 1
   allLevels:
   - level: 0
@@ -17875,6 +17875,7 @@ GameObject:
   - component: {fileID: 532170871}
   - component: {fileID: 532170872}
   - component: {fileID: 532170873}
+  - component: {fileID: 532170874}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -17951,6 +17952,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeSinceLastAutosave: 0
+--- !u!114 &532170874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 532170868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d168291611241a38862b3b7695d143a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameObjectStartsInactive: 0
+  scriptStartsDisabled: 0
+  _startPosition: {x: 342.2765, y: 127.08796, z: 74.282104}
+  _startRotation: {x: -0, y: -0, z: -0, w: 1}
+  DEBUG: 0
+  _id: {fileID: 0}
 --- !u!1 &537703729
 GameObject:
   m_ObjectHideFlags: 0
@@ -21783,8 +21802,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623971842}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 957, y: 4.5, z: 290.5}
+  m_LocalRotation: {x: 0, y: 0.92387956, z: 0, w: -0.3826834}
+  m_LocalPosition: {x: 881.5, y: 60.5, z: -25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

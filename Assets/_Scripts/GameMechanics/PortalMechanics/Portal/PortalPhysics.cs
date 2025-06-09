@@ -418,8 +418,8 @@ namespace PortalMechanics {
 			// Sometimes teleporting leaves the hasTriggeredOnStay state as true so we explicitly reset state here
 			trigger.ResetHasTriggeredOnStayState();
 
-			globalLastTeleportedFrame = Time.frameCount;
-			lastTeleportedTime = Time.time;
+			globalLastTeleportedFrame = SuperspectiveTime.FrameCount;
+			lastTeleportedTime = SuperspectiveTime.Time;
 			
 			teleportingPlayer = false;
 		}

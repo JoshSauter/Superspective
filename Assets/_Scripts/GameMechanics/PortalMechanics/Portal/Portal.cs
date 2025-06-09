@@ -44,7 +44,7 @@ namespace PortalMechanics {
 			transform.rotation = isFlipped ? flippedRotation : startRotation;
 		}
 
-		private float TimeSinceLastTeleport => Time.time - lastTeleportedTime;
+		private float TimeSinceLastTeleport => SuperspectiveTime.Time - lastTeleportedTime;
 
 		public Vector3 IntoPortalVector {
 			get {

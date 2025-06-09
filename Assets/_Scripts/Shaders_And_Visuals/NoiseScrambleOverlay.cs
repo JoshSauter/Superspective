@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Audio;
-using NaughtyAttributes;
 using Saving;
 using SerializableClasses;
+using Sirenix.OdinInspector;
+using SuperspectiveAttributes;
 using SuperspectiveUtils;
 using UnityEngine;
 using ScramblerReference = SerializableClasses.SuperspectiveReference<NoiseScrambleOverlayObject, NoiseScrambleOverlayObject.NoiseScrambleOverlayObjectSave>;
@@ -26,10 +27,13 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
         public float time;
         public float value;
     }
+
+    [DoNotSave]
+    private Dictionary<string, GlobalValueSetter> _copyDict; // Allocated once to avoid allocations in LateUpdate
     private Dictionary<string, GlobalValueSetter> globalValueSetters = new Dictionary<string, GlobalValueSetter>();
     private float GlobalValue => globalValueSetters.Any() ? globalValueSetters.Max(kv => kv.Value.value) : 0f;
     
-    [ShowNativeProperty]
+    [ShowInInspector]
     float MinDistance {
         get {
             if (GameManager.instance.IsCurrentlyLoading) return float.MaxValue;
@@ -57,7 +61,7 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
         }
     }
 
-    [ShowNativeProperty]
+    [ShowInInspector]
     private float Intensity => Mathf.Max(GlobalValue, Mathf.Pow(1 - Mathf.InverseLerp(MAX_VOLUME_DISTANCE, ZERO_VOLUME_DISTANCE, MinDistance / Player.instance.Scale), 2));
 
     protected override void Awake() {
@@ -79,9 +83,21 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
     }
 
     private void LateUpdate() {
-        globalValueSetters = globalValueSetters
-            .Where(kv => Time.time - kv.Value.time <= GLOBAL_VALUE_LIFETIME)
-            .ToDictionary();
+        RemoveExpiredGlobalValueSetters();
+    }
+
+    private void RemoveExpiredGlobalValueSetters() {
+        var keysToRemove = new List<string>();
+
+        foreach (var kv in globalValueSetters) {
+            if (SuperspectiveTime.Time - kv.Value.time > GLOBAL_VALUE_LIFETIME) {
+                keysToRemove.Add(kv.Key);
+            }
+        }
+
+        foreach (var key in keysToRemove) {
+            globalValueSetters.Remove(key);
+        }
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination) {
@@ -119,7 +135,7 @@ public class NoiseScrambleOverlay : SingletonSuperspectiveObject<NoiseScrambleOv
     // Used to override the noise scramble overlay value with some value. Needs to be called every frame to keep the override
     public void SetNoiseScrambleOverlayValue(string id, float overrideValue) {
         globalValueSetters[id] = new GlobalValueSetter() {
-            time = Time.time,
+            time = SuperspectiveTime.Time,
             value = overrideValue
         };
     }
